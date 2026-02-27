@@ -144,16 +144,9 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     [Fact]
     public Task Multiple_Gets_Should_Only_Create_One_SeenLogs() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
-        .ConsumeEvents() // Consume Created event
         .GetEndUserDialog()
         .GetEndUserDialog()
-        .ConsumeEvents() // 1/2 Seen event should fail and get readded to queue
-        .Select((x, ctx) =>
-        {
-            ctx.Application.GetPublishedEvents().Count.Should().Be(1);
-            return x;
-        })
-        .ConsumeEvents() // Consume Seen event should not create Seenlog
+        .ConsumeEvents()
         .GetEndUserSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
@@ -161,25 +154,18 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             ctx.Application.GetPublishedEvents().Count.Should().Be(0);
         });
 
+
     [Fact]
     public Task Multiple_Gets_Should_Only_Create_One_SeenLogs2() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
-        .ConsumeEvents() // Consume Created event
-        .GetEndUserDialog() // SeenLog er den første
-        .GetEndUserDialog() // SeenLog tror den er første burde ikke være her
+        .GetEndUserDialog()
         .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-        .GetEndUserDialog() // SeenLog tror den er første burde være andre
+        .GetEndUserDialog()
         .ConsumeEvents()
-        .Select((x, ctx) =>
-        {
-            ctx.Application.GetPublishedEvents().Count.Should().Be(2);
-            return x;
-        })
-        .ConsumeEvents() // Consume Seen event should not create Seenlog
         .GetEndUserSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
-            x.Count.Should().Be(1);
+            x.Count.Should().Be(2);
             ctx.Application.GetPublishedEvents().Count.Should().Be(0);
         });
 

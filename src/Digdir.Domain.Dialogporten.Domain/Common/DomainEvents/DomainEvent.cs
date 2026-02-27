@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 public abstract record DomainEvent : IDomainEvent
 {
     [JsonInclude]
-    public Guid EventId { get; private set; } = Guid.NewGuid();
+    public Guid EventId { get; protected set; } = Guid.NewGuid();
 
     [JsonInclude]
     public DateTimeOffset OccurredAt { get; set; }

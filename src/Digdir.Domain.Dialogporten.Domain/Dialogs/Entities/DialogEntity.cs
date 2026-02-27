@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Domain.Attachments;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -164,11 +165,14 @@ public sealed class DialogEntity :
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, Guid? lastSeenId)
+    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId)
     {
-        var id = Id
-            .CreateDeterministicSubUuidV7($"{userId.ExternalId}{(dialogSeenDomainEvent.LastSeenId is not null ? dialogSeenDomainEvent.LastSeenId.ToString() : "")}");
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId, lastSeenId));
+        // Use a deterministic id to make the seen-log insert idempotent.
+        // If multiple seen events are produced without dialog changes in between,
+        // they represent the same logical "seen" and should not create duplicates.
+        var seenLogId = Id
+            .CreateDeterministicSubUuidV7($"{UpdatedAt:O}{endUserId}");
+        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId, seenLogId));
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];

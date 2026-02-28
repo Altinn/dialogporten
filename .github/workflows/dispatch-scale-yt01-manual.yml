@@ -1,0 +1,244 @@
+name: Scale YT01 Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      state:
+        description: "Scale state"
+        required: true
+        type: choice
+        options:
+          - 'on'
+          - 'off'
+      postpone_until:
+        description: "Postpone scheduled shutdown until this datetime (ISO 8601, e.g. 2026-03-01T20:00:00+01:00). Only used with 'on'."
+        required: false
+        type: string
+
+run-name: Scale YT01 ${{ inputs.state }}
+
+jobs:
+  scale:
+    runs-on: ubuntu-latest
+    environment: yt01
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get PostgreSQL server name
+        id: pg
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          POSTGRES_NAME=$(az postgres flexible-server list \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "[0].name" -o tsv)
+
+          echo "name=$POSTGRES_NAME" >> "$GITHUB_OUTPUT"
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      # === SCALE ON ===
+      - name: Start PostgreSQL
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          STATE=$(az postgres flexible-server show \
+            --name "${{ steps.pg.outputs.name }}" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "state" -o tsv)
+
+          if [[ "$STATE" != "Ready" ]]; then
+            echo "Starting PostgreSQL server: ${{ steps.pg.outputs.name }}"
+            az postgres flexible-server start \
+              --name "${{ steps.pg.outputs.name }}" \
+              --resource-group "$RESOURCE_GROUP"
+          else
+            echo "PostgreSQL server is already running."
+          fi
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Enable availability test
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az monitor app-insights web-test update \
+            --name "dp-be-yt01-dialogporten-health-test" \
+            --resource-group "$RESOURCE_GROUP" \
+            --enabled true
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Restore Application Insights sampling to 100%
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az resource update \
+            --ids "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Insights/components/dp-be-yt01-applicationInsights" \
+            --set properties.SamplingPercentage=100
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Restart service container app
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # The service app has no HTTP trigger so it needs an explicit restart
+          # to begin consuming from Service Bus after a scale-to-zero period.
+          az extension add --name containerapp --allow-preview --upgrade -y
+
+          APPS=(
+            "dp-be-yt01-webapi-so-ca"
+            "dp-be-yt01-webapi-eu-ca"
+            "dp-be-yt01-graphql-ca"
+            "dp-be-yt01-service"
+          )
+
+          for APP in "${APPS[@]}"; do
+            echo "Finding latest revision for $APP..."
+            REVISION=$(az containerapp revision list \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "[?properties.active==\`true\`].name" \
+              -o tsv | head -n 1)
+
+            if [[ -n "$REVISION" ]]; then
+              echo "Restarting revision $REVISION..."
+              az containerapp revision restart \
+                --name "$APP" \
+                --resource-group "$RESOURCE_GROUP" \
+                --revision "$REVISION"
+            else
+              echo "No active revision found for $APP"
+            fi
+          done
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      # === SCALE OFF ===
+      - name: Stop PostgreSQL
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          STATE=$(az postgres flexible-server show \
+            --name "${{ steps.pg.outputs.name }}" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "state" -o tsv)
+
+          if [[ "$STATE" == "Ready" ]]; then
+            echo "Stopping PostgreSQL server: ${{ steps.pg.outputs.name }}"
+            az postgres flexible-server stop \
+              --name "${{ steps.pg.outputs.name }}" \
+              --resource-group "$RESOURCE_GROUP"
+          else
+            echo "PostgreSQL server is already in state: $STATE. Skipping stop."
+          fi
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Disable availability test
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az monitor app-insights web-test update \
+            --name "dp-be-yt01-dialogporten-health-test" \
+            --resource-group "$RESOURCE_GROUP" \
+            --enabled false
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Reduce Application Insights sampling to 1%
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az resource update \
+            --ids "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Insights/components/dp-be-yt01-applicationInsights" \
+            --set properties.SamplingPercentage=1
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # === POSTPONE HANDLING ===
+      - name: Handle postpone variable
+        if: inputs.postpone_until != ''
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          REPOSITORY: ${{ github.repository }}
+          POSTPONE_UNTIL: ${{ inputs.postpone_until }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Validate the date is in the future
+          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s 2>/dev/null || echo "0")
+          NOW_TS=$(date +%s)
+
+          if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then
+            gh variable set YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+              --body "$POSTPONE_UNTIL" \
+              --env yt01 \
+              --repo "$REPOSITORY"
+            echo "Shutdown postponed until $POSTPONE_UNTIL"
+          else
+            echo "Warning: Postpone date is in the past. Clearing any existing postpone."
+            gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+              --env yt01 \
+              --repo "$REPOSITORY" || true
+          fi
+
+      - name: Clear stale postpone variable
+        if: inputs.postpone_until == ''
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Clean up any past-dated postpone variable
+          POSTPONE_UNTIL=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 \
+            --repo "$REPOSITORY" 2>/dev/null || echo "")
+
+          if [[ -n "$POSTPONE_UNTIL" ]]; then
+            POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s 2>/dev/null || echo "0")
+            NOW_TS=$(date +%s)
+
+            if [[ "$POSTPONE_TS" -le "$NOW_TS" ]]; then
+              echo "Postpone date $POSTPONE_UNTIL is in the past. Clearing variable."
+              gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+                --env yt01 \
+                --repo "$REPOSITORY" || true
+            fi
+          fi
+
+      - name: Logout from Azure
+        if: ${{ failure() || success() }}
+        run: az logout

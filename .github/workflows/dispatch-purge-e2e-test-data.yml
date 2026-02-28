@@ -33,7 +33,7 @@ jobs:
             inputs.environment != 'all' &&
             format('["{0}"]', inputs.environment)
             ||
-            '["test","staging","yt01"]'
+            '["test","staging"]'
           ) }}
 
     steps:

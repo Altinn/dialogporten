@@ -1,4 +1,5 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
@@ -195,4 +196,6 @@ public static class DialogTestData
         transmission.Attachments.Add(attachment);
         return transmission;
     }
+
+    public static Guid NewUuidV7(DateTimeOffset? timeStamp = null) => IdentifiableExtensions.CreateVersion7(timeStamp);
 }

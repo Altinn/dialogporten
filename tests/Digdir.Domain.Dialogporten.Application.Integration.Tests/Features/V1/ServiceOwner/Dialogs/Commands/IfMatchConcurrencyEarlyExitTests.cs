@@ -54,7 +54,7 @@ public sealed class IfMatchConcurrencyEarlyExitTests(DialogApplication applicati
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ConfigureServices(DecorateSaveChangesForbidden)
-            .CreateTransmission(_ => { },
+            .CreateTransmission((_, _) => { },
                 ifMatchDialogRevision: Guid.NewGuid())
             .ExecuteAndAssert<ConcurrencyError>();
 

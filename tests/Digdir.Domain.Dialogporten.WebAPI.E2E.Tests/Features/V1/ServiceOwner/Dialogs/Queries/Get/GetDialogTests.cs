@@ -14,7 +14,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
     public async Task Should_Get_Dialog_By_Id()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
         var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
@@ -35,7 +35,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         const string dialogAttachmentName = "dialog-attachment";
         const string transmissionAttachmentName = "transmission-attachment";
 
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
             dialog.AddAttachment(x =>
                 x.Name = dialogAttachmentName);

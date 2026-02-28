@@ -12,7 +12,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
     public async Task Should_Get_Dialog_By_Id()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
         var languages = new V1EndUserCommon_AcceptedLanguages();

@@ -85,6 +85,12 @@ internal static class TestUsers
                 .Configure(configure)
                 .Build());
 
+        public TFlowStep AsChangeTransmissionUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromDefault()
+                .WithScope(AuthorizationScope.ServiceProviderChangeTransmissions)
+                .Configure(configure)
+                .Build());
+
         public TFlowStep AsUser(ClaimsPrincipal claimsPrincipal) =>
             flowStep.Do(_ => DialogApplication.User.OverrideUser(claimsPrincipal));
 

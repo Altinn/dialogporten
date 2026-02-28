@@ -33,7 +33,7 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
     public async Task Should_Return_Dialog_For_Valid_DialogId()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
         var result = await GetDialog(dialogId);
@@ -65,7 +65,7 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
     public async Task Should_Return_Typed_NotFound_Result_When_Using_Unauthorized_Party()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
         // Fetching dialog with default EndUser should return dialog

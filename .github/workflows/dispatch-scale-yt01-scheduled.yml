@@ -1,0 +1,114 @@
+name: Scale YT01 Scheduled Shutdown
+
+on:
+  schedule:
+    # 16:00 UTC = 17:00 CET (winter) / 18:00 CEST (summer)
+    - cron: '0 16 * * *'
+  workflow_dispatch: {}
+
+run-name: Scale YT01 Scheduled Shutdown
+
+jobs:
+  shutdown:
+    runs-on: ubuntu-latest
+    environment: yt01
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check postpone variable
+        id: check-postpone
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          POSTPONE_UNTIL=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 \
+            --repo "$REPOSITORY" 2>/dev/null || echo "")
+
+          if [[ -n "$POSTPONE_UNTIL" ]]; then
+            POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s 2>/dev/null || echo "0")
+            NOW_TS=$(date +%s)
+
+            if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then
+              echo "Shutdown postponed until $POSTPONE_UNTIL. Skipping."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            else
+              echo "Postpone date $POSTPONE_UNTIL is in the past. Clearing variable."
+              gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+                --env yt01 \
+                --repo "$REPOSITORY" || true
+            fi
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Azure Login
+        if: steps.check-postpone.outputs.skip != 'true'
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Stop PostgreSQL
+        if: steps.check-postpone.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          POSTGRES_NAME=$(az postgres flexible-server list \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "[0].name" -o tsv)
+
+          STATE=$(az postgres flexible-server show \
+            --name "$POSTGRES_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "state" -o tsv)
+
+          if [[ "$STATE" == "Ready" ]]; then
+            echo "Stopping PostgreSQL server: $POSTGRES_NAME"
+            az postgres flexible-server stop \
+              --name "$POSTGRES_NAME" \
+              --resource-group "$RESOURCE_GROUP"
+          else
+            echo "PostgreSQL server $POSTGRES_NAME is already in state: $STATE. Skipping stop."
+          fi
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Disable availability test
+        if: steps.check-postpone.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az monitor app-insights web-test update \
+            --name "dp-be-yt01-dialogporten-health-test" \
+            --resource-group "$RESOURCE_GROUP" \
+            --enabled false
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Reduce Application Insights sampling to 1%
+        if: steps.check-postpone.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az resource update \
+            --ids "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Insights/components/dp-be-yt01-applicationInsights" \
+            --set properties.SamplingPercentage=1
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Logout from Azure
+        if: ${{ failure() || success() }}
+        run: az logout

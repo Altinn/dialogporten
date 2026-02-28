@@ -1,6 +1,6 @@
 // This Bicep module provisions a Service Bus namespace in Azure with support for all SKU tiers.
 // For Premium tier, it configures a private endpoint and private DNS zone for secure VNET connectivity.
-// For Standard/Basic tiers, it uses public access with Entra ID authentication.
+// For Standard/Basic tiers, it uses public access (SAS and Entra ID authentication are both enabled).
 import { uniqueResourceName } from '../../functions/resourceName.bicep'
 
 @description('The prefix used for naming resources to ensure unique names')
@@ -31,7 +31,10 @@ param sku Sku
 
 var serviceBusNameMaxLength = 50
 var serviceBusName = uniqueResourceName('${namePrefix}-service-bus', serviceBusNameMaxLength)
-var isPremium = sku.name == 'Premium'
+var premiumNetworkValidation = sku.name == 'Premium' && (empty(subnetId) || empty(vnetId))
+  ? fail('Premium SKU requires both subnetId and vnetId to be provided')
+  : true
+var isPremium = sku.name == 'Premium' && premiumNetworkValidation
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
   name: serviceBusName

@@ -81,7 +81,7 @@ jobs:
     with:
       environment: yt01
       version: ${{ github.event.client_payload.version }}
-      runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
+      runMigration: false # DB may be off due to scale-to-zero, run migrations manually
       ref: "refs/tags/v${{ github.event.client_payload.version }}"
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable

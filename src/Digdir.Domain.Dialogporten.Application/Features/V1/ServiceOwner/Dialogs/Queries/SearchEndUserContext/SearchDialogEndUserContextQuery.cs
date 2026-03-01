@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using MediatR;
 using OneOf;
@@ -20,9 +19,9 @@ public sealed class SearchDialogEndUserContextQuery : PaginationParameter<Search
     public List<string> Party { get; set; } = [];
 
     /// <summary>
-    /// Filter by end user id
+    /// Filter by content updated at or after this datetime
     /// </summary>
-    public string? EndUserId { get; set; }
+    public DateTimeOffset? ContentUpdatedAfter { get; set; }
 
     /// <summary>
     /// Filter by one or more system labels
@@ -53,48 +52,26 @@ public sealed class DialogEndUserContextItemDto
 internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<SearchDialogEndUserContextQuery, SearchDialogEndUserContextResult>
 {
     private readonly IUserResourceRegistry _userResourceRegistry;
-    private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogSearchRepository _searchRepository;
 
     public SearchDialogEndUserContextQueryHandler(
         IUserResourceRegistry userResourceRegistry,
-        IAltinnAuthorization altinnAuthorization,
         IDialogSearchRepository searchRepository)
     {
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
     }
 
     public async Task<SearchDialogEndUserContextResult> Handle(SearchDialogEndUserContextQuery request, CancellationToken cancellationToken)
     {
         var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
-        DialogSearchAuthorizationResult? authorizedResources = null;
-
-        if (request.EndUserId is not null)
-        {
-            authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
-                request.Party.Select(x => x.ToLowerInvariant()).ToList(),
-                [],
-                cancellationToken);
-
-            if (authorizedResources.HasNoAuthorizations)
-            {
-                return new PaginatedList<DialogEndUserContextItemDto>(
-                    [],
-                    hasNextPage: false,
-                    null,
-                    OrderSet<SearchDialogEndUserContextOrderDefinition, DataDialogEndUserContextListItemDto>.Default.GetOrderString());
-            }
-        }
-
         var paginatedList = await _searchRepository.SearchDialogEndUserContextsAsServiceOwner(
             orgName,
             request.Party.Select(x => x.ToLowerInvariant()).ToList(),
             request.Label,
+            request.ContentUpdatedAfter,
             request.ContinuationToken,
             request.Limit!.Value,
-            authorizedResources,
             cancellationToken);
 
         return paginatedList.ConvertTo(x => new DialogEndUserContextItemDto

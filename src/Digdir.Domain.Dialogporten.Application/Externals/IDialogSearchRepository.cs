@@ -35,9 +35,9 @@ public interface IDialogSearchRepository
         string orgName,
         List<string> parties,
         List<SystemLabel.Values>? systemLabels,
+        DateTimeOffset? contentUpdatedAfter,
         IContinuationTokenSet? continuationToken,
         int limit,
-        DialogSearchAuthorizationResult? authorizedResources,
         CancellationToken cancellationToken);
 
     Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,

@@ -19,8 +19,8 @@
   1. Deploy this file to create the transient PG18 / SSDv2 target.
   2. Run pgcopydb-based migration and cutover operationally.
   3. After the environment is stable on the new server, copy the "param postgresConfiguration" from the 
-     postgres-migration-target.{env}.bicepparam files into the {env}.bicepparam to make the new server the 
-     canonical one for the environment, and remove postgres-migration-target.{env}.bicepparam.
+     postgresql-migration-target.{env}.bicepparam files into the {env}.bicepparam to make the new server the 
+     canonical one for the environment, and remove postgresql-migration-target.{env}.bicepparam.
   4. Remove the old canonical server after the rollback window has passed.
 
   Keeping this template separate makes the transient dual-server state explicit and avoids accidental cutovers

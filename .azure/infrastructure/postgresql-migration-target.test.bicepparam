@@ -14,7 +14,7 @@ param postgresConfiguration = {
   serverNameStem: 'postgres2'
   version: '18'
   sku: {
-    name: 'Standard_D4ads_v5'
+    name: 'Standard_E4ads_v5'
     tier: 'MemoryOptimized'
   }
   storage: {

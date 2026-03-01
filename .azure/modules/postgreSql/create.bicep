@@ -43,23 +43,35 @@ type Sku = {
 @description('The SKU of the PostgreSQL server')
 param sku Sku
 
-@export()
-type StorageConfiguration = {
+@sealed()
+type PremiumLrsStorageConfiguration = {
   @minValue(32)
   storageSizeGB: int
-  @description('The type of storage account to use. Default is Premium_LRS.')
-  type: 'Premium_LRS' | 'PremiumV2_LRS'
-  @description('Autogrow is used with Premium_LRS. PremiumV2_LRS does not support autogrow.')
+  @description('The type of storage account to use.')
+  type: 'Premium_LRS'
+  @description('Autogrow is used with Premium_LRS.')
   autoGrow: ('Enabled' | 'Disabled')?
   @description('The performance tier of the storage. Use only with Premium_LRS.')
   tier: ('P1' | 'P2' | 'P4' | 'P6' | 'P10' | 'P15' | 'P20' | 'P30' | 'P40' | 'P50' | 'P60' | 'P70' | 'P80')?
+}
+
+@sealed()
+type PremiumV2LrsStorageConfiguration = {
+  @minValue(32)
+  storageSizeGB: int
+  @description('The type of storage account to use.')
+  type: 'PremiumV2_LRS'
   @description('Provisioned IOPS. Required when using PremiumV2_LRS.')
   @minValue(3000)
-  iops: int?
+  iops: int
   @description('Provisioned throughput in MB/s. Required when using PremiumV2_LRS.')
   @minValue(125)
-  throughput: int?
+  throughput: int
 }
+
+@export()
+@discriminator('type')
+type StorageConfiguration = PremiumLrsStorageConfiguration | PremiumV2LrsStorageConfiguration
 
 @description('The storage configuration for the PostgreSQL server')
 param storage StorageConfiguration
@@ -110,14 +122,14 @@ var postgresStorage = storage.type == 'PremiumV2_LRS'
   ? {
       storageSizeGB: storage.storageSizeGB
       type: storage.type
-      iops: storage.?iops
-      throughput: storage.?throughput
+      iops: storage.iops
+      throughput: storage.throughput
     }
   : {
       storageSizeGB: storage.storageSizeGB
-      autoGrow: storage.?autoGrow ?? 'Disabled'
+      autoGrow: storage.autoGrow ?? 'Disabled'
       type: storage.type
-      tier: storage.?tier
+      tier: storage.tier
     }
 
 var backupVaultNamePrefix = '${namePrefix}-backupvault'

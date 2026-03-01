@@ -21,11 +21,11 @@ param postgresConfiguration = {
     storageSizeGB: 4096
     type: 'PremiumV2_LRS'
     iops: 24000
-    throughput: 12000
+    throughput: 1200
   }
   enableIndexTuning: false
   enableQueryPerformanceInsight: false
-  backupRetentionDays: 1
+  backupRetentionDays: 7
   availabilityZone: '1'
   enableBackupVault: false
 }

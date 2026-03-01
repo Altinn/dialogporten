@@ -76,7 +76,7 @@ import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from 
 
 param postgresConfiguration {
   serverNameStem: string
-  version: string
+  version: '16' | '17' | '18'
   sku: PostgresSku
   storage: PostgresStorageConfig
   enableIndexTuning: bool

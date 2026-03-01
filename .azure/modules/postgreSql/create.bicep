@@ -22,10 +22,17 @@ param vnetId string
 @description('Tags to apply to resources')
 param tags object
 
-@description('The name stem to use when deriving the PostgreSQL server resource name.')
+@description('The name stem to use when deriving the PostgreSQL server resource name. Use lowercase letters, numbers, and hyphens only.')
+@minLength(1)
+@maxLength(40)
 param serverNameStem string
 
 @description('The PostgreSQL major version to provision.')
+@allowed([
+  '16'
+  '17'
+  '18'
+])
 param postgresVersion string
 
 @description('Whether this deployment should publish the canonical Dialogporten connection string secrets.')
@@ -118,6 +125,7 @@ var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
 var postgresServerName = uniqueResourceName('${namePrefix}-${serverNameStem}', postgresServerNameMaxLength)
+var shouldPublishCanonicalConnectionSecrets = publishCanonicalConnectionSecrets && !empty(environmentKeyVaultName)
 var postgresStorage = storage.type == 'PremiumV2_LRS'
   ? {
       storageSizeGB: storage.storageSizeGB
@@ -340,7 +348,7 @@ resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
   dependsOn: [pg_qs_query_capture_mode]
 }
 
-module adoConnectionString '../keyvault/upsertSecret.bicep' = if (publishCanonicalConnectionSecrets) {
+module adoConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublishCanonicalConnectionSecrets) {
   name: 'adoConnectionString'
   params: {
     destKeyVaultName: environmentKeyVaultName
@@ -350,7 +358,7 @@ module adoConnectionString '../keyvault/upsertSecret.bicep' = if (publishCanonic
   }
 }
 
-module psqlConnectionString '../keyvault/upsertSecret.bicep' = if (publishCanonicalConnectionSecrets) {
+module psqlConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublishCanonicalConnectionSecrets) {
   name: 'psqlConnectionString'
   params: {
     destKeyVaultName: environmentKeyVaultName
@@ -362,5 +370,5 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = if (publishCanoni
 
 output serverName string = postgres.name
 output fullyQualifiedDomainName string = postgres.properties.fullyQualifiedDomainName
-output adoConnectionStringSecretUri string = publishCanonicalConnectionSecrets ? adoConnectionString.outputs.secretUri : ''
-output psqlConnectionStringSecretUri string = publishCanonicalConnectionSecrets ? psqlConnectionString.outputs.secretUri : ''
+output adoConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? adoConnectionString.outputs.secretUri : ''
+output psqlConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? psqlConnectionString.outputs.secretUri : ''

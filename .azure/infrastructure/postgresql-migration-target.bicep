@@ -68,7 +68,7 @@ param deployerPrincipalName string
 @description('Configuration for the transient migration target PostgreSQL server.')
 param postgresConfiguration {
   serverNameStem: string
-  version: string
+  version: '16' | '17' | '18'
   sku: PostgresSku
   storage: PostgresStorageConfig
   enableIndexTuning: bool

@@ -25,7 +25,7 @@ param postgresConfiguration = {
   }
   enableIndexTuning: false
   enableQueryPerformanceInsight: false
-  backupRetentionDays: 1
+  backupRetentionDays: 7
   availabilityZone: '1'
   enableBackupVault: false
 }

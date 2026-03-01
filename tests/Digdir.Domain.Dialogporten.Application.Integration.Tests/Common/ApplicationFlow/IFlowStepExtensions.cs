@@ -313,6 +313,13 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep step) =>
         step.SendCommand(ctx => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
+    public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialogAsEndUser(this IFlowStep step) =>
+        step.SendCommand(ctx => new GetDialogQuerySO
+        {
+            DialogId = ctx.GetDialogId(),
+            EndUserId = ctx.GetParty()
+        });
+
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep step) =>
         step.SendCommand(ctx => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 

@@ -1,5 +1,5 @@
-using Digdir.Library.Dialogporten.E2E.Common;
 using AwesomeAssertions;
+using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using StrawberryShake;
 using Xunit;
@@ -9,7 +9,9 @@ namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 [Collection(nameof(GraphQlTestCollectionFixture))]
 public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
 {
-    public DialogByIdTests(GraphQlE2EFixture fixture) : base(fixture) { }
+    public DialogByIdTests(GraphQlE2EFixture fixture) : base(fixture)
+    {
+    }
 
     [E2EFact]
     public async Task Should_Return_Typed_NotFound_Error_For_Invalid_DialogId()
@@ -30,15 +32,16 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
     }
 
     [E2EFact]
-    public async Task Should_Return_Dialog_For_Valid_DialogId()
+    public async Task Should_Return_Full_Dialog_For_Valid_DialogId()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
         var result = await GetDialog(dialogId);
 
         // Assert
+        result.Errors.Should().BeEmpty();
         result.Data.Should().NotBeNull();
 
         var dialog = result.Data.DialogById.Dialog;

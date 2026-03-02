@@ -13,7 +13,7 @@ public sealed class SearchDialogEndUserContextEndpointSummary : Summary<SearchDi
     {
         Summary = "Gets end user context system labels for dialogs";
         Description = """
-                      Performs a search for dialog end user context labels, returning a paginated list of dialogs.
+                      Performs a search for dialog end user context labels, returning a paginated list of dialog ids and end user context revisions.
 
                       * Party is required.
                       * System labels are matched with OR semantics.
@@ -31,5 +31,7 @@ public sealed class SearchDialogEndUserContextEndpointSummary : Summary<SearchDi
             "Supply \"continuationToken\" for the response to get the next page of results, if hasNextPage is true");
         RequestParam(p => p.Limit,
             $"Limit the number of results per page ({PaginationConstants.MinLimit}-{PaginationConstants.MaxLimit}, default: {PaginationConstants.DefaultLimit})");
+        RequestParam(p => p.ContentUpdatedAfter,
+            "Only return context for dialogs with contentUpdatedAt greater than or equal to the supplied date-time.");
     }
 }

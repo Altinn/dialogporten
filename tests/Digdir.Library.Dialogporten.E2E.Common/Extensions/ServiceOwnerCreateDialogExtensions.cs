@@ -105,5 +105,23 @@ public static class ServiceOwnerCreateDialogExtensions
             dialog.Activities.Add(activity);
             return dialog;
         }
+
+        public V1ServiceOwnerDialogsCommandsCreate_Dialog AddGuiAction(Action<V1ServiceOwnerDialogsCommandsCreate_GuiAction>? modify = null)
+        {
+            ArgumentNullException.ThrowIfNull(dialog);
+            dialog.GuiActions ??= [];
+
+            var guiAction = new V1ServiceOwnerDialogsCommandsCreate_GuiAction
+            {
+                Action = "read",
+                Url = new Uri("https://digdir.no"),
+                Priority = DialogsEntitiesActions_DialogGuiActionPriority.Primary,
+                Title = [DialogTestData.CreateLocalization("Gui-handling")]
+            };
+
+            modify?.Invoke(guiAction);
+            dialog.GuiActions.Add(guiAction);
+            return dialog;
+        }
     }
 }

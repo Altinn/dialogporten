@@ -11,6 +11,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests;
 public sealed class WebApiE2EFixture : E2EFixtureBase
 {
     public IEnduserApi EnduserApi { get; private set; } = null!;
+    public HttpClient EnduserHttpClient { get; private set; } = null!;
 
     protected override bool IncludeGraphQlPreflight => false;
 
@@ -34,8 +35,19 @@ public sealed class WebApiE2EFixture : E2EFixtureBase
             .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser));
+
+        // Add a named HttpClient with the same configuration for raw HTTP calls
+        services
+            .AddHttpClient("EnduserHttpClient")
+            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
+            .AddHttpMessageHandler(serviceProvider =>
+                ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser));
     }
 
-    protected override void AfterServiceProviderBuilt(ServiceProvider serviceProvider) =>
+    protected override void AfterServiceProviderBuilt(ServiceProvider serviceProvider)
+    {
         EnduserApi = serviceProvider.GetRequiredService<IEnduserApi>();
+        var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+        EnduserHttpClient = httpClientFactory.CreateClient("EnduserHttpClient");
+    }
 }

@@ -252,7 +252,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -298,7 +298,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -397,7 +397,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -455,7 +455,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -500,7 +500,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -555,7 +555,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -656,7 +656,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
         /// </item>
         /// <item>
         /// <term>503</term>
@@ -685,7 +685,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -736,7 +736,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -795,7 +795,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider.search\".</description>
         /// </item>
         /// <item>
         /// <term>503</term>
@@ -836,7 +836,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -878,7 +878,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"altinn:system/notifications.condition.check\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"altinn:system/notifications.condition.check\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -912,7 +912,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -996,7 +996,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -1042,7 +1042,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -1089,7 +1089,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -1154,7 +1154,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -1318,7 +1318,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten token with the scope \"digdir:dialogporten.serviceprovider\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>

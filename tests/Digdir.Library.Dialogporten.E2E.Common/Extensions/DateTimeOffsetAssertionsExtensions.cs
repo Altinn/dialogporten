@@ -6,9 +6,7 @@ public static class DateTimeOffsetAssertionsExtensions
 {
     extension(DateTimeOffset dateTime)
     {
-        public void BeCloseToWithinSecond(DateTimeOffset expected)
-        {
+        public void BeCloseToWithinSecond(DateTimeOffset expected) =>
             dateTime.Should().BeCloseTo(expected, TimeSpan.FromSeconds(1));
-        }
     }
 }

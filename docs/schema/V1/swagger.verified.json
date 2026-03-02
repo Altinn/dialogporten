@@ -10640,7 +10640,7 @@
                 }
               }
             },
-            "description": "The given dialog ID was not found."
+            "description": "The specified dialog ID or transmission ID was not found."
           },
           "409": {
             "description": "Conflict occurred while processing the request."

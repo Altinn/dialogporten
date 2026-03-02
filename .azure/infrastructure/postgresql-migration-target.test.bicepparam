@@ -8,8 +8,8 @@ param sourceKeyVaultSubscriptionId = readEnvironmentVariable('AZURE_SOURCE_KEY_V
 param sourceKeyVaultResourceGroup = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP')
 param sourceKeyVaultName = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_NAME')
 
-// Copy this into test.bicepparam replacing the existing postgresConfiguration when migration is complete
-// and remove this file
+// After migrations are complete, remove this file and let the current (burstable, SSDv1-tier) server
+// remain the canoncial "test"-server.
 param postgresConfiguration = {
   serverNameStem: 'postgres2'
   version: '18'

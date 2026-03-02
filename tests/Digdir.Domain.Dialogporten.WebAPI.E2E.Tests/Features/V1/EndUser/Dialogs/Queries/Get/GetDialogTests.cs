@@ -75,10 +75,10 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         apiAction.IsAuthorized.Should().BeFalse();
         apiAction.Endpoints.Should().NotBeEmpty();
 
-        foreach (var endpoint in apiAction.Endpoints)
-        {
-            endpoint.Url.ToString().Should().Be(Constants.UnauthorizedUri.ToString());
-        }
+        apiAction.Endpoints.Should().AllSatisfy(endpoint =>
+            endpoint.Url.ToString().Should()
+                .Be(Constants.UnauthorizedUri.ToString()));
+
     }
 
     [E2EFact]

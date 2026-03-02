@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
@@ -20,4 +21,11 @@ public static class E2EConstants
     public const string EndUserScopes = AuthorizationScope.EndUser;
 
     public const string EphemeralDialogUrn = "digdir:dialogporten:ephemeral-dialog";
+
+    public const string DefaultServiceResource = "urn:altinn:resource:ttd-dialogporten-automated-tests";
+    public static readonly string DefaultParty = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{DefaultEndUserSsn}";
+
+    public const string AvailableExternalResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence";
+    public const string UnavailableExternalResource = "urn:altinn:resource:ttd-altinn-events-automated-tests";
+    public const string UnavailableSubresource = "someunavailablesubresource";
 }

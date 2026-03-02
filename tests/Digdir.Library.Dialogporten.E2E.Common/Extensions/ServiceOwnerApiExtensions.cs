@@ -8,15 +8,11 @@ public static class ServiceOwnerApiExtensions
 {
     extension(IServiceownerApi serviceownerApi)
     {
-        public Task<Guid> CreateSimpleDialogAsync(Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
-        {
-            return serviceownerApi.CreateDialogAsync(DialogTestData.CreateSimpleDialog(modify));
-        }
+        public Task<Guid> CreateSimpleDialogAsync(Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null) =>
+            serviceownerApi.CreateDialogAsync(DialogTestData.CreateSimpleDialog(modify));
 
-        public Task<Guid> CreateComplexDialogAsync(Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
-        {
-            return serviceownerApi.CreateDialogAsync(DialogTestData.CreateComplexDialog(modify));
-        }
+        public Task<Guid> CreateComplexDialogAsync(Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null) =>
+            serviceownerApi.CreateDialogAsync(DialogTestData.CreateComplexDialog(modify));
 
         public async Task<Guid> CreateDialogAsync(V1ServiceOwnerDialogsCommandsCreate_Dialog dialog)
         {

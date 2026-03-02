@@ -22,8 +22,6 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var languages = new V1EndUserCommon_AcceptedLanguages();
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
-        var dialogJson = JsonSerializer.Serialize(response.Content);
-        Console.WriteLine(dialogJson);
         // Assert
         response.IsSuccessful.Should().BeTrue();
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");

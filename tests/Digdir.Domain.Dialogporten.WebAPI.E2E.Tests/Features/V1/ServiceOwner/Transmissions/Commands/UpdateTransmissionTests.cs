@@ -191,7 +191,8 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
         var transmissionId = DialogTestData.NewUuidV7();
         var createDialogResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
-                    DialogTestData.CreateSimpleDialog(),
+                    DialogTestData.CreateSimpleDialog(x =>
+                        x.AddTransmission(t => t.Id = transmissionId)),
                     TestContext.Current.CancellationToken);
 
         var dialogId = createDialogResponse.Content.ToGuid();

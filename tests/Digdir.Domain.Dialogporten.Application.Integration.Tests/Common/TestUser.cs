@@ -39,6 +39,7 @@ internal static class TestUsers
     {
         [ClaimTypes.Name] = "Integration Test User",
         [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaHigh,
+        [ClaimsPrincipalExtensions.AltinnOrgClaim] = "ttd",
         [ClaimsPrincipalExtensions.PidClaim] = DefaultPid,
         [ClaimTypes.NameIdentifier] = "integration-test-user",
         [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim

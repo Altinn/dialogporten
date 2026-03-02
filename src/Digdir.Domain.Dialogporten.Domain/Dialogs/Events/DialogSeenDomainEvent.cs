@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
+﻿using System.Diagnostics.CodeAnalysis;
+using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
@@ -10,9 +11,11 @@ public sealed record DialogSeenDomainEvent : DomainEvent, IProcessEvent
     public string Party { get; }
     public string? Process { get; }
     public string? PrecedingProcess { get; }
-    public string UserId { get; }
-    public DialogUserType.Values UserType { get; }
-    public Guid SeenLogId { get; }
+
+    public string? UserId { get; }
+
+    public DialogUserType.Values? UserType { get; }
+    public Guid? SeenLogId { get; }
 
     public DialogSeenDomainEvent(Guid DialogId,
         string ServiceResource,

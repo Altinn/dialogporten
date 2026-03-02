@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
@@ -213,8 +214,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
 
-        // dto fjern markedAsUn
-        // dto legg til seenlog
+        if (lastSeen is not null && lastSeen.CreatedAt <= dialog.UpdatedAt)
+        {
+            dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+        }
         return dialogDto;
     }
 

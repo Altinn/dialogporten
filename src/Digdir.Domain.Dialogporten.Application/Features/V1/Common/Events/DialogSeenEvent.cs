@@ -20,6 +20,12 @@ public sealed class DialogSeenEvent(
 
     public async Task Handle(DialogSeenDomainEvent dialogSeenDomainEvent, CancellationToken cancellationToken)
     {
+        // Todo: remove when old events is gone
+        if (dialogSeenDomainEvent.SeenLogId is null || dialogSeenDomainEvent.UserType is null || dialogSeenDomainEvent.UserId is null)
+        {
+            return;
+        }
+
         var dialog = await _db.Dialogs
             .Include(x => x.SeenLog
                 .Where(log => log.Id == dialogSeenDomainEvent.SeenLogId))
@@ -49,8 +55,8 @@ public sealed class DialogSeenEvent(
 
         var seenLog = new DialogSeenLog
         {
-            Id = dialogSeenDomainEvent.SeenLogId,
-            EndUserTypeId = dialogSeenDomainEvent.UserType,
+            Id = dialogSeenDomainEvent.SeenLogId.Value,
+            EndUserTypeId = dialogSeenDomainEvent.UserType.Value,
             IsViaServiceOwner = dialogSeenDomainEvent.UserType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
             SeenBy = dialogSeenLogSeenByActor,
             CreatedAt = dialogSeenDomainEvent.OccurredAt

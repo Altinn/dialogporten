@@ -156,7 +156,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
 
 
     [Fact]
-    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs2() => FlowBuilder.For(Application)
+    public Task Multiple_Gets_Around_Update_Should_Create_Multiple_SeenLogs() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
         .GetEndUserDialog()
         .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")

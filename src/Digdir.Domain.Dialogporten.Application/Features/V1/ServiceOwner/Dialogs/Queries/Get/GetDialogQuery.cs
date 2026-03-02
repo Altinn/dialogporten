@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
@@ -121,6 +122,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.ContentUpdatedAt,
             request.EndUserId);
 
+        if (dialogDto.SeenSinceLastContentUpdate.Count == 0)
+        {
+            dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+        }
         return dialogDto;
     }
 

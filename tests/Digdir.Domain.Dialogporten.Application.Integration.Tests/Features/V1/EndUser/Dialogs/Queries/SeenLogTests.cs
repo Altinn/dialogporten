@@ -208,6 +208,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Party = IdportenEmailUserIdentifier.PrefixWithSeparator + "Test@Test.no")
             .AsIntegrationEmailUser()
             .GetEndUserDialog()
+            .ConsumeEvents()
+            .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.SeenSinceLastUpdate.Should().ContainSingle()
                     .Which.IsCurrentEndUser.Should().BeTrue());

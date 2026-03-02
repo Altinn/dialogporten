@@ -7,7 +7,7 @@ param namePrefix string
 param location string
 
 @description('The name of the environment Key Vault')
-param environmentKeyVaultName string
+param environmentKeyVaultName string = ''
 
 @description('The name of the secret name(key) in the source key vault to store the PostgreSQL administrator login password')
 #disable-next-line secure-secrets-in-params
@@ -22,6 +22,22 @@ param vnetId string
 @description('Tags to apply to resources')
 param tags object
 
+@description('The name stem to use when deriving the PostgreSQL server resource name. Use lowercase letters, numbers, and hyphens only.')
+@minLength(1)
+@maxLength(40)
+param serverNameStem string
+
+@description('The PostgreSQL major version to provision.')
+@allowed([
+  '16'
+  '17'
+  '18'
+])
+param postgresVersion string
+
+@description('Whether this deployment should publish the canonical Dialogporten connection string secrets.')
+param publishCanonicalConnectionSecrets bool = true
+
 @description('Whether to provision Azure Backup Vault for PostgreSQL. (This does not create an Azure Backup vault/RSV for now.)')
 param enableBackupVault bool = false
 
@@ -34,16 +50,35 @@ type Sku = {
 @description('The SKU of the PostgreSQL server')
 param sku Sku
 
-@export()
-type StorageConfiguration = {
+@sealed()
+type PremiumLrsStorageConfiguration = {
   @minValue(32)
   storageSizeGB: int
-  autoGrow: 'Enabled' | 'Disabled'
-  @description('The type of storage account to use. Default is Premium_LRS.')
-  type: 'Premium_LRS' | 'PremiumV2_LRS'
-  @description('The performance tier of the storage.')
-  tier: 'P1' | 'P2' | 'P4' | 'P6' | 'P10' | 'P15' | 'P20' | 'P30' | 'P40' | 'P50' | 'P60' | 'P70' | 'P80'
+  @description('The type of storage account to use.')
+  type: 'Premium_LRS'
+  @description('Autogrow is used with Premium_LRS.')
+  autoGrow: ('Enabled' | 'Disabled')?
+  @description('The performance tier of the storage. Use only with Premium_LRS.')
+  tier: ('P1' | 'P2' | 'P4' | 'P6' | 'P10' | 'P15' | 'P20' | 'P30' | 'P40' | 'P50' | 'P60' | 'P70' | 'P80')?
 }
+
+@sealed()
+type PremiumV2LrsStorageConfiguration = {
+  @minValue(32)
+  storageSizeGB: int
+  @description('The type of storage account to use.')
+  type: 'PremiumV2_LRS'
+  @description('Provisioned IOPS. Required when using PremiumV2_LRS.')
+  @minValue(3000)
+  iops: int
+  @description('Provisioned throughput in MB/s. Required when using PremiumV2_LRS.')
+  @minValue(125)
+  throughput: int
+}
+
+@export()
+@discriminator('type')
+type StorageConfiguration = PremiumLrsStorageConfiguration | PremiumV2LrsStorageConfiguration
 
 @description('The storage configuration for the PostgreSQL server')
 param storage StorageConfiguration
@@ -89,7 +124,21 @@ param deployerPrincipalName string
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
-var postgresServerName = uniqueResourceName('${namePrefix}-postgres', postgresServerNameMaxLength)
+var postgresServerName = uniqueResourceName('${namePrefix}-${serverNameStem}', postgresServerNameMaxLength)
+var shouldPublishCanonicalConnectionSecrets = publishCanonicalConnectionSecrets && !empty(environmentKeyVaultName)
+var postgresStorage = storage.type == 'PremiumV2_LRS'
+  ? {
+      storageSizeGB: storage.storageSizeGB
+      type: storage.type
+      iops: storage.iops
+      throughput: storage.throughput
+    }
+  : {
+      storageSizeGB: storage.storageSizeGB
+      autoGrow: storage.autoGrow ?? 'Disabled'
+      type: storage.type
+      tier: storage.tier
+    }
 
 var backupVaultNamePrefix = '${namePrefix}-backupvault'
 var restoreContainerName = toLower('${namePrefix}-postgresql-restore')
@@ -154,15 +203,10 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
     }
   }
   properties: {
-    version: '16'
+    version: postgresVersion
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
-    storage: {
-      storageSizeGB: storage.storageSizeGB
-      autoGrow: storage.autoGrow
-      type: storage.type
-      tier: storage.tier
-    }
+    storage: postgresStorage
     backup: {
       backupRetentionDays: backupRetentionDays
       geoRedundantBackup: 'Disabled'
@@ -310,7 +354,7 @@ resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
   dependsOn: [pg_qs_query_capture_mode]
 }
 
-module adoConnectionString '../keyvault/upsertSecret.bicep' = {
+module adoConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublishCanonicalConnectionSecrets) {
   name: 'adoConnectionString'
   params: {
     destKeyVaultName: environmentKeyVaultName
@@ -320,7 +364,7 @@ module adoConnectionString '../keyvault/upsertSecret.bicep' = {
   }
 }
 
-module psqlConnectionString '../keyvault/upsertSecret.bicep' = {
+module psqlConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublishCanonicalConnectionSecrets) {
   name: 'psqlConnectionString'
   params: {
     destKeyVaultName: environmentKeyVaultName
@@ -330,5 +374,7 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = {
   }
 }
 
-output adoConnectionStringSecretUri string = adoConnectionString.outputs.secretUri
-output psqlConnectionStringSecretUri string = psqlConnectionString.outputs.secretUri
+output serverName string = postgres.name
+output fullyQualifiedDomainName string = postgres.properties.fullyQualifiedDomainName
+output adoConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? adoConnectionString.outputs.secretUri : ''
+output psqlConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? psqlConnectionString.outputs.secretUri : ''

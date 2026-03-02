@@ -27,6 +27,8 @@ param appInsightsSku = {
   name: 'PerGB2018'
 }
 param postgresConfiguration = {
+  serverNameStem: 'postgres'
+  version: '16'
   sku: {
     name: 'Standard_B2s'
     tier: 'Burstable'
@@ -45,7 +47,7 @@ param postgresConfiguration = {
   enableBackupVault: false
 }
 
-param deployerPrincipalName = 'GitHub: altinn/dialogporten - Dev'
+param deployerPrincipalName = 'GitHub: altinn/dialogporten - Test'
 
 param redisSku = {
   name: 'Basic'

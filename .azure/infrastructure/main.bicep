@@ -75,6 +75,8 @@ import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgr
 import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
 
 param postgresConfiguration {
+  serverNameStem: string
+  version: '16' | '17' | '18'
   sku: PostgresSku
   storage: PostgresStorageConfig
   enableIndexTuning: bool
@@ -226,6 +228,9 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     namePrefix: namePrefix
     location: location
     environmentKeyVaultName: environmentKeyVault.outputs.name
+    serverNameStem: postgresConfiguration.serverNameStem
+    postgresVersion: postgresConfiguration.version
+    publishCanonicalConnectionSecrets: true
     srcKeyVault: srcKeyVault
     srcKeyVaultAdministratorLoginPasswordKey: 'dialogportenPgAdminPassword${environment}'
     administratorLoginPassword: contains(keyVaultSourceKeys, 'dialogportenPgAdminPassword${environment}')

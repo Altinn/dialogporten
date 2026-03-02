@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.106.0](https://github.com/Altinn/dialogporten/compare/v1.105.1...v1.106.0) (2026-03-02)
+
+
+### Features
+
+* Add ContentUpdatedAfter query param to enduser context, improve perf ([#3517](https://github.com/Altinn/dialogporten/issues/3517)) ([df21949](https://github.com/Altinn/dialogporten/commit/df21949e48304b4964c8d952876e5e37a4943409))
+
+
+### Bug Fixes
+
+* logging override for party/service tuples ([#3519](https://github.com/Altinn/dialogporten/issues/3519)) ([0c475a9](https://github.com/Altinn/dialogporten/commit/0c475a9f9de28439ed4609c5fde4bff83b2cab83))
+* normalize casing on parties ([#3477](https://github.com/Altinn/dialogporten/issues/3477)) ([27aa571](https://github.com/Altinn/dialogporten/commit/27aa571e88631c9462cec9218a33be3630138306))
+* **perf:** party-resource pruning ([#3486](https://github.com/Altinn/dialogporten/issues/3486)) ([5ac3655](https://github.com/Altinn/dialogporten/commit/5ac3655bd201a8e113a756ff6afedea3545e99ff))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunitv3 to 31.13.2 ([#3524](https://github.com/Altinn/dialogporten/issues/3524)) ([b35b6ff](https://github.com/Altinn/dialogporten/commit/b35b6ff3a16c123578dac25a60649b00b7fea81e))
+* **deps:** update grafana/loki docker tag to v3.6.6 ([#3525](https://github.com/Altinn/dialogporten/issues/3525)) ([570d6bd](https://github.com/Altinn/dialogporten/commit/570d6bd615a09767d0a853bb95ca0597d6a5259e))
+
 ## [1.105.1](https://github.com/Altinn/dialogporten/compare/v1.105.0...v1.105.1) (2026-02-26)
 
 

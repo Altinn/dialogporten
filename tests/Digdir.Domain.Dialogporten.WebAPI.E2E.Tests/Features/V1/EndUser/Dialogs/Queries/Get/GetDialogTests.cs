@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text.Json;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Dialogporten.E2E.Common;

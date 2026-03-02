@@ -25,7 +25,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var updatedNavigationalActionUrl = new Uri("https://example.com/updated-action");
 
         var transmissionId = DialogTestData.NewUuidV7();
-        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
         var request = CreateUpdateRequest(transmissionId, x =>
@@ -89,7 +89,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
         var transmissionId = DialogTestData.NewUuidV7();
-        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
         var request = CreateUpdateRequest(transmissionId, x => x.ExternalReference = "if-match-mismatch");
 
@@ -111,7 +111,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     {
         // Arrange
         var transmissionId = DialogTestData.NewUuidV7();
-        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
         var request = CreateUpdateRequest(transmissionId, x => x.ExternalReference = "forbidden-update");
@@ -135,7 +135,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
         var transmissionId = DialogTestData.NewUuidV7();
-        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
         var request = CreateUpdateRequest(transmissionId, x =>
@@ -164,7 +164,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         const string idempotentKey = "duplicate-idempotent-key";
 
         var transmissionId = DialogTestData.NewUuidV7();
-        var (dialogId, _) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
         {
             x.AddTransmission(x => x.IdempotentKey = idempotentKey);
             x.AddTransmission(x => x.Id = transmissionId);
@@ -190,8 +190,12 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
         var transmissionId = DialogTestData.NewUuidV7();
-        var (dialogId, revisionBeforeUpdate) = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
-            x.AddTransmission(x => x.Id = transmissionId));
+        var createDialogResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(
+                    DialogTestData.CreateSimpleDialog(),
+                    TestContext.Current.CancellationToken);
+
+        var dialogId = createDialogResponse.Content.ToGuid();
+        var revisionBeforeUpdate = createDialogResponse.Headers.ETagToGuid();
         var request = CreateUpdateRequest(transmissionId, x => x.ExternalReference = "revision-change");
 
         // Act

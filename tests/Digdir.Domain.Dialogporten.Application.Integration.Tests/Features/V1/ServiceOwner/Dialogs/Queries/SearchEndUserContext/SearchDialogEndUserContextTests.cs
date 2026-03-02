@@ -65,7 +65,6 @@ public class SearchDialogEndUserContextTests(DialogApplication application) : Ap
             {
                 query.Party = [TestUsers.DefaultParty];
                 query.Label = [SystemLabel.Values.Archive];
-                query.Limit = 2;
             })
             .ExecuteAndAssert<PaginatedList<DialogEndUserContextItemDto>>(result =>
             {

@@ -64,7 +64,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1 # v45.0.1
+      - uses: step-security/changed-files@60967b822d3001fa82242f8d6b4ed46bc3600a68 # v47.0.1
         id: filter
         with:
           base_sha: ${{ inputs.infra_base_sha }}
@@ -87,7 +87,7 @@ jobs:
           echo "Changed github workflows files:"
           echo "${{ steps.filter.outputs.github_workflows_modified_files }}"
 
-      - uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1 # v45.0.1
+      - uses: step-security/changed-files@60967b822d3001fa82242f8d6b4ed46bc3600a68 # v47.0.1
         id: filter-backend
         with:
           base_sha: ${{ inputs.apps_base_sha }}

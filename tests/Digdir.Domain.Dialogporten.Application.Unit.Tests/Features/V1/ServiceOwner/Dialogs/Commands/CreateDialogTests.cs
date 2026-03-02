@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -28,6 +29,7 @@ public class CreateDialogTests
         var unitOfWorkSub = Substitute.For<IUnitOfWork>();
         var domainContextSub = Substitute.For<IDomainContext>();
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
+        var systemLabelAdderSub = Substitute.For<ISystemLabelAdder>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userResourceSub = Substitute.For<IUserResourceRegistry>();
         var userSub = Substitute.For<IUser>();
@@ -46,7 +48,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
+            resourceRegistrySub, systemLabelAdderSub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);
@@ -69,6 +71,7 @@ public class CreateDialogTests
         var unitOfWorkSub = Substitute.For<IUnitOfWork>();
         var domainContextSub = Substitute.For<IDomainContext>();
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
+        var systemLabelAdderSub = Substitute.For<ISystemLabelAdder>();
         var serviceAuthorizationSub = Substitute.For<IServiceResourceAuthorizer>();
         var userSub = Substitute.For<IUser>();
         var userResourceSub = Substitute.For<IUserResourceRegistry>();
@@ -86,7 +89,7 @@ public class CreateDialogTests
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
-            resourceRegistrySub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
+            resourceRegistrySub, systemLabelAdderSub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
         var result = await commandHandler.Handle(createCommand, CancellationToken.None);

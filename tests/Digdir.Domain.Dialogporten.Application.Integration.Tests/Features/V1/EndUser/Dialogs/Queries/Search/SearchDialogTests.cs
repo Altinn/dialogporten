@@ -254,4 +254,36 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
         command.Dto.ServiceResource = DummyService;
         command.Dto.CreatedAt = createdAt;
     }
+
+    [Fact]
+    public Task Search_Dialogs_As_Email_User() =>
+        // IntegrationEmailUser have this email: TEST@TEST.NO
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = IdportenEmailUserIdentifier.PrefixWithSeparator + "Test@Test.no";
+            })
+            .AsIntegrationEmailUser()
+            .SearchEndUserDialogs(x =>
+            {
+                x.Party = [IdportenEmailUserIdentifier.PrefixWithSeparator + "test@test.NO"];
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+                x.Items.Should().ContainSingle());
+
+    [Fact]
+    public Task Search_Dialogs_As_Legacy_SI_User() =>
+        // IntegrationLegacySIUser have this username: UserName
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "USERNAME";
+            })
+            .AsIntegrationLegacySIUser()
+            .SearchEndUserDialogs(x =>
+            {
+                x.Party = [AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "uSeRnAmE"];
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+                x.Items.Should().ContainSingle());
 }

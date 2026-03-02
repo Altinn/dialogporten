@@ -12,12 +12,12 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -34,6 +34,8 @@ using NSubstitute;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers.PostgreSql;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.NullObjects;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
@@ -133,6 +135,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
             .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
             .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
+            .AddSingleton<IFusionCacheProvider>(_ => CreateNullFusionCacheProvider())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
@@ -145,6 +148,7 @@ public class DialogApplication : IAsyncLifetime
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
+            .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 
@@ -228,6 +232,17 @@ public class DialogApplication : IAsyncLifetime
             });
 
         return organizationRegistrySubstitute;
+    }
+
+    private static IFusionCacheProvider CreateNullFusionCacheProvider()
+    {
+        var cacheProviderSubstitute = Substitute.For<IFusionCacheProvider>();
+
+        cacheProviderSubstitute
+            .GetCache(Arg.Any<string>())
+            .Returns(_ => new NullFusionCache(Options.Create(new FusionCacheOptions())));
+
+        return cacheProviderSubstitute;
     }
 
     public IMapper GetMapper() => _mapper!;

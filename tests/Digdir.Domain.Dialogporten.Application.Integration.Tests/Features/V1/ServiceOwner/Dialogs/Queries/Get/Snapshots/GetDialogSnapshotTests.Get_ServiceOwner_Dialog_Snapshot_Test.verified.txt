@@ -1,0 +1,435 @@
+﻿{
+  Id: Guid_1,
+  Revision: Guid_2,
+  Org: ttd,
+  ServiceResource: urn:altinn:resource:0945,
+  ServiceResourceType: GenericAccessResource,
+  Party: urn:altinn:person:identifier-no:15026792522,
+  Progress: 77,
+  Process: https://genevieve.org/neural,
+  ExtendedStatus: hmjil5m1i8,
+  ExternalReference: xl1y4ppfro,
+  CreatedAt: DateTimeOffset_1,
+  UpdatedAt: DateTimeOffset_1,
+  ContentUpdatedAt: DateTimeOffset_1,
+  Status: NotApplicable,
+  IsApiOnly: false,
+  HasUnopenedContent: true,
+  Content: {
+    Title: {
+      Value: [
+        {
+          Value: global Division,
+          LanguageCode: en
+        },
+        {
+          Value: Gorgeous Concrete Fish disintermediate,
+          LanguageCode: nb
+        },
+        {
+          Value: indexing Creative,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    },
+    Summary: {
+      Value: [
+        {
+          Value: concept Quality transmit indigo drive SDD synthesize Home Loan Account,
+          LanguageCode: en
+        },
+        {
+          Value: Beauty & Outdoors mesh Realigned Knoll Incredible Wooden Fish Handcrafted Rubber Salad Awesome Plastic Ball JSON,
+          LanguageCode: nb
+        },
+        {
+          Value: conglomeration Movies Robust Garden & Clothing compressing online transmit South Dakota,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    },
+    SenderName: {
+      Value: [
+        {
+          Value: portals input,
+          LanguageCode: en
+        },
+        {
+          Value: Web Pre-emptive,
+          LanguageCode: nb
+        },
+        {
+          Value: Jewelery, Books & Home users,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    },
+    AdditionalInfo: {
+      Value: [
+        {
+          Value: invoice Personal Loan Account Armenian Dram invoice initiatives indexing seize expedite access Cambridgeshire content-based Berkshire fresh-thinking Steel indexing Glens,
+          LanguageCode: en
+        },
+        {
+          Value: New Israeli Sheqel Denmark Cambridgeshire Berkshire Seamless upward-trending Metal Fully-configurable Team-oriented Customer Colombian Peso tertiary sensor back up Group Plastic,
+          LanguageCode: nb
+        },
+        {
+          Value: budgetary management Dynamic withdrawal Row override solid state Bosnia and Herzegovina ivory California Fresh programming XML Generic Cambridgeshire Granite Stream,
+          LanguageCode: nn
+        }
+      ],
+      MediaType: text/plain
+    }
+  },
+  FromServiceOwnerTransmissionsCount: 3,
+  FromPartyTransmissionsCount: 1,
+  SearchTags: [
+    {
+      Value: hm78299bfk
+    },
+    {
+      Value: lbqf22ud0q
+    }
+  ],
+  Attachments: [
+    {
+      Id: Guid_3,
+      DisplayName: [
+        {
+          Value: Manager yellow Togo,
+          LanguageCode: en
+        },
+        {
+          Value: cyan Supervisor Handmade,
+          LanguageCode: nb
+        },
+        {
+          Value: Web Personal Loan Account withdrawal,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_4,
+          Url: https://andre.net/moldova,
+          ConsumerType: Api
+        }
+      ]
+    },
+    {
+      Id: Guid_5,
+      DisplayName: [
+        {
+          Value: Research Intelligent Frozen Gloves open-source,
+          LanguageCode: en
+        },
+        {
+          Value: Global quantify digital,
+          LanguageCode: nb
+        },
+        {
+          Value: Falkland Islands (Malvinas) Ergonomic deposit,
+          LanguageCode: nn
+        }
+      ],
+      Urls: [
+        {
+          Id: Guid_6,
+          Url: https://jonathon.org/rustic/future,
+          ConsumerType: Gui
+        },
+        {
+          Id: Guid_7,
+          Url: https://princess.org/cultivate/compressing/haptic,
+          ConsumerType: Api
+        },
+        {
+          Id: Guid_8,
+          Url: https://jennifer.name/dynamic/e-markets/terrace,
+          ConsumerType: Gui
+        }
+      ]
+    }
+  ],
+  Transmissions: [
+    {
+      Id: Guid_9,
+      CreatedAt: DateTimeOffset_2,
+      Type: Decision,
+      Sender: {
+        ActorType: ServiceOwner
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Vista Analyst SQL,
+              LanguageCode: en
+            },
+            {
+              Value: Accounts parse Concrete,
+              LanguageCode: nb
+            },
+            {
+              Value: Austria black Metrics,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Avon Executive firewall Toys, Outdoors & Home visionary programming Ergonomic Rubber Soap strategize Cliffs Designer,
+              LanguageCode: en
+            },
+            {
+              Value: Auto Loan Account parsing HDD South Carolina Handcrafted invoice JBOD one-to-one Berkshire SMS,
+              LanguageCode: nb
+            },
+            {
+              Value: Director Vista Tasty Rubber Shoes turquoise core gold Music, Shoes & Automotive engage content mesh,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      IsOpened: false
+    },
+    {
+      Id: Guid_10,
+      CreatedAt: DateTimeOffset_3,
+      Type: Acceptance,
+      Sender: {
+        ActorType: ServiceOwner
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Moroccan Dirham generating hack XSS,
+              LanguageCode: en
+            },
+            {
+              Value: Auto Loan Account out-of-the-box hack schemas,
+              LanguageCode: nb
+            },
+            {
+              Value: Tools & Sports Automotive Divide Face to face,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Gorgeous Concrete Pizza overriding indexing Practical Fresh Towels Corporate Square Granite,
+              LanguageCode: en
+            },
+            {
+              Value: Delaware Savings Account Industrial & Beauty New Mexico leading-edge Realigned bandwidth,
+              LanguageCode: nb
+            },
+            {
+              Value: Sleek 24/7 users Sleek Frozen Hat Buckinghamshire Organized Personal Loan Account,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      IsOpened: false
+    },
+    {
+      Id: Guid_11,
+      CreatedAt: DateTimeOffset_4,
+      Type: Submission,
+      Sender: {
+        ActorType: ServiceOwner
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: help-desk programming,
+              LanguageCode: en
+            },
+            {
+              Value: copying Borders,
+              LanguageCode: nb
+            },
+            {
+              Value: Toys & Movies Implemented,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: Hills PCI Gorgeous payment hard drive Berkshire challenge one-to-one synergistic,
+              LanguageCode: en
+            },
+            {
+              Value: Texas Licensed Granite Chips Vision-oriented Fall Future Customer Buckinghamshire primary Pennsylvania,
+              LanguageCode: nb
+            },
+            {
+              Value: empowering Grenada Gibraltar Games & Computers Drive Granite connect killer Open-architected,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      IsOpened: false
+    },
+    {
+      Id: Guid_12,
+      CreatedAt: DateTimeOffset_5,
+      Type: Decision,
+      Sender: {
+        ActorType: ServiceOwner
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: content-based Personal Loan Account Cayman Islands Dollar,
+              LanguageCode: en
+            },
+            {
+              Value: Brazil Union Practical,
+              LanguageCode: nb
+            },
+            {
+              Value: CFA Franc BEAC Maine Views,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        },
+        Summary: {
+          Value: [
+            {
+              Value: generate plum bypass Gorgeous solid state South Dakota hacking,
+              LanguageCode: en
+            },
+            {
+              Value: Metrics sexy synthesizing Liaison JBOD Kids & Jewelery Berkshire,
+              LanguageCode: nb
+            },
+            {
+              Value: Greens solutions Curve Sleek Metal Keyboard Boliviano boliviano Tasty Wooden Gloves Unbranded,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      },
+      IsOpened: false
+    }
+  ],
+  GuiActions: [
+    {
+      Id: Guid_13,
+      Action: if7go1e4,
+      Url: https://kasandra.info/stable/boliviano-boliviano/orchestrator,
+      IsDeleteDialogAction: false,
+      Priority: Primary,
+      HttpMethod: GET,
+      Title: [
+        {
+          Value: Oregon platforms,
+          LanguageCode: en
+        },
+        {
+          Value: lime success,
+          LanguageCode: nb
+        },
+        {
+          Value: deposit Intranet,
+          LanguageCode: nn
+        }
+      ]
+    }
+  ],
+  ApiActions: [
+    {
+      Id: Guid_14,
+      Action: vfs0vfim,
+      Name: sbh0g7nq,
+      Endpoints: [
+        {
+          Id: Guid_15,
+          Version: v636,
+          Url: https://tabitha.org/time-frame/auto-loan-account,
+          HttpMethod: CONNECT,
+          DocumentationUrl: https://kristofer.name/concrete/pixel/solid-state,
+          RequestSchema: https://daisy.name/calculate,
+          ResponseSchema: https://cyrus.org/secondary,
+          Deprecated: true
+        },
+        {
+          Id: Guid_16,
+          Version: v973,
+          Url: https://holly.info/feed/online,
+          HttpMethod: OPTIONS,
+          DocumentationUrl: https://hadley.info/guatemala/books/strategist,
+          RequestSchema: https://brenna.name/lime,
+          ResponseSchema: https://grover.net/corporate/park/brunei-darussalam,
+          Deprecated: true
+        },
+        {
+          Id: Guid_17,
+          Version: v213,
+          Url: https://vilma.com/new-jersey,
+          HttpMethod: TRACE,
+          DocumentationUrl: https://vella.com/sdd,
+          RequestSchema: https://marcelina.org/back-up,
+          ResponseSchema: https://aurore.biz/station/payment/brook,
+          Deprecated: false
+        }
+      ]
+    }
+  ],
+  Activities: [
+    {
+      Id: Guid_18,
+      CreatedAt: DateTimeOffset_6,
+      ExtendedType: https://chanel.biz/agent,
+      Type: PaymentMade,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Eleazar Prohaska
+      }
+    },
+    {
+      Id: Guid_19,
+      CreatedAt: DateTimeOffset_7,
+      ExtendedType: https://orlo.name/withdrawal/bypass,
+      Type: DialogDeleted,
+      PerformedBy: {
+        ActorType: PartyRepresentative,
+        ActorName: Addie Treutel
+      }
+    }
+  ],
+  ServiceOwnerContext: {
+    Revision: Guid_20
+  },
+  EndUserContext: {
+    Revision: Guid_21,
+    SystemLabels: [
+      Default,
+      Sent
+    ]
+  }
+}

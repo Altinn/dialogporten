@@ -1,17 +1,17 @@
 using AutoMapper;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.Validators;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.Validators;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using AwesomeAssertions;
-
-using UpdateActivityDto =
+using UpdateDialogActivityDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ActivityDto;
-using CreateActivityDto =
+using CreateDialogActivityDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ActivityDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.ServiceOwner.Activities;
@@ -27,7 +27,12 @@ public class ActivityValidatorTests
         DialogActivityType.Values activityType)
     {
         // Arrange
-        var mapper = new MapperConfiguration(cfg => cfg.CreateMap<CreateActivityDto, UpdateActivityDto>()).CreateMapper();
+        var mapper = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<CreateDialogActivityDto, UpdateDialogActivityDto>();
+                cfg.CreateMap<CreateDialogActivityDto, CreateActivityDto>();
+            })
+            .CreateMapper();
 
         var activity = DialogGenerator.GenerateFakeDialogActivity(type: activityType);
         activity.TransmissionId = IdentifiableExtensions.CreateVersion7();
@@ -38,16 +43,19 @@ public class ActivityValidatorTests
         var clock = new Clock();
         var createValidator = new CreateDialogDialogActivityDtoValidator(localizationValidator, actorValidator, clock);
         var updateValidator = new UpdateDialogDialogActivityDtoValidator(localizationValidator, actorValidator, clock);
+        var createActivityValidator = new CreateActivityDtoValidator(localizationValidator, actorValidator, clock);
 
         // Act
         var createValidation = createValidator.Validate(activity);
-        var updateValidation = updateValidator.Validate(mapper.Map<UpdateActivityDto>(activity));
+        var updateValidation = updateValidator.Validate(mapper.Map<UpdateDialogActivityDto>(activity));
+        var createActivityValidation = createActivityValidator.Validate(mapper.Map<CreateActivityDto>(activity));
 
         // Assert
         if (activityType == DialogActivityType.Values.TransmissionOpened)
         {
             createValidation.IsValid.Should().BeTrue();
             updateValidation.IsValid.Should().BeTrue();
+            createActivityValidation.IsValid.Should().BeTrue();
         }
         else
         {

@@ -10,10 +10,9 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
-using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -21,7 +20,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using OneOf;
@@ -51,6 +49,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
+    private readonly ISystemLabelAdder _systemLabelAdder;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IResourceRegistry _resourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
@@ -65,12 +64,14 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IMapper mapper,
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
+        ISystemLabelAdder systemLabelAdder,
         IUserResourceRegistry userResourceRegistry,
         IResourceRegistry resourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         IDataLoaderContext dataLoaderContext,
         IDialogTransmissionAppender dialogTransmissionAppender,
-        ITransmissionHierarchyValidator transmissionHierarchyValidator)
+        ITransmissionHierarchyValidator transmissionHierarchyValidator
+    )
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -84,6 +85,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
         _dialogTransmissionAppender = dialogTransmissionAppender ?? throw new ArgumentNullException(nameof(dialogTransmissionAppender));
         _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
+        _systemLabelAdder = systemLabelAdder;
     }
 
     public async Task<UpdateDialogResult> Handle(UpdateDialogCommand request, CancellationToken cancellationToken)
@@ -203,7 +205,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (!request.IsSilentUpdate)
         {
-            AddSystemLabel(dialog, SystemLabel.Values.Default);
+            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);
         }
 
         var saveResult = await _unitOfWork
@@ -215,25 +217,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             domainError => domainError,
             concurrencyError => concurrencyError,
             conflict => conflict);
-    }
-
-    private void AddSystemLabel(DialogEntity dialog, SystemLabel.Values labelToAdd)
-    {
-        if (!_user.GetPrincipal().TryGetConsumerOrgNumber(out var organizationNumber))
-        {
-            _domainContext.AddError(new DomainFailure(nameof(organizationNumber), "Cannot find organization number for current user."));
-            return;
-        }
-
-        var performedBy = LabelAssignmentLogActorFactory.Create(
-            ActorType.Values.ServiceOwner,
-            actorId: $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{organizationNumber}",
-            actorName: null);
-
-        dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [labelToAdd],
-            removeLabels: [],
-            performedBy);
     }
 
     private void ValidateTimeFields(DialogAttachment attachment)
@@ -378,7 +361,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         if (appendResult.ContainsEndUserTransmission)
         {
-            AddSystemLabel(dialog, SystemLabel.Values.Sent);
+            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
     }
 

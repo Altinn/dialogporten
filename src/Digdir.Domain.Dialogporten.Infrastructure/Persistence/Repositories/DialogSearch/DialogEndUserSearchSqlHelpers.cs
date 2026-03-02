@@ -79,7 +79,8 @@ internal static partial class DialogEndUserSearchSqlHelpers
 
     internal static void LogPartiesAndServicesCount(
         ILogger logger,
-        List<PartiesAndServices>? partiesAndServices)
+        List<PartiesAndServices>? partiesAndServices,
+        string strategyName)
     {
         if (partiesAndServices is null) return;
         if (!logger.IsEnabled(LogLevel.Information)) return;
@@ -91,15 +92,16 @@ internal static partial class DialogEndUserSearchSqlHelpers
             .Select(g => (g.Parties.Length, g.Services.Length))
             .ToList();
 
-        LogPartiesAndServicesCount(logger, totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
+        LogPartiesAndServicesCount(logger, strategyName, totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
     }
 
     [LoggerMessage(
         EventId = 0,
         Level = LogLevel.Information,
-        Message = "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}")]
+        Message = "PartiesAndServices: tp={TotalPartiesCount}, ts={TotalServicesCount}, g={GroupsCount}, gs={GroupSizes}, strategy={StrategyName}")]
     private static partial void LogPartiesAndServicesCount(
         ILogger logger,
+        string strategyName,
         int totalPartiesCount,
         int totalServicesCount,
         int groupsCount,

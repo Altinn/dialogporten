@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
@@ -8,6 +9,165 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 
 public class AuthorizationHelperTests
 {
+    [Fact]
+    public async Task PruneUnreferencedResources_ShouldReturnEarly_WhenNoParties()
+    {
+        var result = new DialogSearchAuthorizationResult();
+        var repo = new FakePartyResourceReferenceRepository();
+
+        await AuthorizationHelper.PruneUnreferencedResources(
+            result,
+            repo,
+            minResourcesPruningThreshold: 0,
+            CancellationToken.None);
+
+        Assert.Equal(0, repo.GetReferencedResourcesByPartyCallCount);
+    }
+
+    [Fact]
+    public async Task PruneUnreferencedResources_ShouldReturnEarly_WhenDistinctResourcesAtOrBelowThreshold()
+    {
+        var result = new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, HashSet<string>>
+            {
+                ["party1"] = ["resource1", "resource2"],
+                ["party2"] = ["resource2"]
+            }
+        };
+        var repo = new FakePartyResourceReferenceRepository();
+
+        await AuthorizationHelper.PruneUnreferencedResources(
+            result,
+            repo,
+            minResourcesPruningThreshold: 2,
+            CancellationToken.None);
+
+        Assert.Equal(0, repo.GetReferencedResourcesByPartyCallCount);
+        Assert.Equal(2, result.ResourcesByParties.Count);
+    }
+
+    [Fact]
+    public async Task PruneUnreferencedResources_ShouldPruneByIntersection_AndKeepInstanceIds()
+    {
+        var result = new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, HashSet<string>>
+            {
+                ["party1"] = ["resource1", "resource2"],
+                ["party2"] = ["resource3"],
+                ["party3"] = ["resource4"],
+            },
+            AltinnAppInstanceIds =
+            [
+                $"{Constants.ServiceContextInstanceIdPrefix}111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+            ]
+        };
+
+        var repo = new FakePartyResourceReferenceRepository
+        {
+            ReferencedResourcesByParty = new Dictionary<string, HashSet<string>>
+            {
+                ["party1"] = ["resource2"],
+                ["party3"] = ["resource4"],
+            }
+        };
+
+        await AuthorizationHelper.PruneUnreferencedResources(
+            result,
+            repo,
+            minResourcesPruningThreshold: 0,
+            CancellationToken.None);
+
+        Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
+        Assert.Equal(2, result.ResourcesByParties.Count);
+        Assert.Single(result.ResourcesByParties["party1"]);
+        Assert.Contains("resource2", result.ResourcesByParties["party1"]);
+        Assert.Single(result.ResourcesByParties["party3"]);
+        Assert.Contains("resource4", result.ResourcesByParties["party3"]);
+        Assert.Single(result.AltinnAppInstanceIds);
+        Assert.Equal(
+            $"{Constants.ServiceContextInstanceIdPrefix}111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            result.AltinnAppInstanceIds.Single());
+    }
+
+    [Fact]
+    public async Task PruneUnreferencedResources_ShouldPassDistinctResourceSetToRepository()
+    {
+        var result = new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, HashSet<string>>
+            {
+                ["party1"] = ["resource1"],
+                ["party2"] = ["resource1", "resource2"]
+            }
+        };
+        var repo = new FakePartyResourceReferenceRepository();
+
+        await AuthorizationHelper.PruneUnreferencedResources(
+            result,
+            repo,
+            minResourcesPruningThreshold: 0,
+            CancellationToken.None);
+
+        Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
+        Assert.NotNull(repo.LastRequestedParties);
+        Assert.NotNull(repo.LastRequestedResources);
+        Assert.Equal(2, repo.LastRequestedParties.Count);
+        Assert.Equal(2, repo.LastRequestedResources.Count);
+        Assert.Contains("resource1", repo.LastRequestedResources);
+        Assert.Contains("resource2", repo.LastRequestedResources);
+    }
+
+    [Fact]
+    public async Task ResolveDialogSearchAuthorization_ThenPruneUnreferencedResources_ShouldPruneExpectedServiceResources()
+    {
+        const string party = "urn:altinn:organization:identifier-no:313130983";
+        const string resourceA = "urn:altinn:resource:resource-a";
+        const string resourceB = "urn:altinn:resource:resource-b";
+
+        var authorizedParties = new AuthorizedPartiesResult
+        {
+            AuthorizedParties =
+            [
+                new()
+                {
+                    Party = party,
+                    PartyId = 313130983,
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedResources = [resourceA, resourceB],
+                    AuthorizedInstances = []
+                }
+            ]
+        };
+
+        var resolved = await AuthorizationHelper.ResolveDialogSearchAuthorization(
+            authorizedParties,
+            constraintParties: [],
+            constraintResources: [],
+            _ => Task.FromResult(new List<SubjectResource>()),
+            CancellationToken.None);
+
+        var repo = new FakePartyResourceReferenceRepository
+        {
+            ReferencedResourcesByParty = new Dictionary<string, HashSet<string>>
+            {
+                [party] = [resourceB]
+            }
+        };
+
+        await AuthorizationHelper.PruneUnreferencedResources(
+            resolved,
+            repo,
+            minResourcesPruningThreshold: 0,
+            CancellationToken.None);
+
+        Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
+        Assert.True(resolved.ResourcesByParties.TryGetValue(party, out var prunedResources));
+        Assert.Single(prunedResources);
+        Assert.Contains(resourceB, prunedResources);
+    }
+
     [Theory]
     [MemberData(nameof(ResolvingScenarios))]
     public async Task ResolveDialogSearchAuthorization_ShouldResolveCorrectly(
@@ -263,5 +423,28 @@ public class AuthorizationHelperTests
                 }
             ]
         };
+    }
+
+    private sealed class FakePartyResourceReferenceRepository : IPartyResourceReferenceRepository
+    {
+        internal int GetReferencedResourcesByPartyCallCount { get; private set; }
+        internal List<string>? LastRequestedParties { get; private set; }
+        internal List<string>? LastRequestedResources { get; private set; }
+
+        internal Dictionary<string, HashSet<string>> ReferencedResourcesByParty { get; init; } = [];
+
+        public Task<Dictionary<string, HashSet<string>>> GetReferencedResourcesByParty(
+            IReadOnlyCollection<string> parties,
+            IReadOnlyCollection<string> resources,
+            CancellationToken cancellationToken)
+        {
+            GetReferencedResourcesByPartyCallCount++;
+            LastRequestedParties = [.. parties];
+            LastRequestedResources = [.. resources];
+            return Task.FromResult(ReferencedResourcesByParty);
+        }
+
+        public Task InvalidateCachedReferencesForParty(string party, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
     }
 }

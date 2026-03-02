@@ -18,7 +18,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
@@ -33,7 +33,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<Guid?>("ActorNameEntityId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("ActorNameEntityId");
 
                     b.Property<int>("ActorTypeId")
                         .HasColumnType("integer");
@@ -55,7 +56,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActorNameEntityId");
+                    b.HasIndex("ActorNameEntityId")
+                        .HasDatabaseName("IX_Actor_ActorNameEntityId")
+                        .HasFilter("\"ActorNameEntityId\" IS NOT NULL");
 
                     b.HasIndex("ActorTypeId");
 
@@ -2001,10 +2004,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Actors.Actor");
 
                     b.Property<Guid>("LabelAssignmentLogId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("LabelAssignmentLogId");
 
                     b.HasIndex("LabelAssignmentLogId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Actor_LabelAssignmentLogId")
+                        .HasFilter("\"LabelAssignmentLogId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("LabelAssignmentLogActor");
                 });
@@ -2014,10 +2020,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Actors.Actor");
 
                     b.Property<Guid>("ActivityId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("ActivityId");
 
                     b.HasIndex("ActivityId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Actor_ActivityId")
+                        .HasFilter("\"ActivityId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogActivityPerformedByActor");
                 });
@@ -2027,10 +2036,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Actors.Actor");
 
                     b.Property<Guid>("DialogSeenLogId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("DialogSeenLogId");
 
                     b.HasIndex("DialogSeenLogId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Actor_DialogSeenLogId")
+                        .HasFilter("\"DialogSeenLogId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogSeenLogSeenByActor");
                 });
@@ -2040,10 +2052,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Actors.Actor");
 
                     b.Property<Guid>("TransmissionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("TransmissionId");
 
                     b.HasIndex("TransmissionId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Actor_TransmissionId")
+                        .HasFilter("\"TransmissionId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogTransmissionSenderActor");
                 });
@@ -2053,9 +2068,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Attachments.Attachment");
 
                     b.Property<Guid>("DialogId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("DialogId");
 
-                    b.HasIndex("DialogId");
+                    b.HasIndex("DialogId")
+                        .HasDatabaseName("IX_Attachment_DialogId")
+                        .HasFilter("\"DialogId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogAttachment");
                 });
@@ -2065,9 +2083,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Attachments.Attachment");
 
                     b.Property<Guid>("TransmissionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("TransmissionId");
 
-                    b.HasIndex("TransmissionId");
+                    b.HasIndex("TransmissionId")
+                        .HasDatabaseName("IX_Attachment_TransmissionId")
+                        .HasFilter("\"TransmissionId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogTransmissionAttachment");
                 });
@@ -2077,10 +2098,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
 
                     b.Property<Guid>("AttachmentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("AttachmentId");
 
                     b.HasIndex("AttachmentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_LocalizationSet_AttachmentId")
+                        .HasFilter("\"AttachmentId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("AttachmentDisplayName");
                 });
@@ -2090,16 +2114,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
 
                     b.Property<Guid>("GuiActionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("DialogGuiActionPrompt_GuiActionId");
 
                     b.HasIndex("GuiActionId")
-                        .IsUnique();
-
-                    b.ToTable("LocalizationSet", t =>
-                        {
-                            t.Property("GuiActionId")
-                                .HasColumnName("DialogGuiActionPrompt_GuiActionId");
-                        });
+                        .IsUnique()
+                        .HasDatabaseName("IX_LocalizationSet_DialogGuiActionPrompt_GuiActionId")
+                        .HasFilter("\"DialogGuiActionPrompt_GuiActionId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogGuiActionPrompt");
                 });
@@ -2109,10 +2130,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
 
                     b.Property<Guid>("GuiActionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("GuiActionId");
 
                     b.HasIndex("GuiActionId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_LocalizationSet_GuiActionId")
+                        .HasFilter("\"GuiActionId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogGuiActionTitle");
                 });
@@ -2122,10 +2146,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
 
                     b.Property<Guid>("ActivityId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("ActivityId");
 
                     b.HasIndex("ActivityId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_LocalizationSet_ActivityId")
+                        .HasFilter("\"ActivityId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogActivityDescription");
                 });
@@ -2135,10 +2162,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
 
                     b.Property<Guid>("DialogContentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("DialogContentId");
 
                     b.HasIndex("DialogContentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_LocalizationSet_DialogContentId")
+                        .HasFilter("\"DialogContentId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogContentValue");
                 });
@@ -2148,10 +2178,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
 
                     b.Property<Guid>("TransmissionContentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("TransmissionContentId");
 
                     b.HasIndex("TransmissionContentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_LocalizationSet_TransmissionContentId")
+                        .HasFilter("\"TransmissionContentId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogTransmissionContentValue");
                 });
@@ -2161,10 +2194,13 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasBaseType("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet");
 
                     b.Property<Guid>("NavigationalActionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("NavigationalActionId");
 
                     b.HasIndex("NavigationalActionId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_LocalizationSet_NavigationalActionId")
+                        .HasFilter("\"NavigationalActionId\" IS NOT NULL");
 
                     b.HasDiscriminator().HasValue("DialogTransmissionNavigationalActionTitle");
                 });

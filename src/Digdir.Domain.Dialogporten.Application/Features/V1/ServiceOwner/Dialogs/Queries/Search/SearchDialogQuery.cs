@@ -169,7 +169,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         // based on the end user's authorization
         var authorizedResources = request.EndUserId is not null
             ? await _altinnAuthorization.GetAuthorizedResourcesForSearch(
-                request.Party ?? [],
+                request.Party?.Select(x => x.ToLowerInvariant()).ToList() ?? [],
                 request.ServiceResource ?? [],
                 cancellationToken)
             : null;
@@ -415,7 +415,7 @@ internal static class SearchDialogQueryExtensions
             UpdatedBefore = request.UpdatedBefore,
             ExternalReference = request.ExternalReference,
             ExtendedStatus = request.ExtendedStatus,
-            Party = request.Party,
+            Party = request.Party?.Select(x => x.ToLowerInvariant()).ToList(),
             ServiceResource = request.ServiceResource,
             Status = request.Status,
             VisibleBefore = request.VisibleBefore,

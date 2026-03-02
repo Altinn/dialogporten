@@ -128,6 +128,7 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                 ctx.Bag[NewIdKey] = newId;
                 x.Dto.Id = newId;
             })
+            .AssertSuccess()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>((x, ctx) =>
                 x.Transmissions.Single().Id

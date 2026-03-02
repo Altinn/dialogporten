@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -25,8 +26,10 @@ public class GetDialogVisibleFromTests(WebApiE2EFixture fixture) : E2ETestBase<W
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        response.Headers.Expires.Should().NotBeNull();
-        response.Headers.Expires!.Value.Should().BeCloseToWithinSecond(visibleFrom);
+        var hasExpiresHeader = response.Headers.TryGetValues("Expires", out var expiresValues);
+        hasExpiresHeader.Should().BeTrue("Expires header should be present");
+        var expires = DateTimeOffset.Parse(expiresValues!.First(), CultureInfo.InvariantCulture);
+        expires.BeCloseToWithinSecond(visibleFrom);
 
         // Cleanup
         var purgeResponse = await Fixture.ServiceownerApi

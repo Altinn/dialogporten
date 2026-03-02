@@ -51,7 +51,7 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .CreateSimpleDialog()
             .CreateTransmission()
             .UpdateTransmission((x, _) =>
-                x.TransmissionId = Guid.NewGuid())
+                x.TransmissionId = NewUuidV7())
             .ExecuteAndAssert<EntityNotFound<DialogTransmission>>();
 
     private const string ExistingKey = "existing-key";

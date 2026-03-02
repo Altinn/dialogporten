@@ -21,7 +21,8 @@ public sealed class UpdateDialogTransmissionEndpointSummary : Summary<UpdateDial
         Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Updated.FormatInvariant("transmission");
         Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[StatusCodes.Status401Unauthorized] =
-            Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope.ServiceProvider);
+            Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure
+                .FormatInvariant(AuthorizationScope.ServiceProviderChangeTransmissions);
         Responses[StatusCodes.Status403Forbidden] =
             Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("update");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogTransmissionNotFound;

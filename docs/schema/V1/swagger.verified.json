@@ -10627,7 +10627,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.changetransmissions\u0022."
           },
           "403": {
             "description": "Unauthorized to update child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."

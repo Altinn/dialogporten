@@ -964,7 +964,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider.changetransmissions\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>

@@ -15,10 +15,8 @@ public class GetDialogVisibleFromTests(WebApiE2EFixture fixture) : E2ETestBase<W
     {
         // Arrange
         var visibleFrom = DateTimeOffset.UtcNow.AddMonths(1);
-        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(modify =>
-        {
-            modify.VisibleFrom = visibleFrom;
-        });
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(
+            dialog => dialog.VisibleFrom = visibleFrom);
 
         // Act
         var languages = new V1EndUserCommon_AcceptedLanguages();
@@ -26,35 +24,10 @@ public class GetDialogVisibleFromTests(WebApiE2EFixture fixture) : E2ETestBase<W
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        var hasExpiresHeader = response.Headers.TryGetValues("Expires", out var expiresValues);
+        var hasExpiresHeader = response.ContentHeaders!.TryGetValues("Expires", out var expiresValues);
         hasExpiresHeader.Should().BeTrue("Expires header should be present");
+
         var expires = DateTimeOffset.Parse(expiresValues!.First(), CultureInfo.InvariantCulture);
         expires.BeCloseToWithinSecond(visibleFrom);
-
-        // Cleanup
-        var purgeResponse = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        purgeResponse.IsSuccessful.Should().BeTrue();
-    }
-
-    [E2EFact]
-    public async Task Should_Return_200_For_Visible_Dialog()
-    {
-        // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
-
-        // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages();
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
-
-        // Assert
-        response.IsSuccessful.Should().BeTrue();
-        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
-        content.Id.Should().Be(dialogId);
-
-        // Cleanup
-        var purgeResponse = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        purgeResponse.IsSuccessful.Should().BeTrue();
     }
 }

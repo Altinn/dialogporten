@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
@@ -19,8 +20,7 @@ public class GetDialogVisibleFromTests(WebApiE2EFixture fixture) : E2ETestBase<W
             dialog => dialog.VisibleFrom = visibleFrom);
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages();
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+        var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

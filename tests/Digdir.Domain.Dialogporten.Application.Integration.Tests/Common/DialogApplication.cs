@@ -324,10 +324,7 @@ public class DialogApplication : IAsyncLifetime
             .AsReadOnly();
     }
 
-    public void PurgeEvents()
-    {
-        _publishedEvents.Clear();
-    }
+    public void PurgeEvents() => _publishedEvents.Clear();
 }
 
 /// <summary>

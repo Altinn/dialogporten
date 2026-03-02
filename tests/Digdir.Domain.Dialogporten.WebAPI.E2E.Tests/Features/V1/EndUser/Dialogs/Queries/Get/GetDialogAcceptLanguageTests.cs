@@ -15,32 +15,24 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         // Arrange
         var dialogId = await CreateDialogWithMultilingualContent();
 
-        try
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages
         {
-            // Act
-            var languages = new V1EndUserCommon_AcceptedLanguages
-            {
-                AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "nb", Weight = 1 }]
-            };
-            var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "nb", Weight = 1 }]
+        };
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
-            // Assert
-            response.IsSuccessful.Should().BeTrue();
-            var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-            content.Content.Title.Value.Should().HaveCount(1);
-            content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
+        content.Content.Title.Value.Should().HaveCount(1);
+        content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
 
-            content.Content.Summary.Value.Should().HaveCount(2);
+        content.Content.Summary.Value.Should().HaveCount(2);
 
-            content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-            content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
-        }
-        finally
-        {
-            // Cleanup
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        }
+        content.Content.ExtendedStatus.Value.Should().HaveCount(1);
+        content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -49,21 +41,13 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         // Arrange
         var dialogId = await CreateDialogWithMultilingualContent();
 
-        try
-        {
-            // Act - Use raw HttpClient to send invalid Accept-Language header
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/enduser/dialogs/{dialogId}");
-            request.Headers.Add("Accept-Language", "it;a=1.0, nb");
-            var response = await Fixture.EnduserHttpClient.SendAsync(request);
+        // Act - Use raw HttpClient to send invalid Accept-Language header
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/enduser/dialogs/{dialogId}");
+        request.Headers.Add("Accept-Language", "it;a=1.0, nb");
+        var response = await Fixture.EnduserHttpClient.SendAsync(request);
 
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        }
-        finally
-        {
-            // Cleanup
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        }
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [E2EFact]
@@ -72,32 +56,24 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         // Arrange
         var dialogId = await CreateDialogWithMultilingualContent();
 
-        try
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages
         {
-            // Act
-            var languages = new V1EndUserCommon_AcceptedLanguages
-            {
-                AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "sv", Weight = 1 }]
-            };
-            var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "sv", Weight = 1 }]
+        };
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
-            // Assert
-            response.IsSuccessful.Should().BeTrue();
-            var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-            content.Content.Title.Value.Should().HaveCount(1);
-            content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
+        content.Content.Title.Value.Should().HaveCount(1);
+        content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
 
-            content.Content.Summary.Value.Should().HaveCount(2);
+        content.Content.Summary.Value.Should().HaveCount(2);
 
-            content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-            content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
-        }
-        finally
-        {
-            // Cleanup
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        }
+        content.Content.ExtendedStatus.Value.Should().HaveCount(1);
+        content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -106,32 +82,24 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         // Arrange
         var dialogId = await CreateDialogWithMultilingualContent();
 
-        try
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages
         {
-            // Act
-            var languages = new V1EndUserCommon_AcceptedLanguages
-            {
-                AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "da", Weight = 1 }]
-            };
-            var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "da", Weight = 1 }]
+        };
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
-            // Assert
-            response.IsSuccessful.Should().BeTrue();
-            var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-            content.Content.Title.Value.Should().HaveCount(1);
-            content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
+        content.Content.Title.Value.Should().HaveCount(1);
+        content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
 
-            content.Content.Summary.Value.Should().HaveCount(2);
+        content.Content.Summary.Value.Should().HaveCount(2);
 
-            content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-            content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
-        }
-        finally
-        {
-            // Cleanup
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        }
+        content.Content.ExtendedStatus.Value.Should().HaveCount(1);
+        content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -140,32 +108,24 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         // Arrange
         var dialogId = await CreateDialogWithMultilingualContent();
 
-        try
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages
         {
-            // Act
-            var languages = new V1EndUserCommon_AcceptedLanguages
-            {
-                AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "*", Weight = 1 }]
-            };
-            var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "*", Weight = 1 }]
+        };
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
-            // Assert
-            response.IsSuccessful.Should().BeTrue();
-            var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-            content.Content.Title.Value.Should().HaveCount(1);
-            content.Content.Title.Value.First().LanguageCode.Should().Be("en");
+        content.Content.Title.Value.Should().HaveCount(1);
+        content.Content.Title.Value.First().LanguageCode.Should().Be("en");
 
-            content.Content.Summary.Value.Should().HaveCount(2);
+        content.Content.Summary.Value.Should().HaveCount(2);
 
-            content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-            content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
-        }
-        finally
-        {
-            // Cleanup
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        }
+        content.Content.ExtendedStatus.Value.Should().HaveCount(1);
+        content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -174,55 +134,43 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         // Arrange
         var dialogId = await CreateDialogWithMultilingualContent();
 
-        try
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages
         {
-            // Act
-            var languages = new V1EndUserCommon_AcceptedLanguages
-            {
-                AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "it", Weight = 1 }]
-            };
-            var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "it", Weight = 1 }]
+        };
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
-            // Assert
-            response.IsSuccessful.Should().BeTrue();
-            var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        // Assert
+        response.IsSuccessful.Should().BeTrue();
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-            content.Content.Title.Value.Should().HaveCount(1);
-            content.Content.Title.Value.First().LanguageCode.Should().Be("en");
+        content.Content.Title.Value.Should().HaveCount(1);
+        content.Content.Title.Value.First().LanguageCode.Should().Be("en");
 
-            content.Content.Summary.Value.Should().HaveCount(1);
-            content.Content.Summary.Value.First().LanguageCode.Should().Be("it");
+        content.Content.Summary.Value.Should().HaveCount(1);
+        content.Content.Summary.Value.First().LanguageCode.Should().Be("it");
 
-            content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-            content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
-        }
-        finally
-        {
-            // Cleanup
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        }
+        content.Content.ExtendedStatus.Value.Should().HaveCount(1);
+        content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
     }
 
-    /// <summary>
-    /// Shared helper method to create a dialog with multilingual content for all tests
-    /// </summary>
-    private async Task<Guid> CreateDialogWithMultilingualContent()
-    {
-        return await Fixture.ServiceownerApi.CreateComplexDialogAsync(modify: d =>
+    private async Task<Guid> CreateDialogWithMultilingualContent() =>
+        await Fixture.ServiceownerApi.CreateComplexDialogAsync(modify: d =>
         {
-            d.VisibleFrom = null;
-            d.Content!.Title = DialogTestData.CreateContentValue(
-                value: [
+            d.Content.Title = DialogTestData.CreateContentValue(
+                value:
+                [
                     DialogTestData.CreateLocalization("en-title-content", "en"),
                     DialogTestData.CreateLocalization("nb-title-content", "nb")
                 ]);
-            d.Content!.ExtendedStatus = DialogTestData.CreateContentValue(
+            d.Content.ExtendedStatus = DialogTestData.CreateContentValue(
                 value: [DialogTestData.CreateLocalization("nb-Status-content", "nb")]);
-            d.Content!.Summary = DialogTestData.CreateContentValue(
-                value: [
+            d.Content.Summary = DialogTestData.CreateContentValue(
+                value:
+                [
                     DialogTestData.CreateLocalization("it-summary-content", "it"),
                     DialogTestData.CreateLocalization("fr-summary-content", "fr")
                 ]);
         });
-    }
 }

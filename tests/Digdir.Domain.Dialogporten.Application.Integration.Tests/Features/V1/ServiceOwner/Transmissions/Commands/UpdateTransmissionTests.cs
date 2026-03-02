@@ -255,7 +255,8 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
 
             var newCreatedAtDate = DateTimeOffset.UtcNow.AddDays(-10);
             Add((command, _) => command.Dto.CreatedAt = newCreatedAtDate,
-                transmission => transmission.CreatedAt.Should().BeCloseToDefault(newCreatedAtDate));
+                transmission => transmission.CreatedAt.Should()
+                    .BeCloseToWithinMicrosecond(newCreatedAtDate));
 
             var updatedAttachmentId = NewUuidV7();
             Add(
@@ -302,7 +303,8 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             Add(
                 (command, _) => command.Dto.Attachments[0].ExpiresAt = updatedAttachmentExpiresAt,
                 transmission => transmission.Attachments.Should().ContainSingle()
-                    .Which.ExpiresAt.Should().BeCloseToDefault(updatedAttachmentExpiresAt));
+                    .Which.ExpiresAt.Should()
+                    .BeCloseToWithinMicrosecond(updatedAttachmentExpiresAt));
 
             const string updatedNavigationalActionTitle = "updated-navigation-title";
             Add(
@@ -322,7 +324,8 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             Add(
                 (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = updatedNavigationalActionExpiresAt,
                 transmission => transmission.NavigationalActions.Should().ContainSingle()
-                    .Which.ExpiresAt.Should().BeCloseToDefault(updatedNavigationalActionExpiresAt));
+                    .Which.ExpiresAt.Should()
+                    .BeCloseToWithinMicrosecond(updatedNavigationalActionExpiresAt));
 
             Add(
                 (command, _) => command.Dto.Attachments = [],

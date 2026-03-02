@@ -5,7 +5,10 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.C
 
 public static class DateTimeOffsetAssertionsExtensions
 {
-    public static AndConstraint<T> BeCloseToDefault<T>(
+    /// <summary>
+    /// Asserts the DateTimeOffset is within 1 microsecond of the expected value.
+    /// </summary>
+    public static AndConstraint<T> BeCloseToWithinMicrosecond<T>(
         this T should, DateTimeOffset expected)
         where T : DateTimeOffsetAssertions<T> =>
         should.BeCloseTo(expected, TimeSpan.FromMicroseconds(1));

@@ -1,4 +1,5 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
@@ -9,8 +10,8 @@ public static class DialogTestData
         Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
     {
         var dialog = CreateDialog(
-            serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
-            party: $"urn:altinn:person:identifier-no:{E2EConstants.DefaultEndUserSsn}",
+            serviceResource: E2EConstants.DefaultServiceResource,
+            party: E2EConstants.DefaultParty,
             content: CreateContent(
                 title: CreateContentValue(
                     value: "Skjema for rapportering av et eller annet",
@@ -38,8 +39,8 @@ public static class DialogTestData
         Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
     {
         var dialog = CreateDialog(
-            serviceResource: "urn:altinn:resource:ttd-dialogporten-automated-tests",
-            party: $"urn:altinn:person:identifier-no:{E2EConstants.DefaultEndUserSsn}",
+            serviceResource: E2EConstants.DefaultServiceResource,
+            party: E2EConstants.DefaultParty,
             content: CreateContent(
                 title: CreateContentValue(
                     value: "Skjema for rapportering av et eller annet",
@@ -80,18 +81,19 @@ public static class DialogTestData
         dialog
             .AddTransmission(t =>
             {
+                t.AuthorizationAttribute = E2EConstants.AvailableExternalResource;
                 t.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
                 {
                     Title = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsestittel", "nb"), CreateLocalization("Transmission title", "en")]),
+                        value: [CreateLocalization("Forsendelsestittel"), CreateLocalization("Transmission title", "en")]),
                     Summary = CreateContentValue(
-                        value: [CreateLocalization("Forsendelse oppsummering", "nb"), CreateLocalization("Transmission summary", "en")])
+                        value: [CreateLocalization("Forsendelse oppsummering"), CreateLocalization("Transmission summary", "en")])
                 };
                 t.Attachments =
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
                     {
-                        DisplayName = [CreateLocalization("Forsendelse visningsnavn", "nb"), CreateLocalization("Transmission attachment display name", "en")],
+                        DisplayName = [CreateLocalization("Forsendelse visningsnavn"), CreateLocalization("Transmission attachment display name", "en")],
                         Urls =
                         [
                             new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -105,18 +107,19 @@ public static class DialogTestData
             })
             .AddTransmission(t =>
             {
+                t.AuthorizationAttribute = E2EConstants.UnavailableExternalResource;
                 t.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
                 {
                     Title = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsesstittel", "nb"), CreateLocalization("Transmission title", "en")]),
+                        value: [CreateLocalization("Forsendelsesstittel"), CreateLocalization("Transmission title", "en")]),
                     Summary = CreateContentValue(
-                        value: [CreateLocalization("Transmisjon oppsummering", "nb"), CreateLocalization("Transmission summary", "en")])
+                        value: [CreateLocalization("Transmisjon oppsummering"), CreateLocalization("Transmission summary", "en")])
                 };
                 t.Attachments =
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
                     {
-                        DisplayName = [CreateLocalization("Visningsnavn for forsendelsesvedlegg ", "nb"), CreateLocalization("Transmission attachment display name", "en")],
+                        DisplayName = [CreateLocalization("Visningsnavn for forsendelsesvedlegg "), CreateLocalization("Transmission attachment display name", "en")],
                         Urls =
                         [
                             new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -130,18 +133,19 @@ public static class DialogTestData
             })
             .AddTransmission(t =>
             {
+                t.AuthorizationAttribute = E2EConstants.UnavailableSubresource;
                 t.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
                 {
                     Title = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsetittel", "nb"), CreateLocalization("Transmission title", "en")]),
+                        value: [CreateLocalization("Forsendelsetittel"), CreateLocalization("Transmission title", "en")]),
                     Summary = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsesoppsummering", "nb"), CreateLocalization("Transmission summary", "en")])
+                        value: [CreateLocalization("Forsendelsesoppsummering"), CreateLocalization("Transmission summary", "en")])
                 };
                 t.Attachments =
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
                     {
-                        DisplayName = [CreateLocalization("Visningsnavn for forsendelsesvedlegg", "nb"), CreateLocalization("Transmission attachment display name", "en")],
+                        DisplayName = [CreateLocalization("Visningsnavn for forsendelsesvedlegg"), CreateLocalization("Transmission attachment display name", "en")],
                         Urls =
                         [
                             new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -161,7 +165,7 @@ public static class DialogTestData
                 g.Action = "read";
                 g.Url = new Uri("https://digdir.no");
                 g.Priority = DialogsEntitiesActions_DialogGuiActionPriority.Primary;
-                g.Title = [CreateLocalization("Gå til dialog", "nb")];
+                g.Title = [CreateLocalization("Gå til dialog")];
             })
             .AddGuiAction(g =>
             {
@@ -169,8 +173,8 @@ public static class DialogTestData
                 g.Url = new Uri("https://digdir.no");
                 g.Priority = DialogsEntitiesActions_DialogGuiActionPriority.Secondary;
                 g.HttpMethod = Http_HttpVerb.POST;
-                g.Title = [CreateLocalization("Utfør handling uten navigasjon", "nb")];
-                g.Prompt = [CreateLocalization("Er du sikker?", "nb")];
+                g.Title = [CreateLocalization("Utfør handling uten navigasjon")];
+                g.Prompt = [CreateLocalization("Er du sikker?")];
             });
 
         // 1 API action with 2 endpoints (one deprecated)
@@ -180,42 +184,18 @@ public static class DialogTestData
         dialog
             .AddAttachment(a =>
             {
-                a.DisplayName = [CreateLocalization("Et vedlegg", "nb")];
-                a.Urls =
-                [
-                    new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
-                    {
-                        Url = new Uri("https://foo.com/foo.pdf"),
-                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui,
-                        MediaType = "application/pdf"
-                    }
-                ];
+                a.DisplayName = [CreateLocalization("Et vedlegg")];
+                a.Urls = [CreateAttachmentUrl()];
             })
             .AddAttachment(a =>
             {
-                a.DisplayName = [CreateLocalization("Et annet vedlegg", "nb")];
-                a.Urls =
-                [
-                    new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
-                    {
-                        Url = new Uri("https://foo.com/foo.pdf"),
-                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui,
-                        MediaType = "application/pdf"
-                    }
-                ];
+                a.DisplayName = [CreateLocalization("Et annet vedlegg")];
+                a.Urls = [CreateAttachmentUrl()];
             })
             .AddAttachment(a =>
             {
-                a.DisplayName = [CreateLocalization("Nok et vedlegg", "nb")];
-                a.Urls =
-                [
-                    new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
-                    {
-                        Url = new Uri("https://foo.com/foo.pdf"),
-                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui,
-                        MediaType = "application/pdf"
-                    }
-                ];
+                a.DisplayName = [CreateLocalization("Nok et vedlegg")];
+                a.Urls = [CreateAttachmentUrl()];
             });
 
         // 3 activities
@@ -247,7 +227,7 @@ public static class DialogTestData
                 };
                 a.Description =
                 [
-                    CreateLocalization("Brukeren har begått skattesvindel", "nb"),
+                    CreateLocalization("Brukeren har begått skattesvindel"),
                     CreateLocalization("Tax fraud", "en")
                 ];
             });
@@ -255,6 +235,14 @@ public static class DialogTestData
         modify?.Invoke(dialog);
         return dialog;
     }
+
+    private static V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl CreateAttachmentUrl() =>
+        new()
+        {
+            Url = new Uri("https://foo.com/foo.pdf"),
+            ConsumerType = Attachments_AttachmentUrlConsumerType.Gui,
+            MediaType = "application/pdf"
+        };
 
     public static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateDialog(
         string serviceResource,

@@ -36,16 +36,7 @@ public static class ServiceOwnerApiExtensions
         public async Task<Guid> CreateComplexDialogAsync(
             Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
         {
-            const string availableExternalResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence";
-            const string unavailableExternalResource = "urn:altinn:resource:ttd-altinn-events-automated-tests";
-            const string unavailableSubresource = "someunavailablesubresource";
-
             var dialog = DialogTestData.CreateComplexDialog(modify);
-            dialog.VisibleFrom = null;
-            var transmissions = dialog.Transmissions.ToList();
-            transmissions[0].AuthorizationAttribute = availableExternalResource;
-            transmissions[1].AuthorizationAttribute = unavailableExternalResource;
-            transmissions[2].AuthorizationAttribute = unavailableSubresource;
 
             var createDialogResponse =
                 await serviceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(

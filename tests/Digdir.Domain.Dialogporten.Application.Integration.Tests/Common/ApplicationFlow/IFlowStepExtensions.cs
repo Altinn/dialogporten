@@ -622,10 +622,7 @@ public static class IFlowStepExtensions
     }
 
     public static Guid GetTransmissionId(this FlowContext ctx)
-    {
-        ctx.Bag.TryGetValue(TransmissionIdKey, out var value).Should().BeTrue();
-        return value.Should().BeOfType<Guid>().Subject;
-    }
+        => ctx.GetGuidByKey(TransmissionIdKey);
 
     public static Guid GetActivityId(this FlowContext ctx)
     {

@@ -36,6 +36,8 @@ public sealed class WebApiE2EFixture : E2EFixtureBase
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser));
     }
 
-    protected override void AfterServiceProviderBuilt(ServiceProvider serviceProvider) =>
+    protected override void AfterServiceProviderBuilt(ServiceProvider serviceProvider)
+    {
         EnduserApi = serviceProvider.GetRequiredService<IEnduserApi>();
+    }
 }

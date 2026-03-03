@@ -92,10 +92,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalId)
                 .MaxBy(x => x.CreatedAt);
 
-            if (lastSeen is null || lastSeen.CreatedAt <= dialog.UpdatedAt)
+            if (lastSeen is null ||
+                lastSeen.CreatedAt <= dialog.UpdatedAt ||
+                dialog.EndUserContext.DialogEndUserContextSystemLabels.Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened)
+                )
             {
                 dialog.UpdateSeenAt(externalId, userId.Type);
-                dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
             }
 
             var saveResult = await _unitOfWork
@@ -123,6 +125,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.ContentUpdatedAt,
             request.EndUserId);
 
+        if (request.EndUserId is not null)
+        {
+            dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+        }
         return dialogDto;
     }
 
@@ -155,7 +161,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var apiAction in dto.ApiActions.Where(a => a.Action == action))
             {
                 if ((apiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
+                 || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
                 {
                     apiAction.IsAuthorized = true;
                 }
@@ -164,7 +170,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var guiAction in dto.GuiActions.Where(a => a.Action == action))
             {
                 if ((guiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
+                 || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
                 {
                     guiAction.IsAuthorized = true;
                 }

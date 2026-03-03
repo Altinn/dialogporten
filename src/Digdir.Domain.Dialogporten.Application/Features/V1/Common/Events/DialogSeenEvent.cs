@@ -39,32 +39,38 @@ public sealed class DialogSeenEvent(
             return;
         }
 
-        // Short circuit if LastSeen already exists for the new Id.
-        if (dialog.SeenLog.Count != 0)
+        // Short circuit if LastSeen already exists for the new Id. AND dialog doesn't have MarkedAsUnopened
+        if (dialog.SeenLog.Count != 0 && dialog.EndUserContext.DialogEndUserContextSystemLabels.All(x => x.SystemLabelId != SystemLabel.Values.MarkedAsUnopened))
         {
             return;
         }
 
         var actorNameEntity = new ActorName { ActorId = dialogSeenDomainEvent.UserId };
 
-        var dialogSeenLogSeenByActor = new DialogSeenLogSeenByActor
+        if (dialog.SeenLog.Count == 0)
         {
-            ActorTypeId = ActorType.Values.PartyRepresentative,
-            ActorNameEntity = actorNameEntity
-        };
+            var dialogSeenLogSeenByActor = new DialogSeenLogSeenByActor
+            {
+                ActorTypeId = ActorType.Values.PartyRepresentative,
+                ActorNameEntity = actorNameEntity
+            };
 
-        var seenLog = new DialogSeenLog
-        {
-            Id = dialogSeenDomainEvent.SeenLogId.Value,
-            EndUserTypeId = dialogSeenDomainEvent.UserType.Value,
-            IsViaServiceOwner = dialogSeenDomainEvent.UserType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
-            SeenBy = dialogSeenLogSeenByActor,
-            CreatedAt = dialogSeenDomainEvent.OccurredAt
-        };
+            var seenLog = new DialogSeenLog
+            {
+                Id = dialogSeenDomainEvent.SeenLogId.Value,
+                EndUserTypeId = dialogSeenDomainEvent.UserType.Value,
+                IsViaServiceOwner = dialogSeenDomainEvent.UserType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
+                SeenBy = dialogSeenLogSeenByActor,
+                CreatedAt = dialogSeenDomainEvent.OccurredAt
+            };
+
+            dialog.SeenLog.Add(seenLog);
+            _db.DialogSeenLog.Add(seenLog);
+        }
 
         var performedBy = new LabelAssignmentLogActor
         {
-            ActorTypeId = dialogSeenLogSeenByActor.ActorTypeId,
+            ActorTypeId = ActorType.Values.PartyRepresentative,
             ActorNameEntity = actorNameEntity
         };
 
@@ -73,8 +79,6 @@ public sealed class DialogSeenEvent(
             removeLabels: [SystemLabel.Values.MarkedAsUnopened],
             performedBy);
 
-        dialog.SeenLog.Add(seenLog);
-        _db.DialogSeenLog.Add(seenLog);
 
         var result = await _unitOfWork
             .DisableUpdatableFilter()

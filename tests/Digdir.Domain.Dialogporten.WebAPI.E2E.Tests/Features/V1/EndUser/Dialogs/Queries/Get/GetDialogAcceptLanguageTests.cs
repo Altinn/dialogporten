@@ -1,4 +1,3 @@
-using System.Net;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -41,13 +40,14 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         // Arrange
         var dialogId = await CreateDialogWithMultilingualContent();
 
-        // Act - Use raw HttpClient to send invalid Accept-Language header
-        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/enduser/dialogs/{dialogId}");
-        request.Headers.Add("Accept-Language", "it;a=1.0, nb");
-        var response = await Fixture.EnduserHttpClient.SendAsync(request);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        // Act
+        var languages = new V1EndUserCommon_AcceptedLanguages
+        {
+            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "invalid;;;", Weight = 1 }]
+        };
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+        response.IsSuccessful.Should().BeFalse();
+        response.Error!.Content.Should().Contain("Accept-Language");
     }
 
     [E2EFact]
@@ -162,10 +162,10 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
                 value:
                 [
                     DialogTestData.CreateLocalization("en-title-content", "en"),
-                    DialogTestData.CreateLocalization("nb-title-content", "nb")
+                    DialogTestData.CreateLocalization("nb-title-content")
                 ]);
             d.Content.ExtendedStatus = DialogTestData.CreateContentValue(
-                value: [DialogTestData.CreateLocalization("nb-Status-content", "nb")]);
+                value: [DialogTestData.CreateLocalization("nb-Status-content")]);
             d.Content.Summary = DialogTestData.CreateContentValue(
                 value:
                 [

@@ -20,7 +20,7 @@ internal static class Constants
         internal const string Frozen = "The dialog {0} was frozen successfully.";
         internal const string ValidationError = "Validation error occurred. See problem details for a list of errors.";
         internal const string DomainError = "Domain error occurred. See problem details for a list of errors.";
-        internal const string ServiceOwnerAuthenticationFailure = "Missing or invalid authentication token. Requires a Maskinporten token with the scope \"{0}\".";
+        internal const string ServiceOwnerAuthenticationFailure = "Missing or invalid authentication token. Requires a Maskinporten token with the scope(s) \"{0}\".";
         internal const string EndUserAuthenticationFailure = "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".";
         internal const string ServiceOwnerLabelNotFound = "The given dialog or service owner label was not found.";
         internal const string DialogNotFound = "The given dialog ID was not found.";

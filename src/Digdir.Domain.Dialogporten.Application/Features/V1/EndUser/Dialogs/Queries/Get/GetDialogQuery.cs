@@ -105,8 +105,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Include(x => x.SeenLog
                         .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
                         .OrderBy(x => x.CreatedAt))
-                    .ThenInclude(x => x.SeenBy)
-                    .ThenInclude(x => x.ActorNameEntity)
+                        .ThenInclude(x => x.SeenBy)
+                        .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.EndUserContext)
                         .ThenInclude(x => x.DialogEndUserContextSystemLabels)
                     .IgnoreQueryFilters()
@@ -167,7 +167,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         }
 
         var lastSeen = dialog.SeenLog
-            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalIdWithPrefix)
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalId)
             .MaxBy(x => x.CreatedAt);
 
         if (lastSeen is null || lastSeen.CreatedAt <= dialog.UpdatedAt)

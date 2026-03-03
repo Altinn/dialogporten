@@ -22,9 +22,9 @@ public sealed record DialogSeenDomainEvent : DomainEvent, IProcessEvent
         string Party,
         string? Process,
         string? PrecedingProcess,
-        string UserId,
-        DialogUserType.Values UserType,
-        Guid SeenLogId)
+        string? UserId,
+        DialogUserType.Values? UserType,
+        Guid? SeenLogId)
     {
         this.DialogId = DialogId;
         this.ServiceResource = ServiceResource;
@@ -34,6 +34,6 @@ public sealed record DialogSeenDomainEvent : DomainEvent, IProcessEvent
         this.UserId = UserId;
         this.UserType = UserType;
         this.SeenLogId = SeenLogId;
-        EventId = SeenLogId;
+        EventId = SeenLogId ?? Guid.NewGuid();
     }
 }

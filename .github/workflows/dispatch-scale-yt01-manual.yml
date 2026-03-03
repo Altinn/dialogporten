@@ -127,8 +127,8 @@ jobs:
             REVISION=$(az containerapp revision list \
               --name "$APP" \
               --resource-group "$RESOURCE_GROUP" \
-              --query "[?properties.active==\`true\`].name" \
-              -o tsv | head -n 1)
+              --query "sort_by([?properties.active==\`true\`], &properties.createdTime)[-1].name" \
+              -o tsv)
 
             if [[ -n "$REVISION" ]]; then
               echo "Restarting revision $REVISION..."

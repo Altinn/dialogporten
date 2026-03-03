@@ -41,11 +41,17 @@ jobs:
         run: |
           set -euo pipefail
 
-          POSTGRES_NAME=$(az postgres flexible-server list \
+          POSTGRES_NAMES=$(az postgres flexible-server list \
             --resource-group "$RESOURCE_GROUP" \
-            --query "[0].name" -o tsv)
+            --query "[?starts_with(name, 'dp-be-yt01-postgres')].name" -o tsv)
 
-          echo "name=$POSTGRES_NAME" >> "$GITHUB_OUTPUT"
+          SERVER_COUNT=$(echo "$POSTGRES_NAMES" | grep -c . || true)
+          if [[ "$SERVER_COUNT" -ne 1 ]]; then
+            echo "Error: Expected 1 PostgreSQL server matching 'dp-be-yt01-postgres*', found $SERVER_COUNT."
+            exit 1
+          fi
+
+          echo "name=$POSTGRES_NAMES" >> "$GITHUB_OUTPUT"
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
@@ -255,5 +261,5 @@ jobs:
           fi
 
       - name: Logout from Azure
-        if: ${{ failure() || success() }}
+        if: ${{ always() }}
         run: az logout

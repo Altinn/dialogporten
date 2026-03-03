@@ -47,7 +47,7 @@ param postgresConfiguration = {
   enableBackupVault: false
 }
 
-param deployerPrincipalName = 'GitHub: altinn/dialogporten - Test'
+param deployerPrincipalName = 'GitHub: altinn/dialogporten - Dev'
 
 param redisSku = {
   name: 'Basic'

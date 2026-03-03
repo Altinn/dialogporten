@@ -30,4 +30,4 @@ param postgresConfiguration = {
   enableBackupVault: false
 }
 
-param deployerPrincipalName = 'GitHub: altinn/dialogporten - Test (new postgresql)'
+param deployerPrincipalName = 'GitHub: altinn/dialogporten - Dev'

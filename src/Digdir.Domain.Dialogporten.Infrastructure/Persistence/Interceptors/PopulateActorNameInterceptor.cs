@@ -6,13 +6,19 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
 internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
+    private const int ActorNameSaveRetries = 1;
+    private const string ActorNameTableName = "ActorName";
+    private const string ActorNameUniqueIndex = "IX_ActorName_ActorId_Name";
+
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
     private readonly ITransactionTime _transactionTime;
@@ -66,7 +72,26 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
         _hasBeenExecuted = true;
-        return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        return await SaveChangesWithActorNameRetry(dbContext, cancellationToken);
+    }
+
+    private static async Task<InterceptionResult<int>> SaveChangesWithActorNameRetry(DbContext dbContext, CancellationToken cancellationToken)
+    {
+        // 
+        const int hardLimit = ActorNameSaveRetries + 1;
+        for (var retryAttempt = 0; retryAttempt < hardLimit; retryAttempt++)
+        {
+            try
+            {
+                var rowsAffected = await dbContext.SaveChangesAsync(cancellationToken);
+                return InterceptionResult<int>.SuppressWithResult(rowsAffected);
+            }
+            catch (Exception ex) when (retryAttempt < ActorNameSaveRetries && IsActorNameUniqueConstraintViolation(ex))
+            {
+                await RewireToExistingActorNames(dbContext, cancellationToken);
+            }
+        }
+        throw new UnreachableException("Should not reach hard limit when actor retry");
     }
 
     private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
@@ -139,6 +164,50 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
     private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
         (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
+
+    private static bool IsActorNameUniqueConstraintViolation(Exception exception) => exception switch
+    {
+        UniqueConstraintException { InnerException.Data: not null } uniqueConstraintException
+            when (uniqueConstraintException.InnerException?.Data["TableName"] as string) == ActorNameTableName => true,
+        PostgresException postgresException
+            when postgresException.SqlState == PostgresErrorCodes.UniqueViolation &&
+            postgresException.TableName == ActorNameTableName &&
+            postgresException.ConstraintName == ActorNameUniqueIndex => true,
+        _ when exception.InnerException is not null => IsActorNameUniqueConstraintViolation(exception.InnerException),
+        _ => false
+    };
+
+    private static async Task RewireToExistingActorNames(DbContext dbContext, CancellationToken cancellationToken)
+    {
+        var addedActorNameEntries = dbContext.ChangeTracker
+            .Entries<ActorName>()
+            .Where(x => x.State == EntityState.Added)
+            .Select(x => x.Entity)
+            .ToList();
+
+        if (addedActorNameEntries.Count == 0)
+        {
+            return;
+        }
+
+        var existingActorNamesByPair = (await GetExistingActorNames(dbContext, addedActorNameEntries, cancellationToken))
+            .ToDictionary(x => (x.ActorId, x.Name));
+
+        foreach (var addedActorName in addedActorNameEntries)
+        {
+            if (!existingActorNamesByPair.TryGetValue((addedActorName.ActorId, addedActorName.Name), out var existingActorName))
+            {
+                continue;
+            }
+
+            foreach (var actor in addedActorName.ActorEntities.ToList())
+            {
+                actor.ActorNameEntity = existingActorName;
+            }
+
+            dbContext.Entry(addedActorName).State = EntityState.Detached;
+        }
+    }
 
     private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {

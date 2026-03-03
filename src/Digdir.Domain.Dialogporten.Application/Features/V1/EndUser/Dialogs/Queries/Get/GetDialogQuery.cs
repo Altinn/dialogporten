@@ -10,7 +10,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
@@ -191,18 +190,17 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            currentUserInformation);
+            userId);
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            currentUserInformation);
+            userId);
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -218,27 +216,28 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         {
             dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
         }
+
         return dialogDto;
     }
 
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        UserInformation currentUserInformation) =>
+        UserId userId) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
                 .First())
-            .Select(log => ToSeenLogDto(currentUserInformation, log))
+            .Select(log => ToSeenLogDto(userId, log))
             .ToList();
 
-    private DialogSeenLogDto ToSeenLogDto(UserInformation currentUserInformation, DialogSeenLog log)
+    private DialogSeenLogDto ToSeenLogDto(UserId currentUserInformation, DialogSeenLog log)
     {
         var actorId = log.SeenBy.ActorNameEntity?.ActorId;
         var logDto = _mapper.Map<DialogSeenLogDto>(log);
-        logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
+        logDto.IsCurrentEndUser = currentUserInformation.ExternalIdWithPrefix == actorId;
         return logDto;
     }
 

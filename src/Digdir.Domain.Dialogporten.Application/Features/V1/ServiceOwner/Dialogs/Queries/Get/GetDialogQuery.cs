@@ -89,7 +89,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             }
 
             var lastSeen = dialog.SeenLog
-                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalIdWithPrefix)
+                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalId)
                 .MaxBy(x => x.CreatedAt);
 
             if (lastSeen is null || lastSeen.CreatedAt <= dialog.UpdatedAt)

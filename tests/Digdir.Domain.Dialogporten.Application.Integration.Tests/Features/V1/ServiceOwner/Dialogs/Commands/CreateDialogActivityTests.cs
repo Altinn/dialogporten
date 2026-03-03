@@ -246,7 +246,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     Description = []
                 }
             )
-            .ExecuteAndAssert<Conflict>();
+            .ExecuteAndAssert<DomainError>();
     }
 
     [Fact]

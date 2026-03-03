@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 

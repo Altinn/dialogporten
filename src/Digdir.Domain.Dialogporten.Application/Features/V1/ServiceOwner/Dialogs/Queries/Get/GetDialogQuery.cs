@@ -95,6 +95,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             if (lastSeen is null || lastSeen.CreatedAt <= dialog.UpdatedAt)
             {
                 dialog.UpdateSeenAt(externalId, userId.Type);
+                dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
             }
 
             var saveResult = await _unitOfWork
@@ -122,10 +123,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.ContentUpdatedAt,
             request.EndUserId);
 
-        if (request.EndUserId is not null && dialogDto.SeenSinceLastContentUpdate.Count != 0)
-        {
-            dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
-        }
         return dialogDto;
     }
 

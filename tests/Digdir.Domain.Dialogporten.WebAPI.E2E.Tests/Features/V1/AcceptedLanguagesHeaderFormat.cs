@@ -1,10 +1,11 @@
 // ReSharper disable InconsistentNaming
+// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1;
 
 public partial class V1EndUserCommon_AcceptedLanguages
 {
     public override string ToString() =>
-        AcceptedLanguage.Count == 0
+        AcceptedLanguage is null || AcceptedLanguage.Count == 0
             ? string.Empty
             : string.Join(", ", AcceptedLanguage.Select(l => l.ToString()));
 }

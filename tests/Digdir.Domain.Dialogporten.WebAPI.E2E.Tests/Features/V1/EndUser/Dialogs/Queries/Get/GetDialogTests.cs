@@ -1,6 +1,7 @@
 using System.Net;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
@@ -18,8 +19,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages();
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+        var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
         response.IsSuccessful.Should().BeTrue();
@@ -38,8 +38,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages();
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+        var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
         response.IsSuccessful.Should().BeTrue();
@@ -62,8 +61,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages();
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+        var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
         response.IsSuccessful.Should().BeTrue();
@@ -87,8 +85,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages();
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+        var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
         response.IsSuccessful.Should().BeTrue();
@@ -119,8 +116,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
             .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
         purgeResponse.IsSuccessful.Should().BeTrue();
 
-        var languages = new V1EndUserCommon_AcceptedLanguages();
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
+        var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

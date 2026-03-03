@@ -146,18 +146,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
                 ? new ConcurrencyError()
                 : new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
         }
-        catch (UniqueConstraintException ex) when
-            (ex.InnerException?.Data["Detail"] is string message &&
-            ex.InnerException.Data["TableName"] is string tableName)
+        catch (Exception ex) when (ex is UniqueConstraintException or ReferenceConstraintException &&
+                                   ex.InnerException?.Data["Detail"] is string message &&
+                                   ex.InnerException.Data["TableName"] is string tableName)
         {
             _domainContext.AddError(tableName, message.Replace('"', '\''));
-        }
-        catch (ReferenceConstraintException)
-        {
-            // A request triggers loading of exising data, but before it's saved,
-            // another request removes it — causing the save attempt to fail.
-            // On a retry, the client will get a "proper" error message
-            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
         }
         catch (Exception ex) when (IsSerializationFailure(ex))
         {

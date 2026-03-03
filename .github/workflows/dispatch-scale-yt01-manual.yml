@@ -49,7 +49,23 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
+      - name: Install containerapp CLI extension
+        run: az extension add --name containerapp --upgrade
+
       # === SCALE ON ===
+      - name: Enable public network access for container app environment
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --public-network-access Enabled
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Start PostgreSQL
         if: inputs.state == 'on'
         shell: bash
@@ -85,19 +101,6 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
-      - name: Restore Application Insights sampling to 100%
-        if: inputs.state == 'on'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          az resource update \
-            --ids "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Insights/components/dp-be-yt01-applicationInsights" \
-            --set properties.SamplingPercentage=100
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
       - name: Restart service container app
         if: inputs.state == 'on'
         shell: bash
@@ -106,8 +109,6 @@ jobs:
 
           # The service app has no HTTP trigger so it needs an explicit restart
           # to begin consuming from Service Bus after a scale-to-zero period.
-          az extension add --name containerapp --allow-preview --upgrade -y
-
           APPS=(
             "dp-be-yt01-webapi-so-ca"
             "dp-be-yt01-webapi-eu-ca"
@@ -137,6 +138,19 @@ jobs:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
       # === SCALE OFF ===
+      - name: Disable public network access for container app environment
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --public-network-access Disabled
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Stop PostgreSQL
         if: inputs.state == 'off'
         shell: bash
@@ -172,22 +186,9 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
-      - name: Reduce Application Insights sampling to 1%
-        if: inputs.state == 'off'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          az resource update \
-            --ids "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Insights/components/dp-be-yt01-applicationInsights" \
-            --set properties.SamplingPercentage=1
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
       # === POSTPONE HANDLING ===
       - name: Handle postpone variable
-        if: inputs.postpone_until != ''
+        if: inputs.postpone_until != '' && inputs.state == 'on'
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
@@ -212,6 +213,20 @@ jobs:
               --env yt01 \
               --repo "$REPOSITORY" || true
           fi
+
+      - name: Warn and clear postpone on scale-off
+        if: inputs.postpone_until != '' && inputs.state == 'off'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Warning: postpone_until was provided with state 'off'. Ignoring and clearing any existing postpone."
+          gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 \
+            --repo "$REPOSITORY" || true
 
       - name: Clear stale postpone variable
         if: inputs.postpone_until == ''

@@ -57,6 +57,23 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Install containerapp CLI extension
+        if: steps.check-postpone.outputs.skip != 'true'
+        run: az extension add --name containerapp --upgrade
+
+      - name: Disable public network access for container app environment
+        if: steps.check-postpone.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --public-network-access Disabled
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Stop PostgreSQL
         if: steps.check-postpone.outputs.skip != 'true'
         shell: bash
@@ -95,19 +112,6 @@ jobs:
             --enabled false
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-
-      - name: Reduce Application Insights sampling to 1%
-        if: steps.check-postpone.outputs.skip != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          az resource update \
-            --ids "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Insights/components/dp-be-yt01-applicationInsights" \
-            --set properties.SamplingPercentage=1
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Logout from Azure
         if: ${{ failure() || success() }}

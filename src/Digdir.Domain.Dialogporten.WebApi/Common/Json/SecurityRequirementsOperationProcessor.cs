@@ -28,7 +28,6 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
         securityRequirement[JwtBearerAuth] =
             context.OperationDescription.Operation.Tags.FirstOrDefault() switch
             {
-
                 _ when context.OperationDescription.Path.Contains("/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification") =>
                     new[] { AuthorizationScope.ServiceProvider, AuthorizationScope.NotificationConditionCheck },
 

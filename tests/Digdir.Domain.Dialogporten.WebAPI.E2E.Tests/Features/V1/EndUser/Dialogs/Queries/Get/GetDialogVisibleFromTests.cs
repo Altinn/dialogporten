@@ -28,6 +28,6 @@ public class GetDialogVisibleFromTests(WebApiE2EFixture fixture) : E2ETestBase<W
         hasExpiresHeader.Should().BeTrue("Expires header should be present");
 
         var expires = DateTimeOffset.Parse(expiresValues!.First(), CultureInfo.InvariantCulture);
-        expires.BeCloseToWithinSecondOf(visibleFrom);
+        expires.BeWithinOneSecondOf(visibleFrom);
     }
 }

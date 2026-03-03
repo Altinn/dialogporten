@@ -114,32 +114,26 @@ jobs:
           set -euo pipefail
 
           # The service app has no HTTP trigger so it needs an explicit restart
-          # to begin consuming from Service Bus after a scale-to-zero period.
-          APPS=(
-            "dp-be-yt01-webapi-so-ca"
-            "dp-be-yt01-webapi-eu-ca"
-            "dp-be-yt01-graphql-ca"
-            "dp-be-yt01-service"
-          )
+          # to reattach its Service Bus consumer after scale-to-zero.
+          # HTTP apps (webapi-so, webapi-eu, graphql) will scale up on first request.
+          APP="dp-be-yt01-service"
 
-          for APP in "${APPS[@]}"; do
-            echo "Finding latest revision for $APP..."
-            REVISION=$(az containerapp revision list \
+          echo "Finding latest revision for $APP..."
+          REVISION=$(az containerapp revision list \
+            --name "$APP" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "sort_by([?properties.active==\`true\`], &properties.createdTime)[-1].name" \
+            -o tsv)
+
+          if [[ -n "$REVISION" ]]; then
+            echo "Restarting revision $REVISION..."
+            az containerapp revision restart \
               --name "$APP" \
               --resource-group "$RESOURCE_GROUP" \
-              --query "sort_by([?properties.active==\`true\`], &properties.createdTime)[-1].name" \
-              -o tsv)
-
-            if [[ -n "$REVISION" ]]; then
-              echo "Restarting revision $REVISION..."
-              az containerapp revision restart \
-                --name "$APP" \
-                --resource-group "$RESOURCE_GROUP" \
-                --revision "$REVISION"
-            else
-              echo "No active revision found for $APP"
-            fi
-          done
+              --revision "$REVISION"
+          else
+            echo "No active revision found for $APP"
+          fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 

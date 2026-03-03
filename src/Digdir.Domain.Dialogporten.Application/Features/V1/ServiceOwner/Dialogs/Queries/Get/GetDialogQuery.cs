@@ -122,7 +122,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.ContentUpdatedAt,
             request.EndUserId);
 
-        if (request.EndUserId is not null && dialogDto.SeenSinceLastContentUpdate.Count == 0)
+        if (request.EndUserId is not null && dialogDto.SeenSinceLastContentUpdate.Count != 0)
         {
             dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
         }

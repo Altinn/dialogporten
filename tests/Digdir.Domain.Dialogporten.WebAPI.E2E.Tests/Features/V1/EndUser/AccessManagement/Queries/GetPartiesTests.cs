@@ -1,6 +1,7 @@
 using System.Net;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
+using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.AccessManagement.Queries;
 
@@ -8,7 +9,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Access
 public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2EFact]
-    public async Task Should_Return_At_Least_Two_AuthorizedParties()
+    public async Task Should_Return_Three_Authorized_Parties()
     {
         // Act
         var response = await Fixture.EnduserApi.V1EndUserAccessManagementQueriesGetPartiesParties(TestContext.Current.CancellationToken);

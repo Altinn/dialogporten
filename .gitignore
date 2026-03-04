@@ -412,6 +412,9 @@ CLAUDE.md
 .claude
 .claude_settings.json
 
+# Oh My Claude Code related files
+.omc
+
 # Auto Claude data directory, *security and *status files
 .auto-claude*
 

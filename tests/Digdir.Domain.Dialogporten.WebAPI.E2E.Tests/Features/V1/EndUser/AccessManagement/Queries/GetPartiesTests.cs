@@ -1,9 +1,6 @@
 using System.Net;
 using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
-using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.AccessManagement.Queries;
 
@@ -19,9 +16,10 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Parties content was null.");
-        content.Should().NotBeEmpty();
 
-        content.Should().AllSatisfy(party =>
-            party.AuthorizedParties.Should().HaveAtLeast(2));
+        content.AuthorizedParties.Should().HaveCount(3);
+        content.AuthorizedParties.Should().ContainSingle(x =>
+            x.Party == E2EConstants.DefaultParty);
+
     }
 }

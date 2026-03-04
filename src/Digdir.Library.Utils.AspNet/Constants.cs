@@ -10,7 +10,7 @@ public static class Constants
     public const string DbQueryParameters = "db.query.parameters";
     public const string DbStatement = "db.statement";
     public const string OtelStatusCode = "otel.status_code";
-    public const string OtelStatusDescription = "otel.status_description";
+    public const string DbStatusCode = "db.response.status_code";
 
     public const string FusionCache = "ZiggyCreatures";
     public const string AspNetCore = "Microsoft.AspNetCore";

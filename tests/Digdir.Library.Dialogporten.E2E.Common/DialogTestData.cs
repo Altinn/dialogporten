@@ -1,11 +1,15 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public static class DialogTestData
 {
+    public static Guid NewUuidV7(DateTimeOffset? timeStamp = null) =>
+        IdentifiableExtensions.CreateVersion7(timeStamp);
+
     public static V1ServiceOwnerDialogsCommandsCreate_Dialog CreateSimpleDialog(
         Action<V1ServiceOwnerDialogsCommandsCreate_Dialog>? modify = null)
     {

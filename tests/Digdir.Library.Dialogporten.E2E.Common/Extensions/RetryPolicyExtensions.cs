@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
@@ -7,7 +8,7 @@ public static class RetryPolicyExtensions
     public static async Task<T> RetryUntilAsync<T>(
         Func<CancellationToken, Task<T>> operation,
         Func<T, bool> isSuccessful,
-        CancellationToken cancellationToken,
+        CancellationToken? cancellationToken = null,
         int maxAttempts = int.MaxValue,
         TimeSpan? delay = null,
         TimeSpan? warningAfter = null,
@@ -19,6 +20,7 @@ public static class RetryPolicyExtensions
 
         ArgumentOutOfRangeException.ThrowIfLessThan(maxAttempts, 1);
 
+        cancellationToken ??= TestContext.Current.CancellationToken;
         var retryDelay = delay ?? TimeSpan.FromSeconds(2);
         var warningThreshold = warningAfter ?? TimeSpan.FromSeconds(4);
         var failThreshold = failAfter ?? TimeSpan.FromSeconds(10);
@@ -40,7 +42,7 @@ public static class RetryPolicyExtensions
 
         for (var attempt = 1; ; attempt++)
         {
-            var result = await operation(cancellationToken);
+            var result = await operation(cancellationToken.Value);
 
             if (isSuccessful(result))
             {
@@ -66,7 +68,7 @@ public static class RetryPolicyExtensions
                     $"The operation did not succeed within the allowed number of attempts ({maxAttempts}).");
             }
 
-            await Task.Delay(retryDelay, cancellationToken);
+            await Task.Delay(retryDelay, cancellationToken.Value);
         }
     }
 }

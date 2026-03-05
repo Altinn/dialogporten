@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
-public static class RetryPolicyExtensions
+public static class RetryPolicies
 {
     public static async Task<T> RetryUntilAsync<T>(
         Func<CancellationToken, Task<T>> operation,

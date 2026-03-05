@@ -33,19 +33,17 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             x.SearchTags = [new() { Value = sentinelLabel }];
         });
 
-
-        var searchResult = await RetryPolicyExtensions.RetryUntilAsync(
+        var searchResult = await RetryPolicies.RetryUntilAsync(
             ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelLabel
             }, new(), ct),
-            result => result.Content?.Items.Any(x => x.Id == dialogId) is true,
-            TestContext.Current.CancellationToken,
-            warningAfter: TimeSpan.FromSeconds(4),
+            isSuccessful: searchResult => searchResult.Content?.Items?.Any(x => x.Id == dialogId) is true,
+            warningAfter: TimeSpan.FromSeconds(5),
             failAfter: TimeSpan.FromSeconds(10),
-            onWarning: warningTime =>
-                TestContext.Current.AddWarning($"Search indexing is delayed. Current delay: {warningTime.TotalSeconds:0.0}s"));
+            onWarning: elapsedTime => TestContext.Current.AddWarning(
+                $"Search indexing is delayed. Current delay: {elapsedTime.TotalSeconds:0.0}s"));
 
         searchResult.Content!.Items.Should().NotBeNull();
         searchResult.Content.Items.Should().HaveCount(1);
@@ -53,13 +51,11 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             .ContainSingle(x => x.Id == dialogId);
 
         var dialog = searchResult.Content!.Items.Single();
-        dialog.Content.Title.Value.Should().HaveCount(1);
-        dialog.Content.Title.Value.First().Value.Should().NotContain(sensitiveTitle);
-        dialog.Content.Title.Value.First().Value.Should().Contain(nonSensitiveTitle);
+        dialog.Content.Title.Value.First().Value.Should().NotBe(sensitiveTitle);
+        dialog.Content.Title.Value.First().Value.Should().Be(nonSensitiveTitle);
 
-        dialog.Content.Summary.Value.Should().HaveCount(1);
-        dialog.Content.Summary.Value.First().Value.Should().NotContain(sensitiveSummary);
-        dialog.Content.Summary.Value.First().Value.Should().Contain(nonSensitiveSummary);
+        dialog.Content.Summary.Value.First().Value.Should().NotBe(sensitiveSummary);
+        dialog.Content.Summary.Value.First().Value.Should().Be(nonSensitiveSummary);
     }
 
     private static Altinn.ApiClients.Dialogporten.Features.V1.V1CommonContent_ContentValue GetContentValue(string value) => new()

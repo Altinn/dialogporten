@@ -1,3 +1,4 @@
+using Polly;
 using System.Diagnostics;
 using Xunit;
 
@@ -21,12 +22,15 @@ public static class RetryPolicyExtensions
         ArgumentOutOfRangeException.ThrowIfLessThan(maxAttempts, 1);
 
         cancellationToken ??= TestContext.Current.CancellationToken;
+
         var retryDelay = delay ?? TimeSpan.FromSeconds(2);
         var warningThreshold = warningAfter ?? TimeSpan.FromSeconds(4);
         var failThreshold = failAfter ?? TimeSpan.FromSeconds(10);
+
         if (warningThreshold < TimeSpan.Zero)
         {
-            throw new ArgumentOutOfRangeException(nameof(warningAfter), "warningAfter must be greater than or equal to 00:00:00.");
+            throw new ArgumentOutOfRangeException(nameof(warningAfter),
+                "warningAfter must be greater than or equal to 00:00:00.");
         }
 
         if (failThreshold < warningThreshold)
@@ -39,36 +43,35 @@ public static class RetryPolicyExtensions
 
         var elapsed = Stopwatch.StartNew();
         var warningLogged = false;
+        var maxRetries = maxAttempts - 1;
 
-        for (var attempt = 1; ; attempt++)
-        {
-            var result = await operation(cancellationToken.Value);
+        var policy = Policy<T>
+            .HandleResult(result => !isSuccessful(result))
+            .WaitAndRetryAsync(
+                maxRetries,
+                _ => retryDelay,
+                (_, _, _, _) =>
+                {
+                    var elapsedTime = elapsed.Elapsed;
 
-            if (isSuccessful(result))
-            {
-                return result;
-            }
+                    if (!warningLogged && elapsedTime >= warningThreshold)
+                    {
+                        warningLogged = true;
+                        onWarning?.Invoke(elapsedTime);
+                    }
 
-            var elapsedTime = elapsed.Elapsed;
-            if (elapsedTime >= failThreshold)
-            {
-                throw new TimeoutException($"The operation did not succeed within the allowed threshold ({failThreshold}). " +
-                    $"Elapsed: {elapsedTime}.");
-            }
+                    if (elapsedTime >= failThreshold)
+                    {
+                        throw new TimeoutException(
+                            $"The operation did not succeed within the allowed threshold ({failThreshold}). " +
+                            $"Elapsed: {elapsedTime}.");
+                    }
+                });
 
-            if (!warningLogged && elapsedTime >= warningThreshold)
-            {
-                warningLogged = true;
-                onWarning?.Invoke(elapsedTime);
-            }
+        var result = await policy.ExecuteAsync(operation, cancellationToken.Value);
 
-            if (attempt >= maxAttempts)
-            {
-                throw new TimeoutException(
-                    $"The operation did not succeed within the allowed number of attempts ({maxAttempts}).");
-            }
-
-            await Task.Delay(retryDelay, cancellationToken.Value);
-        }
+        return isSuccessful(result)
+            ? result
+            : throw new TimeoutException($"The operation did not succeed within the allowed number of attempts ({{maxAttempts}}).");
     }
 }

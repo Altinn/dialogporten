@@ -131,7 +131,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 actorNameEntities.Should().ContainSingle();
 
                 var actorName = actorNameEntities.Single();
-                Console.WriteLine(actorName.ActorId);
                 x.Should().AllSatisfy(x =>
                 {
                     x.PerformedBy.Should().NotBeNull();

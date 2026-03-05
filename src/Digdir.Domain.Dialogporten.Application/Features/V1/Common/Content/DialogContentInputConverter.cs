@@ -69,33 +69,6 @@ internal sealed class DialogContentInputConverter<TDialogContent> :
     }
 }
 
-internal sealed class DialogContentOutputConverter<TDialogContent> :
-    ITypeConverter<List<DialogContent>?, TDialogContent?>
-    where TDialogContent : class, new()
-{
-    public TDialogContent? Convert(List<DialogContent>? sources, TDialogContent? destination, ResolutionContext context)
-    {
-        if (sources is null || sources.Count == 0)
-        {
-            return null;
-        }
-
-        destination ??= new TDialogContent();
-
-        foreach (var source in sources)
-        {
-            if (!PropertyCache<TDialogContent>.PropertyByName.TryGetValue(source.TypeId.ToString(), out var property))
-            {
-                continue;
-            }
-
-            property.SetValue(destination, context.Mapper.Map<ContentValueDto>(source));
-        }
-
-        return destination;
-    }
-}
-
 // ReSharper disable once ClassNeverInstantiated.Local
 file sealed class PropertyCache<T>
 {

@@ -77,6 +77,15 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         labelLogResponse.IsSuccessful.Should().BeTrue();
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
         labelLog.Should().HaveCount(3);
+
+        labelLog.Where(x => x.Action == "set")
+            .Should().HaveCount(2)
+            .And.AllSatisfy(x => x.PerformedBy.ActorType
+                .Should().Be(Actors_ActorType.PartyRepresentative));
+
+        labelLog.Should().ContainSingle(x => x.Action == "remove")
+            .Which.PerformedBy.ActorType.Should()
+            .Be(Actors_ActorType.PartyRepresentative);
     }
 
     [E2EFact]
@@ -97,8 +106,16 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 if_Match: null,
                 TestContext.Current.CancellationToken);
 
+        var dialogResponse = await Fixture.EnduserApi
+            .V1EndUserDialogsQueriesGetDialog(dialogId, new(), TestContext.Current.CancellationToken);
+
         // Assert
         setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        dialogResponse.IsSuccessful.Should().BeTrue();
+
+        // Last label is selected when multiple of Default/Bin/Archive is supplied
+        dialogResponse.Content!.EndUserContext.SystemLabels.Should()
+            .ContainSingle(x => x == DialogEndUserContextsEntities_SystemLabel.Archive);
     }
 
     [E2EFact]
@@ -123,62 +140,46 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         setLabelResponse.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
     }
 
-    // [E2EFact]
-    // public async Task Should_Add_LabelLog_Entry_After_ServiceOwner_Updates_Dialog()
-    // {
-    //     // Arrange
-    //     var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
-    //
-    //     // Set Bin label
-    //     var firstSetLabelRequest = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-    //     {
-    //         AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin]
-    //     };
-    //
-    //     await Fixture.EnduserApi
-    //         .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
-    //             dialogId,
-    //             firstSetLabelRequest,
-    //             if_Match: null,
-    //             TestContext.Current.CancellationToken);
-    //
-    //     // Set Archive label
-    //     var secondSetLabelRequest = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-    //     {
-    //         AddLabels = [DialogEndUserContextsEntities_SystemLabel.Archive]
-    //     };
-    //
-    //     await Fixture.EnduserApi
-    //         .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
-    //             dialogId,
-    //             secondSetLabelRequest,
-    //             if_Match: null,
-    //             TestContext.Current.CancellationToken);
-    //
-    //     // Act - Service owner updates dialog
-    //     var updateDialogDto = new V1ServiceOwnerDialogsCommandsUpdate_Dialog
-    //     {
-    //         Progress = 60
-    //     };
-    //
-    //     var updateResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsUpdateDialog(
-    //         dialogId,
-    //         updateDialogDto,
-    //         if_Match: null,
-    //         TestContext.Current.CancellationToken);
-    //
-    //     // Assert
-    //     updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-    //
-    //     var labelLogResponse = await Fixture.EnduserApi
-    //         .V1EndUserEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(
-    //             dialogId,
-    //             TestContext.Current.CancellationToken);
-    //
-    //     labelLogResponse.IsSuccessful.Should().BeTrue();
-    //     var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
-    //     labelLog.Should().HaveCount(4);
-    // }
+    [E2EFact]
+    public async Task Should_Add_LabelLog_Entry_After_ServiceOwner_Updates_Dialog()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi
+            .CreateSimpleDialogAsync(x => x.Progress = 68);
+
+        // Set Archive label
+        await Fixture.EnduserApi
+            .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+                dialogId,
+                CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Archive),
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Act - Service owner patches dialog
+        var patchResponse = await Fixture.ServiceownerApi.PatchDialogAsync(
+            dialogId,
+            ops => ops.Add(new() { Op = "replace", Path = "/progress", Value = 69 }));
+
+        // Assert
+        patchResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var labelLogResponse = await Fixture.EnduserApi
+            .V1EndUserEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(
+                dialogId,
+                TestContext.Current.CancellationToken);
+
+        labelLogResponse.IsSuccessful.Should().BeTrue();
+        var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
+        labelLog.Should().HaveCount(2);
+
+        labelLog.Should().ContainSingle(x => x.Action == "set")
+            .Which.PerformedBy.ActorType.Should()
+            .Be(Actors_ActorType.PartyRepresentative);
+
+        labelLog.Should().ContainSingle(x => x.Action == "remove")
+            .Which.PerformedBy.ActorType.Should()
+            .Be(Actors_ActorType.ServiceOwner);
+    }
 
     private static V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest CreateSetLabelRequest(
         params DialogEndUserContextsEntities_SystemLabel[] labels) =>

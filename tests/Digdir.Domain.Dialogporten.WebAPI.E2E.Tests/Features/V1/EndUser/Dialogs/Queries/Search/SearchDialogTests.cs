@@ -33,7 +33,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             x.SearchTags = [new() { Value = sentinelLabel }];
         });
 
-        var searchResult = await RetryPolicies.RetryUntilAsync(
+        var searchResult = await E2ERetryPolicies.RetryUntilAsync(
             ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
             {
                 Party = [E2EConstants.DefaultParty],

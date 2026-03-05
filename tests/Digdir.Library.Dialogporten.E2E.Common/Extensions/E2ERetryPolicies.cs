@@ -5,10 +5,10 @@ using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
-public static class RetryPolicies
+public static class E2ERetryPolicies
 {
-    public const string DefaultWarningMessage = "The operation took longer than expected.";
-    public const string E2EWarningTag = "[E2E_WARNING]";
+    private const string DefaultWarningMessage = "The operation took longer than expected.";
+    private const string E2EWarningTag = "[E2E_WARNING]";
 
     public static async Task<T> RetryUntilAsync<T>(
         Func<CancellationToken, Task<T>> operation,

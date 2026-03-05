@@ -135,6 +135,6 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        response.Error!.Content.Should().Contain("authentication level");
+        response.Error!.Content.Should().Contain(Constants.AltinnAuthLevelTooLow);
     }
 }

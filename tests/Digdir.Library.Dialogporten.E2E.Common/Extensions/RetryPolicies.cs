@@ -1,11 +1,15 @@
 using Polly;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
 public static class RetryPolicies
 {
+    public const string DefaultWarningMessage = "The operation took longer than expected.";
+    public const string E2EWarningTag = "[E2E_WARNING]";
+
     public static async Task<T> RetryUntilAsync<T>(
         Func<CancellationToken, Task<T>> operation,
         Func<T, bool> isSuccessful,
@@ -14,7 +18,8 @@ public static class RetryPolicies
         TimeSpan? delay = null,
         TimeSpan? warningAfter = null,
         TimeSpan? failAfter = null,
-        Action<TimeSpan>? onWarning = null)
+        string warningMessage = DefaultWarningMessage,
+        [CallerMemberName] string callerMemberName = "")
     {
         ArgumentNullException.ThrowIfNull(operation);
         ArgumentNullException.ThrowIfNull(isSuccessful);
@@ -23,8 +28,8 @@ public static class RetryPolicies
 
         cancellationToken ??= TestContext.Current.CancellationToken;
 
-        var retryDelay = delay ?? TimeSpan.FromSeconds(2);
-        var warningThreshold = warningAfter ?? TimeSpan.FromSeconds(4);
+        var retryDelay = delay ?? TimeSpan.FromSeconds(1);
+        var warningThreshold = warningAfter ?? TimeSpan.FromSeconds(5);
         var failThreshold = failAfter ?? TimeSpan.FromSeconds(10);
 
         if (warningThreshold < TimeSpan.Zero)
@@ -57,7 +62,9 @@ public static class RetryPolicies
                     if (!warningLogged && elapsedTime >= warningThreshold)
                     {
                         warningLogged = true;
-                        onWarning?.Invoke(elapsedTime);
+                        TestContext.Current.AddWarning(
+                            $"{E2EWarningTag} {callerMemberName}: {warningMessage} " +
+                            $"Elapsed time: {elapsedTime:hh\\:mm\\:ss\\.fff}");
                     }
 
                     if (elapsedTime >= failThreshold)
@@ -72,6 +79,6 @@ public static class RetryPolicies
 
         return isSuccessful(result)
             ? result
-            : throw new TimeoutException($"The operation did not succeed within the allowed number of attempts ({{maxAttempts}}).");
+            : throw new TimeoutException($"The operation did not succeed within the allowed number of attempts ({maxAttempts}).");
     }
 }

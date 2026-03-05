@@ -40,10 +40,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
                 Search = sentinelLabel
             }, new(), ct),
             isSuccessful: searchResult => searchResult.Content?.Items?.Any(x => x.Id == dialogId) is true,
-            warningAfter: TimeSpan.FromSeconds(5),
-            failAfter: TimeSpan.FromSeconds(10),
-            onWarning: elapsedTime => TestContext.Current.AddWarning(
-                $"Search indexing is delayed. Current delay: {elapsedTime.TotalSeconds:0.0}s"));
+            warningMessage: "Search indexing is delayed.");
 
         searchResult.Content!.Items.Should().NotBeNull();
         searchResult.Content.Items.Should().HaveCount(1);

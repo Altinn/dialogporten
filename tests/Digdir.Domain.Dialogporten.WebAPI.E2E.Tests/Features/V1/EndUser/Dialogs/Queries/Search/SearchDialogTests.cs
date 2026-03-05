@@ -19,11 +19,8 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         const string nonSensitiveSummary = "Non-sensitive summary!";
 
         var sentinelLabel = Guid.NewGuid().ToString();
-        // var sentinelLabel = Guid.Parse("51a1fa16-e69c-478d-bb02-acd44146049e");
-        // var dialogId = Guid.Parse("019cbac0-2617-76b2-9c6b-decd9566c8cd");
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(x =>
         {
-            // x.Id = dialogId;
             // This serviceResource requires auth level 4
             x.ServiceResource = "urn:altinn:resource:ttd-dialogporten-transmissions-test";
 
@@ -37,19 +34,28 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         });
 
 
-        // var dialogResult = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, new(), TestContext.Current.CancellationToken);
-        // Console.WriteLine(dialogResult);
-        await Task.Delay(10000);
-        var searchResult = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
-        {
-            Party = [E2EConstants.DefaultParty],
-            Search = sentinelLabel
-        }, new(), TestContext.Current.CancellationToken);
+        var searchResult = await RetryPolicyExtensions.RetryUntilAsync(
+            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            {
+                Party = [E2EConstants.DefaultParty],
+                Search = sentinelLabel
+            }, new(), ct),
+            result => result.Content?.Items.Any(x => x.Id == dialogId) is true,
+            TestContext.Current.CancellationToken);
 
         searchResult.Content!.Items.Should().NotBeNull();
+        searchResult.Content.Items.Should().HaveCount(1);
         searchResult.Content!.Items.Should()
             .ContainSingle(x => x.Id == dialogId);
-        Console.WriteLine(searchResult);
+
+        var dialog = searchResult.Content!.Items.Single();
+        dialog.Content.Title.Value.Should().HaveCount(1);
+        dialog.Content.Title.Value.First().Value.Should().NotContain(sensitiveTitle);
+        dialog.Content.Title.Value.First().Value.Should().Contain(nonSensitiveTitle);
+
+        dialog.Content.Summary.Value.Should().HaveCount(1);
+        dialog.Content.Summary.Value.First().Value.Should().NotContain(sensitiveSummary);
+        dialog.Content.Summary.Value.First().Value.Should().Contain(nonSensitiveSummary);
     }
 
     private static Altinn.ApiClients.Dialogporten.Features.V1.V1CommonContent_ContentValue GetContentValue(string value) => new()

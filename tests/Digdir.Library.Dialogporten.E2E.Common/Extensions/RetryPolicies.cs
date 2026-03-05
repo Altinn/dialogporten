@@ -47,7 +47,8 @@ public static class RetryPolicies
         var warningLogged = false;
 
         var policy = Policy<T>
-            .HandleResult(result => !isSuccessful(result))
+            .Handle<Exception>(ex => ex is not OperationCanceledException)
+            .OrResult(result => !isSuccessful(result))
             .WaitAndRetryAsync(
                 int.MaxValue,
                 _ => retryDelay,

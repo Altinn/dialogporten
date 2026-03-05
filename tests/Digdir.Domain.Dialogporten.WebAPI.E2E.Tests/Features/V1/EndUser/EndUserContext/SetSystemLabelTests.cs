@@ -16,10 +16,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelRequest = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-        {
-            AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin]
-        };
+        var setLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Bin);
 
         var setLabelResponse = await Fixture.EnduserApi
             .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
@@ -48,10 +45,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act - First set Bin label
-        var firstSetLabelRequest = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-        {
-            AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin]
-        };
+        var firstSetLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Bin);
 
         var firstSetLabelResponse = await Fixture.EnduserApi
             .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
@@ -63,10 +57,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         firstSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         // Act - Then change to Archive label
-        var secondSetLabelRequest = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-        {
-            AddLabels = [DialogEndUserContextsEntities_SystemLabel.Archive]
-        };
+        var secondSetLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Archive);
 
         var secondSetLabelResponse = await Fixture.EnduserApi
             .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
@@ -95,10 +86,9 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelRequest = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-        {
-            AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin, DialogEndUserContextsEntities_SystemLabel.Archive]
-        };
+        var setLabelRequest = CreateSetLabelRequest(
+            DialogEndUserContextsEntities_SystemLabel.Bin,
+            DialogEndUserContextsEntities_SystemLabel.Archive);
 
         var setLabelResponse = await Fixture.EnduserApi
             .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
@@ -118,10 +108,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelRequest = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-        {
-            AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin]
-        };
+        var setLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Bin);
 
         var invalidRevision = Guid.NewGuid();
 
@@ -192,4 +179,8 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     //     var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
     //     labelLog.Should().HaveCount(4);
     // }
+
+    private static V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest CreateSetLabelRequest(
+        params DialogEndUserContextsEntities_SystemLabel[] labels) =>
+        new() { AddLabels = [.. labels] };
 }

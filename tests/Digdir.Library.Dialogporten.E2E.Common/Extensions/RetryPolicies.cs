@@ -14,7 +14,6 @@ public static class RetryPolicies
         Func<CancellationToken, Task<T>> operation,
         Func<T, bool> isSuccessful,
         CancellationToken? cancellationToken = null,
-        int maxAttempts = int.MaxValue,
         TimeSpan? delay = null,
         TimeSpan? warningAfter = null,
         TimeSpan? failAfter = null,
@@ -23,8 +22,6 @@ public static class RetryPolicies
     {
         ArgumentNullException.ThrowIfNull(operation);
         ArgumentNullException.ThrowIfNull(isSuccessful);
-
-        ArgumentOutOfRangeException.ThrowIfLessThan(maxAttempts, 1);
 
         cancellationToken ??= TestContext.Current.CancellationToken;
 
@@ -48,12 +45,11 @@ public static class RetryPolicies
 
         var elapsed = Stopwatch.StartNew();
         var warningLogged = false;
-        var maxRetries = maxAttempts - 1;
 
         var policy = Policy<T>
             .HandleResult(result => !isSuccessful(result))
             .WaitAndRetryAsync(
-                maxRetries,
+                int.MaxValue,
                 _ => retryDelay,
                 (_, _, _, _) =>
                 {
@@ -79,6 +75,7 @@ public static class RetryPolicies
 
         return isSuccessful(result)
             ? result
-            : throw new TimeoutException($"The operation did not succeed within the allowed number of attempts ({maxAttempts}).");
+            : throw new TimeoutException(
+                $"The operation did not succeed within the allowed time window ({failThreshold}).");
     }
 }

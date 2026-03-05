@@ -7,7 +7,9 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -111,6 +113,22 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText(
                     ValidationErrorStrings.SentLabelNotAllowed));
+
+    [Fact]
+    public Task Set_Adds_Two_LabelLog_Entries_When_Changing_Label() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Archive])
+            .SendCommand(ctx => new SearchLabelAssignmentLogQuery
+            {
+                DialogId = ctx.GetDialogId(),
+            })
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+                x.Should().AllSatisfy(x =>
+                        x.PerformedBy.Should().NotBeNull())
+                    .And.AllSatisfy(x => x.PerformedBy.ActorType
+                        .Should().Be(ActorType.Values.PartyRepresentative)));
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

@@ -125,10 +125,20 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 DialogId = ctx.GetDialogId(),
             })
             .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                var actorNameEntities = Application.GetDbEntities<ActorName>()
+                    .GetAwaiter().GetResult();
+                actorNameEntities.Should().ContainSingle();
+
+                var actorName = actorNameEntities.Single();
+                Console.WriteLine(actorName.ActorId);
                 x.Should().AllSatisfy(x =>
-                        x.PerformedBy.Should().NotBeNull())
-                    .And.AllSatisfy(x => x.PerformedBy.ActorType
-                        .Should().Be(ActorType.Values.PartyRepresentative)));
+                {
+                    x.PerformedBy.Should().NotBeNull();
+                    x.PerformedBy.ActorName.Should().Be(actorName.Name);
+                });
+            });
+
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

@@ -135,7 +135,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 {
                     x.PerformedBy.Should().NotBeNull();
                     x.PerformedBy.ActorName.Should().Be(actorName.Name);
-                });
+                }).And.HaveCount(3);
             });
 
 

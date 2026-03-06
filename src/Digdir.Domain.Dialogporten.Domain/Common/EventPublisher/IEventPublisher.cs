@@ -10,4 +10,6 @@ public interface IEventPublisher
     /// This also clears the collection on the EventPublisher.
     /// </summary>
     IEnumerable<IDomainEvent> PopDomainEvents();
+
+    bool HasEvents();
 }

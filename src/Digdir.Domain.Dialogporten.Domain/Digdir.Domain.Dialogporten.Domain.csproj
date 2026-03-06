@@ -2,6 +2,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Digdir.Library.Entity.Abstractions\Digdir.Library.Entity.Abstractions.csproj"/>
+        <PackageReference Include="DeterministicGuids" Version="1.0.10" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
     </ItemGroup>
 

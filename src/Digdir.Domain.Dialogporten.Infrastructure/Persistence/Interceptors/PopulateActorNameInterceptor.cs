@@ -85,15 +85,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         {
             actorName.Name = actorNameById[actorName.ActorId!];
 
-            // We don't want to fail the save operation if we are unable to look up the
-            // name for this particular actor, as it is used on enduser get operations.
-            if (!string.IsNullOrWhiteSpace(actorName.Name)
-             || actorName.ActorEntities.All(x => x is DialogSeenLogSeenByActor))
+            if (string.IsNullOrWhiteSpace(actorName.Name))
             {
-                continue;
+                _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
             }
-
-            _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
         }
 
         return _domainContext.IsValid;

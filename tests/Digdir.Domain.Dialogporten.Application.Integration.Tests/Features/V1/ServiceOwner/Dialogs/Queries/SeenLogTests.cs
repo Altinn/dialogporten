@@ -38,6 +38,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         => FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
+            .ConsumeEvents()
+            .GetEndUserDialog()
             .SendCommand((_, ctx) => new GetDialogQuery
             {
                 DialogId = ctx.GetDialogId()
@@ -50,6 +52,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             .SendCommand((_, ctx) => new SearchDialogQuery { ServiceResource = [ctx.GetServiceResource()] })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
@@ -62,6 +65,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     public Task Get_SeenLog_Should_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .ConsumeEvents()
             .GetEndUserDialog()
             .AssertResult<DialogDtoEU>()
             .SendCommand(x => new GetSeenLogQuery
@@ -80,6 +85,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             .SendCommand(x => new SearchSeenLogQuery { DialogId = x.Id })
             .ExecuteAndAssert<List<SearchSeenLogDto>>(result =>
@@ -97,11 +103,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         await FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId)
             .GetEndUserDialog() // Default integration test user
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQueryEU { DialogId = dialogId })
+            .ConsumeEvents()
+            .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
+            .ConsumeEvents()
             .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
             .ExecuteAndAssert<DialogDtoSO>(x =>
             {
@@ -118,11 +128,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
+            .GetEndUserDialog()
+            .ConsumeEvents()
             .GetEndUserDialog()
             .SendCommand((_, ctx) => new GetDialogQuery
             {
@@ -145,11 +159,14 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Id = dialogId;
             })
             .GetEndUserDialog() // Default integration test user
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .AsIntegrationTestUser(x => x.WithPid("13213312833"))
+            .ConsumeEvents()
             .SendCommand(_ => new GetDialogQueryEU { DialogId = dialogId })
+            .ConsumeEvents()
             .SearchServiceOwnerDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
             {
@@ -164,12 +181,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
             .GetEndUserDialog()
+            .ConsumeEvents()
             .AssertResult<DialogDtoEU>()
             .SearchServiceOwnerDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x => x.Items

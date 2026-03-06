@@ -115,7 +115,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     ValidationErrorStrings.SentLabelNotAllowed));
 
     [Fact]
-    public Task Set_Adds_Two_LabelLog_Entries_When_Changing_Label() =>
+    public Task Set_Adds_Three_LabelLog_Entries_When_Changing_NonDefault_Label_Twice() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])

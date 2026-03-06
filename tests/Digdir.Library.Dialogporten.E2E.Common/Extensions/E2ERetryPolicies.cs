@@ -73,12 +73,7 @@ public static class E2ERetryPolicies
                     }
                 });
 
-        var result = await policy.ExecuteAsync(operation, cancellationToken.Value);
-
-        return isSuccessful(result)
-            ? result
-            : throw new TimeoutException(
-                $"The operation did not succeed within the allowed time window ({failThreshold}).");
+        return await policy.ExecuteAsync(operation, cancellationToken.Value);
     }
 
     private static bool DefaultExceptionHandler(Exception ex) =>

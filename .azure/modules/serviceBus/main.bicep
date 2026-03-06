@@ -32,14 +32,14 @@ param vnetId string?
 var serviceBusNameMaxLength = 50
 var serviceBusName = uniqueResourceName('${namePrefix}-service-bus', serviceBusNameMaxLength)
 
-var _vnetRequested = subnetId != null || vnetId != null
-var _vnetSkuValidation = _vnetRequested && sku.name != 'Premium'
+var vnetRequested = subnetId != null || vnetId != null
+var vnetSkuValidation = vnetRequested && sku.name != 'Premium'
   ? fail('VNET configuration is only supported with Premium SKU')
   : true
-var _vnetNetworkIdsValidation = _vnetRequested && (subnetId == null || vnetId == null)
+var vnetNetworkIdsValidation = vnetRequested && (subnetId == null || vnetId == null)
   ? fail('VNET configuration requires both subnetId and vnetId')
   : true
-var vnetEnabled = _vnetRequested && _vnetSkuValidation && _vnetNetworkIdsValidation
+var vnetEnabled = vnetRequested && vnetSkuValidation && vnetNetworkIdsValidation
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
   name: serviceBusName

@@ -1,5 +1,6 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
+using Refit;
 using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -44,6 +45,20 @@ public static class ServiceOwnerApiExtensions
                     TestContext.Current.CancellationToken);
 
             return createActivityResponse.Content.ToGuid();
+        }
+
+        public async Task<IApiResponse> PatchDialogAsync(
+            Guid dialogId,
+            Action<List<JsonPatchOperations_Operation>> modify,
+            Guid? ifMatch = null)
+        {
+            var patchDocument = new List<JsonPatchOperations_Operation>();
+            modify(patchDocument);
+            return await serviceownerApi.V1ServiceOwnerDialogsPatchDialog(
+                dialogId,
+                patchDocument,
+                ifMatch,
+                TestContext.Current.CancellationToken);
         }
     }
 }

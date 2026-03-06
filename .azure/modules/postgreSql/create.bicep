@@ -144,7 +144,7 @@ resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   tags: tags
 }
 
-resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
+resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2025-08-01' = {
   name: postgresServerName
   location: location
   identity: {
@@ -196,7 +196,7 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   tags: tags
 }
 
-resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2024-08-01' = {
+resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2025-08-01' = {
   name: deployer().objectId
   parent: postgres
   properties: {
@@ -206,7 +206,7 @@ resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/admin
   }
 }
 
-resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {
+resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {
     parent: postgres
     name: 'azure.extensions'
     properties: {
@@ -216,7 +216,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     dependsOn: [postgresAdministrators]
   }
 
-resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = {
+resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {
   parent: postgres
   name: 'idle_in_transaction_session_timeout'
   properties: {
@@ -229,7 +229,7 @@ resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/co
 // Enable Query Store when either index tuning or query performance insight is enabled
 var enableQueryStore = enableIndexTuning || enableQueryPerformanceInsight
 
-resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryStore) {
+resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = if (enableQueryStore) {
   parent: postgres
   name: 'track_io_timing'
   properties: {
@@ -239,7 +239,7 @@ resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configuratio
   dependsOn: [idle_transactions_timeout]
 }
 
-resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryStore) {
+resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = if (enableQueryStore) {
   parent: postgres
   name: 'pg_qs.query_capture_mode'
   properties: {
@@ -249,7 +249,7 @@ resource pg_qs_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/con
   dependsOn: [track_io_timing]
 }
 
-resource pgms_wait_sampling_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryPerformanceInsight) {
+resource pgms_wait_sampling_query_capture_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = if (enableQueryPerformanceInsight) {
   parent: postgres
   name: 'pgms_wait_sampling.query_capture_mode'
   properties: {
@@ -259,7 +259,7 @@ resource pgms_wait_sampling_query_capture_mode 'Microsoft.DBforPostgreSQL/flexib
   dependsOn: [pg_qs_query_capture_mode]
 }
 
-resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableIndexTuning) {
+resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = if (enableIndexTuning) {
   parent: postgres
   name: 'index_tuning.mode'
   properties: {
@@ -269,7 +269,7 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
   dependsOn: [pg_qs_query_capture_mode]
 }
 
-resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {
   name: appInsightWorkspaceName
 }
 

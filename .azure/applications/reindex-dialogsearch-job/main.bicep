@@ -47,7 +47,7 @@ var additionalTags = {
 
 var tags = baseTags(additionalTags, environment)
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-07-01' existing = {
   name: containerAppEnvironmentName
 }
 

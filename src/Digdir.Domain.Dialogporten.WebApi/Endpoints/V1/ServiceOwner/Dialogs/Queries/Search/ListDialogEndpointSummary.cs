@@ -22,8 +22,8 @@ public sealed class ListDialogEndpointSummary : Summary<SearchDialogEndpoint, Se
 
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("list");
         Responses[StatusCodes.Status401Unauthorized] =
-            Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope
-                .ServiceProviderSearch);
+            Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(
+                $"{AuthorizationScope.ServiceProvider} {AuthorizationScope.ServiceProviderSearch}");
 
         RequestParam(p => p.ContinuationToken,
             "Supply \"continuationToken\" for the response to get the next page of results, if hasNextPage is true");

@@ -72,14 +72,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
         _hasBeenExecuted = true;
-        return await SaveChangesWithActorNameRetry(dbContext, cancellationToken);
+        return await SaveChangesWithActorNameRetry(dbContext, actorNameEntities, cancellationToken);
     }
 
-    private static async Task<InterceptionResult<int>> SaveChangesWithActorNameRetry(DbContext dbContext, CancellationToken cancellationToken)
+    private async Task<InterceptionResult<int>> SaveChangesWithActorNameRetry(DbContext dbContext, List<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
-        // 
-        const int hardLimit = ActorNameSaveRetries + 1;
-        for (var retryAttempt = 0; retryAttempt < hardLimit; retryAttempt++)
+        for (var retryAttempt = 0; retryAttempt <= ActorNameSaveRetries; retryAttempt++)
         {
             try
             {
@@ -88,10 +86,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             }
             catch (Exception ex) when (retryAttempt < ActorNameSaveRetries && IsActorNameUniqueConstraintViolation(ex))
             {
-                await RewireToExistingActorNames(dbContext, cancellationToken);
+                await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
             }
         }
-        throw new UnreachableException("Should not reach hard limit when actor retry");
+        throw new UnreachableException("Should not reach hard limit on actor retry");
     }
 
     private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
@@ -176,38 +174,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         _ when exception.InnerException is not null => IsActorNameUniqueConstraintViolation(exception.InnerException),
         _ => false
     };
-
-    private static async Task RewireToExistingActorNames(DbContext dbContext, CancellationToken cancellationToken)
-    {
-        var addedActorNameEntries = dbContext.ChangeTracker
-            .Entries<ActorName>()
-            .Where(x => x.State == EntityState.Added)
-            .Select(x => x.Entity)
-            .ToList();
-
-        if (addedActorNameEntries.Count == 0)
-        {
-            return;
-        }
-
-        var existingActorNamesByPair = (await GetExistingActorNames(dbContext, addedActorNameEntries, cancellationToken))
-            .ToDictionary(x => (x.ActorId, x.Name));
-
-        foreach (var addedActorName in addedActorNameEntries)
-        {
-            if (!existingActorNamesByPair.TryGetValue((addedActorName.ActorId, addedActorName.Name), out var existingActorName))
-            {
-                continue;
-            }
-
-            foreach (var actor in addedActorName.ActorEntities.ToList())
-            {
-                actor.ActorNameEntity = existingActorName;
-            }
-
-            dbContext.Entry(addedActorName).State = EntityState.Detached;
-        }
-    }
 
     private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {

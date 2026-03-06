@@ -41,7 +41,7 @@ public static class E2ERetryPolicies
                 "failAfter must be greater than or equal to warningAfter.");
         }
 
-        ArgumentOutOfRangeException.ThrowIfLessThan(retryDelay, TimeSpan.FromMilliseconds(1));
+        ArgumentOutOfRangeException.ThrowIfLessThan(retryDelay, TimeSpan.FromSeconds(1));
 
         var elapsed = Stopwatch.StartNew();
         var warningLogged = false;

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.106.2](https://github.com/Altinn/dialogporten/compare/v1.106.1...v1.106.2) (2026-03-06)
+
+
+### Bug Fixes
+
+* system label log missing performedBy actor ([#3553](https://github.com/Altinn/dialogporten/issues/3553)) ([9b52256](https://github.com/Altinn/dialogporten/commit/9b522562893735b1aec912ec4128a1fb8ac2fafd))
+
+
+### Miscellaneous Chores
+
+* **infra:** Make service bus vnet optional  ([#3518](https://github.com/Altinn/dialogporten/issues/3518)) ([bd68c22](https://github.com/Altinn/dialogporten/commit/bd68c220fd3586483967ec423b399a2244fc8ad3))
+
 ## [1.106.1](https://github.com/Altinn/dialogporten/compare/v1.106.0...v1.106.1) (2026-03-04)
 
 

@@ -36,10 +36,13 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         labelLogResponse.IsSuccessful.Should().BeTrue();
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
         labelLog.Should().HaveCount(1);
+        labelLog.Should().ContainSingle(x => x.Action == "set")
+            .Which.PerformedBy.ActorType.Should()
+            .Be(Actors_ActorType.PartyRepresentative);
     }
 
     [E2EFact]
-    public async Task Should_Add_Two_LabelLog_Entries_When_Changing_Label()
+    public async Task Should_Add_Three_LabelLog_Entries_When_Changing_Label_Twice()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
@@ -78,14 +81,13 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
         labelLog.Should().HaveCount(3);
 
-        labelLog.Where(x => x.Action == "set")
-            .Should().HaveCount(2)
+        labelLog.Should().AllSatisfy(x =>
+            x.PerformedBy.Should().NotBeNull())
             .And.AllSatisfy(x => x.PerformedBy.ActorType
                 .Should().Be(Actors_ActorType.PartyRepresentative));
 
-        labelLog.Should().ContainSingle(x => x.Action == "remove")
-            .Which.PerformedBy.ActorType.Should()
-            .Be(Actors_ActorType.PartyRepresentative);
+        labelLog.Where(x => x.Action == "set").Should().HaveCount(2);
+        labelLog.Should().ContainSingle(x => x.Action == "remove");
     }
 
     [E2EFact]

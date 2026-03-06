@@ -40,7 +40,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
                 Search = sentinelLabel
             }, new(), ct),
             isSuccessful: searchResult => searchResult.Content?.Items?.Any(x => x.Id == dialogId) is true,
-            warningMessage: "Search indexing speed is degraded.");
+            degradationMessage: "Search indexing speed is degraded.");
 
         searchResult.Content!.Items.Should().NotBeNull();
         searchResult.Content.Items.Should().HaveCount(1);

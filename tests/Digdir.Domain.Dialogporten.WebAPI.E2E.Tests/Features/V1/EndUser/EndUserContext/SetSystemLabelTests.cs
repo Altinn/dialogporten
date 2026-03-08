@@ -27,9 +27,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var labelLogResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(
-                dialogId,
-                TestContext.Current.CancellationToken);
+            .GetSystemLabelAssignmentLog(dialogId);
 
         labelLogResponse.IsSuccessful.Should().BeTrue();
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
@@ -69,9 +67,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         secondSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var labelLogResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(
-                dialogId,
-                TestContext.Current.CancellationToken);
+            .GetSystemLabelAssignmentLog(dialogId);
 
         labelLogResponse.IsSuccessful.Should().BeTrue();
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
@@ -164,9 +160,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         patchResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var labelLogResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(
-                dialogId,
-                TestContext.Current.CancellationToken);
+            .GetSystemLabelAssignmentLog(dialogId);
 
         labelLogResponse.IsSuccessful.Should().BeTrue();
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");

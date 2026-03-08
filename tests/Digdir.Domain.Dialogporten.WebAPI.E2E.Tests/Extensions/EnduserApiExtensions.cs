@@ -34,5 +34,12 @@ public static class EnduserApiExtensions
                 dialogId,
                 acceptedLanguages ?? new(),
                 cancellationToken);
+
+        public Task<IApiResponse<ICollection<V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> GetSystemLabelAssignmentLog(
+            Guid dialogId,
+            CancellationToken? cancellationToken = null) =>
+            enduserApi.V1EndUserEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(
+                dialogId,
+                cancellationToken ?? TestContext.Current.CancellationToken);
     }
 }

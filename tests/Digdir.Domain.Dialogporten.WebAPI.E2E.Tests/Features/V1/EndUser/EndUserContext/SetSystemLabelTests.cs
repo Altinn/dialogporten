@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
+using static Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.DialogEndUserContextsEntities_SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUserContext;
 
@@ -18,10 +19,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Act
         var setLabelResponse = await Fixture.EnduserApi
-            .SetSystemLabels(dialogId, request =>
-            {
-                request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin];
-            });
+            .SetSystemLabels(dialogId, request => request.AddLabels = [Bin]);
 
         // Assert
         setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -47,10 +45,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var firstSetLabelResponse = await Fixture.EnduserApi
             .SetSystemLabels(
                 dialogId,
-                request =>
-                {
-                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin];
-                });
+                request => request.AddLabels = [Bin]);
 
         firstSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -58,10 +53,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var secondSetLabelResponse = await Fixture.EnduserApi
             .SetSystemLabels(
                 dialogId,
-                request =>
-                {
-                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Archive];
-                });
+                request => request.AddLabels = [Archive]);
 
         // Assert
         secondSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -74,7 +66,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         labelLog.Should().HaveCount(3);
 
         labelLog.Should().AllSatisfy(x =>
-            x.PerformedBy.Should().NotBeNull())
+                x.PerformedBy.Should().NotBeNull())
             .And.AllSatisfy(x => x.PerformedBy.ActorType
                 .Should().Be(Actors_ActorType.PartyRepresentative));
 
@@ -92,17 +84,9 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var setLabelResponse = await Fixture.EnduserApi
             .SetSystemLabels(
                 dialogId,
-                request =>
-                {
-                    request.AddLabels =
-                    [
-                        DialogEndUserContextsEntities_SystemLabel.Bin,
-                        DialogEndUserContextsEntities_SystemLabel.Archive
-                    ];
-                });
+                request => request.AddLabels = [Bin, Archive]);
 
-        var dialogResponse = await Fixture.EnduserApi
-            .V1EndUserDialogsQueriesGetDialog(dialogId, new(), TestContext.Current.CancellationToken);
+        var dialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
         setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -110,7 +94,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Last label is selected when multiple of Default/Bin/Archive is supplied
         dialogResponse.Content!.EndUserContext.SystemLabels.Should()
-            .ContainSingle(x => x == DialogEndUserContextsEntities_SystemLabel.Archive);
+            .ContainSingle(x => x == Archive);
     }
 
     [E2EFact]
@@ -125,14 +109,12 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var setLabelResponse = await Fixture.EnduserApi
             .SetSystemLabels(
                 dialogId,
-                request =>
-                {
-                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin];
-                },
+                request => request.AddLabels = [Bin],
                 revision: invalidRevision);
 
         // Assert
-        setLabelResponse.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
+        setLabelResponse.StatusCode.Should()
+            .Be(HttpStatusCode.PreconditionFailed);
     }
 
     [E2EFact]
@@ -146,20 +128,18 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         await Fixture.EnduserApi
             .SetSystemLabels(
                 dialogId,
-                request =>
-                {
-                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Archive];
-                });
+                request => request.AddLabels = [Archive]);
 
         // Act - Service owner patches dialog
-        var patchResponse = await Fixture.ServiceownerApi.PatchDialogAsync(
-            dialogId,
-            ops => ops.Add(new()
-            {
-                Op = "replace",
-                Path = "/progress",
-                Value = 69
-            }));
+        var patchResponse = await Fixture.ServiceownerApi
+            .PatchDialogAsync(
+                dialogId,
+                ops => ops.Add(new()
+                {
+                    Op = "replace",
+                    Path = "/progress",
+                    Value = 69
+                }));
 
         // Assert
         patchResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -179,5 +159,4 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .Which.PerformedBy.ActorType.Should()
             .Be(Actors_ActorType.ServiceOwner);
     }
-
 }

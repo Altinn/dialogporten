@@ -52,7 +52,7 @@ public static class ServiceOwnerApiExtensions
             Action<List<JsonPatchOperations_Operation>> modify,
             Guid? ifMatch = null)
         {
-            var patchDocument = new List<JsonPatchOperations_Operation>();
+            List<JsonPatchOperations_Operation> patchDocument = [];
             modify(patchDocument);
             return await serviceownerApi.V1ServiceOwnerDialogsPatchDialog(
                 dialogId,

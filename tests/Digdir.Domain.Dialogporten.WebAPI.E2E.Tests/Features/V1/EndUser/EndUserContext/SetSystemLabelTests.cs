@@ -1,5 +1,6 @@
 using System.Net;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
@@ -16,14 +17,11 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Bin);
-
         var setLabelResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
-                dialogId,
-                setLabelRequest,
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+            .SetSystemLabels(dialogId, request =>
+            {
+                request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin];
+            });
 
         // Assert
         setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -48,26 +46,24 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act - First set Bin label
-        var firstSetLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Bin);
-
         var firstSetLabelResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabels(
                 dialogId,
-                firstSetLabelRequest,
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+                request =>
+                {
+                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin];
+                });
 
         firstSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         // Act - Then change to Archive label
-        var secondSetLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Archive);
-
         var secondSetLabelResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabels(
                 dialogId,
-                secondSetLabelRequest,
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+                request =>
+                {
+                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Archive];
+                });
 
         // Assert
         secondSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -97,16 +93,17 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelRequest = CreateSetLabelRequest(
-            DialogEndUserContextsEntities_SystemLabel.Bin,
-            DialogEndUserContextsEntities_SystemLabel.Archive);
-
         var setLabelResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabels(
                 dialogId,
-                setLabelRequest,
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+                request =>
+                {
+                    request.AddLabels =
+                    [
+                        DialogEndUserContextsEntities_SystemLabel.Bin,
+                        DialogEndUserContextsEntities_SystemLabel.Archive
+                    ];
+                });
 
         var dialogResponse = await Fixture.EnduserApi
             .V1EndUserDialogsQueriesGetDialog(dialogId, new(), TestContext.Current.CancellationToken);
@@ -127,16 +124,16 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelRequest = CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Bin);
-
         var invalidRevision = Guid.NewGuid();
 
         var setLabelResponse = await Fixture.EnduserApi
-            .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabels(
                 dialogId,
-                setLabelRequest,
-                if_Match: invalidRevision,
-                TestContext.Current.CancellationToken);
+                request =>
+                {
+                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Bin];
+                },
+                revision: invalidRevision);
 
         // Assert
         setLabelResponse.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
@@ -151,11 +148,12 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Set Archive label
         await Fixture.EnduserApi
-            .V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabels(
                 dialogId,
-                CreateSetLabelRequest(DialogEndUserContextsEntities_SystemLabel.Archive),
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+                request =>
+                {
+                    request.AddLabels = [DialogEndUserContextsEntities_SystemLabel.Archive];
+                });
 
         // Act - Service owner patches dialog
         var patchResponse = await Fixture.ServiceownerApi.PatchDialogAsync(
@@ -183,7 +181,4 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .Be(Actors_ActorType.ServiceOwner);
     }
 
-    private static V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest CreateSetLabelRequest(
-        params DialogEndUserContextsEntities_SystemLabel[] labels) =>
-        new() { AddLabels = [.. labels] };
 }

@@ -154,7 +154,12 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Act - Service owner patches dialog
         var patchResponse = await Fixture.ServiceownerApi.PatchDialogAsync(
             dialogId,
-            ops => ops.Add(new() { Op = "replace", Path = "/progress", Value = 69 }));
+            ops => ops.Add(new()
+            {
+                Op = "replace",
+                Path = "/progress",
+                Value = 69
+            }));
 
         // Assert
         patchResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);

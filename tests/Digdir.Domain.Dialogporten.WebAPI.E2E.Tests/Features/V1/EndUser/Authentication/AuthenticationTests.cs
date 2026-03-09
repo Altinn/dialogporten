@@ -1,17 +1,16 @@
 using System.Net;
-using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Xunit;
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Authentication;
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Authentication;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     public static TheoryData<AuthenticationScenario, EndpointScenario> AuthenticationCases =>
-        AuthenticationTestHelpers.BuildAuthenticationCases<IServiceownerApi>();
+        AuthenticationTestHelpers.BuildAuthenticationCases<IEnduserApi>();
 
     [E2ETheory]
     [MemberData(nameof(AuthenticationCases))]
@@ -19,10 +18,10 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         AuthenticationScenario authenticationScenario,
         EndpointScenario endpointScenario)
     {
-        using var _ = Fixture.UseServiceOwnerTokenOverrides(tokenOverride: authenticationScenario.TokenOverride);
+        using var _ = Fixture.UseEndUserTokenOverrides(tokenOverride: authenticationScenario.TokenOverride);
 
         var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
-            Fixture.ServiceownerApi, endpointScenario.Method, TestContext.Current.CancellationToken);
+            Fixture.EnduserApi, endpointScenario.Method, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 

@@ -7,14 +7,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal static class AuthorizationHelper
 {
-    private const string AppInstanceUrnPrefix = "urn:altinn:app-instance-id:";
+    private const string AppInstanceRefPrefix = "urn:altinn:instance-id:";
 
     /// <summary>
     /// This method resolves subjects (ie. roles and access packages) based on the authorized parties and constraints provided,
     /// returning a list of all the (unique) resources associated with each party.
     ///
     /// Additionally, it collects Altinn app instance delegations for parties that have them, returning them as an intermediate
-    /// list of app-instance URNs that can later be used to determine the actual dialog ids for these app instances. This is performed
+    /// list of service owner labels for app instances that can later be used to determine the actual dialog ids. This is performed
     /// in this method as well, to avoid having to loop/filter over (the potentially large) list of parties multiple times.
     /// </summary>
     /// <param name="authorizedParties">
@@ -148,16 +148,38 @@ internal static class AuthorizationHelper
                         continue;
                     }
 
-                    if (Guid.TryParse(instance.InstanceId, out _))
+                    var instanceRef = string.IsNullOrWhiteSpace(instance.InstanceRef)
+                        ? Guid.TryParse(instance.InstanceId, out _)
+                            ? $"{AppInstanceRefPrefix}{party.PartyId}/{instance.InstanceId}"
+                            : null
+                        : instance.InstanceRef;
+
+                    var serviceOwnerLabel = ToServiceOwnerAppInstanceLabel(instanceRef);
+                    if (serviceOwnerLabel is not null)
                     {
-                        result.AltinnAppInstanceIds.Add(
-                            $"{AppInstanceUrnPrefix}{instance.InstanceId}".ToLowerInvariant());
+                        result.AltinnAppInstanceIds.Add(serviceOwnerLabel);
                     }
                 }
             }
         }
 
         return result;
+    }
+
+    private static string? ToServiceOwnerAppInstanceLabel(string? instanceRef)
+    {
+        if (string.IsNullOrWhiteSpace(instanceRef))
+        {
+            return null;
+        }
+
+        var normalized = instanceRef.ToLowerInvariant();
+        if (!normalized.StartsWith(AppInstanceRefPrefix, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return (Constants.ServiceContextInstanceIdPrefix + normalized[AppInstanceRefPrefix.Length..]).ToLowerInvariant();
     }
 
     /// <summary>

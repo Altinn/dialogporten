@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
@@ -80,7 +81,9 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
         }
 
         var appInstanceUrn = dialogData.ServiceOwnerLabels
-            .Where(x => x.StartsWith(InstanceUrn.AppInstancePrefix, StringComparison.Ordinal))
+            .Select(TryToAppInstanceUrn)
+            .Where(x => x is not null)
+            .Select(x => x!)
             .OrderByDescending(x => x, StringComparer.Ordinal)
             .FirstOrDefault();
 
@@ -123,6 +126,30 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             .OrderByDescending(x => x.Id)
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
+
+    private static string? TryToAppInstanceUrn(string labelValue)
+    {
+        if (labelValue.StartsWith(InstanceUrn.AppInstancePrefix, StringComparison.Ordinal))
+        {
+            return labelValue;
+        }
+
+        if (!labelValue.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var separator = labelValue.LastIndexOf('/');
+        if (separator < 0 || separator == labelValue.Length - 1)
+        {
+            return null;
+        }
+
+        var instanceId = labelValue[(separator + 1)..];
+        return Guid.TryParse(instanceId, out _)
+            ? (InstanceUrn.AppInstancePrefix + instanceId).ToLowerInvariant()
+            : null;
+    }
 
     private sealed class IdentifierLookupDialogProjection
     {

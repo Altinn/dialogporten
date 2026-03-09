@@ -11,6 +11,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
 {
     private const string RolePrefix = "urn:altinn:rolecode:";
     private const string AccessPackagePrefix = "urn:altinn:accesspackage:";
+    private const string AppInstanceRefPrefix = "urn:altinn:instance-id:";
 
     private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
@@ -178,13 +179,50 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 continue;
             }
 
-            if (string.Equals(authorizedInstance.InstanceUrn, requestInstanceUrn, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(authorizedInstance.InstanceUrn, responseInstanceUrn, StringComparison.OrdinalIgnoreCase))
+            var comparableInstanceUrn = ToComparableInstanceUrn(authorizedInstance);
+            if (comparableInstanceUrn is null)
+            {
+                continue;
+            }
+
+            if (string.Equals(comparableInstanceUrn, requestInstanceUrn, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(comparableInstanceUrn, responseInstanceUrn, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static string? ToComparableInstanceUrn(AuthorizedResource authorizedInstance)
+    {
+        var instanceRef = string.IsNullOrWhiteSpace(authorizedInstance.InstanceRef)
+            ? authorizedInstance.InstanceId
+            : authorizedInstance.InstanceRef;
+
+        if (string.IsNullOrWhiteSpace(instanceRef))
+        {
+            return null;
+        }
+
+        var normalized = instanceRef.ToLowerInvariant();
+        if (normalized.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.Ordinal))
+        {
+            normalized = $"{AppInstanceRefPrefix}{normalized[Constants.ServiceContextInstanceIdPrefix.Length..]}";
+        }
+
+        if (!normalized.StartsWith(AppInstanceRefPrefix, StringComparison.Ordinal))
+        {
+            return normalized;
+        }
+
+        var separator = normalized.LastIndexOf('/');
+        if (separator < 0 || separator == normalized.Length - 1)
+        {
+            return null;
+        }
+
+        return InstanceUrn.AppInstancePrefix + normalized[(separator + 1)..];
     }
 }

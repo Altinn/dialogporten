@@ -23,5 +23,5 @@ internal sealed class AuthorizedResourceDto
 {
     public string ResourceId { get; set; } = null!;
     public string InstanceId { get; set; } = null!;
-    public string? InstanceUrn { get; set; }
+    public string? InstanceRef { get; set; }
 }

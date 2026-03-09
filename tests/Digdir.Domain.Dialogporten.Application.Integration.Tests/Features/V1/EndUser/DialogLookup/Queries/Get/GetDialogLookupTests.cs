@@ -155,7 +155,9 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         var party = Party;
         var serviceResource = "urn:altinn:resource:test-service-a";
         var otherServiceResource = "urn:altinn:resource:test-service-b";
-        var instanceUrn = $"urn:altinn:app-instance-id:{Guid.NewGuid()}";
+        var instanceId = Guid.NewGuid();
+        var instanceUrn = $"urn:altinn:app-instance-id:{instanceId}";
+        var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
 
         return FlowBuilder.For(Application, services =>
             {
@@ -179,14 +181,14 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                                         new AuthorizedResource
                                         {
                                             ResourceId = otherServiceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
-                                            InstanceId = instanceUrn,
-                                            InstanceUrn = instanceUrn
+                                            InstanceId = instanceId.ToString(),
+                                            InstanceRef = instanceRef
                                         },
                                         new AuthorizedResource
                                         {
                                             ResourceId = serviceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
-                                            InstanceId = instanceUrn,
-                                            InstanceUrn = instanceUrn
+                                            InstanceId = instanceId.ToString(),
+                                            InstanceRef = instanceRef
                                         }
                                     ]
                                 }

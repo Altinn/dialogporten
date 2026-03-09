@@ -194,18 +194,17 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<SetSystemLabelResultEU> SetSystemLabelsEndUser(this IFlowStep<CreateDialogResult> step,
+    public static IFlowExecutor<SetSystemLabelResultEU> SetSystemLabelsEndUser(this IFlowStep step,
         Action<SetSystemLabelCommandEU>? modify = null) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x =>
+        step.SendCommand(x =>
+        {
+            var command = new SetSystemLabelCommandEU
             {
-                var command = new SetSystemLabelCommandEU
-                {
-                    DialogId = x.GetDialogId(),
-                };
-                modify?.Invoke(command);
-                return command;
-            });
+                DialogId = x.GetDialogId(),
+            };
+            modify?.Invoke(command);
+            return command;
+        });
 
     public static IFlowExecutor<SetSystemLabelResultSO> SetSystemLabelsServiceOwner(
         this IFlowStep<CreateDialogResult> step,

@@ -17,7 +17,8 @@ public sealed class ContentValueDto
 
     /// <summary>
     /// True if the authenticated user is authorized for this content. If not, the endpoints will
-    /// be replaced with a fixed placeholder.
+    /// be replaced with a fixed placeholder. Can be null if not applicable.
+    ///
     /// </summary>
     public bool? IsAuthorized { get; set; }
 }

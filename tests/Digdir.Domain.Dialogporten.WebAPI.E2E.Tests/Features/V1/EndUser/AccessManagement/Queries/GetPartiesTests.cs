@@ -21,6 +21,5 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         content.AuthorizedParties.Should().HaveCount(3);
         content.AuthorizedParties.Should().ContainSingle(x =>
             x.Party == E2EConstants.DefaultParty);
-
     }
 }

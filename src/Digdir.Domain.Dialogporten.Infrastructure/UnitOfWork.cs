@@ -107,7 +107,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
     }
 
-    private async Task<SaveChangesResult> SaveChangesAsync_Internal(CancellationToken cancellationToken)
+    private async Task<SaveChangesResult> SaveChangesAsync_Internal(CancellationToken cancellationToken, int attempt = 0)
     {
         if (!_domainContext.IsValid)
         {
@@ -129,57 +129,53 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             _saveChangesOptions,
             cancellationToken);
 
-        for (var retryAttempt = 0; retryAttempt <= ActorNameSaveRetries; retryAttempt++)
+        try
         {
-            try
-            {
-                await _dialogDbContext.SaveChangesAsync(cancellationToken);
+            await _dialogDbContext.SaveChangesAsync(cancellationToken);
 
-                // Interceptors can add domain errors, so check again
-                return !_domainContext.IsValid
-                    ? new DomainError(_domainContext.Pop())
-                    : new Success();
-            }
-            catch (DbUpdateConcurrencyException)
+            // Interceptors can add domain errors, so check again
+            return !_domainContext.IsValid
+                ? new DomainError(_domainContext.Pop())
+                : new Success();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Tidligere forsøkte vi å lagre endringene på nytt når _enableConcurrencyCheck var false. Dette kunne føre
+            // til korrupte data, fordi tilstanden til aggregatet ikke ble validert på nytt etter at vi forsøkte å
+            // «merge» endringene fra kolliderende forespørsler. Siden vi ikke har mulighet til å validere aggregatets
+            // tilstand på nytt uten omfattende omskriving, returnerer vi nå i stedet en konfliktfeil til klienten. Når
+            // _enableConcurrencyCheck er true, betyr det at klienten eksplisitt har bedt om samtidighetskontroll og
+            // derfor forventer å få 412 Precondition Failed ved en samtidighetskonflikt. Når flagget er false, har vi
+            // oppdaget en samtidighetskonflikt internt i applikasjonen uten at klienten har bedt om slik kontroll. I
+            // disse tilfellene returnerer vi 409 Conflict. I begge tilfeller signaliserer vi en konflikt til klienten,
+            // men med ulik HTTP-statuskode avhengig av om klienten har bedt om samtidighetskontroll eller ikke.
+            return _enableConcurrencyCheck
+                ? new ConcurrencyError()
+                : new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+        }
+        catch (UniqueConstraintException ex) when
+            (ex.InnerException?.Data["Detail"] is string message &&
+            ex.InnerException.Data["TableName"] is string tableName)
+        {
+            if (attempt < ActorNameSaveRetries &&
+                IsDuplicateActorNameError(tableName, message.Replace('"', '\'')) &&
+                await ResolveDuplicateActorNameConflict(cancellationToken))
             {
-                // Tidligere forsøkte vi å lagre endringene på nytt når _enableConcurrencyCheck var false. Dette kunne føre
-                // til korrupte data, fordi tilstanden til aggregatet ikke ble validert på nytt etter at vi forsøkte å
-                // «merge» endringene fra kolliderende forespørsler. Siden vi ikke har mulighet til å validere aggregatets
-                // tilstand på nytt uten omfattende omskriving, returnerer vi nå i stedet en konfliktfeil til klienten. Når
-                // _enableConcurrencyCheck er true, betyr det at klienten eksplisitt har bedt om samtidighetskontroll og
-                // derfor forventer å få 412 Precondition Failed ved en samtidighetskonflikt. Når flagget er false, har vi
-                // oppdaget en samtidighetskonflikt internt i applikasjonen uten at klienten har bedt om slik kontroll. I
-                // disse tilfellene returnerer vi 409 Conflict. I begge tilfeller signaliserer vi en konflikt til klienten,
-                // men med ulik HTTP-statuskode avhengig av om klienten har bedt om samtidighetskontroll eller ikke.
-                return _enableConcurrencyCheck
-                    ? new ConcurrencyError()
-                    : new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+                return await SaveChangesAsync_Internal(cancellationToken, ++attempt);
             }
-            catch (UniqueConstraintException ex) when
-                (ex.InnerException?.Data["Detail"] is string message &&
-                ex.InnerException.Data["TableName"] is string tableName)
-            {
-                if (retryAttempt < ActorNameSaveRetries &&
-                    IsDuplicateActorNameError(tableName, message.Replace('"', '\'')) &&
-                    await ResolveDuplicateActorNameConflict(cancellationToken))
-                {
-                    continue;
-                }
 
-                _domainContext.AddError(tableName, message.Replace('"', '\''));
-                break;
-            }
-            catch (ReferenceConstraintException)
-            {
-                // A request triggers loading of exising data, but before it's saved,
-                // another request removes it — causing the save attempt to fail.
-                // On a retry, the client will get a "proper" error message
-                return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
-            }
-            catch (Exception ex) when (IsSerializationFailure(ex))
-            {
-                return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
-            }
+            _domainContext.AddError(tableName, message.Replace('"', '\''));
+        }
+        catch (ReferenceConstraintException)
+        {
+            // A request triggers loading of exising data, but before it's saved,
+            // another request removes it — causing the save attempt to fail.
+            // On a retry, the client will get a "proper" error message
+            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+        }
+        catch (Exception ex) when (IsSerializationFailure(ex))
+        {
+            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
         }
 
         // Interceptors can add domain errors, so check again

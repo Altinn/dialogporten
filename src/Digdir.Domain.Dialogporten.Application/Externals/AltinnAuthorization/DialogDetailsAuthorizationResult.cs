@@ -12,19 +12,15 @@ public sealed class DialogDetailsAuthorizationResult
     public bool HasAccessToMainResource() =>
         AuthorizedAltinnActions.Any(action => action.AuthorizationAttribute == Constants.MainResource);
 
-    public bool HasAccessToGuiAction(string action, string? authorizationAttribute)
-    {
-        return authorizationAttribute is null
+    public bool HasAccessToGuiAction(string action, string? authorizationAttribute) =>
+        authorizationAttribute is null
             ? HasAccessToMainResource()
             : HasAccessToAction(action, authorizationAttribute);
-    }
 
-    public bool HasAccessToApiAction(string action, string? authorizationAttribute)
-    {
-        return authorizationAttribute is null
+    public bool HasAccessToApiAction(string action, string? authorizationAttribute) =>
+        authorizationAttribute is null
             ? HasAccessToMainResource()
             : HasAccessToAction(action, authorizationAttribute);
-    }
 
     public bool HasReadAccessToMainResource() =>
         AuthorizedAltinnActions.Any(x => x is

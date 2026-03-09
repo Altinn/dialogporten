@@ -72,22 +72,29 @@ public class PostgresFilter : OpenTelemetry.BaseProcessor<Activity>
 
 internal static class ActivityTagsExtensions
 {
-    // "23505" is the PostgreSQL error code for unique constraint violation
-    private const string UniqueViolationErrorCode = "23505";
-    // "23503" is the PostgreSQL error code for foreign key violation
-    private const string ForeignKeyViolationErrorCode = "23503";
-    // "40001" is the PostgreSQL error code for serialization failure
-    private const string SerializationFailureErrorCode = "40001";
-
     // This mutes Slack notifications and error logging in AppInsights
     public static bool IsHandledPostgresExceptionActivity(this IEnumerable<KeyValuePair<string, string?>> tags) =>
-        tags.Any(t => t is
-        {
-            Key: Constants.DbStatusCode,
-            Value: UniqueViolationErrorCode or ForeignKeyViolationErrorCode or SerializationFailureErrorCode
-        });
+        tags.Any(t => t is { Key: Constants.DbStatusCode, Value: not null } &&
+                        HandledPostgresErrorCodes.All.Contains(t.Value));
 
     public static bool IsSuccessfulSqlStatementActivity(this IEnumerable<KeyValuePair<string, string?>> tags) =>
         tags.Any(t => t is { Key: Constants.DbStatement }) &&
         tags.Any(t => t is { Key: Constants.OtelStatusCode, Value: Constants.Ok });
+}
+
+internal static class HandledPostgresErrorCodes
+{
+    // "23505" is the PostgreSQL error code for unique constraint violation
+    internal const string UniqueViolationErrorCode = "23505";
+    // "23503" is the PostgreSQL error code for foreign key violation
+    internal const string ForeignKeyViolationErrorCode = "23503";
+    // "40001" is the PostgreSQL error code for serialization failure
+    internal const string SerializationFailureErrorCode = "40001";
+
+    internal static readonly HashSet<string> All = new(
+    [
+        UniqueViolationErrorCode,
+        ForeignKeyViolationErrorCode,
+        SerializationFailureErrorCode
+    ], StringComparer.Ordinal);
 }

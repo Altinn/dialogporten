@@ -1,7 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -142,7 +141,7 @@ public sealed class DialogDto
 
     /// <summary>
     /// System defined label used to categorize dialogs.
-    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Bin"/> or <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Archive"/>.
     /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
     /// </summary>
     [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
@@ -410,7 +409,7 @@ public sealed class ContentDto
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
     /// </summary>
-    public AuthorizationContentValueDto? MainContentReference { get; set; }
+    public ContentValueDto? MainContentReference { get; set; }
 }
 
 public sealed class DialogTransmissionContentDto

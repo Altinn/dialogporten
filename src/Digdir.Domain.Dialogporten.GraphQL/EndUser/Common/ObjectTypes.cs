@@ -6,23 +6,11 @@ public sealed class Localization
     public string LanguageCode { get; set; } = null!;
 }
 
-public interface IContentValue
-{
-    List<Localization> Value { get; set; }
-    string MediaType { get; set; }
-}
-
-public sealed class ContentValue : IContentValue
+public sealed class ContentValue
 {
     public List<Localization> Value { get; set; } = [];
     public string MediaType { get; set; } = null!;
-}
-
-public sealed class AuthorizationContentValue : IContentValue
-{
-    public List<Localization> Value { get; set; } = [];
-    public string MediaType { get; set; } = null!;
-    public bool IsAuthorized { get; set; }
+    public bool? IsAuthorized { get; set; }
 }
 
 public sealed class EndUserContext

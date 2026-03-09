@@ -40,7 +40,7 @@ public sealed class DialogContentToContentDtoConverter : ITypeConverter<List<Dia
                     dto.ExtendedStatus = context.Mapper.Map<ContentValueDto>(content);
                     return dto;
                 case DialogContentType.Values.MainContentReference:
-                    dto.MainContentReference = context.Mapper.Map<AuthorizationContentValueDto>(content);
+                    dto.MainContentReference = context.Mapper.Map<ContentValueDto>(content);
                     return dto;
                 default:
                     throw new InvalidOperationException(

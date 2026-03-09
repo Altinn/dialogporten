@@ -4,7 +4,6 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -57,7 +56,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.Content.MainContentReference!.Should().BeEquivalentTo(
-                    new AuthorizationContentValueDto
+                    new ContentValueDto
                     {
                         MediaType = MediaTypes.EmbeddableMarkdown,
                         IsAuthorized = true,

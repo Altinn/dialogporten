@@ -5,7 +5,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 
 public static class ContentValueDtoExtensions
 {
-    public static void ReplaceUnauthorizedContentReference(this IContentValueDto? contentReference)
+    public static void ReplaceUnauthorizedContentReference(this ContentValueDto? contentReference)
     {
         if (contentReference is null)
         {

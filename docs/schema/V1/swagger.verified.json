@@ -464,6 +464,10 @@
       "V1CommonContent_ContentValue": {
         "additionalProperties": false,
         "properties": {
+          "isAuthorized": {
+            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder.",
+            "type": "boolean"
+          },
           "mediaType": {
             "description": "Media type of the content, this can also indicate that the content is embeddable.",
             "type": "string"
@@ -546,28 +550,6 @@
         },
         "type": "object"
       },
-      "V1EndUserCommonContent_AuthorizationContentValue": {
-        "additionalProperties": false,
-        "properties": {
-          "isAuthorized": {
-            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder.",
-            "type": "boolean"
-          },
-          "mediaType": {
-            "description": "Media type of the content, this can also indicate that the content is embeddable.",
-            "type": "string"
-          },
-          "value": {
-            "description": "A list of localizations for the content.",
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
       "V1EndUserDialogsQueriesGet_Content": {
         "additionalProperties": false,
         "properties": {
@@ -594,7 +576,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1EndUserCommonContent_AuthorizationContentValue"
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
           },

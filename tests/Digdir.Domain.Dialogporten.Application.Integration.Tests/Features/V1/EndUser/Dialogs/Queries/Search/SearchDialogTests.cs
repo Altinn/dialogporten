@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
@@ -7,12 +8,11 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -69,6 +69,78 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().HaveCount(0));
+
+    [Fact]
+    public Task Filter_On_Seen_True_Should_Return_Expected_Dialogs_When_Dialog_Created_And_Opened_And_Marked_As_Unopened_And_Opened_Again() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .ConsumeEvents()
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = true;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = true;
+            })
+            .AssertResult<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().Be(ctx.GetDialogId()))
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = true;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().Be(ctx.GetDialogId()));
+
+    [Fact]
+    public Task Filter_On_Seen_False_Should_Return_Expected_Dialogs_When_Dialog_Created_And_Opened_And_Marked_As_Unopened_And_Opened_Again() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .ConsumeEvents()
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = false;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(2))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = false;
+            })
+            .AssertResult<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().NotBe(ctx.GetDialogId()))
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = false;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(2))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchEndUserDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsSeen = false;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().NotBe(ctx.GetDialogId()));
 
     [Fact]
     public async Task Search_Should_Populate_EnduserContextRevision()
@@ -247,14 +319,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
         secondPage.HasNextPage.Should().BeTrue();
     }
 
-    private static void ConfDialog(CreateDialogCommand command, Guid dialogId, DateTimeOffset createdAt)
-    {
-        command.Dto.Id = dialogId;
-        command.Dto.Party = TestUsers.DefaultParty;
-        command.Dto.ServiceResource = DummyService;
-        command.Dto.CreatedAt = createdAt;
-    }
-
     [Fact]
     public Task Search_Dialogs_As_Email_User() =>
         // IntegrationEmailUser have this email: TEST@TEST.NO
@@ -286,4 +350,12 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle());
+
+    private static void ConfDialog(CreateDialogCommand command, Guid dialogId, DateTimeOffset createdAt)
+    {
+        command.Dto.Id = dialogId;
+        command.Dto.Party = TestUsers.DefaultParty;
+        command.Dto.ServiceResource = DummyService;
+        command.Dto.CreatedAt = createdAt;
+    }
 }

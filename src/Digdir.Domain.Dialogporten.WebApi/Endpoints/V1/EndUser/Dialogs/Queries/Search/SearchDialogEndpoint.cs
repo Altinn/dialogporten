@@ -105,6 +105,11 @@ public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDial
     public DateTimeOffset? ContentUpdatedBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool? IsSeen { get; set; }
+
+    /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
     public DateTimeOffset? DueAfter { get; set; }

@@ -67,6 +67,11 @@ public sealed class DialogEntity :
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool IsSeenSinceLastContentUpdate { get; set; }
+
+    /// <summary>
     ///  Indicates whether the dialog can be updated/deleted by the service owner
     /// </summary>
     public bool Frozen { get; set; }
@@ -119,7 +124,10 @@ public sealed class DialogEntity :
         }
 
         ContentUpdatedAt = UpdatedAt;
+        IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration();
     }
+
+    private bool WasCreatedBeforeFirstMigration() => CreatedAt < new DateTime(2025, 12, 1);
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
     {
@@ -129,6 +137,7 @@ public sealed class DialogEntity :
         {
             UpdatedAt = visibleFrom;
             ContentUpdatedAt = visibleFrom;
+            IsSeenSinceLastContentUpdate = false;
             return;
         }
 
@@ -140,6 +149,7 @@ public sealed class DialogEntity :
         if (ContentHasChanged(self))
         {
             ContentUpdatedAt = utcNow;
+            IsSeenSinceLastContentUpdate = false;
         }
     }
 

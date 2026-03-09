@@ -186,7 +186,7 @@ public sealed class TransmissionDto
     /// If supplied, overrides the creating date and time for the transmission.
     /// If not supplied, the current date /time will be used.
     /// </summary>
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? CreatedAt { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

@@ -9,7 +9,7 @@ public static class E2EExplicitOptions
 {
     // When true, tests are marked Explicit and are skipped unless xUnit.Explicit=on/only.
     // Set to false to run E2E tests by default in your IDE.
-    public const bool ExplicitTests = true;
+    public const bool ExplicitTests = false;
 }
 
 public sealed class E2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute

@@ -18,6 +18,7 @@ internal static class Mapper
         UpdatedBefore = req.UpdatedBefore,
         ContentUpdatedAfter = req.ContentUpdatedAfter,
         ContentUpdatedBefore = req.ContentUpdatedBefore,
+        IsContentSeen = req.IsContentSeen,
         DueAfter = req.DueAfter,
         DueBefore = req.DueBefore,
         Process = req.Process,

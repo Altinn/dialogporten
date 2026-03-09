@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
@@ -17,7 +18,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
@@ -198,6 +198,18 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    public static IFlowExecutor<SetSystemLabelResultEU> SetSystemLabelsEndUser(this IFlowStep step,
+        Action<SetSystemLabelCommandEU>? modify = null) =>
+        step.SendCommand((x) =>
+            {
+                var command = new SetSystemLabelCommandEU
+                {
+                    DialogId = x.GetDialogId(),
+                };
+                modify?.Invoke(command);
+                return command;
+            });
+
     public static IFlowExecutor<SetSystemLabelResultSO> SetSystemLabelsServiceOwner(
         this IFlowStep<CreateDialogResult> step,
         Action<SetSystemLabelCommandSO>? modify = null) =>
@@ -314,8 +326,8 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultSO> GetServiceOwnerDialog(this IFlowStep step) =>
         step.SendCommand(ctx => CreateGetServiceOwnerDialogQuery(ctx.GetDialogId()));
 
-    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep step) =>
-        step.SendCommand(ctx => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
+    public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep step, Guid? dialogId = null) =>
+        step.SendCommand(ctx => new GetDialogQueryEU { DialogId = dialogId ?? ctx.GetDialogId() });
 
     public static IFlowExecutor<SearchSeenLogResult> GetEndUserSeenLogs(this IFlowStep step) =>
         step.SendCommand(ctx => new SearchSeenLogQuery { DialogId = ctx.GetDialogId() });

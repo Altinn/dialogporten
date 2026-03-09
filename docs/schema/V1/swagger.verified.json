@@ -465,7 +465,8 @@
         "additionalProperties": false,
         "properties": {
           "isAuthorized": {
-            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder.",
+            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder. Can be null if not applicable.\n            ",
+            "nullable": true,
             "type": "boolean"
           },
           "mediaType": {
@@ -572,7 +573,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
             "nullable": true,
             "oneOf": [
               {
@@ -4302,29 +4303,6 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogsCommonContent_AuthorizationContentValue": {
-        "additionalProperties": false,
-        "properties": {
-          "isAuthorized": {
-            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder.",
-            "nullable": true,
-            "type": "boolean"
-          },
-          "mediaType": {
-            "description": "Media type of the content, this can also indicate that the content is embeddable.",
-            "type": "string"
-          },
-          "value": {
-            "description": "A list of localizations for the content.",
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
       "V1ServiceOwnerDialogsQueriesGet_Content": {
         "additionalProperties": false,
         "properties": {
@@ -4347,11 +4325,11 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nContent value will be masked if user is not authorized to read main content.",
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommonContent_AuthorizationContentValue"
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
               }
             ]
           },

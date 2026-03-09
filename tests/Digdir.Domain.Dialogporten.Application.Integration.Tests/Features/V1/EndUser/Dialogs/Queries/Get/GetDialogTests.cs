@@ -165,7 +165,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.GuiActions.Should().AllSatisfy(guiAction =>
                 {
                     guiAction.IsAuthorized.Should().BeFalse();
-                    guiAction.Url.Should().Be(Constants.UnauthorizedUri.ToString());
+                    guiAction.Url.Should().Be(Constants.UnauthorizedUri);
                 });
             });
 
@@ -241,7 +241,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.ApiActions.Should().AllSatisfy(guiAction =>
                 {
                     guiAction.IsAuthorized.Should().BeFalse();
-                    guiAction.Endpoints.Single().Url.Should().Be(Constants.UnauthorizedUri.ToString());
+                    guiAction.Endpoints.Single().Url.Should().Be(Constants.UnauthorizedUri);
                 });
             });
 

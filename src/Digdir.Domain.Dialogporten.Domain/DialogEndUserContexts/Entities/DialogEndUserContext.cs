@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
@@ -78,7 +79,16 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
         {
             Name = labelValue.ToNamespacedName(),
             Action = action,
-            PerformedBy = performedBy
+            PerformedBy = new LabelAssignmentLogActor
+            {
+                ActorTypeId = performedBy.ActorTypeId,
+                ActorNameEntity = performedBy.ActorNameEntity is null
+                    ? null
+                    : new ActorName
+                    {
+                        ActorId = performedBy.ActorNameEntity.ActorId,
+                        Name = performedBy.ActorNameEntity.Name
+                    }
+            }
         });
-
 }

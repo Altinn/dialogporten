@@ -1092,10 +1092,11 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         /// <summary>
         /// True if the authenticated user is authorized for this content. If not, the endpoints will
-        /// <br/>be replaced with a fixed placeholder.
+        /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
+        /// <br/>            
         /// </summary>
         [JsonPropertyName("isAuthorized")]
-        public bool IsAuthorized { get; set; }
+        public bool? IsAuthorized { get; set; }
 
         /// <summary>
         /// Media type of the content, this can also indicate that the content is embeddable.
@@ -1193,6 +1194,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
+        /// <br/>IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
         /// </summary>
         [JsonPropertyName("mainContentReference")]
         public V1CommonContent_ContentValue MainContentReference { get; set; }

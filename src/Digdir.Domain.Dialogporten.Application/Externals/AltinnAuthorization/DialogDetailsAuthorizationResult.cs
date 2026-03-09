@@ -12,15 +12,33 @@ public sealed class DialogDetailsAuthorizationResult
     public bool HasAccessToMainResource() =>
         AuthorizedAltinnActions.Any(action => action.AuthorizationAttribute == Constants.MainResource);
 
-    public bool HasAccessToGuiAction(string action, string? authorizationAttribute) =>
-        authorizationAttribute is null
-            ? HasAccessToMainResource()
-            : HasAccessToAction(action, authorizationAttribute);
+    public bool HasAccessToGuiAction(string requestedAction, string? authorizationAttribute)
+    {
+        var action = AuthorizedAltinnActions.Find(x => x.Name == requestedAction);
 
-    public bool HasAccessToApiAction(string action, string? authorizationAttribute) =>
-        authorizationAttribute is null
+        if (action is null)
+        {
+            return false;
+        }
+
+        return authorizationAttribute is null
             ? HasAccessToMainResource()
-            : HasAccessToAction(action, authorizationAttribute);
+            : action.AuthorizationAttribute == authorizationAttribute;
+    }
+
+    public bool HasAccessToApiAction(string requestedAction, string? authorizationAttribute)
+    {
+        var action = AuthorizedAltinnActions.Find(x => x.Name == requestedAction);
+
+        if (action is null)
+        {
+            return false;
+        }
+
+        return authorizationAttribute is null
+            ? HasAccessToMainResource()
+            : action.AuthorizationAttribute == authorizationAttribute;
+    }
 
     public bool HasReadAccessToMainResource() =>
         AuthorizedAltinnActions.Any(x => x is
@@ -38,7 +56,4 @@ public sealed class DialogDetailsAuthorizationResult
                 || AuthorizedAltinnActions.Contains(new(Constants.ReadAction, authorizationAttribute))
             ) : HasAccessToMainResource();
     }
-
-    private bool HasAccessToAction(string action, string authorizationAttribute) =>
-        AuthorizedAltinnActions.Any(x => x.Name == action && x.AuthorizationAttribute == authorizationAttribute);
 }

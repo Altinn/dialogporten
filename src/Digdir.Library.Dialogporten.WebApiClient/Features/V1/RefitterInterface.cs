@@ -1402,6 +1402,48 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsFreezeFreezeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+
+        /// <summary>Looks up a dialog by instance URN</summary>
+        /// <remarks>Resolves dialog metadata for a supported instance URN in service owner context.</remarks>
+        /// <param name="instanceUrn">instanceUrn parameter</param>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully resolved identifier lookup metadata.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten.serviceprovider\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Authenticated service owner does not own the resolved dialog.</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>No dialog match was found for the supplied instance URN.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
+        [Get("/api/v1/serviceowner/dialoglookup")]
+        Task<IApiResponse<V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup>> V1ServiceOwnerDialogLookupQueriesGetDialogLookup([Query] string instanceUrn, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
     }
 
 }
@@ -5462,6 +5504,78 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("description")]
         public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup
+    {
+
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; }
+
+        [JsonPropertyName("instanceUrn")]
+        public string InstanceUrn { get; set; }
+
+        [JsonPropertyName("serviceResource")]
+        public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; }
+
+        [JsonPropertyName("serviceOwner")]
+        public V1CommonIdentifierLookup_IdentifierLookupServiceOwner ServiceOwner { get; set; }
+
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
+        [JsonPropertyName("nonSensitiveTitle")]
+        public ICollection<V1CommonLocalizations_Localization> NonSensitiveTitle { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceResource
+    {
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceOwner
+    {
+
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1EndUserCommon_AcceptedLanguages
+    {
+
+        [JsonPropertyName("acceptedLanguage")]
+        public ICollection<V1EndUserCommon_AcceptedLanguage> AcceptedLanguage { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1EndUserCommon_AcceptedLanguage
+    {
+
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; }
+
+        [JsonPropertyName("weight")]
+        public int Weight { get; set; }
 
     }
 

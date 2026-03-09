@@ -6,6 +6,12 @@ public sealed class DialogSearchAuthorizationResult
     // eg. "urn:altinn:resource:some-service" and referred to by "ServiceResource" in DialogEntity
     public Dictionary<string, HashSet<string>> ResourcesByParties { get; init; } = new();
 
+    // Subjects here are role/access package URNs used to derive resource access.
+    public Dictionary<string, HashSet<string>> SubjectsByParties { get; init; } = new();
+
+    // Raw delegated instances from Access Management, keyed by party.
+    public Dictionary<string, List<AuthorizedResource>> AuthorizedInstancesByParties { get; init; } = new();
+
     // These are the dialog IDs that the user has direct access to, which is compiled from AltinnAppInstanceIds
     // and potentially other sources in the future.
     public List<Guid> DialogIds { get; set; } = [];

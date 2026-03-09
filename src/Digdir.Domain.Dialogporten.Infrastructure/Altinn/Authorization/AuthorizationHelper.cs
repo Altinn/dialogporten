@@ -41,7 +41,9 @@ internal static class AuthorizationHelper
         var result = new DialogSearchAuthorizationResult
         {
             // Pre-size with a reasonable capacity to reduce re-allocations.
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(100)
+            ResourcesByParties = new Dictionary<string, HashSet<string>>(100),
+            SubjectsByParties = new Dictionary<string, HashSet<string>>(100),
+            AuthorizedInstancesByParties = new Dictionary<string, List<AuthorizedResource>>(100)
         };
 
         if (authorizedParties.AuthorizedParties.Count == 0)
@@ -103,9 +105,16 @@ internal static class AuthorizationHelper
         foreach (var party in relevantParties)
         {
             var partyResources = new HashSet<string>();
+            var partySubjects = party.AuthorizedRolesAndAccessPackages
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (partySubjects.Count > 0)
+            {
+                result.SubjectsByParties[party.Party] = partySubjects;
+            }
 
             // Aggregate resources granted via roles and access packages.
-            foreach (var role in party.AuthorizedRolesAndAccessPackages)
+            foreach (var role in partySubjects)
             {
                 if (subjectToResources.TryGetValue(role, out var resourcesFromRole))
                 {
@@ -128,17 +137,26 @@ internal static class AuthorizationHelper
                 result.ResourcesByParties[party.Party] = partyResources;
             }
 
+            var partyAuthorizedInstances = party.AuthorizedInstances
+                .Where(instance =>
+                    constraintResourcesSet is null
+                    || constraintResourcesSet.Contains(Constants.ServiceResourcePrefix + instance.ResourceId))
+                .ToList();
+
+            if (partyAuthorizedInstances.Count > 0)
+            {
+                result.AuthorizedInstancesByParties[party.Party] = partyAuthorizedInstances;
+            }
+
             // Handle app instance delegations from Altinn Access Management.
-            foreach (var instance in party.AuthorizedInstances)
+            foreach (var instance in partyAuthorizedInstances)
             {
                 if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                if ((constraintResourcesSet is null
-                    || constraintResourcesSet.Contains(Constants.ServiceResourcePrefix + instance.ResourceId))
-                    && Guid.TryParse(instance.InstanceId, out _))
+                if (Guid.TryParse(instance.InstanceId, out _))
                 {
                     result.AltinnAppInstanceIds.Add(
                         $"{Constants.ServiceContextInstanceIdPrefix}{party.PartyId}/{instance.InstanceId}");

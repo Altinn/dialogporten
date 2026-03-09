@@ -106,7 +106,7 @@ public static class InfrastructureExtensions
             .AddDapperTypeHandlers()
             .AddHostedService<FusionCacheWarmupHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
-            .AddHostedService<DevelopmentCleanupOutboxHostedService>()
+            //.AddHostedService<DevelopmentCleanupOutboxHostedService>()
             .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()
             .AddHostedService<DevelopmentResourcePolicyInformationSyncHostedService>()
             .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient,

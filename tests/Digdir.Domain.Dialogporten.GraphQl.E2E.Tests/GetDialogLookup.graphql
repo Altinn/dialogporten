@@ -1,0 +1,28 @@
+query GetDialogLookup($instanceUrn: String!) {
+  dialogLookup(instanceUrn: $instanceUrn) {
+    lookup {
+      dialogId
+      instanceUrn
+      serviceResource {
+        id
+      }
+      serviceOwner {
+        code
+      }
+      authorizationEvidence {
+        viaRole
+        viaAccessPackage
+        viaResourceDelegation
+        viaInstanceDelegation
+        evidence {
+          grantType
+          subject
+        }
+      }
+    }
+    errors {
+      __typename
+      message
+    }
+  }
+}

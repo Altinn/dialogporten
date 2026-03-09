@@ -27,7 +27,13 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
 
         foreach (var id in newIds)
         {
-            CachedResourceIds.Add(new ServiceResourceInformation(id, LocalResourceType, orgNumber, LocalOrgShortName));
+            CachedResourceIds.Add(new ServiceResourceInformation(
+                id,
+                LocalResourceType,
+                orgNumber,
+                LocalOrgShortName,
+                [new ResourceLocalization("nb", id)],
+                []));
         }
 
         return CachedResourceIds;
@@ -36,7 +42,13 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
     public virtual Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken)
     {
         return Task.FromResult<ServiceResourceInformation?>(
-            new ServiceResourceInformation(serviceResourceId, LocalResourceType, LocalOrgId, LocalOrgShortName));
+            new ServiceResourceInformation(
+                serviceResourceId,
+                LocalResourceType,
+                LocalOrgId,
+                LocalOrgShortName,
+                [new ResourceLocalization("nb", serviceResourceId)],
+                []));
     }
 
     [SuppressMessage("Performance", "CA1822:Mark members as static")]

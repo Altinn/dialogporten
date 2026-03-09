@@ -13,7 +13,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 
 internal sealed class ResourceRegistryClient : IResourceRegistry
 {
-    private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey";
+    private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey_V2";
     private const string ResourceRegistryResourceEndpoint = "resourceregistry/api/v1/resource/";
     private const string AuthenticationLevelCategory = "urn:altinn:minimum-authenticationlevel";
 
@@ -32,7 +32,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         string orgNumber,
         CancellationToken cancellationToken)
     {
-        var resources = await FetchServiceResourceInformation(cancellationToken);
+        var resources = await FetchServiceResources(cancellationToken);
         return resources
             .Where(x => x.OwnerOrgNumber == orgNumber)
             .ToList();
@@ -42,9 +42,8 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         string serviceResourceId,
         CancellationToken cancellationToken)
     {
-        var resources = await FetchServiceResourceInformation(cancellationToken);
-        return resources
-            .FirstOrDefault(x => x.ResourceId == serviceResourceId);
+        var resources = await FetchServiceResources(cancellationToken);
+        return resources.FirstOrDefault(x => x.ResourceId == serviceResourceId);
     }
 
     public async IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset since, int batchSize, [EnumeratorCancellation] CancellationToken cancellationToken)
@@ -102,7 +101,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private async Task<List<UpdatedResource>> GetUniqueUpdatedResources(DateTimeOffset _, CancellationToken cancellationToken)
     {
         // Until we have an API in RR to fetch updated resources only, we have to fetch them all
-        return (await FetchServiceResourceInformation(cancellationToken))
+        return (await FetchServiceResources(cancellationToken))
             .Select(x => new UpdatedResource(new Uri(x.ResourceId), DateTimeOffset.MinValue))
             .ToList();
     }
@@ -163,7 +162,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         return null;
     }
 
-    private async Task<ServiceResourceInformation[]> FetchServiceResourceInformation(CancellationToken cancellationToken)
+    private async Task<ServiceResourceInformation[]> FetchServiceResources(CancellationToken cancellationToken)
     {
         const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}resourcelist?includeMigratedApps=true";
 
@@ -183,10 +182,25 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
                         $"{Constants.ServiceResourcePrefix}{x.Identifier}",
                         x.ResourceType,
                         x.HasCompetentAuthority.Organization!,
-                        x.HasCompetentAuthority.OrgCode!))
+                        x.HasCompetentAuthority.OrgCode!,
+                        ToLocalizations(x.Title),
+                        ToLocalizations(x.Description)))
                     .ToArray();
             },
             token: cancellationToken);
+    }
+
+    private static List<ResourceLocalization> ToLocalizations(IDictionary<string, string>? values)
+    {
+        if (values is null || values.Count == 0)
+        {
+            return [];
+        }
+
+        return values
+            .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !string.IsNullOrWhiteSpace(x.Value))
+            .Select(x => new ResourceLocalization(x.Key.Trim().ToLowerInvariant(), x.Value))
+            .ToList();
     }
 
     private sealed class ResourceRegistryEntry
@@ -212,6 +226,8 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         public required string Identifier { get; init; }
         public required CompetentAuthority HasCompetentAuthority { get; init; }
         public required string ResourceType { get; init; }
+        public IDictionary<string, string>? Title { get; init; }
+        public IDictionary<string, string>? Description { get; init; }
     }
 
     private sealed class CompetentAuthority

@@ -36,7 +36,11 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
             .ToDictionary(pair => pair.Value.Orgnr, pair => new ServiceOwnerInfo
             {
                 OrgNumber = pair.Value.Orgnr,
-                ShortName = pair.Key
+                ShortName = pair.Key,
+                DisplayName = pair.Value.Name?
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !string.IsNullOrWhiteSpace(x.Value))
+                    .Select(x => new ResourceLocalization(x.Key.Trim().ToLowerInvariant(), x.Value))
+                    .ToList() ?? []
             });
 
         return serviceOwnerInfoByOrgNumber;

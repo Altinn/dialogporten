@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
-using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using OneOf;
@@ -17,16 +16,6 @@ public sealed class GetDialogLookupQuery : IRequest<GetDialogLookupResult>, IFea
 
 [GenerateOneOf]
 public sealed partial class GetDialogLookupResult : OneOfBase<EndUserIdentifierLookupDto, EntityNotFound, Forbidden, ValidationError>;
-
-internal sealed class GetDialogLookupQueryValidator : AbstractValidator<GetDialogLookupQuery>
-{
-    public GetDialogLookupQueryValidator()
-    {
-        RuleFor(x => x.InstanceUrn)
-            .Must(value => InstanceUrn.TryParse(value, out _))
-            .WithMessage("InstanceUrn must be a supported URN: 'urn:altinn:app-instance-id:{uuid}', 'urn:altinn:correspondence-id:{uuid}' or 'urn:altinn:dialog-id:{uuid}'.");
-    }
-}
 
 internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLookupQuery, GetDialogLookupResult>
 {

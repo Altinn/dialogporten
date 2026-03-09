@@ -1,0 +1,165 @@
+﻿{
+  Items: [
+    {
+      Id: Guid_1,
+      Org: ttd,
+      Revision: Guid_2,
+      ServiceResource: urn:altinn:resource:0945,
+      ServiceResourceType: GenericAccessResource,
+      Party: urn:altinn:person:identifier-no:15026792522,
+      GuiAttachmentCount: 0,
+      CreatedAt: DateTimeOffset_1,
+      UpdatedAt: DateTimeOffset_1,
+      ContentUpdatedAt: DateTimeOffset_1,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      LatestActivity: {
+        Id: Guid_3,
+        CreatedAt: DateTimeOffset_2,
+        ExtendedType: https://noemie.info/avon,
+        Type: DialogDeleted,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorName: Harry Terry
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_4
+      },
+      EndUserContext: {
+        Revision: Guid_5,
+        SystemLabels: [
+          Default
+        ]
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Research Swedish Krona Springs,
+              LanguageCode: en
+            },
+            {
+              Value: connect Home Loan Account Mongolia,
+              LanguageCode: nb
+            },
+            {
+              Value: Generic Steel Hat Up-sized Canyon,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      }
+    },
+    {
+      Id: Guid_6,
+      Org: ttd,
+      Revision: Guid_7,
+      ServiceResource: urn:altinn:resource:0945,
+      ServiceResourceType: GenericAccessResource,
+      Party: urn:altinn:person:identifier-no:15026792522,
+      GuiAttachmentCount: 0,
+      CreatedAt: DateTimeOffset_3,
+      UpdatedAt: DateTimeOffset_3,
+      ContentUpdatedAt: DateTimeOffset_3,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      LatestActivity: {
+        Id: Guid_8,
+        CreatedAt: DateTimeOffset_4,
+        ExtendedType: https://rose.org/fantastic-frozen-pizza,
+        Type: DialogOpened,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorName: Sherwood Schiller
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_9
+      },
+      EndUserContext: {
+        Revision: Guid_10,
+        SystemLabels: [
+          Default
+        ]
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Research Swedish Krona Springs,
+              LanguageCode: en
+            },
+            {
+              Value: connect Home Loan Account Mongolia,
+              LanguageCode: nb
+            },
+            {
+              Value: Generic Steel Hat Up-sized Canyon,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      }
+    },
+    {
+      Id: Guid_11,
+      Org: ttd,
+      Revision: Guid_12,
+      ServiceResource: urn:altinn:resource:0945,
+      ServiceResourceType: GenericAccessResource,
+      Party: urn:altinn:person:identifier-no:15026792522,
+      GuiAttachmentCount: 0,
+      CreatedAt: DateTimeOffset_5,
+      UpdatedAt: DateTimeOffset_5,
+      ContentUpdatedAt: DateTimeOffset_5,
+      Status: NotApplicable,
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      LatestActivity: {
+        Id: Guid_13,
+        CreatedAt: DateTimeOffset_6,
+        ExtendedType: https://constantin.com/supply-chains,
+        Type: DialogCreated,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorName: Therese Bartell
+        }
+      },
+      ServiceOwnerContext: {
+        Revision: Guid_14
+      },
+      EndUserContext: {
+        Revision: Guid_15,
+        SystemLabels: [
+          Default
+        ]
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: Research Swedish Krona Springs,
+              LanguageCode: en
+            },
+            {
+              Value: connect Home Loan Account Mongolia,
+              LanguageCode: nb
+            },
+            {
+              Value: Generic Steel Hat Up-sized Canyon,
+              LanguageCode: nn
+            }
+          ],
+          MediaType: text/plain
+        }
+      }
+    }
+  ],
+  HasNextPage: false,
+  OrderBy: createdat_desc,id_desc
+}

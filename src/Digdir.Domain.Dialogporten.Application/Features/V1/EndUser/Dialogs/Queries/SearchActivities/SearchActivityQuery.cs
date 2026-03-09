@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -25,16 +24,13 @@ public sealed partial class SearchActivityResult : OneOfBase<List<ActivityDto>, 
 internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivityQuery, SearchActivityResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
     public SearchActivityQueryHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IAltinnAuthorization altinnAuthorization)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
@@ -76,6 +72,8 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
-        return _mapper.Map<List<ActivityDto>>(dialog.Activities);
+        return dialog.Activities
+            .Select(activity => activity.ToDto())
+            .ToList();
     }
 }

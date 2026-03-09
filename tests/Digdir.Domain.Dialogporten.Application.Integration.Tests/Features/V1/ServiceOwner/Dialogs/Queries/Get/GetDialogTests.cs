@@ -1,5 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -47,8 +48,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                var mappedStatus = Application.GetMapper()
-                    .Map<DialogStatus.Values>(createDto.Status);
+                var mappedStatus = createDto.Status.Should().NotBeNull().Subject.ToEntity();
                 result.Status.Should().Be(mappedStatus);
 
                 result.Should().NotBeNull();
@@ -124,8 +124,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                var mappedStatus = Application.GetMapper()
-                    .Map<DialogStatus.Values>(createDto.Status);
+                var mappedStatus = createDto.Status.Should().NotBeNull().Subject.ToEntity();
                 result.Status.Should().Be(mappedStatus);
 
                 result.Should().NotBeNull();

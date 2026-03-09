@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
@@ -37,7 +36,6 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
 {
     private readonly IDialogDbContext _db;
     private readonly IDomainContext _domainContext;
-    private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly IUserResourceRegistry _userResourceRegistry;
@@ -48,7 +46,6 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
     public CreateTransmissionCommandHandler(
         IDialogDbContext db,
         IDomainContext domainContext,
-        IMapper mapper,
         IUnitOfWork unitOfWork,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         IUserResourceRegistry userResourceRegistry,
@@ -59,7 +56,6 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
@@ -92,7 +88,9 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         }
 
         // Map incoming DTOs to domain entities without loading existing transmissions.
-        var newTransmissions = _mapper.Map<List<DialogTransmission>>(request.Transmissions);
+        var newTransmissions = request.Transmissions
+            .Select(transmission => transmission.ToEntity())
+            .ToList();
 
         var conflict = await ValidateIdempotentKeys(dialog.Id, newTransmissions, cancellationToken);
         if (conflict is not null)

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
@@ -28,19 +27,16 @@ public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFoun
 
 internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, GetDialogResult>
 {
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IDataLoaderContext _dataLoaderContext;
 
     public GetDialogQueryHandler(
-        IMapper mapper,
         IAltinnAuthorization altinnAuthorization,
         IUnitOfWork unitOfWork, IUserRegistry userRegistry,
         IDataLoaderContext dataLoaderContext)
     {
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
@@ -59,7 +55,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialog.SeenLog = dialog.SeenLog
             .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
 
-        var dialogDto = _mapper.Map<DialogDto>(dialog);
+        var dialogDto = dialog.ToDto();
 
         if (request.EndUserId is not null)
         {
@@ -107,7 +103,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         return dialogDto;
     }
 
-    private List<DialogSeenLogDto> GetSeenLogs(
+    private static List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
         string? endUserId) =>
@@ -120,10 +116,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             .Select(log => ToSeenDialogDto(endUserId, log))
             .ToList();
 
-    private DialogSeenLogDto ToSeenDialogDto(string? endUserId, DialogSeenLog log)
+    private static DialogSeenLogDto ToSeenDialogDto(string? endUserId, DialogSeenLog log)
     {
         var actorId = log.SeenBy.ActorNameEntity?.ActorId;
-        var logDto = _mapper.Map<DialogSeenLogDto>(log);
+        var logDto = log.ToDto();
         logDto.IsCurrentEndUser = endUserId == actorId;
         return logDto;
     }

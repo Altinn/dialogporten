@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -22,13 +21,11 @@ public sealed partial class SearchLabelAssignmentLogResult : OneOfBase<List<Labe
 internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<SearchLabelAssignmentLogQuery, SearchLabelAssignmentLogResult>
 {
     private readonly IDialogDbContext _dialogDbContext;
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
-    public SearchLabelAssignmentLogQueryHandler(IDialogDbContext dialogDbContext, IMapper mapper, IAltinnAuthorization altinnAuthorization)
+    public SearchLabelAssignmentLogQueryHandler(IDialogDbContext dialogDbContext, IAltinnAuthorization altinnAuthorization)
     {
         _dialogDbContext = dialogDbContext ?? throw new ArgumentNullException(nameof(dialogDbContext));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
     }
 
@@ -66,6 +63,8 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        return _mapper.Map<List<LabelAssignmentLogDto>>(dialog.EndUserContext.LabelAssignmentLogs);
+        return dialog.EndUserContext.LabelAssignmentLogs
+            .Select(log => log.ToDto())
+            .ToList();
     }
 }

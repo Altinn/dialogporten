@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
@@ -39,7 +38,6 @@ public sealed partial class CreateDialogResult : OneOfBase<CreateDialogSuccess, 
 internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogCommand, CreateDialogResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
     private readonly IResourceRegistry _resourceRegistry;
@@ -54,7 +52,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         IUser user,
         IClock clock,
         IDialogDbContext db,
-        IMapper mapper,
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         IResourceRegistry resourceRegistry,
@@ -66,7 +63,6 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     {
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
@@ -79,7 +75,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
 
     public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
     {
-        var dialog = _mapper.Map<DialogEntity>(request.Dto);
+        var dialog = request.Dto.ToEntity();
 
         // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
         // and to guarantee deterministic order of input to output dtos.
@@ -223,13 +219,15 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _systemLabelAdder.AddSystemLabel(dialog, request.Dto.SystemLabel.Value);
     }
 
-    private void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)
+    private static void CreateDialogServiceOwnerContext(CreateDialogCommand request, DialogEntity dialog)
     {
         dialog.ServiceOwnerContext = new();
         if (request.Dto.ServiceOwnerContext?.ServiceOwnerLabels.Count > 0)
         {
             dialog.ServiceOwnerContext.ServiceOwnerLabels =
-                _mapper.Map<List<DialogServiceOwnerLabel>>(request.Dto.ServiceOwnerContext.ServiceOwnerLabels);
+                request.Dto.ServiceOwnerContext.ServiceOwnerLabels
+                    .Select(label => label.ToEntity())
+                    .ToList();
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Common;
+﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
@@ -46,7 +45,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     private readonly IDialogDbContext _db;
     private readonly IUser _user;
     private readonly IClock _clock;
-    private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDomainContext _domainContext;
     private readonly ISystemLabelAdder _systemLabelAdder;
@@ -61,7 +59,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         IDialogDbContext db,
         IUser user,
         IClock clock,
-        IMapper mapper,
         IUnitOfWork unitOfWork,
         IDomainContext domainContext,
         ISystemLabelAdder systemLabelAdder,
@@ -76,7 +73,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _user = user ?? throw new ArgumentNullException(nameof(user));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
@@ -116,7 +112,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
 
         // Update primitive properties
-        _mapper.Map(request.Dto, dialog);
+        request.Dto.ApplyTo(dialog);
 
         if (!request.IsSilentUpdate && !isCurrentUserServiceOwnerAdmin)
         {
@@ -164,7 +160,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             .Merge(request.Dto.SearchTags,
                 destinationKeySelector: x => x.Value,
                 sourceKeySelector: x => x.Value,
-                create: _mapper.Map<List<DialogSearchTag>>,
+                create: createSet => createSet.Select(tag => tag.ToEntity()).ToList(),
                 delete: DeleteDelegate.Default,
                 comparer: StringComparer.InvariantCultureIgnoreCase);
 
@@ -181,7 +177,13 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 destinationKeySelector: x => x.Id,
                 sourceKeySelector: x => x.Id,
                 create: CreateGuiActions,
-                update: _mapper.Update,
+                update: updateSets =>
+                {
+                    foreach (var (source, destination) in updateSets)
+                    {
+                        source.ApplyTo(destination);
+                    }
+                },
                 delete: DeleteDelegate.Default);
 
         dialog.ApiActions
@@ -263,7 +265,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     private void AppendActivity(DialogEntity dialog, UpdateDialogDto dto)
     {
-        var newDialogActivities = _mapper.Map<List<DialogActivity>>(dto.Activities);
+        var newDialogActivities = dto.Activities
+            .Select(activity => activity.ToEntity())
+            .ToList();
 
         var existingIds = _db.DialogActivities
             .Local
@@ -312,7 +316,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     private async Task AppendTransmission(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
     {
-        var newDialogTransmissions = _mapper.Map<List<DialogTransmission>>(dto.Transmissions);
+        var newDialogTransmissions = dto.Transmissions
+            .Select(transmission => transmission.ToEntity())
+            .ToList();
 
         // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
         // and to guarantee deterministic order of input to output dtos.
@@ -367,7 +373,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
     private IEnumerable<DialogGuiAction> CreateGuiActions(IEnumerable<GuiActionDto> creatables)
     {
-        var guiActions = _mapper.Map<List<DialogGuiAction>>(creatables);
+        var guiActions = creatables
+            .Select(action => action.ToEntity())
+            .ToList();
         _db.DialogGuiActions.AddRange(guiActions);
         return guiActions;
     }
@@ -376,8 +384,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         return creatables.Select(x =>
         {
-            var apiAction = _mapper.Map<DialogApiAction>(x);
-            apiAction.Endpoints = _mapper.Map<List<DialogApiActionEndpoint>>(x.Endpoints);
+            var apiAction = x.ToEntity();
             _db.DialogApiActions.Add(apiAction);
             return apiAction;
         });
@@ -387,14 +394,20 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         foreach (var (source, destination) in updateSets)
         {
-            _mapper.Map(source, destination);
+            source.ApplyTo(destination);
 
             destination.Endpoints
                 .Merge(source.Endpoints,
                     destinationKeySelector: x => x.Id,
                     sourceKeySelector: x => x.Id,
                     create: CreateApiActionEndpoint,
-                    update: _mapper.Update,
+                    update: endpointUpdateSets =>
+                    {
+                        foreach (var (endpointSource, endpointDestination) in endpointUpdateSets)
+                        {
+                            endpointSource.ApplyTo(endpointDestination);
+                        }
+                    },
                     delete: DeleteDelegate.Default);
         }
     }
@@ -403,7 +416,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         foreach (var apiActionEndpointDto in creatables)
         {
-            var apiActionEndpoint = _mapper.Map<DialogApiActionEndpoint>(apiActionEndpointDto);
+            var apiActionEndpoint = apiActionEndpointDto.ToEntity();
             _db.DialogApiActionEndpoints.Add(apiActionEndpoint);
             yield return apiActionEndpoint;
         }
@@ -413,10 +426,9 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         return creatables.Select(attachmentDto =>
         {
-            var attachment = _mapper.Map<DialogAttachment>(attachmentDto);
+            var attachment = attachmentDto.ToEntity();
             // Ensure attachments have a UUIDv7 ID, needed to guarantee deterministic order of input to output dtos.
             attachment.EnsureId();
-            attachment.Urls = _mapper.Map<List<AttachmentUrl>>(attachmentDto.Urls);
             _db.DialogAttachments.Add(attachment);
             ValidateTimeFields(attachment);
             return attachment;
@@ -427,14 +439,20 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
     {
         foreach (var updateSet in updateSets)
         {
-            _mapper.Map(updateSet.Source, updateSet.Destination);
+            updateSet.Source.ApplyTo(updateSet.Destination);
             ValidateTimeFields(updateSet.Destination);
             updateSet.Destination.Urls
                 .Merge(updateSet.Source.Urls,
                     destinationKeySelector: x => x.Id,
                     sourceKeySelector: x => x.Id,
-                    create: _mapper.Map<List<AttachmentUrl>>,
-                    update: _mapper.Update,
+                    create: createSet => createSet.Select(url => url.ToEntity()).ToList(),
+                    update: urlUpdateSets =>
+                    {
+                        foreach (var (urlSource, urlDestination) in urlUpdateSets)
+                        {
+                            urlSource.ApplyTo(urlDestination);
+                        }
+                    },
                     delete: DeleteDelegate.Default);
         }
     }

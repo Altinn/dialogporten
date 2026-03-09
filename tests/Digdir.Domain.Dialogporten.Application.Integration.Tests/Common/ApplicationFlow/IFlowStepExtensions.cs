@@ -570,23 +570,11 @@ public static class IFlowStepExtensions
 
     public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoSO dto, FlowContext ctx)
     {
-        var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(dto);
         return new UpdateDialogCommand
         {
             IfMatchDialogRevision = dto.Revision,
             Id = ctx.GetDialogId(),
-            Dto = updateDto
-        };
-    }
-
-    public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoEU dto, FlowContext ctx)
-    {
-        var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(dto);
-        return new UpdateDialogCommand
-        {
-            IfMatchDialogRevision = dto.Revision,
-            Id = ctx.GetDialogId(),
-            Dto = updateDto
+            Dto = dto.ToUpdateDialogDto()
         };
     }
 

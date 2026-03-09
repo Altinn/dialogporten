@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -21,11 +20,6 @@ public class CreateDialogTests
         // Arrange
         var dialogDbContextSub = Substitute.For<IDialogDbContext>();
 
-        var mapper = new MapperConfiguration(cfg =>
-        {
-            cfg.AddMaps(typeof(CreateDialogCommandHandler).Assembly);
-        }).CreateMapper();
-
         var unitOfWorkSub = Substitute.For<IUnitOfWork>();
         var domainContextSub = Substitute.For<IDomainContext>();
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
@@ -47,7 +41,7 @@ public class CreateDialogTests
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
-            mapper, unitOfWorkSub, domainContextSub,
+            unitOfWorkSub, domainContextSub,
             resourceRegistrySub, systemLabelAdderSub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act
@@ -63,11 +57,6 @@ public class CreateDialogTests
         // Arrange
         var dialogDbContextSub = Substitute.For<IDialogDbContext>();
 
-        var mapper = new MapperConfiguration(cfg =>
-        {
-            cfg.AddMaps(typeof(CreateDialogCommandHandler).Assembly);
-        }).CreateMapper();
-
         var unitOfWorkSub = Substitute.For<IUnitOfWork>();
         var domainContextSub = Substitute.For<IDomainContext>();
         var resourceRegistrySub = Substitute.For<IResourceRegistry>();
@@ -88,7 +77,7 @@ public class CreateDialogTests
             .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
-            mapper, unitOfWorkSub, domainContextSub,
+            unitOfWorkSub, domainContextSub,
             resourceRegistrySub, systemLabelAdderSub, userResourceSub, serviceAuthorizationSub, hierarchyValidatorSub);
 
         // Act

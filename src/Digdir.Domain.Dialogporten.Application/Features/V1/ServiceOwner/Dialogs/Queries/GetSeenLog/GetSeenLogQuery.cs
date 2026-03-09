@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -22,16 +21,13 @@ public sealed partial class GetSeenLogResult : OneOfBase<SeenLogDto, EntityNotFo
 
 internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, GetSeenLogResult>
 {
-    private readonly IMapper _mapper;
     private readonly IDialogDbContext _dbContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
     public GetSeenLogQueryHandler(
-        IMapper mapper,
         IDialogDbContext dbContext,
         IUserResourceRegistry userResourceRegistry)
     {
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
@@ -70,7 +66,7 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
             return new EntityNotFound<DialogSeenLog>(request.SeenLogId);
         }
 
-        var dto = _mapper.Map<SeenLogDto>(seenLog);
+        var dto = seenLog.ToDto();
 
         return dto;
     }

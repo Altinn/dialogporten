@@ -1,21 +1,10 @@
-using AutoMapper;
 using System.Reflection;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 
-// ReSharper disable ClassNeverInstantiated.Global
-
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
-
-/// <summary>
-/// TODO: Discuss this with the team later. It works for now
-/// This class is used to map between the incoming dto object and the internal transmission content structure.
-/// Value needs to be mapped from a list of LocalizationDto in order for merging to work.
-///
-/// We might want to consider combining this class with DialogContentInputConverter later.
-/// </summary>
 
 internal sealed class IntermediateTransmissionContent
 {
@@ -24,66 +13,70 @@ internal sealed class IntermediateTransmissionContent
     public string MediaType { get; set; } = MediaTypes.PlainText;
 }
 
-internal sealed class TransmissionContentInputConverter<TTransmissionContent> :
-    ITypeConverter<TTransmissionContent?, List<DialogTransmissionContent>?>
-    where TTransmissionContent : class, new()
+internal static class TransmissionContentInputConverter
 {
-    public List<DialogTransmissionContent>? Convert(TTransmissionContent? source, List<DialogTransmissionContent>? destinations, ResolutionContext context)
+    public static List<DialogTransmissionContent>? ToEntities<TTransmissionContent>(
+        TTransmissionContent? source,
+        List<DialogTransmissionContent>? destinations = null)
+        where TTransmissionContent : class, new()
     {
         if (source is null)
         {
             return null;
         }
 
-        var sources = new List<IntermediateTransmissionContent>();
-
-        foreach (var transmissionContentType in DialogTransmissionContentType.GetValues())
-        {
-            if (!PropertyCache<TTransmissionContent>.PropertyByName.TryGetValue(transmissionContentType.Name, out var sourceProperty))
+        var sources = DialogTransmissionContentType.GetValues()
+            .Select(transmissionContentType =>
             {
-                continue;
-            }
+                if (!PropertyCache<TTransmissionContent>.PropertyByName.TryGetValue(transmissionContentType.Name, out var sourceProperty))
+                {
+                    return null;
+                }
 
-            if (sourceProperty.GetValue(source) is not ContentValueDto sourceValue)
-            {
-                continue;
-            }
+                if (sourceProperty.GetValue(source) is not ContentValueDto sourceValue)
+                {
+                    return null;
+                }
 
-            sources.Add(new IntermediateTransmissionContent
-            {
-                TypeId = transmissionContentType.Id,
-                Value = sourceValue.Value,
-                // Temporary converting of deprecated media types
-                // TODO: https://github.com/Altinn/dialogporten/issues/1782
-                MediaType = sourceValue.MediaType.MapDeprecatedMediaType()
-            });
-        }
+                return new IntermediateTransmissionContent
+                {
+                    TypeId = transmissionContentType.Id,
+                    Value = sourceValue.Value,
+                    // Temporary converting of deprecated media types
+                    // TODO: https://github.com/Altinn/dialogporten/issues/1782
+                    MediaType = sourceValue.MediaType.MapDeprecatedMediaType()
+                };
+            })
+            .OfType<IntermediateTransmissionContent>()
+            .ToList();
 
         destinations ??= [];
         destinations
             .Merge(sources,
                 destinationKeySelector: x => x.TypeId,
                 sourceKeySelector: x => x.TypeId,
-                create: context.Mapper.Map<List<DialogTransmissionContent>>,
-                update: context.Mapper.Update,
+                create: createSet => createSet.Select(content => content.ToEntity()).ToList(),
+                update: updateSets =>
+                {
+                    foreach (var (updateSource, updateDestination) in updateSets)
+                    {
+                        updateSource.ApplyTo(updateDestination);
+                    }
+                },
                 delete: DeleteDelegate.Default);
 
         return destinations;
     }
-}
 
-internal sealed class TransmissionContentOutputConverter<TTransmissionContent> :
-    ITypeConverter<List<DialogTransmissionContent>?, TTransmissionContent?>
-    where TTransmissionContent : class, new()
-{
-    public TTransmissionContent? Convert(List<DialogTransmissionContent>? sources, TTransmissionContent? destination, ResolutionContext context)
+    public static TTransmissionContent? ToDto<TTransmissionContent>(List<DialogTransmissionContent>? sources)
+        where TTransmissionContent : class, new()
     {
         if (sources is null || sources.Count == 0)
         {
             return null;
         }
 
-        destination ??= new TTransmissionContent();
+        var destination = new TTransmissionContent();
 
         foreach (var source in sources)
         {
@@ -92,14 +85,13 @@ internal sealed class TransmissionContentOutputConverter<TTransmissionContent> :
                 continue;
             }
 
-            property.SetValue(destination, context.Mapper.Map<ContentValueDto>(source));
+            property.SetValue(destination, source.ToDto());
         }
 
         return destination;
     }
 }
 
-// ReSharper disable once ClassNeverInstantiated.Local
 file sealed class PropertyCache<T>
 {
     public static readonly Dictionary<string, PropertyInfo> PropertyByName = typeof(T)

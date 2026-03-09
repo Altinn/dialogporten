@@ -42,7 +42,6 @@ public static class ApplicationExtensions
 
         services
             // Framework
-            .AddAutoMapper(ApplicationAssemblyMarker.Assembly)
             .AddMediatR(x =>
             {
                 x.RegisterServicesFromAssembly(ApplicationAssemblyMarker.Assembly);

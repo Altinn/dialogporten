@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -22,13 +21,11 @@ public sealed partial class SearchTransmissionResult : OneOfBase<List<Transmissi
 internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTransmissionQuery, SearchTransmissionResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
-    public SearchTransmissionQueryHandler(IDialogDbContext db, IMapper mapper, IUserResourceRegistry userResourceRegistry)
+    public SearchTransmissionQueryHandler(IDialogDbContext db, IUserResourceRegistry userResourceRegistry)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
     }
 
@@ -71,6 +68,8 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        return _mapper.Map<List<TransmissionDto>>(dialog.Transmissions);
+        return dialog.Transmissions
+            .Select(transmission => transmission.ToDto())
+            .ToList();
     }
 }

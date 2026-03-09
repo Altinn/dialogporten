@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -28,14 +27,12 @@ public sealed partial class GetTransmissionResult : OneOfBase<TransmissionDto, E
 
 internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmissionQuery, GetTransmissionResult>
 {
-    private readonly IMapper _mapper;
     private readonly IDialogDbContext _dbContext;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IClock _clock;
 
-    public GetTransmissionQueryHandler(IMapper mapper, IDialogDbContext dbContext, IAltinnAuthorization altinnAuthorization, IClock clock)
+    public GetTransmissionQueryHandler(IDialogDbContext dbContext, IAltinnAuthorization altinnAuthorization, IClock clock)
     {
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
@@ -99,7 +96,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         }
 
         transmission.FilterLocalizations(request.AcceptedLanguages);
-        var dto = _mapper.Map<TransmissionDto>(transmission);
+        var dto = transmission.ToDto();
 
         dto.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
 

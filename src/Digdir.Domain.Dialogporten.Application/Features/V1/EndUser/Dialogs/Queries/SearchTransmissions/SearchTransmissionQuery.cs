@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -27,14 +26,12 @@ public sealed partial class SearchTransmissionResult : OneOfBase<List<Transmissi
 internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTransmissionQuery, SearchTransmissionResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IClock _clock;
 
-    public SearchTransmissionQueryHandler(IDialogDbContext db, IMapper mapper, IAltinnAuthorization altinnAuthorization, IClock clock)
+    public SearchTransmissionQueryHandler(IDialogDbContext db, IAltinnAuthorization altinnAuthorization, IClock clock)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
@@ -90,7 +87,9 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
-        var dto = _mapper.Map<List<TransmissionDto>>(dialog.Transmissions);
+        var dto = dialog.Transmissions
+            .Select(transmission => transmission.ToDto())
+            .ToList();
 
         foreach (var transmission in dto)
         {

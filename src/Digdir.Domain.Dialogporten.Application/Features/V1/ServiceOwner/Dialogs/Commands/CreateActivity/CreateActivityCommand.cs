@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
@@ -9,7 +8,6 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +49,6 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
-    private readonly IMapper _mapper;
     private readonly ISystemLabelAdder _systemLabelAdder;
 
     public CreateActivityCommandHandler(
@@ -60,14 +57,12 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         IDialogDbContext db,
         IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        IMapper mapper,
         ISystemLabelAdder systemLabelAdder)
     {
         _domainContext = domainContext;
         _unitOfWork = unitOfWork;
         _db = db;
         _userResourceRegistry = userResourceRegistry;
-        _mapper = mapper;
         _systemLabelAdder = systemLabelAdder;
         _serviceResourceAuthorizer = serviceResourceAuthorizer;
     }
@@ -90,7 +85,7 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
             return new Forbidden("User cannot modify frozen dialog");
         }
 
-        var newActivity = _mapper.Map<DialogActivity>(request.Activity);
+        var newActivity = request.Activity.ToEntity();
         newActivity.Id = newActivity.EnsureId();
         newActivity.DialogId = dialog.Id;
 

@@ -596,21 +596,28 @@
             "format": "guid",
             "type": "string"
           },
-          "dialogTitle": {
+          "instanceUrn": {
+            "type": "string"
+          },
+          "nonSensitiveTitle": {
             "items": {
               "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
             },
             "nullable": true,
             "type": "array"
           },
-          "instanceUrn": {
-            "type": "string"
-          },
           "serviceOwner": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceOwner"
           },
           "serviceResource": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceResource"
+          },
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"

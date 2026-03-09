@@ -7,12 +7,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal static class AuthorizationHelper
 {
+    private const string AppInstanceUrnPrefix = "urn:altinn:app-instance-id:";
+
     /// <summary>
     /// This method resolves subjects (ie. roles and access packages) based on the authorized parties and constraints provided,
     /// returning a list of all the (unique) resources associated with each party.
     ///
-    /// Additionally, it collects Altinn app instance delegations for parties that have them, returning them as a intermediate
-    /// list of instance ids that can later be used to determine the actual dialog ids for these app instances. This is performed
+    /// Additionally, it collects Altinn app instance delegations for parties that have them, returning them as an intermediate
+    /// list of app-instance URNs that can later be used to determine the actual dialog ids for these app instances. This is performed
     /// in this method as well, to avoid having to loop/filter over (the potentially large) list of parties multiple times.
     /// </summary>
     /// <param name="authorizedParties">
@@ -41,9 +43,7 @@ internal static class AuthorizationHelper
         var result = new DialogSearchAuthorizationResult
         {
             // Pre-size with a reasonable capacity to reduce re-allocations.
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(100),
-            SubjectsByParties = new Dictionary<string, HashSet<string>>(100),
-            AuthorizedInstancesByParties = new Dictionary<string, List<AuthorizedResource>>(100)
+            ResourcesByParties = new Dictionary<string, HashSet<string>>(100)
         };
 
         if (authorizedParties.AuthorizedParties.Count == 0)
@@ -108,11 +108,6 @@ internal static class AuthorizationHelper
             var partySubjects = party.AuthorizedRolesAndAccessPackages
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            if (partySubjects.Count > 0)
-            {
-                result.SubjectsByParties[party.Party] = partySubjects;
-            }
-
             // Aggregate resources granted via roles and access packages.
             foreach (var role in partySubjects)
             {
@@ -145,21 +140,19 @@ internal static class AuthorizationHelper
 
             if (partyAuthorizedInstances.Count > 0)
             {
-                result.AuthorizedInstancesByParties[party.Party] = partyAuthorizedInstances;
-            }
-
-            // Handle app instance delegations from Altinn Access Management.
-            foreach (var instance in partyAuthorizedInstances)
-            {
-                if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
+                // Handle app instance delegations from Altinn Access Management.
+                foreach (var instance in partyAuthorizedInstances)
                 {
-                    continue;
-                }
+                    if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
 
-                if (Guid.TryParse(instance.InstanceId, out _))
-                {
-                    result.AltinnAppInstanceIds.Add(
-                        $"{Constants.ServiceContextInstanceIdPrefix}{party.PartyId}/{instance.InstanceId}");
+                    if (Guid.TryParse(instance.InstanceId, out _))
+                    {
+                        result.AltinnAppInstanceIds.Add(
+                            $"{AppInstanceUrnPrefix}{instance.InstanceId}".ToLowerInvariant());
+                    }
                 }
             }
         }

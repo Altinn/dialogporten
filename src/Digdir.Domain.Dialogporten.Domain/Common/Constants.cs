@@ -12,7 +12,6 @@ public static class Constants
 
     public const string ServiceResourcePrefix = "urn:altinn:resource:";
     public const string AppResourceIdPrefix = "app_";
-    public const string ServiceContextInstanceIdPrefix = "urn:altinn:integration:storage:";
 
     public const string IsSilentUpdate = "IsSilentUpdate";
 }

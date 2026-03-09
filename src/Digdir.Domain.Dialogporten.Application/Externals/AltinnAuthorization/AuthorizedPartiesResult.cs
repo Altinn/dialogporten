@@ -35,6 +35,7 @@ public sealed class AuthorizedResource
 {
     public string ResourceId { get; set; } = null!;
     public string InstanceId { get; set; } = null!;
+    public string? InstanceUrn { get; set; }
 }
 
 public enum AuthorizedPartyType

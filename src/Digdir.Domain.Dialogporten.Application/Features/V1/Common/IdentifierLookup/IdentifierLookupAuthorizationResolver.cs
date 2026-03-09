@@ -40,15 +40,19 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 new IdentifierLookupAuthorizationEvidenceDto());
         }
 
-        var listAuthorization = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
+        var authorizedParties = await _altinnAuthorization.GetAuthorizedPartiesForLookup(
+            partyIdentifier,
             [dialogData.Party],
-            [dialogData.ServiceResource],
             cancellationToken);
 
-        var authorizedSubjects = listAuthorization.SubjectsByParties
-            .TryGetValue(dialogData.Party, out var subjects)
-            ? subjects.ToList()
-            : new List<string>();
+        var matchingAuthorizedParties = authorizedParties.AuthorizedParties
+            .Where(x => string.Equals(x.Party, dialogData.Party, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var authorizedSubjects = matchingAuthorizedParties
+            .SelectMany(x => x.AuthorizedRolesAndAccessPackages)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         var evidenceItems = new List<IdentifierLookupAuthorizationEvidenceItemDto>();
 
@@ -80,13 +84,9 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         var viaRole = evidenceItems.Any(x => x.GrantType == IdentifierLookupGrantType.Role);
         var viaAccessPackage = evidenceItems.Any(x => x.GrantType == IdentifierLookupGrantType.AccessPackage);
 
-        var hasDialogIdAuthorization = listAuthorization.DialogIds.Contains(dialogData.DialogId);
-        var hasResourceAuthorization = listAuthorization.ResourcesByParties
-            .TryGetValue(dialogData.Party, out var resources)
-            && resources.Any(x => string.Equals(x, dialogData.ServiceResource, StringComparison.OrdinalIgnoreCase));
-        var hasListAuthorization = hasDialogIdAuthorization || hasResourceAuthorization;
-
-        var viaResourceDelegation = hasResourceAuthorization;
+        var viaResourceDelegation = matchingAuthorizedParties
+            .SelectMany(x => x.AuthorizedResources)
+            .Any(x => string.Equals(x, dialogData.ServiceResource, StringComparison.OrdinalIgnoreCase));
 
         if (viaResourceDelegation)
         {
@@ -97,13 +97,13 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             });
         }
 
-        var viaInstanceDelegation = hasDialogIdAuthorization
-                                    || HasInstanceDelegation(
-                                        listAuthorization,
-                                        dialogData.Party,
-                                        dialogData.ServiceResource,
-                                        requestUrn,
-                                        responseInstanceUrn);
+        var viaInstanceDelegation = HasInstanceDelegation(
+            matchingAuthorizedParties
+                .SelectMany(x => x.AuthorizedInstances)
+                .ToList(),
+            dialogData.ServiceResource,
+            requestUrn.Value,
+            responseInstanceUrn);
 
         if (viaInstanceDelegation)
         {
@@ -118,12 +118,11 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             dialogData.ServiceResource,
             cancellationToken);
 
-        var hasEvidenceAccess = viaRole
-                                || viaAccessPackage
-                                || viaResourceDelegation
-                                || viaInstanceDelegation;
-
-        var hasAccess = hasRequiredAuthLevel && (hasListAuthorization || hasEvidenceAccess);
+        var hasAccess = hasRequiredAuthLevel
+                        && (viaRole
+                            || viaAccessPackage
+                            || viaResourceDelegation
+                            || viaInstanceDelegation);
 
         return new IdentifierLookupAuthorizationResolution(
             hasAccess,
@@ -158,22 +157,15 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     }
 
     private static bool HasInstanceDelegation(
-        DialogSearchAuthorizationResult listAuthorization,
-        string party,
+        List<AuthorizedResource> authorizedInstances,
         string serviceResource,
-        InstanceUrn requestUrn,
+        string requestInstanceUrn,
         string responseInstanceUrn)
     {
-        if (!listAuthorization.AuthorizedInstancesByParties.TryGetValue(party, out var authorizedInstances)
-            || authorizedInstances.Count == 0)
+        if (authorizedInstances.Count == 0)
         {
             return false;
         }
-
-        var responseUrnParsed = InstanceUrn.TryParse(responseInstanceUrn, out var responseUrn)
-            ? responseUrn
-            : (InstanceUrn?)null;
-        var responseId = responseUrnParsed?.Id;
 
         var serviceResourceId = serviceResource.StartsWith(Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
             ? serviceResource[Constants.ServiceResourcePrefix.Length..]
@@ -186,49 +178,13 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 continue;
             }
 
-            if (string.Equals(authorizedInstance.InstanceId, requestUrn.Value, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(authorizedInstance.InstanceId, responseInstanceUrn, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if (Guid.TryParse(authorizedInstance.InstanceId, out var instanceGuid)
-                && (instanceGuid == requestUrn.Id || responseId == instanceGuid))
-            {
-                return true;
-            }
-
-            if (TryParseStorageInstanceId(authorizedInstance.InstanceId, out instanceGuid)
-                && (instanceGuid == requestUrn.Id || responseId == instanceGuid))
-            {
-                return true;
-            }
-
-            if (InstanceUrn.TryParse(authorizedInstance.InstanceId, out var authorizedInstanceUrn)
-                && (authorizedInstanceUrn == requestUrn || (responseUrnParsed is { } parsed && authorizedInstanceUrn == parsed)))
+            if (string.Equals(authorizedInstance.InstanceUrn, requestInstanceUrn, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(authorizedInstance.InstanceUrn, responseInstanceUrn, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
         }
 
         return false;
-    }
-
-    private static bool TryParseStorageInstanceId(string value, out Guid instanceId)
-    {
-        instanceId = Guid.Empty;
-
-        if (!value.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var slashIndex = value.LastIndexOf('/');
-        if (slashIndex < 0 || slashIndex == value.Length - 1)
-        {
-            return false;
-        }
-
-        return Guid.TryParse(value[(slashIndex + 1)..], out instanceId);
     }
 }

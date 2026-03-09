@@ -71,6 +71,39 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
             }]
         });
 
+    public async Task<AuthorizedPartiesResult> GetAuthorizedPartiesForLookup(
+        IPartyIdentifier authenticatedParty,
+        List<string> constraintParties,
+        CancellationToken cancellationToken = default)
+    {
+        var authorizedResources = await _db.Dialogs
+            .AsNoTracking()
+            .Select(x => x.ServiceResource)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var parties = constraintParties.Count > 0
+            ? constraintParties.Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            : [authenticatedParty.FullId];
+
+        return new AuthorizedPartiesResult
+        {
+            AuthorizedParties = parties
+                .Select((party, index) => new AuthorizedParty
+                {
+                    Name = "Local Party",
+                    Party = party,
+                    PartyUuid = Guid.NewGuid(),
+                    PartyId = index + 1,
+                    IsCurrentEndUser = string.Equals(party, authenticatedParty.FullId, StringComparison.OrdinalIgnoreCase),
+                    AuthorizedResources = [.. authorizedResources],
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedInstances = []
+                })
+                .ToList()
+        };
+    }
+
     public Task<bool> HasListAuthorizationForDialog(DialogEntity _, CancellationToken __) => Task.FromResult(true);
 
     public bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel) => true;

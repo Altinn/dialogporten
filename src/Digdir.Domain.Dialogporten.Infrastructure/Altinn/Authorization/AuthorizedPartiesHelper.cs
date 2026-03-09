@@ -71,6 +71,7 @@ internal static class AuthorizedPartiesHelper
                 {
                     ResourceId = x.ResourceId,
                     InstanceId = x.InstanceId,
+                    InstanceUrn = x.InstanceUrn
                 }).ToList(),
             SubParties = dto.Subunits.Count > 0 ? dto.Subunits.Select(x => MapFromDto(x, authenticatedUser)).ToList() : null
         };

@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Xunit;
@@ -60,7 +59,7 @@ public class AuthorizationHelperTests
             },
             AltinnAppInstanceIds =
             [
-                $"{Constants.ServiceContextInstanceIdPrefix}111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+                "urn:altinn:app-instance-id:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
             ]
         };
 
@@ -87,7 +86,7 @@ public class AuthorizationHelperTests
         Assert.Contains("resource4", result.ResourcesByParties["party3"]);
         Assert.Single(result.AltinnAppInstanceIds);
         Assert.Equal(
-            $"{Constants.ServiceContextInstanceIdPrefix}111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "urn:altinn:app-instance-id:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             result.AltinnAppInstanceIds.Single());
     }
 
@@ -228,10 +227,10 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
-                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003",
-                    Constants.ServiceContextInstanceIdPrefix + "444/00000000-0000-0000-0000-000000000004",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000001",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000002",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000003",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000004",
                 }
             },
 
@@ -247,9 +246,9 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
-                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000001",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000002",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -287,8 +286,8 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
-                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000002",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -300,7 +299,7 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    "urn:altinn:app-instance-id:00000000-0000-0000-0000-000000000002",
                 }
             },
 

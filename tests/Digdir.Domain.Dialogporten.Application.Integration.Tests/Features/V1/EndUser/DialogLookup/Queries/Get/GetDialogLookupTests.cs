@@ -2,13 +2,13 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get.GetDialogLookupQuery;
 using EndUserIdentifierLookupDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup.EndUserIdentifierLookupDto;
+using IdentifierLookupGrantType = Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup.IdentifierLookupGrantType;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.DialogLookup.Queries.Get;
 
@@ -129,17 +129,11 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             {
                 services.ConfigureAltinnAuthorization(altinnAuthorization =>
                 {
-                    altinnAuthorization.GetAuthorizedParties(
+                    altinnAuthorization.GetAuthorizedPartiesForLookup(
                             default!,
-                            default,
-                            default)
-                        .ReturnsForAnyArgs(new AuthorizedPartiesResult { AuthorizedParties = [] });
-
-                    altinnAuthorization.GetAuthorizedResourcesForSearch(
-                            Arg.Any<List<string>>(),
                             Arg.Any<List<string>>(),
                             Arg.Any<CancellationToken>())
-                        .Returns(new DialogSearchAuthorizationResult());
+                        .ReturnsForAnyArgs(new AuthorizedPartiesResult { AuthorizedParties = [] });
 
                     altinnAuthorization.UserHasRequiredAuthLevel(
                             Arg.Any<string>(),
@@ -155,11 +149,84 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
 
     [Fact]
+    public Task Get_Should_Set_ViaInstanceDelegation_From_AuthorizedPartiesInstances()
+    {
+        var dialogId = NewUuidV7();
+        var party = Party;
+        var serviceResource = "urn:altinn:resource:test-service-a";
+        var otherServiceResource = "urn:altinn:resource:test-service-b";
+        var instanceUrn = $"urn:altinn:app-instance-id:{Guid.NewGuid()}";
+
+        return FlowBuilder.For(Application, services =>
+            {
+                services.ConfigureAltinnAuthorization(altinnAuthorization =>
+                {
+                    altinnAuthorization.GetAuthorizedPartiesForLookup(
+                            default!,
+                            Arg.Any<List<string>>(),
+                            Arg.Any<CancellationToken>())
+                        .ReturnsForAnyArgs(new AuthorizedPartiesResult
+                        {
+                            AuthorizedParties =
+                            [
+                                new AuthorizedParty
+                                {
+                                    Party = party,
+                                    PartyUuid = Guid.NewGuid(),
+                                    Name = "Party",
+                                    AuthorizedInstances =
+                                    [
+                                        new AuthorizedResource
+                                        {
+                                            ResourceId = otherServiceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
+                                            InstanceId = instanceUrn,
+                                            InstanceUrn = instanceUrn
+                                        },
+                                        new AuthorizedResource
+                                        {
+                                            ResourceId = serviceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
+                                            InstanceId = instanceUrn,
+                                            InstanceUrn = instanceUrn
+                                        }
+                                    ]
+                                }
+                            ]
+                        });
+
+                    altinnAuthorization.UserHasRequiredAuthLevel(
+                            Arg.Any<string>(),
+                            Arg.Any<CancellationToken>())
+                        .Returns(true);
+                });
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId;
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.AddServiceOwnerLabels(instanceUrn);
+            })
+            .SendCommand(_ => new GetDialogLookupQuery
+            {
+                InstanceUrn = $"urn:altinn:dialog-id:{dialogId}"
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.AuthorizationEvidence.ViaInstanceDelegation.Should().BeTrue();
+                result.AuthorizationEvidence.Evidence
+                    .Should()
+                    .ContainSingle(x =>
+                        x.GrantType == IdentifierLookupGrantType.InstanceDelegation
+                        && x.Subject == instanceUrn);
+            });
+    }
+
+    [Fact]
     public Task Get_Should_Return_ValidationError_For_Unsupported_Urn() =>
         FlowBuilder.For(Application)
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = $"{Constants.ServiceContextInstanceIdPrefix}1337/{Guid.NewGuid()}"
+                InstanceUrn = $"urn:altinn:unsupported:{Guid.NewGuid()}"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ValidationError>(result =>
                 result.Errors.Should().ContainSingle());

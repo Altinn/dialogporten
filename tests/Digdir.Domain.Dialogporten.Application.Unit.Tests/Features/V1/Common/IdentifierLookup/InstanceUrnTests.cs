@@ -23,7 +23,7 @@ public class InstanceUrnTests
     [InlineData("")]
     [InlineData("urn:altinn:unsupported:4b6ed1db-9307-4066-8282-08391cec3d56")]
     [InlineData("urn:altinn:app-instance-id:not-a-guid")]
-    [InlineData("urn:altinn:integration:storage:1337/4b6ed1db-9307-4066-8282-08391cec3d56")]
+    [InlineData("urn:altinn:legacy-instance-id:1337/4b6ed1db-9307-4066-8282-08391cec3d56")]
     public void TryParse_Should_Reject_Unsupported_Formats(string? value)
     {
         var parsed = InstanceUrn.TryParse(value, out _);

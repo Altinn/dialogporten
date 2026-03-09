@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Bogus;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
@@ -34,7 +33,7 @@ internal static class CreateDialogCommandExtensions
         int? seed = null)
     {
         var activity = seed is null
-            ? DialogGenerator.GenerateFakeDialogActivity(new Randomizer(IFlowStepExtensions.DefaultSeed), type)
+            ? DialogGenerator.GenerateFakeDialogActivity(new Randomizer(DialogGenerator.DefaultSeed), type)
             : DialogGenerator.GenerateFakeDialogActivity(new Randomizer(seed.Value), type);
         modify?.Invoke(activity);
         command.Dto.Activities.Add(activity);

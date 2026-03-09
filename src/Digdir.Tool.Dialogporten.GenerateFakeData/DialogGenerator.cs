@@ -382,7 +382,7 @@ public static class DialogGenerator
     public static ActivityDto GenerateFakeDialogActivity(DialogActivityType.Values? type = null)
         => GenerateFakeDialogActivity(new Randomizer(), type);
 
-    private static ActivityDto GenerateFakeDialogActivity(Randomizer r, DialogActivityType.Values? type)
+    public static ActivityDto GenerateFakeDialogActivity(Randomizer r, DialogActivityType.Values? type)
     {
         var seed = r.Int();
         var activity = ActivityFaker.Clone().UseSeed(seed).Generate();

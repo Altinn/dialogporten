@@ -77,7 +77,7 @@ public static class IFlowStepExtensions
     private const string PartyKey = "Party";
     private const string ActivityIdKey = "ActivityId";
     private const string ServiceResource = "ServiceResource";
-    private const int DefaultSeed = 12345678;
+    public const int DefaultSeed = 12345678;
 
     public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)

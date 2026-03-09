@@ -16,11 +16,11 @@
       LatestActivity: {
         Id: Guid_2,
         CreatedAt: DateTimeOffset_2,
-        ExtendedType: https://noemie.info/avon,
+        ExtendedType: https://maida.biz/blockchains/action-items/automated,
         Type: DialogDeleted,
         PerformedBy: {
           ActorType: PartyRepresentative,
-          ActorName: Harry Terry
+          ActorName: Beth Pfannerstill
         }
       },
       EndUserContext: {
@@ -65,11 +65,11 @@
       LatestActivity: {
         Id: Guid_5,
         CreatedAt: DateTimeOffset_4,
-        ExtendedType: https://rose.org/fantastic-frozen-pizza,
+        ExtendedType: https://maida.biz/blockchains/action-items/automated,
         Type: DialogOpened,
         PerformedBy: {
           ActorType: PartyRepresentative,
-          ActorName: Sherwood Schiller
+          ActorName: Beth Pfannerstill
         }
       },
       EndUserContext: {
@@ -114,11 +114,11 @@
       LatestActivity: {
         Id: Guid_8,
         CreatedAt: DateTimeOffset_6,
-        ExtendedType: https://constantin.com/supply-chains,
+        ExtendedType: https://maida.biz/blockchains/action-items/automated,
         Type: DialogCreated,
         PerformedBy: {
           ActorType: PartyRepresentative,
-          ActorName: Therese Bartell
+          ActorName: Beth Pfannerstill
         }
       },
       EndUserContext: {

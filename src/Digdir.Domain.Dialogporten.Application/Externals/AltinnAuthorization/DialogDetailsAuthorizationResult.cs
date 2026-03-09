@@ -1,4 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
@@ -14,30 +15,24 @@ public sealed class DialogDetailsAuthorizationResult
 
     public bool HasAccessToGuiAction(string requestedAction, string? authorizationAttribute)
     {
-        var action = AuthorizedAltinnActions.Find(x => x.Name == requestedAction);
+        var actions = AuthorizedAltinnActions.FindAll(x => x.Name == requestedAction);
 
-        if (action is null)
-        {
-            return false;
-        }
+        if (actions.IsNullOrEmpty()) return false;
 
         return authorizationAttribute is null
             ? HasAccessToMainResource()
-            : action.AuthorizationAttribute == authorizationAttribute;
+            : actions.Any(x => x.AuthorizationAttribute == authorizationAttribute);
     }
 
     public bool HasAccessToApiAction(string requestedAction, string? authorizationAttribute)
     {
-        var action = AuthorizedAltinnActions.Find(x => x.Name == requestedAction);
+        var actions = AuthorizedAltinnActions.FindAll(x => x.Name == requestedAction);
 
-        if (action is null)
-        {
-            return false;
-        }
+        if (actions.IsNullOrEmpty()) return false;
 
         return authorizationAttribute is null
             ? HasAccessToMainResource()
-            : action.AuthorizationAttribute == authorizationAttribute;
+            : actions.Any(x => x.AuthorizationAttribute == authorizationAttribute);
     }
 
     public bool HasReadAccessToMainResource() =>

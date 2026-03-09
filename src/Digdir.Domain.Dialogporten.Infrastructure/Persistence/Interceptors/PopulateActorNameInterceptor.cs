@@ -1,26 +1,18 @@
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
 internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
-    private const int ActorNameSaveRetries = 1;
-    private const string ActorNameTableName = "ActorName"; // hent
-    private const string ActorNameUniqueIndex = "IX_ActorName_ActorId_Name"; // hent igjen
-
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
     private readonly ITransactionTime _transactionTime;
@@ -74,46 +66,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
         _hasBeenExecuted = true;
-        return await SaveChangesWithActorNameRetry(dbContext, eventData, result, cancellationToken);
-    }
-
-    private async Task<InterceptionResult<int>> SaveChangesWithActorNameRetry(
-        DbContext dbContext,
-        DbContextEventData eventData,
-        InterceptionResult<int> result,
-        CancellationToken cancellationToken)
-    {
-        for (var retryAttempt = 0; retryAttempt <= ActorNameSaveRetries; retryAttempt++)
-        {
-            try
-            {
-                var a = await base.SavingChangesAsync(eventData, result, cancellationToken);
-                if (!_domainContext.IsValid)
-                {
-                    Console.WriteLine("a");
-                }
-                return a;
-            }
-            catch (UniqueConstraintException ex) when
-                (ex.InnerException?.Data["Detail"] is string message &&
-                ex.InnerException.Data["TableName"] is string tableName &&
-                IsDuplicateActorNameError(tableName, message.Replace('"', '\'')))
-            {
-                var actorNameEntities = dbContext.ChangeTracker
-                    .Entries<ActorName>()
-                    .Where(e => e.State is EntityState.Added)
-                    .Where(e => e.Entity.ActorId is not null || e.Entity.Name is not null)
-                    .Select(x => x.Entity)
-                    .ToList();
-
-                await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-        throw new UnreachableException("Should not reach hard limit on actor retry");
+        return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
@@ -148,11 +101,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
     private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added, CancellationToken cancellationToken)
     {
-        if (added.Count == 0)
-        {
-            return;
-        }
-
         // There may be an actorNameEntity with an Id where name is null.
         // One can argue that this method should consider those as well.
         // however we chose to put that responsibility to actorName clean up job.
@@ -192,11 +140,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
         (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
 
-    private static bool IsDuplicateActorNameError(string propertyName, string message) =>
-        propertyName == "ActorName"
-     && message.Contains("(\'ActorId\', \'Name\')=", StringComparison.Ordinal)
-     && message.Contains("already exists", StringComparison.Ordinal);
-
     private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         // Why are we doing "composite key contains" this way, you ask?
@@ -214,5 +157,4 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             .Where(x => distinctIdNameTupples.Any(xx => xx.ActorId == x.ActorId && xx.Name == x.Name))
             .ToList();
     }
-
 }

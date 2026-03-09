@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
@@ -16,6 +17,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure;
 
 internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 {
+    private const int ActorNameSaveRetries = 1;
+    private const string ActorNameTableName = "ActorName";
+
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
     private readonly IDomainContext _domainContext;
@@ -125,41 +129,57 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             _saveChangesOptions,
             cancellationToken);
 
-        try
+        for (var retryAttempt = 0; retryAttempt <= ActorNameSaveRetries; retryAttempt++)
         {
-            await _dialogDbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            // Tidligere forsøkte vi å lagre endringene på nytt når _enableConcurrencyCheck var false. Dette kunne føre
-            // til korrupte data, fordi tilstanden til aggregatet ikke ble validert på nytt etter at vi forsøkte å
-            // «merge» endringene fra kolliderende forespørsler. Siden vi ikke har mulighet til å validere aggregatets
-            // tilstand på nytt uten omfattende omskriving, returnerer vi nå i stedet en konfliktfeil til klienten. Når
-            // _enableConcurrencyCheck er true, betyr det at klienten eksplisitt har bedt om samtidighetskontroll og
-            // derfor forventer å få 412 Precondition Failed ved en samtidighetskonflikt. Når flagget er false, har vi
-            // oppdaget en samtidighetskonflikt internt i applikasjonen uten at klienten har bedt om slik kontroll. I
-            // disse tilfellene returnerer vi 409 Conflict. I begge tilfeller signaliserer vi en konflikt til klienten,
-            // men med ulik HTTP-statuskode avhengig av om klienten har bedt om samtidighetskontroll eller ikke.
-            return _enableConcurrencyCheck
-                ? new ConcurrencyError()
-                : new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
-        }
-        catch (UniqueConstraintException ex) when
-            (ex.InnerException?.Data["Detail"] is string message &&
-            ex.InnerException.Data["TableName"] is string tableName)
-        {
-            _domainContext.AddError(tableName, message.Replace('"', '\''));
-        }
-        catch (ReferenceConstraintException)
-        {
-            // A request triggers loading of exising data, but before it's saved,
-            // another request removes it — causing the save attempt to fail.
-            // On a retry, the client will get a "proper" error message
-            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
-        }
-        catch (Exception ex) when (IsSerializationFailure(ex))
-        {
-            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+            try
+            {
+                await _dialogDbContext.SaveChangesAsync(cancellationToken);
+
+                // Interceptors can add domain errors, so check again
+                return !_domainContext.IsValid
+                    ? new DomainError(_domainContext.Pop())
+                    : new Success();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Tidligere forsøkte vi å lagre endringene på nytt når _enableConcurrencyCheck var false. Dette kunne føre
+                // til korrupte data, fordi tilstanden til aggregatet ikke ble validert på nytt etter at vi forsøkte å
+                // «merge» endringene fra kolliderende forespørsler. Siden vi ikke har mulighet til å validere aggregatets
+                // tilstand på nytt uten omfattende omskriving, returnerer vi nå i stedet en konfliktfeil til klienten. Når
+                // _enableConcurrencyCheck er true, betyr det at klienten eksplisitt har bedt om samtidighetskontroll og
+                // derfor forventer å få 412 Precondition Failed ved en samtidighetskonflikt. Når flagget er false, har vi
+                // oppdaget en samtidighetskonflikt internt i applikasjonen uten at klienten har bedt om slik kontroll. I
+                // disse tilfellene returnerer vi 409 Conflict. I begge tilfeller signaliserer vi en konflikt til klienten,
+                // men med ulik HTTP-statuskode avhengig av om klienten har bedt om samtidighetskontroll eller ikke.
+                return _enableConcurrencyCheck
+                    ? new ConcurrencyError()
+                    : new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+            }
+            catch (UniqueConstraintException ex) when
+                (ex.InnerException?.Data["Detail"] is string message &&
+                ex.InnerException.Data["TableName"] is string tableName)
+            {
+                if (retryAttempt < ActorNameSaveRetries &&
+                    IsDuplicateActorNameError(tableName, message.Replace('"', '\'')) &&
+                    await ResolveDuplicateActorNameConflict(cancellationToken))
+                {
+                    continue;
+                }
+
+                _domainContext.AddError(tableName, message.Replace('"', '\''));
+                break;
+            }
+            catch (ReferenceConstraintException)
+            {
+                // A request triggers loading of exising data, but before it's saved,
+                // another request removes it — causing the save attempt to fail.
+                // On a retry, the client will get a "proper" error message
+                return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+            }
+            catch (Exception ex) when (IsSerializationFailure(ex))
+            {
+                return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+            }
         }
 
         // Interceptors can add domain errors, so check again
@@ -167,6 +187,58 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             ? new DomainError(_domainContext.Pop())
             : new Success();
     }
+
+    private async Task<bool> ResolveDuplicateActorNameConflict(CancellationToken cancellationToken)
+    {
+        var addedActorNames = _dialogDbContext.ChangeTracker
+            .Entries<ActorName>()
+            .Where(e => e.State == EntityState.Added)
+            .Select(e => e.Entity)
+            .Where(e => e.ActorId is not null && e.Name is not null)
+            .ToList();
+
+        if (addedActorNames.Count == 0)
+        {
+            return false;
+        }
+
+        var actorIdNamePairs = addedActorNames
+            .Select(x => (ActorId: x.ActorId!, Name: x.Name!))
+            .Distinct()
+            .ToList();
+        var actorIds = actorIdNamePairs.Select(x => x.ActorId).Distinct().ToList();
+        var names = actorIdNamePairs.Select(x => x.Name).Distinct().ToList();
+
+        var existingActorNames = await _dialogDbContext.Set<ActorName>()
+            .Where(x => actorIds.Contains(x.ActorId!) && names.Contains(x.Name!))
+            .ToListAsync(cancellationToken);
+        var existingByPair = existingActorNames
+            .ToDictionary(x => (ActorId: x.ActorId!, Name: x.Name!));
+
+        var resolvedAny = false;
+        foreach (var addedActorName in addedActorNames)
+        {
+            if (!existingByPair.TryGetValue((addedActorName.ActorId!, addedActorName.Name!), out var existingActorName))
+            {
+                continue;
+            }
+
+            foreach (var actor in addedActorName.ActorEntities)
+            {
+                actor.ActorNameEntity = existingActorName;
+            }
+
+            _dialogDbContext.Entry(addedActorName).State = EntityState.Detached;
+            resolvedAny = true;
+        }
+
+        return resolvedAny;
+    }
+
+    private static bool IsDuplicateActorNameError(string tableName, string message) =>
+        tableName == ActorNameTableName
+     && message.Contains("(\'ActorId\', \'Name\')=", StringComparison.Ordinal)
+     && message.Contains("already exists", StringComparison.Ordinal);
 
     private static bool IsSerializationFailure(Exception ex)
     {

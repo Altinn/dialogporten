@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Reflection;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
@@ -88,7 +87,6 @@ static void BuildAndRun(string[] args)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithPubCapabilities()
             .Build()
-        .AddAutoMapper(GraphQLAssemblyMarker.Assembly)
         .AddHttpContextAccessor()
         .AddScoped<IUser, ApplicationUser>()
         .AddValidatorsFromAssembly(GraphQLAssemblyMarker.Assembly,

@@ -1,20 +1,42 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
+using ApplicationSystemLabel = Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 
-public sealed class MappingProfile : Profile
+internal static class GraphQlMapper
 {
-    public MappingProfile()
+    extension(SetSystemLabelInput source)
     {
-        CreateMap<SetSystemLabelInput, SetSystemLabelCommand>();
+        public SetSystemLabelCommand ToCommand() => new()
+        {
+            DialogId = source.DialogId,
+            AddLabels = source.AddLabels.Select(label => (ApplicationSystemLabel.Values)label).ToList(),
+            RemoveLabels = source.RemoveLabels.Select(label => (ApplicationSystemLabel.Values)label).ToList()
+        };
+    }
 
-        CreateMap<DialogRevisionInput, DialogRevisionDto>();
+    extension(DialogRevisionInput source)
+    {
+        public DialogRevisionDto ToDto() => new()
+        {
+            DialogId = source.DialogId,
+            EndUserContextRevision = source.EnduserContextRevision
+        };
+    }
 
-        CreateMap<BulkSetSystemLabelInput, BulkSetSystemLabelDto>();
+    extension(BulkSetSystemLabelInput source)
+    {
+        public BulkSetSystemLabelDto ToDto() => new()
+        {
+            Dialogs = source.Dialogs.Select(dialog => dialog.ToDto()).ToList(),
+            AddLabels = source.AddLabels.Select(label => (ApplicationSystemLabel.Values)label).ToList(),
+            RemoveLabels = source.RemoveLabels.Select(label => (ApplicationSystemLabel.Values)label).ToList()
+        };
 
-        CreateMap<BulkSetSystemLabelInput, BulkSetSystemLabelCommand>()
-            .ForMember(dest => dest.Dto, opt => opt.MapFrom(src => src));
+        public BulkSetSystemLabelCommand ToCommand() => new()
+        {
+            Dto = source.ToDto()
+        };
     }
 }

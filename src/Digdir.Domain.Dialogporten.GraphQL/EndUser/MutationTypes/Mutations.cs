@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
@@ -10,11 +9,10 @@ public sealed class Mutations
 {
     public async Task<SetSystemLabelPayload> SetSystemLabel(
         [Service] ISender mediator,
-        [Service] IMapper mapper,
         [Service] IHttpContextAccessor httpContextAccessor,
         SetSystemLabelInput input)
     {
-        var command = mapper.Map<SetSystemLabelCommand>(input);
+        var command = input.ToCommand();
         var result = await mediator.Send(command);
 
         return result.Match(
@@ -52,10 +50,9 @@ public sealed class Mutations
 
     public async Task<BulkSetSystemLabelPayload> BulkSetSystemLabels(
         [Service] ISender mediator,
-        [Service] IMapper mapper,
         BulkSetSystemLabelInput input)
     {
-        var command = mapper.Map<BulkSetSystemLabelCommand>(input);
+        var command = input.ToCommand();
         var result = await mediator.Send(command);
 
         return result.Match(

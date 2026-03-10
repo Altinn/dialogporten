@@ -113,7 +113,7 @@ jobs:
 
       - name: Dryrun Deploy PostgreSQL migration target (${{ inputs.environment }})
         uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
-        if: ${{ inputs.dryRun && inputs.environment != 'staging' && inputs.environment != 'prod' && hashFiles(format('.azure/infrastructure/postgresql-migration-target.{0}.bicepparam', inputs.environment)) != '' }}
+        if: ${{ inputs.dryRun && inputs.environment != 'staging' && inputs.environment != 'prod' }}
         id: deploy-migration-target-dry-run
         env:
           # secrets
@@ -157,7 +157,7 @@ jobs:
 
       - name: Deploy PostgreSQL migration target (${{ inputs.environment }})
         uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
-        if: ${{ !inputs.dryRun && inputs.environment != 'staging' && inputs.environment != 'prod' && hashFiles(format('.azure/infrastructure/postgresql-migration-target.{0}.bicepparam', inputs.environment)) != '' }}
+        if: ${{ !inputs.dryRun && inputs.environment != 'staging' && inputs.environment != 'prod' }}
         id: deploy-migration-target
         env:
           # secrets

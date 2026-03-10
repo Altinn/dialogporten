@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Service" type="DotNetProject" factoryName=".NET Project">
+  <configuration default="false" name="Service (E2E)" type="DotNetProject" factoryName=".NET Project">
     <option name="EXE_PATH" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.Service/bin/Debug/net9.0/Digdir.Domain.Dialogporten.Service.dll" />
     <option name="PROGRAM_PARAMETERS" value="--urls https://localhost:56841" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.Service" />

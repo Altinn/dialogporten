@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.106.1](https://github.com/Altinn/dialogporten/compare/v1.106.0...v1.106.1) (2026-03-04)
+
+
+### Bug Fixes
+
+* Filtering of exceptions already handled ([#3531](https://github.com/Altinn/dialogporten/issues/3531)) ([c82c108](https://github.com/Altinn/dialogporten/commit/c82c1087770358f5839c176ba2ff82609a416b57))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency awesomeassertions to 9.4.0 ([#3542](https://github.com/Altinn/dialogporten/issues/3542)) ([7d8ca2b](https://github.com/Altinn/dialogporten/commit/7d8ca2bcfccc8cef3c24431f60eef710ec172061))
+* **deps:** update dependency microsoft.net.test.sdk to 18.3.0 ([#3543](https://github.com/Altinn/dialogporten/issues/3543)) ([acb7f43](https://github.com/Altinn/dialogporten/commit/acb7f43c775eb0228d08714efab7db94d068ac2c))
+* **deps:** update grafana/loki docker tag to v3.6.7 ([#3541](https://github.com/Altinn/dialogporten/issues/3541)) ([046b7f8](https://github.com/Altinn/dialogporten/commit/046b7f8941542b8980f5ea33059f377e62b10e02))
+* **deps:** upgrade az cli to 2.84.0 ([#3547](https://github.com/Altinn/dialogporten/issues/3547)) ([fb18ec6](https://github.com/Altinn/dialogporten/commit/fb18ec6857ee3bcc752e6cdae725558612510b71))
+
 ## [1.106.0](https://github.com/Altinn/dialogporten/compare/v1.105.1...v1.106.0) (2026-03-02)
 
 

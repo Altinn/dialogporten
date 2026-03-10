@@ -1,30 +1,14 @@
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 
-/// <summary>
-/// Reads service resource metadata and incremental authorization-related updates from Altinn resource registry through a single boundary,
-/// giving consistent caching behavior and insulating feature code from upstream API shape changes.
-/// </summary>
 public interface IResourceRegistry
 {
-    /// <summary>
-    /// Gets all service resources owned by the supplied organization number so callers can reuse one cached owner payload.
-    /// </summary>
     Task<IReadOnlyCollection<ServiceResourceInformation>> GetResourceInformationForOrg(string orgNumber, CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Gets metadata for one service resource id.
-    /// </summary>
     Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Streams subject/resource relation changes since a point in time so synchronization jobs can process large deltas without loading all changes in memory.
-    /// </summary>
     IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset since, int batchSize,
         CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Gets changed resource policy information since a point in time.
-    /// </summary>
     Task<IReadOnlyCollection<UpdatedResourcePolicyInformation>> GetUpdatedResourcePolicyInformation(DateTimeOffset since, int numberOfConcurrentRequests,
         CancellationToken cancellationToken);
 }

@@ -11,6 +11,9 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 
+/// <summary>
+/// Reads service resource metadata and authorization-related deltas from Altinn Resource Registry.
+/// </summary>
 internal sealed class ResourceRegistryClient : IResourceRegistry
 {
     private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey_V2";
@@ -28,6 +31,9 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    /// <summary>
+    /// Returns service resources owned by the supplied organization number.
+    /// </summary>
     public async Task<IReadOnlyCollection<ServiceResourceInformation>> GetResourceInformationForOrg(
         string orgNumber,
         CancellationToken cancellationToken)
@@ -38,6 +44,9 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
             .ToList();
     }
 
+    /// <summary>
+    /// Returns metadata for a single service resource id.
+    /// </summary>
     public async Task<ServiceResourceInformation?> GetResourceInformation(
         string serviceResourceId,
         CancellationToken cancellationToken)
@@ -46,6 +55,9 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         return resources.FirstOrDefault(x => x.ResourceId == serviceResourceId);
     }
 
+    /// <summary>
+    /// Streams updated subject-resource mappings since the supplied timestamp.
+    /// </summary>
     public async IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset since, int batchSize, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}updated";
@@ -69,6 +81,9 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         } while (nextUrl is not null);
     }
 
+    /// <summary>
+    /// Returns updated minimum-authentication-level policy data since the supplied timestamp.
+    /// </summary>
     public async Task<IReadOnlyCollection<UpdatedResourcePolicyInformation>> GetUpdatedResourcePolicyInformation(DateTimeOffset since,
         int numberOfConcurrentRequests,
         CancellationToken cancellationToken)

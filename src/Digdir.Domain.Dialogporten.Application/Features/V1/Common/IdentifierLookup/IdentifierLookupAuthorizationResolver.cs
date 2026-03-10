@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
+/// <summary>
+/// Resolves end-user lookup access flags and authorization evidence for a resolved dialog.
+/// </summary>
 internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupAuthorizationResolver
 {
     private const string RolePrefix = "urn:altinn:rolecode:";
@@ -27,6 +30,9 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
+    /// <summary>
+    /// Computes authorization evidence and whether lookup access should be granted.
+    /// </summary>
     public async Task<IdentifierLookupAuthorizationResolution> Resolve(
         IdentifierLookupDialogData dialogData,
         InstanceRef requestRef,

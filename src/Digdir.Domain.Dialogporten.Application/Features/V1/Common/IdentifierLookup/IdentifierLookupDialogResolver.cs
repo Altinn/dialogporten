@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
+/// <summary>
+/// Resolves lookup dialog metadata from dialog id or service owner labels.
+/// </summary>
 internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogResolver
 {
     private readonly IDialogDbContext _db;
@@ -16,6 +19,9 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
+    /// <summary>
+    /// Resolves lookup data for a reference, with configurable deleted-dialog visibility.
+    /// </summary>
     public async Task<IdentifierLookupDialogData?> Resolve(
         InstanceRef instanceRef,
         IdentifierLookupDeletedDialogVisibility deletedDialogVisibility,
@@ -68,10 +74,9 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             projection.NonSensitiveTitle.Count > 0 ? projection.NonSensitiveTitle : null);
     }
 
-    // For a given request reference and resolved dialog data, determine the most appropriate instance reference to return
-    // in the response, preferring app-instance references, then correspondence references, then dialog references.
-    // There should not be multiple app-instance or correspondence references for a given dialog, but if there are,
-    // prefer the one that is last in ordinal descending order (newest).
+    /// <summary>
+    /// Chooses the instance reference to return, preferring app-instance, then correspondence, then dialog reference.
+    /// </summary>
     public string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData)
     {
         if (requestRef.Type is not InstanceRefType.DialogId)

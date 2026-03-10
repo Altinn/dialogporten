@@ -5,6 +5,9 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
+/// <summary>
+/// Resolves localized service resource and service owner presentation values for lookup responses.
+/// </summary>
 internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPresentationResolver
 {
     private readonly IResourceRegistry _resourceRegistry;
@@ -18,6 +21,9 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
         _serviceOwnerNameRegistry = serviceOwnerNameRegistry ?? throw new ArgumentNullException(nameof(serviceOwnerNameRegistry));
     }
 
+    /// <summary>
+    /// Fetches presentation metadata and applies fallback and language pruning.
+    /// </summary>
     public async Task<(IdentifierLookupServiceResourceDto ServiceResource, IdentifierLookupServiceOwnerDto ServiceOwner)> Resolve(
         string serviceResource,
         string orgCode,

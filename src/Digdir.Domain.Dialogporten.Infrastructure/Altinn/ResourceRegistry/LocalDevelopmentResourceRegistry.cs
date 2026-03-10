@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 
+/// <summary>
+/// Local development implementation of resource registry lookups with in-memory fallback data.
+/// </summary>
 internal class LocalDevelopmentResourceRegistry : IResourceRegistry
 {
     private const string LocalResourceType = "LocalResourceType";
@@ -18,6 +21,9 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
         _db = db ?? throw new ArgumentNullException(nameof(db));
     }
 
+    /// <summary>
+    /// Returns local resource metadata for an organization by scanning known dialogs.
+    /// </summary>
     public async Task<IReadOnlyCollection<ServiceResourceInformation>> GetResourceInformationForOrg(string orgNumber, CancellationToken cancellationToken)
     {
         var newIds = await _db.Dialogs
@@ -39,6 +45,9 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
         return CachedResourceIds;
     }
 
+    /// <summary>
+    /// Returns local fallback metadata for a single service resource id.
+    /// </summary>
     public virtual Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken)
     {
         return Task.FromResult<ServiceResourceInformation?>(
@@ -51,10 +60,16 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
                 []));
     }
 
+    /// <summary>
+    /// Returns an empty subject-resource change stream in local development.
+    /// </summary>
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset _, int __, CancellationToken ___)
         => AsyncEnumerableExtensions.Empty<List<UpdatedSubjectResource>>();
 
+    /// <summary>
+    /// Returns no updated policy information in local development.
+    /// </summary>
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public Task<IReadOnlyCollection<UpdatedResourcePolicyInformation>> GetUpdatedResourcePolicyInformation(DateTimeOffset _, int __, CancellationToken ___)
         => Task.FromResult<IReadOnlyCollection<UpdatedResourcePolicyInformation>>(Array.Empty<UpdatedResourcePolicyInformation>());

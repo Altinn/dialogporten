@@ -8,9 +8,6 @@ internal enum IdentifierLookupDeletedDialogVisibility
     IncludeDeleted = 1
 }
 
-/// <summary>
-/// Resolves dialog data used by identifier lookup responses, keeping lookup-specific data access logic out of handlers.
-/// </summary>
 internal interface IIdentifierLookupDialogResolver
 {
     Task<IdentifierLookupDialogData?> Resolve(

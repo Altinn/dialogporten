@@ -2,9 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
-/// <summary>
-/// Resolves localized service resource and service owner presentation data, including shared fallback and language-pruning behavior.
-/// </summary>
 internal interface IIdentifierLookupPresentationResolver
 {
     Task<(IdentifierLookupServiceResourceDto ServiceResource, IdentifierLookupServiceOwnerDto ServiceOwner)> Resolve(

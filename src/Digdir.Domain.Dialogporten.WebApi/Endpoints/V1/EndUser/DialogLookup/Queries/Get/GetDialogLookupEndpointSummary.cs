@@ -11,7 +11,7 @@ public sealed class GetDialogLookupEndpointSummary : Summary<GetDialogLookupEndp
         Summary = "Looks up a dialog by instance reference";
         Description = "Resolves dialog metadata and authorization evidence for a supported instance reference.";
 
-        Responses[StatusCodes.Status200OK] = "Successfully resolved identifier lookup metadata.";
+        Responses[StatusCodes.Status200OK] = "Successfully resolved dialog lookup metadata.";
         Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
         Responses[StatusCodes.Status403Forbidden] = "Authenticated end user is not authorized for the supplied instance reference.";

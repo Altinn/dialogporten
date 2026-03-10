@@ -115,8 +115,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     public async Task<AuthorizedPartiesResult> GetAuthorizedPartiesForLookup(
         IPartyIdentifier authenticatedParty,
         List<string> constraintParties,
-        CancellationToken cancellationToken = default) =>
-        await GetAuthorizedPartiesInternal(
+        CancellationToken cancellationToken = default)
+    {
+        var result = await GetAuthorizedPartiesInternal(
             new AuthorizedPartiesRequest(
                 authenticatedParty,
                 includeAccessPackages: true,
@@ -126,6 +127,12 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
                 partyFilter: CreatePartyFilters(constraintParties)),
             flatten: true,
             cancellationToken);
+
+        // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
+        await PopulateMissingInstanceRefs(result, cancellationToken);
+
+        return result;
+    }
 
     private async Task<AuthorizedPartiesResult> GetAuthorizedPartiesInternal(
         AuthorizedPartiesRequest authorizedPartiesRequest,
@@ -299,12 +306,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 
-        var result = AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(authorizedPartiesDto, authorizedPartiesRequest);
-        await PopulateMissingInstanceRefs(result, cancellationToken);
-        return result;
+        return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(authorizedPartiesDto, authorizedPartiesRequest);
     }
 
-    // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
     private async Task PopulateMissingInstanceRefs(
         AuthorizedPartiesResult authorizedPartiesResult,
         CancellationToken cancellationToken)

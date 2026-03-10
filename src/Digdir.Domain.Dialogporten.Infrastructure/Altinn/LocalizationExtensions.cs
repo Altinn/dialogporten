@@ -14,6 +14,7 @@ internal static class LocalizationExtensions
         return values
             .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !string.IsNullOrWhiteSpace(x.Value))
             .Select(x => new ResourceLocalization(x.Key.Trim().ToLowerInvariant(), x.Value))
+            .DistinctBy(x => x.LanguageCode, StringComparer.Ordinal)
             .ToArray();
     }
 }

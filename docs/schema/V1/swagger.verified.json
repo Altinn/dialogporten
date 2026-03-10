@@ -8128,7 +8128,7 @@
                 }
               }
             },
-            "description": "Successfully resolved identifier lookup metadata."
+            "description": "Successfully resolved instance reference lookup metadata."
           },
           "400": {
             "content": {

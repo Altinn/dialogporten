@@ -9,7 +9,7 @@ param sourceKeyVaultResourceGroup = readEnvironmentVariable('AZURE_SOURCE_KEY_VA
 param sourceKeyVaultName = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_NAME')
 
 // After migrations are complete, remove this file and let the current (burstable, SSDv1-tier) server
-// remain the canoncial "test"-server.
+// remain the canonical "test"-server.
 param postgresConfiguration = {
   serverNameStem: 'postgres2'
   version: '18'

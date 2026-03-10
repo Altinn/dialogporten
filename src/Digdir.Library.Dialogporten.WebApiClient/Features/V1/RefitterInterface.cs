@@ -3112,7 +3112,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
-        /// <br/>Content value will be masked if user is not authorized to read main content.
+        /// <br/>IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
         /// </summary>
         [JsonPropertyName("mainContentReference")]
         public V1CommonContent_ContentValue MainContentReference { get; set; }

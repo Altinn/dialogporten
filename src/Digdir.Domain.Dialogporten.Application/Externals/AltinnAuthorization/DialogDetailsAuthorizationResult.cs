@@ -13,18 +13,7 @@ public sealed class DialogDetailsAuthorizationResult
     public bool HasAccessToMainResource() =>
         AuthorizedAltinnActions.Any(action => action.AuthorizationAttribute == Constants.MainResource);
 
-    public bool HasAccessToGuiAction(string requestedAction, string? authorizationAttribute)
-    {
-        var actions = AuthorizedAltinnActions.FindAll(x => x.Name == requestedAction);
-
-        if (actions.IsNullOrEmpty()) return false;
-
-        return authorizationAttribute is null
-            ? HasAccessToMainResource()
-            : actions.Any(x => x.AuthorizationAttribute == authorizationAttribute);
-    }
-
-    public bool HasAccessToApiAction(string requestedAction, string? authorizationAttribute)
+    public bool HasAccessToAction(string requestedAction, string? authorizationAttribute)
     {
         var actions = AuthorizedAltinnActions.FindAll(x => x.Name == requestedAction);
 

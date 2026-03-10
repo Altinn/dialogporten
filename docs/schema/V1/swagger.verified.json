@@ -573,7 +573,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nContent value will be masked if the user is not authorized to read main content.",
             "nullable": true,
             "oneOf": [
               {
@@ -4325,7 +4325,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nContent value will be masked if user is not authorized to read main content.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
             "nullable": true,
             "oneOf": [
               {

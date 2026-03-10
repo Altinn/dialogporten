@@ -12,7 +12,7 @@ public sealed class GetDialogLookupEndpointSummary : Summary<GetDialogLookupEndp
         Summary = "Looks up a dialog by instance reference";
         Description = "Resolves dialog metadata for a supported instance reference in service owner context.";
 
-        Responses[StatusCodes.Status200OK] = "Successfully resolved identifier lookup metadata.";
+        Responses[StatusCodes.Status200OK] = "Successfully resolved instance reference lookup metadata.";
         Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[StatusCodes.Status401Unauthorized] =
             Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope.ServiceProvider);

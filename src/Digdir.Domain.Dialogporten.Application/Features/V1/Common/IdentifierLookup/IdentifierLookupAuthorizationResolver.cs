@@ -12,10 +12,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLo
 /// </summary>
 internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupAuthorizationResolver
 {
-    private const string RolePrefix = "urn:altinn:rolecode:";
-    private const string AccessPackagePrefix = "urn:altinn:accesspackage:";
-    private const string AppInstanceRefPrefix = "urn:altinn:instance-id:";
-
     private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogDbContext _db;
@@ -25,9 +21,13 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         IAltinnAuthorization altinnAuthorization,
         IDialogDbContext db)
     {
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(db);
+
+        _user = user;
+        _altinnAuthorization = altinnAuthorization;
+        _db = db;
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     public async Task<IdentifierLookupAuthorizationResolution> Resolve(
         IdentifierLookupDialogData dialogData,
         InstanceRef requestRef,
-        string responseInstanceRef,
+        InstanceRef responseInstanceRef,
         CancellationToken cancellationToken)
     {
         var minimumAuthenticationLevel = await _db.ResourcePolicyInformation
@@ -81,11 +81,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
 
         foreach (var subject in roleAndAccessPackageSubjects)
         {
-            var grantType = subject.StartsWith(RolePrefix, StringComparison.Ordinal)
-                ? IdentifierLookupGrantType.Role
-                : subject.StartsWith(AccessPackagePrefix, StringComparison.Ordinal)
-                    ? IdentifierLookupGrantType.AccessPackage
-                    : (IdentifierLookupGrantType?)null;
+            var grantType = ResolveGrantType(subject);
 
             if (grantType is null)
             {
@@ -120,7 +116,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 .SelectMany(x => x.AuthorizedInstances)
                 .ToList(),
             dialogData.ServiceResource,
-            requestRef.Value,
+            requestRef,
             responseInstanceRef);
 
         if (viaInstanceDelegation)
@@ -128,7 +124,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             evidenceItems.Add(new IdentifierLookupAuthorizationEvidenceItemDto
             {
                 GrantType = IdentifierLookupGrantType.InstanceDelegation,
-                Subject = responseInstanceRef
+                Subject = responseInstanceRef.Value
             });
         }
 
@@ -149,6 +145,21 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 ViaInstanceDelegation = viaInstanceDelegation,
                 Evidence = evidenceItems
             });
+    }
+
+    private static IdentifierLookupGrantType? ResolveGrantType(string subject)
+    {
+        if (subject.StartsWith(AltinnAuthorizationConstants.RolePrefix, StringComparison.Ordinal))
+        {
+            return IdentifierLookupGrantType.Role;
+        }
+
+        if (subject.StartsWith(AltinnAuthorizationConstants.AccessPackagePrefix, StringComparison.Ordinal))
+        {
+            return IdentifierLookupGrantType.AccessPackage;
+        }
+
+        return null;
     }
 
     private async Task<List<string>> ResolveRoleAndAccessPackageSubjects(
@@ -174,8 +185,8 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     private static bool HasInstanceDelegation(
         List<AuthorizedResource> authorizedInstances,
         string serviceResource,
-        string requestInstanceRef,
-        string responseInstanceRef)
+        InstanceRef requestInstanceRef,
+        InstanceRef responseInstanceRef)
     {
         if (authorizedInstances.Count == 0)
         {
@@ -199,8 +210,8 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 continue;
             }
 
-            if (string.Equals(comparableInstanceRef, requestInstanceRef, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(comparableInstanceRef, responseInstanceRef, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(comparableInstanceRef, requestInstanceRef.Value, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(comparableInstanceRef, responseInstanceRef.Value, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -223,15 +234,15 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         var normalized = instanceRef.ToLowerInvariant();
         if (normalized.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.Ordinal))
         {
-            normalized = $"{AppInstanceRefPrefix}{normalized[Constants.ServiceContextInstanceIdPrefix.Length..]}";
+            normalized = $"{AltinnAuthorizationConstants.AppInstanceRefPrefix}{normalized[Constants.ServiceContextInstanceIdPrefix.Length..]}";
         }
 
-        if (!normalized.StartsWith(AppInstanceRefPrefix, StringComparison.Ordinal))
+        if (!normalized.StartsWith(AltinnAuthorizationConstants.AppInstanceRefPrefix, StringComparison.Ordinal))
         {
             return normalized;
         }
 
-        var suffix = normalized[AppInstanceRefPrefix.Length..];
+        var suffix = normalized[AltinnAuthorizationConstants.AppInstanceRefPrefix.Length..];
         var separator = suffix.IndexOf('/');
         if (separator <= 0 || separator == suffix.Length - 1)
         {

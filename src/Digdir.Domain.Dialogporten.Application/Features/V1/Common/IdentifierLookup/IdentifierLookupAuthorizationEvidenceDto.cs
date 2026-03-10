@@ -15,7 +15,7 @@ public sealed class IdentifierLookupAuthorizationEvidenceDto
 public sealed class IdentifierLookupAuthorizationEvidenceItemDto
 {
     public IdentifierLookupGrantType GrantType { get; set; }
-    public string Subject { get; set; } = null!;
+    public required string Subject { get; set; }
 }
 
 public enum IdentifierLookupGrantType

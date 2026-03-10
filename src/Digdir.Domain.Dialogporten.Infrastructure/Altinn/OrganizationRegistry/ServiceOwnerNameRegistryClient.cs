@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.OrganizationRegistry;
@@ -12,7 +13,10 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
 
     public ServiceOwnerNameRegistryClient(HttpClient client, IFusionCacheProvider cacheProvider)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+
+        _client = client;
         _cache = cacheProvider.GetCache(nameof(OrganizationRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
     }
 
@@ -37,10 +41,7 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
             {
                 OrgNumber = pair.Value.Orgnr,
                 ShortName = pair.Key,
-                DisplayName = pair.Value.Name?
-                    .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !string.IsNullOrWhiteSpace(x.Value))
-                    .Select(x => new ResourceLocalization(x.Key.Trim().ToLowerInvariant(), x.Value))
-                    .ToList() ?? []
+                DisplayName = pair.Value.Name.ToLocalizations()
             });
 
         return serviceOwnerInfoByOrgNumber;

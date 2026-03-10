@@ -18,7 +18,8 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
 
     public LocalDevelopmentResourceRegistry(IDialogDbContext db)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        ArgumentNullException.ThrowIfNull(db);
+        _db = db;
     }
 
     /// <summary>
@@ -42,7 +43,9 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
                 []));
         }
 
-        return CachedResourceIds;
+        return CachedResourceIds
+            .Where(x => string.Equals(x.OwnerOrgNumber, orgNumber, StringComparison.Ordinal))
+            .ToList();
     }
 
     /// <summary>

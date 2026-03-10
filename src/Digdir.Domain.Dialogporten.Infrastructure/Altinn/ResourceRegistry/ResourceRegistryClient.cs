@@ -5,6 +5,7 @@ using Altinn.Authorization.ABAC.Utils;
 using Altinn.Authorization.ABAC.Xacml;
 using AsyncKeyedLock;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.Extensions.Logging;
 using ZiggyCreatures.Caching.Fusion;
@@ -26,9 +27,13 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
     public ResourceRegistryClient(HttpClient client, IFusionCacheProvider cacheProvider, ILogger<ResourceRegistryClient> logger)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _client = client;
         _cache = cacheProvider.GetCache(nameof(ResourceRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = logger;
     }
 
     /// <summary>
@@ -198,24 +203,11 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
                         x.ResourceType,
                         x.HasCompetentAuthority.Organization!,
                         x.HasCompetentAuthority.OrgCode!,
-                        ToLocalizations(x.Title),
-                        ToLocalizations(x.Description)))
+                        x.Title.ToLocalizations(),
+                        x.Description.ToLocalizations()))
                     .ToArray();
             },
             token: cancellationToken);
-    }
-
-    private static List<ResourceLocalization> ToLocalizations(IDictionary<string, string>? values)
-    {
-        if (values is null || values.Count == 0)
-        {
-            return [];
-        }
-
-        return values
-            .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !string.IsNullOrWhiteSpace(x.Value))
-            .Select(x => new ResourceLocalization(x.Key.Trim().ToLowerInvariant(), x.Value))
-            .ToList();
     }
 
     private sealed class ResourceRegistryEntry
@@ -241,8 +233,8 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         public required string Identifier { get; init; }
         public required CompetentAuthority HasCompetentAuthority { get; init; }
         public required string ResourceType { get; init; }
-        public IDictionary<string, string>? Title { get; init; }
-        public IDictionary<string, string>? Description { get; init; }
+        public IDictionary<string, string> Title { get; init; } = new Dictionary<string, string>();
+        public IDictionary<string, string> Description { get; init; } = new Dictionary<string, string>();
     }
 
     private sealed class CompetentAuthority

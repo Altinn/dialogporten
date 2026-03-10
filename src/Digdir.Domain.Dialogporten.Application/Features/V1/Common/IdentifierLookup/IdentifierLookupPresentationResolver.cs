@@ -17,8 +17,11 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
         IResourceRegistry resourceRegistry,
         IServiceOwnerNameRegistry serviceOwnerNameRegistry)
     {
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _serviceOwnerNameRegistry = serviceOwnerNameRegistry ?? throw new ArgumentNullException(nameof(serviceOwnerNameRegistry));
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(serviceOwnerNameRegistry);
+
+        _resourceRegistry = resourceRegistry;
+        _serviceOwnerNameRegistry = serviceOwnerNameRegistry;
     }
 
     /// <summary>
@@ -39,7 +42,7 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
             ? null
             : await _serviceOwnerNameRegistry.GetServiceOwnerInfo(ownerOrgNumber, cancellationToken);
 
-        if (ownerInfo is not null)
+        if (!string.IsNullOrWhiteSpace(ownerInfo?.ShortName))
         {
             ownerCode = ownerInfo.ShortName;
         }

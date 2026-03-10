@@ -32,9 +32,13 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         IIdentifierLookupPresentationResolver presentationResolver,
         IUserResourceRegistry userResourceRegistry)
     {
-        _dialogResolver = dialogResolver ?? throw new ArgumentNullException(nameof(dialogResolver));
-        _presentationResolver = presentationResolver ?? throw new ArgumentNullException(nameof(presentationResolver));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(dialogResolver);
+        ArgumentNullException.ThrowIfNull(presentationResolver);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _dialogResolver = dialogResolver;
+        _presentationResolver = presentationResolver;
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public async Task<GetDialogLookupResult> Handle(GetDialogLookupQuery request, CancellationToken cancellationToken)

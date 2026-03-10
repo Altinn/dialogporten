@@ -28,9 +28,13 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         IIdentifierLookupPresentationResolver presentationResolver,
         IIdentifierLookupAuthorizationResolver authorizationResolver)
     {
-        _dialogResolver = dialogResolver ?? throw new ArgumentNullException(nameof(dialogResolver));
-        _presentationResolver = presentationResolver ?? throw new ArgumentNullException(nameof(presentationResolver));
-        _authorizationResolver = authorizationResolver ?? throw new ArgumentNullException(nameof(authorizationResolver));
+        ArgumentNullException.ThrowIfNull(dialogResolver);
+        ArgumentNullException.ThrowIfNull(presentationResolver);
+        ArgumentNullException.ThrowIfNull(authorizationResolver);
+
+        _dialogResolver = dialogResolver;
+        _presentationResolver = presentationResolver;
+        _authorizationResolver = authorizationResolver;
     }
 
     public async Task<GetDialogLookupResult> Handle(GetDialogLookupQuery request, CancellationToken cancellationToken)
@@ -54,11 +58,15 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         }
 
         var responseInstanceRef = _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData);
+        if (!InstanceRef.TryParse(responseInstanceRef, out var parsedResponseInstanceRef))
+        {
+            return new Forbidden("Forbidden");
+        }
 
         var authorization = await _authorizationResolver.Resolve(
             dialogData,
             instanceRef,
-            responseInstanceRef,
+            parsedResponseInstanceRef.Value,
             cancellationToken);
 
         if (!authorization.HasAccess)

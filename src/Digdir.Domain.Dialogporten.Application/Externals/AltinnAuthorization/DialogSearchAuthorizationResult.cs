@@ -10,9 +10,9 @@ public sealed class DialogSearchAuthorizationResult
     // and potentially other sources in the future.
     public List<Guid> DialogIds { get; set; } = [];
 
-    // TODO! This needs to be changed to more generically handle instance delegations, see https://github.com/Altinn/dialogporten/issues/3358
-    // AltinnAppInstanceIds contains app-instance label values used for dialog resolution, currently
-    // represented as service owner labels (urn:altinn:integration:storage:<partyId>/<instanceId>).
+    // NOTE: AltinnAppInstanceIds currently carries delegated instance references represented as
+    // service owner labels (urn:altinn:integration:storage:<partyId>/<instanceId>).
+    // See https://github.com/Altinn/dialogporten/issues/3358 for the planned generic handling.
     // Consumers of this result usually should not use these values directly, but instead rely on DialogIds.
     public List<string> AltinnAppInstanceIds { get; set; } = [];
 

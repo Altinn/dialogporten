@@ -25,7 +25,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
     private const string AuthorizedPartiesBaseUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties";
-    private const string AppInstanceRefPrefix = "urn:altinn:instance-id:";
     private const string CorrespondenceRefPrefix = "urn:altinn:correspondence-id:";
     private const string DialogRefPrefix = "urn:altinn:dialog-id:";
     private const string AltinnAppResourceType = "altinnapp";
@@ -388,7 +387,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         }
 
         var normalized = instanceId.ToLowerInvariant();
-        if (normalized.StartsWith(AppInstanceRefPrefix, StringComparison.Ordinal))
+        if (normalized.StartsWith(AltinnAuthorizationConstants.AppInstanceRefPrefix, StringComparison.Ordinal))
         {
             return normalized;
         }
@@ -398,7 +397,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             return null;
         }
 
-        return $"{AppInstanceRefPrefix}{partyId}/{instanceId}".ToLowerInvariant();
+        return $"{AltinnAuthorizationConstants.AppInstanceRefPrefix}{partyId}/{instanceId}".ToLowerInvariant();
     }
 
     private static string? TryCreateResourceInstanceRef(string instanceId, string prefix)
@@ -457,7 +456,8 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return await PopulateDialogIdsFromInstanceDelegationIds(result, cancellationToken);
     }
 
-    // TODO! This needs to be changed to more generically handle instance delegations, see https://github.com/Altinn/dialogporten/issues/3358
+    // NOTE: This maps delegated instance labels to dialog IDs using the current app-instance label format.
+    // See https://github.com/Altinn/dialogporten/issues/3358 for planned generic instance delegation handling.
     private async Task<DialogSearchAuthorizationResult> PopulateDialogIdsFromInstanceDelegationIds(DialogSearchAuthorizationResult result, CancellationToken cancellationToken)
     {
         if (result.AltinnAppInstanceIds.Count == 0)

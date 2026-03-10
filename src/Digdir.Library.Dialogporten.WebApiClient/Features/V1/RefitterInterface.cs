@@ -1417,7 +1417,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </listheader>
         /// <item>
         /// <term>200</term>
-        /// <description>Successfully resolved identifier lookup metadata.</description>
+        /// <description>Successfully resolved instance reference lookup metadata.</description>
         /// </item>
         /// <item>
         /// <term>400</term>

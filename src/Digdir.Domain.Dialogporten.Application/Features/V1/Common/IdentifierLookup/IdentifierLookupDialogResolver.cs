@@ -16,7 +16,8 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
 
     public IdentifierLookupDialogResolver(IDialogDbContext db)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        ArgumentNullException.ThrowIfNull(db);
+        _db = db;
     }
 
     /// <summary>
@@ -62,16 +63,23 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        return projection is null
-            ? null
-            : new IdentifierLookupDialogData(
+        if (projection is null)
+        {
+            return null;
+        }
+
+        var nonSensitiveTitle = projection.NonSensitiveTitle.Count > 0
+            ? projection.NonSensitiveTitle
+            : null;
+
+        return new IdentifierLookupDialogData(
             projection.DialogId,
             projection.Party,
             projection.Org,
             projection.ServiceResource,
             projection.ServiceOwnerLabels,
             projection.Title,
-            projection.NonSensitiveTitle.Count > 0 ? projection.NonSensitiveTitle : null);
+            nonSensitiveTitle);
     }
 
     /// <summary>

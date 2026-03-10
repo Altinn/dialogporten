@@ -11,11 +11,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
 {
+    private static readonly string LocalSubParty = NorwegianOrganizationIdentifier.PrefixWithSeparator + "123456789";
+
     private readonly IDialogDbContext _db;
 
     public LocalDevelopmentAltinnAuthorization(IDialogDbContext db)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        ArgumentNullException.ThrowIfNull(db);
+        _db = db;
     }
 
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
@@ -63,7 +66,7 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
                     new()
                     {
                         Name = "Local Sub Party",
-                        Party = NorwegianOrganizationIdentifier.PrefixWithSeparator + "123456789",
+                        Party = LocalSubParty,
                         PartyUuid = Guid.NewGuid(),
                         IsCurrentEndUser = true
                     }
@@ -82,9 +85,12 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
             .Distinct()
             .ToListAsync(cancellationToken);
 
-        var parties = constraintParties.Count > 0
+        var parties = (constraintParties.Count > 0
             ? constraintParties.Distinct(StringComparer.OrdinalIgnoreCase).ToList()
-            : [authenticatedParty.FullId];
+            : [authenticatedParty.FullId])
+            .Concat([LocalSubParty])
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         return new AuthorizedPartiesResult
         {

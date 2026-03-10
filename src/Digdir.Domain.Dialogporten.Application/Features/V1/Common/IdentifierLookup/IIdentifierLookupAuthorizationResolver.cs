@@ -5,7 +5,7 @@ internal interface IIdentifierLookupAuthorizationResolver
     Task<IdentifierLookupAuthorizationResolution> Resolve(
         IdentifierLookupDialogData dialogData,
         InstanceRef requestRef,
-        string responseInstanceRef,
+        InstanceRef responseInstanceRef,
         CancellationToken cancellationToken);
 }
 

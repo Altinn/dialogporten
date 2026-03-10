@@ -136,21 +136,19 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
 
     [Fact]
     public Task Get_Should_Return_Forbidden_When_EndUser_Has_No_Access() =>
-        FlowBuilder.For(Application, services =>
+        FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
             {
-                services.ConfigureAltinnAuthorization(altinnAuthorization =>
-                {
-                    altinnAuthorization.GetAuthorizedPartiesForLookup(
-                            default!,
-                            Arg.Any<List<string>>(),
-                            Arg.Any<CancellationToken>())
-                        .ReturnsForAnyArgs(new AuthorizedPartiesResult { AuthorizedParties = [] });
+                altinnAuthorization.GetAuthorizedPartiesForLookup(
+                        default!,
+                        Arg.Any<List<string>>(),
+                        Arg.Any<CancellationToken>())
+                    .ReturnsForAnyArgs(new AuthorizedPartiesResult { AuthorizedParties = [] });
 
-                    altinnAuthorization.UserHasRequiredAuthLevel(
-                            Arg.Any<string>(),
-                            Arg.Any<CancellationToken>())
-                        .Returns(true);
-                });
+                altinnAuthorization.UserHasRequiredAuthLevel(
+                        Arg.Any<string>(),
+                        Arg.Any<CancellationToken>())
+                    .Returns(true);
             })
             .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels($"urn:altinn:integration:storage:1337/{Guid.NewGuid()}"))
             .SendCommand((_, ctx) => new GetDialogLookupQuery
@@ -170,47 +168,45 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
         var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
 
-        return FlowBuilder.For(Application, services =>
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
             {
-                services.ConfigureAltinnAuthorization(altinnAuthorization =>
-                {
-                    altinnAuthorization.GetAuthorizedPartiesForLookup(
-                            default!,
-                            Arg.Any<List<string>>(),
-                            Arg.Any<CancellationToken>())
-                        .ReturnsForAnyArgs(new AuthorizedPartiesResult
-                        {
-                            AuthorizedParties =
-                            [
-                                new AuthorizedParty
-                                {
-                                    Party = party,
-                                    PartyUuid = Guid.NewGuid(),
-                                    Name = "Party",
-                                    AuthorizedInstances =
-                                    [
-                                        new AuthorizedResource
-                                        {
-                                            ResourceId = otherServiceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
-                                            InstanceId = instanceId.ToString(),
-                                            InstanceRef = instanceRef
-                                        },
-                                        new AuthorizedResource
-                                        {
-                                            ResourceId = serviceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
-                                            InstanceId = instanceId.ToString(),
-                                            InstanceRef = instanceRef
-                                        }
-                                    ]
-                                }
-                            ]
-                        });
+                altinnAuthorization.GetAuthorizedPartiesForLookup(
+                        default!,
+                        Arg.Any<List<string>>(),
+                        Arg.Any<CancellationToken>())
+                    .ReturnsForAnyArgs(new AuthorizedPartiesResult
+                    {
+                        AuthorizedParties =
+                        [
+                            new AuthorizedParty
+                            {
+                                Party = party,
+                                PartyUuid = Guid.NewGuid(),
+                                Name = "Party",
+                                AuthorizedInstances =
+                                [
+                                    new AuthorizedResource
+                                    {
+                                        ResourceId = otherServiceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
+                                        InstanceId = instanceId.ToString(),
+                                        InstanceRef = instanceRef
+                                    },
+                                    new AuthorizedResource
+                                    {
+                                        ResourceId = serviceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
+                                        InstanceId = instanceId.ToString(),
+                                        InstanceRef = instanceRef
+                                    }
+                                ]
+                            }
+                        ]
+                    });
 
-                    altinnAuthorization.UserHasRequiredAuthLevel(
-                            Arg.Any<string>(),
-                            Arg.Any<CancellationToken>())
-                        .Returns(true);
-                });
+                altinnAuthorization.UserHasRequiredAuthLevel(
+                        Arg.Any<string>(),
+                        Arg.Any<CancellationToken>())
+                    .Returns(true);
             })
             .CreateSimpleDialog((x, _) =>
             {

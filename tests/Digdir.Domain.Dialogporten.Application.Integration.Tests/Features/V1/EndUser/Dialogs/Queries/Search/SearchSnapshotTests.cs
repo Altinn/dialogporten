@@ -6,7 +6,9 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
@@ -70,5 +72,28 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
                 return x;
             });
     }
-}
 
+    [Fact]
+    public Task Search_Latest_Activity_Verify_Output() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog(AddActivities(DialogActivityType.Values.DialogCreated))
+            .CreateSimpleDialog(AddActivities(DialogActivityType.Values.DialogOpened))
+            .CreateSimpleDialog(AddActivities(DialogActivityType.Values.DialogDeleted))
+            .SearchEndUserDialogs((x, ctx) => x.Party = [ctx.GetParty()])
+            .VerifySnapshot(x =>
+                    x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken)))
+            .ExecuteAsync();
+
+    private static Action<CreateDialogCommand, FlowContext> AddActivities(DialogActivityType.Values type) =>
+        (x, _) =>
+            x.AddActivity(modify: activity =>
+                {
+                    activity.Type = DialogActivityType.Values.DialogRestored;
+                    activity.CreatedAt = DialogApplication.Clock.UtcNowOffset.AddDays(-2);
+                })
+                .AddActivity(modify: activity =>
+                {
+                    activity.Type = type;
+                    activity.CreatedAt = DialogApplication.Clock.UtcNowOffset.AddDays(-1);
+                });
+}

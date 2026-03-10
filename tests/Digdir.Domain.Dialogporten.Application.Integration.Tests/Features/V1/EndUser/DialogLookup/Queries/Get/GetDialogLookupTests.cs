@@ -237,37 +237,37 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         const int currentAuthenticationLevel = 0;
         var serviceResource = $"urn:altinn:resource:lookup-auth-level-{Guid.NewGuid():N}";
 
-        return FlowBuilder.For(Application, services =>
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
             {
-                services.ConfigureAltinnAuthorization(altinnAuthorization =>
-                {
-                    altinnAuthorization.GetAuthorizedPartiesForLookup(
-                            default!,
-                            Arg.Any<List<string>>(),
-                            Arg.Any<CancellationToken>())
-                        .ReturnsForAnyArgs(new AuthorizedPartiesResult
-                        {
-                            AuthorizedParties =
-                            [
-                                new AuthorizedParty
-                                {
-                                    Party = Party,
-                                    PartyUuid = Guid.NewGuid(),
-                                    Name = "Party",
-                                    AuthorizedResources = [serviceResource],
-                                    AuthorizedRolesAndAccessPackages = [],
-                                    AuthorizedInstances = []
-                                }
-                            ]
-                        });
+                altinnAuthorization.GetAuthorizedPartiesForLookup(
+                        default!,
+                        Arg.Any<List<string>>(),
+                        Arg.Any<CancellationToken>())
+                    .ReturnsForAnyArgs(new AuthorizedPartiesResult
+                    {
+                        AuthorizedParties =
+                        [
+                            new AuthorizedParty
+                            {
+                                Party = Party,
+                                PartyUuid = Guid.NewGuid(),
+                                Name = "Party",
+                                AuthorizedResources = [serviceResource],
+                                AuthorizedRolesAndAccessPackages = [],
+                                AuthorizedInstances = []
+                            }
+                        ]
+                    });
 
-                    // Resolver should no longer use this for access gating.
-                    altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                        .Returns(false);
-                    altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
-                        .Returns(false);
-                });
-
+                // Resolver should no longer use this for access gating.
+                altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(false);
+                altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
+                    .Returns(false);
+            },
+            services =>
+            {
                 services.RemoveAll<IResourceRegistry>();
                 services.AddScoped<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>();
                 var resourceRegistry = Substitute.For<IResourceRegistry>();

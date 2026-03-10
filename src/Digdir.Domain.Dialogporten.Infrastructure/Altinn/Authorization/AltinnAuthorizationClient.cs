@@ -323,11 +323,21 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         }
 
         var resourceTypesById = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-        foreach (var resourceId in instancesWithoutRef
-                     .Select(x => NormalizeResourceId(x.Instance.ResourceId))
-                     .Distinct(StringComparer.OrdinalIgnoreCase))
+        var resourceIds = instancesWithoutRef
+            .Select(x => NormalizeResourceId(x.Instance.ResourceId))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var resourceInformationTasks = resourceIds.ToDictionary(
+            resourceId => resourceId,
+            resourceId => _resourceRegistry.GetResourceInformation(resourceId, cancellationToken),
+            StringComparer.OrdinalIgnoreCase);
+
+        await Task.WhenAll(resourceInformationTasks.Values);
+
+        foreach (var (resourceId, resourceInformationTask) in resourceInformationTasks)
         {
-            var resourceInformation = await _resourceRegistry.GetResourceInformation(resourceId, cancellationToken);
+            var resourceInformation = await resourceInformationTask;
             resourceTypesById[resourceId] = resourceInformation?.ResourceType;
         }
 

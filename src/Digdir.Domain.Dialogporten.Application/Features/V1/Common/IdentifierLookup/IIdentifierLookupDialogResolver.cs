@@ -23,6 +23,6 @@ internal sealed record IdentifierLookupDialogData(
     string Party,
     string Org,
     string ServiceResource,
-    List<string> ServiceOwnerLabels,
-    List<ResourceLocalization> Title,
-    List<ResourceLocalization>? NonSensitiveTitle);
+    IReadOnlyList<string> ServiceOwnerLabels,
+    IReadOnlyList<ResourceLocalization> Title,
+    IReadOnlyList<ResourceLocalization>? NonSensitiveTitle);

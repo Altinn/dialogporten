@@ -69,7 +69,7 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
     }
 
     private static List<LocalizationDto> ToLocalizationDtos(
-        List<ResourceLocalization>? values,
+        IReadOnlyList<ResourceLocalization>? values,
         string fallback)
     {
         var localizations = values

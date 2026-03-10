@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using FluentValidation.Results;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get;
@@ -22,19 +24,23 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
     private readonly IIdentifierLookupDialogResolver _dialogResolver;
     private readonly IIdentifierLookupPresentationResolver _presentationResolver;
     private readonly IIdentifierLookupAuthorizationResolver _authorizationResolver;
+    private readonly ILogger<GetDialogLookupQueryHandler> _logger;
 
     public GetDialogLookupQueryHandler(
         IIdentifierLookupDialogResolver dialogResolver,
         IIdentifierLookupPresentationResolver presentationResolver,
-        IIdentifierLookupAuthorizationResolver authorizationResolver)
+        IIdentifierLookupAuthorizationResolver authorizationResolver,
+        ILogger<GetDialogLookupQueryHandler> logger)
     {
         ArgumentNullException.ThrowIfNull(dialogResolver);
         ArgumentNullException.ThrowIfNull(presentationResolver);
         ArgumentNullException.ThrowIfNull(authorizationResolver);
+        ArgumentNullException.ThrowIfNull(logger);
 
         _dialogResolver = dialogResolver;
         _presentationResolver = presentationResolver;
         _authorizationResolver = authorizationResolver;
+        _logger = logger;
     }
 
     public async Task<GetDialogLookupResult> Handle(GetDialogLookupQuery request, CancellationToken cancellationToken)
@@ -60,7 +66,14 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         var responseInstanceRef = _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData);
         if (!InstanceRef.TryParse(responseInstanceRef, out var parsedResponseInstanceRef))
         {
-            return new Forbidden("Forbidden");
+            _logger.LogError(
+                "Identifier lookup resolved an invalid response instance reference. RequestInstanceRef={RequestInstanceRef}, ResolvedResponseInstanceRef={ResolvedResponseInstanceRef}, DialogId={DialogId}, ServiceResource={ServiceResource}",
+                request.InstanceRef,
+                responseInstanceRef,
+                dialogData.DialogId,
+                dialogData.ServiceResource);
+
+            throw new UnreachableException("Resolved response instance reference is invalid.");
         }
 
         var authorization = await _authorizationResolver.Resolve(

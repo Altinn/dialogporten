@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.OrganizationRegistry;
 
 internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
 {
-    private const string ServiceOwnerShortNameReferenceCacheKey = "ServiceOwnerShortNameReference";
+    private const string ServiceOwnerShortNameReferenceCacheKey = "ServiceOwnerShortNameReference_v2";
 
     private readonly IFusionCache _cache;
     private readonly HttpClient _client;

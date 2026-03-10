@@ -57,7 +57,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         CancellationToken cancellationToken)
     {
         var resources = await FetchServiceResources(cancellationToken);
-        return resources.FirstOrDefault(x => x.ResourceId == serviceResourceId);
+        return resources.FirstOrDefault(x => string.Equals(x.ResourceId, serviceResourceId, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

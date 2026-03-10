@@ -69,7 +69,7 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
         }
 
         var nonSensitiveTitle = projection.NonSensitiveTitle.Count > 0
-            ? projection.NonSensitiveTitle
+            ? projection.NonSensitiveTitle.ToArray()
             : null;
 
         return new IdentifierLookupDialogData(
@@ -77,8 +77,8 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             projection.Party,
             projection.Org,
             projection.ServiceResource,
-            projection.ServiceOwnerLabels,
-            projection.Title,
+            projection.ServiceOwnerLabels.ToArray(),
+            projection.Title.ToArray(),
             nonSensitiveTitle);
     }
 

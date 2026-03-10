@@ -18,10 +18,16 @@ public sealed record ServiceResourceInformation(
     string ResourceType,
     string OwnerOrgNumber,
     string OwnOrgShortName,
-    List<ResourceLocalization> DisplayName,
-    List<ResourceLocalization> Description)
+    IReadOnlyList<ResourceLocalization> DisplayName,
+    IReadOnlyList<ResourceLocalization> Description)
 {
-    public static readonly ServiceResourceInformation Empty = new(string.Empty, string.Empty, string.Empty, string.Empty, [], []);
+    public static readonly ServiceResourceInformation Empty = new(
+        string.Empty,
+        string.Empty,
+        string.Empty,
+        string.Empty,
+        Array.Empty<ResourceLocalization>(),
+        Array.Empty<ResourceLocalization>());
     public string ResourceType { get; } = ResourceType.ToLowerInvariant();
     public string OwnerOrgNumber { get; } = OwnerOrgNumber.ToLowerInvariant();
     public string OwnOrgShortName { get; } = OwnOrgShortName.ToLowerInvariant();

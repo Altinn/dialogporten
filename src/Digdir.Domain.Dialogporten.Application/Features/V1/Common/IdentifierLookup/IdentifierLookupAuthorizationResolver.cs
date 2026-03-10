@@ -172,11 +172,9 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             return [];
         }
 
-        var authorizedSubjectsSet = authorizedSubjects.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
         return await _db.SubjectResources
             .AsNoTracking()
-            .Where(x => x.Resource == serviceResource && authorizedSubjectsSet.Contains(x.Subject))
+            .Where(x => x.Resource == serviceResource && authorizedSubjects.Contains(x.Subject))
             .Select(x => x.Subject)
             .Distinct()
             .ToListAsync(cancellationToken);

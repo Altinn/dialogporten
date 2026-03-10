@@ -3,8 +3,8 @@ import { uniqueResourceName } from '../../functions/resourceName.bicep'
 @description('The prefix used for naming resources to ensure unique names')
 param namePrefix string
 
-@description('The location where the resources will be deployed')
-param location string
+@description('The location where the resources will be deployed. Defaults to the current resource group location when omitted.')
+param location string = resourceGroup().location
 
 @description('The name of the environment Key Vault')
 param environmentKeyVaultName string = ''

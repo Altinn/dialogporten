@@ -1,7 +1,6 @@
 using './postgresql-migration-target.bicep'
 
 param environment = 'yt01'
-param location = 'norwayeast'
 
 param dialogportenPgAdminPassword = readEnvironmentVariable('PG_ADMIN_PASSWORD')
 param sourceKeyVaultSubscriptionId = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID')

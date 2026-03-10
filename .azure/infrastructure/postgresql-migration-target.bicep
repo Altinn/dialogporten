@@ -39,9 +39,6 @@ import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from 
 @description('The environment whose existing shared infrastructure this transient target will attach to.')
 param environment string
 
-@description('The location where the resources will be deployed. Defaults to the current resource group location.')
-param location string = resourceGroup().location
-
 @description('Password for PostgreSQL admin. Use the same admin password as the current canonical server.')
 @secure()
 @minLength(3)
@@ -95,7 +92,6 @@ module postgresql '../modules/postgreSql/create.bicep' = {
   name: 'postgresqlMigrationTarget'
   params: {
     namePrefix: namePrefix
-    location: location
     serverNameStem: postgresConfiguration.serverNameStem
     postgresVersion: postgresConfiguration.version
     publishCanonicalConnectionSecrets: false

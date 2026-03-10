@@ -376,9 +376,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     }
 
     private static string NormalizeResourceId(string resourceId)
-        => resourceId.StartsWith(Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
+        => resourceId.StartsWith(Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
             ? resourceId.ToLowerInvariant()
-            : (Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix + resourceId).ToLowerInvariant();
+            : (Domain.Common.Constants.ServiceResourcePrefix + resourceId).ToLowerInvariant();
 
     private static string? TryCreateAppInstanceRef(int partyId, string instanceId)
     {
@@ -457,6 +457,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return await PopulateDialogIdsFromInstanceDelegationIds(result, cancellationToken);
     }
 
+    // TODO! This needs to be changed to more generically handle instance delegations, see https://github.com/Altinn/dialogporten/issues/3358
     private async Task<DialogSearchAuthorizationResult> PopulateDialogIdsFromInstanceDelegationIds(DialogSearchAuthorizationResult result, CancellationToken cancellationToken)
     {
         if (result.AltinnAppInstanceIds.Count == 0)

@@ -39,7 +39,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
 
     public async Task<GetDialogLookupResult> Handle(GetDialogLookupQuery request, CancellationToken cancellationToken)
     {
-        if (!InstanceRef.TryParse(request.InstanceRef, out var parsedInstanceRef) || parsedInstanceRef is null)
+        if (!InstanceRef.TryParse(request.InstanceRef, out var parsedInstanceRef))
         {
             return new ValidationError(new ValidationFailure(
                 nameof(request.InstanceRef),

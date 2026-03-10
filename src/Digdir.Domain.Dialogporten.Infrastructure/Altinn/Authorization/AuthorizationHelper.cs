@@ -141,6 +141,7 @@ internal static class AuthorizationHelper
             if (partyAuthorizedInstances.Count > 0)
             {
                 // Handle app instance delegations from Altinn Access Management.
+                // TODO! This logic needs to be changed to more generically handle instance delegations, see https://github.com/Altinn/dialogporten/issues/3358
                 foreach (var instance in partyAuthorizedInstances)
                 {
                     if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))

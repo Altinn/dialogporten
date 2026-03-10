@@ -273,13 +273,15 @@ type DialogEventPayload {
 
 type DialogLookup {
   dialogId: UUID!
-  instanceUrn: String!
+  instanceRef: String!
   serviceResource: DialogLookupServiceResource!
   serviceOwner: DialogLookupServiceOwner!
   authorizationEvidence: DialogLookupAuthorizationEvidence!
 }
 
 type DialogLookupAuthorizationEvidence {
+  minimumAuthenticationLevel: Int!
+  currentAuthenticationLevel: Int!
   viaRole: Boolean!
   viaAccessPackage: Boolean!
   viaResourceDelegation: Boolean!
@@ -371,7 +373,7 @@ type Mutations {
 }
 
 type Queries @authorize(policy: "enduser") {
-  dialogLookup(instanceUrn: String!): DialogLookupPayload!
+  dialogLookup(instanceRef: String!): DialogLookupPayload!
   dialogById(dialogId: UUID!): DialogByIdPayload!
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
   limits: Limits!

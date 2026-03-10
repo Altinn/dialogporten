@@ -29,16 +29,27 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
 
     public async Task<IdentifierLookupAuthorizationResolution> Resolve(
         IdentifierLookupDialogData dialogData,
-        InstanceUrn requestUrn,
-        string responseInstanceUrn,
+        InstanceRef requestRef,
+        string responseInstanceRef,
         CancellationToken cancellationToken)
     {
+        var minimumAuthenticationLevel = await _db.ResourcePolicyInformation
+            .AsNoTracking()
+            .Where(x => x.Resource == dialogData.ServiceResource)
+            .Select(x => x.MinimumAuthenticationLevel)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var currentAuthenticationLevel = _user.GetPrincipal().GetAuthenticationLevel();
         var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifier();
         if (partyIdentifier is null)
         {
             return new IdentifierLookupAuthorizationResolution(
                 false,
-                new IdentifierLookupAuthorizationEvidenceDto());
+                new IdentifierLookupAuthorizationEvidenceDto
+                {
+                    MinimumAuthenticationLevel = minimumAuthenticationLevel,
+                    CurrentAuthenticationLevel = currentAuthenticationLevel
+                });
         }
 
         var authorizedParties = await _altinnAuthorization.GetAuthorizedPartiesForLookup(
@@ -103,32 +114,29 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 .SelectMany(x => x.AuthorizedInstances)
                 .ToList(),
             dialogData.ServiceResource,
-            requestUrn.Value,
-            responseInstanceUrn);
+            requestRef.Value,
+            responseInstanceRef);
 
         if (viaInstanceDelegation)
         {
             evidenceItems.Add(new IdentifierLookupAuthorizationEvidenceItemDto
             {
                 GrantType = IdentifierLookupGrantType.InstanceDelegation,
-                Subject = responseInstanceUrn
+                Subject = responseInstanceRef
             });
         }
 
-        var hasRequiredAuthLevel = await _altinnAuthorization.UserHasRequiredAuthLevel(
-            dialogData.ServiceResource,
-            cancellationToken);
-
-        var hasAccess = hasRequiredAuthLevel
-                        && (viaRole
-                            || viaAccessPackage
-                            || viaResourceDelegation
-                            || viaInstanceDelegation);
+        var hasAccess = viaRole
+                        || viaAccessPackage
+                        || viaResourceDelegation
+                        || viaInstanceDelegation;
 
         return new IdentifierLookupAuthorizationResolution(
             hasAccess,
             new IdentifierLookupAuthorizationEvidenceDto
             {
+                MinimumAuthenticationLevel = minimumAuthenticationLevel,
+                CurrentAuthenticationLevel = currentAuthenticationLevel,
                 ViaRole = viaRole,
                 ViaAccessPackage = viaAccessPackage,
                 ViaResourceDelegation = viaResourceDelegation,
@@ -160,8 +168,8 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     private static bool HasInstanceDelegation(
         List<AuthorizedResource> authorizedInstances,
         string serviceResource,
-        string requestInstanceUrn,
-        string responseInstanceUrn)
+        string requestInstanceRef,
+        string responseInstanceRef)
     {
         if (authorizedInstances.Count == 0)
         {
@@ -179,14 +187,14 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 continue;
             }
 
-            var comparableInstanceUrn = ToComparableInstanceUrn(authorizedInstance);
-            if (comparableInstanceUrn is null)
+            var comparableInstanceRef = ToComparableInstanceRef(authorizedInstance);
+            if (comparableInstanceRef is null)
             {
                 continue;
             }
 
-            if (string.Equals(comparableInstanceUrn, requestInstanceUrn, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(comparableInstanceUrn, responseInstanceUrn, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(comparableInstanceRef, requestInstanceRef, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(comparableInstanceRef, responseInstanceRef, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -195,7 +203,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         return false;
     }
 
-    private static string? ToComparableInstanceUrn(AuthorizedResource authorizedInstance)
+    private static string? ToComparableInstanceRef(AuthorizedResource authorizedInstance)
     {
         var instanceRef = string.IsNullOrWhiteSpace(authorizedInstance.InstanceRef)
             ? authorizedInstance.InstanceId
@@ -217,12 +225,13 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             return normalized;
         }
 
-        var separator = normalized.LastIndexOf('/');
-        if (separator < 0 || separator == normalized.Length - 1)
+        var suffix = normalized[AppInstanceRefPrefix.Length..];
+        var separator = suffix.IndexOf('/');
+        if (separator <= 0 || separator == suffix.Length - 1)
         {
             return null;
         }
 
-        return InstanceUrn.AppInstancePrefix + normalized[(separator + 1)..];
+        return normalized;
     }
 }

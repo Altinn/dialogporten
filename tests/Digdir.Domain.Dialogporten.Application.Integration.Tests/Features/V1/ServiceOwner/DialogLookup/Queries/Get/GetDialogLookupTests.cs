@@ -18,23 +18,27 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     [Fact]
     public Task Get_Should_Return_Deleted_Dialog_For_ServiceOwner()
     {
-        var instanceUrn = $"urn:altinn:app-instance-id:{Guid.NewGuid()}";
+        var instanceId = Guid.NewGuid();
+        var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(instanceUrn))
+            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(storageLabel))
             .DeleteDialog()
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = instanceUrn
+                InstanceRef = instanceRef
             })
             .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
-                result.InstanceUrn.Should().Be(instanceUrn.ToLowerInvariant()));
+                result.InstanceRef.Should().Be(instanceRef.ToLowerInvariant()));
     }
 
     [Fact]
     public Task Get_By_Label_Should_Pick_Newest_Dialog_Even_When_Deleted_For_ServiceOwner()
     {
-        var instanceUrn = $"urn:altinn:app-instance-id:{Guid.NewGuid()}";
+        var instanceId = Guid.NewGuid();
+        var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
         var olderDialogId = NewUuidV7();
         var newerDeletedDialogId = NewUuidV7();
 
@@ -42,17 +46,17 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = olderDialogId;
-                x.AddServiceOwnerLabels(instanceUrn);
+                x.AddServiceOwnerLabels(storageLabel);
             })
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = newerDeletedDialogId;
-                x.AddServiceOwnerLabels(instanceUrn);
+                x.AddServiceOwnerLabels(storageLabel);
             })
             .DeleteDialog()
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = instanceUrn
+                InstanceRef = instanceRef
             })
             .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
                 result.DialogId.Should().Be(newerDeletedDialogId));
@@ -80,7 +84,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{ctx.GetDialogId()}",
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}",
                 AcceptedLanguages = [new AcceptedLanguage("en", 100)]
             })
             .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
@@ -100,7 +104,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .CreateSimpleDialog()
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
                 result.NonSensitiveTitle.Should().BeNull());
@@ -112,7 +116,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .CreateSimpleDialog()
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
 
@@ -123,17 +127,17 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .CreateSimpleDialog()
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
                 result.DialogId.Should().NotBeEmpty());
 
     [Fact]
-    public Task Get_Should_Return_ValidationError_For_Invalid_Urn() =>
+    public Task Get_Should_Return_ValidationError_For_Invalid_InstanceRef() =>
         FlowBuilder.For(Application)
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = "urn:altinn:unsupported:abc"
+                InstanceRef = "urn:altinn:unsupported:abc"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ValidationError>(result =>
                 result.Errors.Should().ContainSingle());

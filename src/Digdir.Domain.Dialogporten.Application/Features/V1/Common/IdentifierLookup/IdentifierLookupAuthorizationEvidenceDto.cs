@@ -2,6 +2,8 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLo
 
 public sealed class IdentifierLookupAuthorizationEvidenceDto
 {
+    public int MinimumAuthenticationLevel { get; set; }
+    public int CurrentAuthenticationLevel { get; set; }
     public bool ViaRole { get; set; }
     public bool ViaAccessPackage { get; set; }
     public bool ViaResourceDelegation { get; set; }

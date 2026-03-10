@@ -8,13 +8,13 @@ public sealed class GetDialogLookupEndpointSummary : Summary<GetDialogLookupEndp
 {
     public GetDialogLookupEndpointSummary()
     {
-        Summary = "Looks up a dialog by instance URN";
-        Description = "Resolves dialog metadata and authorization evidence for a supported instance URN.";
+        Summary = "Looks up a dialog by instance reference";
+        Description = "Resolves dialog metadata and authorization evidence for a supported instance reference.";
 
         Responses[StatusCodes.Status200OK] = "Successfully resolved identifier lookup metadata.";
         Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
-        Responses[StatusCodes.Status403Forbidden] = "Authenticated end user is not authorized for the supplied instance URN.";
-        Responses[StatusCodes.Status404NotFound] = "No dialog match was found for the supplied instance URN.";
+        Responses[StatusCodes.Status403Forbidden] = "Authenticated end user is not authorized for the supplied instance reference.";
+        Responses[StatusCodes.Status404NotFound] = "No dialog match was found for the supplied instance reference.";
     }
 }

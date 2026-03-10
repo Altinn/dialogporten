@@ -489,7 +489,7 @@
             "format": "guid",
             "type": "string"
           },
-          "instanceUrn": {
+          "instanceRef": {
             "type": "string"
           },
           "serviceOwner": {
@@ -504,12 +504,20 @@
       "V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence": {
         "additionalProperties": false,
         "properties": {
+          "currentAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
           "evidence": {
             "items": {
               "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem"
             },
             "nullable": true,
             "type": "array"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
           },
           "viaAccessPackage": {
             "type": "boolean"
@@ -596,7 +604,7 @@
             "format": "guid",
             "type": "string"
           },
-          "instanceUrn": {
+          "instanceRef": {
             "type": "string"
           },
           "nonSensitiveTitle": {
@@ -6650,12 +6658,12 @@
     },
     "/api/v1/enduser/dialoglookup": {
       "get": {
-        "description": "Resolves dialog metadata and authorization evidence for a supported instance URN.",
+        "description": "Resolves dialog metadata and authorization evidence for a supported instance reference.",
         "operationId": "V1EndUserDialogLookupQueriesGet_DialogLookup",
         "parameters": [
           {
             "in": "query",
-            "name": "instanceUrn",
+            "name": "instanceRef",
             "required": true,
             "schema": {
               "type": "string"
@@ -6699,7 +6707,7 @@
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
-            "description": "Authenticated end user is not authorized for the supplied instance URN."
+            "description": "Authenticated end user is not authorized for the supplied instance reference."
           },
           "404": {
             "content": {
@@ -6709,7 +6717,7 @@
                 }
               }
             },
-            "description": "No dialog match was found for the supplied instance URN."
+            "description": "No dialog match was found for the supplied instance reference."
           },
           "503": {
             "content": {
@@ -6738,7 +6746,7 @@
             ]
           }
         ],
-        "summary": "Looks up a dialog by instance URN",
+        "summary": "Looks up a dialog by instance reference",
         "tags": [
           "Enduser"
         ]
@@ -8087,12 +8095,12 @@
     },
     "/api/v1/serviceowner/dialoglookup": {
       "get": {
-        "description": "Resolves dialog metadata for a supported instance URN in service owner context.",
+        "description": "Resolves dialog metadata for a supported instance reference in service owner context.",
         "operationId": "V1ServiceOwnerDialogLookupQueriesGet_DialogLookup",
         "parameters": [
           {
             "in": "query",
-            "name": "instanceUrn",
+            "name": "instanceRef",
             "required": true,
             "schema": {
               "type": "string"
@@ -8146,7 +8154,7 @@
                 }
               }
             },
-            "description": "No dialog match was found for the supplied instance URN."
+            "description": "No dialog match was found for the supplied instance reference."
           },
           "503": {
             "content": {
@@ -8175,7 +8183,7 @@
             ]
           }
         ],
-        "summary": "Looks up a dialog by instance URN",
+        "summary": "Looks up a dialog by instance reference",
         "tags": [
           "Serviceowner"
         ]

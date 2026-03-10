@@ -14,7 +14,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 public sealed class GetDialogLookupQuery : IRequest<GetDialogLookupResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
-    public string InstanceUrn { get; set; } = null!;
+    public string InstanceRef { get; set; } = null!;
     public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
 }
 
@@ -39,20 +39,22 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
 
     public async Task<GetDialogLookupResult> Handle(GetDialogLookupQuery request, CancellationToken cancellationToken)
     {
-        if (!InstanceUrn.TryParse(request.InstanceUrn, out var urn))
+        if (!InstanceRef.TryParse(request.InstanceRef, out var parsedInstanceRef) || parsedInstanceRef is null)
         {
             return new ValidationError(new ValidationFailure(
-                nameof(request.InstanceUrn),
-                "InstanceUrn must be a supported URN: 'urn:altinn:app-instance-id:{uuid}', 'urn:altinn:correspondence-id:{uuid}' or 'urn:altinn:dialog-id:{uuid}'."));
+                nameof(request.InstanceRef),
+                "InstanceRef must be a supported identifier: 'urn:altinn:instance-id:{partyId}/{uuid}', 'urn:altinn:correspondence-id:{uuid}' or 'urn:altinn:dialog-id:{uuid}'."));
         }
 
+        var instanceRef = parsedInstanceRef.Value;
+
         var dialogData = await _dialogResolver.Resolve(
-            urn,
+            instanceRef,
             IdentifierLookupDeletedDialogVisibility.IncludeDeleted,
             cancellationToken);
         if (dialogData is null)
         {
-            return new EntityNotFound(nameof(request.InstanceUrn), [request.InstanceUrn]);
+            return new EntityNotFound(nameof(request.InstanceRef), [request.InstanceRef]);
         }
 
         if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
@@ -64,7 +66,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             }
         }
 
-        var responseInstanceUrn = _dialogResolver.ResolveOutputInstanceUrn(urn, dialogData);
+        var responseInstanceRef = _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData);
 
         var (serviceResource, serviceOwner) = await _presentationResolver.Resolve(
             dialogData.ServiceResource,
@@ -83,7 +85,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         return new ServiceOwnerIdentifierLookupDto
         {
             DialogId = dialogData.DialogId,
-            InstanceUrn = responseInstanceUrn,
+            InstanceRef = responseInstanceRef,
             ServiceResource = serviceResource,
             ServiceOwner = serviceOwner,
             Title = title,

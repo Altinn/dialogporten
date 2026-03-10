@@ -1,5 +1,4 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;

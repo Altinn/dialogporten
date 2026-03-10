@@ -1,10 +1,17 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
+using OneOf.Types;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get.GetDialogLookupQuery;
 using EndUserIdentifierLookupDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup.EndUserIdentifierLookupDto;
@@ -18,11 +25,11 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     [Fact]
     public Task Get_Should_Return_NotFound_For_Deleted_Dialog() =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels($"urn:altinn:app-instance-id:{Guid.NewGuid()}"))
+            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels($"urn:altinn:integration:storage:1337/{Guid.NewGuid()}"))
             .DeleteDialog()
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.EntityNotFound>(_ => { });
 
@@ -30,7 +37,8 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     public Task Get_By_Label_Should_Pick_Newest_NonDeleted_Dialog_For_EndUser()
     {
         var instanceId = Guid.NewGuid();
-        var instanceUrn = $"urn:altinn:app-instance-id:{instanceId}";
+        var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
         var olderDialogId = NewUuidV7();
         var newerDeletedDialogId = NewUuidV7();
 
@@ -38,30 +46,31 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = olderDialogId;
-                x.AddServiceOwnerLabels(instanceUrn);
+                x.AddServiceOwnerLabels(storageLabel);
             })
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = newerDeletedDialogId;
-                x.AddServiceOwnerLabels(instanceUrn);
+                x.AddServiceOwnerLabels(storageLabel);
             })
             .DeleteDialog()
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = instanceUrn
+                InstanceRef = instanceRef
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
                 result.DialogId.Should().Be(olderDialogId);
-                result.InstanceUrn.Should().Be(instanceUrn.ToLowerInvariant());
+                result.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
             });
     }
 
     [Fact]
-    public Task Get_By_AppInstanceUrn_Should_Return_Newest_Dialog_When_Multiple_Labels_Match()
+    public Task Get_By_AppInstanceRef_Should_Return_Newest_Dialog_When_Multiple_Labels_Match()
     {
         var instanceId = Guid.NewGuid();
-        var instanceUrn = $"urn:altinn:app-instance-id:{instanceId}";
+        var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
         var firstDialogId = NewUuidV7();
         var secondDialogId = NewUuidV7();
         var expectedDialogId = firstDialogId.CompareTo(secondDialogId) > 0 ? firstDialogId : secondDialogId;
@@ -70,57 +79,59 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = firstDialogId;
-                x.AddServiceOwnerLabels(instanceUrn);
+                x.AddServiceOwnerLabels(storageLabel);
             })
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = secondDialogId;
-                x.AddServiceOwnerLabels(instanceUrn);
+                x.AddServiceOwnerLabels(storageLabel);
             })
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = instanceUrn
+                InstanceRef = instanceRef
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
                 result.DialogId.Should().Be(expectedDialogId);
-                result.InstanceUrn.Should().Be(instanceUrn.ToLowerInvariant());
+                result.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
             });
     }
 
     [Fact]
-    public Task Get_By_CorrespondenceUrn_Should_Return_Matching_Dialog()
+    public Task Get_By_CorrespondenceRef_Should_Return_Matching_Dialog()
     {
         var correspondenceId = Guid.NewGuid();
-        var correspondenceUrn = $"urn:altinn:correspondence-id:{correspondenceId}";
+        var correspondenceRef = $"urn:altinn:correspondence-id:{correspondenceId}";
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(correspondenceUrn))
+            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(correspondenceRef))
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = correspondenceUrn
+                InstanceRef = correspondenceRef
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>((result, ctx) =>
             {
                 result.DialogId.Should().Be(ctx.GetDialogId());
-                result.InstanceUrn.Should().Be(correspondenceUrn.ToLowerInvariant());
+                result.InstanceRef.Should().Be(correspondenceRef.ToLowerInvariant());
             });
     }
 
     [Fact]
-    public Task Get_By_DialogUrn_Should_Prefer_AppInstanceUrn_Then_CorrespondenceUrn()
+    public Task Get_By_DialogRef_Should_Prefer_AppInstanceRef_Then_CorrespondenceRef()
     {
-        var appInstanceUrn = $"urn:altinn:app-instance-id:{Guid.NewGuid()}";
-        var correspondenceUrn = $"urn:altinn:correspondence-id:{Guid.NewGuid()}";
+        var instanceId = Guid.NewGuid();
+        var appInstanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
+        var correspondenceRef = $"urn:altinn:correspondence-id:{Guid.NewGuid()}";
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(correspondenceUrn, appInstanceUrn))
+            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(correspondenceRef, storageLabel))
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
-                result.InstanceUrn.Should().Be(appInstanceUrn.ToLowerInvariant()));
+                result.InstanceRef.Should().Be(appInstanceRef.ToLowerInvariant()));
     }
 
     [Fact]
@@ -141,10 +152,10 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                         .Returns(true);
                 });
             })
-            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels($"urn:altinn:app-instance-id:{Guid.NewGuid()}"))
+            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels($"urn:altinn:integration:storage:1337/{Guid.NewGuid()}"))
             .SendCommand((_, ctx) => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
 
@@ -156,8 +167,8 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         var serviceResource = "urn:altinn:resource:test-service-a";
         var otherServiceResource = "urn:altinn:resource:test-service-b";
         var instanceId = Guid.NewGuid();
-        var instanceUrn = $"urn:altinn:app-instance-id:{instanceId}";
         var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
 
         return FlowBuilder.For(Application, services =>
             {
@@ -206,11 +217,11 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 x.Dto.Id = dialogId;
                 x.Dto.Party = party;
                 x.Dto.ServiceResource = serviceResource;
-                x.AddServiceOwnerLabels(instanceUrn);
+                x.AddServiceOwnerLabels(storageLabel);
             })
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:dialog-id:{dialogId}"
+                InstanceRef = $"urn:altinn:dialog-id:{dialogId}"
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
@@ -219,16 +230,99 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                     .Should()
                     .ContainSingle(x =>
                         x.GrantType == IdentifierLookupGrantType.InstanceDelegation
-                        && x.Subject == instanceUrn);
+                        && x.Subject == instanceRef);
             });
     }
 
     [Fact]
-    public Task Get_Should_Return_ValidationError_For_Unsupported_Urn() =>
+    public Task Get_Should_Not_Return_Forbidden_When_AuthenticationLevel_Is_Below_Minimum_If_Delegated_Access_Exists()
+    {
+        const int minimumAuthenticationLevel = 4;
+        const int currentAuthenticationLevel = 0;
+        var serviceResource = $"urn:altinn:resource:lookup-auth-level-{Guid.NewGuid():N}";
+
+        return FlowBuilder.For(Application, services =>
+            {
+                services.ConfigureAltinnAuthorization(altinnAuthorization =>
+                {
+                    altinnAuthorization.GetAuthorizedPartiesForLookup(
+                            default!,
+                            Arg.Any<List<string>>(),
+                            Arg.Any<CancellationToken>())
+                        .ReturnsForAnyArgs(new AuthorizedPartiesResult
+                        {
+                            AuthorizedParties =
+                            [
+                                new AuthorizedParty
+                                {
+                                    Party = Party,
+                                    PartyUuid = Guid.NewGuid(),
+                                    Name = "Party",
+                                    AuthorizedResources = [serviceResource],
+                                    AuthorizedRolesAndAccessPackages = [],
+                                    AuthorizedInstances = []
+                                }
+                            ]
+                        });
+
+                    // Resolver should no longer use this for access gating.
+                    altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                        .Returns(false);
+                    altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
+                        .Returns(false);
+                });
+
+                services.RemoveAll<IResourceRegistry>();
+                services.AddScoped<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>();
+                var resourceRegistry = Substitute.For<IResourceRegistry>();
+                resourceRegistry
+                    .GetResourceInformation(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(x => Task.FromResult<ServiceResourceInformation?>(
+                        new ServiceResourceInformation(
+                            ResourceId: (string)x[0],
+                            ResourceType: "GenericAccessResource",
+                            OwnerOrgNumber: "991825827",
+                            OwnOrgShortName: "ttd",
+                            DisplayName: [new ResourceLocalization("nb", (string)x[0])],
+                            Description: [])));
+                resourceRegistry
+                    .GetUpdatedResourcePolicyInformation(Arg.Any<DateTimeOffset>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+                    .Returns(
+                    [
+                        new UpdatedResourcePolicyInformation(
+                            new Uri(serviceResource),
+                            minimumAuthenticationLevel,
+                            DateTimeOffset.UtcNow)
+                    ]);
+                services.AddSingleton(resourceRegistry);
+            })
+            .AsIntegrationTestUser(x => x.WithClaim(ClaimsPrincipalExtensions.IdportenAuthLevelClaim, Constants.IdportenLoaLow))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = Party;
+                x.Dto.ServiceResource = serviceResource;
+                x.AddServiceOwnerLabels($"urn:altinn:integration:storage:1337/{Guid.NewGuid()}");
+            })
+            .SendCommand(_ => new SyncPolicyCommand { Since = DateTimeOffset.MinValue })
+            .AssertResult<Success>()
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.AuthorizationEvidence.ViaResourceDelegation.Should().BeTrue();
+                result.AuthorizationEvidence.MinimumAuthenticationLevel.Should().Be(minimumAuthenticationLevel);
+                result.AuthorizationEvidence.CurrentAuthenticationLevel.Should().Be(currentAuthenticationLevel);
+            });
+    }
+
+    [Fact]
+    public Task Get_Should_Return_ValidationError_For_Unsupported_InstanceRef() =>
         FlowBuilder.For(Application)
             .SendCommand(_ => new GetDialogLookupQuery
             {
-                InstanceUrn = $"urn:altinn:unsupported:{Guid.NewGuid()}"
+                InstanceRef = $"urn:altinn:unsupported:{Guid.NewGuid()}"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ValidationError>(result =>
                 result.Errors.Should().ContainSingle());

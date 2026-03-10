@@ -13,13 +13,13 @@ public sealed partial class Queries
     public async Task<DialogLookupPayload> GetDialogLookup(
         [Service] ISender mediator,
         [Service] IMapper mapper,
-        [Argument] string instanceUrn,
+        [Argument] string instanceRef,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         CancellationToken cancellationToken)
     {
         var request = new GetDialogLookupQuery
         {
-            InstanceUrn = instanceUrn,
+            InstanceRef = instanceRef,
             AcceptedLanguages = acceptLanguage?.AcceptedLanguage
         };
 

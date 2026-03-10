@@ -13,13 +13,13 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
     public DialogLookupTests(GraphQlE2EFixture fixture) : base(fixture) { }
 
     [E2EFact]
-    public async Task Should_Return_Typed_NotFound_Error_For_Unknown_InstanceUrn()
+    public async Task Should_Return_Typed_NotFound_Error_For_Unknown_InstanceRef()
     {
         // Arrange
-        var instanceUrn = $"urn:altinn:app-instance-id:{Guid.NewGuid()}";
+        var instanceRef = $"urn:altinn:instance-id:1337/{Guid.NewGuid()}";
 
         // Act
-        var result = await LookupDialog(instanceUrn);
+        var result = await LookupDialog(instanceRef);
 
         // Assert
         result.Data.Should().NotBeNull();
@@ -27,14 +27,14 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
         var error = result.Data.DialogLookup.Errors.Single();
 
         error.Should().BeOfType<GetDialogLookup_DialogLookup_Errors_DialogLookupNotFound>();
-        error.Message.Should().Contain(instanceUrn);
+        error.Message.Should().Contain(instanceRef);
     }
 
     [E2EFact]
-    public async Task Should_Return_Lookup_For_Existing_InstanceUrn()
+    public async Task Should_Return_Lookup_For_Existing_InstanceRef()
     {
         // Arrange
-        var instanceUrn = $"urn:altinn:app-instance-id:{Guid.NewGuid()}";
+        var instanceRef = $"urn:altinn:instance-id:1337/{Guid.NewGuid()}";
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
             dialog.ServiceOwnerContext = new V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
@@ -43,14 +43,14 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel
                     {
-                        Value = instanceUrn
+                        Value = instanceRef
                     }
                 ]
             };
         });
 
         // Act
-        var result = await LookupDialog(instanceUrn);
+        var result = await LookupDialog(instanceRef);
 
         // Assert
         result.Data.Should().NotBeNull();
@@ -58,7 +58,7 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
         var lookup = result.Data.DialogLookup.Lookup;
         lookup.Should().NotBeNull();
         lookup!.DialogId.Should().Be(dialogId);
-        lookup.InstanceUrn.Should().Be(instanceUrn.ToLowerInvariant());
+        lookup.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
         lookup.ServiceResource.Id.Should().NotBeNullOrWhiteSpace();
         lookup.ServiceOwner.Code.Should().NotBeNullOrWhiteSpace();
     }
@@ -70,13 +70,13 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
         using var _ = Fixture.UseEndUserTokenOverrides(tokenOverride: "invalid.jwt.token");
 
         // Act
-        var result = await LookupDialog($"urn:altinn:app-instance-id:{Guid.NewGuid()}");
+        var result = await LookupDialog($"urn:altinn:instance-id:1337/{Guid.NewGuid()}");
 
         // Assert
         result.Errors.Should().ContainSingle()
             .Which.Message.Should().Contain("401 (Unauthorized)");
     }
 
-    private Task<IOperationResult<IGetDialogLookupResult>> LookupDialog(string instanceUrn) =>
-        Fixture.GraphQlClient.GetDialogLookup.ExecuteAsync(instanceUrn, TestContext.Current.CancellationToken);
+    private Task<IOperationResult<IGetDialogLookupResult>> LookupDialog(string instanceRef) =>
+        Fixture.GraphQlClient.GetDialogLookup.ExecuteAsync(instanceRef, TestContext.Current.CancellationToken);
 }

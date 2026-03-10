@@ -31,6 +31,7 @@ The SwaggerSnapshot test will fail if these files are not identical. It will als
 - Avoid throwing exceptions for domain flow; return domain-specific result objects.
 - Enable nullable reference types and keep entities immutable. Use OneOf for union returns when applicable.
 - Tests use xUnit with the fixture pattern and Verify for snapshot tests.
+- "Try"-methods should return a boolean indicating success and nullable `out` parameter with [NotNullWhen(true)] for the result, e.g. `bool TryGetUser(int id, [NotNullWhen(true)] out User? user)`.
 
 ### LINQ & Collection Style
 - Prefer LINQ over manual loops (`foreach`, `for`) for transformations, filtering, grouping, and projections.

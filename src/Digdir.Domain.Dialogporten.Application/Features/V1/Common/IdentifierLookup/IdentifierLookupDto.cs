@@ -5,7 +5,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLo
 public abstract class IdentifierLookupDto
 {
     public Guid DialogId { get; set; }
-    public string InstanceUrn { get; set; } = null!;
+    public string InstanceRef { get; set; } = null!;
     public IdentifierLookupServiceResourceDto ServiceResource { get; set; } = null!;
     public IdentifierLookupServiceOwnerDto ServiceOwner { get; set; } = null!;
 }

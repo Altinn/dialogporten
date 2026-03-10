@@ -36,7 +36,7 @@ public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, E
     {
         var query = new GetDialogLookupQuery
         {
-            InstanceUrn = req.InstanceUrn,
+            InstanceRef = req.InstanceRef,
             AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
         };
 
@@ -53,7 +53,7 @@ public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, E
 public sealed class GetDialogLookupRequest
 {
     [QueryParam]
-    public string InstanceUrn { get; set; } = null!;
+    public string InstanceRef { get; set; } = null!;
 
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]
     public AcceptedLanguages? AcceptedLanguages { get; set; } = null;

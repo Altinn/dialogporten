@@ -1403,9 +1403,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze")]
         Task<IApiResponse> V1ServiceOwnerDialogsCommandsFreezeFreezeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
-        /// <summary>Looks up a dialog by instance URN</summary>
-        /// <remarks>Resolves dialog metadata for a supported instance URN in service owner context.</remarks>
-        /// <param name="instanceUrn">instanceUrn parameter</param>
+        /// <summary>Looks up a dialog by instance reference</summary>
+        /// <remarks>Resolves dialog metadata for a supported instance reference in service owner context.</remarks>
+        /// <param name="instanceRef">instanceRef parameter</param>
         /// <param name="accept_Language">accept_Language parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
@@ -1433,7 +1433,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>No dialog match was found for the supplied instance URN.</description>
+        /// <description>No dialog match was found for the supplied instance reference.</description>
         /// </item>
         /// <item>
         /// <term>503</term>
@@ -1443,7 +1443,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialoglookup")]
-        Task<IApiResponse<V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup>> V1ServiceOwnerDialogLookupQueriesGetDialogLookup([Query] string instanceUrn, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup>> V1ServiceOwnerDialogLookupQueriesGetDialogLookup([Query] string instanceRef, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
     }
 
 }
@@ -5514,8 +5514,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("dialogId")]
         public System.Guid DialogId { get; set; }
 
-        [JsonPropertyName("instanceUrn")]
-        public string InstanceUrn { get; set; }
+        [JsonPropertyName("instanceRef")]
+        public string InstanceRef { get; set; }
 
         [JsonPropertyName("serviceResource")]
         public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; }

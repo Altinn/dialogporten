@@ -147,13 +147,13 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
     }
 
-    /// <summary>Looks up a dialog by instance URN</summary>
+    /// <summary>Looks up a dialog by instance reference</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IEnduserApi
     {
-        /// <summary>Looks up a dialog by instance URN</summary>
-        /// <remarks>Resolves dialog metadata and authorization evidence for a supported instance URN.</remarks>
-        /// <param name="instanceUrn">instanceUrn parameter</param>
+        /// <summary>Looks up a dialog by instance reference</summary>
+        /// <remarks>Resolves dialog metadata and authorization evidence for a supported instance reference.</remarks>
+        /// <param name="instanceRef">instanceRef parameter</param>
         /// <param name="accept_Language">accept_Language parameter</param>
         /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
         /// <returns>
@@ -177,11 +177,11 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>403</term>
-        /// <description>Authenticated end user is not authorized for the supplied instance URN.</description>
+        /// <description>Authenticated end user is not authorized for the supplied instance reference.</description>
         /// </item>
         /// <item>
         /// <term>404</term>
-        /// <description>No dialog match was found for the supplied instance URN.</description>
+        /// <description>No dialog match was found for the supplied instance reference.</description>
         /// </item>
         /// <item>
         /// <term>503</term>
@@ -191,7 +191,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialoglookup")]
-        Task<IApiResponse<V1CommonIdentifierLookup_EndUserIdentifierLookup>> V1EndUserDialogLookupQueriesGetDialogLookup([Query] string instanceUrn, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1CommonIdentifierLookup_EndUserIdentifierLookup>> V1EndUserDialogLookupQueriesGetDialogLookup([Query] string instanceRef, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
@@ -1156,8 +1156,8 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         [JsonPropertyName("dialogId")]
         public System.Guid DialogId { get; set; }
 
-        [JsonPropertyName("instanceUrn")]
-        public string InstanceUrn { get; set; }
+        [JsonPropertyName("instanceRef")]
+        public string InstanceRef { get; set; }
 
         [JsonPropertyName("serviceOwner")]
         public V1CommonIdentifierLookup_IdentifierLookupServiceOwner ServiceOwner { get; set; }
@@ -1171,8 +1171,14 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
     public partial class V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence
     {
 
+        [JsonPropertyName("currentAuthenticationLevel")]
+        public int CurrentAuthenticationLevel { get; set; }
+
         [JsonPropertyName("evidence")]
         public ICollection<V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem> Evidence { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
 
         [JsonPropertyName("viaAccessPackage")]
         public bool ViaAccessPackage { get; set; }

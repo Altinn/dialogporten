@@ -1,8 +1,8 @@
-query GetDialogLookup($instanceUrn: String!) {
-  dialogLookup(instanceUrn: $instanceUrn) {
+query GetDialogLookup($instanceRef: String!) {
+  dialogLookup(instanceRef: $instanceRef) {
     lookup {
       dialogId
-      instanceUrn
+      instanceRef
       serviceResource {
         id
       }

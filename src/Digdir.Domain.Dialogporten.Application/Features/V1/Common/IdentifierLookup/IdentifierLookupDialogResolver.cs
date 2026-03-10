@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -16,15 +17,15 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
     }
 
     public async Task<IdentifierLookupDialogData?> Resolve(
-        InstanceUrn urn,
+        InstanceRef instanceRef,
         IdentifierLookupDeletedDialogVisibility deletedDialogVisibility,
         CancellationToken cancellationToken)
     {
         var dialogs = GetDialogQuery(deletedDialogVisibility);
 
-        var dialogId = urn.Type is InstanceUrnType.DialogId
-            ? urn.Id
-            : await ResolveDialogIdFromLabel(dialogs, urn.Value, cancellationToken);
+        var dialogId = instanceRef.Type is InstanceRefType.DialogId
+            ? instanceRef.Id
+            : await ResolveDialogIdFromLabel(dialogs, CreateLookupLabel(instanceRef), cancellationToken);
 
         if (dialogId == Guid.Empty)
         {
@@ -55,12 +56,9 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (projection is null)
-        {
-            return null;
-        }
-
-        return new IdentifierLookupDialogData(
+        return projection is null
+            ? null
+            : new IdentifierLookupDialogData(
             projection.DialogId,
             projection.Party,
             projection.Org,
@@ -70,39 +68,34 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             projection.NonSensitiveTitle.Count > 0 ? projection.NonSensitiveTitle : null);
     }
 
-    // For a given request URN and resolved dialog data, determine the most appropriate instance URN to return in the response,
-    // preferring app instance URNs, then correspondence URNs, then dialog URNs. There should not be multiple app instance URNs
-    // or correspondence URNs for a given dialog, but if there are, prefer the one that is last in ordinal descending order (newest).
-    public string ResolveOutputInstanceUrn(InstanceUrn requestUrn, IdentifierLookupDialogData dialogData)
+    // For a given request reference and resolved dialog data, determine the most appropriate instance reference to return
+    // in the response, preferring app-instance references, then correspondence references, then dialog references.
+    // There should not be multiple app-instance or correspondence references for a given dialog, but if there are,
+    // prefer the one that is last in ordinal descending order (newest).
+    public string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData)
     {
-        if (requestUrn.Type is not InstanceUrnType.DialogId)
+        if (requestRef.Type is not InstanceRefType.DialogId)
         {
-            return requestUrn.Value;
+            return requestRef.Value;
         }
 
-        var appInstanceUrn = dialogData.ServiceOwnerLabels
-            .Select(TryToAppInstanceUrn)
-            .Where(x => x is not null)
-            .Select(x => x!)
+        var appInstanceRef = dialogData.ServiceOwnerLabels
+            .Select(x => TryToAppInstanceRef(x, out var appInstanceLabel) ? appInstanceLabel : null)
+            .OfType<string>()
             .OrderByDescending(x => x, StringComparer.Ordinal)
             .FirstOrDefault();
 
-        if (appInstanceUrn is not null)
+        if (appInstanceRef is not null)
         {
-            return appInstanceUrn;
+            return appInstanceRef;
         }
 
-        var correspondenceUrn = dialogData.ServiceOwnerLabels
-            .Where(x => x.StartsWith(InstanceUrn.CorrespondencePrefix, StringComparison.Ordinal))
+        var correspondenceRef = dialogData.ServiceOwnerLabels
+            .Where(x => x.StartsWith(InstanceRef.CorrespondencePrefix, StringComparison.Ordinal))
             .OrderByDescending(x => x, StringComparer.Ordinal)
             .FirstOrDefault();
 
-        if (correspondenceUrn is not null)
-        {
-            return correspondenceUrn;
-        }
-
-        return InstanceUrn.CreateDialogUrn(dialogData.DialogId).ToLowerInvariant();
+        return correspondenceRef ?? InstanceRef.CreateDialogRef(dialogData.DialogId).ToLowerInvariant();
     }
 
     private IQueryable<DialogEntity> GetDialogQuery(
@@ -127,28 +120,36 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
-    private static string? TryToAppInstanceUrn(string labelValue)
+    private static string CreateLookupLabel(InstanceRef instanceRef) =>
+        instanceRef.Type is not InstanceRefType.AppInstanceId || instanceRef.PartyId is null
+            ? instanceRef.Value
+            : $"{Constants.ServiceContextInstanceIdPrefix}{instanceRef.PartyId.Value}/{instanceRef.Id}"
+                .ToLowerInvariant();
+
+    private static bool TryToAppInstanceRef(string labelValue, [NotNullWhen(true)] out string? appInstanceRef)
     {
-        if (labelValue.StartsWith(InstanceUrn.AppInstancePrefix, StringComparison.Ordinal))
+        appInstanceRef = null;
+
+        if (labelValue.StartsWith(InstanceRef.AppInstancePrefix, StringComparison.Ordinal))
         {
-            return labelValue;
+            appInstanceRef = labelValue.ToLowerInvariant();
+            return true;
         }
 
         if (!labelValue.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.Ordinal))
         {
-            return null;
+            return false;
         }
 
         var separator = labelValue.LastIndexOf('/');
         if (separator < 0 || separator == labelValue.Length - 1)
         {
-            return null;
+            return false;
         }
 
-        var instanceId = labelValue[(separator + 1)..];
-        return Guid.TryParse(instanceId, out _)
-            ? (InstanceUrn.AppInstancePrefix + instanceId).ToLowerInvariant()
-            : null;
+        var appInstanceSuffix = labelValue[Constants.ServiceContextInstanceIdPrefix.Length..];
+        appInstanceRef = $"{InstanceRef.AppInstancePrefix}{appInstanceSuffix}".ToLowerInvariant();
+        return true;
     }
 
     private sealed class IdentifierLookupDialogProjection

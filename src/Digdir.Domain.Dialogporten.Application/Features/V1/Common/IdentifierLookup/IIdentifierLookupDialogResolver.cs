@@ -14,11 +14,11 @@ internal enum IdentifierLookupDeletedDialogVisibility
 internal interface IIdentifierLookupDialogResolver
 {
     Task<IdentifierLookupDialogData?> Resolve(
-        InstanceUrn urn,
+        InstanceRef instanceRef,
         IdentifierLookupDeletedDialogVisibility deletedDialogVisibility,
         CancellationToken cancellationToken);
 
-    string ResolveOutputInstanceUrn(InstanceUrn requestUrn, IdentifierLookupDialogData dialogData);
+    string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData);
 }
 
 internal sealed record IdentifierLookupDialogData(

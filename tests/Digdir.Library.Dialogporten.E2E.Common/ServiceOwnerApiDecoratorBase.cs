@@ -67,10 +67,10 @@ internal abstract class ServiceOwnerApiDecoratorBase : IServiceownerApi
         _serviceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(queryParams, cancellationToken);
 
     public virtual Task<IApiResponse<V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup>> V1ServiceOwnerDialogLookupQueriesGetDialogLookup(
-        string instanceUrn,
+        string instanceRef,
         V1EndUserCommon_AcceptedLanguages accept_Language,
         CancellationToken cancellationToken = default) =>
-        _serviceownerApi.V1ServiceOwnerDialogLookupQueriesGetDialogLookup(instanceUrn, accept_Language, cancellationToken);
+        _serviceownerApi.V1ServiceOwnerDialogLookupQueriesGetDialogLookup(instanceRef, accept_Language, cancellationToken);
 
     public virtual Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog(V1ServiceOwnerDialogsCommandsCreate_Dialog dto,
         CancellationToken cancellationToken = default) =>

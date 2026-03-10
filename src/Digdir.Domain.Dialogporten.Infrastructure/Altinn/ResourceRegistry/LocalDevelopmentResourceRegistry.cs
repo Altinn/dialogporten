@@ -53,6 +53,13 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
     /// </summary>
     public virtual Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken)
     {
+        var cachedResource = CachedResourceIds.FirstOrDefault(x =>
+            string.Equals(x.ResourceId, serviceResourceId, StringComparison.OrdinalIgnoreCase));
+        if (cachedResource is not null)
+        {
+            return Task.FromResult<ServiceResourceInformation?>(cachedResource);
+        }
+
         return Task.FromResult<ServiceResourceInformation?>(
             new ServiceResourceInformation(
                 serviceResourceId,

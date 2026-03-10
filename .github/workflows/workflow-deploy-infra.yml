@@ -129,7 +129,6 @@ jobs:
           name: dp-be-${{ inputs.environment }}-${{ inputs.version }}-pgmigration
           template-file: ./.azure/infrastructure/postgresql-migration-target.bicep
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/infrastructure/postgresql-migration-target.${{ inputs.environment }}.bicepparam
 
       - name: Deploy infrastructure (${{ inputs.environment }})
@@ -173,7 +172,6 @@ jobs:
           name: dp-be-${{ inputs.environment }}-${{ inputs.version }}-pgmigration
           template-file: ./.azure/infrastructure/postgresql-migration-target.bicep
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          location: ${{ inputs.region }}
           parameters-file: ./.azure/infrastructure/postgresql-migration-target.${{ inputs.environment }}.bicepparam
 
       - name: Logout from azure

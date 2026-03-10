@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 
-public sealed class DialogContentToContentDtoConverter : ITypeConverter<List<DialogContent>?, ContentDto?>
+internal sealed class DialogContentToContentDtoConverter : ITypeConverter<List<DialogContent>?, ContentDto?>
 {
     public ContentDto? Convert(List<DialogContent>? sources, ContentDto? destination, ResolutionContext context)
     {

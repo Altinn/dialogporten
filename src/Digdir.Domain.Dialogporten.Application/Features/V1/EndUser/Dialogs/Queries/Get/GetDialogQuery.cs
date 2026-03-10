@@ -228,12 +228,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     {
         foreach (var a in dto.ApiActions)
         {
-            a.IsAuthorized = authorization.HasAccessToApiAction(a.Action, a.AuthorizationAttribute);
+            a.IsAuthorized = authorization.HasAccessToAction(a.Action, a.AuthorizationAttribute);
         }
 
         foreach (var g in dto.GuiActions)
         {
-            g.IsAuthorized = authorization.HasAccessToGuiAction(g.Action, g.AuthorizationAttribute);
+            g.IsAuthorized = authorization.HasAccessToAction(g.Action, g.AuthorizationAttribute);
         }
 
         dto.Content.MainContentReference?.IsAuthorized = authorization.HasReadAccessToMainResource();

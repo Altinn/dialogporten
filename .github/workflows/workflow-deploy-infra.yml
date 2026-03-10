@@ -111,6 +111,26 @@ jobs:
           location: ${{ inputs.region }}
           parameters-file: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
 
+      - name: Dryrun Deploy PostgreSQL migration target (${{ inputs.environment }})
+        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        if: ${{ inputs.dryRun && hashFiles(format('.azure/infrastructure/postgresql-migration-target.{0}.bicepparam', inputs.environment)) != '' }}
+        id: deploy-migration-target-dry-run
+        env:
+          # secrets
+          PG_ADMIN_PASSWORD: ${{ steps.pwd-generator.outputs.postgresqlPassword }}
+          AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID }}
+          AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP: ${{ secrets.AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP }}
+          AZURE_SOURCE_KEY_VAULT_NAME: ${{ secrets.AZURE_SOURCE_KEY_VAULT_NAME }}
+        with:
+          scope: subscription
+          type: deployment
+          operation: whatIf
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }}-pgmigration
+          template-file: ./.azure/infrastructure/postgresql-migration-target.bicep
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          location: ${{ inputs.region }}
+          parameters-file: ./.azure/infrastructure/postgresql-migration-target.${{ inputs.environment }}.bicepparam
+
       - name: Deploy infrastructure (${{ inputs.environment }})
         uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
         if: ${{ !inputs.dryRun }}
@@ -133,6 +153,26 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           location: ${{ inputs.region }}
           parameters-file: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
+
+      - name: Deploy PostgreSQL migration target (${{ inputs.environment }})
+        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        if: ${{ !inputs.dryRun && hashFiles(format('.azure/infrastructure/postgresql-migration-target.{0}.bicepparam', inputs.environment)) != '' }}
+        id: deploy-migration-target
+        env:
+          # secrets
+          PG_ADMIN_PASSWORD: ${{ steps.pwd-generator.outputs.postgresqlPassword }}
+          AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID }}
+          AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP: ${{ secrets.AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP }}
+          AZURE_SOURCE_KEY_VAULT_NAME: ${{ secrets.AZURE_SOURCE_KEY_VAULT_NAME }}
+        with:
+          scope: subscription
+          type: deployment
+          operation: create
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }}-pgmigration
+          template-file: ./.azure/infrastructure/postgresql-migration-target.bicep
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          location: ${{ inputs.region }}
+          parameters-file: ./.azure/infrastructure/postgresql-migration-target.${{ inputs.environment }}.bicepparam
 
       - name: Logout from azure
         if: ${{failure() || success()}}

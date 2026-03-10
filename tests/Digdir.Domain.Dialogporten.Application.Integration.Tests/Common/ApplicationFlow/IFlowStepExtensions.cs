@@ -77,7 +77,6 @@ public static class IFlowStepExtensions
     private const string PartyKey = "Party";
     private const string ActivityIdKey = "ActivityId";
     private const string ServiceResource = "ServiceResource";
-    private const int DefaultSeed = 12345678;
 
     public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)
@@ -153,7 +152,7 @@ public static class IFlowStepExtensions
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
-        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DefaultSeed) =>
+        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DialogGenerator.DefaultSeed) =>
         step.CreateDialog(_ =>
         {
             var command = new CreateDialogCommand
@@ -169,7 +168,7 @@ public static class IFlowStepExtensions
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateSimpleDialog(this IFlowStep step,
-        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DefaultSeed) =>
+        Action<CreateDialogCommand, FlowContext>? initialState = null, int seed = DialogGenerator.DefaultSeed) =>
         step.CreateDialog(_ =>
         {
             var command = new CreateDialogCommand
@@ -184,18 +183,17 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<SetSystemLabelResultEU> SetSystemLabelsEndUser(this IFlowStep<CreateDialogResult> step,
+    public static IFlowExecutor<SetSystemLabelResultEU> SetSystemLabelsEndUser(this IFlowStep step,
         Action<SetSystemLabelCommandEU>? modify = null) =>
-        step.AssertResult<CreateDialogSuccess>()
-            .SendCommand(x =>
+        step.SendCommand(x =>
+        {
+            var command = new SetSystemLabelCommandEU
             {
-                var command = new SetSystemLabelCommandEU
-                {
-                    DialogId = x.GetDialogId(),
-                };
-                modify?.Invoke(command);
-                return command;
-            });
+                DialogId = x.GetDialogId(),
+            };
+            modify?.Invoke(command);
+            return command;
+        });
 
     public static IFlowExecutor<SetSystemLabelResultSO> SetSystemLabelsServiceOwner(
         this IFlowStep<CreateDialogResult> step,

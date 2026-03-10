@@ -687,7 +687,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/parties")]
-        Task<IApiResponse<ICollection<V1AccessManagementQueriesGetParties_Parties>>> V1EndUserAccessManagementQueriesGetPartiesParties(CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1AccessManagementQueriesGetParties_Parties>> V1EndUserAccessManagementQueriesGetPartiesParties(CancellationToken cancellationToken = default);
     }
 
 }

@@ -27,6 +27,8 @@ param appInsightsSku = {
   name: 'PerGB2018'
 }
 param postgresConfiguration = {
+  serverNameStem: 'postgres'
+  version: '16'
   sku: {
     name: 'Standard_D8ads_v5'
     tier: 'GeneralPurpose'
@@ -61,6 +63,9 @@ param serviceBusSku = {
   tier: 'Premium'
   capacity: 1
 }
+
+param serviceBusVnetEnabled = true
+
 // Altinn Product Dialogporten: Developers Prod
 param sshJumperConfig = {
   adminLoginGroupObjectId: 'a94de4bf-0a83-4d30-baba-0c6a7365571c'

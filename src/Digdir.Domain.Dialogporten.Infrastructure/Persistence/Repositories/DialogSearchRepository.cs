@@ -481,37 +481,32 @@ internal sealed class DialogSearchRepository(
 
         const string sql =
             """
-            WITH TargetDialogs (DialogId) AS (
-                SELECT unnest(@DialogIds)
-            ),
-            latestActivity AS (
-                SELECT DISTINCT ON (da."DialogId") 
-                    da."DialogId"
-                    , da."Id" AS "ActivityId"
-                    , da."CreatedAt"
-                    , da."TypeId"
-                    , da."ExtendedType"
-                    , da."TransmissionId"
-                FROM TargetDialogs td
-                INNER JOIN "DialogActivity" da ON da."DialogId" = td.DialogId
-                ORDER BY da."DialogId", da."CreatedAt" DESC, da."Id" DESC
-            )
-            SELECT la."DialogId"
-                 , la."ActivityId"
-                 , la."CreatedAt"
-                 , la."TypeId"
-                 , la."ExtendedType"
-                 , la."TransmissionId"
-                 , a."ActorTypeId" AS "ActorType"
-                 , an."ActorId"
-                 , an."Name"       AS "ActorName"
-                 , l."LanguageCode"
-                 , l."Value"       AS "Description"
-            FROM latestActivity la
-            INNER JOIN "Actor" a ON a."Discriminator" = 'DialogActivityPerformedByActor' AND a."ActivityId" = la."ActivityId"
+            SELECT la.*,
+                a."ActorTypeId" AS "ActorType",
+                an."ActorId",
+                an."Name" AS "ActorName",
+                loc."LanguageCode",
+                loc."Value" AS "Description"
+            FROM unnest(@DialogIds)
+            AS td(DialogId)
+            CROSS JOIN LATERAL (
+                SELECT da."DialogId", da."Id" AS "ActivityId", da."CreatedAt",
+                    da."TypeId", da."ExtendedType", da."TransmissionId"
+                FROM "DialogActivity" da
+                WHERE da."DialogId" = td.DialogId
+                ORDER BY da."CreatedAt" DESC, da."Id" DESC
+                LIMIT 1
+            ) la
+            INNER JOIN "Actor" a ON a."ActivityId" = la."ActivityId" 
+                AND a."Discriminator" = 'DialogActivityPerformedByActor'
             LEFT JOIN "ActorName" an ON an."Id" = a."ActorNameEntityId"
-            LEFT JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogActivityDescription' AND ls."ActivityId" = la."ActivityId"
-            LEFT JOIN "Localization" l ON l."LocalizationSetId" = ls."Id";
+            LEFT JOIN LATERAL (
+                SELECT l."LanguageCode", l."Value"
+                FROM "LocalizationSet" ls
+                JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
+                WHERE ls."ActivityId" = la."ActivityId"
+                AND ls."Discriminator" = 'DialogActivityDescription'
+            ) loc ON TRUE;
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);

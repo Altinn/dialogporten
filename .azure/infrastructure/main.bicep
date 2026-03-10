@@ -90,6 +90,9 @@ param deployerPrincipalName string
 import { Sku as ServiceBusSku } from '../modules/serviceBus/main.bicep'
 param serviceBusSku ServiceBusSku
 
+@description('Whether to enable VNET integration for Service Bus (requires Premium SKU)')
+param serviceBusVnetEnabled bool = true
+
 import { Sku as RedisSku } from '../modules/redis/main.bicep'
 param redisSku RedisSku
 @minLength(1)
@@ -170,8 +173,8 @@ module serviceBus '../modules/serviceBus/main.bicep' = {
     namePrefix: namePrefix
     location: location
     sku: serviceBusSku
-    subnetId: vnet.outputs.serviceBusSubnetId
-    vnetId: vnet.outputs.virtualNetworkId
+    subnetId: serviceBusVnetEnabled ? vnet.outputs.serviceBusSubnetId : null
+    vnetId: serviceBusVnetEnabled ? vnet.outputs.virtualNetworkId : null
     tags: tags
   }
 }

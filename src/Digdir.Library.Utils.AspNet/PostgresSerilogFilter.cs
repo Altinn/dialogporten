@@ -2,6 +2,7 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Configuration;
 using Npgsql;
+using Serilog;
 
 namespace Digdir.Library.Utils.AspNet;
 
@@ -14,21 +15,23 @@ internal sealed class PostgresSerilogFilter : ILogEventFilter
     {
         for (var currentEx = exception; currentEx is not null; currentEx = currentEx.InnerException)
         {
-            if (currentEx is PostgresException postgresException &&
-                HandledPostgresErrorCodes.All.Contains(postgresException.SqlState))
+            switch (currentEx)
             {
-                return true;
-            }
-
-            if (currentEx is AggregateException aggregateException)
-            {
-                foreach (var innerException in aggregateException.InnerExceptions)
-                {
-                    if (HasHandledPostgresException(innerException))
+                case PostgresException postgresException when
+                    HandledPostgresErrorCodes.All.Contains(postgresException.SqlState):
+                    return true;
+                case AggregateException aggregateException:
                     {
-                        return true;
+                        if (aggregateException.InnerExceptions.Any(HasHandledPostgresException))
+                        {
+                            return true;
+                        }
+
+                        break;
                     }
-                }
+
+                default:
+                    break;
             }
         }
 
@@ -38,6 +41,6 @@ internal sealed class PostgresSerilogFilter : ILogEventFilter
 
 public static class PostgresSerilogFilterExtensions
 {
-    public static LoggerFilterConfiguration WithHandledPostgresExceptionFilter(this LoggerFilterConfiguration filterConfiguration) =>
+    public static LoggerConfiguration WithHandledPostgresExceptionFilter(this LoggerFilterConfiguration filterConfiguration) =>
         filterConfiguration.With(new PostgresSerilogFilter());
 }

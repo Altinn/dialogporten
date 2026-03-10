@@ -214,6 +214,10 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
     dataEncryption: {
       type: 'SystemManaged'
     }
+    authConfig: {
+      activeDirectoryAuth: 'Enabled'
+      passwordAuth: 'Enabled'
+    }
     replicationRole: 'Primary'
     network: {
       delegatedSubnetResourceId: subnetId

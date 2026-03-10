@@ -70,44 +70,44 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
                 dbCtx.Dialogs
                     .Include(x => x.Content)
-                        .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Content)
-                        .ThenInclude(x => x.Value.Localizations)
+                    .ThenInclude(x => x.Content)
+                    .ThenInclude(x => x.Value.Localizations)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Sender)
-                        .ThenInclude(x => x.ActorNameEntity)
+                    .ThenInclude(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Attachments)
-                        .ThenInclude(x => x.Urls)
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.Urls)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.Attachments)
-                        .ThenInclude(x => x.DisplayName!.Localizations)
+                    .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.DisplayName!.Localizations)
                     .Include(x => x.Transmissions)
-                        .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
+                    .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
                     .Include(x => x.Activities)
-                        .ThenInclude(x => x.Description!.Localizations)
+                    .ThenInclude(x => x.Description!.Localizations)
                     .Include(x => x.Activities)
-                        .ThenInclude(x => x.PerformedBy)
-                        .ThenInclude(x => x.ActorNameEntity)
+                    .ThenInclude(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.SeenLog
                         .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
                         .OrderBy(x => x.CreatedAt))
-                        .ThenInclude(x => x.SeenBy)
-                        .ThenInclude(x => x.ActorNameEntity)
+                    .ThenInclude(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.EndUserContext)
-                        .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                    .ThenInclude(x => x.DialogEndUserContextSystemLabels)
                     .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(x => x.Id == request.DialogId, ct),
             cancellationToken);
@@ -157,16 +157,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // https://github.com/altinn/dialogporten/issues/387
         var userId = _userRegistry.GetCurrentUserId();
 
-        var externalId = userId.ExternalIdWithPrefix;
+        var externalIdWithPrefix = userId.ExternalIdWithPrefix;
         if (userId.Type == DialogUserType.Values.SystemUser)
         {
-            externalId = _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
+            externalIdWithPrefix = _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
                 ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
                 : throw new InvalidOperationException("Systemuser organization number not found");
         }
 
         var lastSeen = dialog.SeenLog
-            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalId)
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalIdWithPrefix)
             .MaxBy(x => x.CreatedAt);
 
         if (lastSeen is null ||
@@ -174,7 +174,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.EndUserContext.DialogEndUserContextSystemLabels.Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened)
             )
         {
-            dialog.UpdateSeenAt(externalId, userId.Type);
+            dialog.UpdateSeenAt(externalIdWithPrefix, userId.Type);
         }
 
 
@@ -198,12 +198,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            userId);
+            externalIdWithPrefix);
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            userId);
+            externalIdWithPrefix);
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -223,21 +223,21 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        UserId userId) =>
+        string externalId) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
                 .First())
-            .Select(log => ToSeenLogDto(userId, log))
+            .Select(log => ToSeenLogDto(externalId, log))
             .ToList();
 
-    private DialogSeenLogDto ToSeenLogDto(UserId currentUserInformation, DialogSeenLog log)
+    private DialogSeenLogDto ToSeenLogDto(string externalId, DialogSeenLog log)
     {
         var actorId = log.SeenBy.ActorNameEntity?.ActorId;
         var logDto = _mapper.Map<DialogSeenLogDto>(log);
-        logDto.IsCurrentEndUser = currentUserInformation.ExternalIdWithPrefix == actorId;
+        logDto.IsCurrentEndUser = externalId == actorId;
         return logDto;
     }
 

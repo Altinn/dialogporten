@@ -122,7 +122,8 @@ jobs:
           AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP: ${{ secrets.AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP }}
           AZURE_SOURCE_KEY_VAULT_NAME: ${{ secrets.AZURE_SOURCE_KEY_VAULT_NAME }}
         with:
-          scope: subscription
+          scope: resourceGroup
+          resource-group-name: dp-be-${{ inputs.environment }}-rg
           type: deployment
           operation: whatIf
           name: dp-be-${{ inputs.environment }}-${{ inputs.version }}-pgmigration
@@ -165,7 +166,8 @@ jobs:
           AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP: ${{ secrets.AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP }}
           AZURE_SOURCE_KEY_VAULT_NAME: ${{ secrets.AZURE_SOURCE_KEY_VAULT_NAME }}
         with:
-          scope: subscription
+          scope: resourceGroup
+          resource-group-name: dp-be-${{ inputs.environment }}-rg
           type: deployment
           operation: create
           name: dp-be-${{ inputs.environment }}-${{ inputs.version }}-pgmigration

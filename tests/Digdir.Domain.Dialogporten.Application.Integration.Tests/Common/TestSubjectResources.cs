@@ -65,13 +65,17 @@ internal static class TestSubjectResourcesExtensions
             }
 
             var mappings = groups
-                .SelectMany(group => group.Subjects.Select(subject => new SubjectResourceSeed(
-                    string.IsNullOrWhiteSpace(subject)
-                        ? throw new ArgumentException("Subject must be set.", nameof(groups))
-                        : subject,
-                    string.IsNullOrWhiteSpace(group.Resource)
-                        ? throw new ArgumentException("Resource must be set.", nameof(groups))
-                        : group.Resource)))
+                .SelectMany(group => (group.Subjects
+                                      ?? throw new ArgumentException(
+                                          "Subjects must be set for each SubjectResourceGroup.",
+                                          nameof(groups)))
+                    .Select(subject => new SubjectResourceSeed(
+                        string.IsNullOrWhiteSpace(subject)
+                            ? throw new ArgumentException("Subject must be set.", nameof(groups))
+                            : subject,
+                        string.IsNullOrWhiteSpace(group.Resource)
+                            ? throw new ArgumentException("Resource must be set.", nameof(groups))
+                            : group.Resource)))
                 .ToArray();
 
             return flowStep.SeedSubjectResources(mappings);

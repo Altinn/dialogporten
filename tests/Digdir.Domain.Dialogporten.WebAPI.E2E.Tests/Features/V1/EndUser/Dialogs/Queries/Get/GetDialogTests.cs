@@ -121,4 +121,20 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [E2EFact]
+    public async Task Should_Return_Forbidden_With_Inadequate_Auth_Level()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(x =>
+            // This serviceResource requires auth level 4, default user has level 3
+            x.ServiceResource = "urn:altinn:resource:ttd-dialogporten-transmissions-test");
+
+        // Act
+        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.Error!.Content.Should().Contain(Constants.AltinnAuthLevelTooLow);
+    }
 }

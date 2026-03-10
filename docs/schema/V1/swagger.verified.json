@@ -7941,10 +7941,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/V1AccessManagementQueriesGetParties_Parties"
-                  },
-                  "type": "array"
+                  "$ref": "#/components/schemas/V1AccessManagementQueriesGetParties_Parties"
                 }
               }
             },

@@ -105,7 +105,7 @@ jobs:
           scope: subscription
           type: deployment
           operation: whatIf
-          name: dp-be-${{ inputs.environment }}-${{ inputs.version }} 
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }}
           template-file: ./.azure/infrastructure/main.bicep
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           location: ${{ inputs.region }}
@@ -113,7 +113,7 @@ jobs:
 
       - name: Dryrun Deploy PostgreSQL migration target (${{ inputs.environment }})
         uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
-        if: ${{ inputs.dryRun && hashFiles(format('.azure/infrastructure/postgresql-migration-target.{0}.bicepparam', inputs.environment)) != '' }}
+        if: ${{ inputs.dryRun }}
         id: deploy-migration-target-dry-run
         env:
           # secrets
@@ -148,7 +148,7 @@ jobs:
           scope: subscription
           type: deployment
           operation: create
-          name: dp-be-${{ inputs.environment }}-${{ inputs.version }} 
+          name: dp-be-${{ inputs.environment }}-${{ inputs.version }}
           template-file: ./.azure/infrastructure/main.bicep
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           location: ${{ inputs.region }}
@@ -156,7 +156,7 @@ jobs:
 
       - name: Deploy PostgreSQL migration target (${{ inputs.environment }})
         uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
-        if: ${{ !inputs.dryRun && hashFiles(format('.azure/infrastructure/postgresql-migration-target.{0}.bicepparam', inputs.environment)) != '' }}
+        if: ${{ !inputs.dryRun }}
         id: deploy-migration-target
         env:
           # secrets

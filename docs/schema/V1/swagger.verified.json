@@ -6691,7 +6691,7 @@
                 }
               }
             },
-            "description": "Successfully resolved identifier lookup metadata."
+            "description": "Successfully resolved dialog lookup metadata."
           },
           "400": {
             "content": {

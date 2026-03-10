@@ -63,6 +63,43 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     }
 
     [Fact]
+    public Task Get_By_CorrespondenceRef_Should_Return_Matching_Dialog()
+    {
+        var correspondenceId = Guid.NewGuid();
+        var correspondenceRef = $"urn:altinn:correspondence-id:{correspondenceId}";
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(correspondenceRef))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = correspondenceRef
+            })
+            .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>((result, ctx) =>
+            {
+                result.DialogId.Should().Be(ctx.GetDialogId());
+                result.InstanceRef.Should().Be(correspondenceRef.ToLowerInvariant());
+            });
+    }
+
+    [Fact]
+    public Task Get_By_DialogRef_Should_Prefer_AppInstanceRef_Then_CorrespondenceRef()
+    {
+        var instanceId = Guid.NewGuid();
+        var appInstanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
+        var correspondenceRef = $"urn:altinn:correspondence-id:{Guid.NewGuid()}";
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(correspondenceRef, storageLabel))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
+                result.InstanceRef.Should().Be(appInstanceRef.ToLowerInvariant()));
+    }
+
+    [Fact]
     public Task Get_Should_Prune_Title_And_NonSensitiveTitle_When_AcceptLanguage_Is_Set() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>

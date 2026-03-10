@@ -64,17 +64,37 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
     }
 
     [E2EFact]
-    public async Task Should_Return_401_Unauthorized_With_Invalid_EndUser_Token()
+    public async Task Should_Return_Typed_Forbidden_Error_When_EndUser_Has_No_Access()
     {
         // Arrange
-        using var _ = Fixture.UseEndUserTokenOverrides(tokenOverride: "invalid.jwt.token");
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var instanceRef = $"urn:altinn:dialog-id:{dialogId}";
+        using var _ = Fixture.UseEndUserTokenOverrides(ssn: "27069815400");
 
         // Act
-        var result = await LookupDialog($"urn:altinn:instance-id:1337/{Guid.NewGuid()}");
+        var result = await LookupDialog(instanceRef);
 
         // Assert
-        result.Errors.Should().ContainSingle()
-            .Which.Message.Should().Contain("401 (Unauthorized)");
+        result.Data.Should().NotBeNull();
+        var error = result.Data.DialogLookup.Errors.Single();
+        error.Should().BeOfType<GetDialogLookup_DialogLookup_Errors_DialogLookupForbidden>();
+        error.Message.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [E2EFact]
+    public async Task Should_Return_Typed_Validation_Error_For_Unsupported_InstanceRef()
+    {
+        // Arrange
+        var instanceRef = $"urn:altinn:unsupported:{Guid.NewGuid()}";
+
+        // Act
+        var result = await LookupDialog(instanceRef);
+
+        // Assert
+        result.Data.Should().NotBeNull();
+        var error = result.Data.DialogLookup.Errors.Single();
+        error.Should().BeOfType<GetDialogLookup_DialogLookup_Errors_DialogLookupValidationError>();
+        error.Message.Should().Contain("supported identifier");
     }
 
     private Task<IOperationResult<IGetDialogLookupResult>> LookupDialog(string instanceRef) =>

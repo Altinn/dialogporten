@@ -97,6 +97,10 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
         error.Message.Should().Contain("supported identifier");
     }
 
-    private Task<IOperationResult<IGetDialogLookupResult>> LookupDialog(string instanceRef) =>
-        Fixture.GraphQlClient.GetDialogLookup.ExecuteAsync(instanceRef, TestContext.Current.CancellationToken);
+    private async Task<IOperationResult<IGetDialogLookupResult>> LookupDialog(string instanceRef)
+    {
+        var result = await Fixture.GraphQlClient.GetDialogLookup.ExecuteAsync(instanceRef, TestContext.Current.CancellationToken);
+        result.Errors.Should().BeNullOrEmpty();
+        return result;
+    }
 }

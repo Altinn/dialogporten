@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -8,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using FluentValidation.Results;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogLookup.Queries.Get;
@@ -26,19 +28,23 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
     private readonly IIdentifierLookupDialogResolver _dialogResolver;
     private readonly IIdentifierLookupPresentationResolver _presentationResolver;
     private readonly IUserResourceRegistry _userResourceRegistry;
+    private readonly ILogger<GetDialogLookupQueryHandler> _logger;
 
     public GetDialogLookupQueryHandler(
         IIdentifierLookupDialogResolver dialogResolver,
         IIdentifierLookupPresentationResolver presentationResolver,
-        IUserResourceRegistry userResourceRegistry)
+        IUserResourceRegistry userResourceRegistry,
+        ILogger<GetDialogLookupQueryHandler> logger)
     {
         ArgumentNullException.ThrowIfNull(dialogResolver);
         ArgumentNullException.ThrowIfNull(presentationResolver);
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(logger);
 
         _dialogResolver = dialogResolver;
         _presentationResolver = presentationResolver;
         _userResourceRegistry = userResourceRegistry;
+        _logger = logger;
     }
 
     public async Task<GetDialogLookupResult> Handle(GetDialogLookupQuery request, CancellationToken cancellationToken)
@@ -71,6 +77,17 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         }
 
         var responseInstanceRef = _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData);
+        if (!InstanceRef.TryParse(responseInstanceRef, out _))
+        {
+            _logger.LogError(
+                "Identifier lookup resolved an invalid response instance reference. RequestInstanceRef={RequestInstanceRef}, ResolvedResponseInstanceRef={ResolvedResponseInstanceRef}, DialogId={DialogId}, ServiceResource={ServiceResource}",
+                request.InstanceRef,
+                responseInstanceRef,
+                dialogData.DialogId,
+                dialogData.ServiceResource);
+
+            throw new UnreachableException("Resolved response instance reference is invalid.");
+        }
 
         var (serviceResource, serviceOwner) = await _presentationResolver.Resolve(
             dialogData.ServiceResource,

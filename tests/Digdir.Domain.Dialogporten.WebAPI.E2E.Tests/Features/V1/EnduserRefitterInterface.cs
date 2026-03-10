@@ -165,7 +165,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </listheader>
         /// <item>
         /// <term>200</term>
-        /// <description>Successfully resolved identifier lookup metadata.</description>
+        /// <description>Successfully resolved dialog lookup metadata.</description>
         /// </item>
         /// <item>
         /// <term>400</term>

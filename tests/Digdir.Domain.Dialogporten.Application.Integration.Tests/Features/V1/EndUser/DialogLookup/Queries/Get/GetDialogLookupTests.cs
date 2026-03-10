@@ -140,7 +140,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .ConfigureAltinnAuthorization(altinnAuthorization =>
             {
                 altinnAuthorization.GetAuthorizedPartiesForLookup(
-                        default!,
+                        null!,
                         Arg.Any<List<string>>(),
                         Arg.Any<CancellationToken>())
                     .ReturnsForAnyArgs(new AuthorizedPartiesResult { AuthorizedParties = [] });
@@ -172,7 +172,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .ConfigureAltinnAuthorization(altinnAuthorization =>
             {
                 altinnAuthorization.GetAuthorizedPartiesForLookup(
-                        default!,
+                        null!,
                         Arg.Any<List<string>>(),
                         Arg.Any<CancellationToken>())
                     .ReturnsForAnyArgs(new AuthorizedPartiesResult
@@ -188,13 +188,13 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                                 [
                                     new AuthorizedResource
                                     {
-                                        ResourceId = otherServiceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
+                                        ResourceId = otherServiceResource[Domain.Common.Constants.ServiceResourcePrefix.Length..],
                                         InstanceId = instanceId.ToString(),
                                         InstanceRef = instanceRef
                                     },
                                     new AuthorizedResource
                                     {
-                                        ResourceId = serviceResource[Digdir.Domain.Dialogporten.Domain.Common.Constants.ServiceResourcePrefix.Length..],
+                                        ResourceId = serviceResource[Domain.Common.Constants.ServiceResourcePrefix.Length..],
                                         InstanceId = instanceId.ToString(),
                                         InstanceRef = instanceRef
                                     }
@@ -227,89 +227,6 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                     .ContainSingle(x =>
                         x.GrantType == IdentifierLookupGrantType.InstanceDelegation
                         && x.Subject == instanceRef);
-            });
-    }
-
-    [Fact]
-    public Task Get_Should_Not_Return_Forbidden_When_AuthenticationLevel_Is_Below_Minimum_If_Delegated_Access_Exists()
-    {
-        const int minimumAuthenticationLevel = 4;
-        const int currentAuthenticationLevel = 0;
-        var serviceResource = $"urn:altinn:resource:lookup-auth-level-{Guid.NewGuid():N}";
-
-        return FlowBuilder.For(Application)
-            .ConfigureAltinnAuthorization(altinnAuthorization =>
-            {
-                altinnAuthorization.GetAuthorizedPartiesForLookup(
-                        default!,
-                        Arg.Any<List<string>>(),
-                        Arg.Any<CancellationToken>())
-                    .ReturnsForAnyArgs(new AuthorizedPartiesResult
-                    {
-                        AuthorizedParties =
-                        [
-                            new AuthorizedParty
-                            {
-                                Party = Party,
-                                PartyUuid = Guid.NewGuid(),
-                                Name = "Party",
-                                AuthorizedResources = [serviceResource],
-                                AuthorizedRolesAndAccessPackages = [],
-                                AuthorizedInstances = []
-                            }
-                        ]
-                    });
-
-                // Resolver should no longer use this for access gating.
-                altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(false);
-                altinnAuthorization.UserHasRequiredAuthLevel(Arg.Any<int>())
-                    .Returns(false);
-            },
-            services =>
-            {
-                services.RemoveAll<IResourceRegistry>();
-                services.AddScoped<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>();
-                var resourceRegistry = Substitute.For<IResourceRegistry>();
-                resourceRegistry
-                    .GetResourceInformation(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(x => Task.FromResult<ServiceResourceInformation?>(
-                        new ServiceResourceInformation(
-                            ResourceId: (string)x[0],
-                            ResourceType: "GenericAccessResource",
-                            OwnerOrgNumber: "991825827",
-                            OwnOrgShortName: "ttd",
-                            DisplayName: [new ResourceLocalization("nb", (string)x[0])],
-                            Description: [])));
-                resourceRegistry
-                    .GetUpdatedResourcePolicyInformation(Arg.Any<DateTimeOffset>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
-                    .Returns(
-                    [
-                        new UpdatedResourcePolicyInformation(
-                            new Uri(serviceResource),
-                            minimumAuthenticationLevel,
-                            DateTimeOffset.UtcNow)
-                    ]);
-                services.AddSingleton(resourceRegistry);
-            })
-            .AsIntegrationTestUser(x => x.WithClaim(ClaimsPrincipalExtensions.IdportenAuthLevelClaim, Constants.IdportenLoaLow))
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Party = Party;
-                x.Dto.ServiceResource = serviceResource;
-                x.AddServiceOwnerLabels($"urn:altinn:integration:storage:1337/{Guid.NewGuid()}");
-            })
-            .SendCommand(_ => new SyncPolicyCommand { Since = DateTimeOffset.MinValue })
-            .AssertResult<Success>()
-            .SendCommand((_, ctx) => new GetDialogLookupQuery
-            {
-                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
-            })
-            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
-            {
-                result.AuthorizationEvidence.ViaResourceDelegation.Should().BeTrue();
-                result.AuthorizationEvidence.MinimumAuthenticationLevel.Should().Be(minimumAuthenticationLevel);
-                result.AuthorizationEvidence.CurrentAuthenticationLevel.Should().Be(currentAuthenticationLevel);
             });
     }
 

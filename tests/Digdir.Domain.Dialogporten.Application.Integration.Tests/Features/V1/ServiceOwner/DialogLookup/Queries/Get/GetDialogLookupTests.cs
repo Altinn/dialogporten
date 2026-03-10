@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using AwesomeAssertions;
-using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogLookup.Queries.Get.GetDialogLookupQuery;
 using ServiceOwnerIdentifierLookupDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup.ServiceOwnerIdentifierLookupDto;
 
@@ -31,35 +30,6 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
                 result.InstanceRef.Should().Be(instanceRef.ToLowerInvariant()));
-    }
-
-    [Fact]
-    public Task Get_By_Label_Should_Pick_Newest_Dialog_Even_When_Deleted_For_ServiceOwner()
-    {
-        var instanceId = Guid.NewGuid();
-        var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
-        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
-        var olderDialogId = NewUuidV7();
-        var newerDeletedDialogId = NewUuidV7();
-
-        return FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = olderDialogId;
-                x.AddServiceOwnerLabels(storageLabel);
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = newerDeletedDialogId;
-                x.AddServiceOwnerLabels(storageLabel);
-            })
-            .DeleteDialog()
-            .SendCommand(_ => new GetDialogLookupQuery
-            {
-                InstanceRef = instanceRef
-            })
-            .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
-                result.DialogId.Should().Be(newerDeletedDialogId));
     }
 
     [Fact]

@@ -83,6 +83,7 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
             .AsNoTracking()
             .Select(x => x.ServiceResource)
             .Distinct()
+            .Take(20)
             .ToListAsync(cancellationToken);
 
         var parties = (constraintParties.Count > 0

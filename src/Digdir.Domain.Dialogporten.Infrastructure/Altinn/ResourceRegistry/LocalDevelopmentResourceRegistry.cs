@@ -60,12 +60,16 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
             return Task.FromResult<ServiceResourceInformation?>(cachedResource);
         }
 
+        var fallbackOwner = CachedResourceIds.FirstOrDefault();
+        var ownerOrgNumber = fallbackOwner?.OwnerOrgNumber ?? LocalOrgId;
+        var ownerOrgShortName = fallbackOwner?.OwnOrgShortName ?? LocalOrgShortName;
+
         return Task.FromResult<ServiceResourceInformation?>(
             new ServiceResourceInformation(
                 serviceResourceId,
                 LocalResourceType,
-                LocalOrgId,
-                LocalOrgShortName,
+                ownerOrgNumber,
+                ownerOrgShortName,
                 [new ResourceLocalization("nb", serviceResourceId)],
                 []));
     }

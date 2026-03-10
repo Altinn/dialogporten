@@ -12,6 +12,10 @@ cleanup() {
     kill "$graphql_pid" >/dev/null 2>&1 || true
     wait "$graphql_pid" >/dev/null 2>&1 || true
   fi
+  if [[ -n "${service_pid:-}" ]] && kill -0 "$service_pid" >/dev/null 2>&1; then
+    kill "$service_pid" >/dev/null 2>&1 || true
+    wait "$service_pid" >/dev/null 2>&1 || true
+  fi
 }
 
 loadEnv() {
@@ -192,6 +196,7 @@ setRepoPath
 
 webapi_log="${script_dir}/dialogporten-webapi-e2e.log"
 graphql_log="${script_dir}/dialogporten-graphql-e2e.log"
+service_log="${script_dir}/dialogporten-service-e2e.log"
 
 podman_check
 
@@ -224,9 +229,11 @@ export ASPNETCORE_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
 export DialogportenBaseUri="${DialogportenBaseUri:-https://localhost}"
 export WebApiPort="${WEBAPI_PORT:-7215}" # Default port should not colide with default port of APIs
 export GraphQlPort="${GRAPHQL_PORT:-5180}"
+export ServicePort="${SERVICE_PORT:-5181}"
 export WebApiUrl="${DialogportenBaseUri}:${WebApiPort}"
 export GraphQlBaseUrl="http://localhost:${GraphQlPort}"
 export GraphQlUrl="${GraphQlBaseUrl}/graphql"
+export ServiceBaseUrl="http://localhost:${ServicePort}"
 
 wait_for_url() {
   local url="$1"
@@ -279,8 +286,21 @@ start_graphql() {
   wait_for_url "$GraphQlUrl" "GraphQL" "$graphql_log"
 }
 
-#  Always start WebApi
+start_service() {
+  echo "Starting Dialogporten Service on ${ServiceBaseUrl}..."
+  dotnet run \
+    --project "$repo_root/src/Digdir.Domain.Dialogporten.Service/Digdir.Domain.Dialogporten.Service.csproj" \
+    --environment "${WEBAPI_ENVIRONMENT}" \
+    --urls "$ServiceBaseUrl" \
+    >"$service_log" 2>&1 &
+  service_pid=$!
+  echo "Service PID: $service_pid"
+  wait_for_url "$ServiceBaseUrl" "Service" "$service_log"
+}
+
+#  Always start WebApi and Service (Service handles async event processing)
 start_webapi
+start_service
 
 if [[ "$mode" == "graphql" || "$mode" == "both" ]]; then
   start_graphql

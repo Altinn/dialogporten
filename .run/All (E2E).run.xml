@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="E2E (WebAPI/GQL/Service)" type="CompoundRunConfigurationType">
+    <toRun name="WebApi" type="DotNetProject" />
+    <toRun name="GraphQL" type="DotNetProject" />
+    <toRun name="Service" type="DotNetProject" />
+    <method v="2" />
+  </configuration>
+</component>

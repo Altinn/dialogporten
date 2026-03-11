@@ -39,6 +39,11 @@ import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from 
 @description('The environment whose existing shared infrastructure this transient target will attach to.')
 param environment string
 
+@description('Password for PostgreSQL admin.')
+@secure()
+@minLength(3)
+param dialogportenPgAdminPassword string
+
 @description('Subscription ID for the source Key Vault that stores the PostgreSQL admin password secret.')
 @secure()
 @minLength(3)
@@ -71,13 +76,6 @@ param postgresConfiguration {
   enableBackupVault: bool
 }
 
-var adminPasswordSecretName = 'dialogportenPgAdminPassword${environment}'
-
-resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
-  name: sourceKeyVaultName
-  scope: az.resourceGroup(sourceKeyVaultSubscriptionId, sourceKeyVaultResourceGroup)
-}
-
 var namePrefix = 'dp-be-${environment}'
 var tags = baseTags({}, environment)
 var srcKeyVault = {
@@ -98,8 +96,8 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     postgresVersion: postgresConfiguration.version
     publishCanonicalConnectionSecrets: false
     srcKeyVault: srcKeyVault
-    srcKeyVaultAdministratorLoginPasswordKey: adminPasswordSecretName
-    administratorLoginPassword: srcKeyVaultResource.getSecret(adminPasswordSecretName)
+    srcKeyVaultAdministratorLoginPasswordKey: 'dialogportenPgAdminPassword${environment}v2'
+    administratorLoginPassword: dialogportenPgAdminPassword
     sku: postgresConfiguration.sku
     storage: postgresConfiguration.storage
     appInsightWorkspaceName: appInsightWorkspaceName

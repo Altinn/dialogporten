@@ -17,9 +17,11 @@ namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 
 public static class DialogGenerator
 {
+    public const int DefaultSeed = 12345678;
+
     static DialogGenerator()
     {
-        Randomizer.Seed = new Random(123456);
+        Randomizer.Seed = new Random(DefaultSeed);
     }
 
     private static readonly Faker<SearchTagDto> SearchTagFaker = new Faker<SearchTagDto>()
@@ -382,7 +384,7 @@ public static class DialogGenerator
     public static ActivityDto GenerateFakeDialogActivity(DialogActivityType.Values? type = null)
         => GenerateFakeDialogActivity(new Randomizer(), type);
 
-    private static ActivityDto GenerateFakeDialogActivity(Randomizer r, DialogActivityType.Values? type)
+    public static ActivityDto GenerateFakeDialogActivity(Randomizer r, DialogActivityType.Values? type)
     {
         var seed = r.Int();
         var activity = ActivityFaker.Clone().UseSeed(seed).Generate();

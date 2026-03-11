@@ -32,7 +32,8 @@ public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE
     public async Task Should_Return_Lookup_For_Existing_InstanceRef()
     {
         // Arrange
-        var instanceRef = $"urn:altinn:instance-id:1337/{Guid.NewGuid()}";
+        var instanceGuid = Guid.NewGuid();
+        var instanceRef = $"urn:altinn:instance-id:1337/{instanceGuid}";
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
             dialog.ServiceOwnerContext = new V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
@@ -41,7 +42,7 @@ public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel
                     {
-                        Value = instanceRef
+                        Value = $"urn:altinn:integration:storage:1337/{instanceGuid}"
                     }
                 ]
             };

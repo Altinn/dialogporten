@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Globalization;
-using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Digdir.Domain.Dialogporten.Application;
@@ -12,8 +11,8 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
@@ -55,6 +54,15 @@ finally
 static void BuildAndRun(string[] args)
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    if (builder.Environment.IsDevelopment())
+    {
+        var developmentProfile = builder.Configuration["DOTNET_DEV_PROFILE"];
+        if (!string.IsNullOrWhiteSpace(developmentProfile))
+        {
+            builder.Configuration.AddJsonFile($"appsettings.Development.{developmentProfile}.json", optional: true, reloadOnChange: true);
+        }
+    }
 
     builder.WebHost.ConfigureKestrel(kestrelOptions =>
     {

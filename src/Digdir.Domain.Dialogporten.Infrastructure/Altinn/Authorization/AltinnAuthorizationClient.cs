@@ -212,10 +212,16 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     {
         var minimumAuthenticationLevel = await _db.ResourcePolicyInformation
             .Where(x => x.Resource == serviceResource)
-            .Select(x => x.MinimumAuthenticationLevel)
+            .Select(x => (int?)x.MinimumAuthenticationLevel)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return UserHasRequiredAuthLevel(minimumAuthenticationLevel);
+        if (minimumAuthenticationLevel is null)
+        {
+            _logger.LogWarning("Could not find resource policy information for resource {ServiceResource}, denying access", serviceResource);
+            return false;
+        }
+
+        return UserHasRequiredAuthLevel(minimumAuthenticationLevel.Value);
     }
 
     // Create static empty lists to reuse and avoid allocations

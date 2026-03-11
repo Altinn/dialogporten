@@ -129,6 +129,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             cancellationToken);
 
         // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
+        // https://github.com/Altinn/dialogporten/issues/3579
         await PopulateMissingInstanceRefs(result, cancellationToken);
 
         return result;

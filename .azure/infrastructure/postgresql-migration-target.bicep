@@ -39,7 +39,7 @@ import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from 
 @description('The environment whose existing shared infrastructure this transient target will attach to.')
 param environment string
 
-@description('Password for PostgreSQL admin. Use the same admin password as the current canonical server.')
+@description('Password for PostgreSQL admin.')
 @secure()
 @minLength(3)
 param dialogportenPgAdminPassword string
@@ -96,7 +96,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     postgresVersion: postgresConfiguration.version
     publishCanonicalConnectionSecrets: false
     srcKeyVault: srcKeyVault
-    srcKeyVaultAdministratorLoginPasswordKey: 'dialogportenPgAdminPassword${environment}'
+    srcKeyVaultAdministratorLoginPasswordKey: 'dialogportenPgAdminPassword${environment}v2'
     administratorLoginPassword: dialogportenPgAdminPassword
     sku: postgresConfiguration.sku
     storage: postgresConfiguration.storage

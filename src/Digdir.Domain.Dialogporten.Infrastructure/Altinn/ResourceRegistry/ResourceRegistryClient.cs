@@ -11,9 +11,12 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 
+/// <summary>
+/// Reads service resource metadata and authorization-related deltas from Altinn Resource Registry.
+/// </summary>
 internal sealed class ResourceRegistryClient : IResourceRegistry
 {
-    private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey";
+    private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey_V2";
     private const string ResourceRegistryResourceEndpoint = "resourceregistry/api/v1/resource/";
     private const string AuthenticationLevelCategory = "urn:altinn:minimum-authenticationlevel";
 
@@ -23,30 +26,42 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
     public ResourceRegistryClient(HttpClient client, IFusionCacheProvider cacheProvider, ILogger<ResourceRegistryClient> logger)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _client = client;
         _cache = cacheProvider.GetCache(nameof(ResourceRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = logger;
     }
 
+    /// <summary>
+    /// Returns service resources owned by the supplied organization number.
+    /// </summary>
     public async Task<IReadOnlyCollection<ServiceResourceInformation>> GetResourceInformationForOrg(
         string orgNumber,
         CancellationToken cancellationToken)
     {
-        var resources = await FetchServiceResourceInformation(cancellationToken);
+        var resources = await FetchServiceResources(cancellationToken);
         return resources
             .Where(x => x.OwnerOrgNumber == orgNumber)
             .ToList();
     }
 
+    /// <summary>
+    /// Returns metadata for a single service resource id.
+    /// </summary>
     public async Task<ServiceResourceInformation?> GetResourceInformation(
         string serviceResourceId,
         CancellationToken cancellationToken)
     {
-        var resources = await FetchServiceResourceInformation(cancellationToken);
-        return resources
-            .FirstOrDefault(x => x.ResourceId == serviceResourceId);
+        var resources = await FetchServiceResources(cancellationToken);
+        return resources.FirstOrDefault(x => string.Equals(x.ResourceId, serviceResourceId, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Streams updated subject-resource mappings since the supplied timestamp.
+    /// </summary>
     public async IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset since, int batchSize, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}updated";
@@ -70,6 +85,9 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         } while (nextUrl is not null);
     }
 
+    /// <summary>
+    /// Returns updated minimum-authentication-level policy data since the supplied timestamp.
+    /// </summary>
     public async Task<IReadOnlyCollection<UpdatedResourcePolicyInformation>> GetUpdatedResourcePolicyInformation(DateTimeOffset since,
         int numberOfConcurrentRequests,
         CancellationToken cancellationToken)
@@ -102,7 +120,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private async Task<List<UpdatedResource>> GetUniqueUpdatedResources(DateTimeOffset _, CancellationToken cancellationToken)
     {
         // Until we have an API in RR to fetch updated resources only, we have to fetch them all
-        return (await FetchServiceResourceInformation(cancellationToken))
+        return (await FetchServiceResources(cancellationToken))
             .Select(x => new UpdatedResource(new Uri(x.ResourceId), DateTimeOffset.MinValue))
             .ToList();
     }
@@ -163,7 +181,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         return null;
     }
 
-    private async Task<ServiceResourceInformation[]> FetchServiceResourceInformation(CancellationToken cancellationToken)
+    private async Task<ServiceResourceInformation[]> FetchServiceResources(CancellationToken cancellationToken)
     {
         const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}resourcelist?includeMigratedApps=true";
 
@@ -183,7 +201,9 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
                         $"{Constants.ServiceResourcePrefix}{x.Identifier}",
                         x.ResourceType,
                         x.HasCompetentAuthority.Organization!,
-                        x.HasCompetentAuthority.OrgCode!))
+                        x.HasCompetentAuthority.OrgCode!,
+                        x.Title.ToLocalizations(),
+                        x.Description.ToLocalizations()))
                     .ToArray();
             },
             token: cancellationToken);
@@ -212,6 +232,8 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         public required string Identifier { get; init; }
         public required CompetentAuthority HasCompetentAuthority { get; init; }
         public required string ResourceType { get; init; }
+        public IDictionary<string, string> Title { get; init; } = new Dictionary<string, string>();
+        public IDictionary<string, string> Description { get; init; } = new Dictionary<string, string>();
     }
 
     private sealed class CompetentAuthority

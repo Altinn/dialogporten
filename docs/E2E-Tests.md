@@ -9,8 +9,18 @@ End-to-end tests that call Dialogporten endpoints using test tokens from the tok
 ## Run tests
 These tests are marked `Explicit` and are skipped by default. Running `dotnet test` will still compile these projects, so you get compile-time checks even when the E2E tests do not run.
 
-To enable these tests locally for debugging, set `E2EExplicitOptions.ExplicitTests` to `false`
-(when `true`, tests are marked explicit and skipped unless you pass `xUnit.Explicit=on/only`).
+By default, E2E tests are explicit.
+To run them by default locally, create `appsettings.local.json` in `tests/Digdir.Library.Dialogporten.E2E.Common`
+and set `ExplicitTests` to `false`:
+
+```json
+{
+  "ExplicitTests": false
+}
+```
+
+If `appsettings.local.json` is missing, `ExplicitTests` defaults to `true` (tests remain explicit).
+You can still override with xUnit flags when needed:
 
 Use the xUnit explicit switch:
 - `dotnet test -- xUnit.Explicit=off` (default; do not run explicit tests)

@@ -116,7 +116,6 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 .SelectMany(x => x.AuthorizedInstances)
                 .ToList(),
             dialogData.ServiceResource,
-            requestRef,
             responseInstanceRef);
 
         if (viaInstanceDelegation)
@@ -178,7 +177,6 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     private static bool HasInstanceDelegation(
         List<AuthorizedResource> authorizedInstances,
         string serviceResource,
-        InstanceRef requestInstanceRef,
         InstanceRef responseInstanceRef)
     {
         if (authorizedInstances.Count == 0)
@@ -197,51 +195,17 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 continue;
             }
 
-            var comparableInstanceRef = ToComparableInstanceRef(authorizedInstance);
-            if (comparableInstanceRef is null)
+            if (string.IsNullOrWhiteSpace(authorizedInstance.InstanceRef))
             {
                 continue;
             }
 
-            if (string.Equals(comparableInstanceRef, requestInstanceRef.Value, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(comparableInstanceRef, responseInstanceRef.Value, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(authorizedInstance.InstanceRef, responseInstanceRef.Value, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
         }
 
         return false;
-    }
-
-    private static string? ToComparableInstanceRef(AuthorizedResource authorizedInstance)
-    {
-        var instanceRef = string.IsNullOrWhiteSpace(authorizedInstance.InstanceRef)
-            ? authorizedInstance.InstanceId
-            : authorizedInstance.InstanceRef;
-
-        if (string.IsNullOrWhiteSpace(instanceRef))
-        {
-            return null;
-        }
-
-        var normalized = instanceRef.ToLowerInvariant();
-        if (normalized.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.Ordinal))
-        {
-            normalized = $"{AltinnAuthorizationConstants.AppInstanceRefPrefix}{normalized[Constants.ServiceContextInstanceIdPrefix.Length..]}";
-        }
-
-        if (!normalized.StartsWith(AltinnAuthorizationConstants.AppInstanceRefPrefix, StringComparison.Ordinal))
-        {
-            return normalized;
-        }
-
-        var suffix = normalized[AltinnAuthorizationConstants.AppInstanceRefPrefix.Length..];
-        var separator = suffix.IndexOf('/');
-        if (separator <= 0 || separator == suffix.Length - 1)
-        {
-            return null;
-        }
-
-        return normalized;
     }
 }

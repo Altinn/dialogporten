@@ -222,6 +222,64 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     }
 
     [Fact]
+    public Task Get_Should_Return_Forbidden_When_Only_Request_InstanceRef_Is_Authorized_For_InstanceDelegation()
+    {
+        var dialogId = NewUuidV7();
+        var party = Party;
+        const string serviceResource = "urn:altinn:resource:test-service-dialog-ref-delegation";
+        var instanceId = Guid.NewGuid();
+        var requestDialogRef = $"urn:altinn:dialog-id:{dialogId}";
+        var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
+
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                altinnAuthorization.GetAuthorizedPartiesForLookup(
+                        null!,
+                        Arg.Any<List<string>>(),
+                        Arg.Any<CancellationToken>())
+                    .ReturnsForAnyArgs(new AuthorizedPartiesResult
+                    {
+                        AuthorizedParties =
+                        [
+                            new AuthorizedParty
+                            {
+                                Party = party,
+                                PartyUuid = Guid.NewGuid(),
+                                Name = "Party",
+                                AuthorizedInstances =
+                                [
+                                    new AuthorizedResource
+                                    {
+                                        ResourceId = serviceResource[Domain.Common.Constants.ServiceResourcePrefix.Length..],
+                                        InstanceId = dialogId.ToString(),
+                                        InstanceRef = requestDialogRef
+                                    }
+                                ]
+                            }
+                        ]
+                    });
+
+                altinnAuthorization.UserHasRequiredAuthLevel(
+                        Arg.Any<string>(),
+                        Arg.Any<CancellationToken>())
+                    .Returns(true);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Id = dialogId;
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.AddServiceOwnerLabels(storageLabel);
+            })
+            .SendCommand(_ => new GetDialogLookupQuery
+            {
+                InstanceRef = requestDialogRef
+            })
+            .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
+    }
+
+    [Fact]
     public Task Get_Should_Set_ViaRole_From_AuthorizedPartiesSubjects()
     {
         var dialogId = NewUuidV7();

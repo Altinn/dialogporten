@@ -65,7 +65,6 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         var storageLabel = $"urn:altinn:integration:storage:1337/{instanceId}";
         var firstDialogId = NewUuidV7();
         var secondDialogId = NewUuidV7();
-        var expectedDialogId = firstDialogId.CompareTo(secondDialogId) > 0 ? firstDialogId : secondDialogId;
 
         return FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
@@ -84,7 +83,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
-                result.DialogId.Should().Be(expectedDialogId);
+                result.DialogId.Should().Be(secondDialogId);
                 result.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
             });
     }

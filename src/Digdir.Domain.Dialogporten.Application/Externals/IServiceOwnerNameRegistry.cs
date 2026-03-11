@@ -9,5 +9,5 @@ public sealed class ServiceOwnerInfo
 {
     public required string OrgNumber { get; init; }
     public required string ShortName { get; init; }
-    public IReadOnlyList<ResourceLocalization> DisplayName { get; init; } = Array.Empty<ResourceLocalization>();
+    public IReadOnlyList<ResourceLocalization> DisplayName { get; init; } = [];
 }

@@ -8,10 +8,8 @@ using Xunit;
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogLookup;
 
 [Collection(nameof(GraphQlTestCollectionFixture))]
-public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
+public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE2EFixture>(fixture)
 {
-    public DialogLookupTests(GraphQlE2EFixture fixture) : base(fixture) { }
-
     [E2EFact]
     public async Task Should_Return_Typed_NotFound_Error_For_Unknown_InstanceRef()
     {
@@ -57,7 +55,7 @@ public class DialogLookupTests : E2ETestBase<GraphQlE2EFixture>
 
         var lookup = result.Data.DialogLookup.Lookup;
         lookup.Should().NotBeNull();
-        lookup!.DialogId.Should().Be(dialogId);
+        lookup.DialogId.Should().Be(dialogId);
         lookup.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
         lookup.ServiceResource.Id.Should().NotBeNullOrWhiteSpace();
         lookup.ServiceOwner.Code.Should().NotBeNullOrWhiteSpace();

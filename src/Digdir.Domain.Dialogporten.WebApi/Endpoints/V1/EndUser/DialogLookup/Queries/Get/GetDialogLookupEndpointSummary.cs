@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using FastEndpoints;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 

@@ -5,7 +5,6 @@ using Altinn.Authorization.ABAC.Utils;
 using Altinn.Authorization.ABAC.Xacml;
 using AsyncKeyedLock;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Altinn;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.Extensions.Logging;
 using ZiggyCreatures.Caching.Fusion;

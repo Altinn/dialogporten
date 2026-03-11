@@ -8,6 +8,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 
 public class AuthorizationHelperTests
 {
+    private const string AltinnIntegrationStorageUrnPrefix = "urn:altinn:integration:storage:";
+
     [Fact]
     public async Task PruneUnreferencedResources_ShouldReturnEarly_WhenNoParties()
     {
@@ -59,7 +61,7 @@ public class AuthorizationHelperTests
             },
             AltinnAppInstanceIds =
             [
-                "urn:altinn:integration:storage:999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+                $"{AltinnIntegrationStorageUrnPrefix}999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
             ]
         };
 
@@ -86,7 +88,7 @@ public class AuthorizationHelperTests
         Assert.Contains("resource4", result.ResourcesByParties["party3"]);
         Assert.Single(result.AltinnAppInstanceIds);
         Assert.Equal(
-            "urn:altinn:integration:storage:999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            $"{AltinnIntegrationStorageUrnPrefix}999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             result.AltinnAppInstanceIds.Single());
     }
 
@@ -227,10 +229,10 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    "urn:altinn:integration:storage:111/00000000-0000-0000-0000-000000000001",
-                    "urn:altinn:integration:storage:111/00000000-0000-0000-0000-000000000002",
-                    "urn:altinn:integration:storage:222/00000000-0000-0000-0000-000000000003",
-                    "urn:altinn:integration:storage:444/00000000-0000-0000-0000-000000000004",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000001",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003",
+                    $"{AltinnIntegrationStorageUrnPrefix}444/00000000-0000-0000-0000-000000000004",
                 }
             },
 
@@ -246,9 +248,9 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    "urn:altinn:integration:storage:111/00000000-0000-0000-0000-000000000001",
-                    "urn:altinn:integration:storage:111/00000000-0000-0000-0000-000000000002",
-                    "urn:altinn:integration:storage:222/00000000-0000-0000-0000-000000000003"
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000001",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -286,8 +288,8 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    "urn:altinn:integration:storage:111/00000000-0000-0000-0000-000000000002",
-                    "urn:altinn:integration:storage:222/00000000-0000-0000-0000-000000000003"
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -299,7 +301,7 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    "urn:altinn:integration:storage:111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
                 }
             },
 

@@ -26,8 +26,9 @@ public sealed record ServiceResourceInformation(
         string.Empty,
         string.Empty,
         string.Empty,
-        Array.Empty<ResourceLocalization>(),
-        Array.Empty<ResourceLocalization>());
+        [],
+        []);
+
     public string ResourceType { get; } = ResourceType.ToLowerInvariant();
     public string OwnerOrgNumber { get; } = OwnerOrgNumber.ToLowerInvariant();
     public string OwnOrgShortName { get; } = OwnOrgShortName.ToLowerInvariant();

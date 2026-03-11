@@ -165,20 +165,15 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     private async Task<List<string>> ResolveRoleAndAccessPackageSubjects(
         string serviceResource,
         List<string> authorizedSubjects,
-        CancellationToken cancellationToken)
-    {
-        if (authorizedSubjects.Count == 0)
-        {
-            return [];
-        }
-
-        return await _db.SubjectResources
-            .AsNoTracking()
-            .Where(x => x.Resource == serviceResource && authorizedSubjects.Contains(x.Subject))
-            .Select(x => x.Subject)
-            .Distinct()
-            .ToListAsync(cancellationToken);
-    }
+        CancellationToken cancellationToken) =>
+        authorizedSubjects.Count == 0
+            ? []
+            : await _db.SubjectResources
+                .AsNoTracking()
+                .Where(x => x.Resource == serviceResource && authorizedSubjects.Contains(x.Subject))
+                .Select(x => x.Subject)
+                .Distinct()
+                .ToListAsync(cancellationToken);
 
     private static bool HasInstanceDelegation(
         List<AuthorizedResource> authorizedInstances,

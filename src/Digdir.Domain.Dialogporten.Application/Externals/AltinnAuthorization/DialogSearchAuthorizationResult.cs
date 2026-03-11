@@ -10,8 +10,10 @@ public sealed class DialogSearchAuthorizationResult
     // and potentially other sources in the future.
     public List<Guid> DialogIds { get; set; } = [];
 
-    // AltinnAppInstanceIds are the IDs of Altinn App Instances that the user has access to.
-    // Consumers of this result usually should not use these IDs directly, but instead rely on the DialogIds
+    // NOTE: AltinnAppInstanceIds currently carries delegated instance references represented as
+    // service owner labels (urn:altinn:integration:storage:<partyId>/<instanceId>).
+    // See https://github.com/Altinn/dialogporten/issues/3358 for the planned generic handling.
+    // Consumers of this result usually should not use these values directly, but instead rely on DialogIds.
     public List<string> AltinnAppInstanceIds { get; set; } = [];
 
     public bool HasNoAuthorizations =>

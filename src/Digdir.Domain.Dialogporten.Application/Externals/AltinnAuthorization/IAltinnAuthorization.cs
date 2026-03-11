@@ -17,6 +17,11 @@ public interface IAltinnAuthorization
     Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,
         CancellationToken cancellationToken = default);
 
+    Task<AuthorizedPartiesResult> GetAuthorizedPartiesForLookup(
+        IPartyIdentifier authenticatedParty,
+        List<string> constraintParties,
+        CancellationToken cancellationToken = default);
+
     Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken);
 
     bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel);

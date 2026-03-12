@@ -40,7 +40,8 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
                 orgNumber,
                 LocalOrgShortName,
                 [new ResourceLocalization("nb", id)],
-                []));
+                [],
+                false));
         }
 
         return CachedResourceIds
@@ -71,7 +72,8 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
                 ownerOrgNumber,
                 ownerOrgShortName,
                 [new ResourceLocalization("nb", serviceResourceId)],
-                []));
+                [],
+                false));
     }
 
     /// <summary>

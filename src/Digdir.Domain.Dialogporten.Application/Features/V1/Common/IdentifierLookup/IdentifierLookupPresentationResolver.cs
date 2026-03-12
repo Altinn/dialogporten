@@ -56,8 +56,9 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
         return (
             new IdentifierLookupServiceResourceDto
             {
-                Id = serviceResource,
-                Name = serviceResourceName
+                Id = StripPrefix(serviceResource),
+                Name = serviceResourceName,
+                IsDelegable = resourceInformation?.Delegable ?? false
             },
             new IdentifierLookupServiceOwnerDto
             {
@@ -67,6 +68,9 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
             }
         );
     }
+
+    private static string StripPrefix(string serviceResource)
+        => serviceResource.Replace(Domain.Common.Constants.ServiceResourcePrefix, string.Empty, StringComparison.OrdinalIgnoreCase);
 
     private static List<LocalizationDto> ToLocalizationDtos(
         IReadOnlyList<ResourceLocalization>? values,

@@ -103,6 +103,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                         .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.EndUserContext)
                         .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                    .Include(x => x.ServiceOwnerContext)
+                        .ThenInclude(x => x.ServiceOwnerLabels)
                     .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(x => x.Id == request.DialogId, ct),
             cancellationToken);

@@ -75,11 +75,13 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         DialogEntity dialogEntity,
         CancellationToken cancellationToken = default)
     {
+        var instanceRef = InstanceRef.FromDialog(dialogEntity);
+
         var request = new DialogDetailsAuthorizationRequest
         {
             ClaimsPrincipal = _user.GetPrincipal(),
             ServiceResource = dialogEntity.ServiceResource,
-            DialogId = dialogEntity.Id,
+            InstanceRef = instanceRef,
             Party = dialogEntity.Party,
             AltinnActions = dialogEntity.GetAltinnActions()
         };
@@ -311,8 +313,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
     // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
     // https://github.com/Altinn/dialogporten/issues/3579
-    private const string CorrespondenceRefPrefix = "urn:altinn:correspondence-id:";
-    private const string DialogRefPrefix = "urn:altinn:dialog-id:";
     private async Task PopulateMissingInstanceRefs(
         AuthorizedPartiesResult authorizedPartiesResult,
         CancellationToken cancellationToken)
@@ -345,8 +345,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
         foreach (var (resourceId, resourceInformationTask) in resourceInformationTasks)
         {
-            var resourceInformation = await resourceInformationTask;
-            resourceTypesById[resourceId] = resourceInformation?.ResourceType;
+            resourceTypesById[resourceId] = resourceInformationTask.Result?.ResourceType;
         }
 
         foreach (var binding in instancesWithoutRef)
@@ -360,8 +359,8 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             var instanceRef = resourceType switch
             {
                 AltinnAppResourceType => TryCreateAppInstanceRef(binding.PartyId, binding.Instance.InstanceId),
-                CorrespondenceServiceResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, CorrespondenceRefPrefix),
-                GenericAccessResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, DialogRefPrefix),
+                CorrespondenceServiceResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, AltinnAuthorizationConstants.CorrespondenceRefPrefix),
+                GenericAccessResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, AltinnAuthorizationConstants.DialogRefPrefix),
                 _ => null
             };
 

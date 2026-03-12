@@ -1,7 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
@@ -86,31 +84,10 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
     /// <summary>
     /// Chooses the instance reference to return, preferring app-instance, then correspondence, then dialog reference.
     /// </summary>
-    public string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData)
-    {
-        if (requestRef.Type is not InstanceRefType.DialogId)
-        {
-            return requestRef.Value;
-        }
-
-        var appInstanceRef = dialogData.ServiceOwnerLabels
-            .Select(x => TryToAppInstanceRef(x, out var appInstanceLabel) ? appInstanceLabel : null)
-            .OfType<string>()
-            .OrderByDescending(x => x, StringComparer.Ordinal)
-            .FirstOrDefault();
-
-        if (appInstanceRef is not null)
-        {
-            return appInstanceRef;
-        }
-
-        var correspondenceRef = dialogData.ServiceOwnerLabels
-            .Where(x => x.StartsWith(InstanceRef.CorrespondencePrefix, StringComparison.Ordinal))
-            .OrderByDescending(x => x, StringComparer.Ordinal)
-            .FirstOrDefault();
-
-        return correspondenceRef ?? InstanceRef.CreateDialogRef(dialogData.DialogId).ToLowerInvariant();
-    }
+    public string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData) =>
+        requestRef.Type is not InstanceRefType.DialogId
+            ? requestRef.Value
+            : InstanceRef.FromDialog(dialogData.DialogId, dialogData.ServiceOwnerLabels).Value;
 
     private IQueryable<DialogEntity> GetDialogQuery(
         IdentifierLookupDeletedDialogVisibility deletedDialogVisibility)
@@ -133,32 +110,6 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             .OrderByDescending(x => x.Id)
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
-
-    private static bool TryToAppInstanceRef(string labelValue, [NotNullWhen(true)] out string? appInstanceRef)
-    {
-        appInstanceRef = null;
-
-        if (labelValue.StartsWith(InstanceRef.AppInstancePrefix, StringComparison.Ordinal))
-        {
-            appInstanceRef = labelValue.ToLowerInvariant();
-            return true;
-        }
-
-        if (!labelValue.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        var separator = labelValue.LastIndexOf('/');
-        if (separator < 0 || separator == labelValue.Length - 1)
-        {
-            return false;
-        }
-
-        var appInstanceSuffix = labelValue[Constants.ServiceContextInstanceIdPrefix.Length..];
-        appInstanceRef = $"{InstanceRef.AppInstancePrefix}{appInstanceSuffix}".ToLowerInvariant();
-        return true;
-    }
 
     private sealed class IdentifierLookupDialogProjection
     {

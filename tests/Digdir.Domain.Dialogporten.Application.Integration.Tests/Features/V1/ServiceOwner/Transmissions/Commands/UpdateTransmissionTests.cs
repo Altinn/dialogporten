@@ -1,8 +1,7 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -15,9 +14,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-using TransmissionAttachmentDto =
-    Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.
-    TransmissionAttachmentDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -90,7 +86,6 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .UpdateTransmission((x, ctx) =>
             {
                 x.TransmissionId = ctx.GetGuidByKey(FirstTransmissionIdKey);
-                x.Dto.Id = ctx.GetGuidByKey(FirstTransmissionIdKey);
                 x.Dto.RelatedTransmissionId = ctx.GetGuidByKey(SecondTransmissionIdKey);
             })
             .ExecuteAndAssert<DomainError>(x =>
@@ -121,12 +116,10 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .AsChangeTransmissionUser()
             .CreateSimpleDialog()
             .CreateTransmission()
-            .Do((_, ctx) => ctx.Application.PurgeEvents())
-            .UpdateTransmission((x, ctx) =>
+            .UpdateTransmission((_, ctx) =>
             {
                 var newId = NewUuidV7();
                 ctx.Bag[NewIdKey] = newId;
-                x.Dto.Id = newId;
             })
             .AssertSuccess()
             .GetServiceOwnerDialog()
@@ -171,11 +164,22 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                 dialog.Revision.Should()
                     .NotBe(ctx.GetGuidByKey(InitialDialogRevisionKey)));
 
+    [Fact]
+    public Task UpdateTransmission_Should_Be_Able_To_Update_Transmission_With_ExpiresAt_In_The_Past_On_Attachments()
+        => FlowBuilder.For(Application)
+            .OverrideUtc(DateTimeOffset.UtcNow.AddYears(-2))
+            .CreateSimpleDialog()
+            .CreateTransmission((x, _) => x.AddAttachment(y => y.ExpiresAt = DialogApplication.Clock.UtcNowOffset.AddDays(1)))
+            .AssertResult<CreateTransmissionSuccess>()
+            .OverrideUtc(DateTimeOffset.UtcNow)
+            .AsChangeTransmissionUser()
+            .UpdateTransmission((x, _) => x.Dto.IdempotentKey = "This is a key")
+            .ExecuteAndAssert<UpdateTransmissionSuccess>();
+
     [Theory]
     [ClassData(typeof(UpdateTransmissionBasicFieldTestData))]
     public Task UpdateTransmission_Persists_Changes_When_Silent_Update_And_Scope_Are_Present(
-        Action<UpdateTransmissionCommand, FlowContext> modify,
-        Action<DialogTransmissionDto> assert) =>
+        UpdateTransmissionSuccessScenario successScenario) =>
         FlowBuilder.For(Application)
             .AsChangeTransmissionUser()
             .CreateSimpleDialog()
@@ -183,7 +187,7 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                 .AddNavigationalAction()
                 .AddAttachment())
             .Do((_, ctx) => ctx.Application.PurgeEvents())
-            .UpdateTransmission(modify)
+            .UpdateTransmission(successScenario.First)
             .AssertResult<UpdateTransmissionSuccess>()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
@@ -193,332 +197,177 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                     .Which.Metadata[Domain.Common.Constants.IsSilentUpdate]
                     .Should().Be(bool.TrueString);
 
-                assert(dialog.Transmissions.Single());
+                successScenario.Second(dialog.Transmissions.Single());
             });
 
-    private sealed class UpdateTransmissionBasicFieldTestData : TheoryData<
-        Action<UpdateTransmissionCommand, FlowContext>,
-        Action<DialogTransmissionDto>>
+    private sealed class UpdateTransmissionBasicFieldTestData : TheoryData<UpdateTransmissionSuccessScenario>
     {
         public UpdateTransmissionBasicFieldTestData()
         {
             const string updatedIdempotentKey = "updated-idempotent-key";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Idempotent key",
                 (command, _) => command.Dto.IdempotentKey = updatedIdempotentKey,
-                transmission => transmission.IdempotentKey.Should().Be(updatedIdempotentKey));
+                transmission => transmission.IdempotentKey.Should().Be(updatedIdempotentKey)));
 
             const string updatedAuthorizationAttribute = "urn:altinn:subresource:updated-auth";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Authorization attribute",
                 (command, _) => command.Dto.AuthorizationAttribute = updatedAuthorizationAttribute,
-                transmission => transmission.AuthorizationAttribute.Should().Be(updatedAuthorizationAttribute));
+                transmission => transmission.AuthorizationAttribute.Should().Be(updatedAuthorizationAttribute)));
 
             var updatedExtendedType = new Uri("urn:dialogporten:test:updated-type");
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Extended type",
                 (command, _) => command.Dto.ExtendedType = updatedExtendedType,
-                transmission => transmission.ExtendedType.Should().Be(updatedExtendedType));
+                transmission => transmission.ExtendedType.Should().Be(updatedExtendedType)));
 
             const string updatedExternalReference = "updated-external-reference";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "External reference",
                 (command, _) => command.Dto.ExternalReference = updatedExternalReference,
-                transmission => transmission.ExternalReference.Should().Be(updatedExternalReference));
+                transmission => transmission.ExternalReference.Should().Be(updatedExternalReference)));
 
             const DialogTransmissionType.Values updatedType = DialogTransmissionType.Values.Acceptance;
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Type",
                 (command, _) => command.Dto.Type = updatedType,
-                transmission => transmission.Type.Should().Be(updatedType));
+                transmission => transmission.Type.Should().Be(updatedType)));
 
             const string updatedActorName = "vasher";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Sender actor name",
                 (command, _) => command.Dto.Sender = new() { ActorType = ActorType.Values.PartyRepresentative, ActorName = updatedActorName },
-                transmission => transmission.Sender.ActorName.Should().Be(updatedActorName));
+                transmission => transmission.Sender.ActorName.Should().Be(updatedActorName)));
 
             const string updatedContentText = "updated-content-text";
-            Add((command, _) =>
+            Add(new UpdateTransmissionSuccessScenario(
+                "Content title",
+                (command, _) =>
                     command.Dto.Content?.Title.Value[0] = new() { Value = updatedContentText, LanguageCode = "nn" },
                 transmission => transmission.Content.Title.Value.Should().ContainSingle()
-                    .Which.Value.Should().Be(updatedContentText));
+                    .Which.Value.Should().Be(updatedContentText)));
 
-            Add((command, _) =>
+            Add(new UpdateTransmissionSuccessScenario(
+                "Content summary",
+                (command, _) =>
                     command.Dto.Content?.Summary = new() { Value = [new() { Value = updatedContentText, LanguageCode = "nn" }] },
                 transmission => transmission.Content.Summary!.Value.Should().ContainSingle()
-                    .Which.Value.Should().Be(updatedContentText));
+                    .Which.Value.Should().Be(updatedContentText)));
 
             const string updatedContentReference = "https://digdir.no/updated-content-reference";
-            Add((command, _) =>
+            Add(new UpdateTransmissionSuccessScenario(
+                "Content reference",
+                (command, _) =>
                     command.Dto.Content?.ContentReference = new()
                     {
                         MediaType = MediaTypes.EmbeddableMarkdown,
                         Value = [new() { Value = updatedContentReference, LanguageCode = "nn" }]
                     },
                 transmission => transmission.Content.ContentReference!.Value.Should().ContainSingle()
-                    .Which.Value.Should().Be(updatedContentReference));
+                    .Which.Value.Should().Be(updatedContentReference)));
 
             var newCreatedAtDate = DateTimeOffset.UtcNow.AddDays(-10);
-            Add((command, _) => command.Dto.CreatedAt = newCreatedAtDate,
+            Add(new UpdateTransmissionSuccessScenario(
+                "Created at",
+                (command, _) => command.Dto.CreatedAt = newCreatedAtDate,
                 transmission => transmission.CreatedAt.Should()
-                    .BeCloseToWithinMicrosecond(newCreatedAtDate));
+                    .BeCloseToWithinMicrosecond(newCreatedAtDate)));
 
             var updatedAttachmentId = NewUuidV7();
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Attachment id",
                 (command, _) => command.Dto.Attachments[0].Id = updatedAttachmentId,
                 transmission => transmission.Attachments.Should().ContainSingle()
-                    .Which.Id.Should().Be(updatedAttachmentId));
+                    .Which.Id.Should().Be(updatedAttachmentId)));
 
             const string updatedAttachmentName = "updated-attachment-name";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Attachment name",
                 (command, _) => command.Dto.Attachments[0].Name = updatedAttachmentName,
                 transmission => transmission.Attachments.Should().ContainSingle()
-                    .Which.Name.Should().Be(updatedAttachmentName));
+                    .Which.Name.Should().Be(updatedAttachmentName)));
 
             const string updatedAttachmentDisplayName = "updated-attachment-name";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Attachment display name",
                 (command, _) => command.Dto.Attachments[0].DisplayName =
                     [new() { LanguageCode = "nn", Value = updatedAttachmentDisplayName }],
                 transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.DisplayName.Should().ContainSingle()
-                    .Which.Value.Should().Be(updatedAttachmentDisplayName));
+                    .Which.Value.Should().Be(updatedAttachmentDisplayName)));
 
             var updatedAttachmentUrl = new Uri("https://digdir.no/updated-attachment.pdf");
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Attachment url",
                 (command, _) => command.Dto.Attachments[0].Urls[0].Url = updatedAttachmentUrl,
                 transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Urls.Should().ContainSingle()
-                    .Which.Url.Should().Be(updatedAttachmentUrl));
+                    .Which.Url.Should().Be(updatedAttachmentUrl)));
 
             const string updatedAttachmentMediaType = "application/zip";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Attachment media type",
                 (command, _) => command.Dto.Attachments[0].Urls[0].MediaType = updatedAttachmentMediaType,
                 transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Urls.Should().ContainSingle()
-                    .Which.MediaType.Should().Be(updatedAttachmentMediaType));
+                    .Which.MediaType.Should().Be(updatedAttachmentMediaType)));
 
             const AttachmentUrlConsumerType.Values updatedAttachmentConsumerType = AttachmentUrlConsumerType.Values.Api;
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Attachment consumer type",
                 (command, _) => command.Dto.Attachments[0].Urls[0].ConsumerType = updatedAttachmentConsumerType,
                 transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Urls.Should().ContainSingle()
-                    .Which.ConsumerType.Should().Be(updatedAttachmentConsumerType));
+                    .Which.ConsumerType.Should().Be(updatedAttachmentConsumerType)));
 
             var updatedAttachmentExpiresAt = DateTimeOffset.UtcNow.AddDays(7);
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Attachment expires at",
                 (command, _) => command.Dto.Attachments[0].ExpiresAt = updatedAttachmentExpiresAt,
                 transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.ExpiresAt.Should()
-                    .BeCloseToWithinMicrosecond(updatedAttachmentExpiresAt));
+                    .BeCloseToWithinMicrosecond(updatedAttachmentExpiresAt)));
 
             const string updatedNavigationalActionTitle = "updated-navigation-title";
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Navigational action title",
                 (command, _) => command.Dto.NavigationalActions[0].Title =
                     [new() { LanguageCode = "nn", Value = updatedNavigationalActionTitle }],
                 transmission => transmission.NavigationalActions.Should().ContainSingle()
                     .Which.Title.Should().ContainSingle()
-                    .Which.Value.Should().Be(updatedNavigationalActionTitle));
+                    .Which.Value.Should().Be(updatedNavigationalActionTitle)));
 
             var updatedNavigationalActionUrl = new Uri("https://digdir.no/updated-navigation");
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Navigational action url",
                 (command, _) => command.Dto.NavigationalActions[0].Url = updatedNavigationalActionUrl,
                 transmission => transmission.NavigationalActions.Should().ContainSingle()
-                    .Which.Url.Should().Be(updatedNavigationalActionUrl));
+                    .Which.Url.Should().Be(updatedNavigationalActionUrl)));
 
             var updatedNavigationalActionExpiresAt = DateTimeOffset.UtcNow.AddDays(14);
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Navigational action expires at",
                 (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = updatedNavigationalActionExpiresAt,
                 transmission => transmission.NavigationalActions.Should().ContainSingle()
                     .Which.ExpiresAt.Should()
-                    .BeCloseToWithinMicrosecond(updatedNavigationalActionExpiresAt));
+                    .BeCloseToWithinMicrosecond(updatedNavigationalActionExpiresAt)));
 
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Clear attachments",
                 (command, _) => command.Dto.Attachments = [],
-                transmission => transmission.Attachments.Should().BeEmpty());
+                transmission => transmission.Attachments.Should().BeEmpty()));
 
-            Add(
+            Add(new UpdateTransmissionSuccessScenario(
+                "Clear navigational actions",
                 (command, _) => command.Dto.NavigationalActions = [],
-                transmission => transmission.NavigationalActions.Should().BeEmpty());
+                transmission => transmission.NavigationalActions.Should().BeEmpty()));
         }
     }
+}
 
-    [Theory]
-    [ClassData(typeof(UpdateTransmissionValidationTestData))]
-    public Task UpdateTransmission_Returns_ValidationError_When_Input_Is_Invalid(
-        Action<UpdateTransmissionCommand, FlowContext> modify,
-        Action<ValidationError, FlowContext> assert) =>
-        FlowBuilder.For(Application)
-            .AsChangeTransmissionUser()
-            .CreateSimpleDialog()
-            .CreateTransmission((x, _) => x
-                .AddNavigationalAction()
-                .AddAttachment())
-            .UpdateTransmission(modify)
-            .ExecuteAndAssert(assert);
 
-    private sealed class UpdateTransmissionValidationTestData : TheoryData<
-        Action<UpdateTransmissionCommand, FlowContext>,
-        Action<ValidationError, FlowContext>>
-    {
-        private const string DuplicateAttachmentIdKey = "duplicate-attachment-id";
-
-        public UpdateTransmissionValidationTestData()
-        {
-            Add(
-                (command, _) => command.IsSilentUpdate = false,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.IsSilentUpdate)));
-
-            Add(
-                (command, _) => command.DialogId = Guid.Empty,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.DialogId)));
-
-            Add(
-                (command, _) => command.TransmissionId = Guid.Empty,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.TransmissionId)));
-
-            Add(
-                (command, _) => command.Dto = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.Dto)));
-
-            Add(
-                (command, _) => command.Dto.IdempotentKey =
-                    new string('a', Domain.Common.Constants.MinIdempotentKeyLength - 1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.IdempotentKey)));
-
-            Add(
-                (command, _) => command.Dto.IdempotentKey =
-                    new string('a', Domain.Common.Constants.MaxIdempotentKeyLength + 1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.IdempotentKey)));
-
-            Add(
-                (command, _) => command.Dto.ExternalReference =
-                    new string('a', Domain.Common.Constants.DefaultMaxStringLength + 1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.ExternalReference)));
-
-            Add(
-                (command, _) => command.Dto.Sender = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.Sender)));
-
-            Add(
-                (command, _) => command.Dto.AuthorizationAttribute = "invalid authorization attribute",
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.AuthorizationAttribute)));
-
-            Add(
-                (command, ctx) =>
-                {
-                    var existingAttachment = command.Dto.Attachments.Single();
-                    ctx.Bag[DuplicateAttachmentIdKey] = existingAttachment.Id;
-                    command.Dto.Attachments.Add(new TransmissionAttachmentDto
-                    {
-                        Id = existingAttachment.Id,
-                        DisplayName = existingAttachment.DisplayName,
-                        Urls = existingAttachment.Urls,
-                        ExpiresAt = existingAttachment.ExpiresAt
-                    });
-                },
-                (error, ctx) => error.ShouldHaveErrorWithText(ctx.GetGuidByKey(DuplicateAttachmentIdKey).ToString()));
-
-            Add(
-                (command, _) => command.Dto.Content = null,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.Content)));
-
-            Add(
-                (command, _) => command.Dto.Attachments[0].Urls = [],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Urls)));
-
-            Add(
-                (command, _) => command.Dto.Attachments[0].Id = Guid.NewGuid(),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Id)));
-
-            Add(
-                (command, _) => command.Dto.Attachments[0].Id = NewUuidV7(DateTimeOffset.UtcNow.AddHours(1)),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Id)));
-
-            Add(
-                (command, _) => command.Dto.Attachments[0].DisplayName =
-                    [new() { LanguageCode = "nb", Value = string.Empty }],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(LocalizationDto.Value)));
-
-            Add(
-                (command, _) => command.Dto.Attachments[0].Urls[0].Url = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.Url)));
-
-            Add(
-                (command, _) => command.Dto.Attachments[0].Urls[0].MediaType = new string('a', 257),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.MediaType)));
-
-            Add(
-                (command, _) => command.Dto.Attachments[0].Urls[0].ConsumerType = (AttachmentUrlConsumerType.Values)999,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.ConsumerType)));
-
-            Add(
-                (command, _) => command.Dto.NavigationalActions[0].Title = [],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Title)));
-
-            Add(
-                (command, _) => command.Dto.NavigationalActions[0].Url = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Url)));
-
-            Add(
-                (command, _) => command.Dto.NavigationalActions[0].Url = new Uri("http://digdir.no/action"),
-                (error, _) => error.ShouldHaveErrorWithText("https"));
-
-            Add(
-                (command, _) => command.Dto.NavigationalActions[0].Url =
-                    new Uri($"https://digdir.no/{new string('a', Domain.Common.Constants.DefaultMaxUriLength)}"),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Url)));
-
-            Add(
-                (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.ExpiresAt)));
-
-            Add(
-                (command, _) => command.Dto.Content!.Title = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.Title)));
-
-            Add(
-                (command, _) => command.Dto.Content!.Title.MediaType = MediaTypes.EmbeddableMarkdown,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.MediaType)));
-
-            Add(
-                (command, _) => command.Dto.Content!.Title.Value =
-                    [new() { LanguageCode = "nb", Value = string.Empty }],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.Value)));
-
-            Add(
-                (command, _) => command.Dto.Content!.Summary = new()
-                {
-                    MediaType = "application/json",
-                    Value = [new() { LanguageCode = "nb", Value = "summary" }]
-                },
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.Summary)));
-
-            Add(
-                (command, _) => command.Dto.Content!.Summary = new()
-                {
-                    MediaType = MediaTypes.PlainText,
-                    Value = []
-                },
-                (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.Value)));
-
-            Add(
-                (command, _) => command.Dto.Content!.ContentReference = new()
-                {
-                    MediaType = MediaTypes.PlainText,
-                    Value = [new() { LanguageCode = "nb", Value = "https://digdir.no/content" }]
-                },
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.ContentReference)));
-
-            Add(
-                (command, _) => command.Dto.Content!.ContentReference = new()
-                {
-                    MediaType = MediaTypes.EmbeddableMarkdown,
-                    Value = [new() { LanguageCode = "nb", Value = "not-an-url" }]
-                },
-                (error, _) => error.ShouldHaveErrorWithText("https"));
-
-            Add(
-                (command, _) => command.Dto.Content!.ContentReference = new()
-                {
-                    MediaType = MediaTypes.EmbeddableMarkdown,
-                    Value = [new() { LanguageCode = "nb", Value = "http://digdir.no/not-https" }]
-                },
-                (error, _) => error.ShouldHaveErrorWithText("https"));
-        }
-    }
+public record UpdateTransmissionSuccessScenario(string Name, Action<UpdateTransmissionCommand, FlowContext> First, Action<DialogTransmissionDto> Second)
+{
+    public override string ToString() => Name;
 }

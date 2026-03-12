@@ -9,7 +9,6 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -38,7 +37,6 @@ public sealed record UpdateTransmissionSuccess(Guid Revision);
 internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateTransmissionCommand, UpdateTransmissionResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IDomainContext _domainContext;
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
@@ -47,7 +45,6 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
 
     public UpdateTransmissionCommandHandler(
         IDialogDbContext db,
-        IDomainContext domainContext,
         IMapper mapper,
         IUnitOfWork unitOfWork,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
@@ -55,7 +52,6 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
@@ -79,7 +75,6 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
         if (authorizeResult.Value is Forbidden forbidden)
         {
-            _domainContext.Pop();
             return forbidden;
         }
 
@@ -111,14 +106,7 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                 update: UpdateTransmissionAttachments,
                 delete: DeleteDelegate.Default);
 
-        if (request.Dto.RelatedTransmissionId is not null &&
-            request.Dto.RelatedTransmissionId.Value == request.TransmissionId)
-        {
-            _domainContext.AddError(new DomainFailure(nameof(UpdateTransmissionDto.RelatedTransmissionId),
-                $"A transmission cannot reference itself ({nameof(UpdateTransmissionDto.RelatedTransmissionId)} is equal to {nameof(UpdateTransmissionDto.Id)}, '{request.TransmissionId}')."));
-        }
-
-        var conflict = await ValidateIdempotentKeys(dialog.Id, transmission, cancellationToken);
+        var conflict = ValidateIdempotentKeys(dialog, transmission);
         if (conflict is not null)
         {
             return conflict;
@@ -138,16 +126,16 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
             conflict => conflict);
     }
 
-    private async Task<Conflict?> ValidateIdempotentKeys(Guid dialogId, DialogTransmission transmission, CancellationToken cancellationToken)
+    private static Conflict? ValidateIdempotentKeys(DialogEntity dialog, DialogTransmission transmission)
     {
         if (string.IsNullOrWhiteSpace(transmission.IdempotentKey))
         {
             return null;
         }
 
-        var exists = await _db.DialogTransmissions
-            .Where(x => x.DialogId == dialogId && x.Id != transmission.Id)
-            .AnyAsync(x => x.IdempotentKey == transmission.IdempotentKey, cancellationToken);
+        var exists = dialog.Transmissions
+            .Where(x => x.Id != transmission.Id)
+            .Any(x => x.IdempotentKey == transmission.IdempotentKey);
 
         return exists
             ? new Conflict(nameof(DialogTransmission.IdempotentKey),

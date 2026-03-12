@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.Validators;
@@ -9,10 +10,11 @@ internal sealed class UpdateTransmissionTransmissionAttachmentUrlDtoValidator : 
     {
         RuleFor(x => x.Url)
             .NotEmpty()
-            .IsValidUri();
+            .IsValidHttpsUrl()
+            .MaximumLength(Constants.DefaultMaxUriLength);
 
         RuleFor(x => x.MediaType)
-            .MaximumLength(256);
+            .MaximumLength(Constants.DefaultMediaTypeMaxLength);
 
         RuleFor(x => x.ConsumerType)
             .IsInEnum();

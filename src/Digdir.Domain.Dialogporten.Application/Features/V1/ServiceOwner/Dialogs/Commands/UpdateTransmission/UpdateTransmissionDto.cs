@@ -9,12 +9,6 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 public class UpdateTransmissionDto
 {
     /// <summary>
-    /// The unique identifier for the transmission in UUIDv7 format.
-    /// </summary>
-    /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
-    public Guid Id { get; set; }
-
-    /// <summary>
     /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and the transmission is not updated.
     /// </summary>
     public string? IdempotentKey { get; set; }

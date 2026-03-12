@@ -3885,12 +3885,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// The unique identifier for the transmission in UUIDv7 format.
-        /// </summary>
-        [JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
-
-        /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and the transmission is not updated.
         /// </summary>
         [JsonPropertyName("idempotentKey")]

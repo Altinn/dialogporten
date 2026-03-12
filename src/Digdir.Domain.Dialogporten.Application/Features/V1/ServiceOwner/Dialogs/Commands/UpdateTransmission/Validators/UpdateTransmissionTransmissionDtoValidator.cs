@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -12,14 +11,8 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator,
-        IValidator<TransmissionNavigationalActionDto> navigationalActionValidator,
-        IClock clock)
+        IValidator<TransmissionNavigationalActionDto> navigationalActionValidator)
     {
-        RuleFor(x => (Guid?)x.Id)
-            .NotEmpty()
-            .IsValidUuidV7()
-            .UuidV7TimestampIsInPast(clock);
-
         RuleFor(x => x.IdempotentKey)
             .MinimumLength(Constants.MinIdempotentKeyLength)
             .MaximumLength(Constants.MaxIdempotentKeyLength);
@@ -34,11 +27,6 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
 
         RuleFor(x => x.Type)
             .IsInEnum();
-
-        RuleFor(x => x.RelatedTransmissionId)
-            .NotEqual(x => x.Id)
-            .WithMessage(x => $"A transmission cannot reference itself ({nameof(x.RelatedTransmissionId)} is equal to {nameof(x.Id)}, '{x.Id}').")
-            .When(x => x.RelatedTransmissionId.HasValue);
 
         RuleFor(x => x.Sender)
             .NotNull()

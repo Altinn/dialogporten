@@ -28,7 +28,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
-        var request = CreateUpdateRequest(transmissionId, x =>
+        var request = CreateUpdateRequest(x =>
         {
             x.ExternalReference = updatedExternalReference;
             x.Attachments =
@@ -91,7 +91,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var transmissionId = DialogTestData.NewUuidV7();
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
-        var request = CreateUpdateRequest(transmissionId, x => x.ExternalReference = "if-match-mismatch");
+        var request = CreateUpdateRequest(x => x.ExternalReference = "if-match-mismatch");
 
         // Act
         var response = await Fixture.ServiceownerApi
@@ -114,7 +114,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
-        var request = CreateUpdateRequest(transmissionId, x => x.ExternalReference = "forbidden-update");
+        var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
 
         // Act
         var response = await Fixture.ServiceownerApi
@@ -138,7 +138,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
-        var request = CreateUpdateRequest(transmissionId, x =>
+        var request = CreateUpdateRequest(x =>
             x.Content.ContentReference = DialogTestData.CreateContentValue(
                 value: "http://example.com/not-https",
                 languageCode: "nb"));
@@ -169,7 +169,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             x.AddTransmission(x => x.IdempotentKey = idempotentKey);
             x.AddTransmission(x => x.Id = transmissionId);
         });
-        var request = CreateUpdateRequest(transmissionId, x => x.IdempotentKey = idempotentKey);
+        var request = CreateUpdateRequest(x => x.IdempotentKey = idempotentKey);
 
         // Act
         var response = await Fixture.ServiceownerApi
@@ -197,7 +197,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         var dialogId = createDialogResponse.Content.ToGuid();
         var revisionBeforeUpdate = createDialogResponse.Headers.ETagToGuid();
-        var request = CreateUpdateRequest(transmissionId, x => x.ExternalReference = "revision-change");
+        var request = CreateUpdateRequest(x => x.ExternalReference = "revision-change");
 
         // Act
         var updateResponse = await Fixture.ServiceownerApi
@@ -223,12 +223,10 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     }
 
     private static V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest CreateUpdateRequest(
-        Guid transmissionId,
         Action<V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest>? modify = null)
     {
         var request = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest
         {
-            Id = transmissionId,
             IsSilentUpdate = true,
             CreatedAt = DateTimeOffset.UtcNow.AddMinutes(-1),
             Type = Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesTransmissions_DialogTransmissionType.Information,

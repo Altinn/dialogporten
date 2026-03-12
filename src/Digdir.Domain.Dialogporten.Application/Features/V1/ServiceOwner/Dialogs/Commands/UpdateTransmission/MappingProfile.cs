@@ -11,7 +11,6 @@ internal sealed class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<UpdateTransmissionDto, DialogTransmission>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.TypeId, opt => opt.MapFrom(src => src.Type))
             .ForMember(dest => dest.Attachments, opt => opt.Ignore());

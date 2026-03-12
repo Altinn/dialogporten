@@ -80,7 +80,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 public static class IFlowStepExtensions
 {
     private const string DialogIdKey = "DialogId";
-    public const string TransmissionIdKey = "TransmissionId";
+    private const string TransmissionIdKey = "TransmissionId";
     private const string PartyKey = "Party";
     private const string ActivityIdKey = "ActivityId";
     private const string ServiceResource = "ServiceResource";
@@ -313,7 +313,6 @@ public static class IFlowStepExtensions
                 var transmission = dialog.Transmissions.Single(x => x.Id == transmissionId);
                 var updateTransmissionDto = new UpdateTransmissionDto
                 {
-                    Id = transmission.Id,
                     IdempotentKey = null,
                     AuthorizationAttribute = transmission.AuthorizationAttribute,
                     ExtendedType = transmission.ExtendedType,

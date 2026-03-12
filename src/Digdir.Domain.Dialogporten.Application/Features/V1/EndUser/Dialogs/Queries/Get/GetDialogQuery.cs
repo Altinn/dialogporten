@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -9,13 +8,16 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -32,26 +34,29 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 {
     private readonly IDialogDbContext _db;
     private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
+    private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public GetDialogQueryHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IUnitOfWork unitOfWork,
+        IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
+        IUser user,
         IAltinnAuthorization altinnAuthorization,
         IDialogTokenGenerator dialogTokenGenerator)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        _user = user ?? throw new ArgumentNullException(nameof(user));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _dialogTokenGenerator = dialogTokenGenerator ?? throw new ArgumentNullException(nameof(dialogTokenGenerator));
     }
@@ -150,18 +155,28 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         // TODO: What if name lookup fails
         // https://github.com/altinn/dialogporten/issues/387
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        dialog.UpdateSeenAt(
-            currentUserInformation.UserId.ExternalIdWithPrefix,
-            currentUserInformation.UserId.Type,
-            currentUserInformation.Name);
+        var userId = _userRegistry.GetCurrentUserId();
 
-        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
+        var externalId = userId.ExternalIdWithPrefix;
+        if (userId.Type == DialogUserType.Values.SystemUser)
+        {
+            externalId = _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
+                ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
+                : throw new InvalidOperationException("Systemuser organization number not found");
+        }
 
-        dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [],
-            removeLabels: [SystemLabel.Values.MarkedAsUnopened],
-            performedBy);
+        var lastSeen = dialog.SeenLog
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalId)
+            .MaxBy(x => x.CreatedAt);
+
+        if (lastSeen is null ||
+            lastSeen.CreatedAt <= dialog.UpdatedAt ||
+            dialog.EndUserContext.DialogEndUserContextSystemLabels.Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened)
+            )
+        {
+            dialog.UpdateSeenAt(externalId, userId.Type);
+        }
+
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
@@ -175,6 +190,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
+
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
@@ -182,12 +198,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            currentUserInformation);
+            userId);
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            currentUserInformation);
+            userId);
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -199,27 +215,29 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
 
+        dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+
         return dialogDto;
     }
 
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        UserInformation currentUserInformation) =>
+        UserId userId) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
                 .First())
-            .Select(log => ToSeenLogDto(currentUserInformation, log))
+            .Select(log => ToSeenLogDto(userId, log))
             .ToList();
 
-    private DialogSeenLogDto ToSeenLogDto(UserInformation currentUserInformation, DialogSeenLog log)
+    private DialogSeenLogDto ToSeenLogDto(UserId currentUserInformation, DialogSeenLog log)
     {
         var actorId = log.SeenBy.ActorNameEntity?.ActorId;
         var logDto = _mapper.Map<DialogSeenLogDto>(log);
-        logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
+        logDto.IsCurrentEndUser = currentUserInformation.ExternalIdWithPrefix == actorId;
         return logDto;
     }
 
@@ -231,7 +249,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var apiAction in dto.ApiActions.Where(a => a.Action == action))
             {
                 if ((apiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
+                 || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
                 {
                     apiAction.IsAuthorized = true;
                 }
@@ -240,7 +258,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var guiAction in dto.GuiActions.Where(a => a.Action == action))
             {
                 if ((guiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
+                 || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
                 {
                     guiAction.IsAuthorized = true;
                 }

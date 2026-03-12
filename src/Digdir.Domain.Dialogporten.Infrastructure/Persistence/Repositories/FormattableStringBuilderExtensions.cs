@@ -10,17 +10,20 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 internal static class PostgresFormattableStringBuilderExtensions
 {
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
-    internal static PostgresFormattableStringBuilder ApplyPaginationOrder<T>(this PostgresFormattableStringBuilder builder, IOrderSet<T> orderSet, string alias)
+    internal static PostgresFormattableStringBuilder ApplyPaginationOrder<T>(
+        this PostgresFormattableStringBuilder builder, IOrderSet<T> orderSet, string alias)
     {
         using var enumerator = orderSet.Orders.GetEnumerator();
 
         if (!enumerator.MoveNext()) return builder;
 
-        builder.Append((string)$" ORDER BY {GetKey(enumerator.Current, alias)} {DirectionToSql(enumerator.Current.Direction)}");
+        builder.Append(
+            (string)$" ORDER BY {GetKey(enumerator.Current, alias)} {DirectionToSql(enumerator.Current.Direction)}");
 
         while (enumerator.MoveNext())
         {
-            builder.Append((string)$", {GetKey(enumerator.Current, alias)} {DirectionToSql(enumerator.Current.Direction)}");
+            builder.Append(
+                (string)$", {GetKey(enumerator.Current, alias)} {DirectionToSql(enumerator.Current.Direction)}");
         }
 
         return builder.Append(" ");
@@ -58,6 +61,30 @@ internal static class PostgresFormattableStringBuilderExtensions
                     )
                 """);
         }
+
+        return queryBuilder;
+    }
+
+    internal static PostgresFormattableStringBuilder AppendIsSeenFilterCondition(
+        this PostgresFormattableStringBuilder queryBuilder,
+        bool? isSeen)
+    {
+        if (isSeen is null)
+        {
+            return queryBuilder;
+        }
+
+        queryBuilder
+            .Append($"""
+                      AND {isSeen}::boolean = (d."IsSeenSinceLastContentUpdate" AND NOT EXISTS (
+                         SELECT 1
+                         FROM "DialogEndUserContext" dec 
+                         JOIN "DialogEndUserContextSystemLabel" sl ON dec."Id" = sl."DialogEndUserContextId"
+                         WHERE dec."DialogId" = d."Id"
+                            AND sl."SystemLabelId" = {SystemLabel.Values.MarkedAsUnopened}
+                         )
+                     )
+                     """);
 
         return queryBuilder;
     }
@@ -131,7 +158,8 @@ internal static class PostgresFormattableStringBuilderExtensions
 
         var orderParts = orderSet.Orders
             .Join(continuationTokenSet.Tokens, x => x.Key, x => x.Key,
-                (order, token) => new OrderPart(order.Direction, order.GetSelector().Body.Type, GetKey(order, alias), token.Value),
+                (order, token) => new OrderPart(order.Direction, order.GetSelector().Body.Type, GetKey(order, alias),
+                    token.Value),
                 StringComparer.InvariantCultureIgnoreCase)
             .ToList();
         // x => x.a < an OR (x.a = an AND x.b < bn) OR (x.a = an AND x.b = bn AND x.c < cn) OR ...
@@ -167,7 +195,8 @@ internal static class PostgresFormattableStringBuilderExtensions
         return builder;
     }
 
-    internal static PostgresFormattableStringBuilder ApplyPaginationLimit(this PostgresFormattableStringBuilder builder, int limit) =>
+    internal static PostgresFormattableStringBuilder ApplyPaginationLimit(this PostgresFormattableStringBuilder builder,
+        int limit) =>
         builder.Append((string)$" LIMIT {limit + 1} ");
 
     private static bool TryGetProcessedServiceOwnerLabels(
@@ -194,14 +223,16 @@ internal static class PostgresFormattableStringBuilderExtensions
             }
             else
             {
-                throw new ArgumentException($"Invalid label format: '{label}'. Wildcard '*' is only allowed at the very end of the string.");
+                throw new ArgumentException(
+                    $"Invalid label format: '{label}'. Wildcard '*' is only allowed at the very end of the string.");
             }
         }
 
         return results.Count > 0;
     }
 
-    private static PostgresFormattableStringBuilder CreateLessThanGreaterThanPart(this PostgresFormattableStringBuilder builder, OrderPart orderPart) =>
+    private static PostgresFormattableStringBuilder CreateLessThanGreaterThanPart(
+        this PostgresFormattableStringBuilder builder, OrderPart orderPart) =>
         // Null values are excluded in greater/less than comparison in
         // postgres since both 'null==null' and 'null!=null' returns
         // false. Threfore we need to take null values into account
@@ -218,7 +249,8 @@ internal static class PostgresFormattableStringBuilderExtensions
         orderPart.Direction switch
         {
             OrderDirection.Asc when orderPart.Type.IsNullableType() && orderPart.Value is not null
-                => builder.Append((string)$" {orderPart.Key} IS NULL OR {orderPart.Key} > ").Append($"{orderPart.Value}"),
+                => builder.Append((string)$" {orderPart.Key} IS NULL OR {orderPart.Key} > ")
+                    .Append($"{orderPart.Value}"),
             OrderDirection.Desc when orderPart.Type.IsNullableType() && orderPart.Value is null
                 => builder.Append((string)$" {orderPart.Key} IS NOT NULL"),
 
@@ -227,7 +259,8 @@ internal static class PostgresFormattableStringBuilderExtensions
             _ => throw new InvalidOperationException()
         };
 
-    private static PostgresFormattableStringBuilder CreateEqualsPart(this PostgresFormattableStringBuilder builder, OrderPart x) =>
+    private static PostgresFormattableStringBuilder CreateEqualsPart(this PostgresFormattableStringBuilder builder,
+        OrderPart x) =>
         x.Value is not null
             ? builder.Append((string)$" {x.Key} = ").Append($"{x.Value}")
             : builder.Append((string)$" {x.Key} IS NULL");

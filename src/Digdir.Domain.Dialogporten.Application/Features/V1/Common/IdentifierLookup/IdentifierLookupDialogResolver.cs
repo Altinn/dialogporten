@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
@@ -32,7 +33,7 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
 
         var dialogId = instanceRef.Type is InstanceRefType.DialogId
             ? instanceRef.Id
-            : await ResolveDialogIdFromLabel(dialogs, CreateLookupLabel(instanceRef), cancellationToken);
+            : await ResolveDialogIdFromLabel(dialogs, instanceRef.ToLookupLabel(), cancellationToken);
 
         if (dialogId == Guid.Empty)
         {
@@ -132,12 +133,6 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             .OrderByDescending(x => x.Id)
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
-
-    private static string CreateLookupLabel(InstanceRef instanceRef) =>
-        instanceRef.Type is not InstanceRefType.AppInstanceId || instanceRef.PartyId is null
-            ? instanceRef.Value
-            : $"{Constants.ServiceContextInstanceIdPrefix}{instanceRef.PartyId.Value}/{instanceRef.Id}"
-                .ToLowerInvariant();
 
     private static bool TryToAppInstanceRef(string labelValue, [NotNullWhen(true)] out string? appInstanceRef)
     {

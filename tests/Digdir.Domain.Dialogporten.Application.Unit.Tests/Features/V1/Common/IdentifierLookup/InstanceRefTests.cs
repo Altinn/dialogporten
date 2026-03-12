@@ -1,4 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using AwesomeAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.IdentifierLookup;

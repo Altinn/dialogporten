@@ -201,13 +201,8 @@ internal static class DecisionRequestHelper
             }
             else if (ns == AttributeIdAppInstance)
             {
-                // TODO!
-                // For app instances, we the syntax of the value is "{partyID}/{instanceID}".
-                // We do not have Altinn partyID in the request, so we cannot support this.
-                // This means we cannot easily support instance specific authorizations for apps.
-                // This should probably be fixed in the PDP, lest we use the party lookup service
-                // to get this value (which would suck).
                 /*
+                 // TODO! Fix this in #3358
                 {
                     AttributeId = AttributeIdAppInstance,
                     Value = dialogId.ToString()

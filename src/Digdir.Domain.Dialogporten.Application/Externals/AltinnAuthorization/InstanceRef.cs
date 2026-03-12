@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using Digdir.Domain.Dialogporten.Domain.Common;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
+namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
 public enum InstanceRefType
 {
@@ -32,6 +33,11 @@ public readonly record struct InstanceRef(InstanceRefType Type, Guid Id, string 
                || TryParseWithPrefix(normalized, CorrespondencePrefix, InstanceRefType.CorrespondenceId, out instanceRef)
                || TryParseWithPrefix(normalized, DialogPrefix, InstanceRefType.DialogId, out instanceRef);
     }
+
+    public string ToLookupLabel() =>
+        Type is not InstanceRefType.AppInstanceId || PartyId is null
+            ? Value
+            : $"{Constants.ServiceContextInstanceIdPrefix}{PartyId.Value}/{Id}".ToLowerInvariant();
 
     private static bool TryParseAppInstanceRef(string normalized, [NotNullWhen(true)] out InstanceRef? instanceRef)
     {

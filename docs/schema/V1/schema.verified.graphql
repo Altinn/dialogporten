@@ -315,6 +315,7 @@ type DialogLookupServiceOwner {
 
 type DialogLookupServiceResource {
   id: String!
+  isDelegable: Boolean!
   name: [Localization!]!
 }
 

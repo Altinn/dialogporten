@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Xunit;
@@ -9,6 +8,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 
 public class AuthorizationHelperTests
 {
+    private const string AltinnIntegrationStorageUrnPrefix = "urn:altinn:integration:storage:";
+
     [Fact]
     public async Task PruneUnreferencedResources_ShouldReturnEarly_WhenNoParties()
     {
@@ -60,7 +61,7 @@ public class AuthorizationHelperTests
             },
             AltinnAppInstanceIds =
             [
-                $"{Constants.ServiceContextInstanceIdPrefix}111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+                $"{AltinnIntegrationStorageUrnPrefix}999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
             ]
         };
 
@@ -87,7 +88,7 @@ public class AuthorizationHelperTests
         Assert.Contains("resource4", result.ResourcesByParties["party3"]);
         Assert.Single(result.AltinnAppInstanceIds);
         Assert.Equal(
-            $"{Constants.ServiceContextInstanceIdPrefix}111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            $"{AltinnIntegrationStorageUrnPrefix}999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             result.AltinnAppInstanceIds.Single());
     }
 
@@ -228,10 +229,10 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
-                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003",
-                    Constants.ServiceContextInstanceIdPrefix + "444/00000000-0000-0000-0000-000000000004",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000001",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003",
+                    $"{AltinnIntegrationStorageUrnPrefix}444/00000000-0000-0000-0000-000000000004",
                 }
             },
 
@@ -247,9 +248,9 @@ public class AuthorizationHelperTests
                 },
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000001",
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
-                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000001",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -287,8 +288,8 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
-                    Constants.ServiceContextInstanceIdPrefix + "222/00000000-0000-0000-0000-000000000003"
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -300,7 +301,7 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>(),
                 new List<string>
                 {
-                    Constants.ServiceContextInstanceIdPrefix + "111/00000000-0000-0000-0000-000000000002",
+                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
                 }
             },
 

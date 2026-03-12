@@ -11,11 +11,14 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
 {
+    private static readonly string LocalSubParty = NorwegianOrganizationIdentifier.PrefixWithSeparator + "123456789";
+
     private readonly IDialogDbContext _db;
 
     public LocalDevelopmentAltinnAuthorization(IDialogDbContext db)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        ArgumentNullException.ThrowIfNull(db);
+        _db = db;
     }
 
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
@@ -63,13 +66,50 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
                     new()
                     {
                         Name = "Local Sub Party",
-                        Party = NorwegianOrganizationIdentifier.PrefixWithSeparator + "123456789",
+                        Party = LocalSubParty,
                         PartyUuid = Guid.NewGuid(),
                         IsCurrentEndUser = true
                     }
                 ]
             }]
         });
+
+    public async Task<AuthorizedPartiesResult> GetAuthorizedPartiesForLookup(
+        IPartyIdentifier authenticatedParty,
+        List<string> constraintParties,
+        CancellationToken cancellationToken = default)
+    {
+        var authorizedResources = await _db.Dialogs
+            .AsNoTracking()
+            .Select(x => x.ServiceResource)
+            .Distinct()
+            .Take(20)
+            .ToListAsync(cancellationToken);
+
+        var parties = (constraintParties.Count > 0
+            ? constraintParties.Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            : [authenticatedParty.FullId])
+            .Concat([LocalSubParty])
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new AuthorizedPartiesResult
+        {
+            AuthorizedParties = parties
+                .Select((party, index) => new AuthorizedParty
+                {
+                    Name = "Local Party",
+                    Party = party,
+                    PartyUuid = Guid.NewGuid(),
+                    PartyId = index + 1,
+                    IsCurrentEndUser = string.Equals(party, authenticatedParty.FullId, StringComparison.OrdinalIgnoreCase),
+                    AuthorizedResources = [.. authorizedResources],
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedInstances = []
+                })
+                .ToList()
+        };
+    }
 
     public Task<bool> HasListAuthorizationForDialog(DialogEntity _, CancellationToken __) => Task.FromResult(true);
 

@@ -22,4 +22,10 @@
         <ProjectReference Include="..\..\src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="appsettings.local.json" Condition="Exists('appsettings.local.json')">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>

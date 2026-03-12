@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureToggle;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using FluentValidation;
@@ -68,6 +69,9 @@ public static class ApplicationExtensions
             .AddTransient<IUserRegistry, UserRegistry>()
             .AddTransient<IUserParties, UserParties>()
             .AddTransient<IClock, Clock>()
+            .AddTransient<IIdentifierLookupDialogResolver, IdentifierLookupDialogResolver>()
+            .AddTransient<IIdentifierLookupPresentationResolver, IdentifierLookupPresentationResolver>()
+            .AddTransient<IIdentifierLookupAuthorizationResolver, IdentifierLookupAuthorizationResolver>()
             .AddTransient<IDialogTransmissionAppender, DialogTransmissionAppender>()
             .AddTransient<ITransmissionHierarchyValidator, TransmissionHierarchyValidator>()
             .AddTransient<ISystemLabelAdder, SystemLabelAdder>()

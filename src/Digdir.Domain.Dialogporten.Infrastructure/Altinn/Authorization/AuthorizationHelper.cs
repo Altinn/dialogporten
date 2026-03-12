@@ -11,8 +11,8 @@ internal static class AuthorizationHelper
     /// This method resolves subjects (ie. roles and access packages) based on the authorized parties and constraints provided,
     /// returning a list of all the (unique) resources associated with each party.
     ///
-    /// Additionally, it collects Altinn app instance delegations for parties that have them, returning them as a intermediate
-    /// list of instance ids that can later be used to determine the actual dialog ids for these app instances. This is performed
+    /// Additionally, it collects Altinn app instance delegations for parties that have them, returning them as an intermediate
+    /// list of service owner labels for app instances that can later be used to determine the actual dialog ids. This is performed
     /// in this method as well, to avoid having to loop/filter over (the potentially large) list of parties multiple times.
     /// </summary>
     /// <param name="authorizedParties">
@@ -50,8 +50,12 @@ internal static class AuthorizationHelper
         }
 
         // Create HashSets from constraints for efficient lookups.
-        var constraintPartiesSet = constraintParties.Count > 0 ? new HashSet<string>(constraintParties) : null;
-        var constraintResourcesSet = constraintResources.Count > 0 ? new HashSet<string>(constraintResources) : null;
+        var constraintPartiesSet = constraintParties.Count > 0
+            ? new HashSet<string>(constraintParties, StringComparer.OrdinalIgnoreCase)
+            : null;
+        var constraintResourcesSet = constraintResources.Count > 0
+            ? new HashSet<string>(constraintResources, StringComparer.OrdinalIgnoreCase)
+            : null;
 
         // Pre-filter parties to a relevant subset to avoid filtering the same large list multiple times.
         var relevantParties = authorizedParties.AuthorizedParties
@@ -65,7 +69,7 @@ internal static class AuthorizationHelper
 
         // Step 1: Collect all unique subjects (roles/access packages) from the relevant parties.
         // This is required to efficiently fetch only the necessary subject-to-resource mappings.
-        var uniqueSubjects = new HashSet<string>(100);
+        var uniqueSubjects = new HashSet<string>(100, StringComparer.OrdinalIgnoreCase);
         foreach (var party in relevantParties)
         {
             foreach (var roleOrAccessPackage in party.AuthorizedRolesAndAccessPackages)
@@ -75,7 +79,7 @@ internal static class AuthorizationHelper
         }
 
         // Step 2: Build a lookup dictionary that maps each subject to its corresponding resources.
-        var subjectToResources = new Dictionary<string, HashSet<string>>();
+        var subjectToResources = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         if (uniqueSubjects.Count > 0)
         {
             var subjectResources = await getAllSubjectResources(cancellationToken);
@@ -90,7 +94,7 @@ internal static class AuthorizationHelper
 
                 if (!subjectToResources.TryGetValue(sr.Subject, out var resources))
                 {
-                    resources = new HashSet<string>();
+                    resources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     subjectToResources[sr.Subject] = resources;
                 }
 
@@ -102,10 +106,12 @@ internal static class AuthorizationHelper
         // This single loop handles role-based resources, direct resources, and instance delegations.
         foreach (var party in relevantParties)
         {
-            var partyResources = new HashSet<string>();
+            var partyResources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var partySubjects = party.AuthorizedRolesAndAccessPackages
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             // Aggregate resources granted via roles and access packages.
-            foreach (var role in party.AuthorizedRolesAndAccessPackages)
+            foreach (var role in partySubjects)
             {
                 if (subjectToResources.TryGetValue(role, out var resourcesFromRole))
                 {
@@ -128,25 +134,55 @@ internal static class AuthorizationHelper
                 result.ResourcesByParties[party.Party] = partyResources;
             }
 
-            // Handle app instance delegations from Altinn Access Management.
-            foreach (var instance in party.AuthorizedInstances)
-            {
-                if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                if ((constraintResourcesSet is null
+            var partyAuthorizedInstances = party.AuthorizedInstances
+                .Where(instance =>
+                    constraintResourcesSet is null
                     || constraintResourcesSet.Contains(Constants.ServiceResourcePrefix + instance.ResourceId))
-                    && Guid.TryParse(instance.InstanceId, out _))
+                .ToList();
+
+            if (partyAuthorizedInstances.Count > 0)
+            {
+                // Handle app instance delegations from Altinn Access Management.
+                // NOTE: This is currently app-instance specific handling. See https://github.com/Altinn/dialogporten/issues/3358 for generic handling.
+                foreach (var instance in partyAuthorizedInstances)
                 {
-                    result.AltinnAppInstanceIds.Add(
-                        $"{Constants.ServiceContextInstanceIdPrefix}{party.PartyId}/{instance.InstanceId}");
+                    if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var instanceRef = string.IsNullOrWhiteSpace(instance.InstanceRef)
+                        ? Guid.TryParse(instance.InstanceId, out _)
+                            ? $"{AltinnAuthorizationConstants.AppInstanceRefPrefix}{party.PartyId}/{instance.InstanceId}"
+                            : null
+                        : instance.InstanceRef;
+
+                    var serviceOwnerLabel = ToServiceOwnerAppInstanceLabel(instanceRef);
+                    if (serviceOwnerLabel is not null)
+                    {
+                        result.AltinnAppInstanceIds.Add(serviceOwnerLabel);
+                    }
                 }
             }
         }
 
         return result;
+    }
+
+    private static string? ToServiceOwnerAppInstanceLabel(string? instanceRef)
+    {
+        if (string.IsNullOrWhiteSpace(instanceRef))
+        {
+            return null;
+        }
+
+        var normalized = instanceRef.ToLowerInvariant();
+        if (!normalized.StartsWith(AltinnAuthorizationConstants.AppInstanceRefPrefix, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return (Constants.ServiceContextInstanceIdPrefix + normalized[AltinnAuthorizationConstants.AppInstanceRefPrefix.Length..]).ToLowerInvariant();
     }
 
     /// <summary>

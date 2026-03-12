@@ -19,7 +19,8 @@ public sealed record ServiceResourceInformation(
     string OwnerOrgNumber,
     string OwnOrgShortName,
     IReadOnlyList<ResourceLocalization> DisplayName,
-    IReadOnlyList<ResourceLocalization> Description)
+    IReadOnlyList<ResourceLocalization> Description,
+    bool Delegable)
 {
     public static readonly ServiceResourceInformation Empty = new(
         string.Empty,
@@ -27,7 +28,8 @@ public sealed record ServiceResourceInformation(
         string.Empty,
         string.Empty,
         [],
-        []);
+        [],
+        false);
 
     public string ResourceType { get; } = ResourceType.ToLowerInvariant();
     public string OwnerOrgNumber { get; } = OwnerOrgNumber.ToLowerInvariant();

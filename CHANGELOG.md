@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.107.0](https://github.com/Altinn/dialogporten/compare/v1.106.2...v1.107.0) (2026-03-12)
+
+
+### Features
+
+* Dialog lookup API ([#3559](https://github.com/Altinn/dialogporten/issues/3559)) ([23c0423](https://github.com/Altinn/dialogporten/commit/23c042350dae1ad293fd2c41515bbab9abe0b458))
+
+
+### Bug Fixes
+
+* Add missing fields, cleanups to dialog lookup ([#3585](https://github.com/Altinn/dialogporten/issues/3585)) ([8e2d8e5](https://github.com/Altinn/dialogporten/commit/8e2d8e5e13cda138db0550060ae4fbde4a73c229))
+* **infra:** enable Active Directory and password authentication for PostgreSQL server ([#3570](https://github.com/Altinn/dialogporten/issues/3570)) ([3497c1e](https://github.com/Altinn/dialogporten/commit/3497c1e4c6562b3e5fcc3cce1d8f5085a47cdd39))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v6.3.0 ([#3575](https://github.com/Altinn/dialogporten/issues/3575)) ([48a867b](https://github.com/Altinn/dialogporten/commit/48a867bb812abbd81cb2d36a09920223eb7933c7))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.23.0 ([#3576](https://github.com/Altinn/dialogporten/issues/3576)) ([d8b5a18](https://github.com/Altinn/dialogporten/commit/d8b5a186b6bc3a6d621c02408661bb7391191577))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.147.0 ([#3577](https://github.com/Altinn/dialogporten/issues/3577)) ([78d745f](https://github.com/Altinn/dialogporten/commit/78d745f5de5db4528679e4f1d368d1be8b99c755))
+* **infra:** Add IAC for PostgreSQL migration targets ([#3526](https://github.com/Altinn/dialogporten/issues/3526)) ([d8de2d3](https://github.com/Altinn/dialogporten/commit/d8de2d34ba44dc104c8261f7028a4d0b1c17ecca))
+* **infra:** implement scale-to-zero for yt01 environment ([#3521](https://github.com/Altinn/dialogporten/issues/3521)) ([300ce33](https://github.com/Altinn/dialogporten/commit/300ce33500d8c5012835c416d621bf98cab694ae))
+* **infra:** store migration target admin password in separate Key Vault secret ([#3573](https://github.com/Altinn/dialogporten/issues/3573)) ([bfcc35e](https://github.com/Altinn/dialogporten/commit/bfcc35e008ae497c6e025368dd1c855937510618))
+* **infra:** update PostgreSQL migration scripts to use existing Key Vault password keys ([#3584](https://github.com/Altinn/dialogporten/issues/3584)) ([7e7a5ea](https://github.com/Altinn/dialogporten/commit/7e7a5eadf5397518602c60d1f5646d590caf0c37))
+
 ## [1.106.2](https://github.com/Altinn/dialogporten/compare/v1.106.1...v1.106.2) (2026-03-10)
 
 

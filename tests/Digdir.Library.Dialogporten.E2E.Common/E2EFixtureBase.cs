@@ -28,6 +28,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: true)
             .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddJsonFile("appsettings.local.json", optional: true)
             .AddUserSecrets<E2ESettings>(optional: true)
             .AddEnvironmentVariables()
             .Build();

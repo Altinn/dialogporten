@@ -50,6 +50,7 @@ public class DialogApplication : IAsyncLifetime
 
     internal static TestClock Clock { get; } = new();
     internal static TestUser User { get; } = new();
+    internal static TestAltinnAuthorization AltinnAuthorization { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
         new PostgreSqlBuilder("postgres:16.11")
@@ -142,7 +143,9 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
-            .AddScoped<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>()
+            .AddSingleton(AltinnAuthorization)
+            .AddScoped<LocalDevelopmentAltinnAuthorization>()
+            .AddScoped<IAltinnAuthorization, RoutedAltinnAuthorization>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
@@ -279,6 +282,7 @@ public class DialogApplication : IAsyncLifetime
     {
         Clock.Reset();
         User.Reset();
+        AltinnAuthorization.Reset();
         _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();

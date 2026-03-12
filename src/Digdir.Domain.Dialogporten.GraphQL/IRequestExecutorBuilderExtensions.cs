@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 using HotChocolate.Execution.Configuration;
@@ -14,7 +15,8 @@ internal static class IRequestExecutorBuilderExtensions
             typeof(IBulkSetSystemLabelError),
             typeof(ISetSystemLabelError),
             typeof(ISearchDialogError),
-            typeof(IDialogByIdError)
+            typeof(IDialogByIdError),
+            typeof(IDialogLookupError)
         };
 
         var errorTypes = typeof(ServiceCollectionExtensions).Assembly

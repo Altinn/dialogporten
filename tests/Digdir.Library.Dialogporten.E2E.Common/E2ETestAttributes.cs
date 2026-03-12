@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 using Xunit.v3;
 
@@ -8,8 +9,15 @@ namespace Digdir.Library.Dialogporten.E2E.Common;
 public static class E2EExplicitOptions
 {
     // When true, tests are marked Explicit and are skipped unless xUnit.Explicit=on/only.
-    // Set to false to run E2E tests by default in your IDE.
-    public const bool ExplicitTests = false;
+    // Set to false in appsettings.local.json to run E2E tests in your IDE.
+    public static bool ExplicitTests { get; } = LoadExplicitTests();
+
+    private static bool LoadExplicitTests() =>
+        new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.local.json", optional: true)
+            .Build()
+            .GetValue("ExplicitTests", defaultValue: true);
 }
 
 public sealed class E2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute

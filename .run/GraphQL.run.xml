@@ -1,0 +1,34 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="GraphQL (E2E)" type="DotNetProject" factoryName=".NET Project">
+    <option name="EXE_PATH" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.GraphQL/bin/Debug/net10.0/Digdir.Domain.Dialogporten.GraphQL.dll" />
+    <option name="PROGRAM_PARAMETERS" value="--urls http://localhost:5181" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.GraphQL" />
+    <option name="PASS_PARENT_ENVS" value="1" />
+    <option name="USE_EXTERNAL_CONSOLE" value="0" />
+    <option name="USE_MONO" value="0" />
+    <option name="RUNTIME_ARGUMENTS" value="" />
+    <option name="PROJECT_PATH" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.GraphQL/Digdir.Domain.Dialogporten.GraphQL.csproj" />
+    <option name="PROJECT_TFM" value="net10.0" />
+    <envs>
+      <env name="ASPNETCORE_ENVIRONMENT" value="Development" />
+      <env name="DOTNET_ENVIRONMENT" value="Development" />
+      <env name="LocalDevelopment__UseLocalDevelopmentUser" value="false" />
+      <env name="LocalDevelopment__UseLocalDevelopmentResourceRegister" value="false" />
+      <env name="LocalDevelopment__UseLocalDevelopmentOrganizationRegister" value="false" />
+      <env name="LocalDevelopment__UseLocalDevelopmentNameRegister" value="false" />
+      <env name="LocalDevelopment__UseLocalDevelopmentPartyNameRegistry" value="false" />
+      <env name="LocalDevelopment__UseLocalDevelopmentAltinnAuthorization" value="false" />
+      <env name="LocalDevelopment__UseLocalDevelopmentCloudEventBus" value="true" />
+      <env name="LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator" value="true" />
+      <env name="LocalDevelopment__DisableCache" value="false" />
+      <env name="LocalDevelopment__DisableAuth" value="false" />
+      <env name="LocalDevelopment__UseInMemoryServiceBusTransport" value="true" />
+      <env name="LocalDevelopment__DisableSubjectResourceSyncOnStartup" value="true" />
+      <env name="LocalDevelopment__DisablePolicyInformationSyncOnStartup" value="true" />
+      <env name="LocalDevelopment__UseLocalMetricsAggregationStorage" value="true" />
+    </envs>
+    <method v="2">
+      <option name="Build" />
+    </method>
+  </configuration>
+</component>

@@ -12,6 +12,10 @@ interface DialogByIdError {
   message: String!
 }
 
+interface DialogLookupError {
+  message: String!
+}
+
 interface SearchDialogError {
   message: String!
 }
@@ -267,6 +271,57 @@ type DialogEventPayload {
   type: DialogEventType!
 }
 
+type DialogLookup {
+  dialogId: UUID!
+  instanceRef: String!
+  serviceResource: DialogLookupServiceResource!
+  serviceOwner: DialogLookupServiceOwner!
+  authorizationEvidence: DialogLookupAuthorizationEvidence!
+}
+
+type DialogLookupAuthorizationEvidence {
+  minimumAuthenticationLevel: Int!
+  currentAuthenticationLevel: Int!
+  viaRole: Boolean!
+  viaAccessPackage: Boolean!
+  viaResourceDelegation: Boolean!
+  viaInstanceDelegation: Boolean!
+  evidence: [DialogLookupAuthorizationEvidenceItem!]!
+}
+
+type DialogLookupAuthorizationEvidenceItem {
+  grantType: DialogLookupGrantType!
+  subject: String!
+}
+
+type DialogLookupForbidden implements DialogLookupError {
+  message: String!
+}
+
+type DialogLookupNotFound implements DialogLookupError {
+  message: String!
+}
+
+type DialogLookupPayload {
+  lookup: DialogLookup
+  errors: [DialogLookupError!]!
+}
+
+type DialogLookupServiceOwner {
+  orgNumber: String!
+  code: String!
+  name: [Localization!]!
+}
+
+type DialogLookupServiceResource {
+  id: String!
+  name: [Localization!]!
+}
+
+type DialogLookupValidationError implements DialogLookupError {
+  message: String!
+}
+
 type EndUserContext {
   revision: UUID!
   systemLabels: [SystemLabel!]!
@@ -318,6 +373,7 @@ type Mutations {
 }
 
 type Queries @authorize(policy: "enduser") {
+  dialogLookup(instanceRef: String!): DialogLookupPayload!
   dialogById(dialogId: UUID!): DialogByIdPayload!
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
   limits: Limits!
@@ -656,6 +712,13 @@ enum AttachmentUrlConsumer {
 enum DialogEventType {
   DIALOG_UPDATED
   DIALOG_DELETED
+}
+
+enum DialogLookupGrantType {
+  ROLE
+  ACCESS_PACKAGE
+  RESOURCE_DELEGATION
+  INSTANCE_DELEGATION
 }
 
 enum DialogStatus {

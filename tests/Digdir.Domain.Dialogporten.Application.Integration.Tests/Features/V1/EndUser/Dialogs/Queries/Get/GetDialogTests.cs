@@ -208,5 +208,5 @@ internal sealed class TestResourceRegistry(DialogDbContext db) : LocalDevelopmen
     public override Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId,
         CancellationToken cancellationToken) =>
         Task.FromResult<ServiceResourceInformation?>(
-            new ServiceResourceInformation(serviceResourceId, CorrespondenceService, "SomeOrg", "org"));
+            new ServiceResourceInformation(serviceResourceId, CorrespondenceService, "SomeOrg", "org", [], []));
 }

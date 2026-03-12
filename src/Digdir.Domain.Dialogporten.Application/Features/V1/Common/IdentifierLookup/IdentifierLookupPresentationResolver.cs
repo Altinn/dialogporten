@@ -47,7 +47,8 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
             ownerCode = ownerInfo.ShortName;
         }
 
-        var serviceResourceName = ToLocalizationDtos(resourceInformation?.DisplayName, serviceResource);
+        var resourceId = StripPrefix(serviceResource);
+        var serviceResourceName = ToLocalizationDtos(resourceInformation?.DisplayName, resourceId);
         var serviceOwnerName = ToLocalizationDtos(ownerInfo?.DisplayName, ownerCode);
 
         serviceResourceName.PruneLocalizations(acceptedLanguages);
@@ -56,7 +57,7 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
         return (
             new IdentifierLookupServiceResourceDto
             {
-                Id = StripPrefix(serviceResource),
+                Id = resourceId,
                 Name = serviceResourceName,
                 IsDelegable = resourceInformation?.Delegable ?? false
             },
@@ -70,7 +71,9 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
     }
 
     private static string StripPrefix(string serviceResource)
-        => serviceResource.Replace(Domain.Common.Constants.ServiceResourcePrefix, string.Empty, StringComparison.OrdinalIgnoreCase);
+        => serviceResource.StartsWith(Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
+            ? serviceResource[Domain.Common.Constants.ServiceResourcePrefix.Length..]
+            : serviceResource;
 
     private static List<LocalizationDto> ToLocalizationDtos(
         IReadOnlyList<ResourceLocalization>? values,

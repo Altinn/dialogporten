@@ -123,6 +123,7 @@ public readonly record struct InstanceRef(InstanceRefType Type, Guid Id, string 
         var instancePart = suffix[(separator + 1)..];
 
         if (!int.TryParse(partyPart, out var partyId)
+            || partyId <= 0
             || !Guid.TryParse(instancePart, out var instanceId))
         {
             return false;

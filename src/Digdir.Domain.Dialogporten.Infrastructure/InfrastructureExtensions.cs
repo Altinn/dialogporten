@@ -183,7 +183,7 @@ public static class InfrastructureExtensions
             // the distributed cache.
             SkipMemoryCache = true,
             // In normal operations, 15 minutes delay is deemed acceptable for authorization data
-            Duration = TimeSpan.FromSeconds(1), // TimeSpan.FromMinutes(15),
+            Duration = TimeSpan.FromMinutes(15),
             // In case Altinn Authorization is down/overloaded, we allow the re-usage of stale authorization data
             // for an additional 15 minutes. Using default FailSafeThrottleDuration.
             FailSafeMaxDuration = TimeSpan.FromMinutes(30),

@@ -233,7 +233,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         public required string Identifier { get; init; }
         public required CompetentAuthority HasCompetentAuthority { get; init; }
         public required string ResourceType { get; init; }
-        public bool Delegable { get; init; }
+        public required bool Delegable { get; init; }
         public IDictionary<string, string> Title { get; init; } = new Dictionary<string, string>();
         public IDictionary<string, string> Description { get; init; } = new Dictionary<string, string>();
     }

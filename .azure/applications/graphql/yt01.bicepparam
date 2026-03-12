@@ -14,6 +14,42 @@ param resources = {
 
 param otelTraceSamplerRatio = '0.05'
 
+// Scale to zero when idle, use HTTP scaling to wake on traffic
+param scale = {
+  minReplicas: 0
+  maxReplicas: 10
+  rules: [
+    {
+      name: 'http-rule'
+      http: {
+        metadata: {
+          concurrentRequests: '10'
+        }
+      }
+    }
+    {
+      name: 'cpu'
+      custom: {
+        type: 'cpu'
+        metadata: {
+          type: 'Utilization'
+          value: '70'
+        }
+      }
+    }
+    {
+      name: 'memory'
+      custom: {
+        type: 'memory'
+        metadata: {
+          type: 'Utilization'
+          value: '70'
+        }
+      }
+    }
+  ]
+}
+
 // Use dedicated workload profile
 param workloadProfileName = 'Dedicated-D8'
 

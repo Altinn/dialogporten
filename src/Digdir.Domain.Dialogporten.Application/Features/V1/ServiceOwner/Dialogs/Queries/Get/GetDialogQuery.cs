@@ -1,15 +1,19 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using OneOf;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
@@ -33,17 +37,19 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IDataLoaderContext _dataLoaderContext;
+    private readonly IUser _user;
 
     public GetDialogQueryHandler(
         IMapper mapper,
         IAltinnAuthorization altinnAuthorization,
-        IUnitOfWork unitOfWork, IUserRegistry userRegistry,
+        IUnitOfWork unitOfWork, IUserRegistry userRegistry, IUser user,
         IDataLoaderContext dataLoaderContext)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        _user = user ?? throw new ArgumentNullException(nameof(user));
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
     }
 
@@ -63,8 +69,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         if (request.EndUserId is not null)
         {
-            var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-
             var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
                 dialog,
                 cancellationToken);
@@ -74,10 +78,27 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 return new EntityNotFound<DialogEntity>(request.DialogId);
             }
 
-            dialog.UpdateSeenAt(
-                currentUserInformation.UserId.ExternalIdWithPrefix,
-                currentUserInformation.UserId.Type,
-                currentUserInformation.Name);
+            var userId = _userRegistry.GetCurrentUserId();
+
+            var externalId = userId.ExternalIdWithPrefix;
+            if (userId.Type == DialogUserType.Values.SystemUser)
+            {
+                externalId = _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
+                    ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
+                    : throw new InvalidOperationException("Systemuser organization number not found");
+            }
+
+            var lastSeen = dialog.SeenLog
+                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalId)
+                .MaxBy(x => x.CreatedAt);
+
+            if (lastSeen is null ||
+                lastSeen.CreatedAt <= dialog.UpdatedAt ||
+                dialog.EndUserContext.DialogEndUserContextSystemLabels.Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened)
+                )
+            {
+                dialog.UpdateSeenAt(externalId, userId.Type);
+            }
 
             var saveResult = await _unitOfWork
                 .DisableUpdatableFilter()
@@ -104,6 +125,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.ContentUpdatedAt,
             request.EndUserId);
 
+        if (request.EndUserId is not null)
+        {
+            dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+        }
         return dialogDto;
     }
 
@@ -136,7 +161,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var apiAction in dto.ApiActions.Where(a => a.Action == action))
             {
                 if ((apiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
+                 || (apiAction.AuthorizationAttribute is not null && resource == apiAction.AuthorizationAttribute))
                 {
                     apiAction.IsAuthorized = true;
                 }
@@ -145,7 +170,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             foreach (var guiAction in dto.GuiActions.Where(a => a.Action == action))
             {
                 if ((guiAction.AuthorizationAttribute is null && resource == Constants.MainResource)
-                    || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
+                 || (guiAction.AuthorizationAttribute is not null && resource == guiAction.AuthorizationAttribute))
                 {
                     guiAction.IsAuthorized = true;
                 }

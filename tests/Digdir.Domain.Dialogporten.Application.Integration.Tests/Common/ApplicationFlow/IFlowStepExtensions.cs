@@ -17,6 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
 using Microsoft.Extensions.DependencyInjection;
 using OneOf;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
@@ -314,6 +315,9 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep step) =>
         step.SendCommand(ctx => new GetDialogQueryEU { DialogId = ctx.GetDialogId() });
 
+    public static IFlowExecutor<SearchSeenLogResult> GetEndUserSeenLogs(this IFlowStep step) =>
+        step.SendCommand(ctx => new SearchSeenLogQuery { DialogId = ctx.GetDialogId() });
+
     public static IFlowExecutor<GetTransmissionResultSO> GetServiceOwnerTransmission(this IFlowStep step,
         Guid transmissionId) =>
         step.SendCommand(ctx => new GetTransmissionQuerySO
@@ -499,6 +503,10 @@ public static class IFlowStepExtensions
 
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
         => step.AssertResult(assert).ExecuteAsync();
+
+    public static TFlowStep ConsumeEvents<TFlowStep>(this TFlowStep flowStep) where TFlowStep : IFlowStep =>
+        flowStep.Do(async ctx =>
+            await ctx.Application.PublishEvents());
 
     public static TFlowStep VerifySnapshot<TFlowStep>(
         this TFlowStep flowStep,

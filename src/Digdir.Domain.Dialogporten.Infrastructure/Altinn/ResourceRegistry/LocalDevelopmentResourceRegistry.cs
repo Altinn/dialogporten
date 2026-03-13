@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 
+/// <summary>
+/// Local development implementation of resource registry lookups with in-memory fallback data.
+/// </summary>
 internal class LocalDevelopmentResourceRegistry : IResourceRegistry
 {
     private const string LocalResourceType = "LocalResourceType";
@@ -15,9 +18,13 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
 
     public LocalDevelopmentResourceRegistry(IDialogDbContext db)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        ArgumentNullException.ThrowIfNull(db);
+        _db = db;
     }
 
+    /// <summary>
+    /// Returns local resource metadata for an organization by scanning known dialogs.
+    /// </summary>
     public async Task<IReadOnlyCollection<ServiceResourceInformation>> GetResourceInformationForOrg(string orgNumber, CancellationToken cancellationToken)
     {
         var newIds = await _db.Dialogs
@@ -27,22 +34,58 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
 
         foreach (var id in newIds)
         {
-            CachedResourceIds.Add(new ServiceResourceInformation(id, LocalResourceType, orgNumber, LocalOrgShortName));
+            CachedResourceIds.Add(new ServiceResourceInformation(
+                id,
+                LocalResourceType,
+                orgNumber,
+                LocalOrgShortName,
+                [new ResourceLocalization("nb", id)],
+                [],
+                false));
         }
 
-        return CachedResourceIds;
+        return CachedResourceIds
+            .Where(x => string.Equals(x.OwnerOrgNumber, orgNumber, StringComparison.Ordinal))
+            .ToList();
     }
 
+    /// <summary>
+    /// Returns local fallback metadata for a single service resource id.
+    /// </summary>
     public virtual Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken)
     {
+        var cachedResource = CachedResourceIds.FirstOrDefault(x =>
+            string.Equals(x.ResourceId, serviceResourceId, StringComparison.OrdinalIgnoreCase));
+        if (cachedResource is not null)
+        {
+            return Task.FromResult<ServiceResourceInformation?>(cachedResource);
+        }
+
+        var fallbackOwner = CachedResourceIds.FirstOrDefault();
+        var ownerOrgNumber = fallbackOwner?.OwnerOrgNumber ?? LocalOrgId;
+        var ownerOrgShortName = fallbackOwner?.OwnOrgShortName ?? LocalOrgShortName;
+
         return Task.FromResult<ServiceResourceInformation?>(
-            new ServiceResourceInformation(serviceResourceId, LocalResourceType, LocalOrgId, LocalOrgShortName));
+            new ServiceResourceInformation(
+                serviceResourceId,
+                LocalResourceType,
+                ownerOrgNumber,
+                ownerOrgShortName,
+                [new ResourceLocalization("nb", serviceResourceId)],
+                [],
+                false));
     }
 
+    /// <summary>
+    /// Returns an empty subject-resource change stream in local development.
+    /// </summary>
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset _, int __, CancellationToken ___)
         => AsyncEnumerableExtensions.Empty<List<UpdatedSubjectResource>>();
 
+    /// <summary>
+    /// Returns no updated policy information in local development.
+    /// </summary>
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public Task<IReadOnlyCollection<UpdatedResourcePolicyInformation>> GetUpdatedResourcePolicyInformation(DateTimeOffset _, int __, CancellationToken ___)
         => Task.FromResult<IReadOnlyCollection<UpdatedResourcePolicyInformation>>(Array.Empty<UpdatedResourcePolicyInformation>());

@@ -44,7 +44,7 @@ public class CreateDialogTests
 
         resourceRegistrySub
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
+            .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd", [], [], false));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,
@@ -85,7 +85,7 @@ public class CreateDialogTests
 
         resourceRegistrySub
             .GetResourceInformation(createCommand.Dto.ServiceResource, Arg.Any<CancellationToken>())
-            .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd"));
+            .Returns(new ServiceResourceInformation(createCommand.Dto.ServiceResource, "foo", "912345678", "ttd", [], [], false));
 
         var commandHandler = new CreateDialogCommandHandler(userSub, clock, dialogDbContextSub,
             mapper, unitOfWorkSub, domainContextSub,

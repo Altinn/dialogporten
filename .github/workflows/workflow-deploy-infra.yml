@@ -116,6 +116,8 @@ jobs:
         if: ${{ inputs.dryRun && inputs.environment != 'staging' && inputs.environment != 'prod' }}
         id: deploy-migration-target-dry-run
         env:
+          # parameters
+          AZURE_KEY_VAULT_SOURCE_KEYS: ${{ steps.keyvault-keys.outputs.key-vault-keys }}
           # secrets
           PG_ADMIN_PASSWORD: ${{ steps.pwd-generator.outputs.postgresqlPassword }}
           AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID }}
@@ -159,6 +161,8 @@ jobs:
         if: ${{ !inputs.dryRun && inputs.environment != 'staging' && inputs.environment != 'prod' }}
         id: deploy-migration-target
         env:
+          # parameters
+          AZURE_KEY_VAULT_SOURCE_KEYS: ${{ steps.keyvault-keys.outputs.key-vault-keys }}
           # secrets
           PG_ADMIN_PASSWORD: ${{ steps.pwd-generator.outputs.postgresqlPassword }}
           AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID: ${{ secrets.AZURE_SOURCE_KEY_VAULT_SUBSCRIPTION_ID }}

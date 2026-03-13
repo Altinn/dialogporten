@@ -147,10 +147,52 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
     }
 
-    /// <summary>Gets a list of dialogs</summary>
+    /// <summary>Looks up a dialog by instance reference</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IEnduserApi
     {
+        /// <summary>Looks up a dialog by instance reference</summary>
+        /// <remarks>Resolves dialog metadata and authorization evidence for a supported instance reference.</remarks>
+        /// <param name="instanceRef">instanceRef parameter</param>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully resolved dialog lookup metadata.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Authenticated end user is not authorized for the supplied instance reference.</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>No dialog match was found for the supplied instance reference.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
+        [Get("/api/v1/enduser/dialoglookup")]
+        Task<IApiResponse<V1CommonIdentifierLookup_EndUserIdentifierLookup>> V1EndUserDialogLookupQueriesGetDialogLookup([Query] string instanceRef, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
         /// Performs a search for dialogs, returning a paginated list of dialogs.
@@ -1101,6 +1143,115 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("value")]
         public ICollection<V1CommonLocalizations_Localization> Value { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_EndUserIdentifierLookup
+    {
+
+        [JsonPropertyName("authorizationEvidence")]
+        public V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; }
+
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; }
+
+        [JsonPropertyName("instanceRef")]
+        public string InstanceRef { get; set; }
+
+        [JsonPropertyName("serviceOwner")]
+        public V1CommonIdentifierLookup_IdentifierLookupServiceOwner ServiceOwner { get; set; }
+
+        [JsonPropertyName("serviceResource")]
+        public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence
+    {
+
+        [JsonPropertyName("currentAuthenticationLevel")]
+        public int CurrentAuthenticationLevel { get; set; }
+
+        [JsonPropertyName("evidence")]
+        public ICollection<V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem> Evidence { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
+
+        [JsonPropertyName("viaAccessPackage")]
+        public bool ViaAccessPackage { get; set; }
+
+        [JsonPropertyName("viaInstanceDelegation")]
+        public bool ViaInstanceDelegation { get; set; }
+
+        [JsonPropertyName("viaResourceDelegation")]
+        public bool ViaResourceDelegation { get; set; }
+
+        [JsonPropertyName("viaRole")]
+        public bool ViaRole { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem
+    {
+
+        [JsonPropertyName("grantType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<V1CommonIdentifierLookup_IdentifierLookupGrantType>))]
+        public V1CommonIdentifierLookup_IdentifierLookupGrantType GrantType { get; set; }
+
+        [JsonPropertyName("subject")]
+        public string Subject { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum V1CommonIdentifierLookup_IdentifierLookupGrantType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Role")]
+        Role = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"AccessPackage")]
+        AccessPackage = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ResourceDelegation")]
+        ResourceDelegation = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"InstanceDelegation")]
+        InstanceDelegation = 3,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceOwner
+    {
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceResource
+    {
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
 
     }
 

@@ -53,7 +53,7 @@ public static class E2ERetryPolicies
             .WaitAndRetryAsync(
                 int.MaxValue,
                 _ => retryDelay,
-                (_, _, _, _) =>
+                (_, _, retryAttempt, _) =>
                 {
                     var elapsedTime = elapsed.Elapsed;
 
@@ -62,14 +62,15 @@ public static class E2ERetryPolicies
                         warningLogged = true;
                         TestContext.Current.AddWarning(
                             $"{E2EWarningTag} {callerMemberName}: {degradationMessage} " +
-                            $"Elapsed time: {elapsedTime:hh\\:mm\\:ss\\.fff}");
+                            $"Elapsed time: {elapsedTime:hh\\:mm\\:ss\\.fff} " +
+                            $"Attempts: {retryAttempt + 1}");
                     }
 
                     if (elapsedTime >= failThreshold)
                     {
                         throw new TimeoutException(
                             $"The operation did not succeed within the allowed threshold ({failThreshold}). " +
-                            $"Elapsed: {elapsedTime}.");
+                            $"Elapsed: {elapsedTime}. Attempts: {retryAttempt + 1}.");
                     }
                 });
 

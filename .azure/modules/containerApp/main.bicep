@@ -41,7 +41,12 @@ type ScaleRule = {
       type: 'Utilization'
       value: string
     }
-  }
+  }?
+  http: {
+    metadata: {
+      concurrentRequests: string
+    }
+  }?
 }
 
 @export()

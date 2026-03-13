@@ -587,6 +587,9 @@
           "id": {
             "type": "string"
           },
+          "isDelegable": {
+            "type": "boolean"
+          },
           "name": {
             "items": {
               "$ref": "#/components/schemas/V1CommonLocalizations_Localization"

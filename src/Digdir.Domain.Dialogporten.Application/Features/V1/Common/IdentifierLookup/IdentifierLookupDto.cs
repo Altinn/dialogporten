@@ -13,6 +13,7 @@ public abstract class IdentifierLookupDto
 public sealed class IdentifierLookupServiceResourceDto
 {
     public required string Id { get; set; }
+    public required bool IsDelegable { get; set; }
     public List<LocalizationDto> Name { get; set; } = [];
 }
 

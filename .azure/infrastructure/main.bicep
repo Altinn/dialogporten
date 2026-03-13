@@ -267,7 +267,7 @@ module redis '../modules/redis/main.bicep' = {
     environmentKeyVaultName: environmentKeyVault.outputs.name
     sku: redisConfiguration.sku
     version: redisConfiguration.version
-    publicNetworkAccess: redisConfiguration.?publicNetworkAccess ?? false
+    publicNetworkAccess: redisConfiguration.publicNetworkAccess ?? false
     subnetId: vnet.outputs.redisSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     tags: tags

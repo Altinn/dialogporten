@@ -204,6 +204,7 @@ resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
 // Create resources with dependencies to other resources
 // #####################################################
 
+var srcKeyVaultPasswordKey = 'dialogportenPgAdminPassword${environment}'
 var srcKeyVault = {
   name: secrets.sourceKeyVaultName
   subscriptionId: secrets.sourceKeyVaultSubscriptionId
@@ -235,9 +236,9 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     postgresVersion: postgresConfiguration.version
     publishCanonicalConnectionSecrets: true
     srcKeyVault: srcKeyVault
-    srcKeyVaultAdministratorLoginPasswordKey: 'dialogportenPgAdminPassword${environment}'
-    administratorLoginPassword: contains(keyVaultSourceKeys, 'dialogportenPgAdminPassword${environment}')
-      ? srcKeyVaultResource.getSecret('dialogportenPgAdminPassword${environment}')
+    srcKeyVaultAdministratorLoginPasswordKey: srcKeyVaultPasswordKey
+    administratorLoginPassword: contains(keyVaultSourceKeys, srcKeyVaultPasswordKey)
+      ? srcKeyVaultResource.getSecret(srcKeyVaultPasswordKey)
       : secrets.dialogportenPgAdminPassword
     sku: postgresConfiguration.sku
     storage: postgresConfiguration.storage

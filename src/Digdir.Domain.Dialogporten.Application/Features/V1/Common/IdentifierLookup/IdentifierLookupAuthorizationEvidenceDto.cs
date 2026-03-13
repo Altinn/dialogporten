@@ -8,7 +8,6 @@ public sealed class IdentifierLookupAuthorizationEvidenceDto
     public bool ViaAccessPackage { get; set; }
     public bool ViaResourceDelegation { get; set; }
     public bool ViaInstanceDelegation { get; set; }
-
     public List<IdentifierLookupAuthorizationEvidenceItemDto> Evidence { get; set; } = [];
 }
 

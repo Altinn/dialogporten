@@ -5792,6 +5792,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; }
+
         [JsonPropertyName("name")]
         public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
 

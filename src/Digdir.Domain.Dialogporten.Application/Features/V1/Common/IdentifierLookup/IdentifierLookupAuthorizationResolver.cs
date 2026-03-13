@@ -49,13 +49,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifier();
         if (partyIdentifier is null)
         {
-            return new IdentifierLookupAuthorizationResolution(
-                false,
-                new IdentifierLookupAuthorizationEvidenceDto
-                {
-                    MinimumAuthenticationLevel = minimumAuthenticationLevel,
-                    CurrentAuthenticationLevel = currentAuthenticationLevel
-                });
+            return CreateUnauthorizedResolution(minimumAuthenticationLevel, currentAuthenticationLevel);
         }
 
         var authorizedParties = await _altinnAuthorization.GetAuthorizedPartiesForLookup(
@@ -63,12 +57,15 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             [dialogData.Party],
             cancellationToken);
 
-        var matchingAuthorizedParties = authorizedParties.AuthorizedParties
-            .Where(x => string.Equals(x.Party, dialogData.Party, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        var matchingAuthorizedParty = authorizedParties.AuthorizedParties
+            .FirstOrDefault(x => string.Equals(x.Party, dialogData.Party, StringComparison.OrdinalIgnoreCase));
 
-        var authorizedSubjects = matchingAuthorizedParties
-            .SelectMany(x => x.AuthorizedRolesAndAccessPackages)
+        if (matchingAuthorizedParty is null)
+        {
+            return CreateUnauthorizedResolution(minimumAuthenticationLevel, currentAuthenticationLevel);
+        }
+
+        var authorizedSubjects = matchingAuthorizedParty.AuthorizedRolesAndAccessPackages
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
@@ -98,8 +95,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         var viaRole = evidenceItems.Any(x => x.GrantType == IdentifierLookupGrantType.Role);
         var viaAccessPackage = evidenceItems.Any(x => x.GrantType == IdentifierLookupGrantType.AccessPackage);
 
-        var viaResourceDelegation = matchingAuthorizedParties
-            .SelectMany(x => x.AuthorizedResources)
+        var viaResourceDelegation = matchingAuthorizedParty.AuthorizedResources
             .Any(x => string.Equals(x, dialogData.ServiceResource, StringComparison.OrdinalIgnoreCase));
 
         if (viaResourceDelegation)
@@ -112,9 +108,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         }
 
         var viaInstanceDelegation = HasInstanceDelegation(
-            matchingAuthorizedParties
-                .SelectMany(x => x.AuthorizedInstances)
-                .ToList(),
+            matchingAuthorizedParty.AuthorizedInstances,
             dialogData.ServiceResource,
             responseInstanceRef);
 
@@ -145,6 +139,17 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 Evidence = evidenceItems
             });
     }
+
+    private static IdentifierLookupAuthorizationResolution CreateUnauthorizedResolution(
+        int minimumAuthenticationLevel,
+        int currentAuthenticationLevel) =>
+        new(
+            false,
+            new IdentifierLookupAuthorizationEvidenceDto
+            {
+                MinimumAuthenticationLevel = minimumAuthenticationLevel,
+                CurrentAuthenticationLevel = currentAuthenticationLevel
+            });
 
     private static IdentifierLookupGrantType? ResolveGrantType(string subject)
     {

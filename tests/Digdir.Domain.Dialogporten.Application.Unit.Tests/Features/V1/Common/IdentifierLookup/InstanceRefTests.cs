@@ -1,4 +1,6 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using AwesomeAssertions;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.IdentifierLookup;
@@ -34,5 +36,79 @@ public class InstanceRefTests
 
         parsed.Should().BeFalse();
         instanceRef.Should().BeNull();
+    }
+
+    [Fact]
+    public void FromDialog_Should_Prefer_AppInstanceRef_From_StorageLabel()
+    {
+        var dialogId = Guid.NewGuid();
+        var instanceId = Guid.NewGuid();
+
+        var result = InstanceRef.FromDialog(dialogId,
+            [
+                $"urn:altinn:correspondence-id:{Guid.NewGuid()}",
+                $"urn:altinn:integration:storage:1337/{instanceId}"
+            ]);
+
+        result.Type.Should().Be(InstanceRefType.AppInstanceId);
+        result.Id.Should().Be(instanceId);
+        result.PartyId.Should().Be(1337);
+        result.Value.Should().Be($"urn:altinn:instance-id:1337/{instanceId}");
+    }
+
+    [Fact]
+    public void FromDialog_Should_Fallback_To_CorrespondenceRef_When_No_AppLabel()
+    {
+        var dialogId = Guid.NewGuid();
+        var correspondenceId = Guid.NewGuid();
+
+        var result = InstanceRef.FromDialog(dialogId,
+            [
+                "urn:altinn:unsupported:abc",
+                $"urn:altinn:correspondence-id:{correspondenceId}"
+            ]);
+
+        result.Type.Should().Be(InstanceRefType.CorrespondenceId);
+        result.Id.Should().Be(correspondenceId);
+        result.Value.Should().Be($"urn:altinn:correspondence-id:{correspondenceId}");
+    }
+
+    [Fact]
+    public void FromDialog_Should_Fallback_To_DialogRef_When_No_Supported_Labels()
+    {
+        var dialogId = Guid.NewGuid();
+
+        var result = InstanceRef.FromDialog(dialogId, ["urn:altinn:unsupported:abc"]);
+
+        result.Type.Should().Be(InstanceRefType.DialogId);
+        result.Id.Should().Be(dialogId);
+        result.Value.Should().Be($"urn:altinn:dialog-id:{dialogId}");
+    }
+
+    [Fact]
+    public void FromDialog_DialogEntity_Overload_Should_Use_ServiceOwnerLabels()
+    {
+        var dialogId = Guid.NewGuid();
+        var instanceId = Guid.NewGuid();
+
+        var dialog = new DialogEntity
+        {
+            Id = dialogId,
+            ServiceOwnerContext = new DialogServiceOwnerContext
+            {
+                ServiceOwnerLabels =
+                [
+                    new DialogServiceOwnerLabel
+                    {
+                        Value = $"urn:altinn:integration:storage:1337/{instanceId}"
+                    }
+                ]
+            }
+        };
+
+        var result = InstanceRef.FromDialog(dialog);
+
+        result.Type.Should().Be(InstanceRefType.AppInstanceId);
+        result.Value.Should().Be($"urn:altinn:instance-id:1337/{instanceId}");
     }
 }

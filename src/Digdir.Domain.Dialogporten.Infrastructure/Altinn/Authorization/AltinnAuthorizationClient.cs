@@ -25,8 +25,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
     private const string AuthorizedPartiesBaseUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties";
-    private const string CorrespondenceRefPrefix = "urn:altinn:correspondence-id:";
-    private const string DialogRefPrefix = "urn:altinn:dialog-id:";
     private const string AltinnAppResourceType = "altinnapp";
     private const string CorrespondenceServiceResourceType = "correspondenceservice";
     private const string GenericAccessResourceType = "genericaccessresource";
@@ -77,11 +75,13 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         DialogEntity dialogEntity,
         CancellationToken cancellationToken = default)
     {
+        var instanceRef = InstanceRef.FromDialog(dialogEntity);
+
         var request = new DialogDetailsAuthorizationRequest
         {
             ClaimsPrincipal = _user.GetPrincipal(),
             ServiceResource = dialogEntity.ServiceResource,
-            DialogId = dialogEntity.Id,
+            InstanceRef = instanceRef,
             Party = dialogEntity.Party,
             AltinnActions = dialogEntity.GetAltinnActions()
         };
@@ -117,7 +117,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         List<string> constraintParties,
         CancellationToken cancellationToken = default)
     {
-        var result = await GetAuthorizedPartiesInternal(
+        return await GetAuthorizedPartiesInternal(
             new AuthorizedPartiesRequest(
                 authenticatedParty,
                 includeAccessPackages: true,
@@ -127,12 +127,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
                 partyFilter: CreatePartyFilters(constraintParties)),
             flatten: true,
             cancellationToken);
-
-        // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
-        // https://github.com/Altinn/dialogporten/issues/3579
-        await PopulateMissingInstanceRefs(result, cancellationToken);
-
-        return result;
     }
 
     private async Task<AuthorizedPartiesResult> GetAuthorizedPartiesInternal(
@@ -169,6 +163,13 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         {
             authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
                 => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
+        }
+
+        // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
+        // https://github.com/Altinn/dialogporten/issues/3579
+        if (authorizedPartiesRequest.IncludeInstances)
+        {
+            await PopulateMissingInstanceRefs(authorizedParties, cancellationToken);
         }
 
         return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
@@ -310,6 +311,8 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(authorizedPartiesDto, authorizedPartiesRequest);
     }
 
+    // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
+    // https://github.com/Altinn/dialogporten/issues/3579
     private async Task PopulateMissingInstanceRefs(
         AuthorizedPartiesResult authorizedPartiesResult,
         CancellationToken cancellationToken)
@@ -342,8 +345,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
         foreach (var (resourceId, resourceInformationTask) in resourceInformationTasks)
         {
-            var resourceInformation = await resourceInformationTask;
-            resourceTypesById[resourceId] = resourceInformation?.ResourceType;
+            resourceTypesById[resourceId] = resourceInformationTask.Result?.ResourceType;
         }
 
         foreach (var binding in instancesWithoutRef)
@@ -357,8 +359,8 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             var instanceRef = resourceType switch
             {
                 AltinnAppResourceType => TryCreateAppInstanceRef(binding.PartyId, binding.Instance.InstanceId),
-                CorrespondenceServiceResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, CorrespondenceRefPrefix),
-                GenericAccessResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, DialogRefPrefix),
+                CorrespondenceServiceResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, AltinnAuthorizationConstants.CorrespondenceRefPrefix),
+                GenericAccessResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, AltinnAuthorizationConstants.DialogRefPrefix),
                 _ => null
             };
 
@@ -468,24 +470,84 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
                 cancellationToken);
         }
 
-        return await PopulateDialogIdsFromInstanceDelegationIds(result, cancellationToken);
-    }
-
-    // NOTE: This maps delegated instance labels to dialog IDs using the current app-instance label format.
-    // See https://github.com/Altinn/dialogporten/issues/3358 for planned generic instance delegation handling.
-    private async Task<DialogSearchAuthorizationResult> PopulateDialogIdsFromInstanceDelegationIds(DialogSearchAuthorizationResult result, CancellationToken cancellationToken)
-    {
-        if (result.AltinnAppInstanceIds.Count == 0)
-        {
-            return result;
-        }
-
-        result.DialogIds = await _db.DialogServiceOwnerLabels
-            .Where(l => result.AltinnAppInstanceIds.Contains(l.Value))
-            .Select(l => l.DialogServiceOwnerContext.DialogId)
-            .ToListAsync(cancellationToken: cancellationToken);
+        await PopulateDialogIdsFromInstanceRefs(
+            result,
+            authorizedParties,
+            request.ConstraintServiceResources,
+            cancellationToken);
 
         return result;
+    }
+
+    private async Task PopulateDialogIdsFromInstanceRefs(
+        DialogSearchAuthorizationResult result,
+        AuthorizedPartiesResult authorizedParties,
+        List<string> constraintServiceResources,
+        CancellationToken cancellationToken)
+    {
+        if (authorizedParties.AuthorizedParties.Count == 0)
+        {
+            return;
+        }
+
+        var constraintResources = constraintServiceResources.Count == 0
+            ? null
+            : new HashSet<string>(constraintServiceResources, StringComparer.OrdinalIgnoreCase);
+
+        var directDialogIds = new HashSet<Guid>();
+        var lookupLabels = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var party in authorizedParties.AuthorizedParties)
+        {
+            var partyAuthorizedInstances = party.AuthorizedInstances
+                .Where(instance =>
+                    constraintResources is null
+                    || constraintResources.Contains($"{Domain.Common.Constants.ServiceResourcePrefix}{instance.ResourceId}"))
+                .ToList();
+
+            if (partyAuthorizedInstances.Count == 0)
+            {
+                continue;
+            }
+
+            foreach (var authorizedInstance in partyAuthorizedInstances)
+            {
+                if (string.IsNullOrWhiteSpace(authorizedInstance.InstanceRef))
+                {
+                    continue;
+                }
+
+                if (!InstanceRef.TryParse(authorizedInstance.InstanceRef, out var parsedInstanceRef))
+                {
+                    continue;
+                }
+
+                var instanceRef = parsedInstanceRef.Value;
+                if (instanceRef.Type is InstanceRefType.DialogId)
+                {
+                    directDialogIds.Add(instanceRef.Id);
+                    continue;
+                }
+
+                lookupLabels.Add(instanceRef.ToLookupLabel());
+            }
+        }
+
+        if (lookupLabels.Count > 0)
+        {
+            var dialogIdsFromLabels = await _db.DialogServiceOwnerLabels
+                .Where(l => lookupLabels.Contains(l.Value))
+                .Select(l => l.DialogServiceOwnerContext.DialogId)
+                .ToListAsync(cancellationToken: cancellationToken);
+            directDialogIds.UnionWith(dialogIdsFromLabels);
+        }
+
+        if (result.DialogIds.Count > 0)
+        {
+            directDialogIds.UnionWith(result.DialogIds);
+        }
+
+        result.DialogIds = [.. directDialogIds];
     }
 
     private async Task<List<SubjectResource>> GetAllSubjectResources(CancellationToken cancellationToken) =>

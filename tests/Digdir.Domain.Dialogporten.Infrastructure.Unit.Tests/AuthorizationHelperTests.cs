@@ -8,8 +8,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 
 public class AuthorizationHelperTests
 {
-    private const string AltinnIntegrationStorageUrnPrefix = "urn:altinn:integration:storage:";
-
     [Fact]
     public async Task PruneUnreferencedResources_ShouldReturnEarly_WhenNoParties()
     {
@@ -46,50 +44,6 @@ public class AuthorizationHelperTests
 
         Assert.Equal(0, repo.GetReferencedResourcesByPartyCallCount);
         Assert.Equal(2, result.ResourcesByParties.Count);
-    }
-
-    [Fact]
-    public async Task PruneUnreferencedResources_ShouldPruneByIntersection_AndKeepInstanceIds()
-    {
-        var result = new DialogSearchAuthorizationResult
-        {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>
-            {
-                ["party1"] = ["resource1", "resource2"],
-                ["party2"] = ["resource3"],
-                ["party3"] = ["resource4"],
-            },
-            AltinnAppInstanceIds =
-            [
-                $"{AltinnIntegrationStorageUrnPrefix}999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-            ]
-        };
-
-        var repo = new FakePartyResourceReferenceRepository
-        {
-            ReferencedResourcesByParty = new Dictionary<string, HashSet<string>>
-            {
-                ["party1"] = ["resource2"],
-                ["party3"] = ["resource4"],
-            }
-        };
-
-        await AuthorizationHelper.PruneUnreferencedResources(
-            result,
-            repo,
-            minResourcesPruningThreshold: 0,
-            CancellationToken.None);
-
-        Assert.Equal(1, repo.GetReferencedResourcesByPartyCallCount);
-        Assert.Equal(2, result.ResourcesByParties.Count);
-        Assert.Single(result.ResourcesByParties["party1"]);
-        Assert.Contains("resource2", result.ResourcesByParties["party1"]);
-        Assert.Single(result.ResourcesByParties["party3"]);
-        Assert.Contains("resource4", result.ResourcesByParties["party3"]);
-        Assert.Single(result.AltinnAppInstanceIds);
-        Assert.Equal(
-            $"{AltinnIntegrationStorageUrnPrefix}999/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-            result.AltinnAppInstanceIds.Single());
     }
 
     [Fact]
@@ -175,8 +129,7 @@ public class AuthorizationHelperTests
         string _, // Used for test explorer readability
         List<string> constraintParties,
         List<string> constraintResources,
-        Dictionary<string, List<string>> expectedResourcesByParties,
-        List<string> expectedInstanceIds)
+        Dictionary<string, List<string>> expectedResourcesByParties)
     {
         // Arrange
         var authorizedParties = GetAuthorizedParties();
@@ -206,10 +159,6 @@ public class AuthorizationHelperTests
             // Verify that all expected resources are present (order doesn't matter)
             Assert.Empty(expectedResources.Except(actualResources));
         }
-
-        // 3. Assert Altinn App Instance IDs
-        Assert.Equal(expectedInstanceIds.Count, actualResult.AltinnAppInstanceIds.Count);
-        Assert.Empty(expectedInstanceIds.Except(actualResult.AltinnAppInstanceIds));
     }
 
     public static IEnumerable<object[]> ResolvingScenarios =>
@@ -226,13 +175,6 @@ public class AuthorizationHelperTests
                     ["party2"] = [ "resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
                     ["party3"] = ["resource5", "resource6"],
                     ["party4"] = ["resource7"]
-                },
-                new List<string>
-                {
-                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000001",
-                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
-                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003",
-                    $"{AltinnIntegrationStorageUrnPrefix}444/00000000-0000-0000-0000-000000000004",
                 }
             },
 
@@ -245,12 +187,6 @@ public class AuthorizationHelperTests
                 {
                     ["party1"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6"],
                     ["party2"] = ["resource1", "resource2", "resource3", "resource4", "resource5", "resource6", "resource7", "resource8" ],
-                },
-                new List<string>
-                {
-                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000001",
-                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
-                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003"
                 }
             },
 
@@ -264,8 +200,7 @@ public class AuthorizationHelperTests
                     ["party1"] = ["resource1", "resource2", "resource5"],
                     ["party2"] = ["resource1", "resource2", "resource5"],
                     ["party3"] = ["resource5"]
-                },
-                new List<string>()
+                }
             },
 
             new object[]
@@ -276,8 +211,7 @@ public class AuthorizationHelperTests
                 new Dictionary<string, List<string>>
                 {
                     ["party2"] = ["resource4"]
-                },
-                new List<string>()
+                }
             },
 
             new object[]
@@ -285,12 +219,7 @@ public class AuthorizationHelperTests
                 "With instance resource constraint",
                 new List<string>(),
                 new List<string> { "urn:altinn:resource:app_org_app-2" },
-                new Dictionary<string, List<string>>(),
-                new List<string>
-                {
-                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
-                    $"{AltinnIntegrationStorageUrnPrefix}222/00000000-0000-0000-0000-000000000003"
-                }
+                new Dictionary<string, List<string>>()
             },
 
             new object[]
@@ -298,11 +227,7 @@ public class AuthorizationHelperTests
                 "With party and instance resource constraint",
                 new List<string> { "party1" },
                 new List<string> { "urn:altinn:resource:app_org_app-2" },
-                new Dictionary<string, List<string>>(),
-                new List<string>
-                {
-                    $"{AltinnIntegrationStorageUrnPrefix}111/00000000-0000-0000-0000-000000000002",
-                }
+                new Dictionary<string, List<string>>()
             },
 
             new object[]
@@ -310,8 +235,7 @@ public class AuthorizationHelperTests
                 "With party constraint and without matching instance resource constraint",
                 new List<string> { "party2" },
                 new List<string> { "urn:altinn:resource:app_org_app-1" },
-                new Dictionary<string, List<string>>(),
-                new List<string>()
+                new Dictionary<string, List<string>>()
             }
         };
 

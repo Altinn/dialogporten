@@ -24,7 +24,7 @@ public class DecisionRequestHelperTests
                 ("pid", "12345678901")
             ),
             $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}713330310");
-        var dialogId = request.DialogId;
+        var instanceRef = request.InstanceRef;
 
         // Act
         var result = DecisionRequestHelper.CreateDialogDetailsRequest(request);
@@ -62,7 +62,7 @@ public class DecisionRequestHelperTests
             Assert.NotNull(resource);
             Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:resource" && a.Value == "some-service");
             Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:organization:identifier-no" && a.Value == "713330310");
-            Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:resourceinstance" && a.Value == dialogId.ToString());
+            Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:resource:instance-id" && a.Value == instanceRef.Value);
             resourceIdsBySubresource[subresource] = resource.Id;
         }
 
@@ -265,7 +265,7 @@ public class DecisionRequestHelperTests
         Assert.NotNull(resource);
         // Check that there are no other resources with the same attribute and no resource instance attribute set
         Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == "urn:altinn:resource" && a.Value == "some-service");
-        Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == "urn:altinn:resourceinstance");
+        Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == "urn:altinn:resource:instance-id");
     }
 
     [Fact]
@@ -290,7 +290,7 @@ public class DecisionRequestHelperTests
         Assert.NotNull(resource);
         // Check that there are no other resources with the same attribute and no resource instance attribute set
         Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == "urn:altinn:resource" && a.Value == "some-service");
-        Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == "urn:altinn:resourceinstance");
+        Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == "urn:altinn:resource:instance-id");
         // Check that we have an org attribute
         Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:org" && a.Value == "ttd");
     }
@@ -371,11 +371,12 @@ public class DecisionRequestHelperTests
             new("urn:altinn:foo", "bar")
         };
         allClaims.AddRange(principalClaims);
+        var dialogId = Guid.NewGuid();
         return new DialogDetailsAuthorizationRequest
         {
             ClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(allClaims)),
             ServiceResource = isApp ? "urn:altinn:app:app_ttd_some-app_with_underscores" : "urn:altinn:resource:some-service",
-            DialogId = Guid.NewGuid(),
+            InstanceRef = new InstanceRef(InstanceRefType.DialogId, dialogId, InstanceRef.CreateDialogRef(dialogId)),
 
             // This should be copied resources with attributes "urn:altinn:organizationnumber" if starting with "urn:altinn:organization:identifier-no::"
             // and "urn:altinn:ssn" if starting with "urn:altinn:person:identifier-no::"

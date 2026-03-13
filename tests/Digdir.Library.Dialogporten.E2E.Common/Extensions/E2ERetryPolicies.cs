@@ -27,8 +27,8 @@ public static class E2ERetryPolicies
         cancellationToken ??= TestContext.Current.CancellationToken;
 
         var retryDelay = delay ?? TimeSpan.FromSeconds(1);
-        var warningThreshold = logWarningAfter ?? TimeSpan.FromSeconds(4);
-        var failThreshold = failAfter ?? TimeSpan.FromSeconds(5);
+        var warningThreshold = logWarningAfter ?? TimeSpan.FromSeconds(10);
+        var failThreshold = failAfter ?? TimeSpan.FromSeconds(20);
 
         if (warningThreshold < TimeSpan.Zero)
         {

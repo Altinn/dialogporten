@@ -29,7 +29,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
                     x.AddAttachment(x =>
-                        x.Urls.First().MediaType = new string('a', 256))))
+                        x.Urls.First().MediaType = new string('a', TestConstants.DefaultMaxStringLength + 1))))
             .ExecuteAndAssert<ValidationError>();
 
     [Fact]

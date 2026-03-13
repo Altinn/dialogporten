@@ -39,6 +39,9 @@ import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from 
 @description('The environment whose existing shared infrastructure this transient target will attach to.')
 param environment string
 
+@description('Array of all keys in the source Key Vault')
+param keyVaultSourceKeys array
+
 @description('Password for PostgreSQL admin.')
 @secure()
 @minLength(3)
@@ -78,6 +81,7 @@ param postgresConfiguration {
 
 var namePrefix = 'dp-be-${environment}'
 var tags = baseTags({}, environment)
+var srcKeyVaultPasswordKey = 'dialogportenPgAdminPassword${environment}v2'
 var srcKeyVault = {
   name: sourceKeyVaultName
   subscriptionId: sourceKeyVaultSubscriptionId
@@ -88,6 +92,11 @@ var virtualNetworkId = resourceId('Microsoft.Network/virtualNetworks', virtualNe
 var postgresqlSubnetId = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetworkName, 'postgresqlSubnet')
 var appInsightWorkspaceName = '${namePrefix}-insightsWorkspace'
 
+resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+  name: sourceKeyVaultName
+  scope: az.resourceGroup(sourceKeyVaultSubscriptionId, sourceKeyVaultResourceGroup)
+}
+
 module postgresql '../modules/postgreSql/create.bicep' = {
   name: 'postgresqlMigrationTarget'
   params: {
@@ -96,8 +105,10 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     postgresVersion: postgresConfiguration.version
     publishCanonicalConnectionSecrets: false
     srcKeyVault: srcKeyVault
-    srcKeyVaultAdministratorLoginPasswordKey: 'dialogportenPgAdminPassword${environment}v2'
-    administratorLoginPassword: dialogportenPgAdminPassword
+    srcKeyVaultAdministratorLoginPasswordKey: srcKeyVaultPasswordKey
+    administratorLoginPassword: contains(keyVaultSourceKeys, srcKeyVaultPasswordKey)
+      ? srcKeyVaultResource.getSecret(srcKeyVaultPasswordKey)
+      : dialogportenPgAdminPassword
     sku: postgresConfiguration.sku
     storage: postgresConfiguration.storage
     appInsightWorkspaceName: appInsightWorkspaceName

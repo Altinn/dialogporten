@@ -163,11 +163,12 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
     private static bool IsSerializationFailure(Exception ex)
     {
+        const string serializationFailureErrorCode = "40001";
+
         for (var currentEx = ex; currentEx != null; currentEx = currentEx.InnerException)
         {
-            if (currentEx is not PostgresException) continue;
-
-            if (currentEx.Message.StartsWith("40001: could not serialize access due to concurrent", StringComparison.OrdinalIgnoreCase))
+            if (currentEx is PostgresException postgresException &&
+                postgresException.SqlState == serializationFailureErrorCode)
             {
                 return true;
             }

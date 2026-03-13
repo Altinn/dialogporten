@@ -2,6 +2,7 @@ using System.Security.Claims;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -15,8 +16,12 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -422,6 +427,55 @@ public class CreateDialogTests : ApplicationCollectionFixture
         actorNames.Should().HaveCount(1);
     }
 
+    [Fact]
+    public async Task Concurrent_Create_Dialogs_With_Same_ActorId_Should_Retry_And_Link_To_Existing_ActorName()
+    {
+        const string actorId = "urn:altinn:person:identifier-no:15915299854";
+        const string actorName = "Brando Sando";
+
+        Application.ConfigureServices(services =>
+        {
+            services.RemoveAll<IPartyNameRegistry>();
+            services.AddSingleton<IPartyNameRegistry>(_ => new CoordinatedPartyNameRegistry(actorName, requiredCallCount: 2));
+        });
+
+        var firstCommand = CreateSimpleDialogCommandWithSender(actorId, seed: 1001);
+        var secondCommand = CreateSimpleDialogCommandWithSender(actorId, seed: 1002);
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await Task.WhenAll(
+            Application.Send(firstCommand, cancellationToken),
+            Application.Send(secondCommand, cancellationToken));
+
+        var createdDialogIds = new[] { firstCommand.Dto.Id!.Value, secondCommand.Dto.Id!.Value };
+
+        var dialogs = await Application.GetDbEntities<DialogEntity>();
+        dialogs.Should().HaveCount(2);
+
+        await using var scope = Application.GetServiceProvider().CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        var transmissionIds = await db.DialogTransmissions
+            .Where(x => createdDialogIds.Contains(x.DialogId))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        var senderActorNameEntityIds = await db.Set<DialogTransmissionSenderActor>()
+            .Where(x => transmissionIds.Contains(x.TransmissionId))
+            .Select(x => x.ActorNameEntityId)
+            .ToListAsync(cancellationToken);
+
+        senderActorNameEntityIds.Should().HaveCount(2);
+        senderActorNameEntityIds.Should().OnlyContain(x => x != null);
+        senderActorNameEntityIds.Distinct().Should().HaveCount(1);
+
+        var actorNames = await Application.GetDbEntities<ActorName>();
+        actorNames
+            .Count(x => x.ActorId == actorId && x.Name == actorName)
+            .Should()
+            .Be(1);
+    }
+
     [Theory]
     [InlineData(true, typeof(CreateDialogSuccess))]
     [InlineData(false, typeof(ValidationError))]
@@ -707,4 +761,43 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         Value = [new() { Value = content, LanguageCode = "nb" }]
     };
+
+    private static CreateDialogCommand CreateSimpleDialogCommandWithSender(string actorId, int seed)
+    {
+        var dto = DialogGenerator.CreateSimpleDialogFaker
+            .Clone()
+            .UseSeed(seed)
+            .Generate();
+
+        dto.Id = IdentifiableExtensions.CreateVersion7();
+        dto.Transmissions = DialogGenerator.GenerateFakeDialogTransmissions(1);
+        dto.Transmissions[0].Sender = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorId = actorId,
+            ActorName = null
+        };
+
+        return new CreateDialogCommand
+        {
+            Dto = dto
+        };
+    }
+
+    private sealed class CoordinatedPartyNameRegistry(string name, int requiredCallCount) : IPartyNameRegistry
+    {
+        private readonly TaskCompletionSource<bool> _gate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private int _callCount;
+
+        public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
+        {
+            if (Interlocked.Increment(ref _callCount) >= requiredCallCount)
+            {
+                _gate.TrySetResult(true);
+            }
+
+            await _gate.Task.WaitAsync(cancellationToken);
+            return name;
+        }
+    }
 }

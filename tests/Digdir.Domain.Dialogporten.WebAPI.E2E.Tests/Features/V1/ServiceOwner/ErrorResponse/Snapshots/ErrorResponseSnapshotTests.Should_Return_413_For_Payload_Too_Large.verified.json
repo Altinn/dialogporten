@@ -1,0 +1,7 @@
+﻿{
+  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.11",
+  "title": "Payload too large. The maximum allowed size is 20000000 bytes.",
+  "status": 413,
+  "instance": "/api/v1/serviceowner/dialogs",
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+}

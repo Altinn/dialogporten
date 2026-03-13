@@ -63,7 +63,7 @@ var tags = baseTags(additionalTags, environment)
 
 var name = '${namePrefix}-cost-metrics'
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-07-01' existing = {
   name: containerAppEnvironmentName
 }
 
@@ -83,7 +83,7 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
 
 var storageAccountName = take('${toLower(replace(namePrefix, '-', ''))}storage${uniqueString(resourceGroup().id)}', 24)
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: storageAccountName
   location: location
   sku: {

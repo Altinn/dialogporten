@@ -93,11 +93,11 @@ var additionalTags = {}
 
 var tags = baseTags(additionalTags, environment)
 
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
   name: appConfigurationName
 }
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-07-01' existing = {
   name: containerAppEnvironmentName
 }
 
@@ -107,7 +107,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
   name: environmentKeyVaultName
 }
 

@@ -4,7 +4,7 @@ param storageAccountName string
 @description('Array of principal IDs to assign the Storage Blob Data Contributor role to')
 param principalIds array
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' existing = {
   name: storageAccountName
 }
 

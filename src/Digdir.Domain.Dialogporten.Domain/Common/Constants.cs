@@ -5,6 +5,7 @@ public static class Constants
     public const int MinSearchStringLength = 3;
     public const int MaxSearchTagLength = 63;
     public const int DefaultMaxStringLength = 255;
+    public const int DefaultMediaTypeMaxLength = 256;
     public const int DefaultMaxUriLength = 1023;
     public const int CorrespondenceMaxStringLength = 512;
     public const int MaxIdempotentKeyLength = 36;

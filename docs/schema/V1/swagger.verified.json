@@ -464,6 +464,11 @@
       "V1CommonContent_ContentValue": {
         "additionalProperties": false,
         "properties": {
+          "isAuthorized": {
+            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder. Can be null if not applicable.\n            ",
+            "nullable": true,
+            "type": "boolean"
+          },
           "mediaType": {
             "description": "Media type of the content, this can also indicate that the content is embeddable.",
             "type": "string"
@@ -736,7 +741,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nContent value will be masked if the user is not authorized to read main content.",
             "nullable": true,
             "oneOf": [
               {
@@ -4502,7 +4507,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
             "nullable": true,
             "oneOf": [
               {

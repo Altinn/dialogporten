@@ -3,10 +3,11 @@
   "title": "Resource no longer available.",
   "status": 410,
   "instance": "/api/v1/enduser/dialogs/00000000-0000-0000-0000-000000000000",
-  "errors": {
-    "DialogEntity": [
-      "Entity \u0027DialogEntity\u0027 with the following key(s) is removed: (00000000-0000-0000-0000-000000000000)."
-    ]
-  },
-  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00",
+  "errors": [
+    {
+      "name": "dialogEntity",
+      "reason": "Entity \u0027DialogEntity\u0027 with the following key(s) is removed: (00000000-0000-0000-0000-000000000000)."
+    }
+  ]
 }

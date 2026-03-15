@@ -3,10 +3,11 @@
   "title": "Unprocessable request.",
   "status": 422,
   "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000/activities",
-  "errors": {
-    "DialogActivity": [
-      "Key (\u0027Id\u0027)=(00000000-0000-0000-0000-000000000000) already exists."
-    ]
-  },
-  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00",
+  "errors": [
+    {
+      "name": "dialogActivity",
+      "reason": "Key (\u0027Id\u0027)=(00000000-0000-0000-0000-000000000000) already exists."
+    }
+  ]
 }

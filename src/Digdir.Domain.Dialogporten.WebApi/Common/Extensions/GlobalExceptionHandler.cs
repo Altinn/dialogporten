@@ -17,7 +17,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
         };
 
         ctx.Response.ContentType = "application/problem+json";
-        var response = ctx.ResponseBuilder();
+        var response = ctx.BuildProblemDetails();
 
         if (ctx.Response.StatusCode >= 500 || response is null)
         {
@@ -28,7 +28,9 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             logger.LogError(exception, "{@Http} {@Type} {@Reason}", http, type, error);
         }
 
-        await ctx.Response.WriteAsJsonAsync(response ?? ctx.DefaultResponse(), cancellationToken);
+        await ctx.Response.WriteAsJsonAsync(
+            response ?? (object)ctx.DefaultResponse(),
+            cancellationToken);
         return true;
     }
 }

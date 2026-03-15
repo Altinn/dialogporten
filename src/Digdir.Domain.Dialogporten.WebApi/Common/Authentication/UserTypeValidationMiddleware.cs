@@ -37,7 +37,7 @@ public sealed class UserTypeValidationMiddleware
                             $"The request was authenticated, but we were unable to determine valid user type in order to authorize the request. Valid user types for this endpoint are: {string.Join(", ", validUserTypes)}")
                     ]
                 );
-                await context.Response.WriteAsJsonAsync(response, response.GetType());
+                await context.Response.WriteAsJsonAsync(response);
 
                 return;
             }

@@ -211,7 +211,11 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
-            x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
+            x.Errors.UseProblemDetails(cfg =>
+            {
+                cfg.TitleTransformer = pd => ErrorResponseBuilderExtensions.GetTitle(pd.Status);
+                cfg.TypeTransformer = pd => ErrorResponseBuilderExtensions.GetType(pd.Status);
+            });
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>

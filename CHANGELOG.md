@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.107.1](https://github.com/Altinn/dialogporten/compare/v1.107.0...v1.107.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* hide MainContentReference FCE if no read permission ([#3472](https://github.com/Altinn/dialogporten/issues/3472)) ([7971e5b](https://github.com/Altinn/dialogporten/commit/7971e5b6b15809b5e5ba4c9543f8bc53d6bca8d7))
+* use correct max length for MediaType in validators ([#3592](https://github.com/Altinn/dialogporten/issues/3592)) ([658cd90](https://github.com/Altinn/dialogporten/commit/658cd90555a2f94c9deea57ccccb615f828f2a2f))
+
+
+### Miscellaneous Chores
+
+* mute serilog npgsql serialization exception ([#3564](https://github.com/Altinn/dialogporten/issues/3564)) ([c5516cc](https://github.com/Altinn/dialogporten/commit/c5516cc73731d0a89ac3bbe4e00c607716018595))
+
 ## [1.107.0](https://github.com/Altinn/dialogporten/compare/v1.106.2...v1.107.0) (2026-03-12)
 
 

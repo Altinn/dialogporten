@@ -13,11 +13,14 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLo
 internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogResolver
 {
     private readonly IDialogDbContext _db;
+    private readonly IResourceRegistry _resourceRegistry;
 
-    public IdentifierLookupDialogResolver(IDialogDbContext db)
+    public IdentifierLookupDialogResolver(IDialogDbContext db, IResourceRegistry resourceRegistry)
     {
         ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
         _db = db;
+        _resourceRegistry = resourceRegistry;
     }
 
     /// <summary>
@@ -85,7 +88,8 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
     /// <summary>
     /// Chooses the instance reference to return, preferring app-instance, then correspondence, then dialog reference.
     /// </summary>
-    public string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData)
+    public async Task<string> ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData,
+        CancellationToken cancellationToken)
     {
         if (requestRef.Type is not InstanceRefType.DialogId)
         {
@@ -108,7 +112,71 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             .OrderByDescending(x => x, StringComparer.Ordinal)
             .FirstOrDefault();
 
-        return correspondenceRef ?? InstanceRef.CreateDialogRef(dialogData.DialogId).ToLowerInvariant();
+        if (correspondenceRef is not null)
+        {
+            return correspondenceRef;
+        }
+
+        // TODO!
+        // Pending https://github.com/Altinn/altinn-correspondence/issues/1777 (and backfill), we use a workaround to
+        // find the output instance ref for correspondence dialogs without a correspondence id label.
+        if (await IsCorrespondenceService(dialogData.ServiceResource, cancellationToken))
+        {
+            var fceUrl = await _db.DialogContents
+                .Where(x => x.DialogId == dialogData.DialogId &&
+                            x.TypeId == DialogContentType.Values.MainContentReference)
+                .SelectMany(x => x.Value.Localizations)
+                .Select(loc => loc.Value)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (TryExtractCorrespondenceId(fceUrl, out var correspondenceId))
+            {
+                return InstanceRef.CorrespondencePrefix + correspondenceId;
+            }
+        }
+
+        return InstanceRef.CreateDialogRef(dialogData.DialogId).ToLowerInvariant();
+    }
+
+    private async Task<bool> IsCorrespondenceService(string dialogDataServiceResource, CancellationToken cancellationToken)
+    {
+        var resourceInformation = await _resourceRegistry.GetResourceInformation(dialogDataServiceResource, cancellationToken);
+        return resourceInformation?.ResourceType == Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants.CorrespondenceService;
+    }
+
+    private const string Prefix = "/correspondence/api/v1/correspondence/";
+    private const string Suffix = "/content";
+    private static bool TryExtractCorrespondenceId(ReadOnlySpan<char> url, [NotNullWhen(true)] out string? id)
+    {
+        id = null;
+
+        var schemeSep = url.IndexOf("://".AsSpan());
+        if (schemeSep < 0)
+            return false;
+
+        var pathStart = url[(schemeSep + 3)..].IndexOf('/');
+        if (pathStart < 0)
+            return false;
+
+        pathStart += schemeSep + 3;
+
+        var path = url[pathStart..];
+
+        if (!path.StartsWith(Prefix.AsSpan(), StringComparison.Ordinal))
+            return false;
+
+        if (!path.EndsWith(Suffix.AsSpan(), StringComparison.Ordinal))
+            return false;
+
+        var guidStart = Prefix.Length;
+        var guidLength = path.Length - Prefix.Length - Suffix.Length;
+
+        if (guidLength != 36)
+            return false;
+
+        id = path.Slice(guidStart, guidLength).ToString();
+
+        return true;
     }
 
     private IQueryable<DialogEntity> GetDialogQuery(

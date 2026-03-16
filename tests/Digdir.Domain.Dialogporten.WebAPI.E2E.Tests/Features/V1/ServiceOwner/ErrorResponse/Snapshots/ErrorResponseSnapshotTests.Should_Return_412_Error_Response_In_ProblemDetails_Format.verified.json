@@ -1,0 +1,7 @@
+﻿{
+  "type": "https://datatracker.ietf.org/doc/html/rfc7232#section-4.2",
+  "title": "Precondition failed.",
+  "status": 412,
+  "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000/activities",
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+}

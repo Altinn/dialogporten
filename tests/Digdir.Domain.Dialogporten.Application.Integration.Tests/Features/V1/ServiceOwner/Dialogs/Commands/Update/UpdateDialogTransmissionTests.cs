@@ -37,6 +37,15 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public Task Cannot_Update_Transmission_Url_With_Media_Type_Exceeding_Max_Length() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x => x.AddTransmission(x =>
+                x.AddAttachment(x =>
+                        x.Urls.First().MediaType = new string('a', TestConstants.DefaultMaxStringLength + 1))))
+            .ExecuteAndAssert<ValidationError>();
+
+    [Fact]
     public Task Can_Create_Simple_Transmission_In_Update() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

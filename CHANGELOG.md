@@ -1,5 +1,60 @@
 # Changelog
 
+## [1.107.0](https://github.com/Altinn/dialogporten/compare/v1.106.2...v1.107.0) (2026-03-12)
+
+
+### Features
+
+* Dialog lookup API ([#3559](https://github.com/Altinn/dialogporten/issues/3559)) ([23c0423](https://github.com/Altinn/dialogporten/commit/23c042350dae1ad293fd2c41515bbab9abe0b458))
+
+
+### Bug Fixes
+
+* Add missing fields, cleanups to dialog lookup ([#3585](https://github.com/Altinn/dialogporten/issues/3585)) ([8e2d8e5](https://github.com/Altinn/dialogporten/commit/8e2d8e5e13cda138db0550060ae4fbde4a73c229))
+* **infra:** enable Active Directory and password authentication for PostgreSQL server ([#3570](https://github.com/Altinn/dialogporten/issues/3570)) ([3497c1e](https://github.com/Altinn/dialogporten/commit/3497c1e4c6562b3e5fcc3cce1d8f5085a47cdd39))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v6.3.0 ([#3575](https://github.com/Altinn/dialogporten/issues/3575)) ([48a867b](https://github.com/Altinn/dialogporten/commit/48a867bb812abbd81cb2d36a09920223eb7933c7))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.23.0 ([#3576](https://github.com/Altinn/dialogporten/issues/3576)) ([d8b5a18](https://github.com/Altinn/dialogporten/commit/d8b5a186b6bc3a6d621c02408661bb7391191577))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.147.0 ([#3577](https://github.com/Altinn/dialogporten/issues/3577)) ([78d745f](https://github.com/Altinn/dialogporten/commit/78d745f5de5db4528679e4f1d368d1be8b99c755))
+* **infra:** Add IAC for PostgreSQL migration targets ([#3526](https://github.com/Altinn/dialogporten/issues/3526)) ([d8de2d3](https://github.com/Altinn/dialogporten/commit/d8de2d34ba44dc104c8261f7028a4d0b1c17ecca))
+* **infra:** implement scale-to-zero for yt01 environment ([#3521](https://github.com/Altinn/dialogporten/issues/3521)) ([300ce33](https://github.com/Altinn/dialogporten/commit/300ce33500d8c5012835c416d621bf98cab694ae))
+* **infra:** store migration target admin password in separate Key Vault secret ([#3573](https://github.com/Altinn/dialogporten/issues/3573)) ([bfcc35e](https://github.com/Altinn/dialogporten/commit/bfcc35e008ae497c6e025368dd1c855937510618))
+* **infra:** update PostgreSQL migration scripts to use existing Key Vault password keys ([#3584](https://github.com/Altinn/dialogporten/issues/3584)) ([7e7a5ea](https://github.com/Altinn/dialogporten/commit/7e7a5eadf5397518602c60d1f5646d590caf0c37))
+
+## [1.106.2](https://github.com/Altinn/dialogporten/compare/v1.106.1...v1.106.2) (2026-03-10)
+
+
+### Bug Fixes
+
+* **api:** use correct return type in parties endpoint OpenAPI spec ([#3545](https://github.com/Altinn/dialogporten/issues/3545)) ([5df6c14](https://github.com/Altinn/dialogporten/commit/5df6c14ce7d47d7fcc8a360e12537c2737685d3e))
+* **app:** Optimize latest activity search query and add verification tests ([#3561](https://github.com/Altinn/dialogporten/issues/3561)) ([8d714b3](https://github.com/Altinn/dialogporten/commit/8d714b3a02ec6f6cb119f152c4790f3d82038883))
+* system label log missing performedBy actor ([#3553](https://github.com/Altinn/dialogporten/issues/3553)) ([9b52256](https://github.com/Altinn/dialogporten/commit/9b522562893735b1aec912ec4128a1fb8ac2fafd))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-dotnet action to v5.2.0 ([#3557](https://github.com/Altinn/dialogporten/issues/3557)) ([62f12ad](https://github.com/Altinn/dialogporten/commit/62f12adb1b9f1381e18c76a1ceefbc04d881151c))
+* **deps:** update dependency azure.identity to 1.18.0 ([#3558](https://github.com/Altinn/dialogporten/issues/3558)) ([4448b69](https://github.com/Altinn/dialogporten/commit/4448b694ea7d24b44460e0992e23dd23f060a1e1))
+* **infra:** Make service bus vnet optional  ([#3518](https://github.com/Altinn/dialogporten/issues/3518)) ([bd68c22](https://github.com/Altinn/dialogporten/commit/bd68c220fd3586483967ec423b399a2244fc8ad3))
+
+## [1.106.1](https://github.com/Altinn/dialogporten/compare/v1.106.0...v1.106.1) (2026-03-04)
+
+
+### Bug Fixes
+
+* Filtering of exceptions already handled ([#3531](https://github.com/Altinn/dialogporten/issues/3531)) ([c82c108](https://github.com/Altinn/dialogporten/commit/c82c1087770358f5839c176ba2ff82609a416b57))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency awesomeassertions to 9.4.0 ([#3542](https://github.com/Altinn/dialogporten/issues/3542)) ([7d8ca2b](https://github.com/Altinn/dialogporten/commit/7d8ca2bcfccc8cef3c24431f60eef710ec172061))
+* **deps:** update dependency microsoft.net.test.sdk to 18.3.0 ([#3543](https://github.com/Altinn/dialogporten/issues/3543)) ([acb7f43](https://github.com/Altinn/dialogporten/commit/acb7f43c775eb0228d08714efab7db94d068ac2c))
+* **deps:** update grafana/loki docker tag to v3.6.7 ([#3541](https://github.com/Altinn/dialogporten/issues/3541)) ([046b7f8](https://github.com/Altinn/dialogporten/commit/046b7f8941542b8980f5ea33059f377e62b10e02))
+* **deps:** upgrade az cli to 2.84.0 ([#3547](https://github.com/Altinn/dialogporten/issues/3547)) ([fb18ec6](https://github.com/Altinn/dialogporten/commit/fb18ec6857ee3bcc752e6cdae725558612510b71))
+
 ## [1.106.0](https://github.com/Altinn/dialogporten/compare/v1.105.1...v1.106.0) (2026-03-02)
 
 

@@ -75,6 +75,8 @@ import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgr
 import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
 
 param postgresConfiguration {
+  serverNameStem: string
+  version: '16' | '17' | '18'
   sku: PostgresSku
   storage: PostgresStorageConfig
   enableIndexTuning: bool
@@ -89,6 +91,9 @@ param deployerPrincipalName string
 
 import { Sku as ServiceBusSku } from '../modules/serviceBus/main.bicep'
 param serviceBusSku ServiceBusSku
+
+@description('Whether to enable VNET integration for Service Bus (requires Premium SKU)')
+param serviceBusVnetEnabled bool = true
 
 import { Sku as RedisSku } from '../modules/redis/main.bicep'
 param redisSku RedisSku
@@ -170,8 +175,8 @@ module serviceBus '../modules/serviceBus/main.bicep' = {
     namePrefix: namePrefix
     location: location
     sku: serviceBusSku
-    subnetId: vnet.outputs.serviceBusSubnetId
-    vnetId: vnet.outputs.virtualNetworkId
+    subnetId: serviceBusVnetEnabled ? vnet.outputs.serviceBusSubnetId : null
+    vnetId: serviceBusVnetEnabled ? vnet.outputs.virtualNetworkId : null
     tags: tags
   }
 }
@@ -199,6 +204,7 @@ resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
 // Create resources with dependencies to other resources
 // #####################################################
 
+var srcKeyVaultPasswordKey = 'dialogportenPgAdminPassword${environment}'
 var srcKeyVault = {
   name: secrets.sourceKeyVaultName
   subscriptionId: secrets.sourceKeyVaultSubscriptionId
@@ -226,10 +232,13 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     namePrefix: namePrefix
     location: location
     environmentKeyVaultName: environmentKeyVault.outputs.name
+    serverNameStem: postgresConfiguration.serverNameStem
+    postgresVersion: postgresConfiguration.version
+    publishCanonicalConnectionSecrets: true
     srcKeyVault: srcKeyVault
-    srcKeyVaultAdministratorLoginPasswordKey: 'dialogportenPgAdminPassword${environment}'
-    administratorLoginPassword: contains(keyVaultSourceKeys, 'dialogportenPgAdminPassword${environment}')
-      ? srcKeyVaultResource.getSecret('dialogportenPgAdminPassword${environment}')
+    srcKeyVaultAdministratorLoginPasswordKey: srcKeyVaultPasswordKey
+    administratorLoginPassword: contains(keyVaultSourceKeys, srcKeyVaultPasswordKey)
+      ? srcKeyVaultResource.getSecret(srcKeyVaultPasswordKey)
       : secrets.dialogportenPgAdminPassword
     sku: postgresConfiguration.sku
     storage: postgresConfiguration.storage

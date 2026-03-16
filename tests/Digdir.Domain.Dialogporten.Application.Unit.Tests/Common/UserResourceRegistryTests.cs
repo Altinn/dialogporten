@@ -65,7 +65,10 @@ public sealed class UserResourceRegistryTests
                 $"res{index + 1}",
                 "type",
                 orgNumber,
-                name))
+                name,
+                [],
+                [],
+                false))
             .ToArray();
 
         var resourceRegistry = Substitute.For<IResourceRegistry>();

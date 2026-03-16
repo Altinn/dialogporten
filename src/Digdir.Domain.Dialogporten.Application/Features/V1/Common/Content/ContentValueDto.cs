@@ -14,4 +14,11 @@ public sealed class ContentValueDto
     /// Media type of the content, this can also indicate that the content is embeddable.
     /// </summary>
     public string MediaType { get; set; } = MediaTypes.PlainText;
+
+    /// <summary>
+    /// True if the authenticated user is authorized for this content. If not, the endpoints will
+    /// be replaced with a fixed placeholder. Can be null if not applicable.
+    ///
+    /// </summary>
+    public bool? IsAuthorized { get; set; }
 }

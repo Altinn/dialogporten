@@ -464,12 +464,171 @@
       "V1CommonContent_ContentValue": {
         "additionalProperties": false,
         "properties": {
+          "isAuthorized": {
+            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder. Can be null if not applicable.\n            ",
+            "nullable": true,
+            "type": "boolean"
+          },
           "mediaType": {
             "description": "Media type of the content, this can also indicate that the content is embeddable.",
             "type": "string"
           },
           "value": {
             "description": "A list of localizations for the content.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_EndUserIdentifierLookup": {
+        "additionalProperties": false,
+        "properties": {
+          "authorizationEvidence": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence"
+          },
+          "dialogId": {
+            "format": "guid",
+            "type": "string"
+          },
+          "instanceRef": {
+            "type": "string"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceResource"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "currentAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "viaAccessPackage": {
+            "type": "boolean"
+          },
+          "viaInstanceDelegation": {
+            "type": "boolean"
+          },
+          "viaResourceDelegation": {
+            "type": "boolean"
+          },
+          "viaRole": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem": {
+        "additionalProperties": false,
+        "properties": {
+          "grantType": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupGrantType"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupGrantType": {
+        "description": "",
+        "enum": [
+          "Role",
+          "AccessPackage",
+          "ResourceDelegation",
+          "InstanceDelegation"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Role",
+          "AccessPackage",
+          "ResourceDelegation",
+          "InstanceDelegation"
+        ]
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupServiceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogId": {
+            "format": "guid",
+            "type": "string"
+          },
+          "instanceRef": {
+            "type": "string"
+          },
+          "nonSensitiveTitle": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceResource"
+          },
+          "title": {
             "items": {
               "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
             },
@@ -546,6 +705,20 @@
         },
         "type": "object"
       },
+      "V1EndUserDialogLookupQueriesGet_DialogLookupRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserDialogsQueriesGet_Content": {
         "additionalProperties": false,
         "properties": {
@@ -568,7 +741,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nContent value will be masked if the user is not authorized to read main content.",
             "nullable": true,
             "oneOf": [
               {
@@ -2531,6 +2704,20 @@
           "Awaiting"
         ]
       },
+      "V1ServiceOwnerDialogLookupQueriesGet_DialogLookupRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerDialogsCommandsCreate_Activity": {
         "additionalProperties": false,
         "properties": {
@@ -4320,7 +4507,7 @@
             ]
           },
           "mainContentReference": {
-            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.",
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.\nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
             "nullable": true,
             "oneOf": [
               {
@@ -6477,6 +6664,102 @@
         ]
       }
     },
+    "/api/v1/enduser/dialoglookup": {
+      "get": {
+        "description": "Resolves dialog metadata and authorization evidence for a supported instance reference.",
+        "operationId": "V1EndUserDialogLookupQueriesGet_DialogLookup",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "instanceRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1CommonIdentifierLookup_EndUserIdentifierLookup"
+                }
+              }
+            },
+            "description": "Successfully resolved dialog lookup metadata."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Authenticated end user is not authorized for the supplied instance reference."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "No dialog match was found for the supplied instance reference."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Looks up a dialog by instance reference",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
     "/api/v1/enduser/dialogs": {
       "get": {
         "description": "Performs a search for dialogs, returning a paginated list of dialogs. \n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
@@ -7729,10 +8012,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/V1AccessManagementQueriesGetParties_Parties"
-                  },
-                  "type": "array"
+                  "$ref": "#/components/schemas/V1AccessManagementQueriesGetParties_Parties"
                 }
               }
             },
@@ -7815,6 +8095,102 @@
         "summary": "Gets currently enforced application-level query limits",
         "tags": [
           "Metadata"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialoglookup": {
+      "get": {
+        "description": "Resolves dialog metadata for a supported instance reference in service owner context.",
+        "operationId": "V1ServiceOwnerDialogLookupQueriesGet_DialogLookup",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "instanceRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup"
+                }
+              }
+            },
+            "description": "Successfully resolved instance reference lookup metadata."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+          },
+          "403": {
+            "description": "Authenticated service owner does not own the resolved dialog."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "No dialog match was found for the supplied instance reference."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Looks up a dialog by instance reference",
+        "tags": [
+          "Serviceowner"
         ]
       }
     },

@@ -1,19 +1,20 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
@@ -48,6 +49,260 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     }
 
     [Fact]
+    public Task Get_Dialog_Should_Include_MainContentReference_When_Read_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddMainContentReference())
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Content.MainContentReference!.Should().BeEquivalentTo(
+                    new ContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        IsAuthorized = true,
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://localhost/nb"
+                            },
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nn",
+                                Value = "https://localhost/nn"
+                            },
+                            new LocalizationDto
+                            {
+                                LanguageCode = "en",
+                                Value = "https://localhost/en"
+                            }
+                        ],
+                    }
+                );
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference_When_No_Read_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application, ConfigureWriteOnlyAuthorization)
+            .CreateSimpleDialog((x, _) => x.AddMainContentReference())
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Content.MainContentReference!.IsAuthorized.Should().BeFalse();
+                x.Content.MainContentReference!.Value.Should().AllSatisfy(x =>
+                    x.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_GuiAction_Url_When_Read_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddGuiAction(guiAction => guiAction.Url = new Uri("https://localhost")))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var guiAction = x.GuiActions.Single();
+                guiAction.IsAuthorized.Should().BeTrue();
+                guiAction.Url.Should().Be(new Uri("https://localhost"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_GuiAction_Url_When_Specific_Access_To_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("read", "urn:altinn:resource:gui-action-0"),
+                        new AltinnAction("read", "urn:altinn:resource:gui-action-1"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) => x.AddGuiAction(guiAction =>
+            {
+                guiAction.Action = "read";
+                guiAction.AuthorizationAttribute = "urn:altinn:resource:gui-action-1";
+                guiAction.Url = new Uri("https://localhost");
+            }))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var guiAction = x.GuiActions.Single();
+                guiAction.IsAuthorized.Should().BeTrue();
+                guiAction.Url.Should().Be(new Uri("https://localhost"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_GuiAction_Urls_When_Missing_Specific_Read_Access_Even_With_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("read", Constants.MainResource),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddGuiAction(g =>
+                {
+                    g.Action = "GuiAction1";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+                x.AddGuiAction(g =>
+                {
+                    g.Priority = DialogGuiActionPriority.Values.Secondary;
+                    g.Action = "GuiAction2";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.GuiActions.Count.Should().Be(2);
+                x.GuiActions.Should().AllSatisfy(guiAction =>
+                {
+                    guiAction.IsAuthorized.Should().BeFalse();
+                    guiAction.Url.Should().Be(Constants.UnauthorizedUri);
+                });
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_GuiAction_Urls_When_Action_Is_Missing() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("write", Constants.MainResource),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddGuiAction(g =>
+                {
+                    g.Action = "read";
+                    g.AuthorizationAttribute = null;
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var guiAction = x.GuiActions.Single();
+                guiAction.IsAuthorized.Should().BeFalse();
+                guiAction.Url.Should().Be(Constants.UnauthorizedUri);
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_ApiAction_Url_When_Read_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction();
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var apiAction = x.ApiActions.Single();
+                apiAction.IsAuthorized.Should().BeTrue();
+                apiAction.Endpoints.Single().Url.Should().Be(new Uri("https://example.com"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Include_ApiAction_Url_When_Specific_Access_To_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("read", "urn:altinn:resource:api-action-0"),
+                        new AltinnAction("read", "urn:altinn:resource:api-action-1"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) => x.AddApiAction(apiAction =>
+            {
+                apiAction.Action = "read";
+                apiAction.AuthorizationAttribute = "urn:altinn:resource:api-action-1";
+            }))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var apiAction = x.ApiActions.Single();
+                apiAction.IsAuthorized.Should().BeTrue();
+                apiAction.Endpoints.Single().Url.Should().Be(new Uri("https://example.com"));
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_ApiAction_Urls_When_Missing_Specific_Read_Access_Even_With_Access_To_Main_Resource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("write", Constants.MainResource),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction(g =>
+                {
+                    g.Action = "read";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+                x.AddApiAction(g =>
+                {
+                    g.Action = "read-2";
+                    g.AuthorizationAttribute = "urn:altinn:resource:unauthorized";
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.ApiActions.Count.Should().Be(2);
+                x.ApiActions.Should().AllSatisfy(guiAction =>
+                {
+                    guiAction.IsAuthorized.Should().BeFalse();
+                    guiAction.Endpoints.Single().Url.Should().Be(Constants.UnauthorizedUri);
+                });
+            });
+
+    [Fact]
+    public Task Get_Dialog_Should_Mask_ApiAction_Urls_When_Action_Is_Missing() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction("write", Constants.MainResource),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction(g =>
+                {
+                    g.Action = "read";
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var apiAction = x.ApiActions.Single();
+                apiAction.IsAuthorized.Should().BeFalse();
+                apiAction.Endpoints.Single().Url.Should().Be(Constants.UnauthorizedUri);
+            });
+
+    [Fact]
     public Task Get_Dialog_Should_Include_Transmission_ExternalReference() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
@@ -57,6 +312,70 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .ExecuteAndAssert<DialogDto>(x =>
                 x.Transmissions.Should().ContainSingle()
                     .Which.ExternalReference.Should().Be("ext"));
+
+    [Fact]
+    public Task Get_Dialog_Should_Return_Transmission_ContentReference_When_Specific_Access() =>
+        FlowBuilder.For(Application, services =>
+            {
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedAltinnActions = [
+                        new AltinnAction(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
+                        new AltinnAction(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-1";
+                    transmission.Content!.ContentReference = new ContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://example.com/secret1"
+                            }
+                        ]
+                    };
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = "urn:altinn:resource:transmission-2";
+                    transmission.Content!.ContentReference = new ContentValueDto
+                    {
+                        MediaType = MediaTypes.EmbeddableMarkdown,
+                        Value =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = "https://example.com/secret2"
+                            }
+                        ]
+                    };
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Transmissions.Count.Should().Be(2);
+                x.Transmissions.Should().AllSatisfy(x =>
+                {
+                    x.IsAuthorized.Should().BeTrue();
+                    x.Content.ContentReference.Should().NotBeNull();
+                    x.Content.ContentReference.Value.Should().NotBeEmpty();
+                    x.Content.ContentReference.Value.Should().AllSatisfy(v =>
+                    {
+                        v.Value.Should().StartWith("https://example.com/secret");
+                    });
+                });
+            });
 
     [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_Transmission_ContentReference() =>
@@ -186,6 +505,15 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }
 
+    private static void ConfigureWriteOnlyAuthorization(IServiceCollection services)
+    {
+        var authorizationResult = new DialogDetailsAuthorizationResult
+        {
+            AuthorizedAltinnActions = [new AltinnAction("write")]
+        };
+        services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+    }
+
     [Theory]
     [InlineData(DialogActivityType.Values.CorrespondenceOpened, false)]
     [InlineData(DialogActivityType.Values.Information, true)]
@@ -208,5 +536,5 @@ internal sealed class TestResourceRegistry(DialogDbContext db) : LocalDevelopmen
     public override Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId,
         CancellationToken cancellationToken) =>
         Task.FromResult<ServiceResourceInformation?>(
-            new ServiceResourceInformation(serviceResourceId, CorrespondenceService, "SomeOrg", "org"));
+            new ServiceResourceInformation(serviceResourceId, CorrespondenceService, "SomeOrg", "org", [], [], false));
 }

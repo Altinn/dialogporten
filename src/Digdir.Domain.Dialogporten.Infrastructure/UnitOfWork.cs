@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
@@ -18,6 +19,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure;
 
 internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 {
+    private const int ActorNameSaveRetries = 1;
+    private const string ActorNameTableName = "ActorName";
+
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
     private readonly IDomainContext _domainContext;
@@ -105,7 +109,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
     }
 
-    private async Task<SaveChangesResult> SaveChangesAsync_Internal(CancellationToken cancellationToken)
+    private async Task<SaveChangesResult> SaveChangesAsync_Internal(CancellationToken cancellationToken, int attempt = 0)
     {
         if (!_domainContext.IsValid)
         {
@@ -130,6 +134,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         try
         {
             await _dialogDbContext.SaveChangesAsync(cancellationToken);
+
+            // Interceptors can add domain errors, so check again
+            return !_domainContext.IsValid
+                ? new DomainError(_domainContext.Pop())
+                : new Success();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -150,6 +159,13 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
                                    ex.InnerException?.Data["Detail"] is string message &&
                                    ex.InnerException.Data["TableName"] is string tableName)
         {
+            if (attempt < ActorNameSaveRetries &&
+                IsDuplicateActorNameError(tableName, message.Replace('"', '\'')) &&
+                await ResolveDuplicateActorNameConflict(cancellationToken))
+            {
+                return await SaveChangesAsync_Internal(cancellationToken, ++attempt);
+            }
+
             _domainContext.AddError(tableName, message.Replace('"', '\''));
         }
         catch (Exception ex) when (IsSerializationFailure(ex))
@@ -167,13 +183,66 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         .OfType<IEventPublisher>()
         .Any(x => x.HasEvents());
 
+    private async Task<bool> ResolveDuplicateActorNameConflict(CancellationToken cancellationToken)
+    {
+        var addedActorNames = _dialogDbContext.ChangeTracker
+            .Entries<ActorName>()
+            .Where(e => e.State == EntityState.Added)
+            .Select(e => e.Entity)
+            .Where(e => e.ActorId is not null && e.Name is not null)
+            .ToList();
+
+        if (addedActorNames.Count == 0)
+        {
+            return false;
+        }
+
+        var actorIdNamePairs = addedActorNames
+            .Select(x => (ActorId: x.ActorId!, Name: x.Name!))
+            .Distinct()
+            .ToList();
+        var actorIds = actorIdNamePairs.Select(x => x.ActorId).Distinct().ToList();
+        var names = actorIdNamePairs.Select(x => x.Name).Distinct().ToList();
+
+        var existingActorNames = await _dialogDbContext.Set<ActorName>()
+            .Where(x => actorIds.Contains(x.ActorId!) && names.Contains(x.Name!))
+            .ToListAsync(cancellationToken);
+        var existingByPair = existingActorNames
+            .ToDictionary(x => (ActorId: x.ActorId!, Name: x.Name!));
+
+        var resolvedAny = false;
+        foreach (var addedActorName in addedActorNames)
+        {
+            if (!existingByPair.TryGetValue((addedActorName.ActorId!, addedActorName.Name!), out var existingActorName))
+            {
+                continue;
+            }
+
+            foreach (var actor in addedActorName.ActorEntities)
+            {
+                actor.ActorNameEntity = existingActorName;
+            }
+
+            _dialogDbContext.Entry(addedActorName).State = EntityState.Detached;
+            resolvedAny = true;
+        }
+
+        return resolvedAny;
+    }
+
+    private static bool IsDuplicateActorNameError(string tableName, string message) =>
+        tableName == ActorNameTableName
+     && message.Contains("(\'ActorId\', \'Name\')=", StringComparison.Ordinal)
+     && message.Contains("already exists", StringComparison.Ordinal);
+
     private static bool IsSerializationFailure(Exception ex)
     {
+        const string serializationFailureErrorCode = "40001";
+
         for (var currentEx = ex; currentEx != null; currentEx = currentEx.InnerException)
         {
-            if (currentEx is not PostgresException) continue;
-
-            if (currentEx.Message.StartsWith("40001: could not serialize access due to concurrent", StringComparison.OrdinalIgnoreCase))
+            if (currentEx is PostgresException postgresException &&
+                postgresException.SqlState == serializationFailureErrorCode)
             {
                 return true;
             }

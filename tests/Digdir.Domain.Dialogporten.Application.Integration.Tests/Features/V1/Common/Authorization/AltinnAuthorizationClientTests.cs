@@ -21,7 +21,9 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
     public async Task UserHasRequiredAuthLevel_Should_Return_False_When_Resource_Policy_Information_Is_Missing()
     {
         // Arrange
-        var client = CreateAltinnAuthorizationClient(Constants.IdportenLoaHigh);
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        var client = CreateAltinnAuthorizationClient(Constants.IdportenLoaHigh, db);
 
         // Act
         var result = await client.UserHasRequiredAuthLevel(
@@ -44,7 +46,7 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
         var serviceResource = $"urn:altinn:resource:test-{Guid.NewGuid()}";
         using var scope = Application.GetServiceProvider().CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
-        db.ResourcePolicyInformation.Add(new Domain.ResourcePolicyInformation.ResourcePolicyInformation
+        db.ResourcePolicyInformation.Add(new()
         {
             Resource = serviceResource,
             MinimumAuthenticationLevel = minimumAuthenticationLevel

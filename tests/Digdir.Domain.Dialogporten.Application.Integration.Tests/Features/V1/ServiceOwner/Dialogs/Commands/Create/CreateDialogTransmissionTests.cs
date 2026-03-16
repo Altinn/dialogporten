@@ -24,6 +24,15 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public CreateTransmissionTests(DialogApplication application) : base(application) { }
 
     [Fact]
+    public Task Cannot_Create_Transmission_Url_With_Media_Type_Exceeding_Max_Length() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.AddTransmission(x =>
+                    x.AddAttachment(x =>
+                        x.Urls.First().MediaType = new string('a', TestConstants.DefaultMaxStringLength + 1))))
+            .ExecuteAndAssert<ValidationError>();
+
+    [Fact]
     public Task Can_Create_Transmission_Without_Summary() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
@@ -141,7 +150,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-                transmission.Content = null!;
+                transmission.Content = null;
                 x.Dto.Transmissions = [transmission];
             })
             .ExecuteAndAssert<ValidationError>(result =>
@@ -153,7 +162,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-                transmission.Content = null!;
+                transmission.Content = null;
                 x.Dto.Transmissions = [transmission];
                 x.Dto.IsApiOnly = true;
             })

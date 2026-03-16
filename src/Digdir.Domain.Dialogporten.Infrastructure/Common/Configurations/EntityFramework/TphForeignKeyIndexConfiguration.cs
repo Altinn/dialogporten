@@ -69,7 +69,7 @@ internal static class TphForeignKeyIndexConfiguration
         var resolvedColumnNames = indexTargets
             .ToDictionary(
                 target => (target.EntityType.Name, target.Property.Name),
-                target => target.ColumnName!);
+                target => target.ColumnName);
 
         // In shared-table TPH, multiple CLR types can expose the same FK property name
         // while mapping to different physical columns (e.g. GuiActionId vs DialogGuiActionPrompt_GuiActionId).

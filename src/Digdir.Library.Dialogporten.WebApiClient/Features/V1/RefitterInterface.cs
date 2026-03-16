@@ -1835,6 +1835,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("mediaType")]
         public string MediaType { get; set; }
 
+        /// <summary>
+        /// True if the authenticated user is authorized for this content. If not, the endpoints will
+        /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
+        /// <br/>            
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3146,6 +3154,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
+        /// <br/>IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
         /// </summary>
         [JsonPropertyName("mainContentReference")]
         public V1CommonContent_ContentValue MainContentReference { get; set; }
@@ -5537,6 +5546,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("id")]
         public string Id { get; set; }
+
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; }
 
         [JsonPropertyName("name")]
         public ICollection<V1CommonLocalizations_Localization> Name { get; set; }

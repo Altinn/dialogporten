@@ -173,6 +173,7 @@ type Content {
 type ContentValue {
   value: [Localization!]!
   mediaType: String!
+  isAuthorized: Boolean
 }
 
 type Dialog {
@@ -315,6 +316,7 @@ type DialogLookupServiceOwner {
 
 type DialogLookupServiceResource {
   id: String!
+  isDelegable: Boolean!
   name: [Localization!]!
 }
 

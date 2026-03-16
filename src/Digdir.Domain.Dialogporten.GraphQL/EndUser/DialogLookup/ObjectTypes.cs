@@ -41,6 +41,7 @@ public sealed class DialogLookup
 public sealed class DialogLookupServiceResource
 {
     public string Id { get; set; } = null!;
+    public bool IsDelegable { get; set; }
     public List<Localization> Name { get; set; } = [];
 }
 

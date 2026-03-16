@@ -61,6 +61,7 @@ static void BuildAndRun(string[] args)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
         .Enrich.WithEnvironmentName()
+        .Filter.WithHandledPostgresExceptionFilter()
         .WriteTo.OpenTelemetryOrConsole(context));
 
     builder.Services

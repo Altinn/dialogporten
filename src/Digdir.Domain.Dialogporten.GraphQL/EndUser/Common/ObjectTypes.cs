@@ -10,6 +10,7 @@ public sealed class ContentValue
 {
     public List<Localization> Value { get; set; } = [];
     public string MediaType { get; set; } = null!;
+    public bool? IsAuthorized { get; set; }
 }
 
 public sealed class EndUserContext

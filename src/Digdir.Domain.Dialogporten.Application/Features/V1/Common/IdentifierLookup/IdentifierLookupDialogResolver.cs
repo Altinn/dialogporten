@@ -133,6 +133,8 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             {
                 return InstanceRef.CorrespondencePrefix + correspondenceId;
             }
+
+            throw new InvalidOperationException("Unable to determine correspondence ID instance reference for correspondence dialog. No label found and FCE URL is not in expected format.");
         }
 
         return InstanceRef.CreateDialogRef(dialogData.DialogId).ToLowerInvariant();

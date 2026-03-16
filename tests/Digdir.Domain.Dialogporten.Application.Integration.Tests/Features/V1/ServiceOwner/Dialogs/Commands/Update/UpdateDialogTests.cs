@@ -272,14 +272,14 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public Task Cannot_Update_Content_To_Null_If_IsApiOnlyFalse_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = false)
-            .AssertSuccessAndUpdateDialog(x => x.Dto.Content = null!)
+            .AssertSuccessAndUpdateDialog(x => x.Dto.Content = null)
             .ExecuteAndAssert<ValidationError>();
 
     [Fact]
     public Task Can_Update_Content_To_Null_If_IsApiOnlyTrue_Dialog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.IsApiOnly = true)
-            .AssertSuccessAndUpdateDialog(x => x.Dto.Content = null!)
+            .AssertSuccessAndUpdateDialog(x => x.Dto.Content = null)
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Fact]

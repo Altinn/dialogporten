@@ -150,7 +150,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-                transmission.Content = null!;
+                transmission.Content = null;
                 x.Dto.Transmissions = [transmission];
             })
             .ExecuteAndAssert<ValidationError>(result =>
@@ -162,7 +162,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-                transmission.Content = null!;
+                transmission.Content = null;
                 x.Dto.Transmissions = [transmission];
                 x.Dto.IsApiOnly = true;
             })

@@ -68,7 +68,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
                 var relatedTransmission = UpdateDialogDialogTransmissionDto();
 
                 transmission.RelatedTransmissionId = relatedTransmission.Id;
-                transmission.Id = null!;
+                transmission.Id = null;
 
                 x.Dto.Transmissions = [transmission, relatedTransmission];
             })
@@ -117,7 +117,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
-                newTransmission.Content = null!;
+                newTransmission.Content = null;
                 x.Dto.Transmissions.Add(newTransmission);
             })
             .ExecuteAndAssert<ValidationError>(error =>
@@ -130,7 +130,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
-                newTransmission.Content = null!;
+                newTransmission.Content = null;
                 x.Dto.Transmissions.Add(newTransmission);
             })
             .GetServiceOwnerDialog()

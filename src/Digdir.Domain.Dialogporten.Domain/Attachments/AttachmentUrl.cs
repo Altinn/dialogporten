@@ -8,7 +8,7 @@ public sealed class AttachmentUrl : IEntity
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
-    public string? MediaType { get; set; } = null!;
+    public string? MediaType { get; set; }
     public Uri Url { get; set; } = null!;
 
     // === Dependent relationships ===

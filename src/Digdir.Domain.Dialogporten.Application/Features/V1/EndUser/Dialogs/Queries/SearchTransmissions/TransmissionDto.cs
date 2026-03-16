@@ -146,7 +146,7 @@ public sealed class AttachmentUrlDto
     /// application/pdf
     /// application/zip
     /// </example>
-    public string? MediaType { get; set; } = null!;
+    public string? MediaType { get; set; }
 
     /// <summary>
     /// The type of consumer the URL is intended for.

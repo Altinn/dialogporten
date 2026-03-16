@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
+using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
@@ -117,7 +118,7 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             return correspondenceRef;
         }
 
-        // TODO!
+        // TODO: Remove workaround: https://github.com/Altinn/dialogporten/issues/3613
         // Pending https://github.com/Altinn/altinn-correspondence/issues/1777 (and backfill), we use a workaround to
         // find the output instance ref for correspondence dialogs without a correspondence id label.
         if (await IsCorrespondenceService(dialogData.ServiceResource, cancellationToken))
@@ -143,7 +144,7 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
     private async Task<bool> IsCorrespondenceService(string dialogDataServiceResource, CancellationToken cancellationToken)
     {
         var resourceInformation = await _resourceRegistry.GetResourceInformation(dialogDataServiceResource, cancellationToken);
-        return resourceInformation?.ResourceType == Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants.CorrespondenceService;
+        return resourceInformation?.ResourceType == CorrespondenceService;
     }
 
     private const string Prefix = "/correspondence/api/v1/correspondence/";

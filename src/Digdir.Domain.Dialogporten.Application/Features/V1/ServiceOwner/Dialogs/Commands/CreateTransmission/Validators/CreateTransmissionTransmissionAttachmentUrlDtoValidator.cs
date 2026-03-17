@@ -13,7 +13,7 @@ internal sealed class CreateTransmissionTransmissionAttachmentUrlDtoValidator : 
             .IsValidUri();
 
         RuleFor(x => x.MediaType)
-            .MaximumLength(Constants.DefaultMediaTypeMaxLength);
+            .MaximumLength(Constants.DefaultMaxStringLength);
 
         RuleFor(x => x.ConsumerType)
             .IsInEnum();

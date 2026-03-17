@@ -1,5 +1,4 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
-using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 
@@ -264,7 +263,9 @@ public static class DialogTestData
         V1CommonContent_ContentValue? summary = null,
         V1CommonContent_ContentValue? senderName = null,
         V1CommonContent_ContentValue? additionalInfo = null,
-        V1CommonContent_ContentValue? extendedStatus = null)
+        V1CommonContent_ContentValue? extendedStatus = null,
+        V1CommonContent_ContentValue? mainContentReference = null
+    )
     {
         var content = new V1ServiceOwnerDialogsCommandsCreate_Content
         {
@@ -282,6 +283,9 @@ public static class DialogTestData
 
         if (extendedStatus is not null)
             content.ExtendedStatus = extendedStatus;
+
+        if (mainContentReference is not null)
+            content.MainContentReference = mainContentReference;
 
         return content;
     }

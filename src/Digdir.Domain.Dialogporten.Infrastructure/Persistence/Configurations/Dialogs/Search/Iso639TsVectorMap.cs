@@ -5,15 +5,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.D
 
 internal sealed class Iso639TsVectorMap
 {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     private Iso639TsVectorMap() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     public Iso639TsVectorMap(string isoCode, string tsConfigName)
     {
         (IsoCode, TsConfigName) = (isoCode, tsConfigName);
     }
 
-    public string IsoCode { get; private set; } = null!;
-    public string TsConfigName { get; private set; } = null!;
+    public string IsoCode { get; private set; }
+    public string TsConfigName { get; private set; }
 }
 
 internal sealed class Iso639TsVectorMapConfiguration : IEntityTypeConfiguration<Iso639TsVectorMap>

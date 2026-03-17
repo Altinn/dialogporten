@@ -23,7 +23,7 @@ param scale = {
       name: 'http-rule'
       http: {
         metadata: {
-          concurrentRequests: '10'
+          concurrentRequests: '100'
         }
       }
     }

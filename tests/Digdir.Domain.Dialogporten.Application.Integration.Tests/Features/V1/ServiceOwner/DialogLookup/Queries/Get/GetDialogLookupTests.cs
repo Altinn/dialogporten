@@ -1,13 +1,19 @@
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using AwesomeAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.DialogLookup.Queries.Get.GetDialogLookupQuery;
 using ServiceOwnerIdentifierLookupDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup.ServiceOwnerIdentifierLookupDto;
+using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.DialogLookup.Queries.Get;
 
@@ -67,6 +73,38 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
                 result.InstanceRef.Should().Be(appInstanceRef.ToLowerInvariant()));
+    }
+
+    [Fact]
+    public Task Get_By_DialogRef_Should_Fall_Back_To_CorrespondenceId_From_MainContentReference_When_Label_Is_Missing()
+    {
+        var correspondenceId = Guid.NewGuid();
+
+        return FlowBuilder.For(Application, services =>
+            {
+                services.RemoveAll<IResourceRegistry>();
+                services.AddScoped<IResourceRegistry, CorrespondenceLookupResourceRegistry>();
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddMainContentReference(content =>
+                {
+                    content.Value =
+                    [
+                        new LocalizationDto
+                        {
+                            LanguageCode = "nb",
+                            Value = $"https://altinn.no/correspondence/api/v1/correspondence/{correspondenceId}/content"
+                        }
+                    ];
+                });
+            })
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
+                result.InstanceRef.Should().Be($"urn:altinn:correspondence-id:{correspondenceId}".ToLowerInvariant()));
     }
 
     [Fact]
@@ -148,4 +186,13 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ValidationError>(result =>
                 result.Errors.Should().ContainSingle());
+}
+
+internal sealed class CorrespondenceLookupResourceRegistry(DialogDbContext db) : LocalDevelopmentResourceRegistry(db)
+{
+    public override Task<ServiceResourceInformation?> GetResourceInformation(
+        string serviceResourceId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<ServiceResourceInformation?>(
+            new ServiceResourceInformation(serviceResourceId, CorrespondenceService, "991825827", "ttd", [], [], false));
 }

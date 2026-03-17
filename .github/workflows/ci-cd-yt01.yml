@@ -12,7 +12,8 @@ concurrency:
 permissions:
   contents: read
   id-token: write
-  pull-requests: read
+  issues: write
+  pull-requests: write
 
 jobs:
   get-versions-from-github:
@@ -83,6 +84,16 @@ jobs:
       version: ${{ github.event.client_payload.version }}
       runMigration: false # DB may be off due to scale-to-zero, run migrations manually
       ref: "refs/tags/v${{ github.event.client_payload.version }}"
+
+  tag-issues-with-environment:
+    name: Tag deployed PRs and issues for yt01
+    needs: [ deploy-apps ]
+    if: ${{ always() && !failure() && !cancelled() && needs.deploy-apps.outputs.deployment_executed == 'true' }}
+    uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
+    with:
+      environment-label: yt01
+      version: ${{ github.event.client_payload.version }}
+
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
     needs: [deploy-apps]
@@ -174,7 +185,7 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [deploy-infra, deploy-apps, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests, run-performance-tests]
+    needs: [deploy-infra, deploy-apps, tag-issues-with-environment, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests, run-performance-tests]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:

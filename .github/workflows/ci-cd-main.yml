@@ -10,6 +10,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
   packages: write
   id-token: write
@@ -97,6 +98,16 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       runMigration: true
 
+  tag-issues-with-environment:
+    name: Tag deployed PRs and issues for test
+    needs: [ deploy-apps ]
+    if: ${{ always() && !failure() && !cancelled() && github.event_name == 'push' && needs.deploy-apps.outputs.deployment_executed == 'true' }}
+    uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
+    with:
+      environment-label: at23
+      from-sha: ${{ github.event.before }}
+      to-sha: ${{ github.sha }}
+
   generate-timestamp:
     name: Generate timestamp
     runs-on: ubuntu-latest
@@ -172,6 +183,7 @@ jobs:
     needs: [
       deploy-infra,
       deploy-apps,
+      tag-issues-with-environment,
       run-e2e-tests,
       run-graphql-e2e-tests,
       run-webapi-e2e-tests,

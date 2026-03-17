@@ -1,0 +1,136 @@
+name: Tag issues with environment
+
+on:
+  workflow_call:
+    inputs:
+      environment-label:
+        description: "Environment label to apply to pull requests and issues"
+        required: true
+        type: string
+      from-sha:
+        description: "Start of the commit range for push-based pull request discovery"
+        required: false
+        type: string
+      to-sha:
+        description: "End of the commit range for push-based pull request discovery"
+        required: false
+        type: string
+      version:
+        description: "Release version for release-based pull request discovery"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  tag-issues-with-environment:
+    name: Tag PRs and issues with ${{ inputs.environment-label }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      LABEL: ${{ inputs.environment-label }}
+      REPOSITORY: ${{ github.repository }}
+      FROM_SHA: ${{ inputs.from-sha }}
+      TO_SHA: ${{ inputs.to-sha }}
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Collect pull request numbers
+        id: collect-prs
+        run: |
+          set -euo pipefail
+
+          extract_pull_request_numbers() {
+            grep -oE '\(#[0-9]+\)|\[#([0-9]+)\]|/pull/[0-9]+' |
+              grep -oE '[0-9]+' |
+              sort -u |
+              paste -sd ',' - || true
+          }
+
+          if [[ -n "$VERSION" ]]; then
+            if [[ -n "$FROM_SHA" || -n "$TO_SHA" ]]; then
+              echo "::error::Provide either version or from-sha/to-sha, not both."
+              exit 1
+            fi
+
+            pr_numbers="$(
+              gh api "repos/${REPOSITORY}/releases/tags/v${VERSION}" --jq '.body // ""' | extract_pull_request_numbers
+            )"
+          else
+            if [[ -z "$FROM_SHA" || -z "$TO_SHA" ]]; then
+              echo "::error::Provide both from-sha and to-sha when version is not set."
+              exit 1
+            fi
+
+            pr_numbers="$(
+              gh api "repos/${REPOSITORY}/compare/${FROM_SHA}...${TO_SHA}" --jq '.commits[].commit.message | split("\n")[0]' | extract_pull_request_numbers
+            )"
+          fi
+
+          echo "pr_numbers=${pr_numbers}" >> "$GITHUB_OUTPUT"
+
+          if [[ -z "$pr_numbers" ]]; then
+            echo "No pull requests found for label ${LABEL}."
+          else
+            echo "Found pull requests: ${pr_numbers}"
+          fi
+
+      - name: Ensure label exists
+        if: ${{ steps.collect-prs.outputs.pr_numbers != '' }}
+        run: |
+          gh label create "$LABEL" \
+            --repo "$REPOSITORY" \
+            --color "1D76DB" \
+            --description "Deployed to ${LABEL}" \
+            >/dev/null 2>&1 || true
+
+      - name: Label pull requests and related issues
+        if: ${{ steps.collect-prs.outputs.pr_numbers != '' }}
+        env:
+          PR_NUMBERS: ${{ steps.collect-prs.outputs.pr_numbers }}
+        run: |
+          set -euo pipefail
+
+          extract_issue_numbers() {
+            local pull_request_number="$1"
+            local pull_request_body
+            pull_request_body="$(gh pr view "$pull_request_number" --repo "$REPOSITORY" --json body --jq '.body // ""')"
+
+            printf '%s\n' "$pull_request_body" |
+              awk '
+                /^## Related Issue\(s\)/ { in_section = 1; next }
+                /^## / && in_section { exit }
+                in_section { print }
+              ' |
+              grep -oE '#[0-9]+' |
+              tr -d '#' |
+              sort -u || true
+          }
+
+          IFS=',' read -r -a pull_request_numbers <<< "$PR_NUMBERS"
+
+          for pull_request_number in "${pull_request_numbers[@]}"; do
+            if [[ -z "$pull_request_number" ]]; then
+              continue
+            fi
+
+            gh api --method POST "repos/${REPOSITORY}/issues/${pull_request_number}/labels" -f "labels[]=${LABEL}" >/dev/null
+            echo "Labeled pull request #${pull_request_number} with ${LABEL}."
+
+            issue_numbers="$(extract_issue_numbers "$pull_request_number")"
+            if [[ -z "$issue_numbers" ]]; then
+              echo "No related issues found in pull request #${pull_request_number}."
+              continue
+            fi
+
+            while IFS= read -r issue_number; do
+              if [[ -z "$issue_number" ]]; then
+                continue
+              fi
+
+              gh api --method POST "repos/${REPOSITORY}/issues/${issue_number}/labels" -f "labels[]=${LABEL}" >/dev/null
+              echo "Labeled issue #${issue_number} with ${LABEL}."
+            done <<< "$issue_numbers"
+          done

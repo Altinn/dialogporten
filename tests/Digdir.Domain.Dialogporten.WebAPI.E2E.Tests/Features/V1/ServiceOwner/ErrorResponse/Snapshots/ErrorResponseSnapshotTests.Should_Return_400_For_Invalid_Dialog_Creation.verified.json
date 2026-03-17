@@ -1,0 +1,36 @@
+﻿{
+  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "instance": "/api/v1/serviceowner/dialogs",
+  "errors": {
+    "dto.serviceResource": [
+      "\u0027ServiceResource\u0027 must start with \u0027urn:altinn:resource:\u0027."
+    ],
+    "dto.party": [
+      "\u0027Party\u0027 must be on format \u0027urn:altinn:organization:identifier-no:{norwegian org-nr}\u0027, \u0027urn:altinn:person:identifier-no:{norwegian f-nr/d-nr}\u0027, \u0027urn:altinn:person:legacy-selfidentified:{username}\u0027 or \u0027urn:altinn:person:idporten-email:{e-mail}\u0027 with valid values, respectively."
+    ],
+    "dto.progress": [
+      "\u0027Progress\u0027 must be between 0 and 100. You entered 101."
+    ],
+    "dto.attachments[0].displayName[0].languageCode": [
+      "\u0027LanguageCode\u0027 \u0027no\u0027 is not a valid language code. Use \u0027nb\u0027 or \u0027nn\u0027 for Norwegian. Culture specific codes like \u0027en_GB\u0027 and \u0027en-US\u0027 are normalized to \u0027en\u0027 (ISO 639)."
+    ],
+    "dto.attachments[0].displayName[1].value": [
+      "\u0027Value\u0027 must not be empty."
+    ],
+    "dto.attachments[0].name": [
+      "The length of \u0027Name\u0027 must be 255 characters or fewer. You entered 256 characters."
+    ],
+    "dto.attachments[0].urls": [
+      "\u0027Urls\u0027 must not be empty."
+    ],
+    "dto.content": [
+      "Title must not be empty."
+    ],
+    "dto.process": [
+      "The length of \u0027Process\u0027 must be 1023 characters or fewer. You entered 1024 characters."
+    ]
+  },
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+}

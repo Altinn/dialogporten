@@ -706,7 +706,7 @@ public sealed class DialogAttachmentUrlDto
     /// application/pdf
     /// application/zip
     /// </example>
-    public string? MediaType { get; set; } = null!;
+    public string? MediaType { get; set; }
 
     /// <summary>
     /// What type of consumer the URL is intended for.
@@ -767,7 +767,7 @@ public sealed class DialogTransmissionAttachmentUrlDto
     /// application/pdf
     /// application/zip
     /// </example>
-    public string? MediaType { get; set; } = null!;
+    public string? MediaType { get; set; }
 
     /// <summary>
     /// The type of consumer the URL is intended for.

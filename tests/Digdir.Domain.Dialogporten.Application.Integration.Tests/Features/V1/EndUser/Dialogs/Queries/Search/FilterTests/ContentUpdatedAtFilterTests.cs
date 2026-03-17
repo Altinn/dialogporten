@@ -16,7 +16,7 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
     [Fact]
     public async Task Can_Filter_Search_On_Content_Updated_At_Before()
     {
-        DateTimeOffset? contentUpdatedAt = null!;
+        DateTimeOffset? contentUpdatedAt = null;
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.Party = Party)
@@ -36,7 +36,7 @@ public class ContentUpdatedAtFilterTests : ApplicationCollectionFixture
     [Fact]
     public async Task Can_Filter_Search_On_Content_Updated_At_After()
     {
-        DateTimeOffset? contentUpdatedAt = null!;
+        DateTimeOffset? contentUpdatedAt = null;
 
         await FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.Party = Party)

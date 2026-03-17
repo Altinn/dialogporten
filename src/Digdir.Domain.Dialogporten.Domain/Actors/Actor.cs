@@ -13,5 +13,5 @@ public abstract class Actor : IEntity
     public ActorType ActorType { get; set; } = null!;
 
     public Guid? ActorNameEntityId { get; set; }
-    public ActorName? ActorNameEntity { get; set; } = null!;
+    public ActorName? ActorNameEntity { get; set; }
 }

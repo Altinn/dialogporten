@@ -55,7 +55,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Content.MainContentReference!.Should().BeEquivalentTo(
+                x.Content.MainContentReference.Should().BeEquivalentTo(
                     new ContentValueDto
                     {
                         MediaType = MediaTypes.EmbeddableMarkdown,

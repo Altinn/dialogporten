@@ -14,7 +14,7 @@ internal sealed class UpdateTransmissionTransmissionAttachmentUrlDtoValidator : 
             .MaximumLength(Constants.DefaultMaxUriLength);
 
         RuleFor(x => x.MediaType)
-            .MaximumLength(Constants.DefaultMediaTypeMaxLength);
+            .MaximumLength(Constants.DefaultMaxStringLength);
 
         RuleFor(x => x.ConsumerType)
             .IsInEnum();

@@ -187,7 +187,7 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                 .AddNavigationalAction()
                 .AddAttachment())
             .Do((_, ctx) => ctx.Application.PurgeEvents())
-            .UpdateTransmission(successScenario.First)
+            .UpdateTransmission(successScenario.ModifyUpdateCommand)
             .AssertResult<UpdateTransmissionSuccess>()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
@@ -197,7 +197,7 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                     .Which.Metadata[Domain.Common.Constants.IsSilentUpdate]
                     .Should().Be(bool.TrueString);
 
-                successScenario.Second(dialog.Transmissions.Single());
+                successScenario.Assert(dialog.Transmissions.Single());
             });
 
     private sealed class UpdateTransmissionBasicFieldTestData : TheoryData<UpdateTransmissionSuccessScenario>
@@ -206,168 +206,171 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
         {
             const string updatedIdempotentKey = "updated-idempotent-key";
             Add(new UpdateTransmissionSuccessScenario(
-                "Idempotent key",
-                (command, _) => command.Dto.IdempotentKey = updatedIdempotentKey,
-                transmission => transmission.IdempotentKey.Should().Be(updatedIdempotentKey)));
+                Name: "Idempotent key",
+                ModifyUpdateCommand: (command, _) => command.Dto.IdempotentKey = updatedIdempotentKey,
+                Assert: transmission => transmission.IdempotentKey.Should().Be(updatedIdempotentKey)));
 
             const string updatedAuthorizationAttribute = "urn:altinn:subresource:updated-auth";
             Add(new UpdateTransmissionSuccessScenario(
-                "Authorization attribute",
-                (command, _) => command.Dto.AuthorizationAttribute = updatedAuthorizationAttribute,
-                transmission => transmission.AuthorizationAttribute.Should().Be(updatedAuthorizationAttribute)));
+                Name: "Authorization attribute",
+                ModifyUpdateCommand: (command, _) => command.Dto.AuthorizationAttribute = updatedAuthorizationAttribute,
+                Assert: transmission => transmission.AuthorizationAttribute.Should().Be(updatedAuthorizationAttribute)));
 
             var updatedExtendedType = new Uri("urn:dialogporten:test:updated-type");
             Add(new UpdateTransmissionSuccessScenario(
-                "Extended type",
-                (command, _) => command.Dto.ExtendedType = updatedExtendedType,
-                transmission => transmission.ExtendedType.Should().Be(updatedExtendedType)));
+                Name: "Extended type",
+                ModifyUpdateCommand: (command, _) => command.Dto.ExtendedType = updatedExtendedType,
+                Assert: transmission => transmission.ExtendedType.Should().Be(updatedExtendedType)));
 
             const string updatedExternalReference = "updated-external-reference";
             Add(new UpdateTransmissionSuccessScenario(
-                "External reference",
-                (command, _) => command.Dto.ExternalReference = updatedExternalReference,
-                transmission => transmission.ExternalReference.Should().Be(updatedExternalReference)));
+                Name: "External reference",
+                ModifyUpdateCommand: (command, _) => command.Dto.ExternalReference = updatedExternalReference,
+                Assert: transmission => transmission.ExternalReference.Should().Be(updatedExternalReference)));
 
             const DialogTransmissionType.Values updatedType = DialogTransmissionType.Values.Acceptance;
             Add(new UpdateTransmissionSuccessScenario(
-                "Type",
-                (command, _) => command.Dto.Type = updatedType,
-                transmission => transmission.Type.Should().Be(updatedType)));
+                Name: "Type",
+                ModifyUpdateCommand: (command, _) => command.Dto.Type = updatedType,
+                Assert: transmission => transmission.Type.Should().Be(updatedType)));
 
             const string updatedActorName = "vasher";
             Add(new UpdateTransmissionSuccessScenario(
-                "Sender actor name",
-                (command, _) => command.Dto.Sender = new() { ActorType = ActorType.Values.PartyRepresentative, ActorName = updatedActorName },
-                transmission => transmission.Sender.ActorName.Should().Be(updatedActorName)));
+                Name: "Sender actor name",
+                ModifyUpdateCommand: (command, _) => command.Dto.Sender = new() { ActorType = ActorType.Values.PartyRepresentative, ActorName = updatedActorName },
+                Assert: transmission => transmission.Sender.ActorName.Should().Be(updatedActorName)));
 
             const string updatedContentText = "updated-content-text";
             Add(new UpdateTransmissionSuccessScenario(
-                "Content title",
-                (command, _) =>
+                Name: "Content title",
+                ModifyUpdateCommand: (command, _) =>
                     command.Dto.Content?.Title.Value[0] = new() { Value = updatedContentText, LanguageCode = "nn" },
-                transmission => transmission.Content.Title.Value.Should().ContainSingle()
+                Assert: transmission => transmission.Content.Title.Value.Should().ContainSingle()
                     .Which.Value.Should().Be(updatedContentText)));
 
             Add(new UpdateTransmissionSuccessScenario(
-                "Content summary",
-                (command, _) =>
+                Name: "Content summary",
+                ModifyUpdateCommand: (command, _) =>
                     command.Dto.Content?.Summary = new() { Value = [new() { Value = updatedContentText, LanguageCode = "nn" }] },
-                transmission => transmission.Content.Summary!.Value.Should().ContainSingle()
+                Assert: transmission => transmission.Content.Summary!.Value.Should().ContainSingle()
                     .Which.Value.Should().Be(updatedContentText)));
 
             const string updatedContentReference = "https://digdir.no/updated-content-reference";
             Add(new UpdateTransmissionSuccessScenario(
-                "Content reference",
-                (command, _) =>
+                Name: "Content reference",
+                ModifyUpdateCommand: (command, _) =>
                     command.Dto.Content?.ContentReference = new()
                     {
                         MediaType = MediaTypes.EmbeddableMarkdown,
                         Value = [new() { Value = updatedContentReference, LanguageCode = "nn" }]
                     },
-                transmission => transmission.Content.ContentReference!.Value.Should().ContainSingle()
+                Assert: transmission => transmission.Content.ContentReference!.Value.Should().ContainSingle()
                     .Which.Value.Should().Be(updatedContentReference)));
 
             var newCreatedAtDate = DateTimeOffset.UtcNow.AddDays(-10);
             Add(new UpdateTransmissionSuccessScenario(
-                "Created at",
-                (command, _) => command.Dto.CreatedAt = newCreatedAtDate,
-                transmission => transmission.CreatedAt.Should()
+                Name: "Created at",
+                ModifyUpdateCommand: (command, _) => command.Dto.CreatedAt = newCreatedAtDate,
+                Assert: transmission => transmission.CreatedAt.Should()
                     .BeCloseToWithinMicrosecond(newCreatedAtDate)));
 
             var updatedAttachmentId = NewUuidV7();
             Add(new UpdateTransmissionSuccessScenario(
-                "Attachment id",
-                (command, _) => command.Dto.Attachments[0].Id = updatedAttachmentId,
-                transmission => transmission.Attachments.Should().ContainSingle()
+                Name: "Attachment id",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Id = updatedAttachmentId,
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Id.Should().Be(updatedAttachmentId)));
 
             const string updatedAttachmentName = "updated-attachment-name";
             Add(new UpdateTransmissionSuccessScenario(
-                "Attachment name",
-                (command, _) => command.Dto.Attachments[0].Name = updatedAttachmentName,
-                transmission => transmission.Attachments.Should().ContainSingle()
+                Name: "Attachment name",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Name = updatedAttachmentName,
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Name.Should().Be(updatedAttachmentName)));
 
             const string updatedAttachmentDisplayName = "updated-attachment-name";
             Add(new UpdateTransmissionSuccessScenario(
-                "Attachment display name",
-                (command, _) => command.Dto.Attachments[0].DisplayName =
+                Name: "Attachment display name",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].DisplayName =
                     [new() { LanguageCode = "nn", Value = updatedAttachmentDisplayName }],
-                transmission => transmission.Attachments.Should().ContainSingle()
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.DisplayName.Should().ContainSingle()
                     .Which.Value.Should().Be(updatedAttachmentDisplayName)));
 
             var updatedAttachmentUrl = new Uri("https://digdir.no/updated-attachment.pdf");
             Add(new UpdateTransmissionSuccessScenario(
-                "Attachment url",
-                (command, _) => command.Dto.Attachments[0].Urls[0].Url = updatedAttachmentUrl,
-                transmission => transmission.Attachments.Should().ContainSingle()
+                Name: "Attachment url",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls[0].Url = updatedAttachmentUrl,
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Urls.Should().ContainSingle()
                     .Which.Url.Should().Be(updatedAttachmentUrl)));
 
             const string updatedAttachmentMediaType = "application/zip";
             Add(new UpdateTransmissionSuccessScenario(
-                "Attachment media type",
-                (command, _) => command.Dto.Attachments[0].Urls[0].MediaType = updatedAttachmentMediaType,
-                transmission => transmission.Attachments.Should().ContainSingle()
+                Name: "Attachment media type",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls[0].MediaType = updatedAttachmentMediaType,
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Urls.Should().ContainSingle()
                     .Which.MediaType.Should().Be(updatedAttachmentMediaType)));
 
             const AttachmentUrlConsumerType.Values updatedAttachmentConsumerType = AttachmentUrlConsumerType.Values.Api;
             Add(new UpdateTransmissionSuccessScenario(
-                "Attachment consumer type",
-                (command, _) => command.Dto.Attachments[0].Urls[0].ConsumerType = updatedAttachmentConsumerType,
-                transmission => transmission.Attachments.Should().ContainSingle()
+                Name: "Attachment consumer type",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls[0].ConsumerType = updatedAttachmentConsumerType,
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.Urls.Should().ContainSingle()
                     .Which.ConsumerType.Should().Be(updatedAttachmentConsumerType)));
 
             var updatedAttachmentExpiresAt = DateTimeOffset.UtcNow.AddDays(7);
             Add(new UpdateTransmissionSuccessScenario(
-                "Attachment expires at",
-                (command, _) => command.Dto.Attachments[0].ExpiresAt = updatedAttachmentExpiresAt,
-                transmission => transmission.Attachments.Should().ContainSingle()
+                Name: "Attachment expires at",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].ExpiresAt = updatedAttachmentExpiresAt,
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.ExpiresAt.Should()
                     .BeCloseToWithinMicrosecond(updatedAttachmentExpiresAt)));
 
             const string updatedNavigationalActionTitle = "updated-navigation-title";
             Add(new UpdateTransmissionSuccessScenario(
-                "Navigational action title",
-                (command, _) => command.Dto.NavigationalActions[0].Title =
+                Name: "Navigational action title",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].Title =
                     [new() { LanguageCode = "nn", Value = updatedNavigationalActionTitle }],
-                transmission => transmission.NavigationalActions.Should().ContainSingle()
+                Assert: transmission => transmission.NavigationalActions.Should().ContainSingle()
                     .Which.Title.Should().ContainSingle()
                     .Which.Value.Should().Be(updatedNavigationalActionTitle)));
 
             var updatedNavigationalActionUrl = new Uri("https://digdir.no/updated-navigation");
             Add(new UpdateTransmissionSuccessScenario(
-                "Navigational action url",
-                (command, _) => command.Dto.NavigationalActions[0].Url = updatedNavigationalActionUrl,
-                transmission => transmission.NavigationalActions.Should().ContainSingle()
+                Name: "Navigational action url",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].Url = updatedNavigationalActionUrl,
+                Assert: transmission => transmission.NavigationalActions.Should().ContainSingle()
                     .Which.Url.Should().Be(updatedNavigationalActionUrl)));
 
             var updatedNavigationalActionExpiresAt = DateTimeOffset.UtcNow.AddDays(14);
             Add(new UpdateTransmissionSuccessScenario(
-                "Navigational action expires at",
-                (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = updatedNavigationalActionExpiresAt,
-                transmission => transmission.NavigationalActions.Should().ContainSingle()
+                Name: "Navigational action expires at",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = updatedNavigationalActionExpiresAt,
+                Assert: transmission => transmission.NavigationalActions.Should().ContainSingle()
                     .Which.ExpiresAt.Should()
                     .BeCloseToWithinMicrosecond(updatedNavigationalActionExpiresAt)));
 
             Add(new UpdateTransmissionSuccessScenario(
-                "Clear attachments",
-                (command, _) => command.Dto.Attachments = [],
-                transmission => transmission.Attachments.Should().BeEmpty()));
+                Name: "Clear attachments",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments = [],
+                Assert: transmission => transmission.Attachments.Should().BeEmpty()));
 
             Add(new UpdateTransmissionSuccessScenario(
-                "Clear navigational actions",
-                (command, _) => command.Dto.NavigationalActions = [],
-                transmission => transmission.NavigationalActions.Should().BeEmpty()));
+                Name: "Clear navigational actions",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions = [],
+                Assert: transmission => transmission.NavigationalActions.Should().BeEmpty()));
         }
     }
 }
 
 
-public record UpdateTransmissionSuccessScenario(string Name, Action<UpdateTransmissionCommand, FlowContext> First, Action<DialogTransmissionDto> Second)
+public record UpdateTransmissionSuccessScenario(
+    string Name,
+    Action<UpdateTransmissionCommand, FlowContext> ModifyUpdateCommand,
+    Action<DialogTransmissionDto> Assert)
 {
     public override string ToString() => Name;
 }

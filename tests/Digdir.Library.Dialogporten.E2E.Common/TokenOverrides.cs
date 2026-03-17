@@ -11,9 +11,16 @@ public sealed record ServiceOwnerTokenOverrides(
     string? Scopes = null,
     string? TokenOverride = null);
 
+public sealed record SystemUserTokenOverrides(
+    string? SystemUserId = null,
+    string? SystemUserOrg = null,
+    string? Scopes = null,
+    string? TokenOverride = null);
+
 public sealed record TokenOverrides(
     EndUserTokenOverrides? EndUser = null,
-    ServiceOwnerTokenOverrides? ServiceOwner = null);
+    ServiceOwnerTokenOverrides? ServiceOwner = null,
+    SystemUserTokenOverrides? SystemUser = null);
 
 public interface ITokenOverridesAccessor
 {

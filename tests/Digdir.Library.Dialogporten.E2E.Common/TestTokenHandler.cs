@@ -10,7 +10,8 @@ namespace Digdir.Library.Dialogporten.E2E.Common;
 public enum TokenKind
 {
     EndUser,
-    ServiceOwner
+    ServiceOwner,
+    SystemUser
 }
 
 public sealed class TestTokenHandler : DelegatingHandler
@@ -59,6 +60,7 @@ public sealed class TestTokenHandler : DelegatingHandler
         {
             TokenKind.EndUser => overrides?.EndUser?.TokenOverride,
             TokenKind.ServiceOwner => overrides?.ServiceOwner?.TokenOverride,
+            TokenKind.SystemUser => overrides?.SystemUser?.TokenOverride,
             _ => null
         };
 
@@ -72,6 +74,7 @@ public sealed class TestTokenHandler : DelegatingHandler
         {
             TokenKind.EndUser => BuildEndUserRequestPath(overrides?.EndUser, tokenEnvironment),
             TokenKind.ServiceOwner => BuildServiceOwnerRequestPath(overrides?.ServiceOwner, tokenEnvironment),
+            TokenKind.SystemUser => BuildSystemUserRequestPath(overrides?.SystemUser, tokenEnvironment),
             _ => throw new InvalidOperationException($"Unsupported token kind: {_kind}")
         };
 
@@ -122,6 +125,22 @@ public sealed class TestTokenHandler : DelegatingHandler
             $"&org={Uri.EscapeDataString(orgName)}" +
             $"&orgNo={Uri.EscapeDataString(orgNumber)}" +
             $"&ttl={DefaultTokenTtl}";
+    }
+
+    private static string BuildSystemUserRequestPath(
+        SystemUserTokenOverrides? overrides,
+        string tokenEnvironment)
+    {
+        var scopes = overrides?.Scopes ?? SystemUserScopes;
+        var systemUserId = overrides?.SystemUserId ?? DefaultSystemUserId;
+        var systemUserOrg = overrides?.SystemUserOrg ?? DefaultSystemUserOrgNo;
+
+        return
+            "/GetSystemUserToken" +
+            $"?env={tokenEnvironment}" +
+            $"&scopes={Uri.EscapeDataString(scopes)}" +
+            $"&systemUserId={Uri.EscapeDataString(systemUserId)}" +
+            $"&systemUserOrg={Uri.EscapeDataString(systemUserOrg)}";
     }
 
     private static string GetDefaultServiceOwnerOrgNumber(string tokenEnvironment) =>

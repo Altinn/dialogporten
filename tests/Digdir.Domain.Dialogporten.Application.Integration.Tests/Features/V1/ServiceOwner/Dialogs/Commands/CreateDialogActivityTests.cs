@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -227,6 +228,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     [Fact]
     public Task Can_Not_Create_Activity_On_Unknown_TransmissionId()
     {
+        var transmissionId = Guid.Parse("019c27dc-76d0-7269-a8e1-b30fc5a53aec");
         return FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .CreateActivity(
@@ -236,7 +238,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
                     ExtendedType = null,
                     Type = DialogActivityType.Values.TransmissionOpened,
-                    TransmissionId = Guid.Parse("019c27dc-76d0-7269-a8e1-b30fc5a53aec"),
+                    TransmissionId = transmissionId,
                     PerformedBy = new ActorDto
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
@@ -246,7 +248,79 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     Description = []
                 }
             )
-            .ExecuteAndAssert<DomainError>();
+            .ExecuteAndAssert<DomainError>(x =>
+            {
+                x.ShouldHaveErrorWithPropertyNameText(nameof(CreateActivityDto.TransmissionId));
+                x.ShouldHaveErrorWithText("does not exist");
+                x.ShouldHaveErrorWithText(transmissionId.ToString());
+            });
+    }
+
+    [Fact]
+    public Task Can_Not_Create_Activity_On_TransmissionId_Belonging_To_Another_Dialog()
+    {
+        var transmissionId = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
+        return FlowBuilder.For(Application)
+            .CreateComplexDialog((x, _) => x.Dto.Transmissions =
+            [
+                new TransmissionDto
+                {
+                    Id = transmissionId,
+                    CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                    AuthorizationAttribute = null,
+                    ExtendedType = null,
+                    ExternalReference = null,
+                    RelatedTransmissionId = null,
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorName = null,
+                        ActorId = "urn:altinn:person:legacy-selfidentified:Per"
+                    },
+                    Content = new TransmissionContentDto
+                    {
+                        Title = new ContentValueDto
+                        {
+                            Value =
+                            [
+                                new LocalizationDto
+                                {
+                                    Value = "title",
+                                    LanguageCode = "nb"
+                                }
+                            ],
+                            MediaType = MediaTypes.PlainText
+                        },
+                        Summary = null,
+                        ContentReference = null
+                    }
+                }
+            ])
+            .CreateSimpleDialog()
+            .CreateActivity(
+                (c, _) => c.Activity = new CreateActivityDto
+                {
+                    Id = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
+                    CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                    ExtendedType = null,
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorName = null,
+                        ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                    },
+                    Description = []
+                }
+            )
+            .ExecuteAndAssert<DomainError>(x =>
+            {
+                x.ShouldHaveErrorWithPropertyNameText(nameof(CreateActivityDto.TransmissionId));
+                x.ShouldHaveErrorWithText("does not exist");
+                x.ShouldHaveErrorWithText(transmissionId.ToString());
+            });
     }
 
     [Fact]
@@ -311,6 +385,35 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 }
             )
             .ExecuteAndAssert<CreateActivitySuccess>();
+    }
+
+    [Fact]
+    public Task Create_Activity_Updates_HasUnopenedContent_When_Last_Transmission_Is_Opened()
+    {
+        var transmissionId = Guid.CreateVersion7();
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddTransmission(transmissionDto =>
+            {
+                transmissionDto.Id = transmissionId;
+                transmissionDto.Type = DialogTransmissionType.Values.Information;
+            }))
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
+            {
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                Type = DialogActivityType.Values.TransmissionOpened,
+                TransmissionId = transmissionId,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.ServiceOwner
+                },
+                Description = []
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.HasUnopenedContent.Should().BeFalse();
+                x.Transmissions.First().IsOpened.Should().BeTrue();
+            });
     }
 
     [Theory, ClassData(typeof(CreateInvalidActivityTestData))]

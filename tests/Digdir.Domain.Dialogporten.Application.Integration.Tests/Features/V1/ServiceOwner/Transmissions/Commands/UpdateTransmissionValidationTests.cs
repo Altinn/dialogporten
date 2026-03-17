@@ -30,8 +30,8 @@ public class UpdateTransmissionValidationTests(DialogApplication application) : 
             .CreateTransmission((x, _) => x
                 .AddNavigationalAction()
                 .AddAttachment())
-            .UpdateTransmission(scenario.First)
-            .ExecuteAndAssert(scenario.Second);
+            .UpdateTransmission(scenario.ModifyUpdateCommand)
+            .ExecuteAndAssert(scenario.Assert);
 
     private sealed class UpdateTransmissionValidationTestData : TheoryData<UpdateTransmissionValidationErrorScenario>
     {
@@ -40,66 +40,66 @@ public class UpdateTransmissionValidationTests(DialogApplication application) : 
         public UpdateTransmissionValidationTestData()
         {
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Cannot create Url exceeding max length",
-                (command, _) => command.Dto.Attachments.First().Urls.First().Url = new Uri($"https://www.altinn.no/{new string('a', Domain.Common.Constants.DefaultMaxUriLength)}"),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.Url))));
+                Name: "Cannot create Url exceeding max length",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments.First().Urls.First().Url = new Uri($"https://www.altinn.no/{new string('a', Domain.Common.Constants.DefaultMaxUriLength)}"),
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.Url))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Cannot create unsecure link",
-                (command, _) => command.Dto.Attachments.First().Urls.First().Url = new Uri("http://www.altinn.no"),
-                (error, _) => error.ShouldHaveErrorWithText("HTTPS")));
+                Name: "Cannot create unsecure link",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments.First().Urls.First().Url = new Uri("http://www.altinn.no"),
+                Assert: (error, _) => error.ShouldHaveErrorWithText("HTTPS")));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Silent update false",
-                (command, _) => command.IsSilentUpdate = false,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.IsSilentUpdate))));
+                Name: "Silent update false",
+                ModifyUpdateCommand: (command, _) => command.IsSilentUpdate = false,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.IsSilentUpdate))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Empty dialog id",
-                (command, _) => command.DialogId = Guid.Empty,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.DialogId))));
+                Name: "Empty dialog id",
+                ModifyUpdateCommand: (command, _) => command.DialogId = Guid.Empty,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.DialogId))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Empty transmission id",
-                (command, _) => command.TransmissionId = Guid.Empty,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.TransmissionId))));
+                Name: "Empty transmission id",
+                ModifyUpdateCommand: (command, _) => command.TransmissionId = Guid.Empty,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.TransmissionId))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Missing dto",
-                (command, _) => command.Dto = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.Dto))));
+                Name: "Missing dto",
+                ModifyUpdateCommand: (command, _) => command.Dto = null!,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionCommand.Dto))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Idempotent key too short",
-                (command, _) => command.Dto.IdempotentKey =
+                Name: "Idempotent key too short",
+                ModifyUpdateCommand: (command, _) => command.Dto.IdempotentKey =
                     new string('a', Domain.Common.Constants.MinIdempotentKeyLength - 1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.IdempotentKey))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.IdempotentKey))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Idempotent key too long",
-                (command, _) => command.Dto.IdempotentKey =
+                Name: "Idempotent key too long",
+                ModifyUpdateCommand: (command, _) => command.Dto.IdempotentKey =
                     new string('a', Domain.Common.Constants.MaxIdempotentKeyLength + 1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.IdempotentKey))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.IdempotentKey))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "External reference too long",
-                (command, _) => command.Dto.ExternalReference =
+                Name: "External reference too long",
+                ModifyUpdateCommand: (command, _) => command.Dto.ExternalReference =
                     new string('a', Domain.Common.Constants.DefaultMaxStringLength + 1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.ExternalReference))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.ExternalReference))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Missing sender",
-                (command, _) => command.Dto.Sender = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.Sender))));
+                Name: "Missing sender",
+                ModifyUpdateCommand: (command, _) => command.Dto.Sender = null!,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.Sender))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Invalid authorization attribute",
-                (command, _) => command.Dto.AuthorizationAttribute = "invalid authorization attribute",
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.AuthorizationAttribute))));
+                Name: "Invalid authorization attribute",
+                ModifyUpdateCommand: (command, _) => command.Dto.AuthorizationAttribute = "invalid authorization attribute",
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.AuthorizationAttribute))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Duplicate attachment id",
-                (command, ctx) =>
+                Name: "Duplicate attachment id",
+                ModifyUpdateCommand: (command, ctx) =>
                 {
                     var existingAttachment = command.Dto.Attachments.Single();
                     ctx.Bag[DuplicateAttachmentIdKey] = existingAttachment.Id;
@@ -111,145 +111,148 @@ public class UpdateTransmissionValidationTests(DialogApplication application) : 
                         ExpiresAt = existingAttachment.ExpiresAt
                     });
                 },
-                (error, ctx) => error.ShouldHaveErrorWithText(ctx.GetGuidByKey(DuplicateAttachmentIdKey).ToString())));
+                Assert: (error, ctx) => error.ShouldHaveErrorWithText(ctx.GetGuidByKey(DuplicateAttachmentIdKey).ToString())));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Missing content",
-                (command, _) => command.Dto.Content = null,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.Content))));
+                Name: "Missing content",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content = null,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(UpdateTransmissionDto.Content))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Attachment without urls",
-                (command, _) => command.Dto.Attachments[0].Urls = [],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Urls))));
+                Name: "Attachment without urls",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls = [],
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Urls))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Attachment id not UUIDv7",
-                (command, _) => command.Dto.Attachments[0].Id = Guid.NewGuid(),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Id))));
+                Name: "Attachment id not UUIDv7",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Id = Guid.NewGuid(),
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Id))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Attachment id from future",
-                (command, _) => command.Dto.Attachments[0].Id = NewUuidV7(DateTimeOffset.UtcNow.AddHours(1)),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Id))));
+                Name: "Attachment id from future",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Id = NewUuidV7(DateTimeOffset.UtcNow.AddHours(1)),
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Id))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Empty attachment display name",
-                (command, _) => command.Dto.Attachments[0].DisplayName =
+                Name: "Empty attachment display name",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].DisplayName =
                     [new() { LanguageCode = "nb", Value = string.Empty }],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(LocalizationDto.Value))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(LocalizationDto.Value))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Missing attachment url",
-                (command, _) => command.Dto.Attachments[0].Urls[0].Url = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.Url))));
+                Name: "Missing attachment url",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls[0].Url = null!,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.Url))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Attachment media type too long",
-                (command, _) => command.Dto.Attachments[0].Urls[0].MediaType = new string('a', 257),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.MediaType))));
+                Name: "Attachment media type too long",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls[0].MediaType = new string('a', 257),
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.MediaType))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Invalid attachment consumer type",
-                (command, _) => command.Dto.Attachments[0].Urls[0].ConsumerType = (AttachmentUrlConsumerType.Values)999,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.ConsumerType))));
+                Name: "Invalid attachment consumer type",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls[0].ConsumerType = (AttachmentUrlConsumerType.Values)999,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentUrlDto.ConsumerType))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Missing navigational action title",
-                (command, _) => command.Dto.NavigationalActions[0].Title = [],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Title))));
+                Name: "Missing navigational action title",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].Title = [],
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Title))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Missing navigational action url",
-                (command, _) => command.Dto.NavigationalActions[0].Url = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Url))));
+                Name: "Missing navigational action url",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].Url = null!,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Url))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Navigational action url not https",
-                (command, _) => command.Dto.NavigationalActions[0].Url = new Uri("http://digdir.no/action"),
-                (error, _) => error.ShouldHaveErrorWithText("https")));
+                Name: "Navigational action url not https",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].Url = new Uri("http://digdir.no/action"),
+                Assert: (error, _) => error.ShouldHaveErrorWithText("https")));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Navigational action url too long",
-                (command, _) => command.Dto.NavigationalActions[0].Url =
+                Name: "Navigational action url too long",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].Url =
                     new Uri($"https://digdir.no/{new string('a', Domain.Common.Constants.DefaultMaxUriLength)}"),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Url))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.Url))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Navigational action expired",
-                (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.ExpiresAt))));
+                Name: "Navigational action expired",
+                ModifyUpdateCommand: (command, _) => command.Dto.NavigationalActions[0].ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1),
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionNavigationalActionDto.ExpiresAt))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Missing content title",
-                (command, _) => command.Dto.Content!.Title = null!,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.Title))));
+                Name: "Missing content title",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.Title = null!,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.Title))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Content title media type invalid",
-                (command, _) => command.Dto.Content!.Title.MediaType = MediaTypes.EmbeddableMarkdown,
-                (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.MediaType))));
+                Name: "Content title media type invalid",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.Title.MediaType = MediaTypes.EmbeddableMarkdown,
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.MediaType))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Empty content title value",
-                (command, _) => command.Dto.Content!.Title.Value =
+                Name: "Empty content title value",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.Title.Value =
                     [new() { LanguageCode = "nb", Value = string.Empty }],
-                (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.Value))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.Value))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Summary media type invalid",
-                (command, _) => command.Dto.Content!.Summary = new()
+                Name: "Summary media type invalid",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.Summary = new()
                 {
                     MediaType = "application/json",
                     Value = [new() { LanguageCode = "nb", Value = "summary" }]
                 },
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.Summary))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.Summary))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Summary value empty",
-                (command, _) => command.Dto.Content!.Summary = new()
+                Name: "Summary value empty",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.Summary = new()
                 {
                     MediaType = MediaTypes.PlainText,
                     Value = []
                 },
-                (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.Value))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(ContentValueDto.Value))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Content reference media type invalid",
-                (command, _) => command.Dto.Content!.ContentReference = new()
+                Name: "Content reference media type invalid",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.ContentReference = new()
                 {
                     MediaType = MediaTypes.PlainText,
                     Value = [new() { LanguageCode = "nb", Value = "https://digdir.no/content" }]
                 },
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.ContentReference))));
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionContentDto.ContentReference))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Content reference not url",
-                (command, _) => command.Dto.Content!.ContentReference = new()
+                Name: "Content reference not url",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.ContentReference = new()
                 {
                     MediaType = MediaTypes.EmbeddableMarkdown,
                     Value = [new() { LanguageCode = "nb", Value = "not-an-url" }]
                 },
-                (error, _) => error.ShouldHaveErrorWithText("https")));
+                Assert: (error, _) => error.ShouldHaveErrorWithText("https")));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Name cannot be too long",
-                (command, _) => command.Dto.Attachments.First().Name = new string('a', Domain.Common.Constants.DefaultMaxUriLength + 10),
-                (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Name))));
+                Name: "Name cannot be too long",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments.First().Name = new string('a', Domain.Common.Constants.DefaultMaxUriLength + 10),
+                Assert: (error, _) => error.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Name))));
 
             Add(new UpdateTransmissionValidationErrorScenario(
-                "Content reference not https",
-                (command, _) => command.Dto.Content!.ContentReference = new()
+                Name: "Content reference not https",
+                ModifyUpdateCommand: (command, _) => command.Dto.Content!.ContentReference = new()
                 {
                     MediaType = MediaTypes.EmbeddableMarkdown,
                     Value = [new() { LanguageCode = "nb", Value = "http://digdir.no/not-https" }]
                 },
-                (error, _) => error.ShouldHaveErrorWithText("https")));
+                Assert: (error, _) => error.ShouldHaveErrorWithText("https")));
         }
     }
 }
 
-public record UpdateTransmissionValidationErrorScenario(string Name, Action<UpdateTransmissionCommand, FlowContext> First, Action<ValidationError, FlowContext> Second)
+public record UpdateTransmissionValidationErrorScenario(
+    string Name,
+    Action<UpdateTransmissionCommand, FlowContext> ModifyUpdateCommand,
+    Action<ValidationError, FlowContext> Assert)
 {
     public override string ToString() => Name;
 }

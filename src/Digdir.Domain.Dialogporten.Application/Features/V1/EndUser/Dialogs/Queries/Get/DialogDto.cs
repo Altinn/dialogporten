@@ -125,7 +125,7 @@ public sealed class DialogDto
 
     /// <summary>
     /// System defined label used to categorize dialogs.
-    /// This is obsolete and will only show; <see cref="SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Bin"/> or <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Archive"/>.
     /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
     /// </summary>
     [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
@@ -358,6 +358,7 @@ public sealed class ContentDto
 
     /// <summary>
     /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
+    /// Content value will be masked if the user is not authorized to read main content.
     /// </summary>
     public ContentValueDto? MainContentReference { get; set; }
 }
@@ -650,7 +651,7 @@ public sealed class DialogAttachmentUrlDto
     /// application/pdf
     /// application/zip
     /// </example>
-    public string? MediaType { get; set; } = null!;
+    public string? MediaType { get; set; }
 
     /// <summary>
     /// What type of consumer the URL is intended for.
@@ -711,7 +712,7 @@ public sealed class DialogTransmissionAttachmentUrlDto
     /// application/pdf
     /// application/zip
     /// </example>
-    public string? MediaType { get; set; } = null!;
+    public string? MediaType { get; set; }
 
     /// <summary>
     /// The type of consumer the URL is intended for.

@@ -77,7 +77,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             }
         }
 
-        var responseInstanceRef = _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData);
+        var responseInstanceRef = await _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData, cancellationToken);
         if (!InstanceRef.TryParse(responseInstanceRef, out _))
         {
             _logger.LogError(

@@ -37,6 +37,15 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public Task Cannot_Update_Transmission_Url_With_Media_Type_Exceeding_Max_Length() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .UpdateDialog(x => x.AddTransmission(x =>
+                x.AddAttachment(x =>
+                        x.Urls.First().MediaType = new string('a', TestConstants.DefaultMaxStringLength + 1))))
+            .ExecuteAndAssert<ValidationError>();
+
+    [Fact]
     public Task Can_Create_Simple_Transmission_In_Update() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -59,7 +68,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
                 var relatedTransmission = UpdateDialogDialogTransmissionDto();
 
                 transmission.RelatedTransmissionId = relatedTransmission.Id;
-                transmission.Id = null!;
+                transmission.Id = null;
 
                 x.Dto.Transmissions = [transmission, relatedTransmission];
             })
@@ -108,7 +117,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
-                newTransmission.Content = null!;
+                newTransmission.Content = null;
                 x.Dto.Transmissions.Add(newTransmission);
             })
             .ExecuteAndAssert<ValidationError>(error =>
@@ -121,7 +130,7 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
             .AssertSuccessAndUpdateDialog(x =>
             {
                 var newTransmission = UpdateDialogDialogTransmissionDto();
-                newTransmission.Content = null!;
+                newTransmission.Content = null;
                 x.Dto.Transmissions.Add(newTransmission);
             })
             .GetServiceOwnerDialog()

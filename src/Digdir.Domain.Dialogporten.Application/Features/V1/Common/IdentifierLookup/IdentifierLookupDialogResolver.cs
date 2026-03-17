@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
+using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
@@ -12,11 +14,14 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLo
 internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogResolver
 {
     private readonly IDialogDbContext _db;
+    private readonly IResourceRegistry _resourceRegistry;
 
-    public IdentifierLookupDialogResolver(IDialogDbContext db)
+    public IdentifierLookupDialogResolver(IDialogDbContext db, IResourceRegistry resourceRegistry)
     {
         ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
         _db = db;
+        _resourceRegistry = resourceRegistry;
     }
 
     /// <summary>
@@ -84,10 +89,83 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
     /// <summary>
     /// Chooses the instance reference to return, preferring app-instance, then correspondence, then dialog reference.
     /// </summary>
-    public string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData) =>
-        requestRef.Type is not InstanceRefType.DialogId
-            ? requestRef.Value
-            : InstanceRef.FromDialog(dialogData.DialogId, dialogData.ServiceOwnerLabels).Value;
+    public async Task<string> ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData,
+        CancellationToken cancellationToken)
+    {
+        if (requestRef.Type is not InstanceRefType.DialogId)
+        {
+            return requestRef.Value;
+        }
+
+        var outputInstanceRef = InstanceRef.FromDialog(dialogData.DialogId, dialogData.ServiceOwnerLabels);
+        if (outputInstanceRef.Type is not InstanceRefType.DialogId)
+        {
+            return outputInstanceRef.Value;
+        }
+
+        // TODO: Remove workaround: https://github.com/Altinn/dialogporten/issues/3613
+        // Pending https://github.com/Altinn/altinn-correspondence/issues/1777 (and backfill), we use a workaround to
+        // find the output instance ref for correspondence dialogs without a correspondence id label.
+        if (await IsCorrespondenceService(dialogData.ServiceResource, cancellationToken))
+        {
+            var fceUrl = await _db.DialogContents
+                .Where(x => x.DialogId == dialogData.DialogId &&
+                            x.TypeId == DialogContentType.Values.MainContentReference)
+                .SelectMany(x => x.Value.Localizations)
+                .Select(loc => loc.Value)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (TryExtractCorrespondenceId(fceUrl, out var correspondenceId))
+            {
+                return AltinnAuthorizationConstants.CorrespondenceRefPrefix + correspondenceId;
+            }
+
+            throw new InvalidOperationException("Unable to determine correspondence ID instance reference for correspondence dialog. No label found and FCE URL is not in expected format.");
+        }
+
+        return outputInstanceRef.Value;
+    }
+
+    private async Task<bool> IsCorrespondenceService(string dialogDataServiceResource, CancellationToken cancellationToken)
+    {
+        var resourceInformation = await _resourceRegistry.GetResourceInformation(dialogDataServiceResource, cancellationToken);
+        return resourceInformation?.ResourceType == CorrespondenceService;
+    }
+
+    private const string Prefix = "/correspondence/api/v1/correspondence/";
+    private const string Suffix = "/content";
+    private static bool TryExtractCorrespondenceId(ReadOnlySpan<char> url, [NotNullWhen(true)] out string? id)
+    {
+        id = null;
+
+        var schemeSep = url.IndexOf("://".AsSpan());
+        if (schemeSep < 0)
+            return false;
+
+        var pathStart = url[(schemeSep + 3)..].IndexOf('/');
+        if (pathStart < 0)
+            return false;
+
+        pathStart += schemeSep + 3;
+
+        var path = url[pathStart..];
+
+        if (!path.StartsWith(Prefix.AsSpan(), StringComparison.Ordinal))
+            return false;
+
+        if (!path.EndsWith(Suffix.AsSpan(), StringComparison.Ordinal))
+            return false;
+
+        var guidStart = Prefix.Length;
+        var guidLength = path.Length - Prefix.Length - Suffix.Length;
+
+        if (guidLength != 36)
+            return false;
+
+        id = path.Slice(guidStart, guidLength).ToString();
+
+        return true;
+    }
 
     private IQueryable<DialogEntity> GetDialogQuery(
         IdentifierLookupDeletedDialogVisibility deletedDialogVisibility)

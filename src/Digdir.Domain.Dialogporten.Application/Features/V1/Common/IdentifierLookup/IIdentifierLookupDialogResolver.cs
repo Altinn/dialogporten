@@ -16,7 +16,10 @@ internal interface IIdentifierLookupDialogResolver
         IdentifierLookupDeletedDialogVisibility deletedDialogVisibility,
         CancellationToken cancellationToken);
 
-    string ResolveOutputInstanceRef(InstanceRef requestRef, IdentifierLookupDialogData dialogData);
+    Task<string> ResolveOutputInstanceRef(
+        InstanceRef requestRef,
+        IdentifierLookupDialogData dialogData,
+        CancellationToken cancellationToken);
 }
 
 internal sealed record IdentifierLookupDialogData(

@@ -91,4 +91,13 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .CreateTransmission((_, _) => { })
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText($"cannot exceed {short.MaxValue}"));
+
+    [Fact]
+    public Task Cannot_Create_Transmission_Url_With_Media_Type_Exceeding_Max_Length() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateTransmission(x =>
+                x.AddAttachment(x =>
+                    x.Urls.First().MediaType = new string('a', TestConstants.DefaultMaxStringLength + 1)))
+            .ExecuteAndAssert<ValidationError>();
 }

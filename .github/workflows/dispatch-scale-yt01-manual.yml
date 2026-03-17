@@ -41,17 +41,19 @@ jobs:
         run: |
           set -euo pipefail
 
-          POSTGRES_NAMES=$(az postgres flexible-server list \
+          # Only target the primary database (hyphen after 'postgres' excludes postgres2, postgres3, etc.)
+          POSTGRES_NAME=$(az postgres flexible-server list \
             --resource-group "$RESOURCE_GROUP" \
-            --query "[?starts_with(name, 'dp-be-yt01-postgres')].name" -o tsv)
+            --query "[?contains(name, 'dp-be-yt01-postgres-')].name" \
+            -o tsv)
 
-          SERVER_COUNT=$(echo "$POSTGRES_NAMES" | grep -c . || true)
-          if [[ "$SERVER_COUNT" -ne 1 ]]; then
-            echo "Error: Expected 1 PostgreSQL server matching 'dp-be-yt01-postgres*', found $SERVER_COUNT."
+          if [[ -z "$POSTGRES_NAME" ]]; then
+            echo "Error: No primary PostgreSQL server matching 'dp-be-yt01-postgres-' found."
             exit 1
           fi
 
-          echo "name=$POSTGRES_NAMES" >> "$GITHUB_OUTPUT"
+          echo "Found PostgreSQL server: $POSTGRES_NAME"
+          echo "name=$POSTGRES_NAME" >> "$GITHUB_OUTPUT"
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
@@ -89,7 +91,7 @@ jobs:
               --name "${{ steps.pg.outputs.name }}" \
               --resource-group "$RESOURCE_GROUP"
           else
-            echo "PostgreSQL server is already running."
+            echo "PostgreSQL server ${{ steps.pg.outputs.name }} is already running."
           fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
@@ -168,7 +170,7 @@ jobs:
               --name "${{ steps.pg.outputs.name }}" \
               --resource-group "$RESOURCE_GROUP"
           else
-            echo "PostgreSQL server is already in state: $STATE. Skipping stop."
+            echo "PostgreSQL server ${{ steps.pg.outputs.name }} is already in state: $STATE. Skipping stop."
           fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}

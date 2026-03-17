@@ -6712,7 +6712,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Authenticated end user is not authorized for the supplied instance reference."
@@ -8146,7 +8146,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "description": "Missing or invalid authentication token. Requires a Maskinporten token with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "403": {
             "description": "Authenticated service owner does not own the resolved dialog."

@@ -251,7 +251,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
 
         log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
         log.PerformedBy.ActorNameEntity.Should().NotBeNull();
-        log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
+        log.PerformedBy.ActorNameEntity.ActorId.Should().Be(AdminPerformedByActorId);
     }
 
     private static void AssertOneLabelWithValue(DialogDto dialog, SystemLabel.Values value)

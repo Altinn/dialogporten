@@ -198,22 +198,22 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
 
         var actorIdNamePairs = addedActorNames
-            .Select(x => (ActorId: x.ActorId!, Name: x.Name!))
+            .Select(x => (x.ActorId, x.Name))
             .Distinct()
             .ToList();
         var actorIds = actorIdNamePairs.Select(x => x.ActorId).Distinct().ToList();
         var names = actorIdNamePairs.Select(x => x.Name).Distinct().ToList();
 
         var existingActorNames = await _dialogDbContext.Set<ActorName>()
-            .Where(x => actorIds.Contains(x.ActorId!) && names.Contains(x.Name!))
+            .Where(x => actorIds.Contains(x.ActorId) && names.Contains(x.Name))
             .ToListAsync(cancellationToken);
         var existingByPair = existingActorNames
-            .ToDictionary(x => (ActorId: x.ActorId!, Name: x.Name!));
+            .ToDictionary(x => (x.ActorId, x.Name));
 
         var resolvedAny = false;
         foreach (var addedActorName in addedActorNames)
         {
-            if (!existingByPair.TryGetValue((addedActorName.ActorId!, addedActorName.Name!), out var existingActorName))
+            if (!existingByPair.TryGetValue((addedActorName.ActorId, addedActorName.Name), out var existingActorName))
             {
                 continue;
             }

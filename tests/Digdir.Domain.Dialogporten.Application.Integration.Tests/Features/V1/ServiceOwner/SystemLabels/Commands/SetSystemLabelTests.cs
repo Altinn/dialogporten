@@ -171,6 +171,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
 
         log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
         log.PerformedBy.ActorNameEntity.Should().NotBeNull();
-        log.PerformedBy.ActorNameEntity!.ActorId.Should().Be(AdminPerformedByActorId);
+        log.PerformedBy.ActorNameEntity.ActorId.Should().Be(AdminPerformedByActorId);
     }
 }

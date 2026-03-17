@@ -107,7 +107,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: environmentKeyVaultName
 }
 

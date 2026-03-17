@@ -134,7 +134,7 @@ param scale Scale = {
   ]
 }
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: environmentKeyVaultName
 }
 

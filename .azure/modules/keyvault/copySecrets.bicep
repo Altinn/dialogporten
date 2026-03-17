@@ -44,7 +44,7 @@ var keys = map(filteredKeysBySecretPrefix, key => {
   appConfigKey: replace(replace(key, secretPrefix, ''), '--', ':')
 })
 
-resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
+resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: srcKeyVaultName
   scope: resourceGroup(srcKeyVaultSubId, srcKeyVaultRGNName)
 }

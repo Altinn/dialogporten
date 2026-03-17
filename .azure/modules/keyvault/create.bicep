@@ -18,7 +18,7 @@ param sku Sku
 
 var keyVaultName = take('${namePrefix}-kv-${uniqueString(resourceGroup().id)}', 24)
 
-resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2026-02-01' = {
   name: keyVaultName
   location: location
   properties: {

@@ -75,12 +75,12 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .CreateTransmission((x, ctx) =>
             {
                 x.Id = NewUuidV7();
-                ctx.Bag[FirstTransmissionIdKey] = x.Id!.Value;
+                ctx.Bag[FirstTransmissionIdKey] = x.Id.Value;
             })
             .CreateTransmission((x, ctx) =>
             {
                 x.Id = NewUuidV7();
-                ctx.Bag[SecondTransmissionIdKey] = x.Id!.Value;
+                ctx.Bag[SecondTransmissionIdKey] = x.Id.Value;
                 x.RelatedTransmissionId = ctx.GetGuidByKey(FirstTransmissionIdKey);
             })
             .UpdateTransmission((x, ctx) =>

@@ -31,6 +31,15 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private const string CorrespondenceServiceResourceType = "correspondenceservice";
     private const string GenericAccessResourceType = "genericaccessresource";
 
+    /// <summary>
+    /// The default minimum authentication level applied when no resource policy information is found for a given
+    /// service resource. Level 3 corresponds to "idporten-loa-substantial" and is the baseline required by most
+    /// Norwegian public-sector services. Falling back to this value rather than denying access outright avoids
+    /// incorrect authorization failures when the resource policy sync has not yet run (e.g., on first deploy or
+    /// during transient sync delays), while still ensuring that low-assurance users (level &lt; 3) are rejected.
+    /// </summary>
+    private const int DefaultMinimumAuthenticationLevel = 3;
+
     private readonly HttpClient _httpClient;
     private readonly IFusionCache _pdpCache;
     private readonly IFusionCache _partiesCache;
@@ -215,13 +224,18 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             .Select(x => (int?)x.MinimumAuthenticationLevel)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (minimumAuthenticationLevel is null)
+        if (minimumAuthenticationLevel is not null)
         {
-            _logger.LogWarning("Could not find resource policy information for resource {ServiceResource}, denying access", serviceResource);
-            return false;
+            return UserHasRequiredAuthLevel(minimumAuthenticationLevel.Value);
         }
 
-        return UserHasRequiredAuthLevel(minimumAuthenticationLevel.Value);
+        _logger.LogWarning(
+            "Could not find resource policy information for resource {ServiceResource}, " +
+            "falling back to default minimum authentication level {DefaultMinimumAuthenticationLevel}",
+            serviceResource,
+            DefaultMinimumAuthenticationLevel);
+
+        return UserHasRequiredAuthLevel(DefaultMinimumAuthenticationLevel);
     }
 
     // Create static empty lists to reuse and avoid allocations

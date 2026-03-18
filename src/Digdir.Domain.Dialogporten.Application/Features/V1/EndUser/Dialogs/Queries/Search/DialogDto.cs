@@ -111,11 +111,17 @@ public sealed class DialogDto
     /// <summary>
     /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
+    [Obsolete($"Use {nameof(IsSeenSinceLastContentUpdate)} instead.")]
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool IsSeenSinceLastContentUpdate { get; set; }
+
+    /// <summary>
     /// System defined label used to categorize dialogs.
-    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Bin"/> or <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Archive"/>.
     /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
     /// </summary>
     [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]

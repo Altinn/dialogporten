@@ -79,6 +79,7 @@ public sealed class DialogSeenEvent(
             removeLabels: [SystemLabel.Values.MarkedAsUnopened],
             performedBy);
 
+        dialog.IsSeenSinceLastContentUpdate = true;
 
         var result = await _unitOfWork
             .DisableUpdatableFilter()

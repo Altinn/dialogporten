@@ -155,7 +155,13 @@ public sealed class DialogDto
     /// <summary>
     /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
+    [Obsolete($"Use {nameof(IsSeenSinceLastContentUpdate)} instead.")]
     public bool HasUnopenedContent { get; set; }
+
+    /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool IsSeenSinceLastContentUpdate { get; set; }
 
     /// <summary>
     /// The dialog unstructured text content.

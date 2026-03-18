@@ -85,6 +85,11 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public DateTimeOffset? ContentUpdatedBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool? IsContentSeen { get; set; }
+
+    /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
     public DateTimeOffset? DueAfter { get; set; }
@@ -231,6 +236,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 FromServiceOwnerTransmissionsCount = dialog.FromServiceOwnerTransmissionsCount,
                 FromPartyTransmissionsCount = dialog.FromPartyTransmissionsCount,
                 LatestActivity = latestActivitiesByDialogIdTask.Result.GetValueOrDefault(dialog.Id),
+                IsSeenSinceLastContentUpdate = dialog.IsSeenSinceLastContentUpdate,
                 SeenSinceLastUpdate = seenLogsByDialogIdTask.Result
                     .GetValueOrDefault(dialog.Id)?
                     .Where(x => x.SeenAt >= dialog.UpdatedAt)
@@ -375,6 +381,7 @@ internal static class SearchDialogQueryExtensions
             Limit = request.Limit!.Value,
             ContentUpdatedAfter = request.ContentUpdatedAfter,
             ContentUpdatedBefore = request.ContentUpdatedBefore,
+            IsContentSeen = request.IsContentSeen,
             Search = request.Search,
             SearchLanguageCode = request.SearchLanguageCode,
             CreatedAfter = request.CreatedAfter,

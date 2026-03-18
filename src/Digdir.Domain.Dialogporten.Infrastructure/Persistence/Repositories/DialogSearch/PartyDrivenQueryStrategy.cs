@@ -161,6 +161,7 @@ internal sealed class PartyDrivenQueryStrategy(ILogger<PartyDrivenQueryStrategy>
             .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
+            .AppendIsContentSeenFilterCondition(query.IsContentSeen)
             .AppendSystemLabelFilterCondition(query.SystemLabel)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
 }

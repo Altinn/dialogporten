@@ -13,8 +13,6 @@ public enum InstanceRefType
 
 public readonly record struct InstanceRef(InstanceRefType Type, Guid Id, string Value, int? PartyId = null)
 {
-
-
     public static string CreateDialogRef(Guid dialogId) => AltinnAuthorizationConstants.DialogRefPrefix + dialogId;
 
     public static InstanceRef FromDialog(DialogEntity dialogEntity)

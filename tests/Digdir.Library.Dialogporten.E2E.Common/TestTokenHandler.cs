@@ -143,7 +143,8 @@ public sealed class TestTokenHandler : DelegatingHandler
             $"?env={tokenEnvironment}" +
             $"&scopes={Uri.EscapeDataString(scopes)}" +
             $"&systemUserId={Uri.EscapeDataString(systemUserId)}" +
-            $"&systemUserOrg={Uri.EscapeDataString(systemUserOrg)}";
+            $"&systemUserOrg={Uri.EscapeDataString(systemUserOrg)}" +
+            $"&ttl={DefaultTokenTtl}";
     }
 
     private static string GetDefaultServiceOwnerOrgNumber(string tokenEnvironment) =>

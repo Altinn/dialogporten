@@ -9,6 +9,8 @@ public static class E2EConstants
     public const string DefaultServiceOwnerOrgNr = "991825827";
     public const string DefaultServiceOwnerOrgName = "ttd";
     public const string DefaultEndUserSsn = "08844397713";
+    public const string DefaultSystemUserId = "aaa88f01-d847-2973-9579-76f658b42caa";
+    public const string DefaultSystemUserOrgNo = "999888777";
 
     public const string Yt01ServiceOwnerOrgNr = "713431400";
 
@@ -19,6 +21,8 @@ public static class E2EConstants
         AuthorizationScope.ServiceProviderSearch;
 
     public const string EndUserScopes = AuthorizationScope.EndUser;
+
+    public const string SystemUserScopes = AuthorizationScope.EndUser;
 
     public const string EphemeralDialogUrn = "digdir:dialogporten:ephemeral-dialog";
 

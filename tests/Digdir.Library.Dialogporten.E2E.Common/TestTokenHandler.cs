@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Text;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -55,8 +56,11 @@ public sealed class TestTokenHandler : DelegatingHandler
     private async Task<string> GetToken(CancellationToken cancellationToken)
     {
         var overrides = _overridesAccessor.Current;
+        var tokenKind = overrides?.EndUserType == EndUserTokenType.SystemUser
+            ? TokenKind.SystemUser
+            : _kind;
 
-        var overrideToken = _kind switch
+        var overrideToken = tokenKind switch
         {
             TokenKind.EndUser => overrides?.EndUser?.TokenOverride,
             TokenKind.ServiceOwner => overrides?.ServiceOwner?.TokenOverride,
@@ -70,12 +74,12 @@ public sealed class TestTokenHandler : DelegatingHandler
         }
 
         var tokenEnvironment = Environment.GetTokenGeneratorEnvironment();
-        var requestPath = _kind switch
+        var requestPath = tokenKind switch
         {
             TokenKind.EndUser => BuildEndUserRequestPath(overrides?.EndUser, tokenEnvironment),
             TokenKind.ServiceOwner => BuildServiceOwnerRequestPath(overrides?.ServiceOwner, tokenEnvironment),
             TokenKind.SystemUser => BuildSystemUserRequestPath(overrides?.SystemUser, tokenEnvironment),
-            _ => throw new InvalidOperationException($"Unsupported token kind: {_kind}")
+            _ => throw new InvalidOperationException($"Unsupported token kind: {tokenKind}")
         };
 
         if (TokenCache.TryGetValue(requestPath, out var cachedToken))

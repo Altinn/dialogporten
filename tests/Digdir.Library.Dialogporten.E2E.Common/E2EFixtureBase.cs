@@ -119,6 +119,15 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         UseTokenOverrides(new TokenOverrides(
             ServiceOwner: new ServiceOwnerTokenOverrides(orgNumber, orgName, scopes, tokenOverride)));
 
+    public IDisposable UseSystemUserTokenOverrides(
+        string? systemUserId = null,
+        string? systemUserOrg = null,
+        string? scopes = null,
+        string? tokenOverride = null) =>
+        UseTokenOverrides(new TokenOverrides(
+            EndUserType: EndUserTokenType.SystemUser,
+            SystemUser: new SystemUserTokenOverrides(systemUserId, systemUserOrg, scopes, tokenOverride)));
+
     public void Cleanup() => ClearTokenOverrides();
 
     public void PreflightCheck()

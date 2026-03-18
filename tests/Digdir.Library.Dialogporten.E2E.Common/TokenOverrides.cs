@@ -1,5 +1,11 @@
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
+public enum EndUserTokenType
+{
+    EndUser,
+    SystemUser
+}
+
 public sealed record EndUserTokenOverrides(
     string? Ssn = null,
     string? Scopes = null,
@@ -18,6 +24,7 @@ public sealed record SystemUserTokenOverrides(
     string? TokenOverride = null);
 
 public sealed record TokenOverrides(
+    EndUserTokenType EndUserType = EndUserTokenType.EndUser,
     EndUserTokenOverrides? EndUser = null,
     ServiceOwnerTokenOverrides? ServiceOwner = null,
     SystemUserTokenOverrides? SystemUser = null);

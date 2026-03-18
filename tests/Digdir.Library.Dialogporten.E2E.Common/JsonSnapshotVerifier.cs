@@ -17,14 +17,20 @@ public static partial class JsonSnapshotVerifier
         [CallerMemberName] string callerMemberName = "",
         [CallerFilePath] string sourceFile = "")
     {
-        var scrubbed = GuidRegex().Replace(json, "00000000-0000-0000-0000-000000000000");
-        scrubbed = TraceIdRegex().Replace(scrubbed, "\"traceId\": \"00-00000000000000000000000000000000-0000000000000000-00\"");
+        var scrubbed = GuidRegex()
+            .Replace(json, "00000000-0000-0000-0000-000000000000");
+
+        scrubbed = TraceIdRegex()
+            .Replace(scrubbed, "\"traceId\": \"00-00000000000000000000000000000000-0000000000000000-00\"");
 
         var prettyJson = JsonSerializer.Serialize(JsonDocument.Parse(scrubbed), IndentedJson);
-        var settings = Verify(prettyJson, extension: "json", sourceFile: sourceFile)
+        var settings = Verify(
+                prettyJson,
+                extension: "json",
+                sourceFile: sourceFile)
             .UseDirectory("Snapshots");
 
-        if (outputFileText is not null && !string.IsNullOrWhiteSpace(outputFileText))
+        if (!string.IsNullOrWhiteSpace(outputFileText))
         {
             var methodName = Path.GetFileNameWithoutExtension(sourceFile);
             settings.UseFileName($"{methodName}.{callerMemberName}.{outputFileText}");

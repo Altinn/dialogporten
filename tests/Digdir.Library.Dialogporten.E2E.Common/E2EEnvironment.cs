@@ -5,7 +5,8 @@ namespace Digdir.Library.Dialogporten.E2E.Common;
 public static class E2EEnvironment
 {
     public static string GetDotnetEnvironment() =>
-        Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? Environments.Development;
+        Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+        ?? Environments.Development;
 
     public static string GetTokenGeneratorEnvironment() =>
         GetDotnetEnvironment() switch

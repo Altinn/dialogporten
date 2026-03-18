@@ -1,0 +1,65 @@
+﻿{
+  "authorizedParties": [
+    {
+      "dateOfBirth": null,
+      "hasKeyRole": false,
+      "hasOnlyAccessToSubParties": false,
+      "isAccessManager": false,
+      "isCurrentEndUser": false,
+      "isDeleted": false,
+      "isMainAdministrator": false,
+      "name": "\u00C6RLIG UROKKELIG TIGER AS",
+      "party": "urn:altinn:organization:identifier-no:310923044",
+      "partyId": 51267836,
+      "partyType": "Organization",
+      "partyUuid": "00000000-0000-0000-0000-000000000000",
+      "subParties": [
+        {
+          "dateOfBirth": null,
+          "hasKeyRole": false,
+          "hasOnlyAccessToSubParties": false,
+          "isAccessManager": false,
+          "isCurrentEndUser": false,
+          "isDeleted": false,
+          "isMainAdministrator": false,
+          "name": "\u00C6RLIG UROKKELIG TIGER AS",
+          "party": "urn:altinn:organization:identifier-no:315010195",
+          "partyId": 51620832,
+          "partyType": "Organization",
+          "partyUuid": "00000000-0000-0000-0000-000000000000",
+          "subParties": null
+        }
+      ]
+    },
+    {
+      "dateOfBirth": null,
+      "hasKeyRole": false,
+      "hasOnlyAccessToSubParties": false,
+      "isAccessManager": false,
+      "isCurrentEndUser": false,
+      "isDeleted": false,
+      "isMainAdministrator": false,
+      "name": "TAKTFULL ORDENTLIG APE",
+      "party": "urn:altinn:organization:identifier-no:310010693",
+      "partyId": 51186218,
+      "partyType": "Organization",
+      "partyUuid": "00000000-0000-0000-0000-000000000000",
+      "subParties": null
+    },
+    {
+      "dateOfBirth": "1943-04-08",
+      "hasKeyRole": false,
+      "hasOnlyAccessToSubParties": false,
+      "isAccessManager": false,
+      "isCurrentEndUser": true,
+      "isDeleted": false,
+      "isMainAdministrator": false,
+      "name": "UROMANTISK LITTERATUR",
+      "party": "urn:altinn:person:identifier-no:08844397713",
+      "partyId": 50364905,
+      "partyType": "Person",
+      "partyUuid": "00000000-0000-0000-0000-000000000000",
+      "subParties": null
+    }
+  ]
+}

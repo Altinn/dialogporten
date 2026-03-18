@@ -32,6 +32,9 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         var content = response.Content ?? throw new InvalidOperationException("Parties content was null.");
 
         // Assert
-        await VerifyJsonSnapshot(JsonSerializer.Serialize(content), outputFileText: Fixture.DotnetEnvironment);
+        await VerifyJsonSnapshot(
+            JsonSerializer.Serialize(content),
+            outputFileText: Fixture.DotnetEnvironment,
+            scrubGuids: false);
     }
 }

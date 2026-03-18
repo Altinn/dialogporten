@@ -14,11 +14,13 @@ public static partial class JsonSnapshotVerifier
     public static Task VerifyJsonSnapshot(
         string json,
         string? outputFileText = null,
+        bool scrubGuids = true,
         [CallerMemberName] string callerMemberName = "",
         [CallerFilePath] string sourceFile = "")
     {
-        var scrubbed = GuidRegex()
-            .Replace(json, "00000000-0000-0000-0000-000000000000");
+        var scrubbed = scrubGuids
+            ? GuidRegex().Replace(json, "00000000-0000-0000-0000-000000000000")
+            : json;
 
         scrubbed = TraceIdRegex()
             .Replace(scrubbed, "\"traceId\": \"00-00000000000000000000000000000000-0000000000000000-00\"");

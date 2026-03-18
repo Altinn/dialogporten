@@ -10,9 +10,9 @@
       "isMainAdministrator": false,
       "name": "\u00C6RLIG UROKKELIG TIGER AS",
       "party": "urn:altinn:organization:identifier-no:310923044",
-      "partyId": 51267836,
+      "partyId": 51606344,
       "partyType": "Organization",
-      "partyUuid": "3b3efe7f-8814-4d36-b0c3-dc754189c8e5",
+      "partyUuid": "e3802e48-77bc-400e-9e73-f10eeb183666",
       "subParties": [
         {
           "dateOfBirth": null,
@@ -24,27 +24,12 @@
           "isMainAdministrator": false,
           "name": "\u00C6RLIG UROKKELIG TIGER AS",
           "party": "urn:altinn:organization:identifier-no:315010195",
-          "partyId": 51620832,
+          "partyId": 51958118,
           "partyType": "Organization",
-          "partyUuid": "f0fff97e-82b3-448a-a173-acede13d4eaa",
+          "partyUuid": "147ddef8-d6b0-4e06-b443-0ebdaa43c490",
           "subParties": null
         }
       ]
-    },
-    {
-      "dateOfBirth": null,
-      "hasKeyRole": false,
-      "hasOnlyAccessToSubParties": false,
-      "isAccessManager": false,
-      "isCurrentEndUser": false,
-      "isDeleted": false,
-      "isMainAdministrator": false,
-      "name": "TAKTFULL ORDENTLIG APE",
-      "party": "urn:altinn:organization:identifier-no:310010693",
-      "partyId": 51186218,
-      "partyType": "Organization",
-      "partyUuid": "7e0067a7-694f-4897-981b-16cd5ec704d9",
-      "subParties": null
     },
     {
       "dateOfBirth": "1943-04-08",
@@ -56,9 +41,24 @@
       "isMainAdministrator": false,
       "name": "UROMANTISK LITTERATUR",
       "party": "urn:altinn:person:identifier-no:08844397713",
-      "partyId": 50364905,
+      "partyId": 50920836,
       "partyType": "Person",
-      "partyUuid": "e3f80a3f-fef6-4555-a955-6c9ffb2af6ea",
+      "partyUuid": "6a2f3504-6df6-4f21-8613-d5d6a00725fe",
+      "subParties": null
+    },
+    {
+      "dateOfBirth": null,
+      "hasKeyRole": false,
+      "hasOnlyAccessToSubParties": false,
+      "isAccessManager": false,
+      "isCurrentEndUser": false,
+      "isDeleted": false,
+      "isMainAdministrator": false,
+      "name": "TAKTFULL ORDENTLIG APE",
+      "party": "urn:altinn:organization:identifier-no:310010693",
+      "partyId": 51525296,
+      "partyType": "Organization",
+      "partyUuid": "7d9811e5-feb4-40c0-9ffe-7a5e40a6f5b3",
       "subParties": null
     }
   ]

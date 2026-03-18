@@ -12,7 +12,7 @@
       "party": "urn:altinn:person:identifier-no:08844397713",
       "partyId": 61847839,
       "partyType": "Person",
-      "partyUuid": "00000000-0000-0000-0000-000000000000",
+      "partyUuid": "7f48e6a1-cb7e-450c-9ea9-048fb47eb36b",
       "subParties": null
     },
     {
@@ -27,7 +27,7 @@
       "party": "urn:altinn:organization:identifier-no:310010693",
       "partyId": 61847828,
       "partyType": "Organization",
-      "partyUuid": "00000000-0000-0000-0000-000000000000",
+      "partyUuid": "8573160b-38a9-46a1-a57b-79e7f57b2933",
       "subParties": null
     },
     {
@@ -42,7 +42,7 @@
       "party": "urn:altinn:organization:identifier-no:310923044",
       "partyId": 62084739,
       "partyType": "Organization",
-      "partyUuid": "00000000-0000-0000-0000-000000000000",
+      "partyUuid": "b675e203-08a9-4ef8-b25a-4bf431018244",
       "subParties": [
         {
           "dateOfBirth": null,
@@ -56,7 +56,7 @@
           "party": "urn:altinn:organization:identifier-no:315010195",
           "partyId": 62763727,
           "partyType": "Organization",
-          "partyUuid": "00000000-0000-0000-0000-000000000000",
+          "partyUuid": "b9ec25dc-89db-4812-8093-e84a2a829eb1",
           "subParties": null
         }
       ]

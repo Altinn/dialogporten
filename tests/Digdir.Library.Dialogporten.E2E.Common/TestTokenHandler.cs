@@ -55,7 +55,8 @@ public sealed class TestTokenHandler : DelegatingHandler
     private async Task<string> GetToken(CancellationToken cancellationToken)
     {
         var overrides = _overridesAccessor.Current;
-        var tokenKind = overrides?.EndUserType == EndUserTokenType.SystemUser
+        var isEndUserHandler = _kind == TokenKind.EndUser;
+        var tokenKind = isEndUserHandler && overrides?.EndUserType == EndUserTokenType.SystemUser
             ? TokenKind.SystemUser
             : _kind;
 
@@ -63,7 +64,7 @@ public sealed class TestTokenHandler : DelegatingHandler
         {
             TokenKind.EndUser => overrides?.EndUser?.TokenOverride,
             TokenKind.ServiceOwner => overrides?.ServiceOwner?.TokenOverride,
-            TokenKind.SystemUser => overrides?.SystemUser?.TokenOverride,
+            TokenKind.SystemUser when isEndUserHandler => overrides?.SystemUser?.TokenOverride,
             _ => null
         };
 
@@ -77,7 +78,7 @@ public sealed class TestTokenHandler : DelegatingHandler
         {
             TokenKind.EndUser => BuildEndUserRequestPath(overrides?.EndUser, tokenEnvironment),
             TokenKind.ServiceOwner => BuildServiceOwnerRequestPath(overrides?.ServiceOwner, tokenEnvironment),
-            TokenKind.SystemUser => BuildSystemUserRequestPath(overrides?.SystemUser, tokenEnvironment),
+            TokenKind.SystemUser when isEndUserHandler => BuildSystemUserRequestPath(overrides?.SystemUser, tokenEnvironment),
             _ => throw new InvalidOperationException($"Unsupported token kind: {tokenKind}")
         };
 

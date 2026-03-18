@@ -21,7 +21,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyJson(response.Error!.Content!);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -36,7 +36,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyJson(response.Error!.Content!);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -52,7 +52,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyJson(response.Error!.Content!);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -68,7 +68,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Gone);
-        await VerifyJson(response.Error!.Content!);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -85,6 +85,6 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        await VerifyJson(response.Error!.Content!);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 }

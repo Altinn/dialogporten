@@ -27,9 +27,11 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
     [E2EFact]
     public async Task Authorized_Parties_Verify_Snapshot()
     {
+        // Arrange/Act
         var response = await Fixture.EnduserApi.V1EndUserAccessManagementQueriesGetPartiesParties(TestContext.Current.CancellationToken);
         var content = response.Content ?? throw new InvalidOperationException("Parties content was null.");
 
-        await VerifyJsonSnapshot(JsonSerializer.Serialize(content), outputFileText: Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development");
+        // Assert
+        await VerifyJsonSnapshot(JsonSerializer.Serialize(content), outputFileText: Fixture.DotnetEnvironment);
     }
 }

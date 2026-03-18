@@ -2,31 +2,46 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Queries.GetParties;
 
-internal static class GetPartiesQueryMapper
+internal static class AuthorizedPartiesResultExtensions
 {
-    internal static PartiesDto ToDto(this AuthorizedPartiesResult source) =>
-        new()
-        {
-            AuthorizedParties = source.AuthorizedParties
-                .Select(ToDto)
-                .ToList()
-        };
+    extension(AuthorizedPartiesResult source)
+    {
+        internal PartiesDto ToDto() =>
+            new()
+            {
+                AuthorizedParties =
+                [
+                    ..source.AuthorizedParties.Select(x => x.ToDto())
+                ]
+            };
+    }
+}
 
-    private static AuthorizedPartyDto ToDto(this AuthorizedParty source) =>
-        new()
-        {
-            Party = source.Party,
-            PartyUuid = source.PartyUuid,
-            PartyId = source.PartyId,
-            Name = source.Name,
-            DateOfBirth = source.DateOfBirth,
-            PartyType = source.PartyType.ToString(),
-            IsDeleted = source.IsDeleted,
-            HasKeyRole = source.HasKeyRole,
-            IsCurrentEndUser = source.IsCurrentEndUser,
-            IsMainAdministrator = source.IsMainAdministrator,
-            IsAccessManager = source.IsAccessManager,
-            HasOnlyAccessToSubParties = source.HasOnlyAccessToSubParties,
-            SubParties = source.SubParties?.Select(ToDto).ToList()
-        };
+internal static class AuthorizedPartyExtensions
+{
+    extension(AuthorizedParty authorizedParty)
+    {
+        internal AuthorizedPartyDto ToDto() =>
+            new()
+            {
+                Party = authorizedParty.Party,
+                PartyUuid = authorizedParty.PartyUuid,
+                PartyId = authorizedParty.PartyId,
+                Name = authorizedParty.Name,
+                DateOfBirth = authorizedParty.DateOfBirth,
+                PartyType = authorizedParty.PartyType.ToString(),
+                IsDeleted = authorizedParty.IsDeleted,
+                HasKeyRole = authorizedParty.HasKeyRole,
+                IsCurrentEndUser = authorizedParty.IsCurrentEndUser,
+                IsMainAdministrator = authorizedParty.IsMainAdministrator,
+                IsAccessManager = authorizedParty.IsAccessManager,
+                HasOnlyAccessToSubParties = authorizedParty.HasOnlyAccessToSubParties,
+                SubParties = authorizedParty.SubParties is null
+                    ? null
+                    :
+                    [
+                        ..authorizedParty.SubParties.Select(x => x.ToDto())
+                    ]
+            };
+    }
 }

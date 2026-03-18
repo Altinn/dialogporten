@@ -25,7 +25,8 @@ public static partial class JsonSnapshotVerifier
         scrubbed = TraceIdRegex()
             .Replace(scrubbed, "\"traceId\": \"00-00000000000000000000000000000000-0000000000000000-00\"");
 
-        var prettyJson = JsonSerializer.Serialize(JsonDocument.Parse(scrubbed), IndentedJson);
+        using var jsonDocument = JsonDocument.Parse(scrubbed);
+        var prettyJson = JsonSerializer.Serialize(jsonDocument.RootElement, IndentedJson);
         var settings = Verify(
                 prettyJson,
                 extension: "json",

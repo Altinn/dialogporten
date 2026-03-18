@@ -34,7 +34,7 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         // Assert
         await VerifyJsonSnapshot(
             JsonSerializer.Serialize(content),
-            outputFileText: Fixture.DotnetEnvironment,
+            fileNameSuffix: Fixture.DotnetEnvironment,
             scrubGuids: false);
     }
 }

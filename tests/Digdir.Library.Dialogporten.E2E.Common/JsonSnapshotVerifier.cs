@@ -11,13 +11,15 @@ public static partial class JsonSnapshotVerifier
         WriteIndented = true
     };
 
-    public static Task VerifyJsonSnapshot(
+    public static async Task VerifyJsonSnapshot(
         string json,
-        string? outputFileText = null,
+        string? fileNameSuffix = null,
         bool scrubGuids = true,
         [CallerMemberName] string callerMemberName = "",
         [CallerFilePath] string sourceFile = "")
     {
+        ArgumentNullException.ThrowIfNull(json);
+
         var scrubbed = scrubGuids
             ? GuidRegex().Replace(json, "00000000-0000-0000-0000-000000000000")
             : json;
@@ -27,20 +29,20 @@ public static partial class JsonSnapshotVerifier
 
         using var jsonDocument = JsonDocument.Parse(scrubbed);
         var prettyJson = JsonSerializer.Serialize(jsonDocument.RootElement, IndentedJson);
-        var settings = Verify(
+
+        var testFileName = Path.GetFileNameWithoutExtension(sourceFile);
+        var verifyTask = Verify(
                 prettyJson,
                 extension: "json",
                 sourceFile: sourceFile)
+            .UseFileName($"{testFileName}.{callerMemberName}{FormatSuffix(fileNameSuffix)}")
             .UseDirectory("Snapshots");
 
-        if (!string.IsNullOrWhiteSpace(outputFileText))
-        {
-            var methodName = Path.GetFileNameWithoutExtension(sourceFile);
-            settings.UseFileName($"{methodName}.{callerMemberName}.{outputFileText}");
-        }
-
-        return settings;
+        await verifyTask;
     }
+
+    private static string FormatSuffix(string? suffix) =>
+        string.IsNullOrWhiteSpace(suffix) ? string.Empty : $".{suffix}";
 
     [GeneratedRegex(@"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")]
     private static partial Regex GuidRegex();

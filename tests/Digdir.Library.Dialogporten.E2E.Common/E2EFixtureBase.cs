@@ -23,7 +23,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        DotnetEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? Environments.Development;
+        DotnetEnvironment = E2EEnvironment.GetDotnetEnvironment();
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)

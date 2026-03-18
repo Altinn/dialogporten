@@ -67,7 +67,7 @@ public sealed class TestTokenHandler : DelegatingHandler
             return overrideToken;
         }
 
-        var tokenEnvironment = Environment.GetTokenGeneratorEnvironment();
+        var tokenEnvironment = E2EEnvironment.GetTokenGeneratorEnvironment();
         var requestPath = _kind switch
         {
             TokenKind.EndUser => BuildEndUserRequestPath(overrides?.EndUser, tokenEnvironment),

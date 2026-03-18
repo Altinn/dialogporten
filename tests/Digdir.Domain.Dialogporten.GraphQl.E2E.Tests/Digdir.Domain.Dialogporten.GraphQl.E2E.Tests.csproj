@@ -24,13 +24,4 @@
       <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <GraphQL Update="GetDialogById.graphql">
-        <Generator>MSBuild:GenerateGraphQLCode</Generator>
-      </GraphQL>
-      <GraphQL Update="schema.extensions.graphql">
-        <Generator>MSBuild:GenerateGraphQLCode</Generator>
-      </GraphQL>
-    </ItemGroup>
-
 </Project>

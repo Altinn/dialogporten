@@ -1,0 +1,29 @@
+query GetAuthorizedParties {
+  parties {
+    dateOfBirth
+    hasKeyRole
+    hasOnlyAccessToSubParties
+    isAccessManager
+    isCurrentEndUser
+    isDeleted
+    isMainAdministrator
+    name
+    party
+    partyId
+    partyType
+    partyUuid
+    subParties {
+      dateOfBirth
+      hasKeyRole
+      isAccessManager
+      isCurrentEndUser
+      isDeleted
+      isMainAdministrator
+      name
+      party
+      partyId
+      partyType
+      partyUuid
+    }
+  }
+}

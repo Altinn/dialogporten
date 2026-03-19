@@ -62,6 +62,30 @@ internal static class PostgresFormattableStringBuilderExtensions
         return queryBuilder;
     }
 
+    internal static PostgresFormattableStringBuilder AppendIsContentSeenFilterCondition(
+        this PostgresFormattableStringBuilder queryBuilder,
+        bool? isContentSeen)
+    {
+        if (isContentSeen is null)
+        {
+            return queryBuilder;
+        }
+
+        queryBuilder
+            .Append($"""
+                      AND {isContentSeen}::boolean = (d."IsSeenSinceLastContentUpdate" AND NOT EXISTS (
+                         SELECT 1
+                         FROM "DialogEndUserContext" dec 
+                         JOIN "DialogEndUserContextSystemLabel" sl ON dec."Id" = sl."DialogEndUserContextId"
+                         WHERE dec."DialogId" = d."Id"
+                            AND sl."SystemLabelId" = {SystemLabel.Values.MarkedAsUnopened}
+                         )
+                     )
+                     """);
+
+        return queryBuilder;
+    }
+
     internal static PostgresFormattableStringBuilder AppendServiceOwnerLabelFilterCondition(
         this PostgresFormattableStringBuilder queryBuilder,
         IEnumerable<string>? serviceOwnerLabels)

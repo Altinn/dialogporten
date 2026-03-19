@@ -15,6 +15,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
   packages: write
   id-token: write
@@ -106,6 +107,15 @@ jobs:
       runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ inputs.version }}"
 
+  tag-issues-with-environment:
+    name: Tag deployed PRs and issues for prod
+    needs: [ deploy-apps, deploy-infra ]
+    if: ${{ always() && !failure() && !cancelled() && (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
+    uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
+    with:
+      environment-label: prod
+      version: ${{ inputs.version }}
+
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
     needs: [ deploy-apps, check-for-changes ]
@@ -132,7 +142,7 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [deploy-infra, deploy-apps]
+    needs: [deploy-infra, deploy-apps, tag-issues-with-environment]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:

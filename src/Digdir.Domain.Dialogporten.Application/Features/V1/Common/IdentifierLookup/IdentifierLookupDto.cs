@@ -6,6 +6,7 @@ public abstract class IdentifierLookupDto
 {
     public Guid DialogId { get; set; }
     public required string InstanceRef { get; set; }
+    public required string Party { get; set; }
     public required IdentifierLookupServiceResourceDto ServiceResource { get; set; }
     public required IdentifierLookupServiceOwnerDto ServiceOwner { get; set; }
 }

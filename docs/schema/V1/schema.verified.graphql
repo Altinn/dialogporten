@@ -275,6 +275,7 @@ type DialogEventPayload {
 type DialogLookup {
   dialogId: UUID!
   instanceRef: String!
+  party: String!
   serviceResource: DialogLookupServiceResource!
   serviceOwner: DialogLookupServiceOwner!
   authorizationEvidence: DialogLookupAuthorizationEvidence!

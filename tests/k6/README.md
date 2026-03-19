@@ -10,14 +10,14 @@ The various testsuites defined within are used in GitHub workflows, but can also
 
 * Either
   * [Grafana K6](https://k6.io/) must be installed and `k6` available in `PATH` 
-  * or Docker (available av `docker` in `PATH`)
+  * or Docker (available as `docker` in `PATH`)
 * Powershell or Bash (should work on any platform supported by K6)
 
 The test project is self-contained and has no dependency to any other Dialogporten-component.
 
 ## How to use
 
-There is a central script for running test suites or individual tests, avaiable as both Powershell and Bash. This script handles credentials, selecting environment to run the tests in and what API version to use (default `v1`).
+There is a central script for running test suites or individual tests, available as both Powershell and Bash. This script handles credentials, selecting environment to run the tests in and what API version to use (default `v1`).
 
 Run `Get-Help .\run.ps1` or `./run.sh --help` for usage information.
 
@@ -33,12 +33,12 @@ For information about the performance tests, see the following README files:
 
 ## Test suites
 
-Various test suites are defined withing the `suites` directory. A suite consists of 
+Various test suites are defined within the `suites` directory. A suite consists of 
 * Importing the tests, or collection of tests to run
 * Define [K6 options](https://k6.io/docs/using-k6/k6-options/) to configure test-run behavior
 * Run the tests
 
-See `suites/all-single-pass.js` for a basic example, running all tests with default options- 
+See `suites/all-single-pass.js` for a basic example, running all tests with default options.
 
 ## How to create a test
 
@@ -53,7 +53,7 @@ Test files **must** clean up any state they create (see `purgeSO` below), to ens
 
 ### Making requests
 
-There are functions to performing a bearer token-authorized request to the service owner and end user endpoints for the selected enviroment and API-version. The `path` parameter are appended to the base URL, can contain query parameters and should not contain a leading slash. `data` can be any javascript object, which will be serialized to JSON.
+There are functions to performing a bearer token-authorized request to the service owner and end user endpoints for the selected environment and API-version. The `path` parameter is appended to the base URL, can contain query parameters and should not contain a leading slash. `data` can be any javascript object, which will be serialized to JSON.
 
 All these functions wrap the corresponding [k6/http](https://k6.io/docs/javascript-api/k6-http/) function.
 
@@ -75,7 +75,7 @@ The optional `params` argument can be supplied to set/override headers and other
 This project utilizes the [k6chaijs](https://k6.io/docs/javascript-api/jslib/k6chaijs/) library to support BDD assertions based on [ChaiJS](https://www.chaijs.com/)
 
 * `describe(testName, testFunction)`: Defines a test and delegate that is invoked to perform the actual test. Wraps `group` in K6, and handles exceptions thrown by `expect`, logging errors to the console for easier debugging.
-* `expect(data, expecationName)`: Chainable BDD-style function that allows various checks to be performed on `data`, where `expecationName` is any string describing the expectation
+* `expect(data, expectationName)`: Chainable BDD-style function that allows various checks to be performed on `data`, where `expectationName` is any string describing the expectation
 
 ### Testdata
 

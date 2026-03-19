@@ -107,6 +107,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         {
             DialogId = dialogData.DialogId,
             InstanceRef = responseInstanceRef,
+            Party = dialogData.Party,
             ServiceResource = serviceResource,
             ServiceOwner = serviceOwner,
             Title = title,

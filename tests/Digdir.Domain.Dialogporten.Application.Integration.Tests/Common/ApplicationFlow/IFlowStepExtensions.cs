@@ -313,7 +313,8 @@ public static class IFlowStepExtensions
                 var transmission = dialog.Transmissions.Single(x => x.Id == transmissionId);
                 var updateTransmissionDto = new UpdateTransmissionDto
                 {
-                    IdempotentKey = null,
+                    IdempotentKey = transmission.IdempotentKey,
+                    CreatedAt = transmission.CreatedAt,
                     AuthorizationAttribute = transmission.AuthorizationAttribute,
                     ExtendedType = transmission.ExtendedType,
                     ExternalReference = transmission.ExternalReference,
@@ -323,6 +324,7 @@ public static class IFlowStepExtensions
                     Content = new()
                     {
                         Title = transmission.Content.Title,
+                        Summary = transmission.Content.Summary,
                         ContentReference = transmission.Content.ContentReference
                     },
                     Attachments = transmission.Attachments.Select(x => new TransmissionAttachmentDto

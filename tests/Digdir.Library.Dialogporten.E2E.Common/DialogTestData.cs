@@ -44,8 +44,14 @@ public static class DialogTestData
                 title: CreateContentValue(
                     value: "Skjema for rapportering av et eller annet",
                     languageCode: "nb"),
+                nonSensitiveTitle: CreateContentValue(
+                    value: "Ikke-sensitiv tittel",
+                    languageCode: "nb"),
                 summary: CreateContentValue(
                     value: "Et sammendrag her. Maks 200 tegn, ingen HTML-støtte. Påkrevd. Vises i liste.",
+                    languageCode: "nb"),
+                nonSensitiveSummary: CreateContentValue(
+                    value: "Ikke-sensitiv sammendrag",
                     languageCode: "nb"),
                 senderName: CreateContentValue(
                     value: "Avsendernavn",
@@ -84,15 +90,28 @@ public static class DialogTestData
                 t.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
                 {
                     Title = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsestittel"), CreateLocalization("Transmission title", "en")]),
+                        value: [
+                            CreateLocalization("Forsendelsestittel"),
+                            CreateLocalization("Transmission title", "en")]),
                     Summary = CreateContentValue(
-                        value: [CreateLocalization("Forsendelse oppsummering"), CreateLocalization("Transmission summary", "en")])
+                        value: [
+                            CreateLocalization("Forsendelse oppsummering"),
+                            CreateLocalization("Transmission summary", "en")]),
+                    ContentReference = CreateContentValue(
+                        mediaType: "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+                        value: [
+                            CreateLocalization("https://digdir.no/nb"),
+                            CreateLocalization("https://digdir.no/en", "en")
+                    ])
                 };
                 t.Attachments =
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
                     {
-                        DisplayName = [CreateLocalization("Forsendelse visningsnavn"), CreateLocalization("Transmission attachment display name", "en")],
+                        DisplayName = [
+                            CreateLocalization("Forsendelse visningsnavn"),
+                            CreateLocalization("Transmission attachment display name", "en")
+                        ],
                         Urls =
                         [
                             new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -110,15 +129,24 @@ public static class DialogTestData
                 t.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
                 {
                     Title = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsesstittel"), CreateLocalization("Transmission title", "en")]),
+                        value: [
+                            CreateLocalization("Forsendelsesstittel"),
+                            CreateLocalization("Transmission title", "en")
+                        ]),
                     Summary = CreateContentValue(
-                        value: [CreateLocalization("Transmisjon oppsummering"), CreateLocalization("Transmission summary", "en")])
+                        value: [
+                            CreateLocalization("Transmisjon oppsummering"),
+                            CreateLocalization("Transmission summary", "en")
+                        ])
                 };
                 t.Attachments =
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
                     {
-                        DisplayName = [CreateLocalization("Visningsnavn for forsendelsesvedlegg "), CreateLocalization("Transmission attachment display name", "en")],
+                        DisplayName = [
+                            CreateLocalization("Visningsnavn for forsendelsesvedlegg "),
+                            CreateLocalization("Transmission attachment display name", "en")
+                        ],
                         Urls =
                         [
                             new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -136,15 +164,24 @@ public static class DialogTestData
                 t.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
                 {
                     Title = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsetittel"), CreateLocalization("Transmission title", "en")]),
+                        value: [
+                            CreateLocalization("Forsendelsetittel"),
+                            CreateLocalization("Transmission title", "en")
+                        ]),
                     Summary = CreateContentValue(
-                        value: [CreateLocalization("Forsendelsesoppsummering"), CreateLocalization("Transmission summary", "en")])
+                        value: [
+                            CreateLocalization("Forsendelsesoppsummering"),
+                            CreateLocalization("Transmission summary", "en")
+                        ])
                 };
                 t.Attachments =
                 [
                     new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachment
                     {
-                        DisplayName = [CreateLocalization("Visningsnavn for forsendelsesvedlegg"), CreateLocalization("Transmission attachment display name", "en")],
+                        DisplayName = [
+                            CreateLocalization("Visningsnavn for forsendelsesvedlegg"),
+                            CreateLocalization("Transmission attachment display name", "en")
+                        ],
                         Urls =
                         [
                             new V1ServiceOwnerDialogsCommandsCreate_TransmissionAttachmentUrl
@@ -260,7 +297,9 @@ public static class DialogTestData
         V1CommonContent_ContentValue? senderName = null,
         V1CommonContent_ContentValue? additionalInfo = null,
         V1CommonContent_ContentValue? extendedStatus = null,
-        V1CommonContent_ContentValue? mainContentReference = null
+        V1CommonContent_ContentValue? mainContentReference = null,
+        V1CommonContent_ContentValue? nonSensitiveTitle = null,
+        V1CommonContent_ContentValue? nonSensitiveSummary = null
     )
     {
         var content = new V1ServiceOwnerDialogsCommandsCreate_Content
@@ -282,6 +321,12 @@ public static class DialogTestData
 
         if (mainContentReference is not null)
             content.MainContentReference = mainContentReference;
+
+        if (nonSensitiveTitle is not null)
+            content.NonSensitiveTitle = nonSensitiveTitle;
+
+        if (nonSensitiveSummary is not null)
+            content.NonSensitiveSummary = nonSensitiveSummary;
 
         return content;
     }

@@ -53,7 +53,7 @@ Test files **must** clean up any state they create (see `purgeSO` below), to ens
 
 ### Making requests
 
-There are functions to performing a bearer token-authorized request to the service owner and end user endpoints for the selected environment and API-version. The `path` parameter is appended to the base URL, can contain query parameters and should not contain a leading slash. `data` can be any javascript object, which will be serialized to JSON.
+There are functions to perform a bearer token-authorized request to the service owner and end user endpoints for the selected environment and API version. The `path` parameter is appended to the base URL, can contain query parameters and should not contain a leading slash. `data` can be any javascript object, which will be serialized to JSON.
 
 All these functions wrap the corresponding [k6/http](https://k6.io/docs/javascript-api/k6-http/) function.
 

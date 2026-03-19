@@ -130,7 +130,7 @@ Use the following steps:
 
 - Ensure a `source key vault` exists for the new environment. Either create a new key vault or use an existing key vault. Currently, two key vaults exist for our environments. One in the test subscription used by Test and Staging, and one in our Production subscription, which Production uses. Ensure you add the necessary secrets that should be used by the new environment. Read here to learn about secret convention [Configuration Guide](Configuration.md). Ensure also that the key vault has the following enabled: `Azure Resource Manager for template deployment`.
 
-- Ensure that a role assignment `Key Vault Secrets User` and `Contributor`(should be inherited) is added for the service principal used by the GitHub Entra Application.
+- Ensure that the service principal used by the GitHub Entra Application has role assignments for `Key Vault Secrets User` and `Contributor` (the Contributor role should be inherited).
 
 - Create an SSH key in Azure and discard the private key. We will use the `az cli` to access the virtual machine so storing the `ssh key` is only a security risk. 
 

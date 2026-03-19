@@ -1,0 +1,65 @@
+﻿{
+  "authorizedParties": [
+    {
+      "dateOfBirth": null,
+      "hasKeyRole": false,
+      "hasOnlyAccessToSubParties": false,
+      "isAccessManager": false,
+      "isCurrentEndUser": false,
+      "isDeleted": false,
+      "isMainAdministrator": false,
+      "name": "\u00C6RLIG UROKKELIG TIGER AS",
+      "party": "urn:altinn:organization:identifier-no:310923044",
+      "partyId": 51267836,
+      "partyType": "Organization",
+      "partyUuid": "3b3efe7f-8814-4d36-b0c3-dc754189c8e5",
+      "subParties": [
+        {
+          "dateOfBirth": null,
+          "hasKeyRole": false,
+          "hasOnlyAccessToSubParties": false,
+          "isAccessManager": false,
+          "isCurrentEndUser": false,
+          "isDeleted": false,
+          "isMainAdministrator": false,
+          "name": "\u00C6RLIG UROKKELIG TIGER AS",
+          "party": "urn:altinn:organization:identifier-no:315010195",
+          "partyId": 51620832,
+          "partyType": "Organization",
+          "partyUuid": "f0fff97e-82b3-448a-a173-acede13d4eaa",
+          "subParties": null
+        }
+      ]
+    },
+    {
+      "dateOfBirth": null,
+      "hasKeyRole": false,
+      "hasOnlyAccessToSubParties": false,
+      "isAccessManager": false,
+      "isCurrentEndUser": false,
+      "isDeleted": false,
+      "isMainAdministrator": false,
+      "name": "TAKTFULL ORDENTLIG APE",
+      "party": "urn:altinn:organization:identifier-no:310010693",
+      "partyId": 51186218,
+      "partyType": "Organization",
+      "partyUuid": "7e0067a7-694f-4897-981b-16cd5ec704d9",
+      "subParties": null
+    },
+    {
+      "dateOfBirth": "1943-04-08",
+      "hasKeyRole": false,
+      "hasOnlyAccessToSubParties": false,
+      "isAccessManager": false,
+      "isCurrentEndUser": true,
+      "isDeleted": false,
+      "isMainAdministrator": false,
+      "name": "UROMANTISK LITTERATUR",
+      "party": "urn:altinn:person:identifier-no:08844397713",
+      "partyId": 50364905,
+      "partyType": "Person",
+      "partyUuid": "e3f80a3f-fef6-4555-a955-6c9ffb2af6ea",
+      "subParties": null
+    }
+  ]
+}

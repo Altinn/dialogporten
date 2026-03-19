@@ -74,6 +74,41 @@ public class InstanceRefTests
     }
 
     [Fact]
+    public void FromDialog_Should_Ignore_Malformed_AppInstanceRef_And_Use_Later_Valid_Candidate()
+    {
+        var dialogId = Guid.NewGuid();
+        var instanceId = Guid.NewGuid();
+
+        var result = InstanceRef.FromDialog(dialogId,
+            [
+                "urn:altinn:instance-id:zzzz/not-a-guid",
+                $"urn:altinn:integration:storage:1337/{instanceId}"
+            ]);
+
+        result.Type.Should().Be(InstanceRefType.AppInstanceId);
+        result.Id.Should().Be(instanceId);
+        result.PartyId.Should().Be(1337);
+        result.Value.Should().Be($"urn:altinn:instance-id:1337/{instanceId}");
+    }
+
+    [Fact]
+    public void FromDialog_Should_Ignore_Malformed_CorrespondenceRef_And_Use_Later_Valid_Candidate()
+    {
+        var dialogId = Guid.NewGuid();
+        var correspondenceId = Guid.NewGuid();
+
+        var result = InstanceRef.FromDialog(dialogId,
+            [
+                "urn:altinn:correspondence-id:zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+                $"urn:altinn:correspondence-id:{correspondenceId}"
+            ]);
+
+        result.Type.Should().Be(InstanceRefType.CorrespondenceId);
+        result.Id.Should().Be(correspondenceId);
+        result.Value.Should().Be($"urn:altinn:correspondence-id:{correspondenceId}");
+    }
+
+    [Fact]
     public void FromDialog_Should_Fallback_To_DialogRef_When_No_Supported_Labels()
     {
         var dialogId = Guid.NewGuid();

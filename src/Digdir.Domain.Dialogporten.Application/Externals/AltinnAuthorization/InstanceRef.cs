@@ -37,7 +37,7 @@ public readonly record struct InstanceRef(InstanceRefType Type, Guid Id, string 
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .OrderByDescending(x => x, StringComparer.Ordinal)
             .Select(ParseCandidate)
-            .FirstOrDefault();
+            .FirstOrDefault(x => x is not null);
 
         if (appInstanceRef is { } appInstance)
         {
@@ -48,7 +48,7 @@ public readonly record struct InstanceRef(InstanceRefType Type, Guid Id, string 
             .Where(x => x.StartsWith(AltinnAuthorizationConstants.CorrespondenceRefPrefix, StringComparison.Ordinal))
             .OrderByDescending(x => x, StringComparer.Ordinal)
             .Select(ParseCandidate)
-            .FirstOrDefault();
+            .FirstOrDefault(x => x is not null);
 
         return correspondenceRef ?? new InstanceRef(InstanceRefType.DialogId, dialogId, CreateDialogRef(dialogId).ToLowerInvariant());
     }

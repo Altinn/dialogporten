@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
-public static partial class JsonSnapshotVerifier
+public static class JsonSnapshotVerifier
 {
     private static readonly JsonSerializerOptions IndentedJson = new()
     {
@@ -21,10 +21,10 @@ public static partial class JsonSnapshotVerifier
         ArgumentNullException.ThrowIfNull(json);
 
         var scrubbed = scrubGuids
-            ? GuidRegex().Replace(json, "00000000-0000-0000-0000-000000000000")
+            ? GuidRegex.Regex().Replace(json, "00000000-0000-0000-0000-000000000000")
             : json;
 
-        scrubbed = TraceIdRegex()
+        scrubbed = GuidRegex.TraceIdRegex()
             .Replace(scrubbed, "\"traceId\": \"00-00000000000000000000000000000000-0000000000000000-00\"");
 
         using var jsonDocument = JsonDocument.Parse(scrubbed);
@@ -44,9 +44,13 @@ public static partial class JsonSnapshotVerifier
     private static string FormatSuffix(string? suffix) =>
         string.IsNullOrWhiteSpace(suffix) ? string.Empty : $".{suffix}";
 
-    [GeneratedRegex(@"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")]
-    private static partial Regex GuidRegex();
+}
 
-    [GeneratedRegex(@"""traceId"":\s*""[^""]+""")]
-    private static partial Regex TraceIdRegex();
+internal static partial class GuidRegex
+{
+    [GeneratedRegex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")]
+    public static partial Regex Regex();
+
+    [GeneratedRegex("""traceId":\s*"[^"]+""")]
+    public static partial Regex TraceIdRegex();
 }

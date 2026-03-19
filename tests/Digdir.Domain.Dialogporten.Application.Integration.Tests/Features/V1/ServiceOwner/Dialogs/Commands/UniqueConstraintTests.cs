@@ -22,39 +22,50 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
 
     # region Create
 
-    private sealed class ExistingDbIdTestData : TheoryData<string, Action<CreateDialogCommand, FlowContext>, string>
+    public sealed record ExistingDbIdScenario(
+        string DisplayName,
+        Action<CreateDialogCommand, FlowContext> ModifyCommand,
+        string ExpectedErrorText) : ClassDataBase(DisplayName);
+
+    private sealed class ExistingDbIdTestData : TheoryData<ExistingDbIdScenario>
     {
         public ExistingDbIdTestData()
         {
             var dialogId = NewUuidV7();
-            Add("Cannot create dialog with existing id",
-                (x, _) => x.Dto.Id = dialogId,
-                dialogId.ToString());
+            Add(new ExistingDbIdScenario(
+                DisplayName: "Cannot create dialog with existing id",
+                ModifyCommand: (x, _) => x.Dto.Id = dialogId,
+                ExpectedErrorText: dialogId.ToString()));
 
             var dialogAttachment = DialogGenerator.GenerateFakeDialogAttachment();
-            Add("Cannot create dialog attachment with existing attachment id",
-                (x, _) => x.Dto.Attachments.Add(dialogAttachment),
-                dialogAttachment.Id.ToString()!);
+            Add(new ExistingDbIdScenario(
+                DisplayName: "Cannot create dialog attachment with existing attachment id",
+                ModifyCommand: (x, _) => x.Dto.Attachments.Add(dialogAttachment),
+                ExpectedErrorText: dialogAttachment.Id.ToString()!));
 
             var dialogActivity = DialogGenerator.GenerateFakeDialogActivity();
-            Add("Cannot create dialog activity with existing id",
-                (x, _) => x.Dto.Activities.Add(dialogActivity),
-                dialogActivity.Id.ToString()!);
+            Add(new ExistingDbIdScenario(
+                DisplayName: "Cannot create dialog activity with existing id",
+                ModifyCommand: (x, _) => x.Dto.Activities.Add(dialogActivity),
+                ExpectedErrorText: dialogActivity.Id.ToString()!));
 
             var guiAction = DialogGenerator.GenerateFakeDialogGuiActions()[0];
-            Add("Cannot create dialog gui action with existing id",
-                (x, _) => x.Dto.GuiActions.Add(guiAction),
-                guiAction.Id.ToString()!);
+            Add(new ExistingDbIdScenario(
+                DisplayName: "Cannot create dialog gui action with existing id",
+                ModifyCommand: (x, _) => x.Dto.GuiActions.Add(guiAction),
+                ExpectedErrorText: guiAction.Id.ToString()!));
 
             var apiAction = DialogGenerator.GenerateFakeDialogApiActions()[0];
-            Add("Cannot create dialog api action with existing id",
-                (x, _) => x.Dto.ApiActions.Add(apiAction),
-                apiAction.Id.ToString()!);
+            Add(new ExistingDbIdScenario(
+                DisplayName: "Cannot create dialog api action with existing id",
+                ModifyCommand: (x, _) => x.Dto.ApiActions.Add(apiAction),
+                ExpectedErrorText: apiAction.Id.ToString()!));
 
             var dialogTransmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-            Add("Cannot create dialog transmission with existing id",
-                (x, _) => x.Dto.Transmissions.Add(dialogTransmission),
-                dialogTransmission.Id.ToString()!);
+            Add(new ExistingDbIdScenario(
+                DisplayName: "Cannot create dialog transmission with existing id",
+                ModifyCommand: (x, _) => x.Dto.Transmissions.Add(dialogTransmission),
+                ExpectedErrorText: dialogTransmission.Id.ToString()!));
 
             var transmissionAttachment = new TransmissionAttachmentDto
             {
@@ -69,25 +80,25 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
                     }
                 ]
             };
-            Add("Cannot create transmission attachment with existing id",
-                (x, _) =>
+            Add(new ExistingDbIdScenario(
+                DisplayName: "Cannot create transmission attachment with existing id",
+                ModifyCommand: (x, _) =>
                 {
                     var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
                     transmission.Attachments.Add(transmissionAttachment);
                     x.Dto.Transmissions.Add(transmission);
                 },
-                transmissionAttachment.Id.ToString()!);
+                ExpectedErrorText: transmissionAttachment.Id.ToString()!));
         }
     }
 
     [Theory, ClassData(typeof(ExistingDbIdTestData))]
-    public Task Existing_Database_Ids_Tests(string _,
-        Action<CreateDialogCommand, FlowContext> createDialogCommand, string conflictingId) =>
+    public Task Existing_Database_Ids_Tests(ExistingDbIdScenario scenario) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(createDialogCommand)
-            .CreateSimpleDialog(createDialogCommand)
+            .CreateSimpleDialog(scenario.ModifyCommand)
+            .CreateSimpleDialog(scenario.ModifyCommand)
             .ExecuteAndAssert<DomainError>(x =>
-                x.ShouldHaveErrorWithText(conflictingId));
+                x.ShouldHaveErrorWithText(scenario.ExpectedErrorText));
 
     [Fact]
     public async Task Cannot_Use_Existing_IdempotentKey_When_Creating_Dialog()

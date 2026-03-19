@@ -2,16 +2,29 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
-internal sealed class AddingEndUserTransmissionSentLabelTestData : TheoryData<DialogTransmissionType.Values, bool>
+public sealed record AddingEndUserTransmissionSentLabelScenario(
+    string DisplayName,
+    DialogTransmissionType.Values TransmissionType,
+    bool ShouldAddSentLabel) : ClassDataBase(DisplayName);
+
+internal sealed class AddingEndUserTransmissionSentLabelTestData : TheoryData<AddingEndUserTransmissionSentLabelScenario>
 {
     public AddingEndUserTransmissionSentLabelTestData()
     {
         foreach (var type in Enum.GetValues<DialogTransmissionType.Values>())
         {
-            // (transmissionType, shouldAddSentLabel)
-            Add(type, type
+            var shouldAddSentLabel = type
                 is DialogTransmissionType.Values.Submission
-                or DialogTransmissionType.Values.Correction);
+                or DialogTransmissionType.Values.Correction;
+
+            var name = shouldAddSentLabel
+                ? $"Should Add Sent label for type {type}"
+                : $"Should not add Sent label for type {type}";
+
+            Add(new AddingEndUserTransmissionSentLabelScenario(
+                DisplayName: name,
+                TransmissionType: type,
+                ShouldAddSentLabel: shouldAddSentLabel));
         }
     }
 }

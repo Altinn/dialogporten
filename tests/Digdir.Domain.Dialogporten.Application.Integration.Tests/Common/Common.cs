@@ -4,7 +4,13 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
-public sealed class DynamicDateFilterTestData : TheoryData<int?, int?, int[]>
+public sealed record DynamicDateFilterScenario(
+    string DisplayName,
+    int? DueAtAfterYear,
+    int? DueAtBeforeYear,
+    int[] ExpectedYears) : ClassDataBase(DisplayName);
+
+public sealed class DynamicDateFilterTestData : TheoryData<DynamicDateFilterScenario>
 {
     // The numbers added to "currentYear" here represent future years relative to the current year.
     // This is done to create test data for dialogs that are due or visible "soon" (1 to 4 years ahead).
@@ -14,9 +20,21 @@ public sealed class DynamicDateFilterTestData : TheoryData<int?, int?, int[]>
         var currentYear = DateTimeOffset.UtcNow.Year;
 
         // AfterYear, BeforeYear, ExpectedCount, ExpectedYears
-        Add(currentYear + 3, null, [currentYear + 3, currentYear + 4]);
-        Add(null, currentYear + 2, [currentYear + 1, currentYear + 2]);
-        Add(currentYear + 1, currentYear + 2, [currentYear + 1, currentYear + 2]);
+        Add(new DynamicDateFilterScenario(
+            DisplayName: $"DueAtAfter: {currentYear + 3}, DueAtBefore: <empty>, ExpectedYears: [{currentYear + 3},{currentYear + 4}]",
+            DueAtAfterYear: currentYear + 3,
+            DueAtBeforeYear: null,
+            ExpectedYears: [currentYear + 3, currentYear + 4]));
+        Add(new DynamicDateFilterScenario(
+            DisplayName: $"DueAtAfter: <empty>, DueAtBefore: {currentYear + 2}, ExpectedYears: [{currentYear + 1},{currentYear + 2}]",
+            DueAtAfterYear: null,
+            DueAtBeforeYear: currentYear + 2,
+            ExpectedYears: [currentYear + 1, currentYear + 2]));
+        Add(new DynamicDateFilterScenario(
+            DisplayName: $"DueAtAfter: {currentYear + 1}, DueAtBefore: {currentYear + 2}, ExpectedYears: [{currentYear + 1},{currentYear + 2}]",
+            DueAtAfterYear: currentYear + 1,
+            DueAtBeforeYear: currentYear + 2,
+            ExpectedYears: [currentYear + 1, currentYear + 2]));
     }
 }
 

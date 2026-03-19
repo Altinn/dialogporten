@@ -32,14 +32,14 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
             dueAt: CreateDateFromYear(year + 1));
 
     [Theory, ClassData(typeof(DynamicDateFilterTestData))]
-    public async Task Should_Filter_On_VisibleFrom_Date(int? afterYear, int? beforeYear, int[] expectedYears)
+    public async Task Should_Filter_On_VisibleFrom_Date(DynamicDateFilterScenario scenario)
     {
         var expectedDialogIds = new List<Guid>();
 
         var createDialogCommands = Enumerable.Range(DateTimeOffset.UtcNow.Year + 1, 4).Select(year =>
         {
             var dialogId = NewUuidV7();
-            if (expectedYears.Contains(year))
+            if (scenario.ExpectedYears.Contains(year))
             {
                 expectedDialogIds.Add(dialogId);
             }
@@ -52,8 +52,12 @@ public class VisibleFromFilterTests : ApplicationCollectionFixture
             .SearchServiceOwnerDialogs(x =>
             {
                 x.Party = [Party];
-                x.VisibleAfter = afterYear.HasValue ? CreateDateFromYear(afterYear.Value) : null;
-                x.VisibleBefore = beforeYear.HasValue ? CreateDateFromYear(beforeYear.Value) : null;
+                x.VisibleAfter = scenario.DueAtAfterYear.HasValue
+                    ? CreateDateFromYear(scenario.DueAtAfterYear.Value)
+                    : null;
+                x.VisibleBefore = scenario.DueAtBeforeYear.HasValue
+                    ? CreateDateFromYear(scenario.DueAtBeforeYear.Value)
+                    : null;
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result =>
             {

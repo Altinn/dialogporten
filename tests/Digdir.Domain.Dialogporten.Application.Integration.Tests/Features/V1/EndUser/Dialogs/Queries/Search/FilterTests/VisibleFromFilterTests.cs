@@ -12,13 +12,10 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class VisibleFromFilterTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    [Theory, ClassData(typeof(DataSet))]
-    public async Task Should_Filter_On_VisibleFrom(
-        List<DialogData> dataSet,
-        DateTimeOffset searchTime,
-        List<string> expectedReferences)
+    [Theory, ClassData(typeof(VisibleFromTestData))]
+    public async Task Should_Filter_On_VisibleFrom(VisibleFromScenario scenario)
     {
-        var createDialogCommands = dataSet
+        var createDialogCommands = scenario.Dialogs
             .Select(CreateDialogCommand)
             .ToArray();
 
@@ -27,12 +24,12 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
         await FlowBuilder.For(Application)
             .OverrideUtc(creationTime)
             .CreateDialogs(createDialogCommands)
-            .OverrideUtc(searchTime)
+            .OverrideUtc(scenario.VisibleFrom)
             .SearchEndUserDialogs(x => x.Party = [Tests.Common.Common.Party])
             .ExecuteAndAssert<PaginatedList<DialogDto>>(result => result.Items
                 .Select(x => x.ExternalReference)
                 .Should()
-                .BeEquivalentTo(expectedReferences));
+                .BeEquivalentTo(scenario.ExpectedServiceResources));
     }
 
     private static CreateDialogCommand CreateDialogCommand(DialogData data)
@@ -46,12 +43,18 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
         return createDialogCommand;
     }
 
-    private sealed class DataSet : TheoryData<List<DialogData>, DateTimeOffset, List<string>>
+    public sealed record VisibleFromScenario(
+        string DisplayName,
+        List<DialogData> Dialogs,
+        DateTimeOffset VisibleFrom,
+        List<string> ExpectedServiceResources) : ClassDataBase(DisplayName);
+
+    private sealed class VisibleFromTestData : TheoryData<VisibleFromScenario>
     {
         private static readonly DateTimeOffset Jan1 = DateTimeOffset.Parse("2020-01-01T10:00:00Z", CultureInfo.InvariantCulture);
         private static readonly DateTimeOffset Feb1 = DateTimeOffset.Parse("2020-02-01T10:00:00Z", CultureInfo.InvariantCulture);
 
-        public DataSet()
+        public VisibleFromTestData()
         {
             var dialogDataSet = Enumerable.Range(0, 10)
                 .Select(i => new DialogData(
@@ -60,12 +63,36 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
                     CreatedAt: Jan1.AddDays(i),
                     VisibleFrom: Feb1.AddDays(i)))
                 .ToList();
-            // DataSet, SearchTime, ExpectedReferences
-            Add(dialogDataSet, Feb1.AddHours(-1), []);
-            Add(dialogDataSet, Feb1, ["0"]);
-            Add(dialogDataSet, Feb1.AddDays(4), ["0", "1", "2", "3", "4"]);
-            Add(dialogDataSet, Feb1.AddDays(8), ["0", "1", "2", "3", "4", "5", "6", "7", "8"]);
-            Add(dialogDataSet, Feb1.AddDays(14), ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+
+            Add(new VisibleFromScenario(
+                DisplayName: "VisibleFrom search before any dialogs",
+                Dialogs: dialogDataSet,
+                VisibleFrom: Feb1.AddHours(-1),
+                ExpectedServiceResources: []));
+
+            Add(new VisibleFromScenario(
+                DisplayName: "VisibleFrom on Feb1: first dialog",
+                Dialogs: dialogDataSet,
+                VisibleFrom: Feb1,
+                ExpectedServiceResources: ["0"]));
+
+            Add(new VisibleFromScenario(
+                DisplayName: "VisibleFrom before 4 days after Feb1: first five dialogs",
+                Dialogs: dialogDataSet,
+                VisibleFrom: Feb1.AddDays(4),
+                ExpectedServiceResources: ["0", "1", "2", "3", "4"]));
+
+            Add(new VisibleFromScenario(
+                DisplayName: "VisibleFrom before 8 days after Feb1: first nine dialogs",
+                Dialogs: dialogDataSet,
+                VisibleFrom: Feb1.AddDays(8),
+                ExpectedServiceResources: ["0", "1", "2", "3", "4", "5", "6", "7", "8"]));
+
+            Add(new VisibleFromScenario(
+                DisplayName: "VisibleFrom before 14 days after Feb1: all dialogs",
+                Dialogs: dialogDataSet,
+                VisibleFrom: Feb1.AddDays(14),
+                ExpectedServiceResources: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]));
         }
     }
 

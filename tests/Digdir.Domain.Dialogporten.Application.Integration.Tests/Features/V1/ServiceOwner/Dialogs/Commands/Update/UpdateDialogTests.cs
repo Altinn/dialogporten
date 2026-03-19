@@ -25,6 +25,7 @@ using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.Service
 using GuiActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.GuiActionDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
+using SearchTagDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.SearchTagDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
@@ -132,45 +133,51 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     .BeCloseTo(initialDate, TimeSpan.FromSeconds(1)));
     }
 
-    private sealed class DatesInPastTestData : TheoryData<string, Action<UpdateDialogCommand>>
+    public sealed record DatesInPastScenario(string DisplayName, Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+
+    private sealed class DatesInPastTestData : TheoryData<DatesInPastScenario>
     {
         public DatesInPastTestData()
         {
             var pastDate = DateTimeOffset.UtcNow.AddDays(-1);
-            Add("Can update dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
-                x => x.Dto.DueAt = pastDate);
-            Add("Can update dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
-                x => x.Dto.ExpiresAt = pastDate);
+
+            Add(new DatesInPastScenario(
+                DisplayName: "Can update dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
+                UpdateDialog: x => x.Dto.DueAt = pastDate));
+
+            Add(new DatesInPastScenario(
+                DisplayName: "Can update dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
+                UpdateDialog: x => x.Dto.ExpiresAt = pastDate));
         }
     }
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Can_Update_Dialog_With_Past_Dates_When_Admin_Scope(
-        string _, Action<UpdateDialogCommand> updateDialog) =>
+        DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .AsAdminUser()
-            .UpdateDialog(updateDialog)
+            .UpdateDialog(scenario.UpdateDialog)
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Can_Update_Dialog_With_Past_Dates_When_Silent_Update(
-        string _, Action<UpdateDialogCommand> updateDialog) =>
+        DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .UpdateDialog(x =>
             {
                 x.IsSilentUpdate = true;
-                updateDialog(x);
+                scenario.UpdateDialog(x);
             })
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Cannot_Update_Dialog_With_Past_Dates_Without_Silent_Update(
-        string _, Action<UpdateDialogCommand> updateDialog) =>
+        DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(updateDialog)
+            .UpdateDialog(scenario.UpdateDialog)
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText("must be in future"));
 
@@ -431,28 +438,51 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ContainSingle(x => x.Id == userDefinedGuiActionId);
     }
 
-    private sealed class ContentUpdatedAtTestData : TheoryData<string, Action<UpdateDialogCommand>>
+    public sealed record ContentUpdatedAtScenario(
+        string DisplayName,
+        Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+
+    private sealed class ContentUpdatedAtTestData : TheoryData<ContentUpdatedAtScenario>
     {
         public ContentUpdatedAtTestData()
         {
             const string baseDesc = "ContentUpdatedAt should update when";
 
-            Add($"{baseDesc} dialog content is updated", x => x.ChangeTitle());
-            Add($"{baseDesc} attachments are added", x => x.AddAttachment());
-            Add($"{baseDesc} transmissions are added", x => x.AddTransmission());
-            Add($"{baseDesc} GUI actions are added", x => x.AddGuiAction());
-            Add($"{baseDesc} API actions are added", x => x.AddApiAction());
-            Add($"{baseDesc} status changes", x => x.Dto.Status = DialogStatusInput.InProgress);
-            Add($"{baseDesc} extended status changes", x => x.Dto.ExtendedStatus = "new extended status");
+            Add(new ContentUpdatedAtScenario(
+                DisplayName: $"{baseDesc} dialog content is updated",
+                UpdateDialog: x => x.ChangeTitle()));
+
+            Add(new ContentUpdatedAtScenario(
+                DisplayName: $"{baseDesc} attachments are added",
+                UpdateDialog: x => x.AddAttachment()));
+
+            Add(new ContentUpdatedAtScenario(
+                DisplayName: $"{baseDesc} transmissions are added",
+                UpdateDialog: x => x.AddTransmission()));
+
+            Add(new ContentUpdatedAtScenario(
+                DisplayName: $"{baseDesc} GUI actions are added",
+                UpdateDialog: x => x.AddGuiAction()));
+
+            Add(new ContentUpdatedAtScenario(
+                DisplayName: $"{baseDesc} API actions are added",
+                UpdateDialog: x => x.AddApiAction()));
+
+            Add(new ContentUpdatedAtScenario(
+                DisplayName: $"{baseDesc} status changes",
+                UpdateDialog: x => x.Dto.Status = DialogStatusInput.InProgress));
+
+            Add(new ContentUpdatedAtScenario(
+                DisplayName: $"{baseDesc} extended status changes",
+                UpdateDialog: x => x.Dto.ExtendedStatus = "new extended status"));
         }
     }
 
     [Theory, ClassData(typeof(ContentUpdatedAtTestData))]
-    public Task ContentUpdatedAt_Should_Change_When_Content_Updates(string _,
-        Action<UpdateDialogCommand> updateDialog) =>
+    public Task ContentUpdatedAt_Should_Change_When_Content_Updates(ContentUpdatedAtScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.Status = DialogStatusInput.Awaiting)
-            .AssertSuccessAndUpdateDialog(updateDialog)
+            .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
@@ -460,29 +490,55 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 x.ContentUpdatedAt.Should().Be(x.UpdatedAt);
             });
 
-    private sealed class ContentNotUpdatedAtTestData : TheoryData<string, Action<UpdateDialogCommand>>
+    public sealed record ContentNotUpdatedAtScenario(
+        string DisplayName,
+        Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+
+    private sealed class ContentNotUpdatedAtTestData : TheoryData<ContentNotUpdatedAtScenario>
     {
         public ContentNotUpdatedAtTestData()
         {
             const string baseDesc = "ContentUpdatedAt should not update when";
 
-            Add($"{baseDesc} external referenced is updated", x => x.Dto.ExternalReference = "ext ref");
-            Add($"{baseDesc} search tags are added", x => x.Dto.SearchTags.Add(new() { Value = "new tag" }));
-            Add($"{baseDesc} process changes", x => x.Dto.Process = "some:process");
-            Add($"{baseDesc} dueAt changes", x => x.Dto.DueAt = DateTimeOffset.UtcNow.AddYears(10));
-            Add($"{baseDesc} expiresAt changes", x => x.Dto.ExpiresAt = DateTimeOffset.UtcNow.AddYears(10));
-            Add($"{baseDesc} progress changes", x => x.Dto.Progress = (x.Dto.Progress % 100) + 1);
-            Add($"{baseDesc} isApiOnly changes", x => x.Dto.IsApiOnly = !x.Dto.IsApiOnly);
-            Add($"{baseDesc} activities are added", x => x.AddActivity());
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} external reference is updated",
+                UpdateDialog: x => x.Dto.ExternalReference = "ext ref"));
+
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} search tags are added",
+                UpdateDialog: x => x.Dto.SearchTags.Add(new SearchTagDto { Value = "new tag" })));
+
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} process changes",
+                UpdateDialog: x => x.Dto.Process = "some:process"));
+
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} dueAt changes",
+                UpdateDialog: x => x.Dto.DueAt = DateTimeOffset.UtcNow.AddYears(10)));
+
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} expiresAt changes",
+                UpdateDialog: x => x.Dto.ExpiresAt = DateTimeOffset.UtcNow.AddYears(10)));
+
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} progress changes",
+                UpdateDialog: x => x.Dto.Progress = (x.Dto.Progress % 100) + 1));
+
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} isApiOnly changes",
+                UpdateDialog: x => x.Dto.IsApiOnly = !x.Dto.IsApiOnly));
+
+            Add(new ContentNotUpdatedAtScenario(
+                DisplayName: $"{baseDesc} activities are added",
+                UpdateDialog: x => x.AddActivity()));
         }
     }
 
     [Theory, ClassData(typeof(ContentNotUpdatedAtTestData))]
-    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Not_Updated(string _,
-        Action<UpdateDialogCommand> updateDialog) =>
+    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Not_Updated(ContentNotUpdatedAtScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.Progress = 1)
-            .AssertSuccessAndUpdateDialog(updateDialog)
+            .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
@@ -546,29 +602,53 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 error.ShouldHaveErrorWithText(nameof(UpdateDialogDto.ExpiresAt)));
     }
 
-    private sealed class ContentNotUpdatedAtSilentUpdateTestData : TheoryData<string, Action<UpdateDialogCommand>>
+    public sealed record ContentNotUpdatedAtSilentUpdateScenario(
+        string DisplayName,
+        Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+
+    private sealed class ContentNotUpdatedAtSilentUpdateTestData : TheoryData<ContentNotUpdatedAtSilentUpdateScenario>
     {
         public ContentNotUpdatedAtSilentUpdateTestData()
         {
             const string baseDesc = "ContentUpdatedAt should not update when";
             const string whenSilent = "and IsSilentUpdate is set to true";
 
-            Add($"{baseDesc} dialog content is updated {whenSilent}", x => { x.ChangeTitle(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} attachments are added {whenSilent}", x => { x.AddAttachment(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} transmissions are added {whenSilent}", x => { x.AddTransmission(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} GUI actions are added {whenSilent}", x => { x.AddGuiAction(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} API actions are added {whenSilent}", x => { x.AddApiAction(); x.IsSilentUpdate = true; });
-            Add($"{baseDesc} status changes {whenSilent}", x => { x.Dto.Status = DialogStatusInput.InProgress; x.IsSilentUpdate = true; });
-            Add($"{baseDesc} extended status changes {whenSilent}", x => { x.Dto.ExtendedStatus = "new extended status"; x.IsSilentUpdate = true; });
+            Add(new ContentNotUpdatedAtSilentUpdateScenario(
+                DisplayName: $"{baseDesc} dialog content is updated {whenSilent}",
+                UpdateDialog: x => { x.ChangeTitle(); x.IsSilentUpdate = true; }));
+
+            Add(new ContentNotUpdatedAtSilentUpdateScenario(
+                DisplayName: $"{baseDesc} attachments are added {whenSilent}",
+                UpdateDialog: x => { x.AddAttachment(); x.IsSilentUpdate = true; }));
+
+            Add(new ContentNotUpdatedAtSilentUpdateScenario(
+                DisplayName: $"{baseDesc} transmissions are added {whenSilent}",
+                UpdateDialog: x => { x.AddTransmission(); x.IsSilentUpdate = true; }));
+
+            Add(new ContentNotUpdatedAtSilentUpdateScenario(
+                DisplayName: $"{baseDesc} GUI actions are added {whenSilent}",
+                UpdateDialog: x => { x.AddGuiAction(); x.IsSilentUpdate = true; }));
+
+            Add(new ContentNotUpdatedAtSilentUpdateScenario(
+                DisplayName: $"{baseDesc} API actions are added {whenSilent}",
+                UpdateDialog: x => { x.AddApiAction(); x.IsSilentUpdate = true; }));
+
+            Add(new ContentNotUpdatedAtSilentUpdateScenario(
+                DisplayName: $"{baseDesc} status changes {whenSilent}",
+                UpdateDialog: x => { x.Dto.Status = DialogStatusInput.InProgress; x.IsSilentUpdate = true; }));
+
+            Add(new ContentNotUpdatedAtSilentUpdateScenario(
+                DisplayName: $"{baseDesc} extended status changes {whenSilent}",
+                UpdateDialog: x => { x.Dto.ExtendedStatus = "new extended status"; x.IsSilentUpdate = true; }));
         }
     }
 
     [Theory, ClassData(typeof(ContentNotUpdatedAtSilentUpdateTestData))]
-    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Updated_Silently(string _,
-        Action<UpdateDialogCommand> updateDialog) =>
+    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Updated_Silently(
+        ContentNotUpdatedAtSilentUpdateScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .AssertSuccessAndUpdateDialog(updateDialog)
+            .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
@@ -651,14 +731,14 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
     [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
     public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
-        DialogTransmissionType.Values transmissionType, bool shouldAddSentLabel) =>
+        AddingEndUserTransmissionSentLabelScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
-                x.AddTransmission(x => x.Type = transmissionType))
+                x.AddTransmission(x => x.Type = scenario.TransmissionType))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                if (shouldAddSentLabel)
+                if (scenario.ShouldAddSentLabel)
                 {
                     x.EndUserContext.SystemLabels.Should().ContainSingle(
                         label => label == SystemLabel.Values.Sent);
@@ -671,13 +751,19 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             });
 
     [Theory, ClassData(typeof(DialogContentLengthTestData))]
-    public Task Content_Length_Validation_Test(Action<UpdateDialogCommand> action, Type expectedResult) =>
+    public Task Content_Length_Validation_Test(
+        DialogContentLengthScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .UpdateDialog(action)
-            .ExecuteAndAssert(expectedResult);
+            .UpdateDialog(scenario.UpdateDialog)
+            .ExecuteAndAssert(scenario.ExpectedResultType);
 
-    private sealed class DialogContentLengthTestData : TheoryData<Action<UpdateDialogCommand>, Type>
+    public sealed record DialogContentLengthScenario(
+        string DisplayName,
+        Action<UpdateDialogCommand> UpdateDialog,
+        Type ExpectedResultType) : ClassDataBase(DisplayName);
+
+    private sealed class DialogContentLengthTestData : TheoryData<DialogContentLengthScenario>
     {
         private static string Repeat(char c, int x) => new(c, x);
         private static int GetMaxLength(DialogContentType.Values value) =>
@@ -709,8 +795,15 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
         private void AddLengthTests(Action<UpdateDialogCommand, string> applyValue, int maxLength)
         {
-            Add(x => applyValue(x, Repeat('x', maxLength)), typeof(UpdateDialogSuccess));
-            Add(x => applyValue(x, Repeat('x', maxLength + 1)), typeof(ValidationError));
+            Add(new DialogContentLengthScenario(
+                DisplayName: $"Dialog content length {maxLength} characters",
+                UpdateDialog: x => applyValue(x, Repeat('x', maxLength)),
+                ExpectedResultType: typeof(UpdateDialogSuccess)));
+
+            Add(new DialogContentLengthScenario(
+                DisplayName: $"Dialog content length {maxLength + 1} characters",
+                UpdateDialog: x => applyValue(x, Repeat('x', maxLength + 1)),
+                ExpectedResultType: typeof(ValidationError)));
         }
 
         private static ContentValueDto CreateContentDto(string content) => new()

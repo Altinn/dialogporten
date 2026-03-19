@@ -34,10 +34,10 @@ public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE
         // Arrange
         var instanceGuid = Guid.NewGuid();
         var instanceRef = $"urn:altinn:instance-id:1337/{instanceGuid}";
-        const string party = "urn:altinn:organization:identifier-no:991825827";
+        var party = string.Empty;
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
-            dialog.Party = party;
+            party = dialog.Party;
             dialog.ServiceOwnerContext = new V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
             {
                 ServiceOwnerLabels =
@@ -60,7 +60,7 @@ public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE
         lookup.Should().NotBeNull();
         lookup.DialogId.Should().Be(dialogId);
         lookup.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
-        lookup.Party.Should().Be(party);
+        lookup.Party.Should().NotBeEmpty().And.Be(party);
         lookup.ServiceResource.Id.Should().NotBeNullOrWhiteSpace();
         lookup.ServiceOwner.Code.Should().NotBeNullOrWhiteSpace();
     }

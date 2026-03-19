@@ -33,6 +33,8 @@ public sealed class DialogLookup
 {
     public Guid DialogId { get; set; }
     public string InstanceRef { get; set; } = null!;
+    public string Party { get; set; } = null!;
+
     public DialogLookupServiceResource ServiceResource { get; set; } = null!;
     public DialogLookupServiceOwner ServiceOwner { get; set; } = null!;
     public DialogLookupAuthorizationEvidence AuthorizationEvidence { get; set; } = null!;

@@ -497,6 +497,9 @@
           "instanceRef": {
             "type": "string"
           },
+          "party": {
+            "type": "string"
+          },
           "serviceOwner": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceOwner"
           },
@@ -621,6 +624,9 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "party": {
+            "type": "string"
           },
           "serviceOwner": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceOwner"

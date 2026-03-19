@@ -5780,6 +5780,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("instanceRef")]
         public string InstanceRef { get; set; }
 
+        [JsonPropertyName("party")]
+        public string Party { get; set; }
+
         [JsonPropertyName("serviceResource")]
         public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; }
 

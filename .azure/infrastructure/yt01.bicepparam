@@ -41,8 +41,8 @@ param postgresConfiguration = {
     iops: 24000
     throughput: 1200
   }
-  enableIndexTuning: false
-  enableQueryPerformanceInsight: false
+  enableIndexTuning: true
+  enableQueryPerformanceInsight: true
   backupRetentionDays: 7
   availabilityZone: '1'
   enableBackupVault: false

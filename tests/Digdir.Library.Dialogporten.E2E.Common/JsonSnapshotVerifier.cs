@@ -21,10 +21,10 @@ public static class JsonSnapshotVerifier
         ArgumentNullException.ThrowIfNull(json);
 
         var scrubbed = scrubGuids
-            ? GuidRegex.Regex().Replace(json, "00000000-0000-0000-0000-000000000000")
+            ? SnapshotScrubbing.GuidRegex().Replace(json, "00000000-0000-0000-0000-000000000000")
             : json;
 
-        scrubbed = GuidRegex.TraceIdRegex()
+        scrubbed = SnapshotScrubbing.TraceIdRegex()
             .Replace(scrubbed, "\"traceId\": \"00-00000000000000000000000000000000-0000000000000000-00\"");
 
         using var jsonDocument = JsonDocument.Parse(scrubbed);
@@ -46,11 +46,11 @@ public static class JsonSnapshotVerifier
 
 }
 
-internal static partial class GuidRegex
+internal static partial class SnapshotScrubbing
 {
     [GeneratedRegex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")]
-    public static partial Regex Regex();
+    public static partial Regex GuidRegex();
 
-    [GeneratedRegex("""traceId":\s*"[^"]+""")]
+    [GeneratedRegex("\"traceId\":\\s*\"[^\"]+\"")]
     public static partial Regex TraceIdRegex();
 }

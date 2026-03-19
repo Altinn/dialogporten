@@ -8,7 +8,7 @@ public static class EnvironmentExtensions
     {
         public static string GetDotnetEnvironment() =>
             Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
-         ?? Environments.Development;
+            ?? Environments.Development;
 
         public static string GetTokenGeneratorEnvironment() =>
             Environment.GetDotnetEnvironment() switch

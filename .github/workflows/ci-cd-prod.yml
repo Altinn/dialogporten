@@ -109,8 +109,8 @@ jobs:
 
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for prod
-    needs: [ deploy-apps ]
-    if: ${{ always() && !failure() && !cancelled() && needs.deploy-apps.outputs.deployment_executed == 'true' }}
+    needs: [ deploy-apps, deploy-infra ]
+    if: ${{ always() && !failure() && !cancelled() && (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
     with:
       environment-label: prod

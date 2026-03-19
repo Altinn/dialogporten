@@ -1,6 +1,10 @@
 name: Deploy infrastructure
 on:
   workflow_call:
+    outputs:
+      deployment_executed:
+        description: "Indicates if the infrastructure deployment was actually executed"
+        value: ${{ jobs.deploy.result == 'success' && !inputs.dryRun }}
     secrets:
       AZURE_CLIENT_ID:
         required: true

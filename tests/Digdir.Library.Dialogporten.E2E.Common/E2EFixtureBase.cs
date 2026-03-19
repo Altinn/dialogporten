@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,7 +24,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        DotnetEnvironment = E2EEnvironment.GetDotnetEnvironment();
+        DotnetEnvironment = Environment.GetDotnetEnvironment();
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)

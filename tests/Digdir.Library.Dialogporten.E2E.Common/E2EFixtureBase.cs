@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,17 +18,18 @@ public abstract class E2EFixtureBase : IAsyncLifetime
     private ITokenOverridesAccessor? _tokenOverridesAccessor;
 
     private PreflightState? PreflightState { get; set; }
+    public string DotnetEnvironment { get; private set; } = Environments.Development;
 
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
-        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? Environments.Development;
+        DotnetEnvironment = Environment.GetDotnetEnvironment();
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: true)
-            .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddJsonFile($"appsettings.{DotnetEnvironment}.json", optional: true)
             .AddJsonFile("appsettings.local.json", optional: true)
             .AddUserSecrets<E2ESettings>(optional: true)
             .AddEnvironmentVariables()
@@ -66,7 +68,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         services.Decorate<IServiceownerApi, EphemeralDialogDecorator>();
 
-        var graphQlPath = environment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
+        var graphQlPath = DotnetEnvironment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
         var graphQlUriBuilder = new UriBuilder(settings.DialogportenBaseUri)
         {
             Path = graphQlPath

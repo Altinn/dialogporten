@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -71,6 +72,19 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     attachment.Name = new string('a', Constants.DefaultMaxStringLength + 1)))
             .ExecuteAndAssert<ValidationError>(result =>
                 result.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Name)));
+
+    [Fact]
+    public Task Can_Not_Create_Transmission_On_Deleted_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .DeleteDialog()
+            .CreateTransmission((_, _) => { })
+            .ExecuteAndAssert<EntityDeleted<DialogEntity>>((x, ctx) =>
+            {
+                x.Name.Should().Be("DialogEntity");
+                var id = ctx.GetDialogId();
+                x.Message.Should().Be($"Entity 'DialogEntity' with the following key(s) is removed: ({id}).");
+            });
 
     [Fact]
     public Task Cannot_Create_More_Than_ShortMaxValue_Transmissions() =>

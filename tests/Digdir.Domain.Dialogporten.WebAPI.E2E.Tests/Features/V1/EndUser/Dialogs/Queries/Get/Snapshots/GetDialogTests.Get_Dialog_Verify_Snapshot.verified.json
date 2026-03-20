@@ -192,7 +192,7 @@
   },
   "contentUpdatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-  "dialogToken": "local-development-jws",
+  "dialogToken": "***",
   "dueAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "endUserContext": {
     "revision": "00000000-0000-0000-0000-000000000000",

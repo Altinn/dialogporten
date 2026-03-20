@@ -39,6 +39,9 @@ public static class JsonSnapshotVerifier
         scrubbed = SnapshotScrubbing.TraceIdRegex()
             .Replace(scrubbed, "\"traceId\": \"00-00000000000000000000000000000000-0000000000000000-00\"");
 
+        scrubbed = SnapshotScrubbing.DialogTokenRegex()
+            .Replace(scrubbed, "\"dialogToken\": \"***\"");
+
         using var jsonDocument = JsonDocument.Parse(scrubbed);
         var prettyJson = JsonSerializer.Serialize(jsonDocument.RootElement, IndentedJson);
 
@@ -65,6 +68,9 @@ internal static partial class SnapshotScrubbing
 
     [GeneratedRegex("\"traceId\":\\s*\"[^\"]+\"")]
     public static partial Regex TraceIdRegex();
+
+    [GeneratedRegex("\"dialogToken\":\\s*\"[^\"]+\"")]
+    public static partial Regex DialogTokenRegex();
 
     [GeneratedRegex("\"\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,7})?[+-]\\d{2}:\\d{2}\"")]
     public static partial Regex DateTimeOffsetRegex();

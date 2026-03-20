@@ -68,6 +68,7 @@ public sealed class DialogTransmission :
         _domainEvents.Clear();
         return events;
     }
+    public bool HasEvents() => _domainEvents.Count != 0;
 }
 
 public sealed class DialogTransmissionSenderActor : Actor, IImmutableEntity

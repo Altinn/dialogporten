@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.108.2](https://github.com/Altinn/dialogporten/compare/v1.108.1...v1.108.2) (2026-03-20)
+
+
+### Miscellaneous Chores
+
+* **infra:** update PostgreSQL SKU to Standard_E8ads_v5 in staging migration parameters ([#3643](https://github.com/Altinn/dialogporten/issues/3643)) ([17ecda8](https://github.com/Altinn/dialogporten/commit/17ecda8413363bd58538e6b86d40f53175c71a14))
+
 ## [1.108.1](https://github.com/Altinn/dialogporten/compare/v1.108.0...v1.108.1) (2026-03-20)
 
 

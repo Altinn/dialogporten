@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.108.1](https://github.com/Altinn/dialogporten/compare/v1.108.0...v1.108.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* **e2e:** use correct serviceowner org number in yt01 ([#3641](https://github.com/Altinn/dialogporten/issues/3641)) ([af185c8](https://github.com/Altinn/dialogporten/commit/af185c808237e8d29b3aa38e51ca4e63130e5481))
+
+
+### Miscellaneous Chores
+
+* **infra:** add PostgreSQL migration target for staging and prod ([#3639](https://github.com/Altinn/dialogporten/issues/3639)) ([a3d4b23](https://github.com/Altinn/dialogporten/commit/a3d4b238c43e7e51ed6ffdec9c3dccb9f6d25091))
+
 ## [1.108.0](https://github.com/Altinn/dialogporten/compare/v1.107.0...v1.108.0) (2026-03-20)
 
 

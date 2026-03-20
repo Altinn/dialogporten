@@ -259,7 +259,7 @@ public static class DialogTestData
                 a.PerformedBy = new V1ServiceOwnerCommonActors_Actor
                 {
                     ActorType = Actors_ActorType.PartyRepresentative,
-                    ActorId = $"urn:altinn:organization:identifier-no:{E2EConstants.DefaultServiceOwnerOrgNr}"
+                    ActorId = $"urn:altinn:organization:identifier-no:{E2EConstants.GetDefaultServiceOwnerOrgNr()}"
                 };
                 a.Description =
                 [

@@ -8,7 +8,10 @@ public sealed record DynamicDateFilterScenario(
     string DisplayName,
     int? DueAtAfterYear,
     int? DueAtBeforeYear,
-    int[] ExpectedYears) : ClassDataBase(DisplayName);
+    int[] ExpectedYears) : IClassDataBase
+{
+    public override string ToString() => DisplayName;
+}
 
 public sealed class DynamicDateFilterTestData : TheoryData<DynamicDateFilterScenario>
 {

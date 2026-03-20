@@ -201,7 +201,10 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
         string DisplayName,
         ClaimsPrincipal User,
         Action<TransmissionDto> ModifyTransmission,
-        Type ExpectedResultType) : ClassDataBase(DisplayName);
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class HtmlContentTestData : TheoryData<HtmlContentScenario>
     {

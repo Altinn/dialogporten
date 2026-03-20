@@ -12,7 +12,10 @@ public class LanguageCodeTests(DialogApplication application) : ApplicationColle
     public sealed record CreateDialogLanguageCodeScenario(
         string DisplayName,
         Action<CreateDialogCommand, FlowContext> ModifyCommand,
-        bool ExpectSuccess) : ClassDataBase(DisplayName);
+        bool ExpectSuccess) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class CreateDialogLanguageCodeTestData : TheoryData<CreateDialogLanguageCodeScenario>
     {

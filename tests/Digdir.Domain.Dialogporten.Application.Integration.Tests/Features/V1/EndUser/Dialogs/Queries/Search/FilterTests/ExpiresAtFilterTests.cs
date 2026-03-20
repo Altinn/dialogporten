@@ -48,7 +48,10 @@ public class ExpiresAtFilterTests(DialogApplication application) : ApplicationCo
         string DisplayName,
         List<DialogData> Dialogs,
         DateTimeOffset ExpiresAtBefore,
-        List<string> ExpectedServiceResources) : ClassDataBase(DisplayName);
+        List<string> ExpectedServiceResources) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class ExpiresAtTestData : TheoryData<ExpiresAtScenario>
     {

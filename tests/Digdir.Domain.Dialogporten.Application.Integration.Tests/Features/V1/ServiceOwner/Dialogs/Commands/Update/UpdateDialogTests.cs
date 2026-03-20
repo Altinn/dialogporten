@@ -133,7 +133,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                     .BeCloseTo(initialDate, TimeSpan.FromSeconds(1)));
     }
 
-    public sealed record DatesInPastScenario(string DisplayName, Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+    public sealed record DatesInPastScenario(string DisplayName, Action<UpdateDialogCommand> UpdateDialog) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class DatesInPastTestData : TheoryData<DatesInPastScenario>
     {
@@ -440,7 +443,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
     public sealed record ContentUpdatedAtScenario(
         string DisplayName,
-        Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+        Action<UpdateDialogCommand> UpdateDialog) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class ContentUpdatedAtTestData : TheoryData<ContentUpdatedAtScenario>
     {
@@ -492,7 +498,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
     public sealed record ContentNotUpdatedAtScenario(
         string DisplayName,
-        Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+        Action<UpdateDialogCommand> UpdateDialog) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class ContentNotUpdatedAtTestData : TheoryData<ContentNotUpdatedAtScenario>
     {
@@ -604,7 +613,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
     public sealed record ContentNotUpdatedAtSilentUpdateScenario(
         string DisplayName,
-        Action<UpdateDialogCommand> UpdateDialog) : ClassDataBase(DisplayName);
+        Action<UpdateDialogCommand> UpdateDialog) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class ContentNotUpdatedAtSilentUpdateTestData : TheoryData<ContentNotUpdatedAtSilentUpdateScenario>
     {
@@ -761,7 +773,10 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     public sealed record DialogContentLengthScenario(
         string DisplayName,
         Action<UpdateDialogCommand> UpdateDialog,
-        Type ExpectedResultType) : ClassDataBase(DisplayName);
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class DialogContentLengthTestData : TheoryData<DialogContentLengthScenario>
     {

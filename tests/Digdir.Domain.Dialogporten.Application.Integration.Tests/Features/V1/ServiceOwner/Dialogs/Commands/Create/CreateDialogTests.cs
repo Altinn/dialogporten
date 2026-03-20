@@ -35,7 +35,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public sealed record CreateDialogWithSpecifiedDialogIdScenario(
         string DisplayName,
         Guid DialogId,
-        Type ExpectedResultType) : ClassDataBase(DisplayName);
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class CreateDialogWithSpecifiedDialogIdTestData : TheoryData<CreateDialogWithSpecifiedDialogIdScenario>
     {
@@ -86,7 +89,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public sealed record CreateDialogWithSpecifiedCreatedAtScenario(
         string DisplayName,
         DateTimeOffset CreatedAt,
-        Type ExpectedResultType) : ClassDataBase(DisplayName);
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class CreateDialogWithSpecifiedCreatedAtTestData : TheoryData<CreateDialogWithSpecifiedCreatedAtScenario>
     {
@@ -119,7 +125,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = scenario.CreatedAt)
             .ExecuteAndAssert(scenario.ExpectedResultType);
 
-    public sealed record CreateDialogWithSpecifiedPartyScenario(string DisplayName, string Party) : ClassDataBase(DisplayName);
+    public sealed record CreateDialogWithSpecifiedPartyScenario(string DisplayName, string Party) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<CreateDialogWithSpecifiedPartyScenario>
     {
@@ -206,7 +215,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public sealed record ValidUpdatedAtScenario(
         string DisplayName,
         DateTimeOffset? CreatedAt,
-        DateTimeOffset UpdatedAt) : ClassDataBase(DisplayName);
+        DateTimeOffset UpdatedAt) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class ValidUpdatedAtTestData : TheoryData<ValidUpdatedAtScenario>
     {
@@ -253,7 +265,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public sealed record InvalidUpdatedAtScenario(
         string DisplayName,
         DateTimeOffset? CreatedAt,
-        DateTimeOffset UpdatedAt) : ClassDataBase(DisplayName);
+        DateTimeOffset UpdatedAt) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class InvalidUpdatedAtTestData : TheoryData<InvalidUpdatedAtScenario>
     {
@@ -295,7 +310,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     public sealed record InvalidTransmissionContentScenario(
         string DisplayName,
-        TransmissionContentDto? Content) : ClassDataBase(DisplayName);
+        TransmissionContentDto? Content) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class InvalidTransmissionContentTestData : TheoryData<InvalidTransmissionContentScenario>
     {
@@ -372,7 +390,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
         string DisplayName,
         ClaimsPrincipal User,
         Action<CreateDialogCommand, FlowContext> ModifyCommand,
-        Type ExpectedResultType) : ClassDataBase(DisplayName);
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class HtmlContentTestData : TheoryData<HtmlContentScenario>
     {
@@ -509,7 +530,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert(expectedType);
 
-    public sealed record DatesInPastScenario(string DisplayName, Action<CreateDialogCommand, FlowContext> ModifyCommand) : ClassDataBase(DisplayName);
+    public sealed record DatesInPastScenario(string DisplayName, Action<CreateDialogCommand, FlowContext> ModifyCommand) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class DatesInPastTestData : TheoryData<DatesInPastScenario>
     {
@@ -562,7 +586,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
         string DisplayName,
         Action<CreateDialogCommand, FlowContext> CreateDialog,
         int ExpectedFromPartyTransmissions,
-        int ExpectedFromServiceOwnerTransmissions) : ClassDataBase(DisplayName);
+        int ExpectedFromServiceOwnerTransmissions) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class TransmissionsCountTestData : TheoryData<TransmissionsCountScenario>
     {
@@ -681,7 +708,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public sealed record SystemLabelOnDialogCreateScenario(
         string DisplayName,
         SystemLabel.Values Label,
-        bool ShouldSucceed) : ClassDataBase(DisplayName);
+        bool ShouldSucceed) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class SystemLabelOnDialogCreateTestData : TheoryData<SystemLabelOnDialogCreateScenario>
     {
@@ -783,7 +813,10 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public sealed record DialogContentLengthScenario(
         string DisplayName,
         Action<CreateDialogCommand, FlowContext> ModifyCommand,
-        Type ExpectedResultType) : ClassDataBase(DisplayName);
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class DialogContentLengthTestData : TheoryData<DialogContentLengthScenario>
     {

@@ -47,7 +47,10 @@ public class VisibleFromFilterTests(DialogApplication application) : Application
         string DisplayName,
         List<DialogData> Dialogs,
         DateTimeOffset VisibleFrom,
-        List<string> ExpectedServiceResources) : ClassDataBase(DisplayName);
+        List<string> ExpectedServiceResources) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class VisibleFromTestData : TheoryData<VisibleFromScenario>
     {

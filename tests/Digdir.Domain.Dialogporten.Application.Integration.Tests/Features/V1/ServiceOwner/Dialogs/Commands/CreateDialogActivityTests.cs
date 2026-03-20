@@ -432,7 +432,10 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     public sealed record CreateInvalidActivityScenario(
         string DisplayName,
         Func<FlowContext, CreateActivityCommand> CreateCommand,
-        List<string> ExpectedErrorTexts) : ClassDataBase(DisplayName);
+        List<string> ExpectedErrorTexts) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class CreateInvalidActivityTestData : TheoryData<CreateInvalidActivityScenario>
     {

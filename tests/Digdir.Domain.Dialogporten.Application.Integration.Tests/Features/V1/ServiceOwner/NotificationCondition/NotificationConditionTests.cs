@@ -16,7 +16,10 @@ public class NotificationConditionTests(DialogApplication application) : Applica
 {
     public sealed record TransmissionNotificationConditionScenario(
         string DisplayName,
-        DialogActivityType.Values ActivityType) : ClassDataBase(DisplayName);
+        DialogActivityType.Values ActivityType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private static readonly bool[] ExpectedSendNotificationsValues = [true, false];
 

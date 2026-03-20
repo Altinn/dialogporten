@@ -25,7 +25,10 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
     public sealed record ExistingDbIdScenario(
         string DisplayName,
         Action<CreateDialogCommand, FlowContext> ModifyCommand,
-        string ExpectedErrorText) : ClassDataBase(DisplayName);
+        string ExpectedErrorText) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
 
     private sealed class ExistingDbIdTestData : TheoryData<ExistingDbIdScenario>
     {

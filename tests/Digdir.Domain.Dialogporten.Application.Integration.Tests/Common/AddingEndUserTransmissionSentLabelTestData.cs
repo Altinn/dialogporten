@@ -5,7 +5,10 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 public sealed record AddingEndUserTransmissionSentLabelScenario(
     string DisplayName,
     DialogTransmissionType.Values TransmissionType,
-    bool ShouldAddSentLabel) : ClassDataBase(DisplayName);
+    bool ShouldAddSentLabel) : IClassDataBase
+{
+    public override string ToString() => DisplayName;
+}
 
 internal sealed class AddingEndUserTransmissionSentLabelTestData : TheoryData<AddingEndUserTransmissionSentLabelScenario>
 {

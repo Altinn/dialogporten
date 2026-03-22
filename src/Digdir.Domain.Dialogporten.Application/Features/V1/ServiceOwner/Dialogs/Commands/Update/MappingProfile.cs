@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -54,7 +55,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.ConsumerTypeId, opt => opt.MapFrom(src => src.ConsumerType));
 
         CreateMap<ContentDto?, List<DialogContent>?>()
-            .ConvertUsing<DialogContentInputConverter<ContentDto>>();
+            .ConvertUsing<ContentDtoToDialogContentConverter<ContentDto>>();
 
         // Since these are append-only, we don't need to merge with existing
         // activity/transmission records and thus can map complex properties

@@ -186,7 +186,7 @@ public sealed class TransmissionDto
     public List<TransmissionNavigationalActionDto> NavigationalActions { get; set; } = [];
 }
 
-public sealed class TransmissionContentDto
+public sealed class TransmissionContentDto : ITransmissionContentDto
 {
     /// <summary>
     /// The transmission title. Must be text/plain.

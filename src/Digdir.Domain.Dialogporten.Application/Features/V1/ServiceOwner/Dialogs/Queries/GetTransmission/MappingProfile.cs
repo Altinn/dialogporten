@@ -15,7 +15,7 @@ public sealed class MappingProfile : Profile
             .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.Dialog.DeletedAt));
 
         CreateMap<List<DialogTransmissionContent>?, ContentDto?>()
-            .ConvertUsing<TransmissionContentOutputConverter<ContentDto>>();
+            .ConvertUsing<DialogTransmissionContentToContentDtoConverter<ContentDto>>();
 
         CreateMap<DialogTransmissionAttachment, AttachmentDto>();
         CreateMap<AttachmentUrl, AttachmentUrlDto>()

@@ -298,7 +298,7 @@ public sealed class ContentDto : IDialogContentDto
     public ContentValueDto? MainContentReference { get; set; }
 }
 
-public sealed class TransmissionContentDto
+public sealed class TransmissionContentDto : ITransmissionContentDto
 {
     /// <summary>
     /// The transmission title. Must be text/plain.

@@ -68,7 +68,7 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.TypeId, opt => opt.MapFrom(src => src.Type));
 
         CreateMap<TransmissionContentDto?, List<DialogTransmissionContent>?>()
-            .ConvertUsing<TransmissionContentInputConverter<TransmissionContentDto>>();
+            .ConvertUsing<TransmissionContentDtoToDialogTransmissionContentConverter<TransmissionContentDto>>();
 
         CreateMap<TransmissionAttachmentDto, DialogTransmissionAttachment>();
 

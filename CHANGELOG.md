@@ -1,5 +1,76 @@
 # Changelog
 
+## [1.109.0](https://github.com/Altinn/dialogporten/compare/v1.108.2...v1.109.0) (2026-03-23)
+
+
+### Features
+
+* **app:** add sender type to transmission created event ([#3654](https://github.com/Altinn/dialogporten/issues/3654)) ([163940d](https://github.com/Altinn/dialogporten/commit/163940d69582a028b7d9a5823e2e0cca533eae38))
+* Generic instance delegation ([#3588](https://github.com/Altinn/dialogporten/issues/3588)) ([b450c63](https://github.com/Altinn/dialogporten/commit/b450c63b7b70776f0a86b3efbd4a360344f15c74))
+
+
+### Bug Fixes
+
+* **app:** set transmission createdAt to dialog visibleFrom ([#3656](https://github.com/Altinn/dialogporten/issues/3656)) ([a26d538](https://github.com/Altinn/dialogporten/commit/a26d53857a29f1b4f45a2064c5416f72b29588d4))
+
+
+### Miscellaneous Chores
+
+* **ci:** update harden security runner to 2.16.0 ([#3650](https://github.com/Altinn/dialogporten/issues/3650)) ([7d01bb8](https://github.com/Altinn/dialogporten/commit/7d01bb856d0a302fab6dab2c1ac10ddd18b16cb8))
+* **deps:** update dependency testcontainers.postgresql to 4.11.0 ([#3646](https://github.com/Altinn/dialogporten/issues/3646)) ([4b48553](https://github.com/Altinn/dialogporten/commit/4b48553087274cadc1e4fbfa4b6a0a66926b8cc9))
+* **deps:** update docker/metadata-action action to v6 ([#3648](https://github.com/Altinn/dialogporten/issues/3648)) ([b28bda0](https://github.com/Altinn/dialogporten/commit/b28bda0807ad71929153a66c511ae3b408cd4ae6))
+
+## [1.108.2](https://github.com/Altinn/dialogporten/compare/v1.108.1...v1.108.2) (2026-03-20)
+
+
+### Miscellaneous Chores
+
+* **infra:** update PostgreSQL SKU to Standard_E8ads_v5 in staging migration parameters ([#3643](https://github.com/Altinn/dialogporten/issues/3643)) ([17ecda8](https://github.com/Altinn/dialogporten/commit/17ecda8413363bd58538e6b86d40f53175c71a14))
+
+## [1.108.1](https://github.com/Altinn/dialogporten/compare/v1.108.0...v1.108.1) (2026-03-20)
+
+
+### Bug Fixes
+
+* **e2e:** use correct serviceowner org number in yt01 ([#3641](https://github.com/Altinn/dialogporten/issues/3641)) ([af185c8](https://github.com/Altinn/dialogporten/commit/af185c808237e8d29b3aa38e51ca4e63130e5481))
+
+
+### Miscellaneous Chores
+
+* **infra:** add PostgreSQL migration target for staging and prod ([#3639](https://github.com/Altinn/dialogporten/issues/3639)) ([a3d4b23](https://github.com/Altinn/dialogporten/commit/a3d4b238c43e7e51ed6ffdec9c3dccb9f6d25091))
+
+## [1.108.0](https://github.com/Altinn/dialogporten/compare/v1.107.0...v1.108.0) (2026-03-20)
+
+
+### Features
+
+* **dialoglookup:** add party to output DTO ([#3629](https://github.com/Altinn/dialogporten/issues/3629)) ([1eab3ba](https://github.com/Altinn/dialogporten/commit/1eab3baaf32586ba094fe34b2c179a91cb31cc5d))
+
+
+### Bug Fixes
+
+* actorname unique constraint ([#3580](https://github.com/Altinn/dialogporten/issues/3580)) ([92909cb](https://github.com/Altinn/dialogporten/commit/92909cbc8f1a290786545699fdb44625f91702c2))
+* Add missing checks to CreateActivityCommand ([#3616](https://github.com/Altinn/dialogporten/issues/3616)) ([06cb2bd](https://github.com/Altinn/dialogporten/commit/06cb2bd29368744024554763a0458b3965f3cabb))
+* Add workaround for missing correspondence SO labels ([#3606](https://github.com/Altinn/dialogporten/issues/3606)) ([9f3502a](https://github.com/Altinn/dialogporten/commit/9f3502ab715fc7ac144310e51a85e5e82556ec94))
+* hide MainContentReference FCE if no read permission ([#3472](https://github.com/Altinn/dialogporten/issues/3472)) ([7971e5b](https://github.com/Altinn/dialogporten/commit/7971e5b6b15809b5e5ba4c9543f8bc53d6bca8d7))
+* return forbidden on missing resource policy information ([#3581](https://github.com/Altinn/dialogporten/issues/3581)) ([eff38f1](https://github.com/Altinn/dialogporten/commit/eff38f1343b4023cfb3379e28fa7b58c0b4de70e))
+* use correct max length for MediaType in validators ([#3592](https://github.com/Altinn/dialogporten/issues/3592)) ([658cd90](https://github.com/Altinn/dialogporten/commit/658cd90555a2f94c9deea57ccccb615f828f2a2f))
+
+
+### Miscellaneous Chores
+
+* **ci:** tag issues and pull requests with environment label on deploy ([#3618](https://github.com/Altinn/dialogporten/issues/3618)) ([36a4ca1](https://github.com/Altinn/dialogporten/commit/36a4ca1f147161457a52e62fdce78ff7ca8dea56))
+* **deps:** update actions/upload-artifact action to v7 ([#3603](https://github.com/Altinn/dialogporten/issues/3603)) ([8de2db2](https://github.com/Altinn/dialogporten/commit/8de2db2cef50325440651dbbc82756e5be4271c2))
+* **deps:** update dependency dapper to 2.1.72 ([#3600](https://github.com/Altinn/dialogporten/issues/3600)) ([e8a0bf8](https://github.com/Altinn/dialogporten/commit/e8a0bf8ed240e827c7903c7610e02c866211e20b))
+* **deps:** update docker/build-push-action action to v7 ([#3621](https://github.com/Altinn/dialogporten/issues/3621)) ([0224b97](https://github.com/Altinn/dialogporten/commit/0224b97384934264e75b7b1e6f50fe8a8b1f71c5))
+* **deps:** update docker/login-action action to v4 ([#3622](https://github.com/Altinn/dialogporten/issues/3622)) ([609f5ec](https://github.com/Altinn/dialogporten/commit/609f5ec36ba5cbbb3fac1ceeedbb0969b3f46856))
+* **deps:** update prom/prometheus docker tag to v3.10.0 ([#3601](https://github.com/Altinn/dialogporten/issues/3601)) ([b6210c1](https://github.com/Altinn/dialogporten/commit/b6210c1ca01cb06394322fdfabe2de9440ce8e0b))
+* **deps:** update step-security/harden-runner action to v2.15.1 ([#3602](https://github.com/Altinn/dialogporten/issues/3602)) ([da45a1a](https://github.com/Altinn/dialogporten/commit/da45a1a33e0839aacc5175597ed9aff9eb1ef3d9))
+* **infra:** promote postgres2 as canonical PostgreSQL server for YT01 ([#3631](https://github.com/Altinn/dialogporten/issues/3631)) ([4779c9e](https://github.com/Altinn/dialogporten/commit/4779c9e8956f5c0e5ac656b6eb5eaef355e5c8ee))
+* mute serilog npgsql serialization exception ([#3564](https://github.com/Altinn/dialogporten/issues/3564)) ([c5516cc](https://github.com/Altinn/dialogporten/commit/c5516cc73731d0a89ac3bbe4e00c607716018595))
+* remove auto mapper from parties endpoint ([#3625](https://github.com/Altinn/dialogporten/issues/3625)) ([2b3b82b](https://github.com/Altinn/dialogporten/commit/2b3b82bee666f0a412064e0553f7bbf1409dcfec))
+* upgrade dotnet sdk to 10.0.201 ([#3608](https://github.com/Altinn/dialogporten/issues/3608)) ([9089bea](https://github.com/Altinn/dialogporten/commit/9089beaaaae0bd1ebe5ed5fb406827ff425faf9e))
+
 ## [1.107.0](https://github.com/Altinn/dialogporten/compare/v1.106.2...v1.107.0) (2026-03-12)
 
 

@@ -133,56 +133,9 @@ internal static class AuthorizationHelper
             {
                 result.ResourcesByParties[party.Party] = partyResources;
             }
-
-            var partyAuthorizedInstances = party.AuthorizedInstances
-                .Where(instance =>
-                    constraintResourcesSet is null
-                    || constraintResourcesSet.Contains(Constants.ServiceResourcePrefix + instance.ResourceId))
-                .ToList();
-
-            if (partyAuthorizedInstances.Count > 0)
-            {
-                // Handle app instance delegations from Altinn Access Management.
-                // NOTE: This is currently app-instance specific handling. See https://github.com/Altinn/dialogporten/issues/3358 for generic handling.
-                foreach (var instance in partyAuthorizedInstances)
-                {
-                    if (!instance.ResourceId.StartsWith(Constants.AppResourceIdPrefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    var instanceRef = string.IsNullOrWhiteSpace(instance.InstanceRef)
-                        ? Guid.TryParse(instance.InstanceId, out _)
-                            ? $"{AltinnAuthorizationConstants.AppInstanceRefPrefix}{party.PartyId}/{instance.InstanceId}"
-                            : null
-                        : instance.InstanceRef;
-
-                    var serviceOwnerLabel = ToServiceOwnerAppInstanceLabel(instanceRef);
-                    if (serviceOwnerLabel is not null)
-                    {
-                        result.AltinnAppInstanceIds.Add(serviceOwnerLabel);
-                    }
-                }
-            }
         }
 
         return result;
-    }
-
-    private static string? ToServiceOwnerAppInstanceLabel(string? instanceRef)
-    {
-        if (string.IsNullOrWhiteSpace(instanceRef))
-        {
-            return null;
-        }
-
-        var normalized = instanceRef.ToLowerInvariant();
-        if (!normalized.StartsWith(AltinnAuthorizationConstants.AppInstanceRefPrefix, StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        return (Constants.ServiceContextInstanceIdPrefix + normalized[AltinnAuthorizationConstants.AppInstanceRefPrefix.Length..]).ToLowerInvariant();
     }
 
     /// <summary>

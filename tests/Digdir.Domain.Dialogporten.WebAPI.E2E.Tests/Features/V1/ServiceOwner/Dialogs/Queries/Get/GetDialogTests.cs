@@ -1,7 +1,7 @@
+using System.Text.Json;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
@@ -59,5 +59,21 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         content.Transmissions.Should().ContainSingle()
             .Which.Attachments.Should().ContainSingle(attachment =>
                 attachment.Name == transmissionAttachmentName);
+    }
+
+    [E2EFact]
+    public async Task Get_Dialog_Verify_Snapshot()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
+
+        // Act
+        var getDialogResult = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsQueriesGetDialog(dialogId, null!,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(getDialogResult.Content));
     }
 }

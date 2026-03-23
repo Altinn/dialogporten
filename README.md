@@ -135,7 +135,7 @@ podman compose -f docker-compose-no-webapi.yml up
 ```
 
 ## DB development
-This project uses Entity Framework core to manage DB migrations. DB development can either be done through Visual Studios Package Manager Console (PMC) or through the CLI. 
+This project uses Entity Framework Core to manage DB migrations. DB development can either be done through Visual Studio's Package Manager Console (PMC) or through the CLI. 
 
 ### DB development through PMC
 Set Digdir.Domain.Dialogporten.Infrastructure as the startup project in Visual Studio's solution explorer, and as the default project in PMC. You are now ready to use [EF core tools through PMC](https://learn.microsoft.com/en-us/ef/core/cli/powershell). 

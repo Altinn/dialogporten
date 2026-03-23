@@ -93,9 +93,14 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     {
         var correspondenceId = Guid.NewGuid();
         var correspondenceRef = $"urn:altinn:correspondence-id:{correspondenceId}";
+        var party = Party;
 
         return FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) => x.AddServiceOwnerLabels(correspondenceRef))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = party;
+                x.AddServiceOwnerLabels(correspondenceRef);
+            })
             .SendCommand((_, _) => new GetDialogLookupQuery
             {
                 InstanceRef = correspondenceRef
@@ -104,6 +109,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             {
                 result.DialogId.Should().Be(ctx.GetDialogId());
                 result.InstanceRef.Should().Be(correspondenceRef.ToLowerInvariant());
+                result.Party.Should().Be(party);
             });
     }
 

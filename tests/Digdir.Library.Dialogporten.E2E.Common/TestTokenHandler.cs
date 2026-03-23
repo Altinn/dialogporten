@@ -10,7 +10,8 @@ namespace Digdir.Library.Dialogporten.E2E.Common;
 public enum TokenKind
 {
     EndUser,
-    ServiceOwner
+    ServiceOwner,
+    SystemUser
 }
 
 public sealed class TestTokenHandler : DelegatingHandler
@@ -54,11 +55,16 @@ public sealed class TestTokenHandler : DelegatingHandler
     private async Task<string> GetToken(CancellationToken cancellationToken)
     {
         var overrides = _overridesAccessor.Current;
+        var isEndUserHandler = _kind == TokenKind.EndUser;
+        var tokenKind = isEndUserHandler && overrides?.EndUserType == EndUserTokenType.SystemUser
+            ? TokenKind.SystemUser
+            : _kind;
 
-        var overrideToken = _kind switch
+        var overrideToken = tokenKind switch
         {
             TokenKind.EndUser => overrides?.EndUser?.TokenOverride,
             TokenKind.ServiceOwner => overrides?.ServiceOwner?.TokenOverride,
+            TokenKind.SystemUser when isEndUserHandler => overrides?.SystemUser?.TokenOverride,
             _ => null
         };
 
@@ -68,11 +74,12 @@ public sealed class TestTokenHandler : DelegatingHandler
         }
 
         var tokenEnvironment = Environment.GetTokenGeneratorEnvironment();
-        var requestPath = _kind switch
+        var requestPath = tokenKind switch
         {
             TokenKind.EndUser => BuildEndUserRequestPath(overrides?.EndUser, tokenEnvironment),
             TokenKind.ServiceOwner => BuildServiceOwnerRequestPath(overrides?.ServiceOwner, tokenEnvironment),
-            _ => throw new InvalidOperationException($"Unsupported token kind: {_kind}")
+            TokenKind.SystemUser when isEndUserHandler => BuildSystemUserRequestPath(overrides?.SystemUser, tokenEnvironment),
+            _ => throw new InvalidOperationException($"Unsupported token kind: {tokenKind}")
         };
 
         if (TokenCache.TryGetValue(requestPath, out var cachedToken))
@@ -113,7 +120,7 @@ public sealed class TestTokenHandler : DelegatingHandler
     {
         var scopes = overrides?.Scopes ?? ServiceOwnerScopes;
         var orgName = overrides?.OrgName ?? DefaultServiceOwnerOrgName;
-        var orgNumber = overrides?.OrgNumber ?? GetDefaultServiceOwnerOrgNumber(tokenEnvironment);
+        var orgNumber = overrides?.OrgNumber ?? GetDefaultServiceOwnerOrgNr();
 
         return
             "/GetEnterpriseToken" +
@@ -124,8 +131,20 @@ public sealed class TestTokenHandler : DelegatingHandler
             $"&ttl={DefaultTokenTtl}";
     }
 
-    private static string GetDefaultServiceOwnerOrgNumber(string tokenEnvironment) =>
-        tokenEnvironment == "yt01"
-            ? Yt01ServiceOwnerOrgNr
-            : DefaultServiceOwnerOrgNr;
+    private static string BuildSystemUserRequestPath(
+        SystemUserTokenOverrides? overrides,
+        string tokenEnvironment)
+    {
+        var scopes = overrides?.Scopes ?? SystemUserScopes;
+        var systemUserId = overrides?.SystemUserId ?? DefaultSystemUserId;
+        var systemUserOrg = overrides?.SystemUserOrg ?? DefaultSystemUserOrgNo;
+
+        return
+            "/GetSystemUserToken" +
+            $"?env={tokenEnvironment}" +
+            $"&scopes={Uri.EscapeDataString(scopes)}" +
+            $"&systemUserId={Uri.EscapeDataString(systemUserId)}" +
+            $"&systemUserOrg={Uri.EscapeDataString(systemUserOrg)}" +
+            $"&ttl={DefaultTokenTtl}";
+    }
 }

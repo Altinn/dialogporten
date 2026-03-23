@@ -19,6 +19,14 @@ public sealed record EndpointScenario(string Name, MethodInfo Method)
 
 public static class AuthenticationTestHelpers
 {
+    public static EndpointScenario[] GetEndpointScenarios<TApi>() =>
+        typeof(TApi)
+            .GetMethods(BindingFlags.Public | BindingFlags.Instance)
+            .Where(IsRefitHttpMethod)
+            .OrderBy(method => method.Name)
+            .Select(method => new EndpointScenario(Name: method.Name, Method: method))
+            .ToArray();
+
     public static TheoryData<AuthenticationScenario, EndpointScenario> BuildAuthenticationCases<TApi>()
     {
         var authScenarios = new[]
@@ -33,12 +41,7 @@ public static class AuthenticationTestHelpers
                 ExpectedAuthenticateHeaderFragment: "error=\"invalid_token\"")
         };
 
-        var endpointScenarios = typeof(TApi)
-            .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-            .Where(IsRefitHttpMethod)
-            .OrderBy(method => method.Name)
-            .Select(method => new EndpointScenario(Name: method.Name, Method: method))
-            .ToArray();
+        var endpointScenarios = GetEndpointScenarios<TApi>();
 
         var theoryData = new TheoryData<AuthenticationScenario, EndpointScenario>();
 

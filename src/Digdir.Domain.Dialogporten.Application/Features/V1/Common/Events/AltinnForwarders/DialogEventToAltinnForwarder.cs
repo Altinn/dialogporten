@@ -153,6 +153,7 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
             Data = GetCloudEventData(domainEvent)
         };
 
+        (cloudEvent.Data ??= new())["senderType"] = domainEvent.SenderType.ToString();
         await CloudEventBus.Publish(cloudEvent, cancellationToken);
     }
 
@@ -171,5 +172,4 @@ internal sealed class DialogEventToAltinnForwarder : DomainEventToAltinnForwarde
 
         return data.Count == 0 ? null : data;
     }
-
 }

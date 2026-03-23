@@ -80,14 +80,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Only target the primary database (hyphen after 'postgres' excludes postgres2, postgres3, etc.)
+          # Target the canonical postgres2 database (PG18/SSDv2)
           POSTGRES_NAME=$(az postgres flexible-server list \
             --resource-group "$RESOURCE_GROUP" \
-            --query "[?contains(name, 'dp-be-yt01-postgres-')].name" \
+            --query "[?contains(name, 'dp-be-yt01-postgres2-')].name" \
             -o tsv)
 
           if [[ -z "$POSTGRES_NAME" ]]; then
-            echo "Error: No primary PostgreSQL server matching 'dp-be-yt01-postgres-' found."
+            echo "Error: No PostgreSQL server matching 'dp-be-yt01-postgres2-' found."
             exit 1
           fi
 

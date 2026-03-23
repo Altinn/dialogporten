@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.110.0](https://github.com/Altinn/dialogporten/compare/v1.109.0...v1.110.0) (2026-03-23)
+
+
+### Features
+
+* **app:** update transmission command ([#3474](https://github.com/Altinn/dialogporten/issues/3474)) ([a421f16](https://github.com/Altinn/dialogporten/commit/a421f165b6bc934a453daad33370f9e06efdd4ca))
+
+
+### Bug Fixes
+
+* **webapi:** include service owner labels on all requests calling GetDialogDetailsAuthorization ([#3667](https://github.com/Altinn/dialogporten/issues/3667)) ([f1b59ad](https://github.com/Altinn/dialogporten/commit/f1b59addbd07449e45d9dba1bafbfba509bb587c))
+
 ## [1.109.0](https://github.com/Altinn/dialogporten/compare/v1.108.2...v1.109.0) (2026-03-23)
 
 

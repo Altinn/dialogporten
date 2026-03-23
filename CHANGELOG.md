@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.110.1](https://github.com/Altinn/dialogporten/compare/v1.110.0...v1.110.1) (2026-03-23)
+
+
+### Miscellaneous Chores
+
+* **deps:** update npgsql dependencies ([#3645](https://github.com/Altinn/dialogporten/issues/3645)) ([c835cd4](https://github.com/Altinn/dialogporten/commit/c835cd48c36621071dc1a6f48ef6f4c9745abc40))
+* **infra:** promote postgres2 as canonical PostgreSQL server for staging ([#3660](https://github.com/Altinn/dialogporten/issues/3660)) ([e57a9fc](https://github.com/Altinn/dialogporten/commit/e57a9fc5d355cbe45f1ebb5923edb9372d2a880c))
+
 ## [1.110.0](https://github.com/Altinn/dialogporten/compare/v1.109.0...v1.110.0) (2026-03-23)
 
 

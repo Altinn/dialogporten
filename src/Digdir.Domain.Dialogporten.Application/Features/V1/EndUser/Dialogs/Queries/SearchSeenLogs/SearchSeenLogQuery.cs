@@ -49,6 +49,8 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
                 .Include(x => x.SeenLog)
                     .ThenInclude(x => x.SeenBy)
                     .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                     cancellationToken: ct),

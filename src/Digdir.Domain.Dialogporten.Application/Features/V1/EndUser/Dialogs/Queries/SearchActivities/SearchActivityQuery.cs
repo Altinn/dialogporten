@@ -44,6 +44,8 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
             dbCtx.Dialogs
                 .AsNoTracking()
                 .Include(x => x.Activities)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                     cancellationToken: ct),

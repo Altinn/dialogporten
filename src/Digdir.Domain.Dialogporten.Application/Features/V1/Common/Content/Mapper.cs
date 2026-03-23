@@ -52,7 +52,6 @@ internal static class ContentMapper
         foreach (var (source, destination) in updateSets)
         {
             destination.MediaType = source.MediaType;
-            destination.Value ??= new DialogTransmissionContentValue();
             destination.Value.Localizations.MergeFrom(source.Value);
         }
     }

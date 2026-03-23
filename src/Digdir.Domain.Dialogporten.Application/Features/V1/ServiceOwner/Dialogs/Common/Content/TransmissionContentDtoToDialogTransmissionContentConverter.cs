@@ -20,11 +20,24 @@ internal sealed class TransmissionContentDtoToDialogTransmissionContentConverter
         }
 
         destinations ??= [];
-        SyncContent(destinations, DialogTransmissionContentType.Values.Title, source.Title);
-        SyncContent(destinations, DialogTransmissionContentType.Values.Summary, source.Summary);
-        SyncContent(destinations, DialogTransmissionContentType.Values.ContentReference, source.ContentReference);
+        foreach (var contentType in DialogTransmissionContentType.GetValues())
+        {
+            var sourceValue = GetSourceValue(contentType.Id, source);
+            SyncContent(destinations, contentType.Id, sourceValue);
+        }
+
         return destinations;
     }
+
+    private static ContentValueDto? GetSourceValue(DialogTransmissionContentType.Values typeId, TContentDto source) =>
+        typeId switch
+        {
+            DialogTransmissionContentType.Values.Title => source.Title,
+            DialogTransmissionContentType.Values.Summary => source.Summary,
+            DialogTransmissionContentType.Values.ContentReference => source.ContentReference,
+            _ => throw new InvalidOperationException(
+                $"Unknown {nameof(DialogTransmissionContentType)} '{typeId}'")
+        };
 
     private static void SyncContent(
         List<DialogTransmissionContent> destinations,
@@ -51,18 +64,17 @@ internal sealed class TransmissionContentDtoToDialogTransmissionContentConverter
         {
             existing.MediaType = mediaType;
             existing.Value.Localizations.MergeFrom(sourceValue.Value);
+            return;
         }
-        else
+
+        destinations.Add(new DialogTransmissionContent
         {
-            destinations.Add(new DialogTransmissionContent
+            TypeId = typeId,
+            MediaType = mediaType,
+            Value = new DialogTransmissionContentValue
             {
-                TypeId = typeId,
-                MediaType = mediaType,
-                Value = new DialogTransmissionContentValue
-                {
-                    Localizations = sourceValue.Value.Select(x => x.ToLocalization()).ToList()
-                }
-            });
-        }
+                Localizations = sourceValue.Value.Select(x => x.ToLocalization()).ToList()
+            }
+        });
     }
 }

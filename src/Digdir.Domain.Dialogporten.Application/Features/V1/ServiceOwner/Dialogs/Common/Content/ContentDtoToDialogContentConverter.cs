@@ -20,16 +20,29 @@ internal sealed class ContentDtoToDialogContentConverter<TContentDto> :
         }
 
         destinations ??= [];
-        SyncContent(destinations, DialogContentType.Values.Title, source.Title);
-        SyncContent(destinations, DialogContentType.Values.NonSensitiveTitle, source.NonSensitiveTitle);
-        SyncContent(destinations, DialogContentType.Values.Summary, source.Summary);
-        SyncContent(destinations, DialogContentType.Values.NonSensitiveSummary, source.NonSensitiveSummary);
-        SyncContent(destinations, DialogContentType.Values.SenderName, source.SenderName);
-        SyncContent(destinations, DialogContentType.Values.AdditionalInfo, source.AdditionalInfo);
-        SyncContent(destinations, DialogContentType.Values.ExtendedStatus, source.ExtendedStatus);
-        SyncContent(destinations, DialogContentType.Values.MainContentReference, source.MainContentReference);
+        foreach (var contentType in DialogContentType.GetValues())
+        {
+            var sourceValue = GetSourceValue(contentType.Id, source);
+            SyncContent(destinations, contentType.Id, sourceValue);
+        }
+
         return destinations;
     }
+
+    private static ContentValueDto? GetSourceValue(DialogContentType.Values typeId, TContentDto source) =>
+        typeId switch
+        {
+            DialogContentType.Values.Title => source.Title,
+            DialogContentType.Values.NonSensitiveTitle => source.NonSensitiveTitle,
+            DialogContentType.Values.Summary => source.Summary,
+            DialogContentType.Values.NonSensitiveSummary => source.NonSensitiveSummary,
+            DialogContentType.Values.SenderName => source.SenderName,
+            DialogContentType.Values.AdditionalInfo => source.AdditionalInfo,
+            DialogContentType.Values.ExtendedStatus => source.ExtendedStatus,
+            DialogContentType.Values.MainContentReference => source.MainContentReference,
+            _ => throw new InvalidOperationException(
+                $"Unknown {nameof(DialogContentType)} '{typeId}'")
+        };
 
     private static void SyncContent(
         List<DialogContent> destinations,
@@ -56,18 +69,17 @@ internal sealed class ContentDtoToDialogContentConverter<TContentDto> :
         {
             existing.MediaType = mediaType;
             existing.Value.Localizations.MergeFrom(sourceValue.Value);
+            return;
         }
-        else
+
+        destinations.Add(new DialogContent
         {
-            destinations.Add(new DialogContent
+            TypeId = typeId,
+            MediaType = mediaType,
+            Value = new DialogContentValue
             {
-                TypeId = typeId,
-                MediaType = mediaType,
-                Value = new DialogContentValue
-                {
-                    Localizations = sourceValue.Value.Select(x => x.ToLocalization()).ToList()
-                }
-            });
-        }
+                Localizations = sourceValue.Value.Select(x => x.ToLocalization()).ToList()
+            }
+        });
     }
 }

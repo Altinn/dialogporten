@@ -13,6 +13,10 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
         IValidator<TransmissionAttachmentDto> attachmentValidator,
         IValidator<TransmissionNavigationalActionDto> navigationalActionValidator)
     {
+        // CreatedAt is not validated for InPast,
+        // Dialog.VisibleFrom could have set the transmission
+        // CreatedAt to a date in the future.
+
         RuleFor(x => x.IdempotentKey)
             .MinimumLength(Constants.MinIdempotentKeyLength)
             .MaximumLength(Constants.MaxIdempotentKeyLength);

@@ -52,6 +52,8 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
                     .ThenInclude(x => x.ActorNameEntity)
                 .Include(x => x.Activities.Where(x => x.Id == request.ActivityId))
                     .ThenInclude(x => x.Description!.Localizations)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                     cancellationToken: ct), cancellationToken);

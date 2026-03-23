@@ -55,8 +55,8 @@ internal sealed class ContentDtoToDialogContentConverter<TContentDto> :
             .Merge(sources,
                 destinationKeySelector: x => x.TypeId,
                 sourceKeySelector: x => x.TypeId,
-                create: context.Mapper.Map<List<DialogContent>>,
-                update: context.Mapper.Update,
+                create: ContentMapper.CreateDialogContents,
+                update: ContentMapper.UpdateDialogContents,
                 delete: DeleteDelegate.Default);
 
         return destinations;

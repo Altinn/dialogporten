@@ -55,8 +55,8 @@ internal sealed class TransmissionContentDtoToDialogTransmissionContentConverter
             .Merge(sources,
                 destinationKeySelector: x => x.TypeId,
                 sourceKeySelector: x => x.TypeId,
-                create: context.Mapper.Map<List<DialogTransmissionContent>>,
-                update: context.Mapper.Update,
+                create: ContentMapper.CreateDialogTransmissionContents,
+                update: ContentMapper.UpdateDialogTransmissionContents,
                 delete: DeleteDelegate.Default);
 
         return destinations;

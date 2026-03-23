@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
@@ -34,51 +33,6 @@ internal static class DialogContentMapExtensions
 
 internal static class ContentMapper
 {
-    internal static IEnumerable<DialogTransmissionContent> CreateDialogTransmissionContents(
-        IEnumerable<IntermediateTransmissionContent> sources) =>
-        sources.Select(x => new DialogTransmissionContent
-        {
-            TypeId = x.TypeId,
-            MediaType = x.MediaType,
-            Value = new DialogTransmissionContentValue
-            {
-                Localizations = x.Value.Select(l => l.ToLocalization()).ToList()
-            }
-        }).ToList();
-
-    internal static void UpdateDialogTransmissionContents(
-        IEnumerable<UpdateSet<DialogTransmissionContent, IntermediateTransmissionContent>> updateSets)
-    {
-        foreach (var (source, destination) in updateSets)
-        {
-            destination.MediaType = source.MediaType;
-            destination.Value.Localizations.MergeFrom(source.Value);
-        }
-    }
-
-    internal static IEnumerable<DialogContent> CreateDialogContents(
-        IEnumerable<IntermediateDialogContent> sources) =>
-        sources.Select(x => new DialogContent
-        {
-            TypeId = x.TypeId,
-            MediaType = x.MediaType,
-            Value = new DialogContentValue
-            {
-                Localizations = x.Value.Select(l => l.ToLocalization()).ToList()
-            }
-        }).ToList();
-
-    internal static void UpdateDialogContents(
-        IEnumerable<UpdateSet<DialogContent, IntermediateDialogContent>> updateSets)
-    {
-        foreach (var (source, destination) in updateSets)
-        {
-            destination.MediaType = source.MediaType;
-            destination.Value ??= new DialogContentValue();
-            destination.Value.Localizations.MergeFrom(source.Value);
-        }
-    }
-
     internal static TContentDto? ToTransmissionContentDto<TContentDto>(
         this List<DialogTransmissionContent>? sources)
         where TContentDto : class, ITransmissionContentDto, new()

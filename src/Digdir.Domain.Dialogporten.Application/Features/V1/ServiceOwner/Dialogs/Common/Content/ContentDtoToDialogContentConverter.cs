@@ -1,5 +1,4 @@
 using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain;
@@ -8,17 +7,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 
 // ReSharper disable ClassNeverInstantiated.Global
-
-/// <summary>
-/// This class is used to map between incoming dto objects and the internal dialog content structure.
-/// Value needs to be mapped from a list of LocalizationDto in order for merging to work.
-/// </summary>
-internal sealed class IntermediateDialogContent
-{
-    public DialogContentType.Values TypeId { get; set; }
-    public List<LocalizationDto> Value { get; set; } = null!;
-    public string MediaType { get; set; } = MediaTypes.PlainText;
-}
 
 internal sealed class ContentDtoToDialogContentConverter<TContentDto> :
     ITypeConverter<TContentDto?, List<DialogContent>?>
@@ -31,48 +19,55 @@ internal sealed class ContentDtoToDialogContentConverter<TContentDto> :
             return null;
         }
 
-        var sources = new List<IntermediateDialogContent>();
-
-        foreach (var dialogContentType in DialogContentType.GetValues())
-        {
-            if (GetSourceValue(dialogContentType.Id, source) is not { } sourceValue)
-            {
-                continue;
-            }
-
-            sources.Add(new IntermediateDialogContent
-            {
-                TypeId = dialogContentType.Id,
-                Value = sourceValue.Value,
-                // Temporary converting of deprecated media types
-                // TODO: https://github.com/Altinn/dialogporten/issues/1782
-                MediaType = sourceValue.MediaType.MapDeprecatedMediaType()
-            });
-        }
-
         destinations ??= [];
-        destinations
-            .Merge(sources,
-                destinationKeySelector: x => x.TypeId,
-                sourceKeySelector: x => x.TypeId,
-                create: ContentMapper.CreateDialogContents,
-                update: ContentMapper.UpdateDialogContents,
-                delete: DeleteDelegate.Default);
-
+        SyncContent(destinations, DialogContentType.Values.Title, source.Title);
+        SyncContent(destinations, DialogContentType.Values.NonSensitiveTitle, source.NonSensitiveTitle);
+        SyncContent(destinations, DialogContentType.Values.Summary, source.Summary);
+        SyncContent(destinations, DialogContentType.Values.NonSensitiveSummary, source.NonSensitiveSummary);
+        SyncContent(destinations, DialogContentType.Values.SenderName, source.SenderName);
+        SyncContent(destinations, DialogContentType.Values.AdditionalInfo, source.AdditionalInfo);
+        SyncContent(destinations, DialogContentType.Values.ExtendedStatus, source.ExtendedStatus);
+        SyncContent(destinations, DialogContentType.Values.MainContentReference, source.MainContentReference);
         return destinations;
     }
 
-    private static ContentValueDto? GetSourceValue(DialogContentType.Values dialogContentType, TContentDto source) =>
-        dialogContentType switch
+    private static void SyncContent(
+        List<DialogContent> destinations,
+        DialogContentType.Values typeId,
+        ContentValueDto? sourceValue)
+    {
+        var existing = destinations.FirstOrDefault(x => x.TypeId == typeId);
+
+        if (sourceValue is null)
         {
-            DialogContentType.Values.Title => source.Title,
-            DialogContentType.Values.NonSensitiveTitle => source.NonSensitiveTitle,
-            DialogContentType.Values.Summary => source.Summary,
-            DialogContentType.Values.NonSensitiveSummary => source.NonSensitiveSummary,
-            DialogContentType.Values.SenderName => source.SenderName,
-            DialogContentType.Values.AdditionalInfo => source.AdditionalInfo,
-            DialogContentType.Values.ExtendedStatus => source.ExtendedStatus,
-            DialogContentType.Values.MainContentReference => source.MainContentReference,
-            _ => null
-        };
+            if (existing is not null)
+            {
+                destinations.Remove(existing);
+            }
+
+            return;
+        }
+
+        // Temporary converting of deprecated media types
+        // TODO: https://github.com/Altinn/dialogporten/issues/1782
+        var mediaType = sourceValue.MediaType.MapDeprecatedMediaType();
+
+        if (existing is not null)
+        {
+            existing.MediaType = mediaType;
+            existing.Value.Localizations.MergeFrom(sourceValue.Value);
+        }
+        else
+        {
+            destinations.Add(new DialogContent
+            {
+                TypeId = typeId,
+                MediaType = mediaType,
+                Value = new DialogContentValue
+                {
+                    Localizations = sourceValue.Value.Select(x => x.ToLocalization()).ToList()
+                }
+            });
+        }
+    }
 }

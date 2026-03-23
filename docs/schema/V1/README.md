@@ -5,7 +5,7 @@ This npm package contains both the Swagger and GraphQL schema definitions for th
 ## Description
 This package includes:
 - **GraphQL Schema (schema.verified.graphql)**: Defines the types, queries, and mutations available in the Dialogporten GraphQL API.
-- **OpenAPI Specification ((swagger.verified.json))**: Provides a detailed description of the RESTful endpoints, parameters, and models used in the Dialogporten API.
+- **OpenAPI Specification (swagger.verified.json)**: Provides a detailed description of the RESTful endpoints, parameters, and models used in the Dialogporten API.
 
 ## Usage
 To use this package, include it in your project dependencies using npm:

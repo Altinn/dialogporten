@@ -3,11 +3,12 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using static Digdir.Library.Dialogporten.E2E.Common.JsonSnapshotVerifier;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.ErrorResponse;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
-public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorResponseSnapshotTestBase(fixture)
+public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2EFact]
     public async Task Should_Return_404_Error_Response_In_ProblemDetails_Format()
@@ -19,8 +20,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
         var response = await Fixture.EnduserApi.GetDialog(nonExistentDialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -34,8 +35,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1EndUserDialogsQueriesSearchActivitiesDialogActivity(nonExistentDialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -50,8 +51,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1EndUserDialogsQueriesGetActivityDialogActivity(dialogId, nonExistentActivityId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -66,8 +67,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1EndUserDialogsQueriesGetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Gone);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.Gone);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -83,7 +84,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1EndUserDialogsQueriesGetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 }

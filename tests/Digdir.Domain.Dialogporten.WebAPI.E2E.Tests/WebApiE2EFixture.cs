@@ -26,11 +26,13 @@ public sealed class WebApiE2EFixture : E2EFixtureBase
             Converters = { new JsonStringEnumConverter() }
         };
 
+        var refitSettings = new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
+        };
+
         services
-            .AddRefitClient<IEnduserApi>(new RefitSettings
-            {
-                ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
-            })
+            .AddRefitClient<IEnduserApi>(refitSettings)
             .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser));

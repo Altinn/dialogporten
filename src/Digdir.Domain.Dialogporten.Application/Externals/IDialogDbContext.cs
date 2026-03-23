@@ -52,6 +52,7 @@ public interface IDialogDbContext
 
     DbSet<ActorName> ActorName { get; }
     DbSet<DialogAttachment> DialogAttachments { get; }
+    DbSet<DialogTransmissionAttachment> DialogTransmissionAttachments { get; }
 
     /// <summary>
     /// Validate a property on the <typeparamref name="TEntity"/> using a lambda

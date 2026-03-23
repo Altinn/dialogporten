@@ -19,12 +19,11 @@ internal static class DecisionRequestHelper
 
     private const string AttributeIdAction = "urn:oasis:names:tc:xacml:1.0:action:action-id";
     private const string AttributeIdResource = "urn:altinn:resource";
-    private const string AttributeIdResourceInstance = "urn:altinn:resourceinstance";
+    private const string AttributeIdResourceInstance = "urn:altinn:resource:instance-id";
     private const string AttributeIdSubResource = "urn:altinn:subresource";
 
     private const string AttributeIdOrg = "urn:altinn:org";
     private const string AttributeIdApp = "urn:altinn:app";
-    private const string AttributeIdAppInstance = "urn:altinn:instance-id";
 
     private const string AttributeIdUserId = "urn:altinn:userid";
     private const string AttributeIdPerson = "urn:altinn:person:identifier-no";
@@ -53,7 +52,7 @@ internal static class DecisionRequestHelper
 
         var accessSubject = CreateAccessSubjectCategory(request.ClaimsPrincipal.Claims);
         var actions = CreateActionCategories(sortedActions, out var actionIdByName);
-        var resources = CreateResourceCategories(request.ServiceResource, request.DialogId, resourceParty, sortedActions, out var resourceIdByName);
+        var resources = CreateResourceCategories(request.ServiceResource, request.InstanceRef, resourceParty, sortedActions, out var resourceIdByName);
 
         var multiRequests = CreateMultiRequests(sortedActions, actionIdByName, resourceIdByName);
 
@@ -151,7 +150,7 @@ internal static class DecisionRequestHelper
 
     private static List<XacmlJsonCategory> CreateResourceCategories(
         string serviceResource,
-        Guid dialogId,
+        InstanceRef instanceRef,
         string party,
         List<AltinnAction> altinnActions, out Dictionary<string, string> resourceIdByName)
     {
@@ -167,11 +166,11 @@ internal static class DecisionRequestHelper
         var partyAttribute = GetPartyAttribute(party);
         return resourceIdByName
             .Select(x =>
-                CreateResourceCategory(x.Value, serviceResource, dialogId, partyAttribute, x.Key))
+                CreateResourceCategory(x.Value, serviceResource, instanceRef, partyAttribute, x.Key))
             .ToList();
     }
 
-    private static XacmlJsonCategory CreateResourceCategory(string id, string serviceResource, Guid? dialogId, XacmlJsonAttribute? partyAttribute, string? authorizationAttribute = null)
+    private static XacmlJsonCategory CreateResourceCategory(string id, string serviceResource, InstanceRef instanceRef, XacmlJsonAttribute? partyAttribute, string? authorizationAttribute = null)
     {
         var (ns, value, org) = SplitNamespaceAndValue(serviceResource);
         var attributes = new List<XacmlJsonAttribute>
@@ -189,32 +188,11 @@ internal static class DecisionRequestHelper
             attributes.Add(partyAttribute);
         }
 
-        if (dialogId is not null)
+        attributes.Add(new()
         {
-            if (ns == AttributeIdResource)
-            {
-                attributes.Add(new()
-                {
-                    AttributeId = AttributeIdResourceInstance,
-                    Value = dialogId.ToString()
-                });
-            }
-            else if (ns == AttributeIdAppInstance)
-            {
-                // TODO!
-                // For app instances, we the syntax of the value is "{partyID}/{instanceID}".
-                // We do not have Altinn partyID in the request, so we cannot support this.
-                // This means we cannot easily support instance specific authorizations for apps.
-                // This should probably be fixed in the PDP, lest we use the party lookup service
-                // to get this value (which would suck).
-                /*
-                {
-                    AttributeId = AttributeIdAppInstance,
-                    Value = dialogId.ToString()
-                });
-                */
-            }
-        }
+            AttributeId = AttributeIdResourceInstance,
+            Value = instanceRef.Value
+        });
 
         if (authorizationAttribute is not null)
         {
@@ -225,7 +203,7 @@ internal static class DecisionRequestHelper
             if (resourceAttributesFromAuthorizationAttribute.Any(x => x.AttributeId is AttributeIdApp or AttributeIdOrg or AttributeIdResource))
             {
                 attributes.RemoveAll(x =>
-                    x.AttributeId is AttributeIdResource or AttributeIdResourceInstance or AttributeIdApp or AttributeIdOrg or AttributeIdAppInstance);
+                    x.AttributeId is AttributeIdResource or AttributeIdResourceInstance or AttributeIdApp or AttributeIdOrg);
             }
 
             attributes.AddRange(resourceAttributesFromAuthorizationAttribute);

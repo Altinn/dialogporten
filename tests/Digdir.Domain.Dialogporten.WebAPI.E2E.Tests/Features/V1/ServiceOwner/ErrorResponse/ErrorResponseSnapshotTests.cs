@@ -3,11 +3,12 @@ using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using static Digdir.Library.Dialogporten.E2E.Common.JsonSnapshotVerifier;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.ErrorResponse;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
-public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorResponseSnapshotTestBase(fixture)
+public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2EFact]
     public async Task Should_Return_404_Error_Response_In_ProblemDetails_Format()
@@ -21,8 +22,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
                 endUserId: null!);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -63,8 +64,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1ServiceOwnerDialogsCommandsCreateDialog(invalidDialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -81,8 +82,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Gone);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.Gone);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -97,8 +98,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, Guid.CreateVersion7());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -117,8 +118,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -133,8 +134,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1ServiceOwnerDialogsCommandsCreateDialog(dialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -149,8 +150,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1ServiceOwnerDialogsCommandsCreateDialog(hugeDialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.RequestEntityTooLarge);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
     [E2EFact]
@@ -165,7 +166,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : ErrorRespons
             .V1ServiceOwnerDialogsQueriesGetDialog(dialogId, null!, TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        await VerifyErrorResponse(response.Error!.Content!);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        await VerifyJsonSnapshot(response.Error!.Content!);
     }
 }

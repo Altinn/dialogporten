@@ -124,8 +124,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         CreateDialogEndUserContext(request, dialog);
         CreateDialogServiceOwnerContext(request, dialog);
 
-        var activityTypes = dialog.Activities
-            .Select(x => x.TypeId)
+        var activityTypes = request.Dto.Activities
+            .Select(x => x.Type)
             .Distinct();
 
         if (!ActivityTypeAuthorization.UsingAllowedActivityTypes(activityTypes, _user, out var errorMessage))

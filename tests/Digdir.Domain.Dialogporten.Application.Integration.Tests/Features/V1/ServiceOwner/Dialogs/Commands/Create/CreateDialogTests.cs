@@ -32,87 +32,132 @@ public class CreateDialogTests : ApplicationCollectionFixture
         _testOutputHelper = testOutputHelper;
     }
 
-    private sealed class CreateDialogWithSpecifiedDialogIdTestData : TheoryData<string, Guid, Type>
+    public sealed record CreateDialogWithSpecifiedDialogIdScenario(
+        string DisplayName,
+        Guid DialogId,
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class CreateDialogWithSpecifiedDialogIdTestData : TheoryData<CreateDialogWithSpecifiedDialogIdScenario>
     {
         public static DateTimeOffset FixedUtcNow => new(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
 
         public CreateDialogWithSpecifiedDialogIdTestData()
         {
-            Add("Validations for UUIDv4 format",
-                Guid.NewGuid(),
-                typeof(ValidationError));
+            Add(new CreateDialogWithSpecifiedDialogIdScenario(
+                DisplayName: "Validations for UUIDv4 format",
+                DialogId: Guid.NewGuid(),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Validations for UUIDv7 format, big endian",
-                Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
-                typeof(ValidationError));
+            Add(new CreateDialogWithSpecifiedDialogIdScenario(
+                DisplayName: "Validations for UUIDv7 format, big endian",
+                DialogId: Guid.Parse("b2ca9301-c371-ab74-a87b-4ee1416b9655"),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(1)),
-                typeof(CreateDialogSuccess));
+            Add(new CreateDialogWithSpecifiedDialogIdScenario(
+                DisplayName: "UUIDv7 future timestamp +1s should succeed",
+                DialogId: IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(1)),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
 
-            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(14)),
-                typeof(CreateDialogSuccess));
+            Add(new CreateDialogWithSpecifiedDialogIdScenario(
+                DisplayName: "UUIDv7 future timestamp +14s should succeed",
+                DialogId: IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(14)),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
 
-            Add("Validations for UUIDv7 with timestamp in the future, with tolerance of 15 seconds",
-                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(16)),
-                typeof(ValidationError));
+            Add(new CreateDialogWithSpecifiedDialogIdScenario(
+                DisplayName: "UUIDv7 future timestamp +16s should fail validation",
+                DialogId: IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(16)),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Can create a dialog with a valid UUIDv7 format",
-                IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(-1)),
-                typeof(CreateDialogSuccess));
+            Add(new CreateDialogWithSpecifiedDialogIdScenario(
+                DisplayName: "Can create a dialog with a valid UUIDv7 format",
+                DialogId: IdentifiableExtensions.CreateVersion7(FixedUtcNow.AddSeconds(-1)),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
         }
     }
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
-    public Task Create_Dialog_With_Specified_DialogId_Tests(string _, Guid guidInput, Type assertType) =>
+    public Task Create_Dialog_With_Specified_DialogId_Tests(
+        CreateDialogWithSpecifiedDialogIdScenario scenario) =>
         FlowBuilder.For(Application)
             .OverrideUtc(CreateDialogWithSpecifiedDialogIdTestData.FixedUtcNow)
-            .CreateSimpleDialog((x, _) => x.Dto.Id = guidInput)
-            .ExecuteAndAssert(assertType);
+            .CreateSimpleDialog((x, _) => x.Dto.Id = scenario.DialogId)
+            .ExecuteAndAssert(scenario.ExpectedResultType);
 
-    private sealed class CreateDialogWithSpecifiedCreatedAtTestData : TheoryData<string, DateTimeOffset, Type>
+    public sealed record CreateDialogWithSpecifiedCreatedAtScenario(
+        string DisplayName,
+        DateTimeOffset CreatedAt,
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class CreateDialogWithSpecifiedCreatedAtTestData : TheoryData<CreateDialogWithSpecifiedCreatedAtScenario>
     {
         public static DateTimeOffset FixedUtcNow => new(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
 
         public CreateDialogWithSpecifiedCreatedAtTestData()
         {
-            Add("Can create dialog with CreatedAt 1 second in the future, within tolerance",
-                FixedUtcNow.AddSeconds(1),
-                typeof(CreateDialogSuccess));
+            Add(new CreateDialogWithSpecifiedCreatedAtScenario(
+                DisplayName: "Can create dialog with CreatedAt 1 second in the future, within tolerance",
+                CreatedAt: FixedUtcNow.AddSeconds(1),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
 
-            Add("Can create dialog with CreatedAt 14 seconds in the future, within tolerance",
-                FixedUtcNow.AddSeconds(14),
-                typeof(CreateDialogSuccess));
+            Add(new CreateDialogWithSpecifiedCreatedAtScenario(
+                DisplayName: "Can create dialog with CreatedAt 14 seconds in the future, within tolerance",
+                CreatedAt: FixedUtcNow.AddSeconds(14),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
 
-            Add("Cannot create dialog with CreatedAt 16 seconds in the future, beyond tolerance",
-                FixedUtcNow.AddSeconds(16),
-                typeof(ValidationError));
+            Add(new CreateDialogWithSpecifiedCreatedAtScenario(
+                DisplayName: "Cannot create dialog with CreatedAt 16 seconds in the future, beyond tolerance",
+                CreatedAt: FixedUtcNow.AddSeconds(16),
+                ExpectedResultType: typeof(ValidationError)));
         }
     }
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedCreatedAtTestData))]
-    public Task Create_Dialog_With_Specified_CreatedAt_Tests(string _, DateTimeOffset createdAt, Type assertType) =>
+    public Task Create_Dialog_With_Specified_CreatedAt_Tests(
+        CreateDialogWithSpecifiedCreatedAtScenario scenario) =>
         FlowBuilder.For(Application)
             .OverrideUtc(CreateDialogWithSpecifiedCreatedAtTestData.FixedUtcNow)
-            .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = createdAt)
-            .ExecuteAndAssert(assertType);
+            .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = scenario.CreatedAt)
+            .ExecuteAndAssert(scenario.ExpectedResultType);
 
-    private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<string, string>
+    public sealed record CreateDialogWithSpecifiedPartyScenario(string DisplayName, string Party) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class CreateDialogWithSpecifiedPartyTestData : TheoryData<CreateDialogWithSpecifiedPartyScenario>
     {
         public CreateDialogWithSpecifiedPartyTestData()
         {
-            Add("Can create dialog with OrganizationIdentifier as Party", "urn:altinn:organization:identifier-no:974760673");
-            Add("Can create dialog with PersonalIdentifier as Party", "urn:altinn:person:identifier-no:15915299854");
-            Add("Can create dialog with A2 SI User as Party", "urn:altinn:person:legacy-selfidentified:SOMEUSER");
-            Add("Can create dialog with ID-Porten email as Party", "urn:altinn:person:idporten-email:foo@BAR.com");
+            Add(new CreateDialogWithSpecifiedPartyScenario(
+                DisplayName: "Can create dialog with OrganizationIdentifier as Party",
+                Party: "urn:altinn:organization:identifier-no:974760673"));
+
+            Add(new CreateDialogWithSpecifiedPartyScenario(
+                DisplayName: "Can create dialog with PersonalIdentifier as Party",
+                Party: "urn:altinn:person:identifier-no:15915299854"));
+
+            Add(new CreateDialogWithSpecifiedPartyScenario(
+                DisplayName: "Can create dialog with A2 SI User as Party",
+                Party: "urn:altinn:person:legacy-selfidentified:SOMEUSER"));
+
+            Add(new CreateDialogWithSpecifiedPartyScenario(
+                DisplayName: "Can create dialog with ID-Porten email as Party",
+                Party: "urn:altinn:person:idporten-email:foo@BAR.com"));
+
             // Not supported yet
             //Add("Can create dialog with Feide orgsub", "urn:altinn:feide-subject:33a633c47ef2f656978f957532ce6d0de6f5e13f1e0618b37b4b2a70573e5551");
         }
     }
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedPartyTestData))]
-    public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(string _, string party)
+    public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(
+        CreateDialogWithSpecifiedPartyScenario scenario)
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
@@ -120,13 +165,13 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Id = expectedDialogId;
-                x.Dto.Party = party;
+                x.Dto.Party = scenario.Party;
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 x.Id.Should().Be(expectedDialogId);
-                x.Party.Should().Be(party.ToLowerInvariant());
+                x.Party.Should().Be(scenario.Party.ToLowerInvariant());
             });
     }
 
@@ -167,111 +212,142 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Id.Should().Be(expectedDialogId));
     }
 
-    private sealed class ValidUpdatedAtTestData : TheoryData<string, DateTimeOffset?, DateTimeOffset>
+    public sealed record ValidUpdatedAtScenario(
+        string DisplayName,
+        DateTimeOffset? CreatedAt,
+        DateTimeOffset UpdatedAt) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class ValidUpdatedAtTestData : TheoryData<ValidUpdatedAtScenario>
     {
         public ValidUpdatedAtTestData()
         {
             var someTimeInThePast = DateTimeOffset.UtcNow.AddYears(-15);
-            Add("Can create dialog with the same UpdatedAt and CreatedAt",
-                someTimeInThePast, // CreatedAt
-                someTimeInThePast); // UpdatedAt
+            Add(new ValidUpdatedAtScenario(
+                DisplayName: "Can create dialog with the same UpdatedAt and CreatedAt",
+                CreatedAt: someTimeInThePast,
+                UpdatedAt: someTimeInThePast)); // UpdatedAt
 
+            Add(new ValidUpdatedAtScenario(
+                DisplayName: "Can create dialog with default UpdatedAt and no CreatedAt",
+                CreatedAt: null,
+                UpdatedAt: default));
 
-            Add("Can create dialog with default UpdatedAt and no CreatedAt",
-                null, // CreatedAt
-                default); // UpdatedAt
-
-            Add("Can create dialog with default UpdatedAt and CreatedAt",
-                default(DateTimeOffset), // CreatedAt
-                default); // UpdatedAt
+            Add(new ValidUpdatedAtScenario(
+                DisplayName: "Can create dialog with default UpdatedAt and CreatedAt",
+                CreatedAt: default(DateTimeOffset),
+                UpdatedAt: default));
         }
     }
 
     [Theory, ClassData(typeof(ValidUpdatedAtTestData))]
-    public async Task Can_Create_Dialog_With_UpdatedAt_And_CreatedAt_Supplied(string _, DateTimeOffset? createdAt,
-        DateTimeOffset updatedAt)
+    public async Task Can_Create_Dialog_With_UpdatedAt_And_CreatedAt_Supplied(ValidUpdatedAtScenario scenario)
     {
         var dialog = await FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
             {
-                x.Dto.UpdatedAt = updatedAt;
-                x.Dto.CreatedAt = createdAt;
+                x.Dto.UpdatedAt = scenario.UpdatedAt;
+                x.Dto.CreatedAt = scenario.CreatedAt;
             })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>();
 
-        var createdAtHasValue = createdAt.HasValue && createdAt != default(DateTimeOffset);
-        dialog.CreatedAt.Should().BeCloseTo(createdAtHasValue ? createdAt!.Value : DateTimeOffset.UtcNow,
+        var createdAtHasValue = scenario.CreatedAt.HasValue && scenario.CreatedAt != default(DateTimeOffset);
+        dialog.CreatedAt.Should().BeCloseTo(createdAtHasValue ? scenario.CreatedAt!.Value : DateTimeOffset.UtcNow,
             precision: TimeSpan.FromSeconds(1));
 
-        dialog.UpdatedAt.Should().BeCloseTo(updatedAt == default ? DateTimeOffset.UtcNow : updatedAt,
+        dialog.UpdatedAt.Should().BeCloseTo(scenario.UpdatedAt == default ? DateTimeOffset.UtcNow : scenario.UpdatedAt,
             precision: TimeSpan.FromSeconds(1));
     }
 
-    private sealed class InvalidUpdatedAtTestData : TheoryData<string, DateTimeOffset?, DateTimeOffset>
+    public sealed record InvalidUpdatedAtScenario(
+        string DisplayName,
+        DateTimeOffset? CreatedAt,
+        DateTimeOffset UpdatedAt) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class InvalidUpdatedAtTestData : TheoryData<InvalidUpdatedAtScenario>
     {
         public InvalidUpdatedAtTestData()
         {
             // CreatedAt must not be empty when 'UpdatedAt is set.
-            Add("Can't create dialog with UpdatedAt without CreatedAt",
-                null, // CreatedAt
-                DateTimeOffset.UtcNow.AddYears(-15)); // UpdatedAt
+            Add(new InvalidUpdatedAtScenario(
+                DisplayName: "Can't create dialog with UpdatedAt without CreatedAt",
+                CreatedAt: null,
+                UpdatedAt: DateTimeOffset.UtcNow.AddYears(-15)));
 
             // UpdatedAt before CreatedAt
-            Add("Can't create dialog with UpdatedAt before CreatedAt",
-                DateTimeOffset.UtcNow.AddYears(-10), // CreatedAt
-                DateTimeOffset.UtcNow.AddYears(-15)); // UpdatedAt
+            Add(new InvalidUpdatedAtScenario(
+                DisplayName: "Can't create dialog with UpdatedAt before CreatedAt",
+                CreatedAt: DateTimeOffset.UtcNow.AddYears(-10),
+                UpdatedAt: DateTimeOffset.UtcNow.AddYears(-15)));
 
             // Can't create dialog with CreatedAt or UpdatedAt in the future
-            Add("Can't create dialog with CreatedAt or UpdatedAt in the future",
-                DateTimeOffset.UtcNow.AddYears(1), // CreatedAt
-                DateTimeOffset.UtcNow.AddYears(1)); // UpdatedAt
+            Add(new InvalidUpdatedAtScenario(
+                DisplayName: "Can't create dialog with CreatedAt or UpdatedAt in the future",
+                CreatedAt: DateTimeOffset.UtcNow.AddYears(1),
+                UpdatedAt: DateTimeOffset.UtcNow.AddYears(1)));
         }
     }
 
     [Theory, ClassData(typeof(InvalidUpdatedAtTestData))]
-    public Task Invalid_UpdatedAt_Tests(string _, DateTimeOffset? createdAt, DateTimeOffset updatedAt) =>
+    public Task Invalid_UpdatedAt_Tests(InvalidUpdatedAtScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
             {
-                x.Dto.CreatedAt = createdAt;
-                x.Dto.UpdatedAt = updatedAt;
+                x.Dto.CreatedAt = scenario.CreatedAt;
+                x.Dto.UpdatedAt = scenario.UpdatedAt;
             })
             .ExecuteAndAssert<ValidationError>(x =>
             {
                 _testOutputHelper.WriteLine(string.Join(Environment.NewLine, x.Errors.Select(e => e.ErrorMessage)));
-                x.ShouldHaveErrorWithText(nameof(updatedAt));
+                x.ShouldHaveErrorWithText(nameof(scenario.UpdatedAt));
             });
 
-    private sealed class InvalidTransmissionContentTestData : TheoryData<string, TransmissionContentDto?>
+    public sealed record InvalidTransmissionContentScenario(
+        string DisplayName,
+        TransmissionContentDto? Content) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class InvalidTransmissionContentTestData : TheoryData<InvalidTransmissionContentScenario>
     {
         public InvalidTransmissionContentTestData()
         {
-            Add("Can't create transmission with null content", null);
+            Add(new InvalidTransmissionContentScenario(
+                DisplayName: "Can't create transmission with null content",
+                Content: null));
 
-            Add("Can't create transmission with empty content",
-                new TransmissionContentDto
+            Add(new InvalidTransmissionContentScenario(
+                DisplayName: "Can't create transmission with empty content",
+                Content: new TransmissionContentDto
                 {
                     Summary = new(),
                     Title = new()
-                });
+                }));
 
-            Add("Can't create transmission with empty content values",
-                new TransmissionContentDto
+            Add(new InvalidTransmissionContentScenario(
+                DisplayName: "Can't create transmission with empty content values",
+                Content: new TransmissionContentDto
                 {
                     Summary = new() { Value = [new() { Value = "", LanguageCode = "nb" }] },
                     Title = new() { Value = [new() { Value = "", LanguageCode = "nb" }] }
-                });
+                }));
         }
     }
 
     [Theory, ClassData(typeof(InvalidTransmissionContentTestData))]
-    public Task Invalid_Transmission_Content(string _, TransmissionContentDto? content) =>
+    public Task Invalid_Transmission_Content(InvalidTransmissionContentScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
             {
                 var transmission = DialogGenerator.GenerateFakeDialogTransmissions(1)[0];
-                transmission.Content = content;
+                transmission.Content = scenario.Content;
                 x.Dto.Transmissions = [transmission];
             })
             .ExecuteAndAssert<ValidationError>(x =>
@@ -310,7 +386,16 @@ public class CreateDialogTests : ApplicationCollectionFixture
         }]
     };
 
-    private sealed class HtmlContentTestData : TheoryData<string, ClaimsPrincipal, Action<CreateDialogCommand, FlowContext>, Type>
+    public sealed record HtmlContentScenario(
+        string DisplayName,
+        ClaimsPrincipal User,
+        Action<CreateDialogCommand, FlowContext> ModifyCommand,
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class HtmlContentTestData : TheoryData<HtmlContentScenario>
     {
         public HtmlContentTestData()
         {
@@ -319,75 +404,86 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 .WithScope(AuthorizationScope.LegacyHtmlScope)
                 .Build();
 
-            Add("Cannot create dialog with HTML content without valid html scope",
-                TestUsers.FromDefault(), // No change in user scopes
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create dialog with HTML content without valid html scope",
+                User: TestUsers.FromDefault(), // No change in user scopes
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Can create dialog with HTML content with valid html scope",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
-                typeof(CreateDialogSuccess));
+            Add(new HtmlContentScenario(
+                DisplayName: "Can create dialog with HTML content with valid html scope",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
 
-            Add("Can create HTML content with table tag with valid html scope",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
-                typeof(CreateDialogSuccess));
+            Add(new HtmlContentScenario(
+                DisplayName: "Can create HTML content with table tag with valid html scope",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateTableHtml(),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
 
-            Add("Cannot create dialog with forbidden HTML tags: iframe",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<iframe src='malicious site'></iframe>"),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create dialog with forbidden HTML tags: iframe",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<iframe src='malicious site'></iframe>"),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Cannot create dialog with forbidden HTML tags: script",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<script>alert('hack');</script>"),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create dialog with forbidden HTML tags: script",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<script>alert('hack');</script>"),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Cannot create dialog with forbidden HTML tags: img",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<img src='evil.png' />"),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create dialog with forbidden HTML tags: img",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<img src='evil.png' />"),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Cannot create dialog with forbidden HTML tags: div",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<div>Not allowed</div>"),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create dialog with forbidden HTML tags: div",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<div>Not allowed</div>"),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Cannot create dialog with forbidden HTML tags: span",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<span>Not allowed</span>"),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create dialog with forbidden HTML tags: span",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateInvalidHtml("<span>Not allowed</span>"),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Cannot create title content with HTML media type with valid html scope",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create title content with HTML media type with valid html scope",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Cannot create summary content with HTML media type with valid html scope",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create summary content with HTML media type with valid html scope",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.Summary = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Cannot create title content with embeddable HTML media type with valid html scope",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
-                typeof(ValidationError));
+            Add(new HtmlContentScenario(
+                DisplayName: "Cannot create title content with embeddable HTML media type with valid html scope",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.Title = CreateHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                ExpectedResultType: typeof(ValidationError)));
 
-            Add("Can create mainContentRef content with embeddable HTML media type with valid html scope",
-                legacyHtmlScopeUser,
-                (x, _) => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
-                typeof(CreateDialogSuccess));
+            Add(new HtmlContentScenario(
+                DisplayName: "Can create mainContentRef content with embeddable HTML media type with valid html scope",
+                User: legacyHtmlScopeUser,
+                ModifyCommand: (x, _) => x.Dto.Content!.MainContentReference = CreateEmbeddableHtmlContentValueDto(MediaTypes.LegacyEmbeddableHtml),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
         }
     }
 
     [Theory, ClassData(typeof(HtmlContentTestData))]
-    public Task Html_Content_Tests(string _, ClaimsPrincipal user,
-        Action<CreateDialogCommand, FlowContext> createDialog, Type expectedType) =>
+    public Task Html_Content_Tests(HtmlContentScenario scenario) =>
         FlowBuilder.For(Application)
-            .AsUser(user)
-            .CreateSimpleDialog(createDialog)
-            .ExecuteAndAssert(expectedType);
+            .AsUser(scenario.User)
+            .CreateSimpleDialog(scenario.ModifyCommand)
+            .ExecuteAndAssert(scenario.ExpectedResultType);
 
     [Fact]
     public Task CreateDialogCommand_Should_Return_Revision() =>
@@ -434,53 +530,74 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert(expectedType);
 
-    private sealed class DatesInPastTestData : TheoryData<string, Action<CreateDialogCommand, FlowContext>>
+    public sealed record DatesInPastScenario(string DisplayName, Action<CreateDialogCommand, FlowContext> ModifyCommand) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class DatesInPastTestData : TheoryData<DatesInPastScenario>
     {
         public DatesInPastTestData()
         {
             var pastDate = DateTimeOffset.UtcNow.AddDays(-1);
-            Add("Can create dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
-                (x, _) => x.Dto.DueAt = pastDate);
-            Add("Can create dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
-                (x, _) => x.Dto.ExpiresAt = pastDate);
-            Add("Can create dialog with VisibleFrom in the past when IsSilentUpdate is set or admin scope is present",
-                (x, _) => x.Dto.VisibleFrom = pastDate);
+
+            Add(new DatesInPastScenario(
+                DisplayName: "Can create dialog with DueAt in the past when IsSilentUpdate is set or admin scope is present",
+                ModifyCommand: (x, _) => x.Dto.DueAt = pastDate));
+
+            Add(new DatesInPastScenario(
+                DisplayName: "Can create dialog with ExpiresAt in the past when IsSilentUpdate is set or admin scope is present",
+                ModifyCommand: (x, _) => x.Dto.ExpiresAt = pastDate));
+
+            Add(new DatesInPastScenario(
+                DisplayName: "Can create dialog with VisibleFrom in the past when IsSilentUpdate is set or admin scope is present",
+                ModifyCommand: (x, _) => x.Dto.VisibleFrom = pastDate));
         }
     }
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Can_Create_Dialog_With_Past_Dates_When_Admin_Scope(
-        string _, Action<CreateDialogCommand, FlowContext> createDialog) =>
+        DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .AsAdminUser()
-            .CreateSimpleDialog(createDialog)
+            .CreateSimpleDialog(scenario.ModifyCommand)
             .ExecuteAndAssert<CreateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Can_Create_Dialog_With_Past_Dates_When_Silent_Update(
-        string _, Action<CreateDialogCommand, FlowContext> createDialog) =>
+        DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, ctx) =>
             {
                 x.IsSilentUpdate = true;
-                createDialog(x, ctx);
+                scenario.ModifyCommand(x, ctx);
             })
             .ExecuteAndAssert<CreateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
     public Task Cannot_Create_Dialog_With_Past_Dates_Without_Silent_Update_Or_Admin_Scope(
-        string _, Action<CreateDialogCommand, FlowContext> createDialog) =>
+        DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(createDialog)
+            .CreateSimpleDialog(scenario.ModifyCommand)
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText("must be in the future"));
 
-    private sealed class TransmissionsCountTestData : TheoryData<string, Action<CreateDialogCommand, FlowContext>, int, int>
+    public sealed record TransmissionsCountScenario(
+        string DisplayName,
+        Action<CreateDialogCommand, FlowContext> CreateDialog,
+        int ExpectedFromPartyTransmissions,
+        int ExpectedFromServiceOwnerTransmissions) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class TransmissionsCountTestData : TheoryData<TransmissionsCountScenario>
     {
         public TransmissionsCountTestData()
         {
-            Add("2 From Party, 1 From ServiceOwner",
-                (x, _) =>
+            Add(new TransmissionsCountScenario(
+                DisplayName: "2 From Party, 1 From ServiceOwner",
+                CreateDialog: (x, _) =>
                 {
                     x.AddTransmission(x =>
                     {
@@ -498,38 +615,47 @@ public class CreateDialogTests : ApplicationCollectionFixture
                         x.Type = DialogTransmissionType.Values.Alert;
                         x.WithServiceOwnerActor();
                     });
-                }, 2, 1
-            );
+                },
+                ExpectedFromPartyTransmissions: 2,
+                ExpectedFromServiceOwnerTransmissions: 1));
 
-            Add("1 From ServiceOwner", (x, _) =>
-            {
-                x.AddTransmission(x =>
+            Add(new TransmissionsCountScenario(
+                DisplayName: "1 From ServiceOwner",
+                CreateDialog: (x, _) =>
                 {
-                    x.Type = DialogTransmissionType.Values.Information;
-                    x.WithServiceOwnerActor();
-                });
-            }, 0, 1);
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Information;
+                        x.WithServiceOwnerActor();
+                    });
+                },
+                ExpectedFromPartyTransmissions: 0,
+                ExpectedFromServiceOwnerTransmissions: 1));
 
-            Add("1 From Party", (x, _) =>
-            {
-                x.AddTransmission(x =>
+            Add(new TransmissionsCountScenario(
+                DisplayName: "1 From Party",
+                CreateDialog: (x, _) =>
                 {
-                    x.Type = DialogTransmissionType.Values.Correction;
-                    x.WithPartyRepresentativeActor();
-                });
-            }, 1, 0);
+                    x.AddTransmission(x =>
+                    {
+                        x.Type = DialogTransmissionType.Values.Correction;
+                        x.WithPartyRepresentativeActor();
+                    });
+                },
+                ExpectedFromPartyTransmissions: 1,
+                ExpectedFromServiceOwnerTransmissions: 0));
         }
     }
 
     [Theory, ClassData(typeof(TransmissionsCountTestData))]
     public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
-        string _, Action<CreateDialogCommand, FlowContext> createDialog, int fromPartyCount, int fromServiceOwnerCount) =>
-        FlowBuilder.For(Application).CreateSimpleDialog(createDialog)
+        TransmissionsCountScenario scenario) =>
+        FlowBuilder.For(Application).CreateSimpleDialog(scenario.CreateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.FromPartyTransmissionsCount.Should().Be(fromPartyCount);
-                x.FromServiceOwnerTransmissionsCount.Should().Be(fromServiceOwnerCount);
+                x.FromPartyTransmissionsCount.Should().Be(scenario.ExpectedFromPartyTransmissions);
+                x.FromServiceOwnerTransmissionsCount.Should().Be(scenario.ExpectedFromServiceOwnerTransmissions);
             });
 
     [Fact]
@@ -559,15 +685,15 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
     [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
     public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
-        DialogTransmissionType.Values transmissionType, bool shouldAddSentLabel) =>
+        AddingEndUserTransmissionSentLabelScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
-                    x.Type = transmissionType))
+                    x.Type = scenario.TransmissionType))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                if (shouldAddSentLabel)
+                if (scenario.ShouldAddSentLabel)
                 {
                     x.EndUserContext.SystemLabels.Should().ContainSingle(
                         label => label == SystemLabel.Values.Sent);
@@ -579,7 +705,15 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 }
             });
 
-    private sealed class SystemLabelOnDialogCreateTestData : TheoryData<SystemLabel.Values, bool>
+    public sealed record SystemLabelOnDialogCreateScenario(
+        string DisplayName,
+        SystemLabel.Values Label,
+        bool ShouldSucceed) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class SystemLabelOnDialogCreateTestData : TheoryData<SystemLabelOnDialogCreateScenario>
     {
         public SystemLabelOnDialogCreateTestData()
         {
@@ -587,23 +721,33 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
             foreach (var systemLabel in systemLabels)
             {
-                Add(systemLabel, SystemLabel.IsDefaultArchiveBinGroup(systemLabel));
+                Add(new SystemLabelOnDialogCreateScenario(
+                    DisplayName: $"SystemLabel {systemLabel} should be default archive bin group: {SystemLabel.IsDefaultArchiveBinGroup(systemLabel)}",
+                    Label: systemLabel,
+                    ShouldSucceed: SystemLabel.IsDefaultArchiveBinGroup(systemLabel)));
             }
 
-            Add(0, false);
-            Add((SystemLabel.Values)systemLabels.Length + 1, false);
+            Add(new SystemLabelOnDialogCreateScenario(
+                DisplayName: "Default value outside enum should be allowed",
+                Label: 0,
+                ShouldSucceed: false));
+
+            Add(new SystemLabelOnDialogCreateScenario(
+                DisplayName: "Value beyond enum range should be rejected",
+                Label: (SystemLabel.Values)systemLabels.Length + 1,
+                ShouldSucceed: false));
         }
     }
 
     [Theory, ClassData(typeof(SystemLabelOnDialogCreateTestData))]
     public Task SystemLabel_On_Dialog_Create_Should_Be_Accepted_When_In_Default_DAB_Group(
-        SystemLabel.Values systemLabel, bool shouldSucceed) =>
+        SystemLabelOnDialogCreateScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
-                x.Dto.SystemLabel = systemLabel)
+                x.Dto.SystemLabel = scenario.Label)
             .ExecuteAndAssert(result =>
             {
-                if (shouldSucceed)
+                if (scenario.ShouldSucceed)
                 {
                     (result is CreateDialogSuccess)
                         .Should().BeTrue();
@@ -661,12 +805,20 @@ public class CreateDialogTests : ApplicationCollectionFixture
                     x.ContentUpdatedAt == x.CreatedAt));
 
     [Theory, ClassData(typeof(DialogContentLengthTestData))]
-    public Task Content_Length_Validation_Test(Action<CreateDialogCommand, FlowContext> action, Type expectedResult) =>
+    public Task Content_Length_Validation_Test(DialogContentLengthScenario scenario) =>
         FlowBuilder.For(Application)
-            .CreateSimpleDialog(action)
-            .ExecuteAndAssert(expectedResult);
+            .CreateSimpleDialog(scenario.ModifyCommand)
+            .ExecuteAndAssert(scenario.ExpectedResultType);
 
-    private sealed class DialogContentLengthTestData : TheoryData<Action<CreateDialogCommand, FlowContext>, Type>
+    public sealed record DialogContentLengthScenario(
+        string DisplayName,
+        Action<CreateDialogCommand, FlowContext> ModifyCommand,
+        Type ExpectedResultType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class DialogContentLengthTestData : TheoryData<DialogContentLengthScenario>
     {
         private static string Repeat(char c, int x) => new(c, x);
         private static int GetMaxLength(DialogContentType.Values value) =>
@@ -698,8 +850,15 @@ public class CreateDialogTests : ApplicationCollectionFixture
 
         private void AddLengthTests(Action<CreateDialogCommand, string> applyValue, int maxLength)
         {
-            Add((x, _) => applyValue(x, Repeat('x', maxLength)), typeof(CreateDialogSuccess));
-            Add((x, _) => applyValue(x, Repeat('x', maxLength + 1)), typeof(ValidationError));
+            Add(new DialogContentLengthScenario(
+                DisplayName: $"Valid dialog content ({maxLength} chars)",
+                ModifyCommand: (x, _) => applyValue(x, Repeat('x', maxLength)),
+                ExpectedResultType: typeof(CreateDialogSuccess)));
+
+            Add(new DialogContentLengthScenario(
+                DisplayName: $"Too long dialog content ({maxLength + 1} chars)",
+                ModifyCommand: (x, _) => applyValue(x, Repeat('x', maxLength + 1)),
+                ExpectedResultType: typeof(ValidationError)));
         }
     }
 

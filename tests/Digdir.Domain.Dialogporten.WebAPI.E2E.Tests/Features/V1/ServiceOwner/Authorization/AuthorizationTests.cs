@@ -2,9 +2,10 @@ using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using Xunit;
+using Refit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Authorization;
 
@@ -44,7 +45,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                 CreateSeedDialog(),
                 TestContext.Current.CancellationToken));
 
-        AssertStatus(createResponse.StatusCode, HttpStatusCode.Created, HttpStatusCode.Forbidden, scenario.ShouldSucceed);
+        AssertStatus(createResponse, HttpStatusCode.Created, HttpStatusCode.Forbidden, scenario.ShouldSucceed);
 
         if (!scenario.ShouldSucceed)
         {
@@ -66,7 +67,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                     dialogId,
                     endUserId: null!,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.OK,
             HttpStatusCode.NotFound);
@@ -83,7 +84,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                     BuildPatchDocument(),
                     etag: null,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.NoContent,
             HttpStatusCode.NotFound);
@@ -100,7 +101,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                     CreateUpdateDialogDto(),
                     if_Match: null,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.NoContent,
             HttpStatusCode.NotFound);
@@ -116,7 +117,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                     dialogId,
                     if_Match: null,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.NoContent,
             HttpStatusCode.NotFound);
@@ -131,7 +132,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                 var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(
                     dialogId,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.OK,
             HttpStatusCode.NotFound);
@@ -147,7 +148,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                     dialogId,
                     transmissionId,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.OK,
             HttpStatusCode.NotFound);
@@ -162,7 +163,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                 var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchActivitiesDialogActivity(
                     dialogId,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.OK,
             HttpStatusCode.NotFound);
@@ -178,7 +179,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                     dialogId,
                     activityId,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.OK,
             HttpStatusCode.NotFound);
@@ -195,10 +196,25 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
                     CreateActivityRequest(),
                     if_Match: null,
                     TestContext.Current.CancellationToken);
-                return response.StatusCode;
+                return response;
             },
             HttpStatusCode.Created,
             HttpStatusCode.NotFound);
+
+    public static TheoryData<EndpointScenario> AllServiceOwnerEndpoints =>
+        new(AuthenticationTestHelpers.GetEndpointScenarios<IServiceownerApi>());
+
+    [E2ETheory]
+    [MemberData(nameof(AllServiceOwnerEndpoints))]
+    public async Task Should_Return_Forbidden_Without_ServiceProvider_Scope(EndpointScenario endpointScenario)
+    {
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: "wrong-scope");
+
+        var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
+            Fixture.ServiceownerApi, endpointScenario.Method, TestContext.Current.CancellationToken);
+
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+    }
 
     [E2EFact]
     public async Task Should_Deny_Search_Without_Search_Scope()
@@ -210,22 +226,22 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             new(),
             TestContext.Current.CancellationToken);
 
-        searchWithoutScopeResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        searchWithoutScopeResponse.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }
 
     private async Task AssertScenarioStatusOnDialog(
         AuthorizationScenario scenario,
-        Func<Guid, Guid, Guid, Task<HttpStatusCode>> operation,
+        Func<Guid, Guid, Guid, Task<IApiResponse>> operation,
         HttpStatusCode expectedSuccess,
         HttpStatusCode expectedFailure)
     {
         var (dialogId, transmissionId, activityId) = await CreateAuthorizedDialogWithIdentifiersAsync();
 
-        var statusCode = await WithScenarioOverrides(
+        var response = await WithScenarioOverrides(
             scenario,
             () => operation(dialogId, transmissionId, activityId));
 
-        AssertStatus(statusCode, expectedSuccess, expectedFailure, scenario.ShouldSucceed);
+        AssertStatus(response, expectedSuccess, expectedFailure, scenario.ShouldSucceed);
     }
 
     private async Task<(Guid dialogId, Guid transmissionId, Guid activityId)> CreateAuthorizedDialogWithIdentifiersAsync()
@@ -234,7 +250,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             CreateSeedDialog(),
             TestContext.Current.CancellationToken);
 
-        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        createResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
         var dialogId = createResponse.Content.ToGuid();
 
         var getDialogResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
@@ -242,7 +258,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             endUserId: null!,
             TestContext.Current.CancellationToken);
 
-        getDialogResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         var dialog = getDialogResponse.Content ?? throw new InvalidOperationException("Expected dialog content.");
         var transmissionId = dialog.Transmissions.Should().NotBeEmpty().And.Subject.First().Id;
@@ -308,10 +324,10 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
     }
 
     private static void AssertStatus(
-        HttpStatusCode actual,
+        IApiResponse actual,
         HttpStatusCode success,
         HttpStatusCode failure,
         bool shouldSucceed) =>
-        actual.Should().Be(shouldSucceed ? success : failure);
+        actual.ShouldHaveStatusCode(shouldSucceed ? success : failure);
 
 }

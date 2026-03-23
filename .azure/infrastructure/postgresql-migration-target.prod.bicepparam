@@ -1,6 +1,6 @@
 using './postgresql-migration-target.bicep'
 
-param environment = 'yt01'
+param environment = 'prod'
 
 param keyVaultSourceKeys = json(readEnvironmentVariable('AZURE_KEY_VAULT_SOURCE_KEYS'))
 param dialogportenPgAdminPassword = readEnvironmentVariable('PG_ADMIN_PASSWORD')
@@ -8,7 +8,7 @@ param sourceKeyVaultSubscriptionId = readEnvironmentVariable('AZURE_SOURCE_KEY_V
 param sourceKeyVaultResourceGroup = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP')
 param sourceKeyVaultName = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_NAME')
 
-// Copy this into yt01.bicepparam replacing the existing postgresConfiguration when migration is complete
+// Copy this into prod.bicepparam replacing the existing postgresConfiguration when migration is complete
 // and remove this file
 param postgresConfiguration = {
   serverNameStem: 'postgres2'
@@ -18,16 +18,16 @@ param postgresConfiguration = {
     tier: 'MemoryOptimized'
   }
   storage: {
-    storageSizeGB: 4096
+    storageSizeGB: 10000
     type: 'PremiumV2_LRS'
     iops: 24000
     throughput: 1200
   }
   enableIndexTuning: false
   enableQueryPerformanceInsight: false
-  backupRetentionDays: 7
-  availabilityZone: '1'
+  backupRetentionDays: 32
+  availabilityZone: '3'
   enableBackupVault: false
 }
 
-param deployerPrincipalName = 'GitHub: altinn/dialogporten - Dev'
+param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod (new postgresql)'

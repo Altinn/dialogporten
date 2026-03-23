@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +36,7 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
 
         var dialogId = instanceRef.Type is InstanceRefType.DialogId
             ? instanceRef.Id
-            : await ResolveDialogIdFromLabel(dialogs, CreateLookupLabel(instanceRef), cancellationToken);
+            : await ResolveDialogIdFromLabel(dialogs, instanceRef.ToLookupLabel(), cancellationToken);
 
         if (dialogId == Guid.Empty)
         {
@@ -97,25 +97,10 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             return requestRef.Value;
         }
 
-        var appInstanceRef = dialogData.ServiceOwnerLabels
-            .Select(x => TryToAppInstanceRef(x, out var appInstanceLabel) ? appInstanceLabel : null)
-            .OfType<string>()
-            .OrderByDescending(x => x, StringComparer.Ordinal)
-            .FirstOrDefault();
-
-        if (appInstanceRef is not null)
+        var outputInstanceRef = InstanceRef.FromDialog(dialogData.DialogId, dialogData.ServiceOwnerLabels);
+        if (outputInstanceRef.Type is not InstanceRefType.DialogId)
         {
-            return appInstanceRef;
-        }
-
-        var correspondenceRef = dialogData.ServiceOwnerLabels
-            .Where(x => x.StartsWith(InstanceRef.CorrespondencePrefix, StringComparison.Ordinal))
-            .OrderByDescending(x => x, StringComparer.Ordinal)
-            .FirstOrDefault();
-
-        if (correspondenceRef is not null)
-        {
-            return correspondenceRef;
+            return outputInstanceRef.Value;
         }
 
         // TODO: Remove workaround: https://github.com/Altinn/dialogporten/issues/3613
@@ -132,13 +117,13 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
 
             if (TryExtractCorrespondenceId(fceUrl, out var correspondenceId))
             {
-                return InstanceRef.CorrespondencePrefix + correspondenceId;
+                return AltinnAuthorizationConstants.CorrespondenceRefPrefix + correspondenceId;
             }
 
             throw new InvalidOperationException("Unable to determine correspondence ID instance reference for correspondence dialog. No label found and FCE URL is not in expected format.");
         }
 
-        return InstanceRef.CreateDialogRef(dialogData.DialogId).ToLowerInvariant();
+        return outputInstanceRef.Value;
     }
 
     private async Task<bool> IsCorrespondenceService(string dialogDataServiceResource, CancellationToken cancellationToken)
@@ -203,38 +188,6 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             .OrderByDescending(x => x.Id)
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
-
-    private static string CreateLookupLabel(InstanceRef instanceRef) =>
-        instanceRef.Type is not InstanceRefType.AppInstanceId || instanceRef.PartyId is null
-            ? instanceRef.Value
-            : $"{Constants.ServiceContextInstanceIdPrefix}{instanceRef.PartyId.Value}/{instanceRef.Id}"
-                .ToLowerInvariant();
-
-    private static bool TryToAppInstanceRef(string labelValue, [NotNullWhen(true)] out string? appInstanceRef)
-    {
-        appInstanceRef = null;
-
-        if (labelValue.StartsWith(InstanceRef.AppInstancePrefix, StringComparison.Ordinal))
-        {
-            appInstanceRef = labelValue.ToLowerInvariant();
-            return true;
-        }
-
-        if (!labelValue.StartsWith(Constants.ServiceContextInstanceIdPrefix, StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        var separator = labelValue.LastIndexOf('/');
-        if (separator < 0 || separator == labelValue.Length - 1)
-        {
-            return false;
-        }
-
-        var appInstanceSuffix = labelValue[Constants.ServiceContextInstanceIdPrefix.Length..];
-        appInstanceRef = $"{InstanceRef.AppInstancePrefix}{appInstanceSuffix}".ToLowerInvariant();
-        return true;
-    }
 
     private sealed class IdentifierLookupDialogProjection
     {

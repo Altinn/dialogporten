@@ -23,7 +23,7 @@ public class GetDialogVisibleFromTests(WebApiE2EFixture fixture) : E2ETestBase<W
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         var hasExpiresHeader = response.ContentHeaders!.TryGetValues("Expires", out var expiresValues);
         hasExpiresHeader.Should().BeTrue("Expires header should be present");
 

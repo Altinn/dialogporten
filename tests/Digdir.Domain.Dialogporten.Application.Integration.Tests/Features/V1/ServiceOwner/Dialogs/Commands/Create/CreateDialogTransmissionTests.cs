@@ -15,6 +15,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionDto;
+using GetTransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
@@ -22,6 +23,28 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class CreateTransmissionTests : ApplicationCollectionFixture
 {
     public CreateTransmissionTests(DialogApplication application) : base(application) { }
+
+    [Fact]
+    public Task VisibleFrom_Should_Control_Timestamps_On_Create()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(3);
+        var transmissionId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.AddTransmission(x =>
+                {
+                    x.Id = transmissionId;
+                });
+            })
+            .GetServiceOwnerTransmission(transmissionId)
+            .ExecuteAndAssert<GetTransmissionDto>(transmission =>
+                transmission.CreatedAt
+                    .Should()
+                    .BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1)));
+    }
 
     [Fact]
     public Task Cannot_Create_Transmission_Url_With_Media_Type_Exceeding_Max_Length() =>

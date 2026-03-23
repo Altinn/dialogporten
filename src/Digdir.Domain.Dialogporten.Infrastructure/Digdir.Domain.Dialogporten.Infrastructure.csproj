@@ -22,9 +22,9 @@
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
         <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1" />
-        <PackageReference Include="ZiggyCreatures.FusionCache.Locking.AsyncKeyed" Version="2.5.0" />
-        <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.5.0" />
-        <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack" Version="2.5.0" />
+        <PackageReference Include="ZiggyCreatures.FusionCache.Locking.AsyncKeyed" Version="2.6.0" />
+        <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.6.0" />
+        <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack" Version="2.6.0" />
     </ItemGroup>
 
     <ItemGroup>

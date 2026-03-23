@@ -14,7 +14,7 @@ public class CrossApiAuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase
 
     [E2ETheory]
     [MemberData(nameof(EndpointCases))]
-    public async Task Enduser_Endpoints_Should_Return_401_Forbidden_For_Valid_ServiceOwner_Tokens(
+    public async Task Enduser_Endpoints_Should_Return_403_Forbidden_For_Valid_ServiceOwner_Tokens(
         EndpointScenario endpointScenario)
     {
         var serviceOwnerToken = await TestTokenGenerator.GenerateTokenAsync(

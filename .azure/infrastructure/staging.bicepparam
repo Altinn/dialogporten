@@ -27,24 +27,21 @@ param appInsightsSku = {
   name: 'PerGB2018'
 }
 param postgresConfiguration = {
-  serverNameStem: 'postgres'
-  version: '16'
+  serverNameStem: 'postgres2'
+  version: '18'
   sku: {
-    name: 'Standard_D8ads_v5'
-    tier: 'GeneralPurpose'
+    name: 'Standard_E8ads_v5'
+    tier: 'MemoryOptimized'
   }
   storage: {
     storageSizeGB: 256
-    autoGrow: 'Enabled'
-    type: 'Premium_LRS'
-    tier: 'P20'
+    type: 'PremiumV2_LRS'
+    iops: 3000
+    throughput: 125
   }
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: true
-  parameterLogging: {
-    enabled: false
-  }
   backupRetentionDays: 7
   availabilityZone: '2'
   enableBackupVault: false

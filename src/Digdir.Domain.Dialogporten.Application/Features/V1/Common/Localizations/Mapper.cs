@@ -8,7 +8,11 @@ internal static class LocalizationDtoMapExtensions
     extension(LocalizationDto dto)
     {
         internal Localization ToLocalization() =>
-            new() { Value = dto.Value, LanguageCode = dto.LanguageCode };
+            new()
+            {
+                Value = dto.Value,
+                LanguageCode = dto.LanguageCode
+            };
     }
 }
 
@@ -17,7 +21,11 @@ internal static class LocalizationMapExtensions
     extension(Localization localization)
     {
         internal LocalizationDto ToDto() =>
-            new() { Value = localization.Value, LanguageCode = localization.LanguageCode };
+            new()
+            {
+                Value = localization.Value,
+                LanguageCode = localization.LanguageCode
+            };
     }
 }
 
@@ -31,23 +39,24 @@ internal static class LocalizationSetMapExtensions
 
     extension(ICollection<Localization> localizations)
     {
-        internal void MergeFrom(ICollection<LocalizationDto> dtos)
-        {
+        internal void MergeFrom(ICollection<LocalizationDto> dtos) =>
             localizations.Merge(
                 sources: dtos,
                 destinationKeySelector: x => x.LanguageCode,
                 sourceKeySelector: x => x.LanguageCode,
                 create: creatables => creatables.Select(x => x.ToLocalization()).ToList(),
-                update: updateSets =>
-                {
-                    foreach (var (source, destination) in updateSets)
-                    {
-                        destination.Value = source.Value;
-                        destination.LanguageCode = source.LanguageCode;
-                    }
-                },
+                update: UpdateLocalizations,
                 delete: DeleteDelegate.Default,
                 comparer: StringComparer.InvariantCultureIgnoreCase);
+    }
+
+    private static void UpdateLocalizations(
+        IEnumerable<UpdateSet<Localization, LocalizationDto>> updateSets)
+    {
+        foreach (var (source, destination) in updateSets)
+        {
+            destination.Value = source.Value;
+            destination.LanguageCode = source.LanguageCode;
         }
     }
 }

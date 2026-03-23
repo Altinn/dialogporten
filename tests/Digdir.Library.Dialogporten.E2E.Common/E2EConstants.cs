@@ -1,18 +1,24 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
 public static class E2EConstants
 {
     public const string TestTokenBaseUrl = "https://altinn-testtools-token-generator.azurewebsites.net/api";
-    public const string DefaultServiceOwnerOrgNr = "991825827";
     public const string DefaultServiceOwnerOrgName = "ttd";
     public const string DefaultEndUserSsn = "08844397713";
     public const string DefaultSystemUserId = "aaa88f01-d847-2973-9579-76f658b42caa";
     public const string DefaultSystemUserOrgNo = "999888777";
 
-    public const string Yt01ServiceOwnerOrgNr = "713431400";
+    private const string DefaultServiceOwnerOrgNr = "991825827";
+    private const string Yt01ServiceOwnerOrgNr = "713431400";
+
+    public static string GetDefaultServiceOwnerOrgNr() =>
+        Environment.GetDotnetEnvironment() == "yt01"
+            ? Yt01ServiceOwnerOrgNr
+            : DefaultServiceOwnerOrgNr;
 
     public const int DefaultTokenTtl = 1800;
 

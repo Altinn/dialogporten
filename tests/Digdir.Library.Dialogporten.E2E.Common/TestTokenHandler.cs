@@ -120,7 +120,7 @@ public sealed class TestTokenHandler : DelegatingHandler
     {
         var scopes = overrides?.Scopes ?? ServiceOwnerScopes;
         var orgName = overrides?.OrgName ?? DefaultServiceOwnerOrgName;
-        var orgNumber = overrides?.OrgNumber ?? GetDefaultServiceOwnerOrgNumber(tokenEnvironment);
+        var orgNumber = overrides?.OrgNumber ?? GetDefaultServiceOwnerOrgNr();
 
         return
             "/GetEnterpriseToken" +
@@ -147,9 +147,4 @@ public sealed class TestTokenHandler : DelegatingHandler
             $"&systemUserOrg={Uri.EscapeDataString(systemUserOrg)}" +
             $"&ttl={DefaultTokenTtl}";
     }
-
-    private static string GetDefaultServiceOwnerOrgNumber(string tokenEnvironment) =>
-        tokenEnvironment == "yt01"
-            ? Yt01ServiceOwnerOrgNr
-            : DefaultServiceOwnerOrgNr;
 }

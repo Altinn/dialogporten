@@ -5,13 +5,16 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission.TransmissionAttachmentDto;
+using GetTransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.TransmissionDto;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
+using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -71,6 +74,35 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                     attachment.Name = new string('a', Constants.DefaultMaxStringLength + 1)))
             .ExecuteAndAssert<ValidationError>(result =>
                 result.ShouldHaveErrorWithText(nameof(TransmissionAttachmentDto.Name)));
+
+    [Fact]
+    public Task VisibleFrom_Should_Control_Timestamps_On_Create()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(3);
+        var transmissionId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.VisibleFrom = visibleFrom)
+            .CreateTransmission((x, _) => x.Id = transmissionId)
+            .GetServiceOwnerTransmission(transmissionId)
+            .ExecuteAndAssert<GetTransmissionDto>(transmission =>
+                transmission.CreatedAt
+                    .Should()
+                    .BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1)));
+    }
+
+    [Fact]
+    public Task Can_Not_Create_Transmission_On_Deleted_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .DeleteDialog()
+            .CreateTransmission((_, _) => { })
+            .ExecuteAndAssert<EntityDeleted<DialogEntity>>((x, ctx) =>
+            {
+                x.Name.Should().Be("DialogEntity");
+                var id = ctx.GetDialogId();
+                x.Message.Should().Be($"Entity 'DialogEntity' with the following key(s) is removed: ({id}).");
+            });
 
     [Fact]
     public Task Cannot_Create_More_Than_ShortMaxValue_Transmissions() =>

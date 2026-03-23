@@ -417,29 +417,35 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     }
 
     [Theory, ClassData(typeof(CreateInvalidActivityTestData))]
-    public Task Validation_error(string _, Func<FlowContext, CreateActivityCommand> activity,
-        List<string> errors)
+    public Task Validation_error(CreateInvalidActivityScenario scenario)
     {
         return FlowBuilder.For(Application)
             .OverrideUtc(CreateInvalidActivityTestData.Time)
             .CreateSimpleDialog()
-            .SendCommand(activity)
+            .SendCommand(scenario.CreateCommand)
             .ExecuteAndAssert<ValidationError>(validationError =>
             {
-                validationError.Errors.Select(e => e.ErrorMessage).Should().BeEquivalentTo(errors);
+                validationError.Errors.Select(e => e.ErrorMessage).Should().BeEquivalentTo(scenario.ExpectedErrorTexts);
             });
     }
 
-    private sealed class
-        CreateInvalidActivityTestData : TheoryData<string, Func<FlowContext, CreateActivityCommand>,
-        List<string>>
+    public sealed record CreateInvalidActivityScenario(
+        string DisplayName,
+        Func<FlowContext, CreateActivityCommand> CreateCommand,
+        List<string> ExpectedErrorTexts) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class CreateInvalidActivityTestData : TheoryData<CreateInvalidActivityScenario>
     {
         public static readonly DateTimeOffset Time = new(2001, 1, 1, 1, 1, 0, TimeSpan.Zero);
 
         public CreateInvalidActivityTestData()
         {
-            Add("Empty Guid",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Empty Guid",
+                CreateCommand: ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Empty,
                     IfMatchDialogRevision = null,
@@ -460,10 +466,11 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
-                ["'DialogId' must not be empty."]);
+                ExpectedErrorTexts: ["'DialogId' must not be empty."]));
 
-            Add("Activity.Id must not be Guid v7",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.Id must not be Guid v7",
+                CreateCommand: ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     IfMatchDialogRevision = null,
@@ -484,13 +491,15 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "Invalid Id. Expected big endian UUIDv7 format. Got '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
                     "Invalid Id. Expected the unix timestamp portion of the UUIDv7 to be in the past. Extrapolated '6302-08-09T22:01:26.2600000+00:00' from '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'."
-                ]);
+                ]));
 
-            Add("Activity.Id must not be Guid v4",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.Id must not be Guid v4",
+                CreateCommand: ctx => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     IfMatchDialogRevision = null,
@@ -511,13 +520,15 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "Invalid Id. Expected big endian UUIDv7 format. Got '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
                     "Invalid Id. Expected the unix timestamp portion of the UUIDv7 to be in the past. Extrapolated '6302-08-09T22:01:26.2600000+00:00' from '7c597b1a-c7f4-4c91-a13b-3b6de0ba59ef'.",
-                ]);
+                ]));
 
-            Add("Activity.Id must not be empty",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.Id must not be empty",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("019c27e4-b9be-7f48-b652-fa7aa5df094a"),
                     IfMatchDialogRevision = null,
@@ -538,12 +549,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "Invalid Id. Expected big endian UUIDv7 format. Got '00000000-0000-0000-0000-000000000000'."
-                ]);
+                ]));
 
-            Add("Activity.CreatedAt cant be in the future with a tolerance of 15 seconds",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.CreatedAt cant be in the future with a tolerance of 15 seconds",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -564,12 +577,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "'CreatedAt' must be in the past.",
-                ]);
+                ]));
 
-            Add("Activity.ExtendedType must be a well formatted uri",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.ExtendedType must be a well formatted uri",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -590,12 +605,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "'ExtendedType' is not a well formatted URI.",
-                ]);
+                ]));
 
-            Add("Activity.ExtendedType uri cant be 1025 or longer",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.ExtendedType uri cant be 1025 or longer",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -616,12 +633,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "The length of 'ExtendedType' must be 1023 characters or fewer. You entered 1025 characters.",
-                ]);
+                ]));
 
-            Add("Activity.PerformedBy cant be null",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.PerformedBy cant be null",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -637,12 +656,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "'PerformedBy' must not be empty.",
-                ]);
+                ]));
 
-            Add("Activity.PerformedBy.ActorId must be a valid urn",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.PerformedBy.ActorId must be a valid urn",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -663,12 +684,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "'ActorId' must be on format 'urn:altinn:organization:identifier-no:{norwegian org-nr}', 'urn:altinn:person:identifier-no:{norwegian f-nr/d-nr}', 'urn:altinn:person:legacy-selfidentified:{username}' or 'urn:altinn:person:idporten-email:{e-mail}' with valid values, respectively.",
-                ]);
+                ]));
 
-            Add("Activity.PerformedBy cant have both ActorName and ActorId when ActorType is not ServiceOwner",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.PerformedBy cant have both ActorName and ActorId when ActorType is not ServiceOwner",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -689,12 +712,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "If 'ActorType' is 'ServiceOwner', both 'ActorId' and 'ActorName' must be null. For any other value of 'ActorType', 'ActorId' or 'ActorName' must be set, but not both simultaneously.",
-                ]);
+                ]));
 
-            Add("Activity.PerformedBy must have either actorName or ActorId when ActorType is snot ServiceOwner",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.PerformedBy must have either actorName or ActorId when ActorType is not ServiceOwner",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -715,12 +740,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "If 'ActorType' is 'ServiceOwner', both 'ActorId' and 'ActorName' must be null. For any other value of 'ActorType', 'ActorId' or 'ActorName' must be set, but not both simultaneously.",
-                ]);
+                ]));
 
-            Add("Activity.Description is required when the type is 'Information'.",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.Description is required when the type is 'Information'.",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -741,12 +768,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "Description is required when the type is 'Information'.",
-                ]);
+                ]));
 
-            Add("Activity.Description is only allowed when the type is 'Information'.",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.Description is only allowed when the type is 'Information'.",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -774,12 +803,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "Description is only allowed when the type is 'Information'.",
-                ]);
+                ]));
 
-            Add("Activity.TransmissionId can only be used when ActivityType is TransmissionOpened",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.TransmissionId can only be used when ActivityType is TransmissionOpened",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -800,12 +831,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "Only activities of type TransmissionOpened can reference a transmission.",
-                ]);
+                ]));
 
-            Add("Activity.TransmissionId must be set then TransmissionOpened",
-                ctx => new CreateActivityCommand
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.TransmissionId must be set then TransmissionOpened",
+                CreateCommand: _ => new CreateActivityCommand
                 {
                     DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
                     IfMatchDialogRevision = null,
@@ -826,9 +859,10 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     },
                     IsSilentUpdate = false
                 },
+                ExpectedErrorTexts:
                 [
                     "An activity of type TransmissionOpened needs to reference a transmission."
-                ]);
+                ]));
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
@@ -199,6 +200,21 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             },
             HttpStatusCode.Created,
             HttpStatusCode.NotFound);
+
+    public static TheoryData<EndpointScenario> AllServiceOwnerEndpoints =>
+        new(AuthenticationTestHelpers.GetEndpointScenarios<IServiceownerApi>());
+
+    [E2ETheory]
+    [MemberData(nameof(AllServiceOwnerEndpoints))]
+    public async Task Should_Return_Forbidden_Without_ServiceProvider_Scope(EndpointScenario endpointScenario)
+    {
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: "wrong-scope");
+
+        var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
+            Fixture.ServiceownerApi, endpointScenario.Method, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
 
     [E2EFact]
     public async Task Should_Deny_Search_Without_Search_Scope()

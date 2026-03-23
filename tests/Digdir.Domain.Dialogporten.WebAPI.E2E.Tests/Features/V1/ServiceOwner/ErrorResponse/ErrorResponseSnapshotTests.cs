@@ -22,7 +22,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
                 endUserId: null!);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -64,7 +64,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateDialog(invalidDialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -82,7 +82,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Gone);
+        response.ShouldHaveStatusCode(HttpStatusCode.Gone);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -98,7 +98,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, Guid.CreateVersion7());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
+        response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -118,7 +118,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        response.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -134,7 +134,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateDialog(dialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -150,7 +150,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateDialog(hugeDialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge);
+        response.ShouldHaveStatusCode(HttpStatusCode.RequestEntityTooLarge);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -166,7 +166,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsQueriesGetDialog(dialogId, null!, TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 }

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -23,7 +24,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
             TestContext.Current.CancellationToken);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.Id.Should().Be(dialogId);
     }
@@ -51,7 +52,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
             TestContext.Current.CancellationToken);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.Attachments.Should()
             .ContainSingle(attachment =>

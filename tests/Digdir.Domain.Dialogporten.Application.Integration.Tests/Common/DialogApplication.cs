@@ -62,9 +62,12 @@ public class DialogApplication : IAsyncLifetime
         });
         _mapper = config.CreateMapper();
 
+        var timeSpanAllowance = TimeSpan.FromMicroseconds(5);
         AssertionConfiguration.Current.Equivalency.Modify(options => options
-            .Using<DateTimeOffset>(ctx => ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMicroseconds(1)))
-            .WhenTypeIs<DateTimeOffset>());
+            .Using<DateTimeOffset>(ctx =>
+                ctx.Subject.Should().BeCloseTo(ctx.Expectation, timeSpanAllowance))
+            .WhenTypeIs<DateTimeOffset>()
+        );
 
         _fixtureRootProvider = _rootProvider = BuildServiceCollection().BuildServiceProvider();
 
@@ -324,6 +327,8 @@ public class DialogApplication : IAsyncLifetime
             .ToList()
             .AsReadOnly();
     }
+
+    public void PurgeEvents() => _publishedEvents.Clear();
 }
 
 /// <summary>

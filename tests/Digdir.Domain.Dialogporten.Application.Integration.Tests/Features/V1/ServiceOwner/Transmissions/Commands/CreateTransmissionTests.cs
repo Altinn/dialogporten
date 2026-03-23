@@ -57,7 +57,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public Task Can_Create_Transmission_With_Attachment_Name() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .CreateTransmission(x => x.AddAttachment(x => x.Name = TransmissionAttachmentName))
+            .CreateTransmission((x, _) => x.AddAttachment(x => x.Name = TransmissionAttachmentName))
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
                 result.Transmissions.Last()
@@ -69,7 +69,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public Task Cannot_Create_Transmission_With_Name_Longer_Than_DefaultMaxLength() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .CreateTransmission(x =>
+            .CreateTransmission((x, _) =>
                 x.AddAttachment(attachment =>
                     attachment.Name = new string('a', Constants.DefaultMaxStringLength + 1)))
             .ExecuteAndAssert<ValidationError>(result =>
@@ -128,7 +128,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public Task Cannot_Create_Transmission_Url_With_Media_Type_Exceeding_Max_Length() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .CreateTransmission(x =>
+            .CreateTransmission((x, _) =>
                 x.AddAttachment(x =>
                     x.Urls.First().MediaType = new string('a', TestConstants.DefaultMaxStringLength + 1)))
             .ExecuteAndAssert<ValidationError>();

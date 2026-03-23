@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.109.0](https://github.com/Altinn/dialogporten/compare/v1.108.2...v1.109.0) (2026-03-23)
+
+
+### Features
+
+* **app:** add sender type to transmission created event ([#3654](https://github.com/Altinn/dialogporten/issues/3654)) ([163940d](https://github.com/Altinn/dialogporten/commit/163940d69582a028b7d9a5823e2e0cca533eae38))
+* Generic instance delegation ([#3588](https://github.com/Altinn/dialogporten/issues/3588)) ([b450c63](https://github.com/Altinn/dialogporten/commit/b450c63b7b70776f0a86b3efbd4a360344f15c74))
+
+
+### Bug Fixes
+
+* **app:** set transmission createdAt to dialog visibleFrom ([#3656](https://github.com/Altinn/dialogporten/issues/3656)) ([a26d538](https://github.com/Altinn/dialogporten/commit/a26d53857a29f1b4f45a2064c5416f72b29588d4))
+
+
+### Miscellaneous Chores
+
+* **ci:** update harden security runner to 2.16.0 ([#3650](https://github.com/Altinn/dialogporten/issues/3650)) ([7d01bb8](https://github.com/Altinn/dialogporten/commit/7d01bb856d0a302fab6dab2c1ac10ddd18b16cb8))
+* **deps:** update dependency testcontainers.postgresql to 4.11.0 ([#3646](https://github.com/Altinn/dialogporten/issues/3646)) ([4b48553](https://github.com/Altinn/dialogporten/commit/4b48553087274cadc1e4fbfa4b6a0a66926b8cc9))
+* **deps:** update docker/metadata-action action to v6 ([#3648](https://github.com/Altinn/dialogporten/issues/3648)) ([b28bda0](https://github.com/Altinn/dialogporten/commit/b28bda0807ad71929153a66c511ae3b408cd4ae6))
+
 ## [1.108.2](https://github.com/Altinn/dialogporten/compare/v1.108.1...v1.108.2) (2026-03-20)
 
 

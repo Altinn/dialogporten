@@ -22,7 +22,8 @@ internal static class CreateDialogCommandExtensions
         return command;
     }
 
-    public static CreateDialogCommand AddTransmission(this CreateDialogCommand command, Action<TransmissionDto>? modify = null)
+    public static CreateDialogCommand AddTransmission(this CreateDialogCommand command,
+        Action<TransmissionDto>? modify = null)
     {
         var transmission = DialogGenerator.GenerateFakeDialogTransmissions(count: 1).First();
         modify?.Invoke(transmission);

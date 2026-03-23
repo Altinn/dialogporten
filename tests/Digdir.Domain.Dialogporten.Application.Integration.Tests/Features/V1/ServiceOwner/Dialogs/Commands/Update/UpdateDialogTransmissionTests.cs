@@ -12,6 +12,7 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using ContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.ContentDto;
+using GetTransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
@@ -57,6 +58,23 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
                 dialog.Transmissions.Count.Should().Be(1));
+
+    [Fact]
+    public Task VisibleFrom_Should_Control_Timestamps_On_Create()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(3);
+        var transmissionId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.VisibleFrom = visibleFrom)
+            .UpdateDialog(x =>
+                x.AddTransmission(x => x.Id = transmissionId))
+            .GetServiceOwnerTransmission(transmissionId)
+            .ExecuteAndAssert<GetTransmissionDto>(transmission =>
+                transmission.CreatedAt
+                    .Should()
+                    .BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1)));
+    }
 
     [Fact]
     public Task Can_Update_Related_Transmission_With_Null_Id() =>

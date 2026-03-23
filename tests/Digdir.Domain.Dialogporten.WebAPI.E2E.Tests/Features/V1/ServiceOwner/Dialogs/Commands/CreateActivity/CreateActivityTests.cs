@@ -70,7 +70,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, dialogReq, Guid.CreateVersion7());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
+        response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
         response.Content.Should().BeNull();
     }
 
@@ -88,7 +88,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         response.Content.Should().BeNull();
     }
 
@@ -106,7 +106,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Gone);
+        response.ShouldHaveStatusCode(HttpStatusCode.Gone);
         response.Content.Should().BeNull();
     }
 
@@ -127,7 +127,7 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response.ShouldHaveStatusCode(HttpStatusCode.Created);
         response.Content.ToGuid();
     }
 
@@ -149,10 +149,10 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response1.StatusCode.Should().Be(HttpStatusCode.Created);
+        response1.ShouldHaveStatusCode(HttpStatusCode.Created);
         response1.Content.ToGuid();
 
-        response2.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        response2.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
         response2.Content.Should().BeNull();
         response2.Error!.Content.Should().Contain($"Key ('Id')=({activityId}) already exists.");
     }

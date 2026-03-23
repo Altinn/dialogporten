@@ -2,6 +2,7 @@ using System.Net;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Authentication;
@@ -23,7 +24,7 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
             Fixture.EnduserApi, endpointScenario.Method, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
 
         response.Headers.Should().NotBeNull();
         var hasAuthenticateHeader = response.Headers.TryGetValues("WWW-Authenticate", out var authenticateHeaders);

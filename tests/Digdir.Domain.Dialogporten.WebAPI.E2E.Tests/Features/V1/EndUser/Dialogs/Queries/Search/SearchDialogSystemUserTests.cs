@@ -22,7 +22,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 
     [E2EFact]
@@ -44,7 +44,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
             accept_Language: new());
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content;
         content.Should().NotBeNull();
         content.Items.Should().BeNull();

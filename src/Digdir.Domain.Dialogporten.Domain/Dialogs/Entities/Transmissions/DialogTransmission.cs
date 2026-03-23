@@ -57,6 +57,7 @@ public sealed class DialogTransmission :
         _domainEvents.Add(new DialogTransmissionCreatedDomainEvent(
             DialogId,
             Id,
+            Sender.ActorTypeId,
             Dialog.ServiceResource,
             Dialog.Party,
             Dialog.Process,

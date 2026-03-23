@@ -10,7 +10,7 @@ internal sealed class DialogDetailsAuthorizationRequest
 {
     public required ClaimsPrincipal ClaimsPrincipal { get; init; }
     public required string ServiceResource { get; init; }
-    public required Guid DialogId { get; init; }
+    public required InstanceRef InstanceRef { get; init; }
     public required string Party { get; init; }
 
     // Each action applies to a resource. This is the main resource, or another resource indicated by an authorization attribute
@@ -28,7 +28,7 @@ internal static class DialogDetailsAuthorizationRequestExtensions
         var actionsKey = string.Join(";", request.AltinnActions.OrderBy(a => a.Name)
             .Select(a => $"{a.Name}:{a.AuthorizationAttribute}"));
 
-        var rawKey = $"{request.DialogId}||{claimsKey}|{actionsKey}";
+        var rawKey = $"{request.InstanceRef.Value}||{claimsKey}|{actionsKey}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
         var hashString = Convert.ToHexStringLower(hashBytes);

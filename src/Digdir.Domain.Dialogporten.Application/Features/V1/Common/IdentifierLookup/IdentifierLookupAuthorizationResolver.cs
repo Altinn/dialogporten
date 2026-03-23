@@ -33,9 +33,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     /// <summary>
     /// Computes authorization evidence and whether lookup access should be granted.
     /// </summary>
-    public async Task<IdentifierLookupAuthorizationResolution> Resolve(
-        IdentifierLookupDialogData dialogData,
-        InstanceRef requestRef,
+    public async Task<IdentifierLookupAuthorizationResolution> Resolve(IdentifierLookupDialogData dialogData,
         InstanceRef responseInstanceRef,
         CancellationToken cancellationToken)
     {

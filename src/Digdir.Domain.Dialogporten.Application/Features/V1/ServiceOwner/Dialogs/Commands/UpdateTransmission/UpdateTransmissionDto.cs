@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 
@@ -77,7 +78,7 @@ public class UpdateTransmissionDto
     public List<TransmissionNavigationalActionDto> NavigationalActions { get; set; } = [];
 }
 
-public sealed class TransmissionContentDto
+public sealed class TransmissionContentDto : ITransmissionContentDto
 {
     /// <summary>
     /// The transmission title. Must be text/plain.

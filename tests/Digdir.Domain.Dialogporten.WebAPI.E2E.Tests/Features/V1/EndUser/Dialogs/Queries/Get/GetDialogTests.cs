@@ -22,7 +22,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.SeenSinceLastUpdate.Should().HaveCount(1);
 
@@ -41,7 +41,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.GuiActions.Should().HaveCount(2);
 
@@ -64,7 +64,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.ApiActions.Should().HaveCount(1);
 
@@ -88,7 +88,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.Transmissions.Should().NotBeEmpty();
 
@@ -114,12 +114,12 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         // Act
         var purgeResponse = await Fixture.ServiceownerApi
             .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
-        purgeResponse.IsSuccessful.Should().BeTrue();
+        purgeResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 
     [E2EFact]
@@ -134,7 +134,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var response = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
         response.Error!.Content.Should().Contain(Constants.AltinnAuthLevelTooLow);
     }
 

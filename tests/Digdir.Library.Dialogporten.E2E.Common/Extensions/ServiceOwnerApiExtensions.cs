@@ -1,7 +1,6 @@
+using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
-using AwesomeAssertions;
 using Refit;
-using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
@@ -22,12 +21,7 @@ public static class ServiceOwnerApiExtensions
                     dialog,
                     TestContext.Current.CancellationToken);
 
-            if (!createDialogResponse.IsSuccessStatusCode)
-            {
-                TestContext.Current.TestOutputHelper!.WriteLine(createDialogResponse.Error.Content!);
-            }
-
-            createDialogResponse.Error.Should().BeNull();
+            createDialogResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
 
             return createDialogResponse.Content.ToGuid();
         }
@@ -43,6 +37,8 @@ public static class ServiceOwnerApiExtensions
                     DialogTestData.CreateSimpleActivity(modify),
                     ifMatch,
                     TestContext.Current.CancellationToken);
+
+            createActivityResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
 
             return createActivityResponse.Content.ToGuid();
         }

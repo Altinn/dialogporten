@@ -12,6 +12,20 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUse
 public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2EFact]
+    public async Task Should_Set_System_Label()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var response = await Fixture.EnduserApi
+            .SetSystemLabels(dialogId, request => request.AddLabels = [Bin]);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [E2EFact]
     public async Task Should_Add_One_LabelLog_Entry_After_Setting_Label()
     {
         // Arrange

@@ -179,14 +179,16 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
         return dialogs;
     }
 
-    private static async Task<Guid> ResolveDialogIdFromLabel(
+    private async Task<Guid> ResolveDialogIdFromLabel(
         IQueryable<DialogEntity> dialogs,
         string labelValue,
         CancellationToken cancellationToken) =>
-        await dialogs
-            .Where(x => x.ServiceOwnerContext.ServiceOwnerLabels.Any(l => l.Value == labelValue))
-            .OrderByDescending(x => x.Id)
-            .Select(x => x.Id)
+        await _db.DialogServiceOwnerLabels
+            .Where(l => l.Value == labelValue)
+            .Join(dialogs,
+                l => l.DialogServiceOwnerContextId,
+                d => d.Id, (l, d) => d.Id)
+            .OrderByDescending(id => id)
             .FirstOrDefaultAsync(cancellationToken);
 
     private sealed class IdentifierLookupDialogProjection

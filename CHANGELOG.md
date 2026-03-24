@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.110.2](https://github.com/Altinn/dialogporten/compare/v1.110.1...v1.110.2) (2026-03-24)
+
+
+### Bug Fixes
+
+* **infra:** serialize dependencies for PostgreSQL configurations ([#3673](https://github.com/Altinn/dialogporten/issues/3673)) ([aed2d80](https://github.com/Altinn/dialogporten/commit/aed2d80547444128deb90b70a4b0dca52a2500d0)), closes [#3664](https://github.com/Altinn/dialogporten/issues/3664)
+* **infra:** serialize PostgreSQL configuration deployments to prevent ServerIsBusy race condition ([#3664](https://github.com/Altinn/dialogporten/issues/3664)) ([dca8a01](https://github.com/Altinn/dialogporten/commit/dca8a010e5098a015be9adf6031507a241cea831))
+
 ## [1.110.1](https://github.com/Altinn/dialogporten/compare/v1.110.0...v1.110.1) (2026-03-23)
 
 

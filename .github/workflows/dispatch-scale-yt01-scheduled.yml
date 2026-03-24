@@ -106,7 +106,7 @@ jobs:
             REVISION=$(az containerapp show \
               --name "$APP" \
               --resource-group "$RESOURCE_GROUP" \
-              --query "properties.latestRevisionName" -o tsv)
+              --query "properties.latestReadyRevisionName" -o tsv)
 
             local STATUS
             STATUS=$(az containerapp revision show \

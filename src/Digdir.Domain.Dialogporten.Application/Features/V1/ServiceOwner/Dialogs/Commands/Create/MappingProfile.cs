@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -47,10 +48,10 @@ internal sealed class MappingProfile : Profile
             .ForMember(dest => dest.TypeId, opt => opt.MapFrom(src => src.Type));
 
         CreateMap<ContentDto?, List<DialogContent>?>()
-            .ConvertUsing<DialogContentInputConverter<ContentDto>>();
+            .ConvertUsing<ContentDtoToDialogContentConverter<ContentDto>>();
 
         CreateMap<TransmissionContentDto?, List<DialogTransmissionContent>?>()
-            .ConvertUsing<TransmissionContentInputConverter<TransmissionContentDto>>();
+            .ConvertUsing<TransmissionContentDtoToDialogTransmissionContentConverter<TransmissionContentDto>>();
 
         CreateMap<TransmissionDto, DialogTransmission>()
             .ForMember(dest => dest.Type, opt => opt.Ignore())

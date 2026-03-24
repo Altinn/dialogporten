@@ -19,28 +19,28 @@ internal sealed class DialogContentToContentDtoConverter : ITypeConverter<List<D
             switch (content.TypeId)
             {
                 case DialogContentType.Values.Title:
-                    dto.Title = context.Mapper.Map<ContentValueDto>(content);
+                    dto.Title = content.ToContentValueDto();
                     return dto;
                 case DialogContentType.Values.NonSensitiveTitle:
-                    dto.NonSensitiveTitle = context.Mapper.Map<ContentValueDto>(content);
+                    dto.NonSensitiveTitle = content.ToContentValueDto();
                     return dto;
                 case DialogContentType.Values.SenderName:
-                    dto.SenderName = context.Mapper.Map<ContentValueDto>(content);
+                    dto.SenderName = content.ToContentValueDto();
                     return dto;
                 case DialogContentType.Values.Summary:
-                    dto.Summary = context.Mapper.Map<ContentValueDto>(content);
+                    dto.Summary = content.ToContentValueDto();
                     return dto;
                 case DialogContentType.Values.NonSensitiveSummary:
-                    dto.NonSensitiveSummary = context.Mapper.Map<ContentValueDto>(content);
+                    dto.NonSensitiveSummary = content.ToContentValueDto();
                     return dto;
                 case DialogContentType.Values.AdditionalInfo:
-                    dto.AdditionalInfo = context.Mapper.Map<ContentValueDto>(content);
+                    dto.AdditionalInfo = content.ToContentValueDto();
                     return dto;
                 case DialogContentType.Values.ExtendedStatus:
-                    dto.ExtendedStatus = context.Mapper.Map<ContentValueDto>(content);
+                    dto.ExtendedStatus = content.ToContentValueDto();
                     return dto;
                 case DialogContentType.Values.MainContentReference:
-                    dto.MainContentReference = context.Mapper.Map<ContentValueDto>(content);
+                    dto.MainContentReference = content.ToContentValueDto();
                     return dto;
                 default:
                     throw new InvalidOperationException(

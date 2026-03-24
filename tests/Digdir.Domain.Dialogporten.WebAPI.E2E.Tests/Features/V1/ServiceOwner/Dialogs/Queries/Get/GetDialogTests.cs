@@ -75,6 +75,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
 
         // Assert
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(getDialogResult.Content));
+            JsonSerializer.Serialize(getDialogResult.Content),
+            fileNameSuffix: Fixture.DotnetEnvironment);
     }
 }

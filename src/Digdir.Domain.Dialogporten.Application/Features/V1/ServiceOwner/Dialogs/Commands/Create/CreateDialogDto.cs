@@ -1,5 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -247,7 +248,7 @@ public sealed class TransmissionDto
     public List<TransmissionNavigationalActionDto> NavigationalActions { get; set; } = [];
 }
 
-public sealed class ContentDto
+public sealed class ContentDto : IDialogContentDto
 {
     /// <summary>
     /// The title of the dialog.
@@ -297,7 +298,7 @@ public sealed class ContentDto
     public ContentValueDto? MainContentReference { get; set; }
 }
 
-public sealed class TransmissionContentDto
+public sealed class TransmissionContentDto : ITransmissionContentDto
 {
     /// <summary>
     /// The transmission title. Must be text/plain.

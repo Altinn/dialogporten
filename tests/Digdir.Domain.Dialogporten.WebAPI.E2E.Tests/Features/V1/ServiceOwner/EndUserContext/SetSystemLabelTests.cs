@@ -51,12 +51,10 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Act
         var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                CreateSetRequest(ServiceOwnerSystemLabel.Bin),
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -73,12 +71,10 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Act
         var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                CreateSetRequest(ServiceOwnerSystemLabel.Bin, ServiceOwnerSystemLabel.Archive),
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin, ServiceOwnerSystemLabel.Archive]);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -92,12 +88,11 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Act
         var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                CreateSetRequest(ServiceOwnerSystemLabel.Bin),
-                Guid.NewGuid(),
-                TestContext.Current.CancellationToken);
+                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin],
+                revision: Guid.NewGuid());
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
@@ -112,12 +107,10 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Act
         var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+            .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                CreateSetRequest(ServiceOwnerSystemLabel.Archive),
-                if_Match: null,
-                TestContext.Current.CancellationToken);
+                request => request.AddLabels = [ServiceOwnerSystemLabel.Archive]);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -133,12 +126,4 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         response.IsSuccessful.Should().BeTrue();
         return response.Content ?? throw new InvalidOperationException("Dialog content was null.");
     }
-
-    private static V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest CreateSetRequest(
-        params ServiceOwnerSystemLabel[] addLabels) =>
-        new()
-        {
-            AddLabels = addLabels,
-            RemoveLabels = []
-        };
 }

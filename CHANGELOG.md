@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.110.3](https://github.com/Altinn/dialogporten/compare/v1.110.2...v1.110.3) (2026-03-24)
+
+
+### Miscellaneous Chores
+
+* **infra:** enable migration target deployment for prod ([#3676](https://github.com/Altinn/dialogporten/issues/3676)) ([479b5f4](https://github.com/Altinn/dialogporten/commit/479b5f42c80a5321fa8d5d8c42af623fb69591b7)), closes [#3658](https://github.com/Altinn/dialogporten/issues/3658)
+* **infra:** refine yt01 scaling strategy ([#3674](https://github.com/Altinn/dialogporten/issues/3674)) ([ac44120](https://github.com/Altinn/dialogporten/commit/ac44120699e4f0a626e2add38e0aaf8c80188ea1))
+
 ## [1.110.2](https://github.com/Altinn/dialogporten/compare/v1.110.1...v1.110.2) (2026-03-24)
 
 

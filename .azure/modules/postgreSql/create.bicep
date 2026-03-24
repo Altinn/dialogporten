@@ -314,7 +314,7 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     value: 'report'
     source: 'user-override'
   }
-  dependsOn: [pgms_wait_sampling_query_capture_mode, pg_qs_query_capture_mode, track_io_timing, idle_transactions_timeout, enable_extensions]
+  dependsOn: [pgms_wait_sampling_query_capture_mode]
 }
 
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {

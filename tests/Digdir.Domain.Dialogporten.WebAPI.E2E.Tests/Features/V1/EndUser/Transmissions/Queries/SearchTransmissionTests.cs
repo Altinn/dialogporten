@@ -1,3 +1,4 @@
+using System.Net;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -23,7 +24,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             TestContext.Current.CancellationToken);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Transmission content was null.");
         content.Should().ContainSingle().Which.Id.Should().Be(transmissionId);
     }

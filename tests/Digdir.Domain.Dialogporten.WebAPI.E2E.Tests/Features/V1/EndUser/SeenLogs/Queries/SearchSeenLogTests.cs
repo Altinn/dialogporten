@@ -1,3 +1,4 @@
+using System.Net;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -15,7 +16,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         var getDialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
-        getDialogResponse.IsSuccessful.Should().BeTrue();
+        getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         var dialogContent = getDialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
         var seenLogId = dialogContent.SeenSinceLastUpdate.Single().Id;
 
@@ -25,7 +26,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             TestContext.Current.CancellationToken);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Seen log content was null.");
         content.Should().ContainSingle().Which.Id.Should().Be(seenLogId);
     }

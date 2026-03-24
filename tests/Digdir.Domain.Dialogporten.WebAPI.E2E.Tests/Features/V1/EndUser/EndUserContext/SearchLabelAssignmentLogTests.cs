@@ -20,13 +20,13 @@ public class SearchLabelAssignmentLogTests(WebApiE2EFixture fixture) : E2ETestBa
             dialogId,
             request => request.AddLabels = [Bin]);
 
-        setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         // Act
         var response = await Fixture.EnduserApi.GetSystemLabelAssignmentLog(dialogId);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Label assignment log content was null.");
         content.Should().ContainSingle().Which.Action.Should().Be("set");
     }

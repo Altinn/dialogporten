@@ -21,7 +21,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabels(dialogId, request => request.AddLabels = [Bin]);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
     }
 
     [E2EFact]

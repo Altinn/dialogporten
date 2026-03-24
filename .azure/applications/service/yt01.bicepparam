@@ -15,8 +15,8 @@ param resources = {
 
 param otelTraceSamplerRatio = '0.05'
 
-// Scale to zero when idle (manual restart needed to wake, no HTTP ingress)
-param minReplicas = 0
+// Scale-off workflows override to 0 via az CLI.
+param minReplicas = 1
 
 // secrets
 param appInsightConnectionString = readEnvironmentVariable('AZURE_APP_INSIGHTS_CONNECTION_STRING')

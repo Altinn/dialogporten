@@ -40,9 +40,7 @@ public static class AuthenticationTestHelpers
                 TokenOverride: "thisisnotavalidtoken",
                 ExpectedAuthenticateHeaderFragment: "error=\"invalid_token\"")
         };
-
         var endpointScenarios = GetEndpointScenarios<TApi>();
-
         var theoryData = new TheoryData<AuthenticationScenario, EndpointScenario>();
 
         foreach (var authScenario in authScenarios)
@@ -51,6 +49,18 @@ public static class AuthenticationTestHelpers
             {
                 theoryData.Add(authScenario, endpointScenario);
             }
+        }
+
+        return theoryData;
+    }
+
+    public static TheoryData<EndpointScenario> BuildEndpointCases<TApi>()
+    {
+        var theoryData = new TheoryData<EndpointScenario>();
+
+        foreach (var endpointScenario in GetEndpointScenarios<TApi>())
+        {
+            theoryData.Add(endpointScenario);
         }
 
         return theoryData;

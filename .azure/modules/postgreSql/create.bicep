@@ -304,7 +304,7 @@ resource pgms_wait_sampling_query_capture_mode 'Microsoft.DBforPostgreSQL/flexib
     value: 'all'
     source: 'user-override'
   }
-  dependsOn: [pg_qs_query_capture_mode]
+  dependsOn: [pg_qs_query_capture_mode, track_io_timing, idle_transactions_timeout, enable_extensions]
 }
 
 resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = if (enableIndexTuning) {
@@ -314,7 +314,7 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     value: 'report'
     source: 'user-override'
   }
-  dependsOn: [pg_qs_query_capture_mode]
+  dependsOn: [pgms_wait_sampling_query_capture_mode, pg_qs_query_capture_mode, track_io_timing, idle_transactions_timeout, enable_extensions]
 }
 
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {

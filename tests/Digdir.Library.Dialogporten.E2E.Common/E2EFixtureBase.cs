@@ -19,6 +19,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
     private PreflightState? PreflightState { get; set; }
     public string DotnetEnvironment { get; private set; } = Environments.Development;
+    public E2ESettings Settings { get; private set; } = null!;
 
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
 
@@ -37,6 +38,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         var settings = configuration.Get<E2ESettings>()
                        ?? throw new InvalidOperationException("E2E settings are missing.");
+        Settings = settings;
 
         var services = new ServiceCollection();
 

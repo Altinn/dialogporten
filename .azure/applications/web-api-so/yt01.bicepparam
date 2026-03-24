@@ -14,19 +14,11 @@ param resources = {
 
 param otelTraceSamplerRatio = '0.05'
 
-// Scale to zero when idle, use HTTP scaling to wake on traffic
+// Scale-off workflows override to 0 via az CLI.
 param scale = {
-  minReplicas: 0
+  minReplicas: 1
   maxReplicas: 10
   rules: [
-    {
-      name: 'http-rule'
-      http: {
-        metadata: {
-          concurrentRequests: '100'
-        }
-      }
-    }
     {
       name: 'cpu'
       custom: {

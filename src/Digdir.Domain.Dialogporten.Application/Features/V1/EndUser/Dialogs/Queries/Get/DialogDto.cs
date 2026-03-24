@@ -1,6 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -363,7 +364,7 @@ public sealed class ContentDto
     public ContentValueDto? MainContentReference { get; set; }
 }
 
-public sealed class DialogTransmissionContentDto
+public sealed class DialogTransmissionContentDto : ITransmissionContentDto
 {
     /// <summary>
     /// The transmission title.

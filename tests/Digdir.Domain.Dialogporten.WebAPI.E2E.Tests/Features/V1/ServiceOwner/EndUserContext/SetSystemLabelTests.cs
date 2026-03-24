@@ -34,7 +34,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         var dialog1 = await GetDialogAsync(dialogId1, E2EConstants.DefaultParty);
         var dialog2 = await GetDialogAsync(dialogId2, E2EConstants.DefaultParty);
@@ -57,7 +57,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         var dialog = await GetDialogAsync(dialogId, E2EConstants.DefaultParty);
         dialog.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
@@ -77,7 +77,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 request => request.AddLabels = [ServiceOwnerSystemLabel.Bin, ServiceOwnerSystemLabel.Archive]);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
     }
 
     [E2EFact]
@@ -95,7 +95,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 revision: Guid.NewGuid());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
+        response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
     }
 
     [E2EFact]
@@ -113,7 +113,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 request => request.AddLabels = [ServiceOwnerSystemLabel.Archive]);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 
     private async Task<V1ServiceOwnerDialogsQueriesGet_Dialog> GetDialogAsync(Guid dialogId, string endUserId)
@@ -123,7 +123,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             endUserId,
             TestContext.Current.CancellationToken);
 
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         return response.Content ?? throw new InvalidOperationException("Dialog content was null.");
     }
 }

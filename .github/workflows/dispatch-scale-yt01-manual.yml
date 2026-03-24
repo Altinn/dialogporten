@@ -135,6 +135,11 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --query "properties.latestReadyRevisionName" -o tsv)
 
+            if [[ -z "$REVISION" || "$REVISION" == "None" ]]; then
+              echo "No ready revision found for $APP"
+              return 1
+            fi
+
             local STATUS
             STATUS=$(az containerapp revision show \
               --name "$APP" \
@@ -158,9 +163,14 @@ jobs:
             activate_app "$APP" &
             PIDS+=($!)
           done
+          FAILED=0
           for PID in "${PIDS[@]}"; do
-            wait "$PID"
+            wait "$PID" || FAILED=1
           done
+          if [[ "$FAILED" -ne 0 ]]; then
+            echo "One or more revision activations failed"
+            exit 1
+          fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
@@ -330,6 +340,11 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --query "properties.latestReadyRevisionName" -o tsv)
 
+            if [[ -z "$REVISION" || "$REVISION" == "None" ]]; then
+              echo "No ready revision found for $APP. Skipping."
+              return 0
+            fi
+
             local STATUS
             STATUS=$(az containerapp revision show \
               --name "$APP" \
@@ -353,9 +368,14 @@ jobs:
             deactivate_app "$APP" &
             PIDS+=($!)
           done
+          FAILED=0
           for PID in "${PIDS[@]}"; do
-            wait "$PID"
+            wait "$PID" || FAILED=1
           done
+          if [[ "$FAILED" -ne 0 ]]; then
+            echo "One or more revision deactivations failed"
+            exit 1
+          fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 

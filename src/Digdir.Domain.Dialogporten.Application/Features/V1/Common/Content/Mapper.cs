@@ -31,34 +31,31 @@ internal static class DialogContentMapExtensions
     }
 }
 
-internal static class ContentMapper
+internal static class TransmissionContentListMapExtensions
 {
-    internal static TContentDto? ToTransmissionContentDto<TContentDto>(
-        this List<DialogTransmissionContent>? sources)
-        where TContentDto : class, ITransmissionContentDto, new()
+    extension(List<DialogTransmissionContent>? sources)
     {
-        if (sources is null || sources.Count == 0)
-        {
-            return null;
-        }
-
-        return sources.Aggregate(new TContentDto(), (dto, content) =>
-        {
-            switch (content.TypeId)
-            {
-                case DialogTransmissionContentType.Values.Title:
-                    dto.Title = content.ToContentValueDto();
-                    return dto;
-                case DialogTransmissionContentType.Values.Summary:
-                    dto.Summary = content.ToContentValueDto();
-                    return dto;
-                case DialogTransmissionContentType.Values.ContentReference:
-                    dto.ContentReference = content.ToContentValueDto();
-                    return dto;
-                default:
-                    throw new InvalidOperationException(
-                        $"Unknown TypeId {content.TypeId} found in DialogTransmissionContent {content.Id}");
-            }
-        });
+        internal TContentDto? ToTransmissionContentDto<TContentDto>()
+            where TContentDto : class, ITransmissionContentDto, new() =>
+            sources is null || sources.Count == 0
+                ? null
+                : sources.Aggregate(new TContentDto(), (dto, content) =>
+                {
+                    switch (content.TypeId)
+                    {
+                        case DialogTransmissionContentType.Values.Title:
+                            dto.Title = content.ToContentValueDto();
+                            return dto;
+                        case DialogTransmissionContentType.Values.Summary:
+                            dto.Summary = content.ToContentValueDto();
+                            return dto;
+                        case DialogTransmissionContentType.Values.ContentReference:
+                            dto.ContentReference = content.ToContentValueDto();
+                            return dto;
+                        default:
+                            throw new InvalidOperationException(
+                                $"Unknown TypeId {content.TypeId} found in DialogTransmissionContent {content.Id}");
+                    }
+                });
     }
 }

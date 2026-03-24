@@ -77,43 +77,36 @@ public static class TestTokenGenerator
         TokenKind kind,
         EndUserTokenOverrides? endUserOverrides = null,
         ServiceOwnerTokenOverrides? serviceOwnerOverrides = null,
-        SystemUserTokenOverrides? systemUserOverrides = null)
-    {
-        var tokenEnvironment = Environment.GetTokenGeneratorEnvironment();
-
-     return kind switch     
-      {
-          TokenKind.EndUser => BuildEndUserRequestPath(endUserOverrides, tokenEnvironment),
-          TokenKind.ServiceOwner => BuildServiceOwnerRequestPath(serviceOwnerOverrides, tokenEnvironment),                                                                     
-          TokenKind.SystemUser => BuildSystemUserRequestPath(systemUserOverrides, tokenEnvironment),
-          _ => throw new InvalidOperationException($"Unsupported token kind: {kind}")                                                                                          
-      };
-    }
+        SystemUserTokenOverrides? systemUserOverrides = null) =>
+        kind switch
+        {
+            TokenKind.EndUser => BuildEndUserRequestPath(endUserOverrides),
+            TokenKind.ServiceOwner => BuildServiceOwnerRequestPath(serviceOwnerOverrides),
+            TokenKind.SystemUser => BuildSystemUserRequestPath(systemUserOverrides),
+            _ => throw new InvalidOperationException($"Unsupported token kind: {kind}")
+        };
 
     private static string BuildEndUserRequestPath(
-        EndUserTokenOverrides? overrides,
-        string tokenEnvironment) =>
+        EndUserTokenOverrides? overrides) =>
         "/GetPersonalToken" +
-        $"?env={tokenEnvironment}" +
+        $"?env={Environment.GetTokenGeneratorEnvironment()}" +
         $"&scopes={Uri.EscapeDataString(overrides?.Scopes ?? EndUserScopes)}" +
         $"&pid={Uri.EscapeDataString(overrides?.Ssn ?? DefaultEndUserSsn)}" +
         $"&ttl={DefaultTokenTtl}";
 
     private static string BuildServiceOwnerRequestPath(
-        ServiceOwnerTokenOverrides? overrides,
-        string tokenEnvironment) =>
+        ServiceOwnerTokenOverrides? overrides) =>
         "/GetEnterpriseToken" +
-        $"?env={tokenEnvironment}" +
+        $"?env={Environment.GetTokenGeneratorEnvironment()}" +
         $"&scopes={Uri.EscapeDataString(overrides?.Scopes ?? ServiceOwnerScopes)}" +
         $"&org={Uri.EscapeDataString(overrides?.OrgName ?? DefaultServiceOwnerOrgName)}" +
         $"&orgNo={Uri.EscapeDataString(overrides?.OrgNumber ?? GetDefaultServiceOwnerOrgNr())}" +
         $"&ttl={DefaultTokenTtl}";
 
     private static string BuildSystemUserRequestPath(
-        SystemUserTokenOverrides? overrides,
-        string tokenEnvironment) =>
+        SystemUserTokenOverrides? overrides) =>
         "/GetSystemUserToken" +
-        $"?env={tokenEnvironment}" +
+        $"?env={Environment.GetTokenGeneratorEnvironment()}" +
         $"&scopes={Uri.EscapeDataString(overrides?.Scopes ?? SystemUserScopes)}" +
         $"&systemUserId={Uri.EscapeDataString(overrides?.SystemUserId ?? DefaultSystemUserId)}" +
         $"&systemUserOrg={Uri.EscapeDataString(overrides?.SystemUserOrg ?? DefaultSystemUserOrgNo)}" +

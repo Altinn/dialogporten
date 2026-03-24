@@ -3,6 +3,7 @@ using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Authentication;
 
@@ -27,6 +28,6 @@ public class CrossApiAuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase
         var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
             Fixture.ServiceownerApi, endpointScenario.Method, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }
 }

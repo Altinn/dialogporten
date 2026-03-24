@@ -81,22 +81,13 @@ public static class TestTokenGenerator
     {
         var tokenEnvironment = Environment.GetTokenGeneratorEnvironment();
 
-        if (kind == TokenKind.EndUser)
-        {
-            return BuildEndUserRequestPath(endUserOverrides, tokenEnvironment);
-        }
-
-        if (kind == TokenKind.ServiceOwner)
-        {
-            return BuildServiceOwnerRequestPath(serviceOwnerOverrides, tokenEnvironment);
-        }
-
-        if (kind == TokenKind.SystemUser)
-        {
-            return BuildSystemUserRequestPath(systemUserOverrides, tokenEnvironment);
-        }
-
-        throw new InvalidOperationException($"Unsupported token kind: {kind}");
+     return kind switch     
+      {
+          TokenKind.EndUser => BuildEndUserRequestPath(endUserOverrides, tokenEnvironment),
+          TokenKind.ServiceOwner => BuildServiceOwnerRequestPath(serviceOwnerOverrides, tokenEnvironment),                                                                     
+          TokenKind.SystemUser => BuildSystemUserRequestPath(systemUserOverrides, tokenEnvironment),
+          _ => throw new InvalidOperationException($"Unsupported token kind: {kind}")                                                                                          
+      };
     }
 
     private static string BuildEndUserRequestPath(

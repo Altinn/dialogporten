@@ -1,0 +1,144 @@
+using System.Net;
+using Altinn.ApiClients.Dialogporten.Features.V1;
+using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Library.Dialogporten.E2E.Common;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using ServiceOwnerSystemLabel = Altinn.ApiClients.Dialogporten.Features.V1.DialogEndUserContextsEntities_SystemLabel;
+
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.EndUserContext;
+
+[Collection(nameof(WebApiTestCollectionFixture))]
+public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
+{
+    [E2EFact]
+    public async Task Should_BulkSet_Labels_For_Accessible_Dialogs()
+    {
+        // Arrange
+        var dialogId1 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var dialogId2 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels(
+                E2EConstants.DefaultParty,
+                new V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel
+                {
+                    Dialogs =
+                    [
+                        new() { DialogId = dialogId1 },
+                        new() { DialogId = dialogId2 }
+                    ],
+                    AddLabels = [ServiceOwnerSystemLabel.Bin]
+                },
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var dialog1 = await GetDialogAsync(dialogId1, E2EConstants.DefaultParty);
+        var dialog2 = await GetDialogAsync(dialogId2, E2EConstants.DefaultParty);
+
+        dialog1.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
+        dialog2.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
+    }
+
+    [E2EFact]
+    public async Task Should_Set_Label_As_ServiceOwner()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+                dialogId,
+                E2EConstants.DefaultParty,
+                CreateSetRequest(ServiceOwnerSystemLabel.Bin),
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var dialog = await GetDialogAsync(dialogId, E2EConstants.DefaultParty);
+        dialog.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
+    }
+
+    [E2EFact]
+    public async Task Should_Accept_Multiple_SystemLabels()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+                dialogId,
+                E2EConstants.DefaultParty,
+                CreateSetRequest(ServiceOwnerSystemLabel.Bin, ServiceOwnerSystemLabel.Archive),
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_412_For_Invalid_IfMatch_Revision()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+                dialogId,
+                E2EConstants.DefaultParty,
+                CreateSetRequest(ServiceOwnerSystemLabel.Bin),
+                Guid.NewGuid(),
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_For_Unauthorized_Dialog()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+            dialog.Party = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{E2EConstants.GetDefaultServiceOwnerOrgNr()}");
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+                dialogId,
+                E2EConstants.DefaultParty,
+                CreateSetRequest(ServiceOwnerSystemLabel.Archive),
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private async Task<V1ServiceOwnerDialogsQueriesGet_Dialog> GetDialogAsync(Guid dialogId, string endUserId)
+    {
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
+            dialogId,
+            endUserId,
+            TestContext.Current.CancellationToken);
+
+        response.IsSuccessful.Should().BeTrue();
+        return response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+    }
+
+    private static V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest CreateSetRequest(
+        params ServiceOwnerSystemLabel[] addLabels) =>
+        new()
+        {
+            AddLabels = addLabels,
+            RemoveLabels = []
+        };
+}

@@ -10,6 +10,11 @@ on:
         options:
           - 'on'
           - 'off'
+      deploy:
+        description: "Deploy latest version when scaling on (checks if newer version is available)"
+        required: false
+        type: boolean
+        default: true
       postpone_until:
         description: "Postpone scheduled shutdown until this datetime (ISO 8601, e.g. 2026-03-01T20:00:00+01:00). Only used with 'on'."
         required: false
@@ -96,6 +101,21 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
+      - name: Scale workload profile up
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env workload-profile update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --workload-profile-name "Dedicated-D8" \
+            --min-nodes 3 \
+            --max-nodes 10
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Enable availability test
         if: inputs.state == 'on'
         shell: bash
@@ -109,35 +129,90 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
-      - name: Restart service container app
+      - name: Set minReplicas=1 for all apps
         if: inputs.state == 'on'
         shell: bash
         run: |
           set -euo pipefail
 
-          # The service app has no HTTP trigger so it needs an explicit restart
-          # to reattach its Service Bus consumer after scale-to-zero.
-          # HTTP apps (webapi-so, webapi-eu, graphql) will scale up on first request.
-          APP="dp-be-yt01-service"
+          APPS=(
+            "dp-be-yt01-webapi-eu-ca"
+            "dp-be-yt01-webapi-so-ca"
+            "dp-be-yt01-graphql-ca"
+            "dp-be-yt01-service"
+          )
 
-          echo "Finding latest revision for $APP..."
-          REVISION=$(az containerapp revision list \
-            --name "$APP" \
-            --resource-group "$RESOURCE_GROUP" \
-            --query "sort_by([?properties.active==\`true\`], &properties.createdTime)[-1].name" \
-            -o tsv)
-
-          if [[ -n "$REVISION" ]]; then
-            echo "Restarting revision $REVISION..."
-            az containerapp revision restart \
+          for APP in "${APPS[@]}"; do
+            echo "Setting minReplicas=1 for $APP..."
+            az containerapp update \
               --name "$APP" \
               --resource-group "$RESOURCE_GROUP" \
-              --revision "$REVISION"
-          else
-            echo "No active revision found for $APP"
-          fi
+              --min-replicas 1
+          done
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Resume scheduled Container App Jobs
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG_KEY="scaleOffOriginalCron"
+
+          mapfile -t JOBS < <(az containerapp job list \
+            -g "$RESOURCE_GROUP" \
+            --query "[?properties.configuration.triggerType=='Schedule'].name" \
+            -o tsv)
+
+          if [[ ${#JOBS[@]} -eq 0 ]]; then
+            echo "No scheduled Container App Jobs found."
+            exit 0
+          fi
+
+          for JOB in "${JOBS[@]}"; do
+            SAVED_CRON=$(az containerapp job show \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --query "tags.\"${TAG_KEY}\"" -o tsv 2>/dev/null || true)
+
+            if [[ -z "$SAVED_CRON" || "$SAVED_CRON" == "None" ]]; then
+              echo "[$JOB] skipped: no saved cron tag"
+              continue
+            fi
+
+            az containerapp job update \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --cron-expression "$SAVED_CRON" --only-show-errors >/dev/null
+            echo "[$JOB] resumed (cron=$SAVED_CRON)"
+          done
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Deploy latest version
+        if: inputs.state == 'on' && inputs.deploy == true
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LATEST_VERSION=$(gh release view --repo "$REPOSITORY" --json tagName -q '.tagName' | sed 's/^v//')
+          echo "Latest release version: $LATEST_VERSION"
+
+          DEPLOYED_VERSION=$(gh variable get LATEST_DEPLOYED_APPS_VERSION \
+            --env yt01 \
+            --repo "$REPOSITORY" 2>/dev/null || echo "")
+          echo "Currently deployed version: ${DEPLOYED_VERSION:-unknown}"
+
+          if [[ "$LATEST_VERSION" != "$DEPLOYED_VERSION" ]]; then
+            echo "Newer version available. Triggering deploy of $LATEST_VERSION..."
+            gh workflow run ci-cd-yt01.yml \
+              --repo "$REPOSITORY" \
+              -f version="$LATEST_VERSION"
+          else
+            echo "Already on latest version ($DEPLOYED_VERSION). Skipping deploy."
+          fi
 
       # === SCALE OFF ===
       - name: Disable public network access for container app environment
@@ -185,6 +260,95 @@ jobs:
             --name "dp-be-yt01-dialogporten-health-test" \
             --resource-group "$RESOURCE_GROUP" \
             --enabled false
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Pause scheduled Container App Jobs
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG_KEY="scaleOffOriginalCron"
+          PAUSE_CRON="0 0 1 1 *"
+
+          mapfile -t JOBS < <(az containerapp job list \
+            -g "$RESOURCE_GROUP" \
+            --query "[?properties.configuration.triggerType=='Schedule'].name" \
+            -o tsv)
+
+          if [[ ${#JOBS[@]} -eq 0 ]]; then
+            echo "No scheduled Container App Jobs found."
+            exit 0
+          fi
+
+          for JOB in "${JOBS[@]}"; do
+            CURRENT_CRON=$(az containerapp job show \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --query "properties.configuration.scheduleTriggerConfig.cronExpression" \
+              -o tsv)
+
+            if [[ -z "$CURRENT_CRON" || "$CURRENT_CRON" == "None" ]]; then
+              echo "[$JOB] skipped: empty cron expression"
+              continue
+            fi
+
+            SAVED_CRON=$(az containerapp job show \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --query "tags.\"${TAG_KEY}\"" -o tsv 2>/dev/null || true)
+
+            if [[ -z "$SAVED_CRON" || "$SAVED_CRON" == "None" ]]; then
+              JOB_ID=$(az containerapp job show -g "$RESOURCE_GROUP" -n "$JOB" --query id -o tsv)
+              az tag update --resource-id "$JOB_ID" \
+                --operation Merge --tags "${TAG_KEY}=${CURRENT_CRON}" \
+                --only-show-errors >/dev/null
+            fi
+
+            az containerapp job update \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --cron-expression "$PAUSE_CRON" --only-show-errors >/dev/null
+            az containerapp job stop \
+              -g "$RESOURCE_GROUP" -n "$JOB" --only-show-errors >/dev/null || true
+            echo "[$JOB] paused (cron=$CURRENT_CRON -> $PAUSE_CRON)"
+          done
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Set minReplicas=0 for all apps
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APPS=(
+            "dp-be-yt01-webapi-eu-ca"
+            "dp-be-yt01-webapi-so-ca"
+            "dp-be-yt01-graphql-ca"
+            "dp-be-yt01-service"
+          )
+
+          for APP in "${APPS[@]}"; do
+            echo "Setting minReplicas=0 for $APP..."
+            az containerapp update \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --min-replicas 0
+          done
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Scale workload profile down
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env workload-profile update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --workload-profile-name "Dedicated-D8" \
+            --min-nodes 0 \
+            --max-nodes 10
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 

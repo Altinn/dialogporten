@@ -1,0 +1,252 @@
+name: Scale YT01 Down
+
+on:
+  workflow_call: {}
+
+jobs:
+  scale-down:
+    runs-on: ubuntu-latest
+    environment: yt01
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get PostgreSQL server name
+        id: pg
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Target the canonical postgres2 database (PG18/SSDv2)
+          POSTGRES_NAME=$(az postgres flexible-server list \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "[?contains(name, 'dp-be-yt01-postgres2-')].name" \
+            -o tsv)
+
+          if [[ -z "$POSTGRES_NAME" ]]; then
+            echo "Error: No PostgreSQL server matching 'dp-be-yt01-postgres2-' found."
+            exit 1
+          fi
+
+          echo "Found PostgreSQL server: $POSTGRES_NAME"
+          echo "name=$POSTGRES_NAME" >> "$GITHUB_OUTPUT"
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Install containerapp CLI extension
+        run: az extension add --name containerapp --upgrade
+
+      - name: Disable availability test
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az monitor app-insights web-test update \
+            --name "dp-be-yt01-dialogporten-health-test" \
+            --resource-group "$RESOURCE_GROUP" \
+            --enabled false
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Purge E2E test data
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Triggering E2E test data purge for yt01..."
+          gh workflow run dispatch-purge-e2e-test-data.yml \
+            --repo "$REPOSITORY" \
+            -f environment=yt01
+
+          # Wait for the run to be created
+          sleep 10
+
+          RUN_ID=$(gh run list \
+            --repo "$REPOSITORY" \
+            --workflow "dispatch-purge-e2e-test-data.yml" \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId')
+
+          if [[ -z "$RUN_ID" || "$RUN_ID" == "null" ]]; then
+            echo "Error: Could not find the purge workflow run."
+            exit 1
+          fi
+
+          echo "Waiting for E2E purge run $RUN_ID to complete..."
+          gh run watch "$RUN_ID" \
+            --repo "$REPOSITORY" \
+            --exit-status
+
+      - name: Disable public network access for container app environment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --public-network-access Disabled
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Deactivate revisions for all apps
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APPS=(
+            "dp-be-yt01-webapi-eu-ca"
+            "dp-be-yt01-webapi-so-ca"
+            "dp-be-yt01-graphql-ca"
+            "dp-be-yt01-service"
+          )
+
+          deactivate_app() {
+            local APP=$1
+            local REVISION
+            REVISION=$(az containerapp show \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "properties.latestReadyRevisionName" -o tsv)
+
+            if [[ -z "$REVISION" || "$REVISION" == "None" ]]; then
+              echo "No ready revision found for $APP. Skipping."
+              return 0
+            fi
+
+            local STATUS
+            STATUS=$(az containerapp revision show \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --revision "$REVISION" \
+              --query "properties.active" -o tsv)
+
+            if [[ "${STATUS,,}" != "false" ]]; then
+              echo "Deactivating revision $REVISION for $APP..."
+              az containerapp revision deactivate \
+                --name "$APP" \
+                --resource-group "$RESOURCE_GROUP" \
+                --revision "$REVISION"
+            else
+              echo "$APP revision $REVISION is already inactive. Skipping."
+            fi
+          }
+
+          PIDS=()
+          for APP in "${APPS[@]}"; do
+            deactivate_app "$APP" &
+            PIDS+=($!)
+          done
+          FAILED=0
+          for PID in "${PIDS[@]}"; do
+            wait "$PID" || FAILED=1
+          done
+          if [[ "$FAILED" -ne 0 ]]; then
+            echo "One or more revision deactivations failed"
+            exit 1
+          fi
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Pause scheduled Container App Jobs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG_KEY="scaleOffOriginalCron"
+          PAUSE_CRON="0 0 1 1 *"
+
+          mapfile -t JOBS < <(az containerapp job list \
+            -g "$RESOURCE_GROUP" \
+            --query "[?properties.configuration.triggerType=='Schedule'].name" \
+            -o tsv)
+
+          if [[ ${#JOBS[@]} -eq 0 ]]; then
+            echo "No scheduled Container App Jobs found."
+            exit 0
+          fi
+
+          for JOB in "${JOBS[@]}"; do
+            CURRENT_CRON=$(az containerapp job show \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --query "properties.configuration.scheduleTriggerConfig.cronExpression" \
+              -o tsv)
+
+            if [[ -z "$CURRENT_CRON" || "$CURRENT_CRON" == "None" ]]; then
+              echo "[$JOB] skipped: empty cron expression"
+              continue
+            fi
+
+            SAVED_CRON=$(az containerapp job show \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --query "tags.\"${TAG_KEY}\"" -o tsv 2>/dev/null || true)
+
+            if [[ -z "$SAVED_CRON" || "$SAVED_CRON" == "None" ]]; then
+              JOB_ID=$(az containerapp job show -g "$RESOURCE_GROUP" -n "$JOB" --query id -o tsv)
+              az tag update --resource-id "$JOB_ID" \
+                --operation Merge --tags "${TAG_KEY}=${CURRENT_CRON}" \
+                --only-show-errors >/dev/null
+            fi
+
+            az containerapp job update \
+              -g "$RESOURCE_GROUP" -n "$JOB" \
+              --cron-expression "$PAUSE_CRON" --only-show-errors >/dev/null
+            az containerapp job stop \
+              -g "$RESOURCE_GROUP" -n "$JOB" --only-show-errors >/dev/null || true
+            echo "[$JOB] paused (cron=$CURRENT_CRON -> $PAUSE_CRON)"
+          done
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Scale workload profile down
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env workload-profile update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --workload-profile-name "Dedicated-D8" \
+            --min-nodes 0 \
+            --max-nodes 10
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Stop PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          STATE=$(az postgres flexible-server show \
+            --name "${{ steps.pg.outputs.name }}" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "state" -o tsv)
+
+          if [[ "$STATE" == "Ready" ]]; then
+            echo "Stopping PostgreSQL server: ${{ steps.pg.outputs.name }}"
+            az postgres flexible-server stop \
+              --name "${{ steps.pg.outputs.name }}" \
+              --resource-group "$RESOURCE_GROUP"
+          else
+            echo "PostgreSQL server ${{ steps.pg.outputs.name }} is already in state: $STATE. Skipping stop."
+          fi
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Logout from Azure
+        if: ${{ always() }}
+        run: az logout

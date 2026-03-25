@@ -74,6 +74,21 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
+      - name: Scale workload profile down
+        if: steps.check-postpone.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az containerapp env workload-profile update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --workload-profile-name "Dedicated-D8" \
+            --min-nodes 0 \
+            --max-nodes 10
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Stop PostgreSQL
         if: steps.check-postpone.outputs.skip != 'true'
         shell: bash
@@ -191,21 +206,6 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --min-replicas 0
           done
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-
-      - name: Scale workload profile down
-        if: steps.check-postpone.outputs.skip != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          az containerapp env workload-profile update \
-            --name "dp-be-yt01-cae" \
-            --resource-group "$RESOURCE_GROUP" \
-            --workload-profile-name "Dedicated-D8" \
-            --min-nodes 0 \
-            --max-nodes 10
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 

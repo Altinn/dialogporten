@@ -36,8 +36,14 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var dialog1 = await GetDialogAsync(dialogId1, E2EConstants.DefaultParty);
-        var dialog2 = await GetDialogAsync(dialogId2, E2EConstants.DefaultParty);
+        var dialog1Response = await Fixture.ServiceownerApi.GetDialog(dialogId1, E2EConstants.DefaultParty);
+        var dialog2Response = await Fixture.ServiceownerApi.GetDialog(dialogId2, E2EConstants.DefaultParty);
+
+        dialog1Response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        dialog2Response.ShouldHaveStatusCode(HttpStatusCode.OK);
+
+        var dialog1 = dialog1Response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        var dialog2 = dialog2Response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
         dialog1.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
         dialog2.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
@@ -59,7 +65,10 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var dialog = await GetDialogAsync(dialogId, E2EConstants.DefaultParty);
+        var dialogResponse = await Fixture.ServiceownerApi.GetDialog(dialogId, E2EConstants.DefaultParty);
+        dialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+
+        var dialog = dialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
         dialog.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
     }
 
@@ -114,16 +123,5 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-    }
-
-    private async Task<V1ServiceOwnerDialogsQueriesGet_Dialog> GetDialogAsync(Guid dialogId, string endUserId)
-    {
-        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
-            dialogId,
-            endUserId,
-            TestContext.Current.CancellationToken);
-
-        response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        return response.Content ?? throw new InvalidOperationException("Dialog content was null.");
     }
 }

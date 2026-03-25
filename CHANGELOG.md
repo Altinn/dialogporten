@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.110.4](https://github.com/Altinn/dialogporten/compare/v1.110.3...v1.110.4) (2026-03-25)
+
+
+### Bug Fixes
+
+* **lookup:** resolve ResolveDialogIdFromLabel timeout on large datasets ([#3681](https://github.com/Altinn/dialogporten/issues/3681)) ([a3dd496](https://github.com/Altinn/dialogporten/commit/a3dd496289ab1443f75dc24347f0bba9f217a4db))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverlet.collector to 8.0.1 ([#3683](https://github.com/Altinn/dialogporten/issues/3683)) ([3453c69](https://github.com/Altinn/dialogporten/commit/3453c698f0e99922065ac66e2dd99b8740fd7ef9))
+* **deps:** update dependency verify.xunitv3 to 31.13.4 ([#3684](https://github.com/Altinn/dialogporten/issues/3684)) ([b9ef252](https://github.com/Altinn/dialogporten/commit/b9ef252b8c6e953385f376bb52cf3df9c9633ae8))
+
 ## [1.110.3](https://github.com/Altinn/dialogporten/compare/v1.110.2...v1.110.3) (2026-03-24)
 
 

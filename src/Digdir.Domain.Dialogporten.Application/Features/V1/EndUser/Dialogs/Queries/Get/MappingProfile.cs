@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -38,10 +39,12 @@ internal sealed class MappingProfile : Profile
                     .ToList()));
 
         CreateMap<DialogSeenLog, DialogSeenLogDto>()
-            .ForMember(dest => dest.SeenAt, opt => opt.MapFrom(src => src.CreatedAt));
+            .ForMember(dest => dest.SeenAt, opt => opt.MapFrom(src => src.CreatedAt))
+            .ForMember(dest => dest.SeenBy, opt => opt.MapFrom(src => src.SeenBy.ToDto()));
 
         CreateMap<DialogActivity, DialogActivityDto>()
-            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId));
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId))
+            .ForMember(dest => dest.PerformedBy, opt => opt.MapFrom(src => src.PerformedBy.ToDto()));
 
         CreateMap<DialogApiAction, DialogApiActionDto>();
 
@@ -65,7 +68,8 @@ internal sealed class MappingProfile : Profile
 
         CreateMap<DialogTransmission, DialogTransmissionDto>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId))
-            .ForMember(dest => dest.IsOpened, opt => opt.MapFrom(src => DialogUnopenedContent.IsOpened(src)));
+            .ForMember(dest => dest.IsOpened, opt => opt.MapFrom(src => DialogUnopenedContent.IsOpened(src)))
+            .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.Sender.ToDto()));
 
         CreateMap<DialogTransmissionAttachment, DialogTransmissionAttachmentDto>();
         CreateMap<AttachmentUrl, DialogTransmissionAttachmentUrlDto>()

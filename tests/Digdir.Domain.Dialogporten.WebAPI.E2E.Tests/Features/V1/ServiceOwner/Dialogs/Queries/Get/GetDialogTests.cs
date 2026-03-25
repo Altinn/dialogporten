@@ -18,10 +18,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
-            dialogId,
-            endUserId: null!,
-            TestContext.Current.CancellationToken);
+        var response = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -46,10 +43,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         });
 
         // Act
-        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
-            dialogId,
-            endUserId: null!,
-            TestContext.Current.CancellationToken);
+        var response = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -69,9 +63,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var getDialogResult = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsQueriesGetDialog(dialogId, null!,
-                TestContext.Current.CancellationToken);
+        var getDialogResult = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         // Assert
         await JsonSnapshotVerifier.VerifyJsonSnapshot(

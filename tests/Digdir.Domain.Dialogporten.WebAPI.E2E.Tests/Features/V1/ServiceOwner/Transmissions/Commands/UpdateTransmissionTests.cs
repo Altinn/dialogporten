@@ -210,16 +210,13 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         var revisionAfterUpdate = updateResponse.Headers.ETagToGuid();
 
-        var afterUpdateDialog = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
-            dialogId,
-            endUserId: null!,
-            TestContext.Current.CancellationToken);
+        var afterUpdateDialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         // Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         revisionAfterUpdate.Should().NotBe(revisionBeforeUpdate);
         afterUpdateDialog.Content.Should().NotBeNull();
-        afterUpdateDialog.Content!.Revision.Should().Be(revisionAfterUpdate);
+        afterUpdateDialog.Content.Revision.Should().Be(revisionAfterUpdate);
     }
 
     private static V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest CreateUpdateRequest(

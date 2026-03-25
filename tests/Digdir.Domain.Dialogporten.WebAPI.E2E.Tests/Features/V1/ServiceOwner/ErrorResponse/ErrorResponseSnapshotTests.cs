@@ -17,9 +17,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         var nonExistentDialogId = Guid.CreateVersion7();
 
         // Act
-        var response =
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(dialogId: nonExistentDialogId,
-                endUserId: null!);
+        var response = await Fixture.ServiceownerApi.GetDialog(nonExistentDialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -162,8 +160,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         using var _ = Fixture.UseServiceOwnerTokenOverrides("964951284", "hko");
 
         // Act
-        var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsQueriesGetDialog(dialogId, null!, TestContext.Current.CancellationToken);
+        var response = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);

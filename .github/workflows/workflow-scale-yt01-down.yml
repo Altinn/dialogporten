@@ -1,7 +1,18 @@
 name: Scale YT01 Down
 
 on:
-  workflow_call: {}
+  workflow_call:
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_RESOURCE_GROUP_NAME:
+        required: true
+      RELEASE_VERSION_STORAGE_PAT:
+        required: true
 
 jobs:
   scale-down:

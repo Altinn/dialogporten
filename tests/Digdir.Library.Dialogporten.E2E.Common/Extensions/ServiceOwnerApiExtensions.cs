@@ -26,6 +26,15 @@ public static class ServiceOwnerApiExtensions
             return createDialogResponse.Content.ToGuid();
         }
 
+        public Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> GetDialog(
+            Guid dialogId,
+            string? endUserId = null,
+            CancellationToken? cancellationToken = null) =>
+            serviceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
+                dialogId,
+                endUserId ?? null!,
+                cancellationToken ?? TestContext.Current.CancellationToken);
+
         public async Task<Guid> CreateSimpleActivityAsync(
             Guid dialogId,
             Guid? ifMatch = null,

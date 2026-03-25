@@ -18,7 +18,6 @@ import { default as dialogRestore } from './dialogRestore.js';
 import { default as dialogSearch } from './dialogSearch.js';
 import { default as dialogSearchServiceOwnerLabel } from './dialogSearchServiceOwnerLabel.js';
 import { default as dialogServiceOwnerLabels } from './dialogServiceOwnerLabels.js';
-import { default as dialogSystemLabels } from './dialogSystemLabels.js';
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
 
 export default function() {
@@ -41,6 +40,5 @@ export default function() {
   dialogSearch();
   dialogSearchServiceOwnerLabel();
   dialogServiceOwnerLabels();
-  dialogSystemLabels();
   dialogUpdateActivity();
 }

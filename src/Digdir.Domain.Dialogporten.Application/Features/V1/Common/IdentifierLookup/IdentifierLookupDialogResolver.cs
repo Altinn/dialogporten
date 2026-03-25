@@ -182,13 +182,23 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
     private async Task<Guid> ResolveDialogIdFromLabel(
         IQueryable<DialogEntity> dialogs,
         string labelValue,
-        CancellationToken cancellationToken) =>
-        await _db.DialogServiceOwnerLabels
+        CancellationToken cancellationToken)
+    {
+        var matches = await _db.DialogServiceOwnerLabels
             .Where(l => l.Value == labelValue)
             .Join(dialogs,
                 l => l.DialogServiceOwnerContextId,
-                d => d.Id, (l, d) => d.Id)
-            .FirstOrDefaultAsync(cancellationToken);
+                d => d.Id,
+                (l, d) => d.Id)
+            .Take(2)
+            .ToListAsync(cancellationToken);
+
+        return matches.Count > 1
+            ? throw new InvalidOperationException(
+                $"Multiple dialogs found with service owner label '{labelValue}'. " +
+                $"Label values must be unique across dialogs.")
+            : matches.FirstOrDefault();
+    }
 
     private sealed class IdentifierLookupDialogProjection
     {

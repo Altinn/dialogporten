@@ -58,7 +58,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     }
 
     [Fact]
-    public Task Get_By_AppInstanceRef_Should_Return_Newest_Dialog_When_Multiple_Labels_Match()
+    public async Task Get_By_AppInstanceRef_Should_Throw_When_Multiple_Labels_Match()
     {
         var instanceId = Guid.NewGuid();
         var instanceRef = $"urn:altinn:instance-id:1337/{instanceId}";
@@ -66,26 +66,23 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         var firstDialogId = NewUuidV7();
         var secondDialogId = NewUuidV7();
 
-        return FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = firstDialogId;
-                x.AddServiceOwnerLabels(storageLabel);
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Id = secondDialogId;
-                x.AddServiceOwnerLabels(storageLabel);
-            })
-            .SendCommand(_ => new GetDialogLookupQuery
-            {
-                InstanceRef = instanceRef
-            })
-            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
-            {
-                result.DialogId.Should().Be(secondDialogId);
-                result.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
-            });
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            FlowBuilder.For(Application)
+                .CreateSimpleDialog((x, _) =>
+                {
+                    x.Dto.Id = firstDialogId;
+                    x.AddServiceOwnerLabels(storageLabel);
+                })
+                .CreateSimpleDialog((x, _) =>
+                {
+                    x.Dto.Id = secondDialogId;
+                    x.AddServiceOwnerLabels(storageLabel);
+                })
+                .SendCommand(_ => new GetDialogLookupQuery
+                {
+                    InstanceRef = instanceRef
+                })
+                .ExecuteAsync());
     }
 
     [Fact]

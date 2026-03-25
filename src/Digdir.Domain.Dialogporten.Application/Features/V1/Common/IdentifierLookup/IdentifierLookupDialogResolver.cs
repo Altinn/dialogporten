@@ -188,7 +188,6 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
             .Join(dialogs,
                 l => l.DialogServiceOwnerContextId,
                 d => d.Id, (l, d) => d.Id)
-            .OrderByDescending(id => id)
             .FirstOrDefaultAsync(cancellationToken);
 
     private sealed class IdentifierLookupDialogProjection

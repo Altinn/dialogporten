@@ -15,7 +15,7 @@ param resources = {
 
 param otelTraceSamplerRatio = '0.05'
 
-// Scale-off workflows override to 0 via az CLI.
+// Scale-off workflows deactivate revisions via az CLI.
 param minReplicas = 1
 
 // secrets

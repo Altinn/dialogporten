@@ -63,10 +63,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             scenario,
             async (dialogId, _, _) =>
             {
-                var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
-                    dialogId,
-                    endUserId: null!,
-                    TestContext.Current.CancellationToken);
+                var response = await Fixture.ServiceownerApi.GetDialog(dialogId);
                 return response;
             },
             HttpStatusCode.OK,
@@ -253,10 +250,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         createResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
         var dialogId = createResponse.Content.ToGuid();
 
-        var getDialogResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
-            dialogId,
-            endUserId: null!,
-            TestContext.Current.CancellationToken);
+        var getDialogResponse = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
 

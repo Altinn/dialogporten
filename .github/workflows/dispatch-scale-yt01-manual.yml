@@ -66,29 +66,6 @@ jobs:
         run: az extension add --name containerapp --upgrade
 
       # === SCALE ON ===
-      - name: Enable public network access for container app environment
-        if: inputs.state == 'on'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          CURRENT=$(az containerapp env show \
-            --name "dp-be-yt01-cae" \
-            --resource-group "$RESOURCE_GROUP" \
-            --query "properties.publicNetworkAccess" -o tsv)
-
-          if [[ "${CURRENT,,}" != "enabled" ]]; then
-            echo "Enabling public network access (currently: $CURRENT)..."
-            az containerapp env update \
-              --name "dp-be-yt01-cae" \
-              --resource-group "$RESOURCE_GROUP" \
-              --public-network-access Enabled
-          else
-            echo "Public network access is already enabled. Skipping."
-          fi
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-
       - name: Scale workload profile up
         if: inputs.state == 'on'
         shell: bash
@@ -137,30 +114,7 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
-      - name: Enable availability test
-        if: inputs.state == 'on'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          CURRENT=$(az monitor app-insights web-test show \
-            --name "dp-be-yt01-dialogporten-health-test" \
-            --resource-group "$RESOURCE_GROUP" \
-            --query "enabled" -o tsv)
-
-          if [[ "${CURRENT,,}" != "true" ]]; then
-            echo "Enabling availability test (currently: $CURRENT)..."
-            az monitor app-insights web-test update \
-              --name "dp-be-yt01-dialogporten-health-test" \
-              --resource-group "$RESOURCE_GROUP" \
-              --enabled true
-          else
-            echo "Availability test is already enabled. Skipping."
-          fi
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-
-      - name: Set minReplicas=1 for all apps
+      - name: Activate revisions for all apps
         if: inputs.state == 'on'
         shell: bash
         run: |
@@ -173,22 +127,50 @@ jobs:
             "dp-be-yt01-service"
           )
 
-          for APP in "${APPS[@]}"; do
-            CURRENT=$(az containerapp show \
+          activate_app() {
+            local APP=$1
+            local REVISION
+            REVISION=$(az containerapp show \
               --name "$APP" \
               --resource-group "$RESOURCE_GROUP" \
-              --query "properties.template.scale.minReplicas" -o tsv)
+              --query "properties.latestReadyRevisionName" -o tsv)
 
-            if [[ "$CURRENT" -ne 1 ]]; then
-              echo "Setting minReplicas=1 for $APP (currently: $CURRENT)..."
-              az containerapp update \
+            if [[ -z "$REVISION" || "$REVISION" == "None" ]]; then
+              echo "No ready revision found for $APP"
+              return 1
+            fi
+
+            local STATUS
+            STATUS=$(az containerapp revision show \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --revision "$REVISION" \
+              --query "properties.active" -o tsv)
+
+            if [[ "${STATUS,,}" != "true" ]]; then
+              echo "Activating revision $REVISION for $APP..."
+              az containerapp revision activate \
                 --name "$APP" \
                 --resource-group "$RESOURCE_GROUP" \
-                --min-replicas 1
+                --revision "$REVISION"
             else
-              echo "$APP already at minReplicas=1. Skipping."
+              echo "$APP revision $REVISION is already active. Skipping."
             fi
+          }
+
+          PIDS=()
+          for APP in "${APPS[@]}"; do
+            activate_app "$APP" &
+            PIDS+=($!)
           done
+          FAILED=0
+          for PID in "${PIDS[@]}"; do
+            wait "$PID" || FAILED=1
+          done
+          if [[ "$FAILED" -ne 0 ]]; then
+            echo "One or more revision activations failed"
+            exit 1
+          fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
@@ -238,6 +220,52 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
+      - name: Enable public network access for container app environment
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CURRENT=$(az containerapp env show \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "properties.publicNetworkAccess" -o tsv)
+
+          if [[ "${CURRENT,,}" != "enabled" ]]; then
+            echo "Enabling public network access (currently: $CURRENT)..."
+            az containerapp env update \
+              --name "dp-be-yt01-cae" \
+              --resource-group "$RESOURCE_GROUP" \
+              --public-network-access Enabled
+          else
+            echo "Public network access is already enabled. Skipping."
+          fi
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Enable availability test
+        if: inputs.state == 'on'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CURRENT=$(az monitor app-insights web-test show \
+            --name "dp-be-yt01-dialogporten-health-test" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "enabled" -o tsv)
+
+          if [[ "${CURRENT,,}" != "true" ]]; then
+            echo "Enabling availability test (currently: $CURRENT)..."
+            az monitor app-insights web-test update \
+              --name "dp-be-yt01-dialogporten-health-test" \
+              --resource-group "$RESOURCE_GROUP" \
+              --enabled true
+          else
+            echo "Availability test is already enabled. Skipping."
+          fi
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Deploy latest version
         if: inputs.state == 'on' && inputs.deploy == true
         env:
@@ -265,6 +293,19 @@ jobs:
           fi
 
       # === SCALE OFF ===
+      - name: Disable availability test
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          az monitor app-insights web-test update \
+            --name "dp-be-yt01-dialogporten-health-test" \
+            --resource-group "$RESOURCE_GROUP" \
+            --enabled false
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Disable public network access for container app environment
         if: inputs.state == 'off'
         shell: bash
@@ -278,53 +319,63 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
-      - name: Scale workload profile down
+      - name: Deactivate revisions for all apps
         if: inputs.state == 'off'
         shell: bash
         run: |
           set -euo pipefail
 
-          az containerapp env workload-profile update \
-            --name "dp-be-yt01-cae" \
-            --resource-group "$RESOURCE_GROUP" \
-            --workload-profile-name "Dedicated-D8" \
-            --min-nodes 0 \
-            --max-nodes 10
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          APPS=(
+            "dp-be-yt01-webapi-eu-ca"
+            "dp-be-yt01-webapi-so-ca"
+            "dp-be-yt01-graphql-ca"
+            "dp-be-yt01-service"
+          )
 
-      - name: Stop PostgreSQL
-        if: inputs.state == 'off'
-        shell: bash
-        run: |
-          set -euo pipefail
+          deactivate_app() {
+            local APP=$1
+            local REVISION
+            REVISION=$(az containerapp show \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "properties.latestReadyRevisionName" -o tsv)
 
-          STATE=$(az postgres flexible-server show \
-            --name "${{ steps.pg.outputs.name }}" \
-            --resource-group "$RESOURCE_GROUP" \
-            --query "state" -o tsv)
+            if [[ -z "$REVISION" || "$REVISION" == "None" ]]; then
+              echo "No ready revision found for $APP. Skipping."
+              return 0
+            fi
 
-          if [[ "$STATE" == "Ready" ]]; then
-            echo "Stopping PostgreSQL server: ${{ steps.pg.outputs.name }}"
-            az postgres flexible-server stop \
-              --name "${{ steps.pg.outputs.name }}" \
-              --resource-group "$RESOURCE_GROUP"
-          else
-            echo "PostgreSQL server ${{ steps.pg.outputs.name }} is already in state: $STATE. Skipping stop."
+            local STATUS
+            STATUS=$(az containerapp revision show \
+              --name "$APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --revision "$REVISION" \
+              --query "properties.active" -o tsv)
+
+            if [[ "${STATUS,,}" != "false" ]]; then
+              echo "Deactivating revision $REVISION for $APP..."
+              az containerapp revision deactivate \
+                --name "$APP" \
+                --resource-group "$RESOURCE_GROUP" \
+                --revision "$REVISION"
+            else
+              echo "$APP revision $REVISION is already inactive. Skipping."
+            fi
+          }
+
+          PIDS=()
+          for APP in "${APPS[@]}"; do
+            deactivate_app "$APP" &
+            PIDS+=($!)
+          done
+          FAILED=0
+          for PID in "${PIDS[@]}"; do
+            wait "$PID" || FAILED=1
+          done
+          if [[ "$FAILED" -ne 0 ]]; then
+            echo "One or more revision deactivations failed"
+            exit 1
           fi
-        env:
-          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-
-      - name: Disable availability test
-        if: inputs.state == 'off'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          az monitor app-insights web-test update \
-            --name "dp-be-yt01-dialogporten-health-test" \
-            --resource-group "$RESOURCE_GROUP" \
-            --enabled false
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
@@ -379,26 +430,40 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
-      - name: Set minReplicas=0 for all apps
+      - name: Scale workload profile down
         if: inputs.state == 'off'
         shell: bash
         run: |
           set -euo pipefail
 
-          APPS=(
-            "dp-be-yt01-webapi-eu-ca"
-            "dp-be-yt01-webapi-so-ca"
-            "dp-be-yt01-graphql-ca"
-            "dp-be-yt01-service"
-          )
+          az containerapp env workload-profile update \
+            --name "dp-be-yt01-cae" \
+            --resource-group "$RESOURCE_GROUP" \
+            --workload-profile-name "Dedicated-D8" \
+            --min-nodes 0 \
+            --max-nodes 10
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
-          for APP in "${APPS[@]}"; do
-            echo "Setting minReplicas=0 for $APP..."
-            az containerapp update \
-              --name "$APP" \
-              --resource-group "$RESOURCE_GROUP" \
-              --min-replicas 0
-          done
+      - name: Stop PostgreSQL
+        if: inputs.state == 'off'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          STATE=$(az postgres flexible-server show \
+            --name "${{ steps.pg.outputs.name }}" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "state" -o tsv)
+
+          if [[ "$STATE" == "Ready" ]]; then
+            echo "Stopping PostgreSQL server: ${{ steps.pg.outputs.name }}"
+            az postgres flexible-server stop \
+              --name "${{ steps.pg.outputs.name }}" \
+              --resource-group "$RESOURCE_GROUP"
+          else
+            echo "PostgreSQL server ${{ steps.pg.outputs.name }} is already in state: $STATE. Skipping stop."
+          fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 

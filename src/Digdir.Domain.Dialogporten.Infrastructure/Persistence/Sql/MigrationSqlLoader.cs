@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Sql;
 
 internal static class MigrationSqlLoader

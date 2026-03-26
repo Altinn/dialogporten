@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Refit;
-using Xunit;
 using static System.Text.Json.Serialization.JsonIgnoreCondition;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;

@@ -1,6 +1,5 @@
 using System.Reflection;
 using Refit;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 

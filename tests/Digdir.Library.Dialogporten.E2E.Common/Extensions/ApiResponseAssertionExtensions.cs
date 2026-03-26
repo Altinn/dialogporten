@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json;
 using AwesomeAssertions;
 using Refit;
-using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 

@@ -1,7 +1,6 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.E2E.Cleanup.Tests;
 

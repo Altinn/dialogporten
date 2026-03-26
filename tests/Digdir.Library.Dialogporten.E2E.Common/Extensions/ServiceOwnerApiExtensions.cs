@@ -52,6 +52,28 @@ public static class ServiceOwnerApiExtensions
             return createActivityResponse.Content.ToGuid();
         }
 
+        public Task<IApiResponse> SetSystemLabel(
+            Guid dialogId,
+            string endUserId,
+            Action<V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest>? modify = null,
+            Guid? ifMatch = null,
+            CancellationToken? cancellationToken = null)
+        {
+            var request = new V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
+            {
+                AddLabels = [],
+                RemoveLabels = []
+            };
+
+            modify?.Invoke(request);
+            return serviceownerApi.V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+                dialogId,
+                endUserId,
+                request,
+                ifMatch,
+                cancellationToken ?? TestContext.Current.CancellationToken);
+        }
+
         public async Task<IApiResponse> PatchDialogAsync(
             Guid dialogId,
             Action<List<JsonPatchOperations_Operation>> modify,

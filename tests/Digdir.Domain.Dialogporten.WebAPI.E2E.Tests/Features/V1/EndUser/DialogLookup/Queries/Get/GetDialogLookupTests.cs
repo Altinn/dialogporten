@@ -55,7 +55,9 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var lookup = response.Content!;
+        response.Content.Should().NotBeNull();
+
+        var lookup = response.Content;
         lookup.DialogId.Should().Be(dialogId);
         lookup.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
         lookup.Party.Should().NotBeEmpty().And.Be(party);

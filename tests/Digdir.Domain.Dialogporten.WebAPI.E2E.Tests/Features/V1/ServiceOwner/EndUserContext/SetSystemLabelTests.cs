@@ -61,7 +61,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 dialogId,
                 E2EConstants.DefaultParty,
                 request => request.AddLabels = [ServiceOwnerSystemLabel.Bin],
-                revision: Guid.NewGuid());
+                ifMatch: Guid.NewGuid());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);

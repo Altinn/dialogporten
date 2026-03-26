@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -12,7 +13,8 @@ internal sealed class MappingProfile : Profile
     {
         CreateMap<CreateTransmissionDto, DialogTransmission>()
             .ForMember(dest => dest.Type, opt => opt.Ignore())
-            .ForMember(dest => dest.TypeId, opt => opt.MapFrom(src => src.Type));
+            .ForMember(dest => dest.TypeId, opt => opt.MapFrom(src => src.Type))
+            .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.Sender.ToActor<DialogTransmissionSenderActor>()));
 
         CreateMap<TransmissionContentDto?, List<DialogTransmissionContent>?>()
             .ConvertUsing<TransmissionContentDtoToDialogTransmissionContentConverter<TransmissionContentDto>>();

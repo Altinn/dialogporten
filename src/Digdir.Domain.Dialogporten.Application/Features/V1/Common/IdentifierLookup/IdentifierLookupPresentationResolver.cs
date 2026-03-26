@@ -38,10 +38,7 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
         List<AcceptedLanguage>? acceptedLanguages,
         CancellationToken cancellationToken)
     {
-        var resourceInformationTask = _resourceRegistry.GetResourceInformation(serviceResource, cancellationToken);
-        var minimumAuthenticationLevelTask = _serviceResourceMinimumAuthenticationLevelResolver.GetMinimumAuthenticationLevel(serviceResource, cancellationToken);
-
-        var resourceInformation = await resourceInformationTask;
+        var resourceInformation = await _resourceRegistry.GetResourceInformation(serviceResource, cancellationToken);
 
         var ownerOrgNumber = resourceInformation?.OwnerOrgNumber ?? string.Empty;
         var ownerCode = resourceInformation?.OwnOrgShortName ?? orgCode;
@@ -58,7 +55,8 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
         var resourceId = StripPrefix(serviceResource);
         var serviceResourceName = ToLocalizationDtos(resourceInformation?.DisplayName, resourceId);
         var serviceOwnerName = ToLocalizationDtos(ownerInfo?.DisplayName, ownerCode);
-        var minimumAuthenticationLevel = await minimumAuthenticationLevelTask;
+        var minimumAuthenticationLevel = await _serviceResourceMinimumAuthenticationLevelResolver
+            .GetMinimumAuthenticationLevel(serviceResource, cancellationToken);
 
         serviceResourceName.PruneLocalizations(acceptedLanguages);
         serviceOwnerName.PruneLocalizations(acceptedLanguages);

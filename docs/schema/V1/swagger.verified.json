@@ -523,10 +523,6 @@
             "nullable": true,
             "type": "array"
           },
-          "minimumAuthenticationLevel": {
-            "format": "int32",
-            "type": "integer"
-          },
           "viaAccessPackage": {
             "type": "boolean"
           },
@@ -597,6 +593,10 @@
           },
           "isDelegable": {
             "type": "boolean"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
           },
           "name": {
             "items": {

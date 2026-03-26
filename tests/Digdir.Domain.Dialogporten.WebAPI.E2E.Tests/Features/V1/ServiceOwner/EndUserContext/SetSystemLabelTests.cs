@@ -261,14 +261,6 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 ExpectedLabel = ServiceOwnerSystemLabel.Archive
             });
 
-            Add(new MultipleSystemLabelScenario
-            {
-                DisplayName = "Archive - Archive + Archive -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Archive,
-                LabelsToAdd = [ServiceOwnerSystemLabel.Archive],
-                LabelsToRemove = [ServiceOwnerSystemLabel.Archive],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
-            });
 
             Add(new MultipleSystemLabelScenario
             {

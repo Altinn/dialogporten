@@ -2,7 +2,6 @@ using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using StrawberryShake;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 

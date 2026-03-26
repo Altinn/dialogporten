@@ -1,12 +1,10 @@
 using Digdir.Domain.Dialogporten.GraphQL;
 using HotChocolate.Execution;
 using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Path = System.IO.Path;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.Integration.Tests.Schema;
 

@@ -1,5 +1,4 @@
 using System.Net;
-using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;

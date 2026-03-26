@@ -1,9 +1,6 @@
-using System;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Conventions;
 

@@ -9,7 +9,6 @@ using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
-using ZiggyCreatures.Caching.Fusion.NullObjects;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 

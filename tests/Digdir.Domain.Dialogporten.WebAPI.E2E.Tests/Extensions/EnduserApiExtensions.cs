@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1;
 using Refit;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 

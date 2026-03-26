@@ -135,8 +135,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
-    // "This test is flaky. It sometimes fails with a 503 Service Unavailable against the Azure environments,
-    // and can also be reproduced locally where you get an HttpRequestException with the error
+    // "This test is flaky. It sometimes fails with a 503 Service Unavailable in the Azure environments,
+    // and can be reproduced locally where you get an HttpRequestException with the error
     // `Error while copying content to a stream`.
     // It also tests Kestrel functionality, not Dialogporten"
     [E2EFact(Skip = "Flaky, see comment")]

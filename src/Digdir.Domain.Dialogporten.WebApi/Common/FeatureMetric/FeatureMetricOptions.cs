@@ -8,11 +8,11 @@ public sealed class FeatureMetricOptions
     /// <summary>
     /// Gets or sets the list of path prefixes to exclude from feature metric tracking.
     /// </summary>
-    public List<string> ExcludedPathPrefixes { get; set; } = new()
-    {
+    public List<string> ExcludedPathPrefixes { get; set; } =
+    [
         "/health",
         "/metrics",
         "/swagger",
         "/openapi"
-    };
+    ];
 }

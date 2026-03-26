@@ -473,9 +473,8 @@ public static class IFlowStepExtensions
                 NewCreatedAt = newCreatedAt ?? DateTimeOffset.UtcNow
             });
 
-    public static IFlowExecutor<CreateActivityResult> CreateSimpleActivity<TIn>(this IFlowExecutor<TIn> step)
-    {
-        return CreateActivity(step, (x, _) =>
+    public static IFlowExecutor<CreateActivityResult> CreateSimpleActivity<TIn>(this IFlowExecutor<TIn> step) =>
+        CreateActivity(step, (x, _) =>
         {
             x.Activity = new CreateActivityDto
             {
@@ -493,7 +492,6 @@ public static class IFlowStepExtensions
                 Description = []
             };
         });
-    }
 
     public static IFlowExecutor<CreateActivityResult> CreateActivity<TIn>(
         this IFlowExecutor<TIn> step,

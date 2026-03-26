@@ -161,6 +161,17 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 result.NonSensitiveTitle.Should().BeNull());
 
     [Fact]
+    public Task Get_Should_Fall_Back_To_Default_MinimumAuthenticationLevel_On_ServiceResource() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
+                result.ServiceResource.MinimumAuthenticationLevel.Should().Be(3));
+
+    [Fact]
     public Task Get_Should_Return_Forbidden_When_Org_Does_Not_Match() =>
         FlowBuilder.For(Application)
             .AsIntegrationTestUser(x => x.WithClaim(ClaimsPrincipalExtensions.AltinnOrgClaim, "other-org"))

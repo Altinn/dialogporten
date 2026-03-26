@@ -1,8 +1,12 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using AwesomeAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get.GetDialogLookupQuery;
@@ -150,6 +154,24 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
+
+    [Fact]
+    public Task Get_Should_Return_Forbidden_When_EndUser_Auth_Level_Is_Too_Low()
+    {
+        const string serviceResource = "urn:altinn:resource:test-service-auth-level-too-low";
+
+        return FlowBuilder.For(Application)
+            .AsIntegrationTestUser(x => x.WithClaim(
+                ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaSubstantial))
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = serviceResource)
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel: 4))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
+    }
 
     [Fact]
     public Task Get_Should_Set_ViaInstanceDelegation_From_AuthorizedPartiesInstances()
@@ -319,6 +341,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 x.Dto.Party = party;
                 x.Dto.ServiceResource = serviceResource;
             })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel: 4))
             .SeedSubjectResources(serviceResource, [roleSubject])
             .SendCommand(_ => new GetDialogLookupQuery
             {
@@ -326,6 +349,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
+                result.ServiceResource.MinimumAuthenticationLevel.Should().Be(4);
                 result.AuthorizationEvidence.ViaRole.Should().BeTrue();
                 result.AuthorizationEvidence.ViaAccessPackage.Should().BeFalse();
                 result.AuthorizationEvidence.ViaResourceDelegation.Should().BeFalse();
@@ -457,4 +481,21 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ValidationError>(result =>
                 result.Errors.Should().ContainSingle());
+
+    private static async Task SeedMinimumAuthenticationLevel(
+        FlowContext ctx,
+        string serviceResource,
+        int minimumAuthenticationLevel)
+    {
+        using var scope = ctx.Application.GetServiceProvider().CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        db.ResourcePolicyInformation.Add(new()
+        {
+            Resource = serviceResource,
+            MinimumAuthenticationLevel = minimumAuthenticationLevel
+        });
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+    }
 }

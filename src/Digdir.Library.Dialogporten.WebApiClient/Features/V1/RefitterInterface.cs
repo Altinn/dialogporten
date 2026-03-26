@@ -5807,6 +5807,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("isDelegable")]
         public bool IsDelegable { get; set; }
 
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
+
         [JsonPropertyName("name")]
         public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
 

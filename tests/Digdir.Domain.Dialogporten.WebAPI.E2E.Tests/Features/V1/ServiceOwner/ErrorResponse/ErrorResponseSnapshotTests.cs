@@ -135,7 +135,10 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
-    [E2EFact]
+    // "This test is flaky. It sometimes fails with a 503 Service Unavailable again the Azure environment,
+    // this can also be reproduced locally where you get a HttpRequestException with the error
+    // `Error while copying content to a stream` also it tests Kestrel functionality, not Dialogporten"
+    [E2EFact(Skip = "Flaky, see comment")]
     public async Task Should_Return_413_For_Payload_Too_Large()
     {
         // Arrange - create a dialog with a body exceeding 20 MB

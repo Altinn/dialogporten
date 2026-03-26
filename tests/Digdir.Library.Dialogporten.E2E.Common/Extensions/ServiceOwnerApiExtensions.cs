@@ -56,7 +56,7 @@ public static class ServiceOwnerApiExtensions
             Guid dialogId,
             string endUserId,
             Action<V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest>? modify = null,
-            Guid? revision = null,
+            Guid? ifMatch = null,
             CancellationToken? cancellationToken = null)
         {
             var request = new V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
@@ -70,7 +70,7 @@ public static class ServiceOwnerApiExtensions
                 dialogId,
                 endUserId,
                 request,
-                revision,
+                ifMatch,
                 cancellationToken ?? TestContext.Current.CancellationToken);
         }
 

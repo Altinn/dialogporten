@@ -73,7 +73,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     }
 
     [E2EFact]
-    public async Task Should_Accept_Multiple_SystemLabels()
+    public async Task Should_Use_Last_Label_When_Multiple_SystemLabels_Are_Supplied()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
@@ -83,10 +83,21 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin, ServiceOwnerSystemLabel.Archive]);
+                request => request.AddLabels = [
+                    ServiceOwnerSystemLabel.Bin,
+                    ServiceOwnerSystemLabel.Archive]);
+
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+        var dialogResponse = await Fixture.ServiceownerApi
+            .GetDialog(dialogId, E2EConstants.DefaultParty);
+
+        dialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+
+        // The last label is selected when multiple of Default/Bin/Archive is supplied
+        dialogResponse.Content!.EndUserContext.SystemLabels.Should()
+            .ContainSingle(x => x == ServiceOwnerSystemLabel.Archive);
     }
 
     [E2EFact]

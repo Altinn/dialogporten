@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.110.5](https://github.com/Altinn/dialogporten/compare/v1.110.4...v1.110.5) (2026-03-26)
+
+
+### Miscellaneous Chores
+
+* misc. cleanup, use extension blocks ([#3692](https://github.com/Altinn/dialogporten/issues/3692)) ([736c077](https://github.com/Altinn/dialogporten/commit/736c077764fd12ca4830c16d0d21f93fb4ab42d3))
+
 ## [1.110.4](https://github.com/Altinn/dialogporten/compare/v1.110.3...v1.110.4) (2026-03-25)
 
 

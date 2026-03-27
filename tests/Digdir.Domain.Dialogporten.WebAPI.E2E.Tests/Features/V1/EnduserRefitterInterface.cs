@@ -1188,9 +1188,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         [JsonPropertyName("evidence")]
         public ICollection<V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem> Evidence { get; set; }
 
-        [JsonPropertyName("minimumAuthenticationLevel")]
-        public int MinimumAuthenticationLevel { get; set; }
-
         [JsonPropertyName("viaAccessPackage")]
         public bool ViaAccessPackage { get; set; }
 
@@ -1260,6 +1257,9 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         [JsonPropertyName("isDelegable")]
         public bool IsDelegable { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
 
         [JsonPropertyName("name")]
         public ICollection<V1CommonLocalizations_Localization> Name { get; set; }

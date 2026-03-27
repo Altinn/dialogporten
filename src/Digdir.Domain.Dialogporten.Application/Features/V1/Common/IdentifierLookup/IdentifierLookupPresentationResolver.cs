@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -11,16 +12,20 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLo
 internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPresentationResolver
 {
     private readonly IResourceRegistry _resourceRegistry;
+    private readonly IServiceResourceMinimumAuthenticationLevelResolver _serviceResourceMinimumAuthenticationLevelResolver;
     private readonly IServiceOwnerNameRegistry _serviceOwnerNameRegistry;
 
     public IdentifierLookupPresentationResolver(
         IResourceRegistry resourceRegistry,
+        IServiceResourceMinimumAuthenticationLevelResolver serviceResourceMinimumAuthenticationLevelResolver,
         IServiceOwnerNameRegistry serviceOwnerNameRegistry)
     {
         ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(serviceResourceMinimumAuthenticationLevelResolver);
         ArgumentNullException.ThrowIfNull(serviceOwnerNameRegistry);
 
         _resourceRegistry = resourceRegistry;
+        _serviceResourceMinimumAuthenticationLevelResolver = serviceResourceMinimumAuthenticationLevelResolver;
         _serviceOwnerNameRegistry = serviceOwnerNameRegistry;
     }
 
@@ -50,6 +55,8 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
         var resourceId = StripPrefix(serviceResource);
         var serviceResourceName = ToLocalizationDtos(resourceInformation?.DisplayName, resourceId);
         var serviceOwnerName = ToLocalizationDtos(ownerInfo?.DisplayName, ownerCode);
+        var minimumAuthenticationLevel = await _serviceResourceMinimumAuthenticationLevelResolver
+            .GetMinimumAuthenticationLevel(serviceResource, cancellationToken);
 
         serviceResourceName.PruneLocalizations(acceptedLanguages);
         serviceOwnerName.PruneLocalizations(acceptedLanguages);
@@ -59,7 +66,8 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
             {
                 Id = resourceId,
                 Name = serviceResourceName,
-                IsDelegable = resourceInformation?.Delegable ?? false
+                IsDelegable = resourceInformation?.Delegable ?? false,
+                MinimumAuthenticationLevel = minimumAuthenticationLevel
             },
             new IdentifierLookupServiceOwnerDto
             {

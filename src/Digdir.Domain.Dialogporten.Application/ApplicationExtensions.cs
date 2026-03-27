@@ -65,6 +65,7 @@ public static class ApplicationExtensions
 
             // Transient
             .AddTransient<IServiceResourceAuthorizer, ServiceResourceAuthorizer>()
+            .AddTransient<IServiceResourceMinimumAuthenticationLevelResolver, ServiceResourceMinimumAuthenticationLevelResolver>()
             .AddTransient<IUserResourceRegistry, UserResourceRegistry>()
             .AddTransient<IUserRegistry, UserRegistry>()
             .AddTransient<IUserParties, UserParties>()

@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -92,6 +93,9 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             cacheProvider,
             user,
             db,
+            new ServiceResourceMinimumAuthenticationLevelResolver(
+                db,
+                Substitute.For<ILogger<ServiceResourceMinimumAuthenticationLevelResolver>>()),
             Substitute.For<IResourceRegistry>(),
             Substitute.For<IPartyResourceReferenceRepository>(),
             Substitute.For<ILogger<AltinnAuthorizationClient>>(),

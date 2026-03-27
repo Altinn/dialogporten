@@ -282,7 +282,6 @@ type DialogLookup {
 }
 
 type DialogLookupAuthorizationEvidence {
-  minimumAuthenticationLevel: Int!
   currentAuthenticationLevel: Int!
   viaRole: Boolean!
   viaAccessPackage: Boolean!
@@ -318,6 +317,7 @@ type DialogLookupServiceOwner {
 type DialogLookupServiceResource {
   id: String!
   isDelegable: Boolean!
+  minimumAuthenticationLevel: Int!
   name: [Localization!]!
 }
 

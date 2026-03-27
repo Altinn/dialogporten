@@ -33,12 +33,12 @@ internal sealed partial class SyncSubjectMapCommandHandler : IRequestHandler<Syn
     {
         ArgumentNullException.ThrowIfNull(resourceRegistry);
         ArgumentNullException.ThrowIfNull(subjectResourceRepository);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(logger);
 
         _resourceRegistry = resourceRegistry;
         _subjectResourceRepository = subjectResourceRepository;
         _unitOfWork = unitOfWork;
-        ArgumentNullException.ThrowIfNull(logger);
-
         _logger = logger;
     }
 

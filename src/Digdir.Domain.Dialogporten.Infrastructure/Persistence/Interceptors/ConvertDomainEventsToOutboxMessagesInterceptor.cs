@@ -31,6 +31,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         ArgumentNullException.ThrowIfNull(topicEventSender);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(publishEndpoint);
+        ArgumentNullException.ThrowIfNull(applicationContext);
 
         _transactionTime = transactionTime;
         _topicEventSender = topicEventSender;

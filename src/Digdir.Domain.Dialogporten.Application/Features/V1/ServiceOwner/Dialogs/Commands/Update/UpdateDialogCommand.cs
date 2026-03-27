@@ -83,6 +83,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         ArgumentNullException.ThrowIfNull(resourceRegistry);
         ArgumentNullException.ThrowIfNull(serviceResourceAuthorizer);
         ArgumentNullException.ThrowIfNull(dataLoaderContext);
+        ArgumentNullException.ThrowIfNull(systemLabelAdder);
         ArgumentNullException.ThrowIfNull(dialogTransmissionAppender);
         ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
 

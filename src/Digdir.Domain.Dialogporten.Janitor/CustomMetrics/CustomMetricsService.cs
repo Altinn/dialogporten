@@ -20,7 +20,6 @@ public sealed partial class CustomMetricsService
     {
         ArgumentNullException.ThrowIfNull(collectors);
         ArgumentNullException.ThrowIfNull(logger);
-        ArgumentNullException.ThrowIfNull(meterProvider);
 
         _collectors = collectors;
         _logger = logger;

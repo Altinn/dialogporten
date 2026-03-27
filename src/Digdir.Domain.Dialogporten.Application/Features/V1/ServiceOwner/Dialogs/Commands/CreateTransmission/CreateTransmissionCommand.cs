@@ -65,6 +65,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
         ArgumentNullException.ThrowIfNull(dialogTransmissionAppender);
         ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
+        ArgumentNullException.ThrowIfNull(systemLabelAdder);
 
         _db = db;
         _domainContext = domainContext;

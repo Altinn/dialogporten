@@ -268,9 +268,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/problem+json, text/plain")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
-        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel>>> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Add a service owner label to a dialog</summary>
         /// <remarks>
@@ -1539,6 +1539,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     using System = global::System;
 
     
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel
+    {
+
+        /// <summary>
+        /// A label value.
+        /// </summary>
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+    }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails

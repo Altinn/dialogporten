@@ -18,7 +18,7 @@ public sealed class GetServiceOwnerLabelEndpoint(ISender sender) : Endpoint<GetS
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf(
+        Description(b => b.ProducesOneOf<List<ServiceOwnerLabelDto>>(
             StatusCodes.Status200OK,
             StatusCodes.Status404NotFound));
     }

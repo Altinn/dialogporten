@@ -36,10 +36,18 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         IClock clock,
         ICompactJwsGenerator compactJwsGenerator)
     {
-        _applicationSettings = applicationSettings.Value ?? throw new ArgumentNullException(nameof(applicationSettings));
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _compactJwsGenerator = compactJwsGenerator ?? throw new ArgumentNullException(nameof(compactJwsGenerator));
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(compactJwsGenerator);
+
+        var settings = applicationSettings.Value;
+        ArgumentNullException.ThrowIfNull(settings, nameof(applicationSettings));
+
+        _applicationSettings = settings;
+        _user = user;
+        _clock = clock;
+        _compactJwsGenerator = compactJwsGenerator;
     }
 
     public string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult,

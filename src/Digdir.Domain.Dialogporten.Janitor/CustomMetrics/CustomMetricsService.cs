@@ -18,9 +18,13 @@ public sealed partial class CustomMetricsService
         ILogger<CustomMetricsService> logger,
         MeterProvider? meterProvider = null)
     {
-        _collectors = collectors ?? throw new ArgumentNullException(nameof(collectors));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _meterProvider = meterProvider ?? throw new ArgumentNullException(nameof(meterProvider));
+        ArgumentNullException.ThrowIfNull(collectors);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(meterProvider);
+
+        _collectors = collectors;
+        _logger = logger;
+        _meterProvider = meterProvider;
     }
 
     /// <summary>

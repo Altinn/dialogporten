@@ -11,7 +11,9 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
 
     public SubjectResourceRepository(DialogDbContext dbContext)
     {
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(dbContext);
+
+        _dbContext = dbContext;
     }
 
     public async Task<DateTimeOffset> GetLastUpdatedAt(

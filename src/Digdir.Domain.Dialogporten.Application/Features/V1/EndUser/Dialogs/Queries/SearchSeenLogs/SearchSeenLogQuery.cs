@@ -33,10 +33,15 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         IAltinnAuthorization altinnAuthorization,
         IUserRegistry userRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(userRegistry);
+
+        _db = db;
+        _mapper = mapper;
+        _altinnAuthorization = altinnAuthorization;
+        _userRegistry = userRegistry;
     }
 
     public async Task<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)

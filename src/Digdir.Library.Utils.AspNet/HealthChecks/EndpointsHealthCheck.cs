@@ -19,8 +19,11 @@ internal sealed class EndpointsHealthCheck : IHealthCheck
         ILogger<EndpointsHealthCheck> logger,
         IOptions<AspNetUtilitiesSettings> options)
     {
-        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(httpClientFactory);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _httpClientFactory = httpClientFactory;
+        _logger = logger;
         _endpoints = options.Value.HealthCheckSettings.HttpGetEndpointsToCheck;
     }
 

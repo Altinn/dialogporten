@@ -64,17 +64,29 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         ITransmissionHierarchyValidator transmissionHierarchyValidator
     )
     {
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _systemLabelAdder = systemLabelAdder ?? throw new ArgumentNullException(nameof(systemLabelAdder));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(domainContext);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(systemLabelAdder);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(serviceResourceAuthorizer);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
+
+        _user = user;
+        _db = db;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
+        _domainContext = domainContext;
+        _resourceRegistry = resourceRegistry;
+        _systemLabelAdder = systemLabelAdder;
+        _userResourceRegistry = userResourceRegistry;
+        _serviceResourceAuthorizer = serviceResourceAuthorizer;
+        _clock = clock;
+        _transmissionHierarchyValidator = transmissionHierarchyValidator;
     }
 
     public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)

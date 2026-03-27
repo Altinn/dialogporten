@@ -45,11 +45,17 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         IUserResourceRegistry userResourceRegistry,
         IAltinnAuthorization altinnAuthorization)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(userRegistry);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+
+        _db = db;
+        _unitOfWork = unitOfWork;
+        _userRegistry = userRegistry;
+        _userResourceRegistry = userResourceRegistry;
+        _altinnAuthorization = altinnAuthorization;
     }
 
     public async Task<SetSystemLabelResult> Handle(

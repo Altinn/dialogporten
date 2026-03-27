@@ -27,10 +27,15 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         Lazy<IPublishEndpoint> publishEndpoint,
         IApplicationContext applicationContext)
     {
-        _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
-        _topicEventSender = topicEventSender ?? throw new ArgumentNullException(nameof(topicEventSender));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+        ArgumentNullException.ThrowIfNull(transactionTime);
+        ArgumentNullException.ThrowIfNull(topicEventSender);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(publishEndpoint);
+
+        _transactionTime = transactionTime;
+        _topicEventSender = topicEventSender;
+        _logger = logger;
+        _publishEndpoint = publishEndpoint;
         _applicationContext = applicationContext;
     }
 

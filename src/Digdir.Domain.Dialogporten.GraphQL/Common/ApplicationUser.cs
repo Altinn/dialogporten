@@ -9,7 +9,9 @@ internal sealed class ApplicationUser : IUser
 
     public ApplicationUser(IHttpContextAccessor httpContextAccessor)
     {
-        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        ArgumentNullException.ThrowIfNull(httpContextAccessor);
+
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public ClaimsPrincipal GetPrincipal()

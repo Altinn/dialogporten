@@ -89,7 +89,6 @@ jobs:
             --repo "$REPOSITORY" \
             --workflow "dispatch-purge-e2e-test-data.yml" \
             --event workflow_dispatch \
-            --status in_progress,queued,pending \
             --limit 1 \
             --json databaseId \
             --jq '.[0].databaseId')

@@ -31,10 +31,18 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
         ILogger<UserResourceRegistry> logger,
         IOptions<ApplicationSettings> applicationSettings)
     {
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _applicationSettings = applicationSettings.Value ?? throw new ArgumentNullException(nameof(applicationSettings));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+
+        var settings = applicationSettings.Value;
+        ArgumentNullException.ThrowIfNull(settings, nameof(applicationSettings));
+
+        _user = user;
+        _resourceRegistry = resourceRegistry;
+        _logger = logger;
+        _applicationSettings = settings;
     }
 
     public async Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken)
@@ -115,7 +123,9 @@ internal sealed class LocalDevelopmentUserResourceRegistryDecorator : IUserResou
 
     public LocalDevelopmentUserResourceRegistryDecorator(IUserResourceRegistry userResourceRegistry)
     {
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public Task<bool> CurrentUserIsOwner(string serviceResource, CancellationToken cancellationToken) =>

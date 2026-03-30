@@ -7,10 +7,19 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 /// <summary>
 /// Middleware to handle feature metric delivery acknowledgments based on HTTP response status codes
 /// </summary>
-public sealed class FeatureMetricMiddleware(RequestDelegate next, IOptions<FeatureMetricOptions> options)
+public sealed class FeatureMetricMiddleware
 {
-    private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
-    private readonly FeatureMetricOptions _options = options.Value;
+    private readonly RequestDelegate _next;
+    private readonly FeatureMetricOptions _options;
+
+    public FeatureMetricMiddleware(RequestDelegate next, IOptions<FeatureMetricOptions> options)
+    {
+        ArgumentNullException.ThrowIfNull(next);
+        ArgumentNullException.ThrowIfNull(options);
+
+        _next = next;
+        _options = options.Value;
+    }
 
     public async Task InvokeAsync(HttpContext context)
     {

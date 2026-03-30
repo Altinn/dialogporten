@@ -33,8 +33,11 @@ internal sealed class NotificationProcessingContext : INotificationProcessingCon
         Guid eventId,
         Action<Guid> onDispose)
     {
-        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _onDispose = onDispose ?? throw new ArgumentNullException(nameof(onDispose));
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
+        ArgumentNullException.ThrowIfNull(onDispose);
+
+        _serviceScopeFactory = serviceScopeFactory;
+        _onDispose = onDispose;
         _eventId = eventId;
     }
 

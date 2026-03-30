@@ -61,18 +61,38 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         IServiceScopeFactory serviceScopeFactory,
         IOptionsMonitor<ApplicationSettings> applicationSettings)
     {
-        _httpClient = client ?? throw new ArgumentNullException(nameof(client));
-        _pdpCache = cacheProvider.GetCache(nameof(Authorization)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _partiesCache = cacheProvider.GetCache(nameof(AuthorizedPartiesResult)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _serviceResourceMinimumAuthenticationLevelResolver = serviceResourceMinimumAuthenticationLevelResolver ?? throw new ArgumentNullException(nameof(serviceResourceMinimumAuthenticationLevelResolver));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _partyResourceReferenceRepository = partyResourceReferenceRepository ?? throw new ArgumentNullException(nameof(partyResourceReferenceRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(serviceResourceMinimumAuthenticationLevelResolver);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(partyResourceReferenceRepository);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+
+        var pdpCache = cacheProvider.GetCache(nameof(Authorization));
+        ArgumentNullException.ThrowIfNull(pdpCache);
+
+        var partiesCache = cacheProvider.GetCache(nameof(AuthorizedPartiesResult));
+        ArgumentNullException.ThrowIfNull(partiesCache);
+
+        var subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource));
+        ArgumentNullException.ThrowIfNull(subjectResourcesCache);
+
+        _httpClient = client;
+        _pdpCache = pdpCache;
+        _partiesCache = partiesCache;
+        _subjectResourcesCache = subjectResourcesCache;
+        _user = user;
+        _db = db;
+        _serviceResourceMinimumAuthenticationLevelResolver = serviceResourceMinimumAuthenticationLevelResolver;
+        _resourceRegistry = resourceRegistry;
+        _partyResourceReferenceRepository = partyResourceReferenceRepository;
+        _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
+        _applicationSettings = applicationSettings;
     }
 
     public async Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(

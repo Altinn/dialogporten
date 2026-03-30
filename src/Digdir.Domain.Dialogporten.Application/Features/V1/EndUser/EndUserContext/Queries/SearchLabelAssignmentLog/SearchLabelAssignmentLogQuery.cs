@@ -27,9 +27,13 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
 
     public SearchLabelAssignmentLogQueryHandler(IDialogDbContext dialogDbContext, IMapper mapper, IAltinnAuthorization altinnAuthorization)
     {
-        _dialogDbContext = dialogDbContext ?? throw new ArgumentNullException(nameof(dialogDbContext));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        ArgumentNullException.ThrowIfNull(dialogDbContext);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+
+        _dialogDbContext = dialogDbContext;
+        _mapper = mapper;
+        _altinnAuthorization = altinnAuthorization;
     }
 
     public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)

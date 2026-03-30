@@ -29,9 +29,13 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
 
     public GetActivityQueryHandler(IMapper mapper, IDialogDbContext dbContext, IUserResourceRegistry userResourceRegistry)
     {
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _mapper = mapper;
+        _dbContext = dbContext;
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public async Task<GetActivityResult> Handle(GetActivityQuery request,

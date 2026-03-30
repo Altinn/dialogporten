@@ -14,8 +14,11 @@ internal sealed class RedisHealthCheck : IHealthCheck
 
     public RedisHealthCheck(IOptions<InfrastructureSettings> options, ILogger<RedisHealthCheck> logger)
     {
-        _settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _settings = options.Value;
+        _logger = logger;
     }
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)

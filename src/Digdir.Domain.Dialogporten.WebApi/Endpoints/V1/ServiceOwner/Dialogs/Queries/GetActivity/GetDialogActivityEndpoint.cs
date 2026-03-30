@@ -13,7 +13,9 @@ public sealed class GetDialogActivityEndpoint : Endpoint<GetActivityQuery, Activ
 
     public GetDialogActivityEndpoint(ISender sender)
     {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
     }
 
     public override void Configure()

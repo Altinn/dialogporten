@@ -73,18 +73,32 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         ITransmissionHierarchyValidator transmissionHierarchyValidator
     )
     {
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
-        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
-        _dialogTransmissionAppender = dialogTransmissionAppender ?? throw new ArgumentNullException(nameof(dialogTransmissionAppender));
-        _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(domainContext);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(serviceResourceAuthorizer);
+        ArgumentNullException.ThrowIfNull(dataLoaderContext);
+        ArgumentNullException.ThrowIfNull(systemLabelAdder);
+        ArgumentNullException.ThrowIfNull(dialogTransmissionAppender);
+        ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
+
+        _user = user;
+        _clock = clock;
+        _db = db;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
+        _domainContext = domainContext;
+        _userResourceRegistry = userResourceRegistry;
+        _resourceRegistry = resourceRegistry;
+        _serviceResourceAuthorizer = serviceResourceAuthorizer;
+        _dataLoaderContext = dataLoaderContext;
+        _dialogTransmissionAppender = dialogTransmissionAppender;
+        _transmissionHierarchyValidator = transmissionHierarchyValidator;
         _systemLabelAdder = systemLabelAdder;
     }
 

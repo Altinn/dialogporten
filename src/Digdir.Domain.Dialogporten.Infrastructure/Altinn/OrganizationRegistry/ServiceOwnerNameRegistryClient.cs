@@ -15,8 +15,11 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(cacheProvider);
 
+        var cache = cacheProvider.GetCache(nameof(OrganizationRegistry));
+        ArgumentNullException.ThrowIfNull(cache);
+
         _client = client;
-        _cache = cacheProvider.GetCache(nameof(OrganizationRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
+        _cache = cache;
     }
 
     public async Task<ServiceOwnerInfo?> GetServiceOwnerInfo(string orgNumber, CancellationToken cancellationToken)

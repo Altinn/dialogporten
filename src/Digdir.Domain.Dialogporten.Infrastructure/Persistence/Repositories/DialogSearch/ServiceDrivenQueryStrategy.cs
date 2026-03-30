@@ -4,10 +4,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 
-internal sealed class ServiceDrivenQueryStrategy(ILogger<ServiceDrivenQueryStrategy> logger)
-    : IQueryStrategy<EndUserSearchContext>
+internal sealed class ServiceDrivenQueryStrategy : IQueryStrategy<EndUserSearchContext>
 {
-    private readonly ILogger<ServiceDrivenQueryStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<ServiceDrivenQueryStrategy> _logger;
+
+    public ServiceDrivenQueryStrategy(ILogger<ServiceDrivenQueryStrategy> logger)
+    {
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _logger = logger;
+    }
 
     public string Name => "ServiceDriven";
 

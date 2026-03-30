@@ -31,10 +31,15 @@ internal sealed partial class SyncSubjectMapCommandHandler : IRequestHandler<Syn
         IUnitOfWork unitOfWork,
         ILogger<SyncSubjectMapCommandHandler> logger)
     {
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _subjectResourceRepository = subjectResourceRepository ?? throw new ArgumentNullException(nameof(subjectResourceRepository));
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(subjectResourceRepository);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _resourceRegistry = resourceRegistry;
+        _subjectResourceRepository = subjectResourceRepository;
         _unitOfWork = unitOfWork;
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = logger;
     }
 
     public async Task<SyncSubjectMapResult> Handle(SyncSubjectMapCommand request, CancellationToken cancellationToken)

@@ -30,8 +30,11 @@ public sealed class PatchDialogsController : ControllerBase
 
     public PatchDialogsController(ISender sender, IMapper mapper)
     {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        ArgumentNullException.ThrowIfNull(sender);
+        ArgumentNullException.ThrowIfNull(mapper);
+
+        _sender = sender;
+        _mapper = mapper;
     }
 
     /// <summary>

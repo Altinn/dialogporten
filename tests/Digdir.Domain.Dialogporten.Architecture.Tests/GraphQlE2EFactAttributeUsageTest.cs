@@ -1,8 +1,8 @@
 using System.Reflection;
 using Digdir.Domain.Dialogporten.GraphQl.E2E.Tests;
-using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests;
 using Digdir.Library.Dialogporten.E2E.Common;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Deprecated;
 
 namespace Digdir.Domain.Dialogporten.Architecture.Tests;
 

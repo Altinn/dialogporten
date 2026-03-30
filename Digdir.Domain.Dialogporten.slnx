@@ -39,7 +39,7 @@
     <Project Path="tests/Digdir.Domain.Dialogporten.GraphQl.Integration.Tests/Digdir.Domain.Dialogporten.GraphQl.Integration.Tests.csproj" />
     <Project Path="tests/Digdir.Domain.Dialogporten.GraphQl.Unit.Tests/Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.csproj" />
     <Project Path="tests/Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests/Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests.csproj" />
-    <Project Path="tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Deprecated/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Deprecated.csproj" />
     <Project Path="tests/Digdir.Domain.Dialogporten.WebApi.Unit.Tests/Digdir.Domain.Dialogporten.WebApi.Unit.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Libraries/" />

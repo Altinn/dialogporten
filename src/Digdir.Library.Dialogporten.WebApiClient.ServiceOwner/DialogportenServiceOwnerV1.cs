@@ -1,281 +1,148 @@
 using Altinn.ApiClients.Dialogporten.Features.V1.ServiceOwner;
+using Refit;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner;
 
-internal sealed class DialogportenServiceOwnerV1 : IDialogportenServiceOwnerV1
+internal sealed class DialogportenServiceOwnerV1(
+    IDialogsPostEndpoint dialogsPost,
+    IDialogsGet2Endpoint dialogsGet,
+    IDialogsGetEndpoint dialogsList,
+    IDialogsPutEndpoint dialogsPut,
+    IDialogsPatchEndpoint dialogsPatch,
+    IDialogsDeleteEndpoint dialogsDelete,
+    IRestoreEndpoint restore,
+    IPurgeEndpoint purge,
+    IFreezeEndpoint freeze,
+    ITransmissionsPostEndpoint transmissionsPost,
+    ITransmissionsGet2Endpoint transmissionsGet,
+    ITransmissionsGetEndpoint transmissionsList,
+    ITransmissionsPutEndpoint transmissionsPut,
+    IActivitiesPostEndpoint activitiesPost,
+    IActivitiesGet2Endpoint activitiesGet,
+    IActivitiesGetEndpoint activitiesList,
+    ILabelsGetEndpoint labelsGet,
+    ILabelsPostEndpoint labelsPost,
+    ILabelsDeleteEndpoint labelsDelete,
+    ISystemlabelsEndpoint systemLabels,
+    IBulksetEndpoint bulkSetSystemLabels,
+    ISeenlogGet2Endpoint seenLogGet,
+    ISeenlogGetEndpoint seenLogList,
+    IEndusercontextEndpoint endUserContext,
+    IDialoglookupEndpoint dialogLookup,
+    IShouldSendNotificationEndpoint notificationCondition)
+    : IDialogportenServiceOwnerV1
 {
-    private readonly IDialogsPostEndpoint _dialogsPost;
-    private readonly IDialogsGet2Endpoint _dialogsGet;
-    private readonly IDialogsGetEndpoint _dialogsList;
-    private readonly IDialogsPutEndpoint _dialogsPut;
-    private readonly IDialogsPatchEndpoint _dialogsPatch;
-    private readonly IDialogsDeleteEndpoint _dialogsDelete;
-    private readonly IRestoreEndpoint _restore;
-    private readonly IPurgeEndpoint _purge;
-    private readonly IFreezeEndpoint _freeze;
-    private readonly ITransmissionsPostEndpoint _transmissionsPost;
-    private readonly ITransmissionsGet2Endpoint _transmissionsGet;
-    private readonly ITransmissionsGetEndpoint _transmissionsList;
-    private readonly ITransmissionsPutEndpoint _transmissionsPut;
-    private readonly IActivitiesPostEndpoint _activitiesPost;
-    private readonly IActivitiesGet2Endpoint _activitiesGet;
-    private readonly IActivitiesGetEndpoint _activitiesList;
-    private readonly ILabelsGetEndpoint _labelsGet;
-    private readonly ILabelsPostEndpoint _labelsPost;
-    private readonly ILabelsDeleteEndpoint _labelsDelete;
-    private readonly ISystemlabelsEndpoint _systemLabels;
-    private readonly IBulksetEndpoint _bulkSetSystemLabels;
-    private readonly ISeenlogGet2Endpoint _seenLogGet;
-    private readonly ISeenlogGetEndpoint _seenLogList;
-    private readonly IEndusercontextEndpoint _endUserContext;
-    private readonly IDialoglookupEndpoint _dialogLookup;
-    private readonly IShouldSendNotificationEndpoint _notificationCondition;
-
-    public DialogportenServiceOwnerV1(
-        IDialogsPostEndpoint dialogsPost,
-        IDialogsGet2Endpoint dialogsGet,
-        IDialogsGetEndpoint dialogsList,
-        IDialogsPutEndpoint dialogsPut,
-        IDialogsPatchEndpoint dialogsPatch,
-        IDialogsDeleteEndpoint dialogsDelete,
-        IRestoreEndpoint restore,
-        IPurgeEndpoint purge,
-        IFreezeEndpoint freeze,
-        ITransmissionsPostEndpoint transmissionsPost,
-        ITransmissionsGet2Endpoint transmissionsGet,
-        ITransmissionsGetEndpoint transmissionsList,
-        ITransmissionsPutEndpoint transmissionsPut,
-        IActivitiesPostEndpoint activitiesPost,
-        IActivitiesGet2Endpoint activitiesGet,
-        IActivitiesGetEndpoint activitiesList,
-        ILabelsGetEndpoint labelsGet,
-        ILabelsPostEndpoint labelsPost,
-        ILabelsDeleteEndpoint labelsDelete,
-        ISystemlabelsEndpoint systemLabels,
-        IBulksetEndpoint bulkSetSystemLabels,
-        ISeenlogGet2Endpoint seenLogGet,
-        ISeenlogGetEndpoint seenLogList,
-        IEndusercontextEndpoint endUserContext,
-        IDialoglookupEndpoint dialogLookup,
-        IShouldSendNotificationEndpoint notificationCondition)
-    {
-        _dialogsPost = dialogsPost;
-        _dialogsGet = dialogsGet;
-        _dialogsList = dialogsList;
-        _dialogsPut = dialogsPut;
-        _dialogsPatch = dialogsPatch;
-        _dialogsDelete = dialogsDelete;
-        _restore = restore;
-        _purge = purge;
-        _freeze = freeze;
-        _transmissionsPost = transmissionsPost;
-        _transmissionsGet = transmissionsGet;
-        _transmissionsList = transmissionsList;
-        _transmissionsPut = transmissionsPut;
-        _activitiesPost = activitiesPost;
-        _activitiesGet = activitiesGet;
-        _activitiesList = activitiesList;
-        _labelsGet = labelsGet;
-        _labelsPost = labelsPost;
-        _labelsDelete = labelsDelete;
-        _systemLabels = systemLabels;
-        _bulkSetSystemLabels = bulkSetSystemLabels;
-        _seenLogGet = seenLogGet;
-        _seenLogList = seenLogList;
-        _endUserContext = endUserContext;
-        _dialogLookup = dialogLookup;
-        _notificationCondition = notificationCondition;
-    }
-
     #region Dialogs
 
-    public async Task<string> CreateDialogAsync(CreateDialogRequest request, CancellationToken cancellationToken)
-    {
-        var response = await _dialogsPost.Execute(request, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<string>> CreateDialogAsync(CreateDialogRequest request, CancellationToken cancellationToken) =>
+        dialogsPost.Execute(request, cancellationToken);
 
-    public async Task<Dialog> GetDialogAsync(Guid dialogId, string? endUserId, CancellationToken cancellationToken)
-    {
-        var response = await _dialogsGet.Execute(dialogId, endUserId!, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<Dialog>> GetDialogAsync(Guid dialogId, string? endUserId, CancellationToken cancellationToken) =>
+        dialogsGet.Execute(dialogId, endUserId!, cancellationToken);
 
-    public async Task<PaginatedDialogList> ListDialogsAsync(SearchDialogQueryParams? queryParams, CancellationToken cancellationToken)
-    {
-        var response = await _dialogsList.Execute(queryParams ?? new SearchDialogQueryParams(), cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<PaginatedDialogList>> ListDialogsAsync(SearchDialogQueryParams? queryParams, CancellationToken cancellationToken) =>
+        dialogsList.Execute(queryParams ?? new SearchDialogQueryParams(), cancellationToken);
 
-    public async Task UpdateDialogAsync(Guid dialogId, UpdateDialogRequest request, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _dialogsPut.Execute(dialogId, request, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> UpdateDialogAsync(Guid dialogId, UpdateDialogRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        dialogsPut.Execute(dialogId, request, revision, cancellationToken);
 
-    public async Task PatchDialogAsync(Guid dialogId, IEnumerable<PatchOperation> patchDocument, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _dialogsPatch.Execute(dialogId, patchDocument, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> PatchDialogAsync(Guid dialogId, IEnumerable<PatchOperation> patchDocument, Guid? revision, CancellationToken cancellationToken) =>
+        dialogsPatch.Execute(dialogId, patchDocument, revision, cancellationToken);
 
-    public async Task DeleteDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _dialogsDelete.Execute(dialogId, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> DeleteDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken) =>
+        dialogsDelete.Execute(dialogId, revision, cancellationToken);
 
-    public async Task RestoreDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _restore.Execute(dialogId, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> RestoreDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken) =>
+        restore.Execute(dialogId, revision, cancellationToken);
 
-    public async Task PurgeDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _purge.Execute(dialogId, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> PurgeDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken) =>
+        purge.Execute(dialogId, revision, cancellationToken);
 
-    public async Task FreezeDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _freeze.Execute(dialogId, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> FreezeDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken) =>
+        freeze.Execute(dialogId, revision, cancellationToken);
 
     #endregion
 
     #region Transmissions
 
-    public async Task<string> CreateTransmissionAsync(Guid dialogId, CreateTransmissionRequest request, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _transmissionsPost.Execute(dialogId, request, revision, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<string>> CreateTransmissionAsync(Guid dialogId, CreateTransmissionRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        transmissionsPost.Execute(dialogId, request, revision, cancellationToken);
 
-    public async Task<Transmission> GetTransmissionAsync(Guid dialogId, Guid transmissionId, CancellationToken cancellationToken)
-    {
-        var response = await _transmissionsGet.Execute(dialogId, transmissionId, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<Transmission>> GetTransmissionAsync(Guid dialogId, Guid transmissionId, CancellationToken cancellationToken) =>
+        transmissionsGet.Execute(dialogId, transmissionId, cancellationToken);
 
-    public async Task<ICollection<TransmissionSummary>> ListTransmissionsAsync(Guid dialogId, CancellationToken cancellationToken)
-    {
-        var response = await _transmissionsList.Execute(dialogId, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<ICollection<TransmissionSummary>>> ListTransmissionsAsync(Guid dialogId, CancellationToken cancellationToken) =>
+        transmissionsList.Execute(dialogId, cancellationToken);
 
-    public async Task UpdateTransmissionAsync(Guid dialogId, Guid transmissionId, UpdateTransmissionRequest request, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _transmissionsPut.Execute(dialogId, transmissionId, request, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> UpdateTransmissionAsync(Guid dialogId, Guid transmissionId, UpdateTransmissionRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        transmissionsPut.Execute(dialogId, transmissionId, request, revision, cancellationToken);
 
     #endregion
 
     #region Activities
 
-    public async Task<string> CreateActivityAsync(Guid dialogId, CreateActivityRequest request, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _activitiesPost.Execute(dialogId, request, revision, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<string>> CreateActivityAsync(Guid dialogId, CreateActivityRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        activitiesPost.Execute(dialogId, request, revision, cancellationToken);
 
-    public async Task<Activity> GetActivityAsync(Guid dialogId, Guid activityId, CancellationToken cancellationToken)
-    {
-        var response = await _activitiesGet.Execute(dialogId, activityId, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<Activity>> GetActivityAsync(Guid dialogId, Guid activityId, CancellationToken cancellationToken) =>
+        activitiesGet.Execute(dialogId, activityId, cancellationToken);
 
-    public async Task<ICollection<ActivitySummary>> ListActivitiesAsync(Guid dialogId, CancellationToken cancellationToken)
-    {
-        var response = await _activitiesList.Execute(dialogId, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<ICollection<ActivitySummary>>> ListActivitiesAsync(Guid dialogId, CancellationToken cancellationToken) =>
+        activitiesList.Execute(dialogId, cancellationToken);
 
     #endregion
 
     #region Service Owner Labels
 
-    public async Task GetServiceOwnerLabelsAsync(Guid dialogId, CancellationToken cancellationToken)
-    {
-        var response = await _labelsGet.Execute(dialogId, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> GetServiceOwnerLabelsAsync(Guid dialogId, CancellationToken cancellationToken) =>
+        labelsGet.Execute(dialogId, cancellationToken);
 
-    public async Task AddServiceOwnerLabelAsync(Guid dialogId, CreateServiceOwnerLabelRequest label, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _labelsPost.Execute(dialogId, label, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> AddServiceOwnerLabelAsync(Guid dialogId, CreateServiceOwnerLabelRequest label, Guid? revision, CancellationToken cancellationToken) =>
+        labelsPost.Execute(dialogId, label, revision, cancellationToken);
 
-    public async Task DeleteServiceOwnerLabelAsync(Guid dialogId, string label, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _labelsDelete.Execute(dialogId, label, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> DeleteServiceOwnerLabelAsync(Guid dialogId, string label, Guid? revision, CancellationToken cancellationToken) =>
+        labelsDelete.Execute(dialogId, label, revision, cancellationToken);
 
     #endregion
 
     #region System Labels
 
-    public async Task SetSystemLabelAsync(Guid dialogId, string endUserId, SetSystemLabelRequest request, Guid? revision, CancellationToken cancellationToken)
-    {
-        var response = await _systemLabels.Execute(dialogId, endUserId, request, revision, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> SetSystemLabelAsync(Guid dialogId, string endUserId, SetSystemLabelRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        systemLabels.Execute(dialogId, endUserId, request, revision, cancellationToken);
 
-    public async Task BulkSetSystemLabelsAsync(string endUserId, BulkSetSystemLabelsRequest request, CancellationToken cancellationToken)
-    {
-        var response = await _bulkSetSystemLabels.Execute(endUserId, request, cancellationToken);
-        response.EnsureSuccess();
-    }
+    public Task<IApiResponse> BulkSetSystemLabelsAsync(string endUserId, BulkSetSystemLabelsRequest request, CancellationToken cancellationToken) =>
+        bulkSetSystemLabels.Execute(endUserId, request, cancellationToken);
 
     #endregion
 
     #region Seen Logs
 
-    public async Task<SeenLog> GetSeenLogAsync(Guid dialogId, Guid seenLogId, CancellationToken cancellationToken)
-    {
-        var response = await _seenLogGet.Execute(dialogId, seenLogId, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<SeenLog>> GetSeenLogAsync(Guid dialogId, Guid seenLogId, CancellationToken cancellationToken) =>
+        seenLogGet.Execute(dialogId, seenLogId, cancellationToken);
 
-    public async Task<ICollection<SeenLogSummary>> ListSeenLogsAsync(Guid dialogId, CancellationToken cancellationToken)
-    {
-        var response = await _seenLogList.Execute(dialogId, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<ICollection<SeenLogSummary>>> ListSeenLogsAsync(Guid dialogId, CancellationToken cancellationToken) =>
+        seenLogList.Execute(dialogId, cancellationToken);
 
     #endregion
 
     #region End User Context
 
-    public async Task<PaginatedEndUserContextList> ListEndUserContextAsync(SearchEndUserContextQueryParams queryParams, CancellationToken cancellationToken)
-    {
-        var response = await _endUserContext.Execute(queryParams, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<PaginatedEndUserContextList>> ListEndUserContextAsync(SearchEndUserContextQueryParams queryParams, CancellationToken cancellationToken) =>
+        endUserContext.Execute(queryParams, cancellationToken);
 
     #endregion
 
     #region Dialog Lookup
 
-    public async Task<DialogLookup> GetDialogLookupAsync(string instanceRef, V1EndUserCommon_AcceptedLanguages? acceptLanguage, CancellationToken cancellationToken)
-    {
-        var response = await _dialogLookup.Execute(instanceRef, acceptLanguage ?? new V1EndUserCommon_AcceptedLanguages(), cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<DialogLookup>> GetDialogLookupAsync(string instanceRef, V1EndUserCommon_AcceptedLanguages? acceptLanguage, CancellationToken cancellationToken) =>
+        dialogLookup.Execute(instanceRef, acceptLanguage ?? new V1EndUserCommon_AcceptedLanguages(), cancellationToken);
 
     #endregion
 
     #region Notification Condition
 
-    public async Task<NotificationCondition> GetNotificationConditionAsync(Guid dialogId, NotificationConditionQueryParams queryParams, CancellationToken cancellationToken)
-    {
-        var response = await _notificationCondition.Execute(dialogId, queryParams, cancellationToken);
-        return response.EnsureSuccess();
-    }
+    public Task<IApiResponse<NotificationCondition>> GetNotificationConditionAsync(Guid dialogId, NotificationConditionQueryParams queryParams, CancellationToken cancellationToken) =>
+        notificationCondition.Execute(dialogId, queryParams, cancellationToken);
 
     #endregion
 }

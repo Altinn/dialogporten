@@ -1176,6 +1176,9 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         [JsonPropertyName("serviceResource")]
         public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; }
 
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]

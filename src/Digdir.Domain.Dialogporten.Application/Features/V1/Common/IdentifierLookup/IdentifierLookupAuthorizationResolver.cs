@@ -14,23 +14,19 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
 {
     private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
-    private readonly IServiceResourceMinimumAuthenticationLevelResolver _serviceResourceMinimumAuthenticationLevelResolver;
     private readonly IDialogDbContext _db;
 
     public IdentifierLookupAuthorizationResolver(
         IUser user,
         IAltinnAuthorization altinnAuthorization,
-        IServiceResourceMinimumAuthenticationLevelResolver serviceResourceMinimumAuthenticationLevelResolver,
         IDialogDbContext db)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
-        ArgumentNullException.ThrowIfNull(serviceResourceMinimumAuthenticationLevelResolver);
         ArgumentNullException.ThrowIfNull(db);
 
         _user = user;
         _altinnAuthorization = altinnAuthorization;
-        _serviceResourceMinimumAuthenticationLevelResolver = serviceResourceMinimumAuthenticationLevelResolver;
         _db = db;
     }
 
@@ -41,18 +37,11 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         InstanceRef responseInstanceRef,
         CancellationToken cancellationToken)
     {
-        var minimumAuthenticationLevel = await _serviceResourceMinimumAuthenticationLevelResolver
-            .GetMinimumAuthenticationLevel(dialogData.ServiceResource, cancellationToken);
         var currentAuthenticationLevel = _user.GetPrincipal().GetAuthenticationLevel();
-        if (currentAuthenticationLevel < minimumAuthenticationLevel)
-        {
-            return CreateUnauthorizedResolution(currentAuthenticationLevel);
-        }
-
         var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifier();
         if (partyIdentifier is null)
         {
-            return CreateUnauthorizedResolution(currentAuthenticationLevel);
+            return CreateUnauthorizedResolution();
         }
 
         var authorizedParties = await _altinnAuthorization.GetAuthorizedPartiesForLookup(
@@ -65,7 +54,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
 
         if (matchingAuthorizedParty is null)
         {
-            return CreateUnauthorizedResolution(currentAuthenticationLevel);
+            return CreateUnauthorizedResolution();
         }
 
         var authorizedSubjects = matchingAuthorizedParty.AuthorizedRolesAndAccessPackages
@@ -142,13 +131,10 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             });
     }
 
-    private static IdentifierLookupAuthorizationResolution CreateUnauthorizedResolution(int currentAuthenticationLevel) =>
+    private static IdentifierLookupAuthorizationResolution CreateUnauthorizedResolution() =>
         new(
             false,
-            new IdentifierLookupAuthorizationEvidenceDto
-            {
-                CurrentAuthenticationLevel = currentAuthenticationLevel
-            });
+            new IdentifierLookupAuthorizationEvidenceDto());
 
     private static IdentifierLookupGrantType? ResolveGrantType(string subject)
     {

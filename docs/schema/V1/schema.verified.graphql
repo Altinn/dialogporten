@@ -276,6 +276,7 @@ type DialogLookup {
   dialogId: UUID!
   instanceRef: String!
   party: String!
+  title: [Localization!]!
   serviceResource: DialogLookupServiceResource!
   serviceOwner: DialogLookupServiceOwner!
   authorizationEvidence: DialogLookupAuthorizationEvidence!

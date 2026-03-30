@@ -45,8 +45,11 @@ public sealed class UserRegistry : IUserRegistry
         IUser user,
         IPartyNameRegistry partyNameRegistry)
     {
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(partyNameRegistry);
+
+        _user = user;
+        _partyNameRegistry = partyNameRegistry;
     }
 
     public UserId GetCurrentUserId()
@@ -99,7 +102,9 @@ internal sealed class LocalDevelopmentUserRegistryDecorator : IUserRegistry
 
     public LocalDevelopmentUserRegistryDecorator(IUserRegistry userRegistry)
     {
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        ArgumentNullException.ThrowIfNull(userRegistry);
+
+        _userRegistry = userRegistry;
     }
 
     public UserId GetCurrentUserId() => _userRegistry.GetCurrentUserId();

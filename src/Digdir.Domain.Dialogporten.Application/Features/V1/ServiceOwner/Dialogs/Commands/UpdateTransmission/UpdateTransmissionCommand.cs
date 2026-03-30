@@ -51,12 +51,19 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         IUserResourceRegistry userResourceRegistry,
         ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(serviceResourceAuthorizer);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
+
+        _db = db;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
+        _serviceResourceAuthorizer = serviceResourceAuthorizer;
+        _userResourceRegistry = userResourceRegistry;
+        _transmissionHierarchyValidator = transmissionHierarchyValidator;
     }
 
     public async Task<UpdateTransmissionResult> Handle(UpdateTransmissionCommand request, CancellationToken cancellationToken)

@@ -10,9 +10,16 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabel;
 
-public sealed class SetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<SetDialogSystemLabelRequest>
+public sealed class SetDialogSystemLabelsEndpoint : Endpoint<SetDialogSystemLabelRequest>
 {
-    private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+    private readonly ISender _sender;
+
+    public SetDialogSystemLabelsEndpoint(ISender sender)
+    {
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
+    }
 
     public override void Configure()
     {

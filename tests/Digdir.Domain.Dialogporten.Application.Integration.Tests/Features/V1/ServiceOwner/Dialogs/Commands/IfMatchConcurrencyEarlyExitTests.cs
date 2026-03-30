@@ -172,9 +172,15 @@ public sealed class IfMatchConcurrencyEarlyExitTests(DialogApplication applicati
 }
 
 // Decorating IUnitOfWork to throw an exception when SaveChangesAsync is called to verify early-exit concurrency checks
-internal sealed class SaveChangesForbiddenUnitOfWork(IUnitOfWork inner) : IUnitOfWork
+internal sealed class SaveChangesForbiddenUnitOfWork : IUnitOfWork
 {
-    private readonly IUnitOfWork _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+    private readonly IUnitOfWork _inner;
+
+    public SaveChangesForbiddenUnitOfWork(IUnitOfWork inner)
+    {
+        ArgumentNullException.ThrowIfNull(inner);
+        _inner = inner;
+    }
 
     public Task<SaveChangesResult> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         throw new InvalidOperationException("SaveChangesAsync should not be called for early-exit concurrency checks.");

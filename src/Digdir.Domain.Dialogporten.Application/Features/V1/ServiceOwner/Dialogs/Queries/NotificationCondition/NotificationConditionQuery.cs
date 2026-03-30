@@ -32,7 +32,9 @@ internal sealed class NotificationConditionQueryHandler : IRequestHandler<Notifi
 
     public NotificationConditionQueryHandler(IDialogDbContext db)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
+        ArgumentNullException.ThrowIfNull(db);
+
+        _db = db;
     }
 
     public async Task<NotificationConditionResult> Handle(NotificationConditionQuery request, CancellationToken cancellationToken)

@@ -17,8 +17,11 @@ internal sealed class IdempotentNotificationHandler<TNotification> :
 
     public IdempotentNotificationHandler(INotificationHandler<TNotification> decorated, INotificationProcessingContextFactory processingContextFactory)
     {
-        _decorated = decorated ?? throw new ArgumentNullException(nameof(decorated));
-        _processingContextFactory = processingContextFactory ?? throw new ArgumentNullException(nameof(processingContextFactory));
+        ArgumentNullException.ThrowIfNull(decorated);
+        ArgumentNullException.ThrowIfNull(processingContextFactory);
+
+        _decorated = decorated;
+        _processingContextFactory = processingContextFactory;
     }
 
     public async Task Handle(TNotification notification, CancellationToken cancellationToken)

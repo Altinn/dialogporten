@@ -8,9 +8,16 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabel;
 
-public sealed class GetServiceOwnerLabelEndpoint(ISender sender) : Endpoint<GetServiceOwnerLabelsQuery, List<ServiceOwnerLabelDto>>
+public sealed class GetServiceOwnerLabelEndpoint : Endpoint<GetServiceOwnerLabelsQuery, List<ServiceOwnerLabelDto>>
 {
-    private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+    private readonly ISender _sender;
+
+    public GetServiceOwnerLabelEndpoint(ISender sender)
+    {
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
+    }
 
     public override void Configure()
     {

@@ -26,8 +26,11 @@ internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetSer
         IDialogDbContext db,
         IUserResourceRegistry userResourceRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _db = db;
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public async Task<GetServiceOwnerLabelsResult> Handle(GetServiceOwnerLabelsQuery request, CancellationToken cancellationToken)

@@ -33,8 +33,11 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         IUnitOfWork unitOfWork,
         IDataLoaderContext dataLoaderContext)
     {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(dataLoaderContext);
+
+        _unitOfWork = unitOfWork;
+        _dataLoaderContext = dataLoaderContext;
     }
 
     public async Task<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,

@@ -33,8 +33,11 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
         IDialogDbContext dbContext,
         IAltinnAuthorization altinnAuthorization)
     {
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+
+        _dbContext = dbContext;
+        _altinnAuthorization = altinnAuthorization;
     }
 
     public async Task<GetActivityResult> Handle(GetActivityQuery request,

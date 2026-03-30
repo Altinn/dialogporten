@@ -30,8 +30,11 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         IMapper mapper,
         IUserResourceRegistry userResourceRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+
+        _db = db;
+        _mapper = mapper;
         _userResourceRegistry = userResourceRegistry;
     }
 

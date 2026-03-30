@@ -28,8 +28,11 @@ internal sealed class TransmissionHierarchyValidator : ITransmissionHierarchyVal
         ITransmissionHierarchyRepository hierarchyRepository,
         IDomainContext domainContext)
     {
-        _hierarchyRepository = hierarchyRepository ?? throw new ArgumentNullException(nameof(hierarchyRepository));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
+        ArgumentNullException.ThrowIfNull(hierarchyRepository);
+        ArgumentNullException.ThrowIfNull(domainContext);
+
+        _hierarchyRepository = hierarchyRepository;
+        _domainContext = domainContext;
     }
 
     public void ValidateWholeAggregate(DialogEntity dialog)

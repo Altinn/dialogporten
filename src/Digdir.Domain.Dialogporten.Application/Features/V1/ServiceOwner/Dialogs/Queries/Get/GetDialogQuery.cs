@@ -39,11 +39,17 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         IUnitOfWork unitOfWork, IUserRegistry userRegistry,
         IDataLoaderContext dataLoaderContext)
     {
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
-        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(userRegistry);
+        ArgumentNullException.ThrowIfNull(dataLoaderContext);
+
+        _mapper = mapper;
+        _altinnAuthorization = altinnAuthorization;
+        _unitOfWork = unitOfWork;
+        _userRegistry = userRegistry;
+        _dataLoaderContext = dataLoaderContext;
     }
 
     public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)

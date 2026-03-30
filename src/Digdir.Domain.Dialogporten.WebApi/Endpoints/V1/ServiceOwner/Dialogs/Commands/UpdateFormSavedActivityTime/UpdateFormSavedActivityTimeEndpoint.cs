@@ -7,9 +7,16 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 
-public sealed class UpdateFormSavedActivityTimeEndpoint(ISender sender) : Endpoint<UpdateFormSavedActivityTimeRequest>
+public sealed class UpdateFormSavedActivityTimeEndpoint : Endpoint<UpdateFormSavedActivityTimeRequest>
 {
-    private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+    private readonly ISender _sender;
+
+    public UpdateFormSavedActivityTimeEndpoint(ISender sender)
+    {
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
+    }
 
     public override void Configure()
     {
@@ -18,8 +25,6 @@ public sealed class UpdateFormSavedActivityTimeEndpoint(ISender sender) : Endpoi
         Group<ServiceOwnerGroup>();
         Description(x => x.ExcludeFromDescription());
     }
-
-
     public override async Task HandleAsync(UpdateFormSavedActivityTimeRequest req, CancellationToken ct)
     {
         var command = new UpdateFormSavedActivityTimeCommand

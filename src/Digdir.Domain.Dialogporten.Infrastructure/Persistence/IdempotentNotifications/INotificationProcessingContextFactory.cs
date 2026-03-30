@@ -23,8 +23,11 @@ internal sealed class NotificationProcessingContextFactory : INotificationProces
 
     public NotificationProcessingContextFactory(IServiceScopeFactory serviceScopeFactory, ILogger<NotificationProcessingContextFactory> logger)
     {
-        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _serviceScopeFactory = serviceScopeFactory;
+        _logger = logger;
         Task.Run(ContextHousekeeping);
     }
 

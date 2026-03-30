@@ -15,8 +15,11 @@ internal sealed class UpdateServiceOwnerContextDataLoader : TypedDataLoader<Upda
 
     public UpdateServiceOwnerContextDataLoader(IDialogDbContext dialogDbContext, IUserResourceRegistry userResourceRegistry)
     {
-        _dialogDbContext = dialogDbContext ?? throw new ArgumentNullException(nameof(dialogDbContext));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(dialogDbContext);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _dialogDbContext = dialogDbContext;
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public override async Task<DialogServiceOwnerContext?> Load(

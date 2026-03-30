@@ -22,15 +22,25 @@ public sealed partial class FreezeDialogResult : OneOfBase<FreezeDialogSuccess, 
 
 public sealed record FreezeDialogSuccess(Guid Revision);
 
-internal sealed class FreezeDialogCommandHandler(
-    IDialogDbContext db,
-    IUnitOfWork unitOfWork,
-    IUserResourceRegistry userResourceRegistry
-) : IRequestHandler<FreezeDialogCommand, FreezeDialogResult>
+internal sealed class FreezeDialogCommandHandler : IRequestHandler<FreezeDialogCommand, FreezeDialogResult>
 {
-    private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
-    private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-    private readonly IUserResourceRegistry _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+    private readonly IDialogDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserResourceRegistry _userResourceRegistry;
+
+    public FreezeDialogCommandHandler(
+        IDialogDbContext db,
+        IUnitOfWork unitOfWork,
+        IUserResourceRegistry userResourceRegistry)
+    {
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _db = db;
+        _unitOfWork = unitOfWork;
+        _userResourceRegistry = userResourceRegistry;
+    }
 
     public async Task<FreezeDialogResult> Handle(FreezeDialogCommand request, CancellationToken cancellationToken)
     {

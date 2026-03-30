@@ -73,13 +73,13 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         ArgumentNullException.ThrowIfNull(applicationSettings);
 
         var pdpCache = cacheProvider.GetCache(nameof(Authorization));
-        ArgumentNullException.ThrowIfNull(pdpCache, nameof(cacheProvider));
+        ArgumentNullException.ThrowIfNull(pdpCache);
 
         var partiesCache = cacheProvider.GetCache(nameof(AuthorizedPartiesResult));
-        ArgumentNullException.ThrowIfNull(partiesCache, nameof(cacheProvider));
+        ArgumentNullException.ThrowIfNull(partiesCache);
 
         var subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource));
-        ArgumentNullException.ThrowIfNull(subjectResourcesCache, nameof(cacheProvider));
+        ArgumentNullException.ThrowIfNull(subjectResourcesCache);
 
         _httpClient = client;
         _pdpCache = pdpCache;

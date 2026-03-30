@@ -35,21 +35,23 @@ internal sealed class ServiceOwnerV1(
     #region Dialogs
 
     public Task<IApiResponse<string>> CreateDialogAsync(
-        V1ServiceOwnerDialogsCommandsCreate_Dialog request,
+        CreateDialogRequest request,
         CancellationToken cancellationToken) =>
-        dialogsPost.Execute(request, cancellationToken);
+        dialogsPost.Execute(request.ToTransport(), cancellationToken);
 
-    public Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> GetDialogAsync(Guid dialogId, string? endUserId, CancellationToken cancellationToken) =>
-        dialogsGet.Execute(dialogId, endUserId!, cancellationToken);
+    public async Task<IApiResponse<Dialog>> GetDialogAsync(Guid dialogId, string? endUserId, CancellationToken cancellationToken) =>
+        (await dialogsGet.Execute(dialogId, endUserId!, cancellationToken))
+            .MapContent(static dialog => dialog.ToContract());
 
-    public Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> ListDialogsAsync(DialogsGetQueryParams? queryParams, CancellationToken cancellationToken) =>
-        dialogsList.Execute(queryParams ?? new DialogsGetQueryParams(), cancellationToken);
+    public async Task<IApiResponse<PaginatedDialogList>> ListDialogsAsync(SearchDialogQueryParams? queryParams, CancellationToken cancellationToken) =>
+        (await dialogsList.Execute(queryParams?.ToTransport() ?? new DialogsGetQueryParams(), cancellationToken))
+            .MapContent(static dialogs => dialogs.ToContract());
 
-    public Task<IApiResponse> UpdateDialogAsync(Guid dialogId, V1ServiceOwnerDialogsCommandsUpdate_Dialog request, Guid? revision, CancellationToken cancellationToken) =>
-        dialogsPut.Execute(dialogId, request, revision, cancellationToken);
+    public Task<IApiResponse> UpdateDialogAsync(Guid dialogId, UpdateDialogRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        dialogsPut.Execute(dialogId, request.ToTransport(), revision, cancellationToken);
 
-    public Task<IApiResponse> PatchDialogAsync(Guid dialogId, IEnumerable<JsonPatchOperations_Operation> patchDocument, Guid? revision, CancellationToken cancellationToken) =>
-        dialogsPatch.Execute(dialogId, patchDocument, revision, cancellationToken);
+    public Task<IApiResponse> PatchDialogAsync(Guid dialogId, IEnumerable<PatchOperation> patchDocument, Guid? revision, CancellationToken cancellationToken) =>
+        dialogsPatch.Execute(dialogId, patchDocument.Select(static operation => operation.ToTransport()).ToList(), revision, cancellationToken);
 
     public Task<IApiResponse> DeleteDialogAsync(Guid dialogId, Guid? revision, CancellationToken cancellationToken) =>
         dialogsDelete.Execute(dialogId, revision, cancellationToken);
@@ -67,30 +69,34 @@ internal sealed class ServiceOwnerV1(
 
     #region Transmissions
 
-    public Task<IApiResponse<string>> CreateTransmissionAsync(Guid dialogId, V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest request, Guid? revision, CancellationToken cancellationToken) =>
-        transmissionsPost.Execute(dialogId, request, revision, cancellationToken);
+    public Task<IApiResponse<string>> CreateTransmissionAsync(Guid dialogId, CreateTransmissionRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        transmissionsPost.Execute(dialogId, request.ToTransport(), revision, cancellationToken);
 
-    public Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> GetTransmissionAsync(Guid dialogId, Guid transmissionId, CancellationToken cancellationToken) =>
-        transmissionsGet.Execute(dialogId, transmissionId, cancellationToken);
+    public async Task<IApiResponse<Transmission>> GetTransmissionAsync(Guid dialogId, Guid transmissionId, CancellationToken cancellationToken) =>
+        (await transmissionsGet.Execute(dialogId, transmissionId, cancellationToken))
+            .MapContent(static transmission => transmission.ToContract());
 
-    public Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission>>> ListTransmissionsAsync(Guid dialogId, CancellationToken cancellationToken) =>
-        transmissionsList.Execute(dialogId, cancellationToken);
+    public async Task<IApiResponse<ICollection<TransmissionSummary>>> ListTransmissionsAsync(Guid dialogId, CancellationToken cancellationToken) =>
+        (await transmissionsList.Execute(dialogId, cancellationToken))
+            .MapContent(static transmissions => transmissions.Select(static transmission => transmission.ToContract()).ToList());
 
-    public Task<IApiResponse> UpdateTransmissionAsync(Guid dialogId, Guid transmissionId, V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest request, Guid? revision, CancellationToken cancellationToken) =>
-        transmissionsPut.Execute(dialogId, transmissionId, request, revision, cancellationToken);
+    public Task<IApiResponse> UpdateTransmissionAsync(Guid dialogId, Guid transmissionId, UpdateTransmissionRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        transmissionsPut.Execute(dialogId, transmissionId, request.ToTransport(), revision, cancellationToken);
 
     #endregion
 
     #region Activities
 
-    public Task<IApiResponse<string>> CreateActivityAsync(Guid dialogId, V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest request, Guid? revision, CancellationToken cancellationToken) =>
-        activitiesPost.Execute(dialogId, request, revision, cancellationToken);
+    public Task<IApiResponse<string>> CreateActivityAsync(Guid dialogId, CreateActivityRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        activitiesPost.Execute(dialogId, request.ToTransport(), revision, cancellationToken);
 
-    public Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> GetActivityAsync(Guid dialogId, Guid activityId, CancellationToken cancellationToken) =>
-        activitiesGet.Execute(dialogId, activityId, cancellationToken);
+    public async Task<IApiResponse<Activity>> GetActivityAsync(Guid dialogId, Guid activityId, CancellationToken cancellationToken) =>
+        (await activitiesGet.Execute(dialogId, activityId, cancellationToken))
+            .MapContent(static activity => activity.ToContract());
 
-    public Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchActivities_Activity>>> ListActivitiesAsync(Guid dialogId, CancellationToken cancellationToken) =>
-        activitiesList.Execute(dialogId, cancellationToken);
+    public async Task<IApiResponse<ICollection<ActivitySummary>>> ListActivitiesAsync(Guid dialogId, CancellationToken cancellationToken) =>
+        (await activitiesList.Execute(dialogId, cancellationToken))
+            .MapContent(static activities => activities.Select(static activity => activity.ToContract()).ToList());
 
     #endregion
 
@@ -99,8 +105,8 @@ internal sealed class ServiceOwnerV1(
     public Task<IApiResponse> GetServiceOwnerLabelsAsync(Guid dialogId, CancellationToken cancellationToken) =>
         labelsGet.Execute(dialogId, cancellationToken);
 
-    public Task<IApiResponse> AddServiceOwnerLabelAsync(Guid dialogId, V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label label, Guid? revision, CancellationToken cancellationToken) =>
-        labelsPost.Execute(dialogId, label, revision, cancellationToken);
+    public Task<IApiResponse> AddServiceOwnerLabelAsync(Guid dialogId, CreateServiceOwnerLabelRequest label, Guid? revision, CancellationToken cancellationToken) =>
+        labelsPost.Execute(dialogId, label.ToTransport(), revision, cancellationToken);
 
     public Task<IApiResponse> DeleteServiceOwnerLabelAsync(Guid dialogId, string label, Guid? revision, CancellationToken cancellationToken) =>
         labelsDelete.Execute(dialogId, label, revision, cancellationToken);
@@ -109,42 +115,47 @@ internal sealed class ServiceOwnerV1(
 
     #region System Labels
 
-    public Task<IApiResponse> SetSystemLabelAsync(Guid dialogId, string endUserId, V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest request, Guid? revision, CancellationToken cancellationToken) =>
-        systemLabels.Execute(dialogId, endUserId, request, revision, cancellationToken);
+    public Task<IApiResponse> SetSystemLabelAsync(Guid dialogId, string endUserId, SetSystemLabelRequest request, Guid? revision, CancellationToken cancellationToken) =>
+        systemLabels.Execute(dialogId, endUserId, request.ToTransport(), revision, cancellationToken);
 
-    public Task<IApiResponse> BulkSetSystemLabelsAsync(string endUserId, V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel request, CancellationToken cancellationToken) =>
-        bulkSetSystemLabels.Execute(endUserId, request, cancellationToken);
+    public Task<IApiResponse> BulkSetSystemLabelsAsync(string endUserId, BulkSetSystemLabelsRequest request, CancellationToken cancellationToken) =>
+        bulkSetSystemLabels.Execute(endUserId, request.ToTransport(), cancellationToken);
 
     #endregion
 
     #region Seen Logs
 
-    public Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> GetSeenLogAsync(Guid dialogId, Guid seenLogId, CancellationToken cancellationToken) =>
-        seenLogGet.Execute(dialogId, seenLogId, cancellationToken);
+    public async Task<IApiResponse<SeenLog>> GetSeenLogAsync(Guid dialogId, Guid seenLogId, CancellationToken cancellationToken) =>
+        (await seenLogGet.Execute(dialogId, seenLogId, cancellationToken))
+            .MapContent(static seenLog => seenLog.ToContract());
 
-    public Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> ListSeenLogsAsync(Guid dialogId, CancellationToken cancellationToken) =>
-        seenLogList.Execute(dialogId, cancellationToken);
+    public async Task<IApiResponse<ICollection<SeenLogSummary>>> ListSeenLogsAsync(Guid dialogId, CancellationToken cancellationToken) =>
+        (await seenLogList.Execute(dialogId, cancellationToken))
+            .MapContent(static seenLogs => seenLogs.Select(static seenLog => seenLog.ToContract()).ToList());
 
     #endregion
 
     #region End User Context
 
-    public Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem>> ListEndUserContextAsync(EndusercontextQueryParams queryParams, CancellationToken cancellationToken) =>
-        endUserContext.Execute(queryParams, cancellationToken);
+    public async Task<IApiResponse<PaginatedEndUserContextList>> ListEndUserContextAsync(SearchEndUserContextQueryParams queryParams, CancellationToken cancellationToken) =>
+        (await endUserContext.Execute(queryParams.ToTransport(), cancellationToken))
+            .MapContent(static endUserContextResult => endUserContextResult.ToContract());
 
     #endregion
 
     #region Dialog Lookup
 
-    public Task<IApiResponse<V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup>> GetDialogLookupAsync(string instanceRef, V1EndUserCommon_AcceptedLanguages? acceptLanguage, CancellationToken cancellationToken) =>
-        dialogLookup.Execute(instanceRef, acceptLanguage ?? new V1EndUserCommon_AcceptedLanguages(), cancellationToken);
+    public async Task<IApiResponse<DialogLookup>> GetDialogLookupAsync(string instanceRef, AcceptedLanguages? acceptLanguage, CancellationToken cancellationToken) =>
+        (await dialogLookup.Execute(instanceRef, acceptLanguage?.ToTransport() ?? new V1EndUserCommon_AcceptedLanguages(), cancellationToken))
+            .MapContent(static dialogLookupResponse => dialogLookupResponse.ToContract());
 
     #endregion
 
     #region Notification Condition
 
-    public Task<IApiResponse<V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition>> GetNotificationConditionAsync(Guid dialogId, ShouldSendNotificationQueryParams queryParams, CancellationToken cancellationToken) =>
-        notificationCondition.Execute(dialogId, queryParams, cancellationToken);
+    public async Task<IApiResponse<NotificationCondition>> GetNotificationConditionAsync(Guid dialogId, NotificationConditionQueryParams queryParams, CancellationToken cancellationToken) =>
+        (await notificationCondition.Execute(dialogId, queryParams.ToTransport(), cancellationToken))
+            .MapContent(static condition => condition.ToContract());
 
     #endregion
 }

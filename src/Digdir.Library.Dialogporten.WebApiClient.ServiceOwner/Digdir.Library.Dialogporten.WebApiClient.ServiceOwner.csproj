@@ -19,9 +19,13 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
+        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.SourceGenerator\Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.SourceGenerator.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
+        <AdditionalFiles Include="Features/V1/ServiceOwner/RefitterInterface.cs" />
         <PackageReference Include="Refit" Version="10.0.1" />
         <PackageReference Include="Refit.HttpClientFactory" Version="10.0.1" />
         <PackageReference Include="Refitter.SourceGenerator" Version="1.7.3" Condition="$(Configuration)=='Release'">

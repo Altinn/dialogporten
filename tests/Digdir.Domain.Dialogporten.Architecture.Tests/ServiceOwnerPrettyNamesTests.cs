@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Reflection;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.SourceGenerator;
 using Microsoft.CodeAnalysis;
@@ -84,7 +83,7 @@ public class ServiceOwnerPrettyNamesTests
                     [
                         ..classDeclaration.Members
                             .OfType<PropertyDeclarationSyntax>()
-                            .Where(static property => property.Modifiers.Any(SyntaxKind.PublicKeyword))
+                            .Where(static property => property.Modifiers.Any(static modifier => modifier.IsKind(SyntaxKind.PublicKeyword)))
                             .Select(static property => property.Type)
                     ]),
                 EnumDeclarationSyntax enumDeclaration => new TransportType(
@@ -128,24 +127,12 @@ public class ServiceOwnerPrettyNamesTests
 
     private static string GetPrettyName(string transportTypeName)
     {
-        var prettyNamesType = typeof(ServiceOwnerContractsGenerator).Assembly
-            .GetType("Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.SourceGenerator.ServiceOwnerPrettyNames");
-
-        prettyNamesType.Should().NotBeNull();
-
-        var tryGetPrettyNameMethod = prettyNamesType!
-            .GetMethod("TryGetPrettyName", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-
-        tryGetPrettyNameMethod.Should().NotBeNull();
-
-        object?[] arguments = [transportTypeName, null];
-        ServiceOwnerPrettyNames.TryGetPrettyName()
-        var success = (bool)tryGetPrettyNameMethod!.Invoke(null, arguments)!;
+        var success = ServiceOwnerPrettyNames.TryGetPrettyName(transportTypeName, out var prettyName);
 
         success.Should().BeTrue($"'{transportTypeName}' should have a pretty-name mapping");
-        arguments[1].Should().BeOfType<string>();
+        prettyName.Should().BeOfType<string>();
 
-        return (string)arguments[1]!;
+        return prettyName;
     }
 
     private sealed record TransportType(string Name, ImmutableArray<TypeSyntax> PropertyTypes);

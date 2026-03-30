@@ -15,4 +15,8 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" PrivateAssets="all" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.Architecture.Tests" />
+    </ItemGroup>
+
 </Project>

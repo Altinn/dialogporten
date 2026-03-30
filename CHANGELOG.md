@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.111.0](https://github.com/Altinn/dialogporten/compare/v1.110.5...v1.111.0) (2026-03-30)
+
+
+### Features
+
+* **dialoglookup:** Add minimum authentication level to service resource lookup ([#3695](https://github.com/Altinn/dialogporten/issues/3695)) ([5acfe46](https://github.com/Altinn/dialogporten/commit/5acfe46adf38027546a478fe4154f59588bf3b1a))
+* **dialoglookup:** Add title to EU DTO ([#3710](https://github.com/Altinn/dialogporten/issues/3710)) ([79f98db](https://github.com/Altinn/dialogporten/commit/79f98dbe60399a029cc3aa9bfbf9ff88cb367d80))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunitv3 to 31.13.5 ([#3705](https://github.com/Altinn/dialogporten/issues/3705)) ([06f8b4d](https://github.com/Altinn/dialogporten/commit/06f8b4da457eccdcac5bebadd39d4ba3a59781f9))
+* **deps:** update nginx docker tag to v1.29.6 ([#3706](https://github.com/Altinn/dialogporten/issues/3706)) ([c543e89](https://github.com/Altinn/dialogporten/commit/c543e89fdbaf6e7621fc00981f7c5fbcf8218dc9))
+
 ## [1.110.5](https://github.com/Altinn/dialogporten/compare/v1.110.4...v1.110.5) (2026-03-26)
 
 

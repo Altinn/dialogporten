@@ -28,9 +28,11 @@ internal sealed class FeatureMetricServiceResourceCache : IFeatureMetricServiceR
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(resourceRegistry);
 
-        _cache = cacheProvider.GetCache(nameof(IFeatureMetricServiceResourceCache)) ??
-                 throw new ArgumentNullException(nameof(cacheProvider));
+        var cache = cacheProvider.GetCache(nameof(IFeatureMetricServiceResourceCache));
+        ArgumentNullException.ThrowIfNull(cache);
+
         _db = db;
+        _cache = cache;
         _resourceRegistry = resourceRegistry;
     }
 

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using FluentValidation.Results;
@@ -93,6 +94,12 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             request.AcceptedLanguages,
             cancellationToken);
 
+        var title = IdentifierLookupTitleResolver.ResolveEndUserTitle(
+            dialogData,
+            authorization.Evidence.CurrentAuthenticationLevel,
+            serviceResource.MinimumAuthenticationLevel);
+        title.PruneLocalizations(request.AcceptedLanguages);
+
         return new EndUserIdentifierLookupDto
         {
             DialogId = dialogData.DialogId,
@@ -100,6 +107,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             Party = dialogData.Party,
             ServiceResource = serviceResource,
             ServiceOwner = serviceOwner,
+            Title = title,
             AuthorizationEvidence = authorization.Evidence
         };
     }

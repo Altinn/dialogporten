@@ -505,6 +505,13 @@
           },
           "serviceResource": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceResource"
+          },
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"

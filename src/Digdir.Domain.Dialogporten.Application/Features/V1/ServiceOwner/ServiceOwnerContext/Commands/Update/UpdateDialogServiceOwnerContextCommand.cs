@@ -35,9 +35,13 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
         IUnitOfWork unitOfWork,
         IDataLoaderContext dataLoaderContext, IMapper mapper)
     {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(dataLoaderContext);
+        ArgumentNullException.ThrowIfNull(mapper);
+
+        _unitOfWork = unitOfWork;
+        _dataLoaderContext = dataLoaderContext;
+        _mapper = mapper;
     }
 
     public async Task<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,

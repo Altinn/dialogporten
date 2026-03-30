@@ -31,10 +31,18 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         ILogger<PartyNameRegistryClient> logger,
         IOptionsMonitor<ApplicationSettings> applicationSettings)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _cache = cacheProvider.GetCache(nameof(NameRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+
+        var cache = cacheProvider.GetCache(nameof(NameRegistry));
+        ArgumentNullException.ThrowIfNull(cache);
+
+        _client = client;
+        _logger = logger;
+        _cache = cache;
+        _applicationSettings = applicationSettings;
     }
 
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>

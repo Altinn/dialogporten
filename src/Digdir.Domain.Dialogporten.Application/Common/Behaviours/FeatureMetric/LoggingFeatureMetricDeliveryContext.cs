@@ -14,8 +14,11 @@ internal sealed partial class LoggingFeatureMetricDeliveryContext : IFeatureMetr
         ILogger<LoggingFeatureMetricDeliveryContext> logger,
         IHostEnvironment? hostEnvironment = null)
     {
-        _recorder = recorder ?? throw new ArgumentNullException(nameof(recorder));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(recorder);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _recorder = recorder;
+        _logger = logger;
         _hostEnvironment = hostEnvironment;
     }
 

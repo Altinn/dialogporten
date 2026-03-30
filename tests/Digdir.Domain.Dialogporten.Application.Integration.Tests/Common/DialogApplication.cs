@@ -343,8 +343,11 @@ internal sealed class TestFeatureMetricServiceResourceCache : IFeatureMetricServ
 
     public TestFeatureMetricServiceResourceCache(IDialogDbContext db, IResourceRegistry resourceRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+
+        _db = db;
+        _resourceRegistry = resourceRegistry;
     }
 
     public async Task<ServiceResourceInformation?> GetServiceResource(Guid dialogId, CancellationToken cancellationToken)

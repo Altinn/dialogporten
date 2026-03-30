@@ -158,9 +158,13 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         IAltinnAuthorization altinnAuthorization,
         IDialogSearchRepository searchRepository)
     {
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(searchRepository);
+
+        _userResourceRegistry = userResourceRegistry;
+        _altinnAuthorization = altinnAuthorization;
+        _searchRepository = searchRepository;
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)

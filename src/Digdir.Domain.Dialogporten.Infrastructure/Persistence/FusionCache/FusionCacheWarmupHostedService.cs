@@ -17,9 +17,16 @@ internal sealed class FusionCacheWarmupHostedService : IHostedService
         ILogger<FusionCacheWarmupHostedService> logger,
         IConfiguration configuration)
     {
-        _cache = cacheProvider.GetCache(nameof(Altinn.ResourceRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        var cache = cacheProvider.GetCache(nameof(Altinn.ResourceRegistry));
+        ArgumentNullException.ThrowIfNull(cache);
+
+        _cache = cache;
+        _logger = logger;
+        _configuration = configuration;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

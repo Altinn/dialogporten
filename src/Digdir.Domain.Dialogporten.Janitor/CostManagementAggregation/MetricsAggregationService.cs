@@ -13,8 +13,11 @@ public sealed partial class MetricsAggregationService
 
     public MetricsAggregationService(ILogger<MetricsAggregationService> logger, CostCoefficients costCoefficients)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _costCoefficients = costCoefficients ?? throw new ArgumentNullException(nameof(costCoefficients));
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(costCoefficients);
+
+        _logger = logger;
+        _costCoefficients = costCoefficients;
     }
 
     public List<AggregatedCostMetricsRecord> AggregateFeatureMetrics(List<CostMetricRecord> rawMetrics)

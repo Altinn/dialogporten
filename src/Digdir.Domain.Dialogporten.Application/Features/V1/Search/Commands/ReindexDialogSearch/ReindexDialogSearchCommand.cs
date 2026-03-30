@@ -34,8 +34,11 @@ internal sealed partial class ReindexDialogSearchCommandHandler : IRequestHandle
         IServiceScopeFactory scopeFactory,
         ILogger<ReindexDialogSearchCommandHandler> logger)
     {
-        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(scopeFactory);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _scopeFactory = scopeFactory;
+        _logger = logger;
     }
 
     public async Task<ReindexDialogSearchResult> Handle(ReindexDialogSearchCommand request, CancellationToken ct)

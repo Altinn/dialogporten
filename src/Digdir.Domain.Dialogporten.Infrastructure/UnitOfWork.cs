@@ -35,10 +35,15 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         IDomainContext domainContext,
         IApplicationContext applicationContext)
     {
-        _dialogDbContext = dialogDbContext ?? throw new ArgumentNullException(nameof(dialogDbContext));
-        _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
-        _applicationContext = applicationContext ?? throw new ArgumentNullException(nameof(applicationContext));
+        ArgumentNullException.ThrowIfNull(dialogDbContext);
+        ArgumentNullException.ThrowIfNull(transactionTime);
+        ArgumentNullException.ThrowIfNull(domainContext);
+        ArgumentNullException.ThrowIfNull(applicationContext);
+
+        _dialogDbContext = dialogDbContext;
+        _transactionTime = transactionTime;
+        _domainContext = domainContext;
+        _applicationContext = applicationContext;
     }
 
     public IUnitOfWork EnableConcurrencyCheck<TEntity>(

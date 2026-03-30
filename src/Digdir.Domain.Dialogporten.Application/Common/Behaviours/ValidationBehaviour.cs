@@ -14,8 +14,11 @@ internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavi
 
     public ValidationBehaviour(IEnumerable<IValidator<TRequest>> validators, IDataLoaderContext dataLoaderContext)
     {
-        _validators = validators ?? throw new ArgumentNullException(nameof(validators));
-        _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
+        ArgumentNullException.ThrowIfNull(validators);
+        ArgumentNullException.ThrowIfNull(dataLoaderContext);
+
+        _validators = validators;
+        _dataLoaderContext = dataLoaderContext;
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)

@@ -57,14 +57,24 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         ISystemLabelAdder systemLabelAdder
     )
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _serviceResourceAuthorizer = serviceResourceAuthorizer ?? throw new ArgumentNullException(nameof(serviceResourceAuthorizer));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _dialogTransmissionAppender = dialogTransmissionAppender ?? throw new ArgumentNullException(nameof(dialogTransmissionAppender));
-        _transmissionHierarchyValidator = transmissionHierarchyValidator ?? throw new ArgumentNullException(nameof(transmissionHierarchyValidator));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(domainContext);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(serviceResourceAuthorizer);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(dialogTransmissionAppender);
+        ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
+        ArgumentNullException.ThrowIfNull(systemLabelAdder);
+
+        _db = db;
+        _domainContext = domainContext;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
+        _serviceResourceAuthorizer = serviceResourceAuthorizer;
+        _userResourceRegistry = userResourceRegistry;
+        _dialogTransmissionAppender = dialogTransmissionAppender;
+        _transmissionHierarchyValidator = transmissionHierarchyValidator;
         _systemLabelAdder = systemLabelAdder;
     }
 

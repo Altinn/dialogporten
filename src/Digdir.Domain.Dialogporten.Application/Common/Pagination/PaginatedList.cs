@@ -29,10 +29,12 @@ public sealed class PaginatedList<T>
 
     public PaginatedList(IEnumerable<T> items, bool hasNextPage, string? @continue, string orderBy)
     {
+        ArgumentNullException.ThrowIfNull(items);
+
         ContinuationToken = @continue;
         HasNextPage = hasNextPage;
         OrderBy = orderBy;
-        Items = items?.ToList() ?? throw new ArgumentNullException(nameof(items));
+        Items = items.ToList();
     }
 
     /// <summary>

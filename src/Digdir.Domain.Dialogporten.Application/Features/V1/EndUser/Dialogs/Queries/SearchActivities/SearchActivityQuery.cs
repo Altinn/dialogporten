@@ -33,9 +33,13 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
         IMapper mapper,
         IAltinnAuthorization altinnAuthorization)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+
+        _db = db;
+        _mapper = mapper;
+        _altinnAuthorization = altinnAuthorization;
     }
 
     public async Task<SearchActivityResult> Handle(SearchActivityQuery request, CancellationToken cancellationToken)

@@ -4,7 +4,7 @@ param keyvaultName string
 @description('Array of principal IDs to assign the Key Vault Secrets User role to')
 param principalIds array
 
-resource keyvault 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+resource keyvault 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: keyvaultName
 }
 

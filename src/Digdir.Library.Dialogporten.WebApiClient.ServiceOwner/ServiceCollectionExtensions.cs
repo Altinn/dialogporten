@@ -2,6 +2,7 @@ using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.V1;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,7 +72,7 @@ public static class ServiceCollectionExtensions
 
     private static void RegisterFacade(IServiceCollection services)
     {
-        services.TryAddTransient<IDialogportenServiceOwnerV1, DialogportenServiceOwnerV1>();
-        services.TryAddTransient<IDialogportenServiceOwnerClient, DialogportenServiceOwnerClient>();
+        services.TryAddTransient<IServiceOwnerV1, ServiceOwnerV1>();
+        services.TryAddTransient<IServiceOwnerClient, ServiceOwnerClient>();
     }
 }

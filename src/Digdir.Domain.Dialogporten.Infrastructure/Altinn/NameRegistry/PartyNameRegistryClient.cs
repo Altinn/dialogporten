@@ -37,7 +37,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         ArgumentNullException.ThrowIfNull(applicationSettings);
 
         var cache = cacheProvider.GetCache(nameof(NameRegistry));
-        ArgumentNullException.ThrowIfNull(cache, nameof(cacheProvider));
+        ArgumentNullException.ThrowIfNull(cache);
 
         _client = client;
         _logger = logger;

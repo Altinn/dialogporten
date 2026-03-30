@@ -17,15 +17,25 @@ using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class DialogSearchRepository(
-    DialogDbContext dbContext,
-    NpgsqlDataSource dataSource,
-    ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector) : IDialogSearchRepository
+internal sealed class DialogSearchRepository : IDialogSearchRepository
 {
-    private readonly DialogDbContext _db = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
-    private readonly ISearchStrategySelector<EndUserSearchContext> _endUserSearchStrategySelector =
-        endUserSearchStrategySelector ?? throw new ArgumentNullException(nameof(endUserSearchStrategySelector));
+    private readonly DialogDbContext _db;
+    private readonly NpgsqlDataSource _dataSource;
+    private readonly ISearchStrategySelector<EndUserSearchContext> _endUserSearchStrategySelector;
+
+    public DialogSearchRepository(
+        DialogDbContext dbContext,
+        NpgsqlDataSource dataSource,
+        ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector)
+    {
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(dataSource);
+        ArgumentNullException.ThrowIfNull(endUserSearchStrategySelector);
+
+        _db = dbContext;
+        _dataSource = dataSource;
+        _endUserSearchStrategySelector = endUserSearchStrategySelector;
+    }
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {

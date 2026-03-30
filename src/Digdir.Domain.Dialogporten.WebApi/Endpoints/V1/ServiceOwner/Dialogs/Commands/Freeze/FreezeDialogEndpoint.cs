@@ -8,9 +8,16 @@ using AuthorizationPolicy = Digdir.Domain.Dialogporten.WebApi.Common.Authorizati
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Freeze;
 
-public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialogRequest>
+public sealed class FreezeDialogEndpoint : Endpoint<FreezeDialogRequest>
 {
-    private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+    private readonly ISender _sender;
+
+    public FreezeDialogEndpoint(ISender sender)
+    {
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
+    }
 
     public override void Configure()
     {
@@ -29,6 +36,7 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
             StatusCodes.Status410Gone,
             StatusCodes.Status412PreconditionFailed));
     }
+
     public override async Task HandleAsync(FreezeDialogRequest req, CancellationToken ct)
     {
         var command = new FreezeDialogCommand
@@ -50,7 +58,6 @@ public sealed class FreezeDialogEndpoint(ISender sender) : Endpoint<FreezeDialog
             concurrencyError => this.PreconditionFailed(ct),
             conflict => this.ConflictAsync(conflict, ct));
     }
-
 }
 
 public sealed class FreezeDialogRequest

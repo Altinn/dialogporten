@@ -4,11 +4,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 
-internal sealed class PartyDrivenQueryStrategy(ILogger<PartyDrivenQueryStrategy> logger)
-    : IQueryStrategy<EndUserSearchContext>
+internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchContext>
 {
     internal const string StrategyName = "PartyDriven";
-    private readonly ILogger<PartyDrivenQueryStrategy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<PartyDrivenQueryStrategy> _logger;
+
+    public PartyDrivenQueryStrategy(ILogger<PartyDrivenQueryStrategy> logger)
+    {
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _logger = logger;
+    }
 
     public string Name => StrategyName;
 

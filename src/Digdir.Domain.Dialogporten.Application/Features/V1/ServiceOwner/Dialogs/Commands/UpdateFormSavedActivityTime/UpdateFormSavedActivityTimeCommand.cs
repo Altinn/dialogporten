@@ -28,12 +28,26 @@ public sealed record UpdateFormSavedActivityTimeSuccess(Guid Revision);
 [GenerateOneOf]
 public sealed partial class UpdateFormSavedActivityTimeResult : OneOfBase<UpdateFormSavedActivityTimeSuccess, Forbidden, DomainError, EntityNotFound, ConcurrencyError, Conflict>;
 
-internal sealed class BumpFormSavedCommandHandler(IDialogDbContext db, IUnitOfWork unitOfWork, IUserResourceRegistry userResourceRegistry)
+internal sealed class BumpFormSavedCommandHandler
     : IRequestHandler<UpdateFormSavedActivityTimeCommand, UpdateFormSavedActivityTimeResult>
 {
-    private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
-    private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-    private readonly IUserResourceRegistry _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+    private readonly IDialogDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserResourceRegistry _userResourceRegistry;
+
+    public BumpFormSavedCommandHandler(
+        IDialogDbContext db,
+        IUnitOfWork unitOfWork,
+        IUserResourceRegistry userResourceRegistry)
+    {
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _db = db;
+        _unitOfWork = unitOfWork;
+        _userResourceRegistry = userResourceRegistry;
+    }
 
     public async Task<UpdateFormSavedActivityTimeResult> Handle(UpdateFormSavedActivityTimeCommand request, CancellationToken cancellationToken)
     {

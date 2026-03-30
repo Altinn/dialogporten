@@ -5,10 +5,17 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.DialogSearch;
 
-internal sealed class DialogSearchIndexer(IDialogSearchRepository db) : INotificationHandler<DialogCreatedDomainEvent>, INotificationHandler<DialogUpdatedDomainEvent>
+internal sealed class DialogSearchIndexer : INotificationHandler<DialogCreatedDomainEvent>, INotificationHandler<DialogUpdatedDomainEvent>
 {
     private static readonly AsyncKeyedLocker<Guid> Semaphore = new();
-    private readonly IDialogSearchRepository _db = db ?? throw new ArgumentNullException(nameof(db));
+    private readonly IDialogSearchRepository _db;
+
+    public DialogSearchIndexer(IDialogSearchRepository db)
+    {
+        ArgumentNullException.ThrowIfNull(db);
+
+        _db = db;
+    }
 
     public Task Handle(DialogCreatedDomainEvent notification, CancellationToken cancellationToken) =>
         UpdateIndex(notification.DialogId, cancellationToken);

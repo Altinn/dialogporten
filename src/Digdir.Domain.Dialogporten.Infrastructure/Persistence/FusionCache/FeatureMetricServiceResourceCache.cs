@@ -9,20 +9,30 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 /// <summary>
 /// FusionCache implementation of IFeatureMetricServiceResourceCache for feature metric service resource caching
 /// </summary>
-internal sealed class FeatureMetricServiceResourceCache(
-    IFusionCacheProvider cacheProvider,
-    IDialogDbContext db,
-    IResourceRegistry resourceRegistry) : IFeatureMetricServiceResourceCache
+internal sealed class FeatureMetricServiceResourceCache : IFeatureMetricServiceResourceCache
 {
     private static readonly AsyncKeyedLocker<string> LockPool = new();
 
-    private readonly IFusionCache _cache = cacheProvider.GetCache(nameof(IFeatureMetricServiceResourceCache)) ??
-                                           throw new ArgumentNullException(nameof(cacheProvider));
-
-    private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
-    private readonly IResourceRegistry _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+    private readonly IFusionCache _cache;
+    private readonly IDialogDbContext _db;
+    private readonly IResourceRegistry _resourceRegistry;
 
     private const string CacheKeyPrefix = "feature-metric-service-resource:";
+
+    public FeatureMetricServiceResourceCache(
+        IFusionCacheProvider cacheProvider,
+        IDialogDbContext db,
+        IResourceRegistry resourceRegistry)
+    {
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+
+        _cache = cacheProvider.GetCache(nameof(IFeatureMetricServiceResourceCache)) ??
+                 throw new ArgumentNullException(nameof(cacheProvider));
+        _db = db;
+        _resourceRegistry = resourceRegistry;
+    }
 
     public async Task<ServiceResourceInformation?> GetServiceResource(Guid dialogId, CancellationToken cancellationToken)
     {

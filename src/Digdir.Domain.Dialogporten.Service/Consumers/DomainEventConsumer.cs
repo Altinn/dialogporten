@@ -4,11 +4,19 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.Service.Consumers;
 
-public sealed class DomainEventConsumer<THandler, TEvent>(THandler handler) : IConsumer<TEvent>
+public sealed class DomainEventConsumer<THandler, TEvent> : IConsumer<TEvent>
     where THandler : INotificationHandler<TEvent>
     where TEvent : class, IDomainEvent
 {
-    private readonly THandler _handler = handler ?? throw new ArgumentNullException(nameof(handler));
+    private readonly THandler _handler;
+
+    public DomainEventConsumer(THandler handler)
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+
+        _handler = handler;
+    }
+
     public Task Consume(ConsumeContext<TEvent> context) => _handler.Handle(context.Message, context.CancellationToken);
 }
 

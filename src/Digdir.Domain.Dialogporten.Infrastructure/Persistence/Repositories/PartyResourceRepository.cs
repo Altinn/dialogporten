@@ -39,10 +39,12 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
         ArgumentNullException.ThrowIfNull(applicationSettings);
         ArgumentNullException.ThrowIfNull(cacheProvider);
 
+        var cache = cacheProvider.GetCache(nameof(IPartyResourceReferenceRepository));
+        ArgumentNullException.ThrowIfNull(cache);
+
         _dataSource = dataSource;
         _applicationSettings = applicationSettings;
-        _cache = cacheProvider.GetCache(nameof(IPartyResourceReferenceRepository)) ??
-                 throw new ArgumentNullException(nameof(cacheProvider));
+        _cache = cache;
     }
 
     public async Task<Dictionary<string, HashSet<string>>> GetReferencedResourcesByParty(

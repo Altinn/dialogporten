@@ -16,7 +16,7 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
         ArgumentNullException.ThrowIfNull(cacheProvider);
 
         var cache = cacheProvider.GetCache(nameof(OrganizationRegistry));
-        ArgumentNullException.ThrowIfNull(cache, nameof(cacheProvider));
+        ArgumentNullException.ThrowIfNull(cache);
 
         _client = client;
         _cache = cache;

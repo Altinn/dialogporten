@@ -22,7 +22,7 @@ internal sealed class FusionCacheWarmupHostedService : IHostedService
         ArgumentNullException.ThrowIfNull(configuration);
 
         var cache = cacheProvider.GetCache(nameof(Altinn.ResourceRegistry));
-        ArgumentNullException.ThrowIfNull(cache, nameof(cacheProvider));
+        ArgumentNullException.ThrowIfNull(cache);
 
         _cache = cache;
         _logger = logger;

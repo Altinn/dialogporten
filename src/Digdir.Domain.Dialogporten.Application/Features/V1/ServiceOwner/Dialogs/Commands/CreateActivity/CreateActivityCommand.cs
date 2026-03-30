@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
@@ -58,7 +57,6 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
     private readonly IUser _user;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
-    private readonly IMapper _mapper;
     private readonly ISystemLabelAdder _systemLabelAdder;
 
     public CreateActivityCommandHandler(
@@ -68,7 +66,6 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         IUser user,
         IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        IMapper mapper,
         ISystemLabelAdder systemLabelAdder)
     {
         _domainContext = domainContext;
@@ -76,7 +73,6 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         _db = db;
         _user = user;
         _userResourceRegistry = userResourceRegistry;
-        _mapper = mapper;
         _systemLabelAdder = systemLabelAdder;
         _serviceResourceAuthorizer = serviceResourceAuthorizer;
     }
@@ -99,7 +95,7 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
             return new Forbidden("User cannot modify frozen dialog");
         }
 
-        var newActivity = _mapper.Map<DialogActivity>(request.Activity);
+        var newActivity = request.Activity.ToDialogActivity();
         newActivity.Id = newActivity.EnsureId();
         newActivity.DialogId = dialog.Id;
 

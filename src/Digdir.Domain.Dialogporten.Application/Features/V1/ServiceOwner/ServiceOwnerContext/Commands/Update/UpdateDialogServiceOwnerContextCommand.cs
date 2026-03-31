@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
@@ -29,19 +28,16 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDataLoaderContext _dataLoaderContext;
-    private readonly IMapper _mapper;
 
     public UpdateDialogServiceOwnerContextCommandHandler(
         IUnitOfWork unitOfWork,
-        IDataLoaderContext dataLoaderContext, IMapper mapper)
+        IDataLoaderContext dataLoaderContext)
     {
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(dataLoaderContext);
-        ArgumentNullException.ThrowIfNull(mapper);
 
         _unitOfWork = unitOfWork;
         _dataLoaderContext = dataLoaderContext;
-        _mapper = mapper;
     }
 
     public async Task<UpdateDialogServiceOwnerContextResult> Handle(UpdateDialogServiceOwnerContextCommand request,
@@ -63,7 +59,7 @@ internal sealed class UpdateDialogServiceOwnerContextCommandHandler :
             .Merge(request.Dto.ServiceOwnerLabels,
                 destinationKeySelector: x => x.Value,
                 sourceKeySelector: x => x.Value,
-                create: _mapper.Map<List<DialogServiceOwnerLabel>>,
+                create: x => x.Select(y => y.ToEntity()),
                 delete: DeleteDelegate.Default,
                 comparer: StringComparer.InvariantCultureIgnoreCase);
 

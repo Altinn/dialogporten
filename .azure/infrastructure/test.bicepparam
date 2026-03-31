@@ -27,8 +27,8 @@ param appInsightsSku = {
   name: 'PerGB2018'
 }
 param postgresConfiguration = {
-  serverNameStem: 'postgres'
-  version: '16'
+  serverNameStem: 'postgres2'
+  version: '18'
   sku: {
     name: 'Standard_B2s'
     tier: 'Burstable'
@@ -39,9 +39,8 @@ param postgresConfiguration = {
     type: 'Premium_LRS'
     tier: 'P4'
   }
-  // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: false
-  enableQueryPerformanceInsight: true
+  enableQueryPerformanceInsight: false
   backupRetentionDays: 7
   availabilityZone: '1'
   enableBackupVault: false

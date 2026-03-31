@@ -26,6 +26,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.WebAPI.ServiceOwner.E2E.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <AdditionalFiles Include="Features/V1/ServiceOwner/RefitterInterface.cs" />
         <PackageReference Include="Refit" Version="10.0.1" />
         <PackageReference Include="Refit.HttpClientFactory" Version="10.0.1" />

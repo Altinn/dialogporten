@@ -251,14 +251,20 @@ public sealed class ServiceOwnerContractsGenerator : IIncrementalGenerator
 
             builder.AppendLine($"public partial class {prettyName}");
             builder.AppendLine("{");
-            foreach (var property in typeModel.Properties)
+            for (var index = 0; index < typeModel.Properties.Length; index++)
             {
+                var property = typeModel.Properties[index];
                 if (property.JsonPropertyName is not null)
                 {
                     builder.AppendLine($"    [JsonPropertyName(\"{property.JsonPropertyName}\")]");
                 }
 
                 builder.AppendLine($"    public {RewriteType(property.TypeSyntax, prettyNames)} {property.Name} {{ get; set; }}");
+
+                if (index < typeModel.Properties.Length - 1)
+                {
+                    builder.AppendLine();
+                }
             }
 
             builder.AppendLine("}");

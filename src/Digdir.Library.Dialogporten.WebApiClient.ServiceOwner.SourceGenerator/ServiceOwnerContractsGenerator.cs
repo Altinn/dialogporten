@@ -236,6 +236,7 @@ public sealed class ServiceOwnerContractsGenerator : IIncrementalGenerator
 
             if (typeModel.Kind == TransportTypeKind.Enum)
             {
+                builder.AppendLine($"[JsonConverter(typeof(JsonStringEnumConverter<{prettyName}>))]");
                 builder.AppendLine($"public enum {prettyName}");
                 builder.AppendLine("{");
                 for (var index = 0; index < typeModel.EnumMembers.Length; index++)

@@ -8,20 +8,21 @@ param sourceKeyVaultSubscriptionId = readEnvironmentVariable('AZURE_SOURCE_KEY_V
 param sourceKeyVaultResourceGroup = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_RESOURCE_GROUP')
 param sourceKeyVaultName = readEnvironmentVariable('AZURE_SOURCE_KEY_VAULT_NAME')
 
-// After migrations are complete, remove this file and let the current (burstable, SSDv1-tier) server
-// remain the canonical "test"-server.
+// After migration is complete, copy this postgresConfiguration block into test.bicepparam
+// to make postgres2 the canonical server, then remove this file.
+// AT23 stays on Burstable / Premium_LRS (SSDv1) to keep costs down.
 param postgresConfiguration = {
   serverNameStem: 'postgres2'
   version: '18'
   sku: {
-    name: 'Standard_E4ads_v5'
-    tier: 'MemoryOptimized'
+    name: 'Standard_B2s'
+    tier: 'Burstable'
   }
   storage: {
     storageSizeGB: 32
-    type: 'PremiumV2_LRS'
-    iops: 3000
-    throughput: 125
+    autoGrow: 'Enabled'
+    type: 'Premium_LRS'
+    tier: 'P4'
   }
   enableIndexTuning: false
   enableQueryPerformanceInsight: false

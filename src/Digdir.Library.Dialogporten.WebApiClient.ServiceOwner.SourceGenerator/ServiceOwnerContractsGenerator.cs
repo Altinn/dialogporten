@@ -126,7 +126,10 @@ public sealed class ServiceOwnerContractsGenerator : IIncrementalGenerator
                     ..classDeclaration.Members
                         .OfType<PropertyDeclarationSyntax>()
                         .Where(static property => property.Modifiers.Any(SyntaxKind.PublicKeyword))
-                        .Select(static property => new PropertyModel(property.Identifier.ValueText, property.Type))
+                        .Select(static property => new PropertyModel(
+                            property.Identifier.ValueText,
+                            property.Type,
+                            GetJsonPropertyName(property)))
                 ],
                 []),
             EnumDeclarationSyntax enumDeclaration => new(
@@ -222,6 +225,7 @@ public sealed class ServiceOwnerContractsGenerator : IIncrementalGenerator
         builder.AppendLine("#pragma warning disable CS0618, CS8601, CS8602, CS8603, CS8604, CS8618, CS8619");
         builder.AppendLine("using System;");
         builder.AppendLine("using System.Collections.Generic;");
+        builder.AppendLine("using System.Text.Json.Serialization;");
         builder.AppendLine();
         builder.AppendLine($"namespace {ContractNamespace};");
         builder.AppendLine();
@@ -249,6 +253,11 @@ public sealed class ServiceOwnerContractsGenerator : IIncrementalGenerator
             builder.AppendLine("{");
             foreach (var property in typeModel.Properties)
             {
+                if (property.JsonPropertyName is not null)
+                {
+                    builder.AppendLine($"    [JsonPropertyName(\"{property.JsonPropertyName}\")]");
+                }
+
                 builder.AppendLine($"    public {RewriteType(property.TypeSyntax, prettyNames)} {property.Name} {{ get; set; }}");
             }
 
@@ -468,6 +477,39 @@ public sealed class ServiceOwnerContractsGenerator : IIncrementalGenerator
     private static TypeSyntax GetPropertyType(TypeModel typeModel, string propertyName) =>
         typeModel.Properties.First(property => property.Name.Equals(propertyName, StringComparison.Ordinal)).TypeSyntax;
 
+    private static string? GetJsonPropertyName(PropertyDeclarationSyntax property)
+    {
+        foreach (var attribute in property.AttributeLists.SelectMany(static list => list.Attributes))
+        {
+            if (!IsJsonPropertyNameAttribute(attribute.Name))
+            {
+                continue;
+            }
+
+            if (attribute.ArgumentList?.Arguments.FirstOrDefault()?.Expression is not LiteralExpressionSyntax
+                {
+                    RawKind: (int)SyntaxKind.StringLiteralExpression,
+                    Token.ValueText: { } value
+                })
+            {
+                return null;
+            }
+
+            return value;
+        }
+
+        return null;
+    }
+
+    private static bool IsJsonPropertyNameAttribute(NameSyntax attributeName) =>
+        attributeName switch
+        {
+            IdentifierNameSyntax identifierName => identifierName.Identifier.ValueText is "JsonPropertyName" or "JsonPropertyNameAttribute",
+            QualifiedNameSyntax qualifiedName => IsJsonPropertyNameAttribute(qualifiedName.Right),
+            AliasQualifiedNameSyntax aliasQualifiedName => IsJsonPropertyNameAttribute(aliasQualifiedName.Name),
+            _ => false
+        };
+
     private sealed class TransportTypeNameRewriter(ImmutableDictionary<string, string> prettyNames) : CSharpSyntaxRewriter
     {
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node) =>
@@ -510,15 +552,18 @@ public sealed class ServiceOwnerContractsGenerator : IIncrementalGenerator
 
     private sealed class PropertyModel
     {
-        public PropertyModel(string name, TypeSyntax typeSyntax)
+        public PropertyModel(string name, TypeSyntax typeSyntax, string? jsonPropertyName)
         {
             Name = name;
             TypeSyntax = typeSyntax;
+            JsonPropertyName = jsonPropertyName;
         }
 
         public string Name { get; }
 
         public TypeSyntax TypeSyntax { get; }
+
+        public string? JsonPropertyName { get; }
     }
 
     private enum MappingDirection

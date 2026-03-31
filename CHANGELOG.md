@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.111.0](https://github.com/Altinn/dialogporten/compare/v1.110.5...v1.111.0) (2026-03-31)
+
+
+### Features
+
+* **dialoglookup:** Add minimum authentication level to service resource lookup ([#3695](https://github.com/Altinn/dialogporten/issues/3695)) ([5acfe46](https://github.com/Altinn/dialogporten/commit/5acfe46adf38027546a478fe4154f59588bf3b1a))
+* **dialoglookup:** Add title to EU DTO ([#3710](https://github.com/Altinn/dialogporten/issues/3710)) ([79f98db](https://github.com/Altinn/dialogporten/commit/79f98dbe60399a029cc3aa9bfbf9ff88cb367d80))
+
+
+### Bug Fixes
+
+* GetServiceOwnerLabels generates untyped refit response ([#3704](https://github.com/Altinn/dialogporten/issues/3704)) ([7f10efb](https://github.com/Altinn/dialogporten/commit/7f10efba809796c6dc2c55fb10fdd6901129fe5a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunitv3 to 31.13.5 ([#3705](https://github.com/Altinn/dialogporten/issues/3705)) ([06f8b4d](https://github.com/Altinn/dialogporten/commit/06f8b4da457eccdcac5bebadd39d4ba3a59781f9))
+* **deps:** update nginx docker tag to v1.29.6 ([#3706](https://github.com/Altinn/dialogporten/issues/3706)) ([c543e89](https://github.com/Altinn/dialogporten/commit/c543e89fdbaf6e7621fc00981f7c5fbcf8218dc9))
+* **infra:** promote postgres2 as canonical PostgreSQL server for prod ([#3708](https://github.com/Altinn/dialogporten/issues/3708)) ([76d89ad](https://github.com/Altinn/dialogporten/commit/76d89ad9c57c533f58ca1ade93fd3078ed8988d4))
+* **infra:** Promote postgres2 as canonical PostgreSQL server for test ([#3715](https://github.com/Altinn/dialogporten/issues/3715)) ([15d3b6b](https://github.com/Altinn/dialogporten/commit/15d3b6b97be33da857bb49265a3e514de59e2a18))
+
 ## [1.110.5](https://github.com/Altinn/dialogporten/compare/v1.110.4...v1.110.5) (2026-03-26)
 
 

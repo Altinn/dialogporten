@@ -17,7 +17,6 @@ internal sealed class ServiceDrivenQueryStrategy : IQueryStrategy<EndUserSearchC
 
     public string Name => "ServiceDriven";
 
-    // Service-driven is always preferred when branching logic is enabled.
     public int Score(EndUserSearchContext context)
     {
         _ = context;

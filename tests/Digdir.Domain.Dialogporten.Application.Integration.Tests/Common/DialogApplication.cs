@@ -148,8 +148,8 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenSystemLabelMaskQueryStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
@@ -195,7 +195,7 @@ public class DialogApplication : IAsyncLifetime
                 {
                     UseAltinnAutoAuthorizedPartiesQueryParameters = true,
                     UseCorrectPersonNameOrdering = true,
-                    UseBranchingLogicForDialogSearch = true
+                    UseSystemLabelsMaskForEndUserDialogSearch = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

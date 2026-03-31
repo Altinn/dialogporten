@@ -25,21 +25,21 @@ app.MapPost("/dialogTokenVerify", (
         : Results.Unauthorized());
 
 app.MapGet("/dialog/{dialogId:Guid}", async (
-        [FromServices] IServiceOwnerClient client,
+        [FromServices] IServiceOwnerClient serviceOwnerClient,
         [FromRoute] Guid dialogId,
         CancellationToken cancellationToken) =>
     {
-        var response = await client.V1.GetDialogAsync(dialogId, cancellationToken: cancellationToken);
+        var response = await serviceOwnerClient.V1.GetDialogAsync(dialogId, cancellationToken: cancellationToken);
         return response.IsSuccessStatusCode
             ? Results.Ok(response.Content)
             : Results.StatusCode((int)response.StatusCode);
     });
 
 app.MapGet("/dialogs", async (
-        [FromServices] IServiceOwnerClient client,
+        [FromServices] IServiceOwnerClient serviceOwnerClient,
         CancellationToken cancellationToken) =>
     {
-        var response = await client.V1.ListDialogsAsync(cancellationToken: cancellationToken);
+        var response = await serviceOwnerClient.V1.ListDialogsAsync(cancellationToken: cancellationToken);
         return response.IsSuccessStatusCode
             ? Results.Ok(response.Content)
             : Results.StatusCode((int)response.StatusCode);

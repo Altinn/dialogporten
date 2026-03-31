@@ -234,10 +234,10 @@ internal static class PostgresFormattableStringBuilderExtensions
                 throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids must be greater than zero.");
             }
 
-  if (systemLabelId > 15)                                                                                                                                                                                               
-  {
-      throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids above 15 are not supported by the bitmask.");                                                                              
-  }   
+            if (systemLabelId > 15)
+            {
+                throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids above 15 are not supported by the bitmask.");
+            }
 
             requiredMask |= (short)(1 << (systemLabelId - 1));
         }

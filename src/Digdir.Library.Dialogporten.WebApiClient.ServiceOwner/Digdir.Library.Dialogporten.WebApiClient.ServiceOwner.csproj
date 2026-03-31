@@ -10,6 +10,7 @@
         <BuildInParallel>false</BuildInParallel>
         <ImplicitUsings>true</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <UserSecretsId>ceba3904-b2c0-4acd-9571-f5d2dd523654</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(Configuration)' == 'Release'">

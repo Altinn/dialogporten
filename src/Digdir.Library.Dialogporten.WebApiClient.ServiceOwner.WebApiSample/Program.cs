@@ -29,7 +29,7 @@ app.MapGet("/dialog/{dialogId:Guid}", async (
         [FromRoute] Guid dialogId,
         CancellationToken cancellationToken) =>
     {
-        var response = await serviceOwnerClient.V1.GetDialogAsync(dialogId, cancellationToken: cancellationToken);
+        var response = await serviceOwnerClient.V1.GetDialog(dialogId, cancellationToken: cancellationToken);
         return response.IsSuccessStatusCode
             ? Results.Ok(response.Content)
             : Results.StatusCode((int)response.StatusCode);
@@ -39,7 +39,7 @@ app.MapGet("/dialogs", async (
         [FromServices] IServiceOwnerClient serviceOwnerClient,
         CancellationToken cancellationToken) =>
     {
-        var response = await serviceOwnerClient.V1.ListDialogsAsync(cancellationToken: cancellationToken);
+        var response = await serviceOwnerClient.V1.ListDialogs(cancellationToken: cancellationToken);
         return response.IsSuccessStatusCode
             ? Results.Ok(response.Content)
             : Results.StatusCode((int)response.StatusCode);

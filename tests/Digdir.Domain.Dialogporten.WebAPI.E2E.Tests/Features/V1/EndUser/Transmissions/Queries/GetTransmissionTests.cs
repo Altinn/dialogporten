@@ -36,9 +36,11 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
     public async Task Get_Transmission_Verify_Snapshot()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(
+            TransmissionTestData.AddComplexTransmissions);
         var dialog = await Fixture.EnduserApi.GetDialog(dialogId);
-        var transmissionId = dialog.Content!.Transmissions.First().Id;
+        var transmissionId = dialog.Content!.Transmissions
+            .Single(t => t.RelatedTransmissionId is not null).Id;
 
         // Act
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetTransmissionDialogTransmission(

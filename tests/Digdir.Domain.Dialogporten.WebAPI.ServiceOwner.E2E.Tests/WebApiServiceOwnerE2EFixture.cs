@@ -51,6 +51,7 @@ public sealed class WebApiServiceOwnerE2EFixture : E2EFixtureBase
         }
 
         services.AddTransient<IServiceOwnerV1, ServiceOwnerV1>();
+        services.Decorate<IServiceOwnerV1, EphemeralServiceOwnerV1Decorator>();
         services.AddTransient<IServiceOwnerClient, ServiceOwnerClient>();
     }
 

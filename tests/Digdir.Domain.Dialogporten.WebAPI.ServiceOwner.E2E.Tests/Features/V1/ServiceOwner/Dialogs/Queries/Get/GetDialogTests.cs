@@ -12,7 +12,7 @@ public class GetDialogTests(WebApiServiceOwnerE2EFixture fixture) :
     public async Task Get_Dialog_Verify_Snapshot()
     {
         // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var dialogId = await Fixture.ServiceOwnerClient.V1.CreateComplexDialogAsync();
 
         // Act
         var getDialogResult = await Fixture

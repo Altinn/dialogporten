@@ -51,7 +51,7 @@ public class DialogApplication : IAsyncLifetime
     internal static TestAltinnAuthorization AltinnAuthorization { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
-        new PostgreSqlBuilder("postgres:16.11")
+        new PostgreSqlBuilder("postgres:18.2")
         .Build();
 
     public async ValueTask InitializeAsync()

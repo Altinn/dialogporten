@@ -59,7 +59,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   name: last(split(userAssignedIdentityId, '/'))
 }
 
-resource job 'Microsoft.App/jobs@2024-03-01' = {
+resource job 'Microsoft.App/jobs@2025-07-01' = {
   name: name
   location: location
   identity: {

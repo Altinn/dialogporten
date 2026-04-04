@@ -15,7 +15,7 @@ param enableBlobSoftDelete bool = false
 @maxValue(365)
 param blobSoftDeleteRetentionDays int
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' existing = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' existing = {
   name: storageAccountName
 }
 

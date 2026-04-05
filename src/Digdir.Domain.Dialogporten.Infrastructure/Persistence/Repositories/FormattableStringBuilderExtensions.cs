@@ -62,6 +62,20 @@ internal static class PostgresFormattableStringBuilderExtensions
         return queryBuilder;
     }
 
+    internal static PostgresFormattableStringBuilder AppendSystemLabelMaskFilterCondition(
+        this PostgresFormattableStringBuilder queryBuilder,
+        IEnumerable<SystemLabel.Values>? endUserLabels)
+    {
+        if (!TryBuildSystemLabelsMask(endUserLabels, out var requiredMask))
+        {
+            return queryBuilder;
+        }
+
+        return queryBuilder.Append($"""
+            AND (d."SystemLabelsMask" & {requiredMask}::smallint) = {requiredMask}::smallint
+            """);
+    }
+
     internal static PostgresFormattableStringBuilder AppendServiceOwnerLabelFilterCondition(
         this PostgresFormattableStringBuilder queryBuilder,
         IEnumerable<string>? serviceOwnerLabels)
@@ -199,6 +213,36 @@ internal static class PostgresFormattableStringBuilderExtensions
         }
 
         return results.Count > 0;
+    }
+
+    private static bool TryBuildSystemLabelsMask(
+        IEnumerable<SystemLabel.Values>? labels,
+        out short requiredMask)
+    {
+        requiredMask = 0;
+
+        if (labels is null)
+        {
+            return false;
+        }
+
+        foreach (var label in labels.Distinct())
+        {
+            var systemLabelId = (int)label;
+            if (systemLabelId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids must be greater than zero.");
+            }
+
+            if (systemLabelId > 15)
+            {
+                throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids above 15 are not supported by the bitmask.");
+            }
+
+            requiredMask |= (short)(1 << (systemLabelId - 1));
+        }
+
+        return requiredMask != 0;
     }
 
     private static PostgresFormattableStringBuilder CreateLessThanGreaterThanPart(this PostgresFormattableStringBuilder builder, OrderPart orderPart) =>

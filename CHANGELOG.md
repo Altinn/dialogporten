@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.111.1](https://github.com/Altinn/dialogporten/compare/v1.111.0...v1.111.1) (2026-04-05)
+
+
+### Miscellaneous Chores
+
+* **deps:** update azure/cli action to v3 ([#3720](https://github.com/Altinn/dialogporten/issues/3720)) ([91df86e](https://github.com/Altinn/dialogporten/commit/91df86eb67ed125c2b6269d807f6951df97f5fee))
+* **deps:** update dotnet monorepo ([#3723](https://github.com/Altinn/dialogporten/issues/3723)) ([829562a](https://github.com/Altinn/dialogporten/commit/829562a7de4debf7217b7a8f851fa6a23f04fe8b))
+* **deps:** update grafana/loki docker tag to v3.7.1 ([#3726](https://github.com/Altinn/dialogporten/issues/3726)) ([e5d1509](https://github.com/Altinn/dialogporten/commit/e5d150998085b2e26f2297215f9c321c56d4a9f9))
+* **deps:** update nginx docker tag to v1.29.7 ([#3717](https://github.com/Altinn/dialogporten/issues/3717)) ([41116ec](https://github.com/Altinn/dialogporten/commit/41116ec31c889dc814740b820fe78813c75c063d))
+* **deps:** update opentelemetry-dotnet monorepo to 1.15.1 ([#3725](https://github.com/Altinn/dialogporten/issues/3725)) ([2655f38](https://github.com/Altinn/dialogporten/commit/2655f383a9f95377176f9503e9e9c8dcf500b84c))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.148.0 ([#3718](https://github.com/Altinn/dialogporten/issues/3718)) ([b06fed3](https://github.com/Altinn/dialogporten/commit/b06fed3db68f77926f369b275ec7d5c26f4ca836))
+* **deps:** update refit monorepo to 10.1.6 ([#3719](https://github.com/Altinn/dialogporten/issues/3719)) ([ad45ba4](https://github.com/Altinn/dialogporten/commit/ad45ba4ead660308f8330e01602ad6471f2933b9))
+
 ## [1.111.0](https://github.com/Altinn/dialogporten/compare/v1.110.5...v1.111.0) (2026-03-31)
 
 

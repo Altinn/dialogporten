@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -27,5 +28,24 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Transmission content was null.");
         content.Should().ContainSingle().Which.Id.Should().Be(transmissionId);
+    }
+
+    [E2EFact]
+    public async Task Search_Transmissions_Verify_Snapshot()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(
+            TransmissionTestData.AddComplexTransmissions);
+
+        // Act
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchTransmissionsDialogTransmission(
+            dialogId,
+            new V1EndUserCommon_AcceptedLanguages(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(response.Content),
+            fileNameSuffix: Fixture.DotnetEnvironment);
     }
 }

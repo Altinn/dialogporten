@@ -1,0 +1,26 @@
+﻿[
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": "uri:dialog-opened",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "seenByEndUserIdHash": null,
+    "transmissionId": null,
+    "type": "DialogOpened"
+  },
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": null,
+    "id": "00000000-0000-0000-0000-000000000000",
+    "seenByEndUserIdHash": null,
+    "transmissionId": null,
+    "type": "Information"
+  },
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": null,
+    "id": "00000000-0000-0000-0000-000000000000",
+    "seenByEndUserIdHash": null,
+    "transmissionId": "00000000-0000-0000-0000-000000000000",
+    "type": "TransmissionOpened"
+  }
+]

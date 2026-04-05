@@ -23,6 +23,9 @@
     <Project Path="src/Digdir.Library.Entity.EntityFrameworkCore/Digdir.Library.Entity.EntityFrameworkCore.csproj" />
   </Folder>
   <Folder Name="/src/Libraries/WebApiClient/">
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.SourceGenerator/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.SourceGenerator.csproj" />
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.WebApiSample/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.WebApiSample.csproj" />
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj" />
     <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.WebApiSample/Digdir.Library.Dialogporten.WebApiClient.WebApiSample.csproj" />
     <Project Path="src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj" />
   </Folder>
@@ -37,7 +40,7 @@
     <Project Path="tests/Digdir.Domain.Dialogporten.GraphQl.Integration.Tests/Digdir.Domain.Dialogporten.GraphQl.Integration.Tests.csproj" />
     <Project Path="tests/Digdir.Domain.Dialogporten.GraphQl.Unit.Tests/Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.csproj" />
     <Project Path="tests/Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests/Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests.csproj" />
-    <Project Path="tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.csproj" />
+    <Project Path="tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Deprecated/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Deprecated.csproj" />
     <Project Path="tests/Digdir.Domain.Dialogporten.WebApi.Unit.Tests/Digdir.Domain.Dialogporten.WebApi.Unit.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Libraries/" />

@@ -19,8 +19,7 @@ internal sealed class MappingProfile : Profile
     {
         CreateMap<CreateDialogDto, DialogEntity>()
             .ForMember(dest => dest.Status, opt => opt.Ignore())
-            .ForMember(dest => dest.StatusId, opt =>
-                opt.MapFrom(src => src.Status.ToDialogStatusValue()));
+            .ForMember(dest => dest.StatusId, opt => opt.Ignore());
         CreateMap<SearchTagDto, DialogSearchTag>();
 
         CreateMap<DialogServiceOwnerContextDto, DialogServiceOwnerContext>();

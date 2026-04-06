@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -131,6 +132,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         // Update primitive properties
         _mapper.Map(request.Dto, dialog);
+        dialog.StatusId = request.Dto.Status.ToDialogStatusValue();
 
         if (!request.IsSilentUpdate && !isCurrentUserServiceOwnerAdmin)
         {

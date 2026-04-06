@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -758,6 +759,16 @@ public class CreateDialogTests : ApplicationCollectionFixture
                         .Should().BeTrue();
                 }
             });
+
+    [Theory]
+    [InlineData(DialogStatusInput.New, DialogStatus.Values.NotApplicable)]
+    [InlineData(DialogStatusInput.Sent, DialogStatus.Values.Awaiting)]
+    public Task Can_Create_Dialog_With_Deprecated_DialogStatus(
+        DialogStatusInput initialStatus, DialogStatus.Values expectedStatus) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.Status = initialStatus)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Status.Should().Be(expectedStatus));
 
     [Fact]
     public Task Can_Create_Dialog_Without_Supplying_Dialog_Status() =>

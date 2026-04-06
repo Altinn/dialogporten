@@ -760,6 +760,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 }
             });
 
+#pragma warning disable CS0618 // Type or member is obsolete
     [Theory]
     [InlineData(DialogStatusInput.New, DialogStatus.Values.NotApplicable)]
     [InlineData(DialogStatusInput.Sent, DialogStatus.Values.Awaiting)]
@@ -769,6 +770,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog((x, _) => x.Dto.Status = initialStatus)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x => x.Status.Should().Be(expectedStatus));
+#pragma warning restore CS0618 // Type or member is obsolete
 
     [Fact]
     public Task Can_Create_Dialog_Without_Supplying_Dialog_Status() =>

@@ -74,6 +74,11 @@ dotnet_diagnostic.CA1000.severity = none
 # "Instantiate argument exceptions correctly"
 dotnet_diagnostic.CA2208.severity = suggestion
 
+# Sonar false positive for C# 14 extension blocks
+dotnet_diagnostic.S2325.severity = none
+dotnet_diagnostic.S4136.severity = none
+dotnet_diagnostic.S8368.severity = none
+
 [*.yml]
 
 # Enforce indentation to be 2 spaces

@@ -53,7 +53,9 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 new()
                 {
                     Type = ActivityType.Information,
-                    Description = [ new() { LanguageCode = "en", Value = "Test activity" }],
+                    Description = [
+                        new() { LanguageCode = "en", Value = "Test activity" },
+                        new() { LanguageCode = "nb", Value = "Test-aktivitet" }],
                     PerformedBy = new()
                     {
                         ActorType = ActorType.ServiceOwner

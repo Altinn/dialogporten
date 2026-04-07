@@ -43,6 +43,7 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
             dbCtx.Dialogs
                 .AsNoTracking()
                 .Include(x => x.Activities)
+                    .ThenInclude(x => x.Description!.Localizations)
                 .Include(x => x.ServiceOwnerContext)
                     .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()

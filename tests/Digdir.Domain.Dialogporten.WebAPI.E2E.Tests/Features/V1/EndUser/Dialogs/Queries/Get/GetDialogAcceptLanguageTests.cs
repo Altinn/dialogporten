@@ -155,6 +155,26 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
     }
 
+    [E2EFact]
+    public async Task Should_Return_All_Localizations_When_Empty_AcceptedLanguages()
+    {
+        // Arrange
+        var dialogId = await CreateDialogWithMultilingualContent();
+
+        // Act — the SDK sends an empty Accept-Language header rather than omitting it
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(
+            dialogId,
+            new V1EndUserCommon_AcceptedLanguages());
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+
+        content.Content.Title.Value.Should().HaveCount(2);
+        content.Content.Summary.Value.Should().HaveCount(2);
+        content.Content.ExtendedStatus.Value.Should().HaveCount(1);
+    }
+
     private async Task<Guid> CreateDialogWithMultilingualContent() =>
         await Fixture.ServiceownerApi.CreateComplexDialogAsync(modify: d =>
         {

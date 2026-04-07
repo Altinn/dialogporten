@@ -2744,9 +2744,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
 
-        [JsonPropertyName("seenByEndUserIdHash")]
-        public string SeenByEndUserIdHash { get; set; }
-
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }
 

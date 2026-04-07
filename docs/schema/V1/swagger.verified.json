@@ -2216,10 +2216,6 @@
             "format": "guid",
             "type": "string"
           },
-          "seenByEndUserIdHash": {
-            "nullable": true,
-            "type": "string"
-          },
           "transmissionId": {
             "format": "guid",
             "nullable": true,

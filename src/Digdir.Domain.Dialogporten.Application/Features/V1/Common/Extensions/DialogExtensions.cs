@@ -11,7 +11,7 @@ internal static class DialogExtensions
 {
     public static void FilterLocalizations(this DialogEntity dialog, List<AcceptedLanguage>? acceptedLanguages)
     {
-        if (acceptedLanguages is null)
+        if (acceptedLanguages is null or [])
         {
             return;
         }
@@ -45,7 +45,7 @@ internal static class DialogExtensions
 
     public static void FilterLocalizations(this DialogTransmission transmission, List<AcceptedLanguage>? acceptedLanguages)
     {
-        if (acceptedLanguages is null)
+        if (acceptedLanguages is null or [])
         {
             return;
         }
@@ -71,7 +71,7 @@ internal static class DialogExtensions
 
     public static void PruneLocalizations(this List<Localization>? localizations, List<AcceptedLanguage>? acceptedLanguages)
     {
-        if (localizations is null || acceptedLanguages is null) return;
+        if (localizations is null or [] || acceptedLanguages is null or []) return;
 
         var danishOrSwedish = acceptedLanguages
             .Select(x => x.LanguageCode)
@@ -93,7 +93,7 @@ internal static class DialogExtensions
 
     public static void PruneLocalizations(this List<LocalizationDto>? localizations, List<AcceptedLanguage>? acceptedLanguages)
     {
-        if (localizations is null || acceptedLanguages is null) return;
+        if (localizations is null or [] || acceptedLanguages is null or []) return;
 
         var danishOrSwedish = acceptedLanguages
             .Select(x => x.LanguageCode)

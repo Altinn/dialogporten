@@ -12,7 +12,7 @@ internal abstract class ServiceOwnerApiDecoratorBase : IServiceownerApi
         _serviceownerApi = serviceownerApi;
     }
 
-    public virtual Task<IApiResponse> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(Guid dialogId,
+    public virtual Task<IApiResponse<ICollection<V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel>>> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(Guid dialogId,
         CancellationToken cancellationToken = default) =>
         _serviceownerApi.V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(dialogId, cancellationToken);
 

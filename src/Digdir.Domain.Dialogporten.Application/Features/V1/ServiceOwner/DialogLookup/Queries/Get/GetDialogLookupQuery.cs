@@ -96,12 +96,12 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             request.AcceptedLanguages,
             cancellationToken);
 
-        var title = ToLocalizations(dialogData.Title);
+        var title = IdentifierLookupTitleResolver.ToLocalizations(dialogData.Title);
         title.PruneLocalizations(request.AcceptedLanguages);
 
         var nonSensitiveTitle = dialogData.NonSensitiveTitle is null
             ? null
-            : ToLocalizations(dialogData.NonSensitiveTitle);
+            : IdentifierLookupTitleResolver.ToLocalizations(dialogData.NonSensitiveTitle);
         nonSensitiveTitle?.PruneLocalizations(request.AcceptedLanguages);
 
         return new ServiceOwnerIdentifierLookupDto
@@ -115,13 +115,4 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             NonSensitiveTitle = nonSensitiveTitle
         };
     }
-
-    private static List<LocalizationDto> ToLocalizations(IEnumerable<ResourceLocalization> localizations) =>
-        localizations
-            .Select(x => new LocalizationDto
-            {
-                LanguageCode = x.LanguageCode,
-                Value = x.Value
-            })
-            .ToList();
 }

@@ -20,12 +20,19 @@ public sealed partial class CostMetricsAggregationOrchestrator
         ParquetFileService parquetService,
         AzureStorageService storageService)
     {
-        _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _applicationInsightsService = applicationInsightsService ?? throw new ArgumentNullException(nameof(applicationInsightsService));
-        _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
-        _parquetService = parquetService ?? throw new ArgumentNullException(nameof(parquetService));
-        _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
+        ArgumentNullException.ThrowIfNull(hostEnvironment);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(applicationInsightsService);
+        ArgumentNullException.ThrowIfNull(aggregationService);
+        ArgumentNullException.ThrowIfNull(parquetService);
+        ArgumentNullException.ThrowIfNull(storageService);
+
+        _hostEnvironment = hostEnvironment;
+        _logger = logger;
+        _applicationInsightsService = applicationInsightsService;
+        _aggregationService = aggregationService;
+        _parquetService = parquetService;
+        _storageService = storageService;
     }
 
     public async Task<AggregationResult> AggregateCostMetricsForDateOnlyAsync(

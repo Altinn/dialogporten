@@ -1,7 +1,6 @@
+using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
-using AwesomeAssertions;
 using Refit;
-using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
@@ -22,15 +21,19 @@ public static class ServiceOwnerApiExtensions
                     dialog,
                     TestContext.Current.CancellationToken);
 
-            if (!createDialogResponse.IsSuccessStatusCode)
-            {
-                TestContext.Current.TestOutputHelper!.WriteLine(createDialogResponse.Error.Content!);
-            }
-
-            createDialogResponse.Error.Should().BeNull();
+            createDialogResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
 
             return createDialogResponse.Content.ToGuid();
         }
+
+        public Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> GetDialog(
+            Guid dialogId,
+            string? endUserId = null,
+            CancellationToken? cancellationToken = null) =>
+            serviceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
+                dialogId,
+                endUserId ?? null!,
+                cancellationToken ?? TestContext.Current.CancellationToken);
 
         public async Task<Guid> CreateSimpleActivityAsync(
             Guid dialogId,
@@ -44,7 +47,31 @@ public static class ServiceOwnerApiExtensions
                     ifMatch,
                     TestContext.Current.CancellationToken);
 
+            createActivityResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
+
             return createActivityResponse.Content.ToGuid();
+        }
+
+        public Task<IApiResponse> SetSystemLabel(
+            Guid dialogId,
+            string endUserId,
+            Action<V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest>? modify = null,
+            Guid? ifMatch = null,
+            CancellationToken? cancellationToken = null)
+        {
+            var request = new V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
+            {
+                AddLabels = [],
+                RemoveLabels = []
+            };
+
+            modify?.Invoke(request);
+            return serviceownerApi.V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(
+                dialogId,
+                endUserId,
+                request,
+                ifMatch,
+                cancellationToken ?? TestContext.Current.CancellationToken);
         }
 
         public async Task<IApiResponse> PatchDialogAsync(

@@ -1,6 +1,5 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
-using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using static Digdir.Library.Dialogporten.E2E.Common.JsonSnapshotVerifier;
@@ -17,12 +16,10 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         var nonExistentDialogId = Guid.CreateVersion7();
 
         // Act
-        var response =
-            await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(dialogId: nonExistentDialogId,
-                endUserId: null!);
+        var response = await Fixture.ServiceownerApi.GetDialog(nonExistentDialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -64,7 +61,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateDialog(invalidDialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -82,7 +79,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Gone);
+        response.ShouldHaveStatusCode(HttpStatusCode.Gone);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -98,7 +95,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, Guid.CreateVersion7());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.PreconditionFailed);
+        response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -118,7 +115,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(dialogId, request, null);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        response.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -134,11 +131,15 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateDialog(dialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
-    [E2EFact]
+    // "This test is flaky. It sometimes fails with a 503 Service Unavailable in the Azure environments,
+    // and can be reproduced locally where you get an HttpRequestException with the error
+    // `Error while copying content to a stream`.
+    // It also tests Kestrel functionality, not Dialogporten"
+    [E2EFact(Skip = "Flaky, see comment")]
     public async Task Should_Return_413_For_Payload_Too_Large()
     {
         // Arrange - create a dialog with a body exceeding 20 MB
@@ -150,7 +151,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1ServiceOwnerDialogsCommandsCreateDialog(hugeDialog);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge);
+        response.ShouldHaveStatusCode(HttpStatusCode.RequestEntityTooLarge);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -162,11 +163,10 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         using var _ = Fixture.UseServiceOwnerTokenOverrides("964951284", "hko");
 
         // Act
-        var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsQueriesGetDialog(dialogId, null!, TestContext.Current.CancellationToken);
+        var response = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 }

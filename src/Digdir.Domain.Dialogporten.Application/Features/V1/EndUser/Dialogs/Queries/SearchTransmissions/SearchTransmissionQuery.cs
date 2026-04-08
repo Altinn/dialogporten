@@ -33,10 +33,15 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
 
     public SearchTransmissionQueryHandler(IDialogDbContext db, IMapper mapper, IAltinnAuthorization altinnAuthorization, IClock clock)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        _db = db;
+        _mapper = mapper;
+        _altinnAuthorization = altinnAuthorization;
+        _clock = clock;
     }
 
     public async Task<SearchTransmissionResult> Handle(SearchTransmissionQuery request, CancellationToken cancellationToken)
@@ -59,6 +64,8 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
                 .Include(x => x.Transmissions)
                     .ThenInclude(x => x.Sender)
                     .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                     cancellationToken: ct), cancellationToken);

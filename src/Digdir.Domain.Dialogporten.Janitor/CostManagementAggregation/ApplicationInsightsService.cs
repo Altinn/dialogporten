@@ -17,9 +17,13 @@ public sealed partial class ApplicationInsightsService
         ILogger<ApplicationInsightsService> logger,
         IOptions<MetricsAggregationOptions> options)
     {
-        _logsClient = logsClient ?? throw new ArgumentNullException(nameof(logsClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(logsClient);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(options);
+
+        _logsClient = logsClient;
+        _logger = logger;
+        _options = options.Value;
     }
 
     private sealed class LogTableColumnNames

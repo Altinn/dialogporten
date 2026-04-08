@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.Authorization.ABAC.Xacml.JsonProfile;
 using Digdir.Domain.Dialogporten.Application;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -29,21 +30,13 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private const string CorrespondenceServiceResourceType = "correspondenceservice";
     private const string GenericAccessResourceType = "genericaccessresource";
 
-    /// <summary>
-    /// The default minimum authentication level applied when no resource policy information is found for a given
-    /// service resource. Level 3 corresponds to "idporten-loa-substantial" and is the baseline required by most
-    /// Norwegian public-sector services. Falling back to this value rather than denying access outright avoids
-    /// incorrect authorization failures when the resource policy sync has not yet run (e.g., on first deploy or
-    /// during transient sync delays), while still ensuring that low-assurance users (level &lt; 3) are rejected.
-    /// </summary>
-    private const int DefaultMinimumAuthenticationLevel = 3;
-
     private readonly HttpClient _httpClient;
     private readonly IFusionCache _pdpCache;
     private readonly IFusionCache _partiesCache;
     private readonly IFusionCache _subjectResourcesCache;
     private readonly IUser _user;
     private readonly IDialogDbContext _db;
+    private readonly IServiceResourceMinimumAuthenticationLevelResolver _serviceResourceMinimumAuthenticationLevelResolver;
     private readonly IResourceRegistry _resourceRegistry;
     private readonly IPartyResourceReferenceRepository _partyResourceReferenceRepository;
     private readonly ILogger _logger;
@@ -61,23 +54,45 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         IFusionCacheProvider cacheProvider,
         IUser user,
         IDialogDbContext db,
+        IServiceResourceMinimumAuthenticationLevelResolver serviceResourceMinimumAuthenticationLevelResolver,
         IResourceRegistry resourceRegistry,
         IPartyResourceReferenceRepository partyResourceReferenceRepository,
         ILogger<AltinnAuthorizationClient> logger,
         IServiceScopeFactory serviceScopeFactory,
         IOptionsMonitor<ApplicationSettings> applicationSettings)
     {
-        _httpClient = client ?? throw new ArgumentNullException(nameof(client));
-        _pdpCache = cacheProvider.GetCache(nameof(Authorization)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _partiesCache = cacheProvider.GetCache(nameof(AuthorizedPartiesResult)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource)) ?? throw new ArgumentNullException(nameof(cacheProvider));
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _partyResourceReferenceRepository = partyResourceReferenceRepository ?? throw new ArgumentNullException(nameof(partyResourceReferenceRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
+        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(serviceResourceMinimumAuthenticationLevelResolver);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(partyResourceReferenceRepository);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+
+        var pdpCache = cacheProvider.GetCache(nameof(Authorization));
+        ArgumentNullException.ThrowIfNull(pdpCache);
+
+        var partiesCache = cacheProvider.GetCache(nameof(AuthorizedPartiesResult));
+        ArgumentNullException.ThrowIfNull(partiesCache);
+
+        var subjectResourcesCache = cacheProvider.GetCache(nameof(SubjectResource));
+        ArgumentNullException.ThrowIfNull(subjectResourcesCache);
+
+        _httpClient = client;
+        _pdpCache = pdpCache;
+        _partiesCache = partiesCache;
+        _subjectResourcesCache = subjectResourcesCache;
+        _user = user;
+        _db = db;
+        _serviceResourceMinimumAuthenticationLevelResolver = serviceResourceMinimumAuthenticationLevelResolver;
+        _resourceRegistry = resourceRegistry;
+        _partyResourceReferenceRepository = partyResourceReferenceRepository;
+        _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
+        _applicationSettings = applicationSettings;
     }
 
     public async Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
@@ -218,26 +233,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     public bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel) =>
         minimumAuthenticationLevel <= _user.GetPrincipal().GetAuthenticationLevel();
 
-    public async Task<bool> UserHasRequiredAuthLevel(string serviceResource, CancellationToken cancellationToken)
-    {
-        var minimumAuthenticationLevel = await _db.ResourcePolicyInformation
-            .Where(x => x.Resource == serviceResource)
-            .Select(x => (int?)x.MinimumAuthenticationLevel)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (minimumAuthenticationLevel is not null)
-        {
-            return UserHasRequiredAuthLevel(minimumAuthenticationLevel.Value);
-        }
-
-        _logger.LogWarning(
-            "Could not find resource policy information for resource {ServiceResource}, " +
-            "falling back to default minimum authentication level {DefaultMinimumAuthenticationLevel}",
-            serviceResource,
-            DefaultMinimumAuthenticationLevel);
-
-        return UserHasRequiredAuthLevel(DefaultMinimumAuthenticationLevel);
-    }
+    public async Task<bool> UserHasRequiredAuthLevel(string serviceResource, CancellationToken cancellationToken) =>
+        UserHasRequiredAuthLevel(await _serviceResourceMinimumAuthenticationLevelResolver
+            .GetMinimumAuthenticationLevel(serviceResource, cancellationToken));
 
     // Create static empty lists to reuse and avoid allocations
     private static readonly List<string> EmptyStringList = [];
@@ -457,7 +455,19 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
     {
-        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier() ?? throw new UnreachableException();
+        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier();
+        if (partyIdentifier is null)
+        {
+            var (userType, externalId) = _user.GetPrincipal().GetUserType();
+            var safeExternalId = userType is DialogUserType.Values.Person
+                or DialogUserType.Values.ServiceOwnerOnBehalfOfPerson
+                or DialogUserType.Values.IdportenEmailIdentifiedUser
+                ? "<redacted>"
+                : externalId;
+            throw new UnreachableException(
+                $"GetEndUserPartyIdentifier returned null. UserType={userType}, ExternalId={safeExternalId}");
+        }
+
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
             partyIdentifier,
             includeAccessPackages: true,

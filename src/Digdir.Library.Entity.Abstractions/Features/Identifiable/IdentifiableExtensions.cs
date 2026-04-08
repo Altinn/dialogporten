@@ -24,7 +24,7 @@ public static class IdentifiableExtensions
     /// </summary>
     /// <param name="identifiable">The <see cref="IIdentifiableEntity"/> to update.</param>
     public static Guid EnsureId(this IIdentifiableEntity identifiable)
-        => identifiable.Id = CreateVersion7IfDefault(identifiable.Id);
+        => identifiable.Id = identifiable.Id.CreateVersion7IfDefault();
 
     /// <summary>
     /// Creates a new version 7 UUID if the value is null or <see cref="Guid.Empty"/>.

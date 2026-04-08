@@ -7,9 +7,16 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
-public sealed class BulkSetDialogSystemLabelsEndpoint(ISender sender) : Endpoint<BulkSetDialogSystemLabelsRequest>
+public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSystemLabelsRequest>
 {
-    private readonly ISender _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+    private readonly ISender _sender;
+
+    public BulkSetDialogSystemLabelsEndpoint(ISender sender)
+    {
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
+    }
 
     public override void Configure()
     {

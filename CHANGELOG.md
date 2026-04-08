@@ -1,5 +1,82 @@
 # Changelog
 
+## [1.111.0](https://github.com/Altinn/dialogporten/compare/v1.110.5...v1.111.0) (2026-03-31)
+
+
+### Features
+
+* **dialoglookup:** Add minimum authentication level to service resource lookup ([#3695](https://github.com/Altinn/dialogporten/issues/3695)) ([5acfe46](https://github.com/Altinn/dialogporten/commit/5acfe46adf38027546a478fe4154f59588bf3b1a))
+* **dialoglookup:** Add title to EU DTO ([#3710](https://github.com/Altinn/dialogporten/issues/3710)) ([79f98db](https://github.com/Altinn/dialogporten/commit/79f98dbe60399a029cc3aa9bfbf9ff88cb367d80))
+
+
+### Bug Fixes
+
+* GetServiceOwnerLabels generates untyped refit response ([#3704](https://github.com/Altinn/dialogporten/issues/3704)) ([7f10efb](https://github.com/Altinn/dialogporten/commit/7f10efba809796c6dc2c55fb10fdd6901129fe5a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency verify.xunitv3 to 31.13.5 ([#3705](https://github.com/Altinn/dialogporten/issues/3705)) ([06f8b4d](https://github.com/Altinn/dialogporten/commit/06f8b4da457eccdcac5bebadd39d4ba3a59781f9))
+* **deps:** update nginx docker tag to v1.29.6 ([#3706](https://github.com/Altinn/dialogporten/issues/3706)) ([c543e89](https://github.com/Altinn/dialogporten/commit/c543e89fdbaf6e7621fc00981f7c5fbcf8218dc9))
+* **infra:** promote postgres2 as canonical PostgreSQL server for prod ([#3708](https://github.com/Altinn/dialogporten/issues/3708)) ([76d89ad](https://github.com/Altinn/dialogporten/commit/76d89ad9c57c533f58ca1ade93fd3078ed8988d4))
+* **infra:** Promote postgres2 as canonical PostgreSQL server for test ([#3715](https://github.com/Altinn/dialogporten/issues/3715)) ([15d3b6b](https://github.com/Altinn/dialogporten/commit/15d3b6b97be33da857bb49265a3e514de59e2a18))
+
+## [1.110.5](https://github.com/Altinn/dialogporten/compare/v1.110.4...v1.110.5) (2026-03-26)
+
+
+### Miscellaneous Chores
+
+* misc. cleanup, use extension blocks ([#3692](https://github.com/Altinn/dialogporten/issues/3692)) ([736c077](https://github.com/Altinn/dialogporten/commit/736c077764fd12ca4830c16d0d21f93fb4ab42d3))
+
+## [1.110.4](https://github.com/Altinn/dialogporten/compare/v1.110.3...v1.110.4) (2026-03-25)
+
+
+### Bug Fixes
+
+* **lookup:** resolve ResolveDialogIdFromLabel timeout on large datasets ([#3681](https://github.com/Altinn/dialogporten/issues/3681)) ([a3dd496](https://github.com/Altinn/dialogporten/commit/a3dd496289ab1443f75dc24347f0bba9f217a4db))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverlet.collector to 8.0.1 ([#3683](https://github.com/Altinn/dialogporten/issues/3683)) ([3453c69](https://github.com/Altinn/dialogporten/commit/3453c698f0e99922065ac66e2dd99b8740fd7ef9))
+* **deps:** update dependency verify.xunitv3 to 31.13.4 ([#3684](https://github.com/Altinn/dialogporten/issues/3684)) ([b9ef252](https://github.com/Altinn/dialogporten/commit/b9ef252b8c6e953385f376bb52cf3df9c9633ae8))
+
+## [1.110.3](https://github.com/Altinn/dialogporten/compare/v1.110.2...v1.110.3) (2026-03-24)
+
+
+### Miscellaneous Chores
+
+* **infra:** enable migration target deployment for prod ([#3676](https://github.com/Altinn/dialogporten/issues/3676)) ([479b5f4](https://github.com/Altinn/dialogporten/commit/479b5f42c80a5321fa8d5d8c42af623fb69591b7)), closes [#3658](https://github.com/Altinn/dialogporten/issues/3658)
+* **infra:** refine yt01 scaling strategy ([#3674](https://github.com/Altinn/dialogporten/issues/3674)) ([ac44120](https://github.com/Altinn/dialogporten/commit/ac44120699e4f0a626e2add38e0aaf8c80188ea1))
+
+## [1.110.2](https://github.com/Altinn/dialogporten/compare/v1.110.1...v1.110.2) (2026-03-24)
+
+
+### Bug Fixes
+
+* **infra:** serialize dependencies for PostgreSQL configurations ([#3673](https://github.com/Altinn/dialogporten/issues/3673)) ([aed2d80](https://github.com/Altinn/dialogporten/commit/aed2d80547444128deb90b70a4b0dca52a2500d0)), closes [#3664](https://github.com/Altinn/dialogporten/issues/3664)
+* **infra:** serialize PostgreSQL configuration deployments to prevent ServerIsBusy race condition ([#3664](https://github.com/Altinn/dialogporten/issues/3664)) ([dca8a01](https://github.com/Altinn/dialogporten/commit/dca8a010e5098a015be9adf6031507a241cea831))
+
+## [1.110.1](https://github.com/Altinn/dialogporten/compare/v1.110.0...v1.110.1) (2026-03-23)
+
+
+### Miscellaneous Chores
+
+* **deps:** update npgsql dependencies ([#3645](https://github.com/Altinn/dialogporten/issues/3645)) ([c835cd4](https://github.com/Altinn/dialogporten/commit/c835cd48c36621071dc1a6f48ef6f4c9745abc40))
+* **infra:** promote postgres2 as canonical PostgreSQL server for staging ([#3660](https://github.com/Altinn/dialogporten/issues/3660)) ([e57a9fc](https://github.com/Altinn/dialogporten/commit/e57a9fc5d355cbe45f1ebb5923edb9372d2a880c))
+
+## [1.110.0](https://github.com/Altinn/dialogporten/compare/v1.109.0...v1.110.0) (2026-03-23)
+
+
+### Features
+
+* **app:** update transmission command ([#3474](https://github.com/Altinn/dialogporten/issues/3474)) ([a421f16](https://github.com/Altinn/dialogporten/commit/a421f165b6bc934a453daad33370f9e06efdd4ca))
+
+
+### Bug Fixes
+
+* **webapi:** include service owner labels on all requests calling GetDialogDetailsAuthorization ([#3667](https://github.com/Altinn/dialogporten/issues/3667)) ([f1b59ad](https://github.com/Altinn/dialogporten/commit/f1b59addbd07449e45d9dba1bafbfba509bb587c))
+
 ## [1.109.0](https://github.com/Altinn/dialogporten/compare/v1.108.2...v1.109.0) (2026-03-23)
 
 

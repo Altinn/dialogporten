@@ -16,8 +16,11 @@ public sealed class UserParties : IUserParties
 
     public UserParties(IUser user, IAltinnAuthorization altinnAuthorization)
     {
-        _user = user ?? throw new ArgumentNullException(nameof(user));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+
+        _user = user;
+        _altinnAuthorization = altinnAuthorization;
     }
 
     public Task<AuthorizedPartiesResult> GetUserParties(CancellationToken cancellationToken = default)

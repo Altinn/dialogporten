@@ -14,7 +14,9 @@ public sealed partial class ParquetFileService
 
     public ParquetFileService(ILogger<ParquetFileService> logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _logger = logger;
     }
 
     public async Task<byte[]> GenerateParquetFileAsync(List<AggregatedCostMetricsRecord> records, CancellationToken cancellationToken = default)

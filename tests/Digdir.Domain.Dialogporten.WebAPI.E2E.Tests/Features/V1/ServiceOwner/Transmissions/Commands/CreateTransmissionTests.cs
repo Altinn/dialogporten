@@ -1,7 +1,7 @@
+using System.Net;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -26,7 +26,7 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 if_Match: null,
                 TestContext.Current.CancellationToken);
 
-        createResponse.IsSuccessful.Should().BeTrue();
+        createResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
         var transmissionId = createResponse.Content.ToGuid();
 
         var response =
@@ -35,7 +35,7 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                     dialogId, transmissionId, TestContext.Current.CancellationToken);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.Attachments.Should().ContainSingle().Which.Name.Should().Be(transmissionAttachmentName);
     }

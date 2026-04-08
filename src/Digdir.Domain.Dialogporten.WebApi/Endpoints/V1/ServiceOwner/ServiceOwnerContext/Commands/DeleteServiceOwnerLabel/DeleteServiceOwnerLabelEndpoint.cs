@@ -6,7 +6,6 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
-using Grpc.Core;
 using MediatR;
 using ServiceOwnerLabelDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update.
@@ -20,7 +19,9 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
 
     public DeleteServiceOwnerLabelEndpoint(ISender sender)
     {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
     }
 
     public override void Configure()

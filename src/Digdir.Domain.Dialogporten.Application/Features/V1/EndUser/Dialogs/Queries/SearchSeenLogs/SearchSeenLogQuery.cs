@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Common;
+﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -23,20 +22,21 @@ public sealed partial class SearchSeenLogResult : OneOfBase<List<SeenLogDto>, En
 internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQuery, SearchSeenLogResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IUserRegistry _userRegistry;
 
     public SearchSeenLogQueryHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IAltinnAuthorization altinnAuthorization,
         IUserRegistry userRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(userRegistry);
+
+        _db = db;
+        _altinnAuthorization = altinnAuthorization;
+        _userRegistry = userRegistry;
     }
 
     public async Task<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
@@ -49,6 +49,8 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
                 .Include(x => x.SeenLog)
                     .ThenInclude(x => x.SeenBy)
                     .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                     cancellationToken: ct),
@@ -82,7 +84,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         return dialog.SeenLog
             .Select(x =>
             {
-                var dto = _mapper.Map<SeenLogDto>(x);
+                var dto = x.ToDto();
                 dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == x.SeenBy.ActorNameEntity?.ActorId;
                 return dto;
             })

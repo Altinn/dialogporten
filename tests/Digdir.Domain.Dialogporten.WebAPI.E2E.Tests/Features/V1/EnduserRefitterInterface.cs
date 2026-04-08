@@ -1176,6 +1176,9 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         [JsonPropertyName("serviceResource")]
         public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; }
 
+        [JsonPropertyName("title")]
+        public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -1187,9 +1190,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         [JsonPropertyName("evidence")]
         public ICollection<V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem> Evidence { get; set; }
-
-        [JsonPropertyName("minimumAuthenticationLevel")]
-        public int MinimumAuthenticationLevel { get; set; }
 
         [JsonPropertyName("viaAccessPackage")]
         public bool ViaAccessPackage { get; set; }
@@ -1260,6 +1260,9 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         [JsonPropertyName("isDelegable")]
         public bool IsDelegable { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
 
         [JsonPropertyName("name")]
         public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
@@ -2735,14 +2738,14 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset CreatedAt { get; set; }
 
+        [JsonPropertyName("description")]
+        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
+
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
-
-        [JsonPropertyName("seenByEndUserIdHash")]
-        public string SeenByEndUserIdHash { get; set; }
 
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }

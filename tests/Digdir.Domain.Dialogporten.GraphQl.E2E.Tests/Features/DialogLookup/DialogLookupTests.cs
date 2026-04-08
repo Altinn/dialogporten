@@ -3,7 +3,6 @@ using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using AwesomeAssertions;
 using StrawberryShake;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogLookup;
 
@@ -61,6 +60,7 @@ public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE
         lookup.DialogId.Should().Be(dialogId);
         lookup.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
         lookup.Party.Should().NotBeEmpty().And.Be(party);
+        lookup.Title.Should().NotBeNull().And.NotBeEmpty();
         lookup.ServiceResource.Id.Should().NotBeNullOrWhiteSpace();
         lookup.ServiceOwner.Code.Should().NotBeNullOrWhiteSpace();
     }

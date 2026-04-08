@@ -1,8 +1,8 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
@@ -37,17 +37,11 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         InstanceRef responseInstanceRef,
         CancellationToken cancellationToken)
     {
-        var minimumAuthenticationLevel = await _db.ResourcePolicyInformation
-            .AsNoTracking()
-            .Where(x => x.Resource == dialogData.ServiceResource)
-            .Select(x => x.MinimumAuthenticationLevel)
-            .FirstOrDefaultAsync(cancellationToken);
-
         var currentAuthenticationLevel = _user.GetPrincipal().GetAuthenticationLevel();
         var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifier();
         if (partyIdentifier is null)
         {
-            return CreateUnauthorizedResolution(minimumAuthenticationLevel, currentAuthenticationLevel);
+            return CreateUnauthorizedResolution();
         }
 
         var authorizedParties = await _altinnAuthorization.GetAuthorizedPartiesForLookup(
@@ -60,7 +54,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
 
         if (matchingAuthorizedParty is null)
         {
-            return CreateUnauthorizedResolution(minimumAuthenticationLevel, currentAuthenticationLevel);
+            return CreateUnauthorizedResolution();
         }
 
         var authorizedSubjects = matchingAuthorizedParty.AuthorizedRolesAndAccessPackages
@@ -128,7 +122,6 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             hasAccess,
             new IdentifierLookupAuthorizationEvidenceDto
             {
-                MinimumAuthenticationLevel = minimumAuthenticationLevel,
                 CurrentAuthenticationLevel = currentAuthenticationLevel,
                 ViaRole = viaRole,
                 ViaAccessPackage = viaAccessPackage,
@@ -138,16 +131,10 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             });
     }
 
-    private static IdentifierLookupAuthorizationResolution CreateUnauthorizedResolution(
-        int minimumAuthenticationLevel,
-        int currentAuthenticationLevel) =>
+    private static IdentifierLookupAuthorizationResolution CreateUnauthorizedResolution() =>
         new(
             false,
-            new IdentifierLookupAuthorizationEvidenceDto
-            {
-                MinimumAuthenticationLevel = minimumAuthenticationLevel,
-                CurrentAuthenticationLevel = currentAuthenticationLevel
-            });
+            new IdentifierLookupAuthorizationEvidenceDto());
 
     private static IdentifierLookupGrantType? ResolveGrantType(string subject)
     {
@@ -187,8 +174,8 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             return false;
         }
 
-        var serviceResourceId = serviceResource.StartsWith(Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
-            ? serviceResource[Constants.ServiceResourcePrefix.Length..]
+        var serviceResourceId = serviceResource.StartsWith(Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
+            ? serviceResource[Domain.Common.Constants.ServiceResourcePrefix.Length..]
             : serviceResource;
 
         foreach (var authorizedInstance in authorizedInstances)

@@ -17,8 +17,11 @@ internal sealed class DevelopmentCleanupOutboxHostedService : IHostedService
 
     public DevelopmentCleanupOutboxHostedService(IServiceScopeFactory serviceScopeFactory, IHostEnvironment environment)
     {
-        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
+        ArgumentNullException.ThrowIfNull(environment);
+
+        _serviceScopeFactory = serviceScopeFactory;
+        _environment = environment;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

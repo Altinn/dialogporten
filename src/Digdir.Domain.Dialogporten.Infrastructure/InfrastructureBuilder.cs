@@ -39,9 +39,13 @@ internal sealed class InfrastructureBuilder :
 
     public InfrastructureBuilder(IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
-        _services = services ?? throw new ArgumentNullException(nameof(services));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(environment);
+
+        _services = services;
+        _configuration = configuration;
+        _environment = environment;
     }
 
     public IServiceCollection Build()

@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -22,14 +21,15 @@ public sealed partial class SearchLabelAssignmentLogResult : OneOfBase<List<Labe
 internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<SearchLabelAssignmentLogQuery, SearchLabelAssignmentLogResult>
 {
     private readonly IDialogDbContext _dialogDbContext;
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
-    public SearchLabelAssignmentLogQueryHandler(IDialogDbContext dialogDbContext, IMapper mapper, IAltinnAuthorization altinnAuthorization)
+    public SearchLabelAssignmentLogQueryHandler(IDialogDbContext dialogDbContext, IAltinnAuthorization altinnAuthorization)
     {
-        _dialogDbContext = dialogDbContext ?? throw new ArgumentNullException(nameof(dialogDbContext));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        ArgumentNullException.ThrowIfNull(dialogDbContext);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+
+        _dialogDbContext = dialogDbContext;
+        _altinnAuthorization = altinnAuthorization;
     }
 
     public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
@@ -41,6 +41,8 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
                         .ThenInclude(x => x.LabelAssignmentLogs)
                         .ThenInclude(x => x.PerformedBy)
                         .ThenInclude(x => x.ActorNameEntity)
+                    .Include(x => x.ServiceOwnerContext)
+                        .ThenInclude(x => x.ServiceOwnerLabels)
                     .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                         cancellationToken: ct),
             cancellationToken);
@@ -66,6 +68,6 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        return _mapper.Map<List<LabelAssignmentLogDto>>(dialog.EndUserContext.LabelAssignmentLogs);
+        return dialog.EndUserContext.LabelAssignmentLogs.Select(x => x.ToDto()).ToList();
     }
 }

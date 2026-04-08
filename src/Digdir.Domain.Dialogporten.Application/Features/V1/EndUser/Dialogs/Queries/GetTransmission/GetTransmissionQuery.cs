@@ -35,10 +35,15 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
 
     public GetTransmissionQueryHandler(IMapper mapper, IDialogDbContext dbContext, IAltinnAuthorization altinnAuthorization, IClock clock)
     {
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        _mapper = mapper;
+        _dbContext = dbContext;
+        _altinnAuthorization = altinnAuthorization;
+        _clock = clock;
     }
 
     public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
@@ -62,6 +67,8 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
                 .Include(x => x.Transmissions)
                     .ThenInclude(x => x.Sender)
                     .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                     cancellationToken: ct),

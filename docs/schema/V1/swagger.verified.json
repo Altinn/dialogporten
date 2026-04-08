@@ -505,6 +505,13 @@
           },
           "serviceResource": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceResource"
+          },
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -522,10 +529,6 @@
             },
             "nullable": true,
             "type": "array"
-          },
-          "minimumAuthenticationLevel": {
-            "format": "int32",
-            "type": "integer"
           },
           "viaAccessPackage": {
             "type": "boolean"
@@ -597,6 +600,10 @@
           },
           "isDelegable": {
             "type": "boolean"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
           },
           "name": {
             "items": {
@@ -2200,6 +2207,13 @@
             "format": "date-time",
             "type": "string"
           },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "extendedType": {
             "format": "uri",
             "nullable": true,
@@ -2207,10 +2221,6 @@
           },
           "id": {
             "format": "guid",
-            "type": "string"
-          },
-          "seenByEndUserIdHash": {
-            "nullable": true,
             "type": "string"
           },
           "transmissionId": {
@@ -6728,6 +6738,16 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "A label value.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1WellKnownJwksQueriesGet_Jwk": {
         "additionalProperties": false,
         "properties": {
@@ -10047,6 +10067,16 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "Successfully retrieved the service owner labels."
           },
           "401": {

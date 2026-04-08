@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Refit;
-using Xunit;
 using static System.Text.Json.Serialization.JsonIgnoreCondition;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
@@ -19,6 +18,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
     private PreflightState? PreflightState { get; set; }
     public string DotnetEnvironment { get; private set; } = Environments.Development;
+    public E2ESettings Settings { get; private set; } = null!;
 
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
 
@@ -37,6 +37,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         var settings = configuration.Get<E2ESettings>()
                        ?? throw new InvalidOperationException("E2E settings are missing.");
+        Settings = settings;
 
         var services = new ServiceCollection();
 

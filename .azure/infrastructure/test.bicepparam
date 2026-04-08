@@ -27,8 +27,8 @@ param appInsightsSku = {
   name: 'PerGB2018'
 }
 param postgresConfiguration = {
-  serverNameStem: 'postgres'
-  version: '16'
+  serverNameStem: 'postgres2'
+  version: '18'
   sku: {
     name: 'Standard_B2s'
     tier: 'Burstable'

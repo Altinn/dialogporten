@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
-using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.OrderOption;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Common;
@@ -58,8 +57,11 @@ internal sealed class SearchDialogEndUserContextQueryHandler : IRequestHandler<S
         IUserResourceRegistry userResourceRegistry,
         IDialogSearchRepository searchRepository)
     {
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(searchRepository);
+
+        _userResourceRegistry = userResourceRegistry;
+        _searchRepository = searchRepository;
     }
 
     public async Task<SearchDialogEndUserContextResult> Handle(SearchDialogEndUserContextQuery request, CancellationToken cancellationToken)

@@ -1,5 +1,4 @@
 using Digdir.Library.Dialogporten.E2E.Common;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.E2E.Cleanup.Tests;
 

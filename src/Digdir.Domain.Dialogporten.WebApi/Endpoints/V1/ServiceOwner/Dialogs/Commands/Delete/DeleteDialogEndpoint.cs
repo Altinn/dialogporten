@@ -1,4 +1,4 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
@@ -14,7 +14,9 @@ public sealed class DeleteDialogEndpoint : Endpoint<DeleteDialogRequest>
 
     public DeleteDialogEndpoint(ISender sender)
     {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
     }
 
     public override void Configure()

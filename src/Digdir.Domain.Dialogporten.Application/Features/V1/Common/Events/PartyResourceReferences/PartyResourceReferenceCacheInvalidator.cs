@@ -12,9 +12,16 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.Party
 /// pruning-table convergence for soft-deletes; convergence is expected after regular
 /// purge/hard-delete operations.
 /// </summary>
-internal sealed class PartyResourceReferenceCacheInvalidator(IPartyResourceReferenceRepository repo) : INotificationHandler<DialogCreatedDomainEvent>, INotificationHandler<DialogDeletedDomainEvent>
+internal sealed class PartyResourceReferenceCacheInvalidator : INotificationHandler<DialogCreatedDomainEvent>, INotificationHandler<DialogDeletedDomainEvent>
 {
-    private readonly IPartyResourceReferenceRepository _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+    private readonly IPartyResourceReferenceRepository _repo;
+
+    public PartyResourceReferenceCacheInvalidator(IPartyResourceReferenceRepository repo)
+    {
+        ArgumentNullException.ThrowIfNull(repo);
+
+        _repo = repo;
+    }
 
     public async Task Handle(DialogCreatedDomainEvent notification, CancellationToken cancellationToken) =>
         await _repo.InvalidateCachedReferencesForParty(notification.Party, cancellationToken);

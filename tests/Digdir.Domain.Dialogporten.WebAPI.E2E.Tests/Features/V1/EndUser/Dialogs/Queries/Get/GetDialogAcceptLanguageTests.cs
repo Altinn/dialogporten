@@ -1,7 +1,7 @@
+using System.Net;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -22,7 +22,7 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
         content.Content.Title.Value.Should().HaveCount(1);
@@ -46,7 +46,7 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
             AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "invalid;;;", Weight = 1 }]
         };
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
-        response.IsSuccessful.Should().BeFalse();
+        response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
         response.Error!.Content.Should().Contain("Accept-Language");
     }
 
@@ -64,7 +64,7 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
         content.Content.Title.Value.Should().HaveCount(1);
@@ -90,7 +90,7 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
         content.Content.Title.Value.Should().HaveCount(1);
@@ -116,7 +116,7 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
         content.Content.Title.Value.Should().HaveCount(1);
@@ -142,7 +142,7 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(dialogId, languages);
 
         // Assert
-        response.IsSuccessful.Should().BeTrue();
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
         content.Content.Title.Value.Should().HaveCount(1);
@@ -153,6 +153,26 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
 
         content.Content.ExtendedStatus.Value.Should().HaveCount(1);
         content.Content.ExtendedStatus.Value.First().LanguageCode.Should().Be("nb");
+    }
+
+    [E2EFact]
+    public async Task Should_Return_All_Localizations_When_Empty_AcceptedLanguages()
+    {
+        // Arrange
+        var dialogId = await CreateDialogWithMultilingualContent();
+
+        // Act — the SDK sends an empty Accept-Language header rather than omitting it
+        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetDialog(
+            dialogId,
+            new V1EndUserCommon_AcceptedLanguages());
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+
+        content.Content.Title.Value.Should().HaveCount(2);
+        content.Content.Summary.Value.Should().HaveCount(2);
+        content.Content.ExtendedStatus.Value.Should().HaveCount(1);
     }
 
     private async Task<Guid> CreateDialogWithMultilingualContent() =>

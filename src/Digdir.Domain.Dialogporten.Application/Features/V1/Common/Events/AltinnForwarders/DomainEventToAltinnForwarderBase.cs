@@ -10,8 +10,14 @@ internal class DomainEventToAltinnForwarderBase
 
     protected DomainEventToAltinnForwarderBase(ICloudEventBus cloudEventBus, IOptions<ApplicationSettings> settings)
     {
-        CloudEventBus = cloudEventBus ?? throw new ArgumentNullException(nameof(cloudEventBus));
-        _dialogportenSettings = settings.Value.Dialogporten ?? throw new ArgumentNullException(nameof(settings));
+        ArgumentNullException.ThrowIfNull(cloudEventBus);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var dialogportenSettings = settings.Value.Dialogporten;
+        ArgumentNullException.ThrowIfNull(dialogportenSettings, nameof(settings));
+
+        CloudEventBus = cloudEventBus;
+        _dialogportenSettings = dialogportenSettings;
     }
 
     internal string SourceBaseUrl() =>

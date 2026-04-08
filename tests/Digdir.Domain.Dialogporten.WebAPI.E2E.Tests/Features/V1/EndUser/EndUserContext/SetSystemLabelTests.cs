@@ -3,7 +3,6 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using Xunit;
 using static Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.DialogEndUserContextsEntities_SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUserContext;
@@ -11,6 +10,20 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUse
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
+    [E2EFact]
+    public async Task Should_Set_System_Label()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var response = await Fixture.EnduserApi
+            .SetSystemLabels(dialogId, request => request.AddLabels = [Bin]);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+    }
+
     [E2EFact]
     public async Task Should_Add_One_LabelLog_Entry_After_Setting_Label()
     {
@@ -22,12 +35,12 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabels(dialogId, request => request.AddLabels = [Bin]);
 
         // Assert
-        setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         var labelLogResponse = await Fixture.EnduserApi
             .GetSystemLabelAssignmentLog(dialogId);
 
-        labelLogResponse.IsSuccessful.Should().BeTrue();
+        labelLogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
         labelLog.Should().HaveCount(1);
         labelLog.Should().ContainSingle(x => x.Action == "set")
@@ -47,7 +60,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 dialogId,
                 request => request.AddLabels = [Bin]);
 
-        firstSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        firstSetLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         // Act - Then change to Archive label
         var secondSetLabelResponse = await Fixture.EnduserApi
@@ -56,12 +69,12 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 request => request.AddLabels = [Archive]);
 
         // Assert
-        secondSetLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        secondSetLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         var labelLogResponse = await Fixture.EnduserApi
             .GetSystemLabelAssignmentLog(dialogId);
 
-        labelLogResponse.IsSuccessful.Should().BeTrue();
+        labelLogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
         labelLog.Should().HaveCount(3);
 
@@ -89,8 +102,8 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Assert
-        setLabelResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        dialogResponse.IsSuccessful.Should().BeTrue();
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+        dialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         // Last label is selected when multiple of Default/Bin/Archive is supplied
         dialogResponse.Content!.EndUserContext.SystemLabels.Should()
@@ -113,8 +126,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 revision: invalidRevision);
 
         // Assert
-        setLabelResponse.StatusCode.Should()
-            .Be(HttpStatusCode.PreconditionFailed);
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
     }
 
     [E2EFact]
@@ -142,12 +154,12 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 }));
 
         // Assert
-        patchResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        patchResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         var labelLogResponse = await Fixture.EnduserApi
             .GetSystemLabelAssignmentLog(dialogId);
 
-        labelLogResponse.IsSuccessful.Should().BeTrue();
+        labelLogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");
         labelLog.Should().HaveCount(2);
 

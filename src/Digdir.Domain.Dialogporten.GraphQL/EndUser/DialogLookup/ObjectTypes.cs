@@ -34,6 +34,7 @@ public sealed class DialogLookup
     public Guid DialogId { get; set; }
     public string InstanceRef { get; set; } = null!;
     public string Party { get; set; } = null!;
+    public List<Localization> Title { get; set; } = [];
 
     public DialogLookupServiceResource ServiceResource { get; set; } = null!;
     public DialogLookupServiceOwner ServiceOwner { get; set; } = null!;
@@ -44,6 +45,7 @@ public sealed class DialogLookupServiceResource
 {
     public string Id { get; set; } = null!;
     public bool IsDelegable { get; set; }
+    public int MinimumAuthenticationLevel { get; set; }
     public List<Localization> Name { get; set; } = [];
 }
 
@@ -56,7 +58,6 @@ public sealed class DialogLookupServiceOwner
 
 public sealed class DialogLookupAuthorizationEvidence
 {
-    public int MinimumAuthenticationLevel { get; set; }
     public int CurrentAuthenticationLevel { get; set; }
     public bool ViaRole { get; set; }
     public bool ViaAccessPackage { get; set; }

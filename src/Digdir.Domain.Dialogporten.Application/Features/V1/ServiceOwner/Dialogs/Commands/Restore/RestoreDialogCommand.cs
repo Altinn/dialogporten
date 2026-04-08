@@ -33,9 +33,13 @@ internal sealed class RestoreDialogCommandHandler : IRequestHandler<RestoreDialo
 
     public RestoreDialogCommandHandler(IDialogDbContext db, IUnitOfWork unitOfWork, IUserResourceRegistry userResourceRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _db = db;
+        _unitOfWork = unitOfWork;
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public async Task<RestoreDialogResult> Handle(RestoreDialogCommand request, CancellationToken cancellationToken)

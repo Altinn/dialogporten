@@ -1,4 +1,3 @@
-using System.Diagnostics.Metrics;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

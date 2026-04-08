@@ -1,6 +1,5 @@
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1;
 using Refit;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 
@@ -34,6 +33,17 @@ public static class EnduserApiExtensions
                 dialogId,
                 acceptedLanguages ?? new(),
                 cancellationToken);
+
+        public Task<IApiResponse> BulkSetSystemLabels(
+            Action<V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel> modify,
+            CancellationToken? cancellationToken = null)
+        {
+            var request = new V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel();
+            modify(request);
+            return enduserApi.V1EndUserEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels(
+                request,
+                cancellationToken ?? TestContext.Current.CancellationToken);
+        }
 
         public Task<IApiResponse<ICollection<V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> GetSystemLabelAssignmentLog(
             Guid dialogId,

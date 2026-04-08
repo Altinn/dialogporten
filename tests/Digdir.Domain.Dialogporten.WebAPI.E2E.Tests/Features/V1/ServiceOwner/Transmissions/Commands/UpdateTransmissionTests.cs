@@ -4,7 +4,6 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -210,16 +209,13 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         var revisionAfterUpdate = updateResponse.Headers.ETagToGuid();
 
-        var afterUpdateDialog = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetDialog(
-            dialogId,
-            endUserId: null!,
-            TestContext.Current.CancellationToken);
+        var afterUpdateDialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
 
         // Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         revisionAfterUpdate.Should().NotBe(revisionBeforeUpdate);
         afterUpdateDialog.Content.Should().NotBeNull();
-        afterUpdateDialog.Content!.Revision.Should().Be(revisionAfterUpdate);
+        afterUpdateDialog.Content.Revision.Should().Be(revisionAfterUpdate);
     }
 
     private static V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest CreateUpdateRequest(

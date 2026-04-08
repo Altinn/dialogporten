@@ -1,5 +1,4 @@
 using System.Net;
-using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -20,7 +19,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         var response = await Fixture.EnduserApi.GetDialog(nonExistentDialogId);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -35,7 +34,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1EndUserDialogsQueriesSearchActivitiesDialogActivity(nonExistentDialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -51,7 +50,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1EndUserDialogsQueriesGetActivityDialogActivity(dialogId, nonExistentActivityId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -67,7 +66,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1EndUserDialogsQueriesGetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Gone);
+        response.ShouldHaveStatusCode(HttpStatusCode.Gone);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 
@@ -84,7 +83,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             .V1EndUserDialogsQueriesGetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
         await VerifyJsonSnapshot(response.Error!.Content!);
     }
 }

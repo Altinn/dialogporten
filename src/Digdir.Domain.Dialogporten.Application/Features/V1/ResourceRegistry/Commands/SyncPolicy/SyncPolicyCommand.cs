@@ -29,9 +29,13 @@ internal sealed partial class SyncPolicyCommandHandler : IRequestHandler<SyncPol
         IResourcePolicyInformationRepository resourcePolicyMetadataRepository,
         ILogger<SyncPolicyCommandHandler> logger)
     {
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _resourcePolicyMetadataRepository = resourcePolicyMetadataRepository ?? throw new ArgumentNullException(nameof(resourcePolicyMetadataRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(resourcePolicyMetadataRepository);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _resourceRegistry = resourceRegistry;
+        _resourcePolicyMetadataRepository = resourcePolicyMetadataRepository;
+        _logger = logger;
     }
 
     public async Task<SyncPolicyResult> Handle(SyncPolicyCommand request,

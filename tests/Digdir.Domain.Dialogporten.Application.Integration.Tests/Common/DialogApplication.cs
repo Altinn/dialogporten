@@ -51,7 +51,7 @@ public class DialogApplication : IAsyncLifetime
     internal static TestAltinnAuthorization AltinnAuthorization { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
-        new PostgreSqlBuilder("postgres:16.11")
+        new PostgreSqlBuilder("postgres:18.2")
         .Build();
 
     public async ValueTask InitializeAsync()
@@ -343,8 +343,11 @@ internal sealed class TestFeatureMetricServiceResourceCache : IFeatureMetricServ
 
     public TestFeatureMetricServiceResourceCache(IDialogDbContext db, IResourceRegistry resourceRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+
+        _db = db;
+        _resourceRegistry = resourceRegistry;
     }
 
     public async Task<ServiceResourceInformation?> GetServiceResource(Guid dialogId, CancellationToken cancellationToken)

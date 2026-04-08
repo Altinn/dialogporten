@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -92,6 +93,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
     {
         var dialog = _mapper.Map<DialogEntity>(request.Dto);
+        dialog.StatusId = request.Dto.Status.ToDialogStatusValue();
 
         // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
         // and to guarantee deterministic order of input to output dtos.

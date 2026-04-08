@@ -2207,6 +2207,13 @@
             "format": "date-time",
             "type": "string"
           },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "extendedType": {
             "format": "uri",
             "nullable": true,
@@ -2214,10 +2221,6 @@
           },
           "id": {
             "format": "guid",
-            "type": "string"
-          },
-          "seenByEndUserIdHash": {
-            "nullable": true,
             "type": "string"
           },
           "transmissionId": {

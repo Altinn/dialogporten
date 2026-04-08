@@ -2738,14 +2738,14 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         [JsonPropertyName("createdAt")]
         public System.DateTimeOffset CreatedAt { get; set; }
 
+        [JsonPropertyName("description")]
+        public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
+
         [JsonPropertyName("extendedType")]
         public System.Uri ExtendedType { get; set; }
 
         [JsonPropertyName("id")]
         public System.Guid Id { get; set; }
-
-        [JsonPropertyName("seenByEndUserIdHash")]
-        public string SeenByEndUserIdHash { get; set; }
 
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }

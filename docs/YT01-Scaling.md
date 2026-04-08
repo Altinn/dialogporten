@@ -47,6 +47,7 @@ Postponing prevents the scheduled shutdown from running until a given time. Key 
 - **Can be set even when the environment is already running** — it just sets a future timestamp that the scheduled shutdown checks
 - The timestamp is stored as a GitHub environment variable (`YT01_DB_SHUTDOWN_POSTPONE_UNTIL`)
 - The scheduled workflow checks this variable each day. If the timestamp is in the future, shutdown is skipped
+- The scheduled shutdown only runs once per day (at 16:00 UTC), so a postpone that extends past that time will keep the environment running for an additional 24 hours until the next scheduled run
 - Stale (past-dated) postpone values are automatically cleaned up by both the manual and scheduled workflows
 
 ### Examples

@@ -296,8 +296,18 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Validate input is a single parseable datetime
+          if [[ ${#POSTPONE_UNTIL} -gt 35 ]]; then
+            echo "Error: postpone_until looks malformed (too long). Got: $POSTPONE_UNTIL"
+            exit 1
+          fi
+          if ! date -d "$POSTPONE_UNTIL" +%s > /dev/null 2>&1; then
+            echo "Error: postpone_until is not a valid datetime. Got: $POSTPONE_UNTIL"
+            exit 1
+          fi
+
           # Validate the date is in the future
-          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s 2>/dev/null || echo "0")
+          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s)
           NOW_TS=$(date +%s)
 
           if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then

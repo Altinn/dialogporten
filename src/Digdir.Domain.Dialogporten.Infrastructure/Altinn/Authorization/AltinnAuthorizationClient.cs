@@ -455,7 +455,19 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
     {
-        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier() ?? throw new UnreachableException();
+        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier();
+        if (partyIdentifier is null)
+        {
+            var (userType, externalId) = _user.GetPrincipal().GetUserType();
+            var safeExternalId = userType is DialogUserType.Values.Person
+                or DialogUserType.Values.ServiceOwnerOnBehalfOfPerson
+                or DialogUserType.Values.IdportenEmailIdentifiedUser
+                ? "<redacted>"
+                : externalId;
+            throw new UnreachableException(
+                $"GetEndUserPartyIdentifier returned null. UserType={userType}, ExternalId={safeExternalId}");
+        }
+
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
             partyIdentifier,
             includeAccessPackages: true,

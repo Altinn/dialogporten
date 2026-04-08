@@ -8,11 +8,8 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -36,7 +33,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private readonly IMapper _mapper;
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
-    private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
     private readonly IUnitOfWork _unitOfWork;
@@ -47,7 +43,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
-        IUser user,
         IAltinnAuthorization altinnAuthorization,
         IDialogTokenGenerator dialogTokenGenerator)
     {
@@ -56,7 +51,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
-        _user = user ?? throw new ArgumentNullException(nameof(user));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _dialogTokenGenerator = dialogTokenGenerator ?? throw new ArgumentNullException(nameof(dialogTokenGenerator));
     }
@@ -153,20 +147,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotVisible<DialogEntity>(dialog.VisibleFrom.Value);
         }
 
-        // TODO: What if name lookup fails
-        // https://github.com/altinn/dialogporten/issues/387
         var userId = _userRegistry.GetCurrentUserId();
 
-        var externalIdWithPrefix = userId.ExternalIdWithPrefix;
-        if (userId.Type == DialogUserType.Values.SystemUser)
-        {
-            externalIdWithPrefix = _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
-                ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
-                : throw new InvalidOperationException("Systemuser organization number not found");
-        }
-
         var lastSeen = dialog.SeenLog
-            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalIdWithPrefix)
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalIdWithPrefix)
             .MaxBy(x => x.CreatedAt);
 
         if (lastSeen is null ||
@@ -174,7 +158,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.EndUserContext.DialogEndUserContextSystemLabels.Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened)
             )
         {
-            dialog.UpdateSeenAt(externalIdWithPrefix, userId.Type);
+            dialog.UpdateSeenAt(userId.ExternalIdWithPrefix, userId.Type);
         }
 
 
@@ -198,12 +182,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            externalIdWithPrefix);
+            userId.ExternalIdWithPrefix);
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            externalIdWithPrefix);
+            userId.ExternalIdWithPrefix);
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,

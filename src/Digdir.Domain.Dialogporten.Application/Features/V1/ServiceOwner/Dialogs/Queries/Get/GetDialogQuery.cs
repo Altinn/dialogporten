@@ -3,17 +3,13 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using OneOf;
-using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
@@ -37,19 +33,17 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IDataLoaderContext _dataLoaderContext;
-    private readonly IUser _user;
 
     public GetDialogQueryHandler(
         IMapper mapper,
         IAltinnAuthorization altinnAuthorization,
-        IUnitOfWork unitOfWork, IUserRegistry userRegistry, IUser user,
+        IUnitOfWork unitOfWork, IUserRegistry userRegistry,
         IDataLoaderContext dataLoaderContext)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
-        _user = user ?? throw new ArgumentNullException(nameof(user));
         _dataLoaderContext = dataLoaderContext ?? throw new ArgumentNullException(nameof(dataLoaderContext));
     }
 
@@ -80,16 +74,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             var userId = _userRegistry.GetCurrentUserId();
 
-            var externalId = userId.ExternalIdWithPrefix;
-            if (userId.Type == DialogUserType.Values.SystemUser)
-            {
-                externalId = _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
-                    ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
-                    : throw new InvalidOperationException("Systemuser organization number not found");
-            }
-
             var lastSeen = dialog.SeenLog
-                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == externalId)
+                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalIdWithPrefix)
                 .MaxBy(x => x.CreatedAt);
 
             if (lastSeen is null ||
@@ -97,7 +83,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 dialog.EndUserContext.DialogEndUserContextSystemLabels.Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened)
                 )
             {
-                dialog.UpdateSeenAt(externalId, userId.Type);
+                dialog.UpdateSeenAt(userId.ExternalIdWithPrefix, userId.Type);
             }
 
             var saveResult = await _unitOfWork

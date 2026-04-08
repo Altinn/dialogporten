@@ -70,11 +70,7 @@ public sealed class UserRegistry : IUserRegistry
                 or UserIdType.AltinnSelfIdentifiedUser
                 or UserIdType.IdportenEmailIdentifiedUser
                 or UserIdType.FeideUser
-                => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
-
-            // We need a hack here, since we have no way of looking up a systemuser name. Since we have a claims principal
-            // we instead look up the system user organization number.
-            UserIdType.SystemUser => await _partyNameRegistry.GetName(GetSystemUserOrg(), cancellationToken),
+                or UserIdType.SystemUser => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
             UserIdType.Unknown => throw new UnreachableException(),
             UserIdType.ServiceOwner => throw new UnreachableException(),
             _ => throw new UnreachableException()
@@ -85,11 +81,6 @@ public sealed class UserRegistry : IUserRegistry
             Name = name
         };
     }
-
-    private string GetSystemUserOrg() =>
-        _user.GetPrincipal().TryGetSystemUserOrgNumber(out var systemOrgNumber)
-            ? NorwegianOrganizationIdentifier.PrefixWithSeparator + systemOrgNumber
-            : throw new InvalidOperationException("Systemuser organization number not found");
 }
 
 internal sealed class LocalDevelopmentUserRegistryDecorator : IUserRegistry

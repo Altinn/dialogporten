@@ -72,7 +72,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         var relevantActorNameEntities = actorNameEntities
-            .Where(x => x.ActorId is not null && !x.ActorId.StartsWith(SystemUserIdentifier.Prefix, StringComparison.InvariantCultureIgnoreCase))
+            .Where(x => x.ActorId is not null)
             .ToList();
 
         var actorNameById = (await Task.WhenAll(relevantActorNameEntities

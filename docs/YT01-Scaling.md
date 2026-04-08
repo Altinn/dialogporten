@@ -51,7 +51,7 @@ Postponing prevents the scheduled shutdown from running until a given time. Key 
 
 ### Examples
 
-Keep the environment running until 20:00 CET tonight:
+Keep the environment running until 20:00 CEST tonight:
 - Run the manual workflow with `state: on` and `postpone_until: 2026-04-08T20:00:00+02:00`
 - Or, if the environment is already running, just run it with `state: on` and the `postpone_until` value — the scale-on is idempotent
 

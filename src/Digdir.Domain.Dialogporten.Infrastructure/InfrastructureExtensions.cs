@@ -129,8 +129,8 @@ public static class InfrastructureExtensions
 
             // Transient
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenSystemLabelMaskQueryStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()

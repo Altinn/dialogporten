@@ -2,6 +2,12 @@
 
 The YT01 environment is scaled down outside working hours to save costs. A set of GitHub Actions workflows handle scaling the environment on and off, with support for postponing the scheduled shutdown.
 
+## TL;DR
+
+1. Scale the environment on using the [manual scaling workflow](https://github.com/Altinn/dialogporten/actions/workflows/dispatch-scale-yt01-manual.yml) with `state: on`
+2. If you need the environment beyond 16:00 UTC, set `postpone_until` to a later date/time
+3. When you're done, scale the environment off using the manual workflow with `state: off` to keep costs low
+
 ## Scaling On
 
 Use the **manual workflow** (`dispatch-scale-yt01-manual.yml`) with `state: on`.
@@ -45,7 +51,7 @@ Postponing prevents the scheduled shutdown from running until a given time. Key 
 
 - Set via the `postpone_until` input when scaling on (e.g. if you need the environment to stay up past 16:00 UTC)
 - **Can be set even when the environment is already running** — it just sets a future timestamp that the scheduled shutdown checks
-- The timestamp is stored as a GitHub environment variable (`YT01_DB_SHUTDOWN_POSTPONE_UNTIL`)
+- The timestamp is stored as a GitHub environment variable (`YT01_DB_SHUTDOWN_POSTPONE_UNTIL`). You can check if a postpone is currently set and its value at [Settings > Variables > Actions](https://github.com/Altinn/dialogporten/settings/variables/actions)
 - The scheduled workflow checks this variable each day. If the timestamp is in the future, shutdown is skipped
 - The scheduled shutdown only runs once per day (at 16:00 UTC), so a postpone that extends past that time will keep the environment running for an additional 24 hours until the next scheduled run
 - Stale (past-dated) postpone values are automatically cleaned up by both the manual and scheduled workflows

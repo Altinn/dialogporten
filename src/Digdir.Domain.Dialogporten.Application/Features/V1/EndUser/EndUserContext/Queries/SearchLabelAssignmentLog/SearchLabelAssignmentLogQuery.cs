@@ -73,6 +73,7 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             .LabelAssignmentLogs
             .OrderBy(x => x.CreatedAt)
             .ThenBy(x => x.Id)
-            .Select(x => x.ToDto()).ToList();
+            .Select(x => x.ToDto())
+            .ToList();
     }
 }

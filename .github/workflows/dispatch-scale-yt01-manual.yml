@@ -291,6 +291,7 @@ jobs:
         if: inputs.postpone_until != ''
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
           POSTPONE_UNTIL: ${{ inputs.postpone_until }}
@@ -320,7 +321,7 @@ jobs:
               --env yt01 \
               --repo "$REPOSITORY"
             PRETTY_DATE=$(TZ=Europe/Oslo date -d "@$POSTPONE_TS" +"%b %-d, %Y %H:%M %Z")
-            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
+            GH_TOKEN="$GITHUB_TOKEN" gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
               -f "name=Scale YT01 on (postpone until $PRETTY_DATE)"
             echo "Shutdown postponed until $POSTPONE_UNTIL"
           else
@@ -371,6 +372,7 @@ jobs:
       - name: Clear postpone variable
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
         shell: bash
@@ -383,7 +385,7 @@ jobs:
 
           if [[ -n "$POSTPONE_UNTIL" ]]; then
             PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$POSTPONE_UNTIL")
-            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
+            GH_TOKEN="$GITHUB_TOKEN" gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
               -f "name=Scale YT01 off (cleared postpone until $PRETTY_DATE)"
             gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
               --env yt01 \

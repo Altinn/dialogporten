@@ -34,7 +34,8 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
 
     public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _dialogDbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+        var dialog = await _dialogDbContext
+            .WrapWithRepeatableRead((dbCtx, ct) =>
                 dbCtx.Dialogs
                     .AsNoTracking()
                     .Include(x => x.EndUserContext)
@@ -68,6 +69,11 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        return dialog.EndUserContext.LabelAssignmentLogs.Select(x => x.ToDto()).ToList();
+        return dialog.EndUserContext
+            .LabelAssignmentLogs
+            .OrderBy(x => x.CreatedAt)
+            .ThenBy(x => x.Id)
+            .Select(x => x.ToDto())
+            .ToList();
     }
 }

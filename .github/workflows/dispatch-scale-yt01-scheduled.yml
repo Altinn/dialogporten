@@ -34,19 +34,31 @@ jobs:
 
             if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then
               echo "Shutdown postponed until $POSTPONE_UNTIL. Skipping."
+              CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+                --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+              if [[ -n "$CURRENT" ]]; then
+                PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+                echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
+              fi
               echo "skip=true" >> "$GITHUB_OUTPUT"
-              PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z")
-              echo "## Shutdown postponed until $PRETTY_DATE" >> "$GITHUB_STEP_SUMMARY"
               exit 0
             else
               echo "Postpone date $POSTPONE_UNTIL is in the past. Clearing variable."
               gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
                 --env yt01 \
                 --repo "$REPOSITORY" || true
-              echo "## Cleared expired postpone, shutting down" >> "$GITHUB_STEP_SUMMARY"
             fi
+          fi
+
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "## Shutting down" >> "$GITHUB_STEP_SUMMARY"
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           echo "skip=false" >> "$GITHUB_OUTPUT"

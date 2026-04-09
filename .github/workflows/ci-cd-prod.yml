@@ -107,6 +107,18 @@ jobs:
       runMigration: ${{ needs.check-for-changes.outputs.hasMigrationChanges == 'true' }}
       ref: "refs/tags/v${{ inputs.version }}"
 
+  update-manifests:
+    name: Update manifest image tags for prod
+    needs: [deploy-apps, check-for-changes]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    uses: ./.github/workflows/workflow-dispatch-update-manifests.yml
+    with:
+      environment: prod
+      image_tag: ${{ inputs.version }}
+    secrets:
+      MANIFEST_APP_ID: ${{ secrets.MANIFEST_APP_ID }}
+      MANIFEST_APP_PRIVATE_KEY: ${{ secrets.MANIFEST_APP_PRIVATE_KEY }}
+
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for prod
     needs: [ deploy-apps, deploy-infra ]

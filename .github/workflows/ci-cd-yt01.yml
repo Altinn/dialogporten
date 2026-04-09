@@ -111,6 +111,18 @@ jobs:
       runMigration: false # DB may be off due to scale-to-zero, run migrations manually
       ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
 
+  update-manifests:
+    name: Update manifest image tags for yt01
+    needs: [deploy-apps, check-for-changes, resolve-version]
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    uses: ./.github/workflows/workflow-dispatch-update-manifests.yml
+    with:
+      environment: yt01
+      image_tag: ${{ needs.resolve-version.outputs.version }}
+    secrets:
+      MANIFEST_APP_ID: ${{ secrets.MANIFEST_APP_ID }}
+      MANIFEST_APP_PRIVATE_KEY: ${{ secrets.MANIFEST_APP_PRIVATE_KEY }}
+
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for yt01
     needs: [ deploy-apps, deploy-infra, resolve-version ]

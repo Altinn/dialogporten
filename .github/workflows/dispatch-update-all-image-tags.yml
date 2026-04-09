@@ -1,0 +1,28 @@
+name: Dispatch - Update all image tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - yt01
+          - tt02
+          - at23
+          - prod
+      image_tag:
+        description: "Image tag to set (e.g., 1.2.3-abc1234)"
+        required: true
+        type: string
+
+jobs:
+  dispatch:
+    uses: ./.github/workflows/workflow-dispatch-update-manifests.yml
+    with:
+      environment: ${{ inputs.environment }}
+      image_tag: ${{ inputs.image_tag }}
+    secrets:
+      MANIFEST_APP_ID: ${{ secrets.MANIFEST_APP_ID }}
+      MANIFEST_APP_PRIVATE_KEY: ${{ secrets.MANIFEST_APP_PRIVATE_KEY }}

@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
-      actions: write
       id-token: write
       contents: read
     steps:
@@ -291,9 +290,7 @@ jobs:
         if: inputs.postpone_until != ''
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
-          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
           POSTPONE_UNTIL: ${{ inputs.postpone_until }}
         shell: bash
         run: |
@@ -321,8 +318,7 @@ jobs:
               --env yt01 \
               --repo "$REPOSITORY"
             PRETTY_DATE=$(TZ=Europe/Oslo date -d "@$POSTPONE_TS" +"%b %-d, %Y %H:%M %Z")
-            GH_TOKEN="$GITHUB_TOKEN" gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-              -f "name=Scale YT01 on (postpone until $PRETTY_DATE)"
+            echo "## Shutdown postponed until $PRETTY_DATE" >> "$GITHUB_STEP_SUMMARY"
             echo "Shutdown postponed until $POSTPONE_UNTIL"
           else
             echo "Warning: Postpone date is in the past. Clearing any existing postpone."
@@ -366,15 +362,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
-      actions: write
       contents: read
     steps:
       - name: Clear postpone variable
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
-          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
         shell: bash
         run: |
           set -euo pipefail
@@ -385,8 +378,7 @@ jobs:
 
           if [[ -n "$POSTPONE_UNTIL" ]]; then
             PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$POSTPONE_UNTIL")
-            GH_TOKEN="$GITHUB_TOKEN" gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-              -f "name=Scale YT01 off (cleared postpone until $PRETTY_DATE)"
+            echo "## Cleared postpone (was until $PRETTY_DATE)" >> "$GITHUB_STEP_SUMMARY"
             gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
               --env yt01 \
               --repo "$REPOSITORY" || true

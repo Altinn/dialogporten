@@ -64,6 +64,9 @@ Keep the environment running until 20:00 tonight:
 - Or, if the environment is already running, just run it with `state: on` and the `postpone_until` value — the scale-on is idempotent
 - The time is interpreted as Norwegian time (CET/CEST), so no need to think about UTC offsets
 
+Clear an active postpone without scaling off:
+- Run the manual workflow with `state: on` and `postpone_until` set to a time in the past (e.g. `2020-01-01 00:00`) — this clears the variable, and the next scheduled shutdown will proceed normally
+
 Immediately shut down regardless of any postpone:
 - Run the manual workflow with `state: off` — this clears the postpone first
 

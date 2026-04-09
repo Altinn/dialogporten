@@ -18,7 +18,9 @@ internal sealed class ServiceDrivenSystemLabelMaskQueryStrategy : IQueryStrategy
     public string Name => "ServiceDrivenSystemLabelMask";
 
     public int Score(EndUserSearchContext context) =>
-        context.FeatureToggle.UseSystemLabelsMaskForEndUserDialogSearch ? 110 : 0;
+        context.FeatureToggle.UseSystemLabelsMaskForEndUserDialogSearch
+            ? QueryStrategyScores.Preferred
+            : QueryStrategyScores.Ineligible;
 
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {

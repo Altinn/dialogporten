@@ -37,8 +37,9 @@ jobs:
             if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then
               echo "Shutdown postponed until $POSTPONE_UNTIL. Skipping."
               echo "skip=true" >> "$GITHUB_OUTPUT"
+              PRETTY_DATE=$(date -u -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M UTC")
               gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-                -f "name=Scale YT01 Scheduled Shutdown — postponed until $POSTPONE_UNTIL"
+                -f "name=Scale YT01 Scheduled Shutdown — postponed until $PRETTY_DATE"
               exit 0
             else
               echo "Postpone date $POSTPONE_UNTIL is in the past. Clearing variable."

@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
-      actions: write
       contents: read
     outputs:
       skip: ${{ steps.check-postpone.outputs.skip }}
@@ -21,9 +20,7 @@ jobs:
         id: check-postpone
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
-          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
 
@@ -39,20 +36,17 @@ jobs:
               echo "Shutdown postponed until $POSTPONE_UNTIL. Skipping."
               echo "skip=true" >> "$GITHUB_OUTPUT"
               PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z")
-              GH_TOKEN="$GITHUB_TOKEN" gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-                -f "name=Scale YT01 Scheduled Shutdown — postponed until $PRETTY_DATE"
+              echo "## Shutdown postponed until $PRETTY_DATE" >> "$GITHUB_STEP_SUMMARY"
               exit 0
             else
               echo "Postpone date $POSTPONE_UNTIL is in the past. Clearing variable."
               gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
                 --env yt01 \
                 --repo "$REPOSITORY" || true
-              GH_TOKEN="$GITHUB_TOKEN" gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-                -f "name=Scale YT01 Scheduled Shutdown — cleared expired postpone, shutting down"
+              echo "## Cleared expired postpone, shutting down" >> "$GITHUB_STEP_SUMMARY"
             fi
           else
-            GH_TOKEN="$GITHUB_TOKEN" gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-              -f "name=Scale YT01 Scheduled Shutdown — shutting down"
+            echo "## Shutting down" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           echo "skip=false" >> "$GITHUB_OUTPUT"

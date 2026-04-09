@@ -20,7 +20,7 @@ on:
         required: false
         type: string
 
-run-name: Scale YT01 ${{ inputs.state }}${{ inputs.postpone_until && format(' (postpone until {0})', inputs.postpone_until) || '' }}
+run-name: Scale YT01 ${{ inputs.state }}
 
 jobs:
   scale-on:
@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
+      actions: write
       id-token: write
       contents: read
     steps:
@@ -291,6 +292,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
           POSTPONE_UNTIL: ${{ inputs.postpone_until }}
         shell: bash
         run: |
@@ -317,6 +319,9 @@ jobs:
               --body "$POSTPONE_UNTIL" \
               --env yt01 \
               --repo "$REPOSITORY"
+            PRETTY_DATE=$(date -u -d "@$POSTPONE_TS" +"%b %-d, %Y %H:%M UTC")
+            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
+              -f "name=Scale YT01 on (postpone until $PRETTY_DATE)"
             echo "Shutdown postponed until $POSTPONE_UNTIL"
           else
             echo "Warning: Postpone date is in the past. Clearing any existing postpone."

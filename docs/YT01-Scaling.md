@@ -51,11 +51,11 @@ Postponing prevents the scheduled shutdown from running until a given time. Key 
 
 - Set via the `postpone_until` input when scaling on (e.g. if you need the environment to stay up past 18:00 CEST / 17:00 CET)
 - **Can be set even when the environment is already running** — it just sets a future timestamp that the scheduled shutdown checks
-- The timestamp is stored as a GitHub environment variable (`YT01_DB_SHUTDOWN_POSTPONE_UNTIL`). You can check if a postpone is currently set and its value at [Settings > Variables > Actions](https://github.com/Altinn/dialogporten/settings/variables/actions)
+- The timestamp is stored as a GitHub environment variable (`YT01_DB_SHUTDOWN_POSTPONE_UNTIL`). You can also check the raw value at [Settings > Variables > Actions](https://github.com/Altinn/dialogporten/settings/variables/actions), but this requires elevated permissions (likely admin)
+- Every run of both workflows shows the current postpone state on the **Summary tab** — check the latest run of either workflow to see whether a postpone is active
 - The scheduled workflow checks this variable each day. If the timestamp is in the future, shutdown is skipped
 - The scheduled shutdown only runs once per day (at 16:00 UTC), so a postpone that extends past that time will keep the environment running for an additional 24 hours until the next scheduled run
 - Stale (past-dated) postpone values are automatically cleaned up by both the manual and scheduled workflows
-- Every run of both workflows shows the current postpone state on the **Summary tab** — check the latest run of either workflow to see whether a postpone is active
 
 ### Examples
 

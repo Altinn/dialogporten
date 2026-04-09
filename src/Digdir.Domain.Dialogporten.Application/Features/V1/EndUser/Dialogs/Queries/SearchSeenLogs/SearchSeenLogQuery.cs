@@ -82,6 +82,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         }
 
         return dialog.SeenLog
+            .OrderBy(x => x.CreatedAt)
             .Select(x =>
             {
                 var dto = x.ToDto();

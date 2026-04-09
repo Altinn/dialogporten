@@ -319,7 +319,7 @@ jobs:
               --body "$POSTPONE_UNTIL" \
               --env yt01 \
               --repo "$REPOSITORY"
-            PRETTY_DATE=$(date -u -d "@$POSTPONE_TS" +"%b %-d, %Y %H:%M UTC")
+            PRETTY_DATE=$(TZ=Europe/Oslo date -d "@$POSTPONE_TS" +"%b %-d, %Y %H:%M %Z")
             gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
               -f "name=Scale YT01 on (postpone until $PRETTY_DATE)"
             echo "Shutdown postponed until $POSTPONE_UNTIL"
@@ -382,7 +382,7 @@ jobs:
             --repo "$REPOSITORY" 2>/dev/null || echo "")
 
           if [[ -n "$POSTPONE_UNTIL" ]]; then
-            PRETTY_DATE=$(date -u -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M UTC" 2>/dev/null || echo "$POSTPONE_UNTIL")
+            PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$POSTPONE_UNTIL")
             gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
               -f "name=Scale YT01 off (cleared postpone until $PRETTY_DATE)"
             gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \

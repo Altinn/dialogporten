@@ -420,6 +420,3 @@ CLAUDE.md
 
 # Auto Claude data directory
 .auto-claude/
-
-# Generated OpenAPI documents (build-time)
-tmp/

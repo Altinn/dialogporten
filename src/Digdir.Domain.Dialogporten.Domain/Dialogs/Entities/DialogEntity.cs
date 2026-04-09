@@ -165,14 +165,25 @@ public sealed class DialogEntity :
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId)
+    public void OnSeen(string userId, DialogUserType.Values userTypeId)
     {
+        var lastSeen = SeenLog
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId)
+            .MaxBy(x => x.CreatedAt);
+
+        if (lastSeen is not null &&
+            lastSeen.CreatedAt > UpdatedAt &&
+            EndUserContext.DialogEndUserContextSystemLabels.All(x => x.SystemLabelId != SystemLabel.Values.MarkedAsUnopened))
+        {
+            return;
+        }
+
         // Use a deterministic id to make the seen-log insert idempotent.
         // If multiple seen events are produced without dialog changes in between,
         // they represent the same logical "seen" and should not create duplicates.
         var seenLogId = Id
-            .CreateDeterministicSubUuidV7($"{UpdatedAt:O}{endUserId}");
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, endUserId, userTypeId, seenLogId));
+            .CreateDeterministicSubUuidV7($"{UpdatedAt:O}{userId}");
+        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, userId, userTypeId, seenLogId));
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];

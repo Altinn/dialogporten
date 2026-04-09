@@ -74,17 +74,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             var userId = _userRegistry.GetCurrentUserId();
 
-            var lastSeen = dialog.SeenLog
-                .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId.ExternalIdWithPrefix)
-                .MaxBy(x => x.CreatedAt);
-
-            if (lastSeen is null ||
-                lastSeen.CreatedAt <= dialog.UpdatedAt ||
-                dialog.EndUserContext.DialogEndUserContextSystemLabels.Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened)
-                )
-            {
-                dialog.UpdateSeenAt(userId.ExternalIdWithPrefix, userId.Type);
-            }
+            dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
 
             var saveResult = await _unitOfWork
                 .DisableUpdatableFilter()

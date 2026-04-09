@@ -16,7 +16,7 @@ on:
         type: boolean
         default: true
       postpone_until:
-        description: "Postpone scheduled shutdown until this datetime (ISO 8601, e.g. 2026-03-01T20:00:00+01:00). Only used with 'on'."
+        description: "Postpone scheduled shutdown until this datetime in Norwegian time (e.g. 2026-03-01 20:00). Full ISO 8601 also accepted. Only used with 'on'."
         required: false
         type: string
 
@@ -303,14 +303,14 @@ jobs:
             echo "Error: postpone_until looks malformed (too long). Got: $POSTPONE_UNTIL"
             exit 1
           fi
-          if ! date -d "$POSTPONE_UNTIL" +%s > /dev/null 2>&1; then
+          if ! TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +%s > /dev/null 2>&1; then
             echo "Error: postpone_until is not a valid datetime. Got: $POSTPONE_UNTIL"
             exit 1
           fi
 
-          # Canonicalize to UTC so relative expressions (e.g. "tomorrow") are
-          # stored as a fixed timestamp and not reinterpreted on each scheduled run.
-          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s)
+          # Canonicalize to UTC. Plain datetimes (without offset) are interpreted
+          # as Norwegian time (Europe/Oslo) so users don't need to think about DST.
+          POSTPONE_TS=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +%s)
           POSTPONE_UNTIL=$(date -u -d "@$POSTPONE_TS" +"%Y-%m-%dT%H:%M:%SZ")
           NOW_TS=$(date +%s)
 

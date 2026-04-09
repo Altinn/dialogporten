@@ -234,6 +234,7 @@ internal static class PostgresFormattableStringBuilderExtensions
                 throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids must be greater than zero.");
             }
 
+            // `short` in C# maps to `smallint` in PostgreSQL, and both are 16-bit signed integers. So, to avoid touching the sign bit, there are 15 distinct values that can be used.
             if (systemLabelId > 15)
             {
                 throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids above 15 are not supported by the bitmask.");

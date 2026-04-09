@@ -16,7 +16,7 @@ on:
         type: boolean
         default: true
       postpone_until:
-        description: "Postpone scheduled shutdown until this datetime (ISO 8601, e.g. 2026-03-01T20:00:00+01:00). Only used with 'on'."
+        description: "Postpone scheduled shutdown until this datetime in Norwegian time (e.g. 2026-03-01 20:00). Full ISO 8601 also accepted. Only used with 'on'."
         required: false
         type: string
 
@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
+      actions: write
       id-token: write
       contents: read
     steps:
@@ -291,6 +292,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
           POSTPONE_UNTIL: ${{ inputs.postpone_until }}
         shell: bash
         run: |
@@ -301,14 +303,14 @@ jobs:
             echo "Error: postpone_until looks malformed (too long). Got: $POSTPONE_UNTIL"
             exit 1
           fi
-          if ! date -d "$POSTPONE_UNTIL" +%s > /dev/null 2>&1; then
+          if ! TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +%s > /dev/null 2>&1; then
             echo "Error: postpone_until is not a valid datetime. Got: $POSTPONE_UNTIL"
             exit 1
           fi
 
-          # Canonicalize to UTC so relative expressions (e.g. "tomorrow") are
-          # stored as a fixed timestamp and not reinterpreted on each scheduled run.
-          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s)
+          # Canonicalize to UTC. Plain datetimes (without offset) are interpreted
+          # as Norwegian time (Europe/Oslo) so users don't need to think about DST.
+          POSTPONE_TS=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +%s)
           POSTPONE_UNTIL=$(date -u -d "@$POSTPONE_TS" +"%Y-%m-%dT%H:%M:%SZ")
           NOW_TS=$(date +%s)
 
@@ -317,6 +319,9 @@ jobs:
               --body "$POSTPONE_UNTIL" \
               --env yt01 \
               --repo "$REPOSITORY"
+            PRETTY_DATE=$(TZ=Europe/Oslo date -d "@$POSTPONE_TS" +"%b %-d, %Y %H:%M %Z")
+            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
+              -f "name=Scale YT01 on (postpone until $PRETTY_DATE)"
             echo "Shutdown postponed until $POSTPONE_UNTIL"
           else
             echo "Warning: Postpone date is in the past. Clearing any existing postpone."
@@ -360,20 +365,30 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
+      actions: write
       contents: read
     steps:
       - name: Clear postpone variable
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         shell: bash
         run: |
           set -euo pipefail
 
-          echo "Clearing any existing postpone variable before scale-off..."
-          gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+          POSTPONE_UNTIL=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
             --env yt01 \
-            --repo "$REPOSITORY" || true
+            --repo "$REPOSITORY" 2>/dev/null || echo "")
+
+          if [[ -n "$POSTPONE_UNTIL" ]]; then
+            PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$POSTPONE_UNTIL")
+            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
+              -f "name=Scale YT01 off (cleared postpone until $PRETTY_DATE)"
+            gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+              --env yt01 \
+              --repo "$REPOSITORY" || true
+          fi
 
   scale-off:
     if: inputs.state == 'off'

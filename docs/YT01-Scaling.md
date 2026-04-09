@@ -55,6 +55,7 @@ Postponing prevents the scheduled shutdown from running until a given time. Key 
 - The scheduled workflow checks this variable each day. If the timestamp is in the future, shutdown is skipped
 - The scheduled shutdown only runs once per day (at 16:00 UTC), so a postpone that extends past that time will keep the environment running for an additional 24 hours until the next scheduled run
 - Stale (past-dated) postpone values are automatically cleaned up by both the manual and scheduled workflows
+- Every run of both workflows shows the current postpone state on the **Summary tab** — check the latest run of either workflow to see whether a postpone is active
 
 ### Examples
 

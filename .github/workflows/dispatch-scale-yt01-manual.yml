@@ -306,8 +306,10 @@ jobs:
             exit 1
           fi
 
-          # Validate the date is in the future
+          # Canonicalize to UTC so relative expressions (e.g. "tomorrow") are
+          # stored as a fixed timestamp and not reinterpreted on each scheduled run.
           POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s)
+          POSTPONE_UNTIL=$(date -u -d "@$POSTPONE_TS" +"%Y-%m-%dT%H:%M:%SZ")
           NOW_TS=$(date +%s)
 
           if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then

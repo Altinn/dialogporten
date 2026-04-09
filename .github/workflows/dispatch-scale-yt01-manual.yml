@@ -20,7 +20,7 @@ on:
         required: false
         type: string
 
-run-name: Scale YT01 ${{ inputs.state }}
+run-name: Scale YT01 ${{ inputs.state }}${{ inputs.postpone_until && format(' (postpone until {0})', inputs.postpone_until) || '' }}
 
 jobs:
   scale-on:

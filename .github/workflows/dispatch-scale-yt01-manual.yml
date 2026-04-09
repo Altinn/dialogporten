@@ -365,20 +365,30 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
+      actions: write
       contents: read
     steps:
       - name: Clear postpone variable
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         shell: bash
         run: |
           set -euo pipefail
 
-          echo "Clearing any existing postpone variable before scale-off..."
-          gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+          POSTPONE_UNTIL=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
             --env yt01 \
-            --repo "$REPOSITORY" || true
+            --repo "$REPOSITORY" 2>/dev/null || echo "")
+
+          if [[ -n "$POSTPONE_UNTIL" ]]; then
+            PRETTY_DATE=$(date -u -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M UTC" 2>/dev/null || echo "$POSTPONE_UNTIL")
+            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
+              -f "name=Scale YT01 off (cleared postpone until $PRETTY_DATE)"
+            gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+              --env yt01 \
+              --repo "$REPOSITORY" || true
+          fi
 
   scale-off:
     if: inputs.state == 'off'

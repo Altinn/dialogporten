@@ -1,7 +1,9 @@
 using System.Net;
+using System.Text.Json;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using static Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesActivities_DialogActivityType;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Activities.Queries;
 
@@ -13,7 +15,18 @@ public class GetActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
-        var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId);
+        var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId, null, x =>
+        {
+            x.Type = Information;
+            x.Description =
+            [
+                new()
+                {
+                    LanguageCode = "en",
+                    Value = "Test activity"
+                }
+            ];
+        });
 
         // Act
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetActivityDialogActivity(
@@ -26,5 +39,8 @@ public class GetActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Activity content was null.");
         content.Id.Should().Be(activityId);
+
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(response.Content));
     }
 }

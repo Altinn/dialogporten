@@ -147,11 +147,17 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
         IDialogSearchRepository searchRepository,
         IUser user)
     {
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _searchRepository = searchRepository ?? throw new ArgumentNullException(nameof(searchRepository));
-        _user = user ?? throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(userRegistry);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(searchRepository);
+        ArgumentNullException.ThrowIfNull(user);
+
+        _clock = clock;
+        _userRegistry = userRegistry;
+        _altinnAuthorization = altinnAuthorization;
+        _searchRepository = searchRepository;
+        _user = user;
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)

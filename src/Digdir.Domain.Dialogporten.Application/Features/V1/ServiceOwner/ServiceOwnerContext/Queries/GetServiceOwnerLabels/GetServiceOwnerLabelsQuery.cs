@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -21,17 +20,17 @@ public sealed partial class GetServiceOwnerLabelsResult : OneOfBase<ServiceOwner
 internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetServiceOwnerLabelsQuery, GetServiceOwnerLabelsResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
     public GetServiceOwnerLabelsQueryHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IUserResourceRegistry userResourceRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _db = db;
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public async Task<GetServiceOwnerLabelsResult> Handle(GetServiceOwnerLabelsQuery request, CancellationToken cancellationToken)
@@ -54,7 +53,7 @@ internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetSer
         return new ServiceOwnerLabelResultDto
         {
             Revision = serviceOwnerContext.Revision,
-            Labels = _mapper.Map<List<ServiceOwnerLabelDto>>(serviceOwnerContext.ServiceOwnerLabels),
+            Labels = [.. serviceOwnerContext.ServiceOwnerLabels.Select(x => x.ToDto())],
         };
     }
 }

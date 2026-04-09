@@ -39,7 +39,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.SeenSinceLastUpdate.Should().HaveCount(1);
-        
+
         var seenEntry = content.SeenSinceLastUpdate.Single();
         seenEntry.SeenBy.ActorId.Should().Contain(NorwegianPersonIdentifier.HashPrefix);
         seenEntry.IsCurrentEndUser.Should().BeTrue();

@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -27,18 +26,18 @@ public sealed partial class GetActivityResult : OneOfBase<ActivityDto, EntityNot
 
 internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery, GetActivityResult>
 {
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogDbContext _dbContext;
 
     public GetActivityQueryHandler(
         IDialogDbContext dbContext,
-        IMapper mapper,
         IAltinnAuthorization altinnAuthorization)
     {
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+
+        _dbContext = dbContext;
+        _altinnAuthorization = altinnAuthorization;
     }
 
     public async Task<GetActivityResult> Handle(GetActivityQuery request,
@@ -91,6 +90,6 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
         }
 
         activity.FilterLocalizations(request.AcceptedLanguages);
-        return _mapper.Map<ActivityDto>(activity);
+        return activity.ToDto();
     }
 }

@@ -62,6 +62,8 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         lookup.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
         lookup.Party.Should().NotBeEmpty().And.Be(party);
         lookup.ServiceResource.Id.Should().NotBeNullOrWhiteSpace();
+        lookup.ServiceResource.MinimumAuthenticationLevel.Should().Be(2);
         lookup.ServiceOwner.Code.Should().NotBeNullOrWhiteSpace();
+        lookup.Title.Should().NotBeNull().And.NotBeEmpty();
     }
 }

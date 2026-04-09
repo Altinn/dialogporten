@@ -15,9 +15,13 @@ internal sealed class DevelopmentResourcePolicyInformationSyncHostedService : IH
 
     public DevelopmentResourcePolicyInformationSyncHostedService(IServiceProvider serviceProvider, IHostEnvironment environment, IConfiguration configuration)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        ArgumentNullException.ThrowIfNull(serviceProvider);
+        ArgumentNullException.ThrowIfNull(environment);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        _serviceProvider = serviceProvider;
+        _environment = environment;
+        _configuration = configuration;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

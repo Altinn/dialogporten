@@ -4,6 +4,10 @@ query GetDialogLookup($instanceRef: String!) {
       dialogId
       instanceRef
       party
+      title {
+        languageCode
+        value
+      }
       serviceResource {
         id
       }

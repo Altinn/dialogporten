@@ -1,12 +1,14 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabels;
 
-internal sealed class MappingProfile : Profile
+internal static class ServiceOwnerLabelMapExtensions
 {
-    public MappingProfile()
+    extension(DialogServiceOwnerLabel source)
     {
-        CreateMap<DialogServiceOwnerLabel, ServiceOwnerLabelDto>();
+        internal ServiceOwnerLabelDto ToDto() => new()
+        {
+            Value = source.Value
+        };
     }
 }

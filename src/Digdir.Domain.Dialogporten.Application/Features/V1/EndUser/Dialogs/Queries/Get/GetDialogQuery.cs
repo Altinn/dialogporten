@@ -46,13 +46,21 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         IAltinnAuthorization altinnAuthorization,
         IDialogTokenGenerator dialogTokenGenerator)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _dialogTokenGenerator = dialogTokenGenerator ?? throw new ArgumentNullException(nameof(dialogTokenGenerator));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(userRegistry);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(dialogTokenGenerator);
+
+        _db = db;
+        _mapper = mapper;
+        _unitOfWork = unitOfWork;
+        _clock = clock;
+        _userRegistry = userRegistry;
+        _altinnAuthorization = altinnAuthorization;
+        _dialogTokenGenerator = dialogTokenGenerator;
     }
 
     public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)

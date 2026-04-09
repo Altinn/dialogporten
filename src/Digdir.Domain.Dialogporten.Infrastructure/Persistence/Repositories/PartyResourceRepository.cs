@@ -19,19 +19,33 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 /// Input parties and resources are expected as full URNs. Internally, parties and resources are handled
 /// in unprefixed form together with a separate short party prefix.
 /// </summary>
-internal sealed class PartyResourceRepository(
-    NpgsqlDataSource dataSource,
-    IOptionsSnapshot<ApplicationSettings> applicationSettings,
-    IFusionCacheProvider cacheProvider) : IPartyResourceReferenceRepository
+internal sealed class PartyResourceRepository : IPartyResourceReferenceRepository
 {
     private const string ResourcePrefix = "urn:altinn:resource:";
     private const string CacheKeyPrefix = "ps:";
 
     private static readonly StringComparer Comparer = StringComparer.InvariantCultureIgnoreCase;
 
-    private readonly NpgsqlDataSource _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
-    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings = applicationSettings ?? throw new ArgumentNullException(nameof(applicationSettings));
-    private readonly IFusionCache _cache = cacheProvider.GetCache(nameof(IPartyResourceReferenceRepository)) ?? throw new ArgumentNullException(nameof(cacheProvider));
+    private readonly NpgsqlDataSource _dataSource;
+    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
+    private readonly IFusionCache _cache;
+
+    public PartyResourceRepository(
+        NpgsqlDataSource dataSource,
+        IOptionsSnapshot<ApplicationSettings> applicationSettings,
+        IFusionCacheProvider cacheProvider)
+    {
+        ArgumentNullException.ThrowIfNull(dataSource);
+        ArgumentNullException.ThrowIfNull(applicationSettings);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+
+        var cache = cacheProvider.GetCache(nameof(IPartyResourceReferenceRepository));
+        ArgumentNullException.ThrowIfNull(cache);
+
+        _dataSource = dataSource;
+        _applicationSettings = applicationSettings;
+        _cache = cache;
+    }
 
     public async Task<Dictionary<string, HashSet<string>>> GetReferencedResourcesByParty(
         IReadOnlyCollection<string> parties,

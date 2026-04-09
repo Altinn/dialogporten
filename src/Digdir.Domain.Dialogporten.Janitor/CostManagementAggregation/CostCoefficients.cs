@@ -9,7 +9,9 @@ public sealed class CostCoefficients
 
     public CostCoefficients(IOptions<CostCoefficientsOptions> options)
     {
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+
+        _options = options.Value;
         _coefficients = new Dictionary<TransactionType, decimal>
         {
             { TransactionType.CreateDialog, _options.CreateDialog },

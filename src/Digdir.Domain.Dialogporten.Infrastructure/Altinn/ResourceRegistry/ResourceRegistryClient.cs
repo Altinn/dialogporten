@@ -30,8 +30,11 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         ArgumentNullException.ThrowIfNull(cacheProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
+        var cache = cacheProvider.GetCache(nameof(ResourceRegistry));
+        ArgumentNullException.ThrowIfNull(cache);
+
         _client = client;
-        _cache = cacheProvider.GetCache(nameof(ResourceRegistry)) ?? throw new ArgumentNullException(nameof(cacheProvider));
+        _cache = cache;
         _logger = logger;
     }
 

@@ -28,9 +28,13 @@ internal sealed class DialogTransmissionAppender : IDialogTransmissionAppender
         IClock clock,
         IDomainContext domainContext)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(domainContext);
+
+        _db = db;
+        _clock = clock;
+        _domainContext = domainContext;
     }
 
     public DialogTransmissionAppendResult Append(

@@ -16,7 +16,9 @@ public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, S
 
     public GetDialogLookupEndpoint(ISender sender)
     {
-        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
+        ArgumentNullException.ThrowIfNull(sender);
+
+        _sender = sender;
     }
 
     public override void Configure()

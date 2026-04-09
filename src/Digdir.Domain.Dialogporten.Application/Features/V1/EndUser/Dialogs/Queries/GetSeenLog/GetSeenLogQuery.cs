@@ -34,10 +34,15 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
         IAltinnAuthorization altinnAuthorization,
         IUserRegistry userRegistry)
     {
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        _altinnAuthorization = altinnAuthorization ?? throw new ArgumentNullException(nameof(altinnAuthorization));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(altinnAuthorization);
+        ArgumentNullException.ThrowIfNull(userRegistry);
+
+        _mapper = mapper;
+        _dbContext = dbContext;
+        _altinnAuthorization = altinnAuthorization;
+        _userRegistry = userRegistry;
     }
 
     public async Task<GetSeenLogResult> Handle(GetSeenLogQuery request,

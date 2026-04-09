@@ -27,9 +27,13 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
 
     public SearchTransmissionQueryHandler(IDialogDbContext db, IMapper mapper, IUserResourceRegistry userResourceRegistry)
     {
-        _db = db ?? throw new ArgumentNullException(nameof(db));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+
+        _db = db;
+        _mapper = mapper;
+        _userResourceRegistry = userResourceRegistry;
     }
 
     public async Task<SearchTransmissionResult> Handle(SearchTransmissionQuery request, CancellationToken cancellationToken)

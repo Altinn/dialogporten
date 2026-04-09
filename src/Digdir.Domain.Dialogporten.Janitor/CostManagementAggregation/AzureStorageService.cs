@@ -15,9 +15,13 @@ public sealed partial class AzureStorageService
         ILogger<AzureStorageService> logger,
         IOptions<MetricsAggregationOptions> options)
     {
-        _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(blobServiceClient);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(options);
+
+        _blobServiceClient = blobServiceClient;
+        _logger = logger;
+        _options = options.Value;
     }
 
     public async Task UploadParquetFileAsync(byte[] parquetData, string fileName, CancellationToken cancellationToken = default)

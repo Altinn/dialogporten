@@ -296,8 +296,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Validate the date is in the future
-          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s 2>/dev/null || echo "0")
+          # Validate input is a single parseable datetime
+          if [[ ${#POSTPONE_UNTIL} -gt 35 ]]; then
+            echo "Error: postpone_until looks malformed (too long). Got: $POSTPONE_UNTIL"
+            exit 1
+          fi
+          if ! date -d "$POSTPONE_UNTIL" +%s > /dev/null 2>&1; then
+            echo "Error: postpone_until is not a valid datetime. Got: $POSTPONE_UNTIL"
+            exit 1
+          fi
+
+          # Canonicalize to UTC so relative expressions (e.g. "tomorrow") are
+          # stored as a fixed timestamp and not reinterpreted on each scheduled run.
+          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s)
+          POSTPONE_UNTIL=$(date -u -d "@$POSTPONE_TS" +"%Y-%m-%dT%H:%M:%SZ")
           NOW_TS=$(date +%s)
 
           if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then

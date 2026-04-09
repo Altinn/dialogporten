@@ -37,9 +37,13 @@ internal sealed class ServiceResourceAuthorizer : IServiceResourceAuthorizer
         IResourceRegistry resourceRegistry,
         IDomainContext domainContext)
     {
-        _userResourceRegistry = userResourceRegistry ?? throw new ArgumentNullException(nameof(userResourceRegistry));
-        _resourceRegistry = resourceRegistry ?? throw new ArgumentNullException(nameof(resourceRegistry));
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
+        ArgumentNullException.ThrowIfNull(resourceRegistry);
+        ArgumentNullException.ThrowIfNull(domainContext);
+
+        _userResourceRegistry = userResourceRegistry;
+        _resourceRegistry = resourceRegistry;
+        _domainContext = domainContext;
     }
 
     public async Task<AuthorizeServiceResourcesResult> AuthorizeServiceResources(

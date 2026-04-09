@@ -1,8 +1,14 @@
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using AwesomeAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get.GetDialogLookupQuery;
@@ -150,6 +156,166 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
+
+    [Fact]
+    public Task Get_Should_Return_NonSensitiveTitle_As_Title_When_EndUser_Auth_Level_Is_Too_Low()
+    {
+        var party = Party;
+        const string serviceResource = "urn:altinn:resource:test-service-auth-level-too-low";
+
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
+            .AsIntegrationTestUser(x => x.WithClaim(
+                ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaSubstantial))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.Dto.Content!.Title.Value =
+                [
+                    new LocalizationDto { LanguageCode = "nb", Value = "Gradert tittel" }
+                ];
+                x.Dto.Content.NonSensitiveTitle = new ContentValueDto
+                {
+                    Value =
+                    [
+                        new LocalizationDto { LanguageCode = "nb", Value = "Ugradert tittel" }
+                    ]
+                };
+            })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel: 4))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.Title.Should().ContainSingle();
+                result.Title[0].Value.Should().Be("Ugradert tittel");
+                result.AuthorizationEvidence.CurrentAuthenticationLevel.Should().Be(3);
+            });
+    }
+
+    [Fact]
+    public Task Get_Should_Fall_Back_To_Title_When_EndUser_Auth_Level_Is_Too_Low_And_NonSensitiveTitle_Is_Not_Set()
+    {
+        var party = Party;
+        const string serviceResource = "urn:altinn:resource:test-service-auth-level-title-fallback";
+
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
+            .AsIntegrationTestUser(x => x.WithClaim(
+                ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaSubstantial))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.Dto.Content!.Title.Value =
+                [
+                    new LocalizationDto { LanguageCode = "nb", Value = "Gradert tittel" }
+                ];
+                x.Dto.Content.NonSensitiveTitle = null;
+            })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel: 4))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.Title.Should().ContainSingle();
+                result.Title[0].Value.Should().Be("Gradert tittel");
+            });
+    }
+
+    [Fact]
+    public Task Get_Should_Return_Title_When_EndUser_Auth_Level_Is_Sufficient_Even_If_NonSensitiveTitle_Is_Set()
+    {
+        var party = Party;
+        const string serviceResource = "urn:altinn:resource:test-service-auth-level-sufficient";
+
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
+            .AsIntegrationTestUser(x => x.WithClaim(
+                ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaHigh))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.Dto.Content!.Title.Value =
+                [
+                    new LocalizationDto { LanguageCode = "nb", Value = "Gradert tittel" }
+                ];
+                x.Dto.Content.NonSensitiveTitle = new ContentValueDto
+                {
+                    Value =
+                    [
+                        new LocalizationDto { LanguageCode = "nb", Value = "Ugradert tittel" }
+                    ]
+                };
+            })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel: 4))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.Title.Should().ContainSingle();
+                result.Title[0].Value.Should().Be("Gradert tittel");
+                result.AuthorizationEvidence.CurrentAuthenticationLevel.Should().Be(4);
+            });
+    }
+
+    [Fact]
+    public Task Get_Should_Prune_Selected_Title_When_AcceptLanguage_Is_Set()
+    {
+        var party = Party;
+        const string serviceResource = "urn:altinn:resource:test-service-title-pruning";
+
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
+            .AsIntegrationTestUser(x => x.WithClaim(
+                ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaSubstantial))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.Dto.Content!.Title.Value =
+                [
+                    new LocalizationDto { LanguageCode = "nb", Value = "Gradert tittel" },
+                    new LocalizationDto { LanguageCode = "en", Value = "Sensitive title" }
+                ];
+                x.Dto.Content.NonSensitiveTitle = new ContentValueDto
+                {
+                    Value =
+                    [
+                        new LocalizationDto { LanguageCode = "nb", Value = "Ugradert tittel" },
+                        new LocalizationDto { LanguageCode = "en", Value = "Non-sensitive title" }
+                    ]
+                };
+            })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel: 4))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}",
+                AcceptedLanguages = [new AcceptedLanguage("en", 100)]
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.Title.Should().ContainSingle();
+                result.Title[0].LanguageCode.Should().Be("en");
+                result.Title[0].Value.Should().Be("Non-sensitive title");
+            });
+    }
 
     [Fact]
     public Task Get_Should_Set_ViaInstanceDelegation_From_AuthorizedPartiesInstances()
@@ -319,6 +485,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 x.Dto.Party = party;
                 x.Dto.ServiceResource = serviceResource;
             })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel: 4))
             .SeedSubjectResources(serviceResource, [roleSubject])
             .SendCommand(_ => new GetDialogLookupQuery
             {
@@ -326,6 +493,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
+                result.ServiceResource.MinimumAuthenticationLevel.Should().Be(4);
                 result.AuthorizationEvidence.ViaRole.Should().BeTrue();
                 result.AuthorizationEvidence.ViaAccessPackage.Should().BeFalse();
                 result.AuthorizationEvidence.ViaResourceDelegation.Should().BeFalse();
@@ -457,4 +625,47 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             })
             .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ValidationError>(result =>
                 result.Errors.Should().ContainSingle());
+
+    private static async Task SeedMinimumAuthenticationLevel(
+        FlowContext ctx,
+        string serviceResource,
+        int minimumAuthenticationLevel)
+    {
+        using var scope = ctx.Application.GetServiceProvider().CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        db.ResourcePolicyInformation.Add(new()
+        {
+            Resource = serviceResource,
+            MinimumAuthenticationLevel = minimumAuthenticationLevel
+        });
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+    }
+
+    private static void ConfigureLookupAccessViaResourceDelegation(
+        IAltinnAuthorization altinnAuthorization,
+        string party,
+        string serviceResource)
+    {
+        altinnAuthorization.GetAuthorizedPartiesForLookup(
+                null!,
+                Arg.Any<List<string>>(),
+                Arg.Any<CancellationToken>())
+            .ReturnsForAnyArgs(new AuthorizedPartiesResult
+            {
+                AuthorizedParties =
+                [
+                    new AuthorizedParty
+                    {
+                        Party = party,
+                        PartyUuid = Guid.NewGuid(),
+                        Name = "Party",
+                        AuthorizedRolesAndAccessPackages = [],
+                        AuthorizedResources = [serviceResource],
+                        AuthorizedInstances = []
+                    }
+                ]
+            });
+    }
 }

@@ -23,9 +23,13 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         IDomainContext domainContext,
         IPartyNameRegistry partyNameRegistry)
     {
-        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
-        _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
-        _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
+        ArgumentNullException.ThrowIfNull(transactionTime);
+        ArgumentNullException.ThrowIfNull(domainContext);
+        ArgumentNullException.ThrowIfNull(partyNameRegistry);
+
+        _domainContext = domainContext;
+        _partyNameRegistry = partyNameRegistry;
+        _transactionTime = transactionTime;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(

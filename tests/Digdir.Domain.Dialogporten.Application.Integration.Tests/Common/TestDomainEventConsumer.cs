@@ -11,7 +11,8 @@ internal sealed class TestDomainEventConsumer<T> : IConsumer<T>
 
     public TestDomainEventConsumer(IPublisher publisher)
     {
-        _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
+        ArgumentNullException.ThrowIfNull(publisher);
+        _publisher = publisher;
     }
 
     public async Task Consume(ConsumeContext<T> context) => await _publisher.Publish(context.Message);

@@ -17,6 +17,9 @@ on:
       MANIFEST_APP_PRIVATE_KEY:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   dispatch:
     name: Dispatch to dialogporten-manifests

@@ -4,12 +4,9 @@
         <!-- In order to support doc blocks for Swagger generation in PatchDialogsController.cs -->
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>1591</NoWarn> <!-- Disable warnings for missing XML comments -->
-        <!-- ASP.NET Core built-in OpenAPI: build-time generation disabled because the app
-             requires infrastructure settings (DB, Redis, etc.) to start. Use the runtime
-             endpoint at /openapi/v1.json instead, or enable these and provide config. -->
         <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
         <OpenApiGenerateDocumentsOnBuild>true</OpenApiGenerateDocumentsOnBuild>
-        <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/../../tmp</OpenApiDocumentsDirectory>
+        <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/</OpenApiDocumentsDirectory>
     </PropertyGroup>
 
     <ItemGroup>
@@ -38,6 +35,27 @@
 
     <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">
         <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_Net100) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /output:$(TargetDir)swagger.json /verbose:true"/>
+    </Target>
+
+    <Target Name="NormalizeGeneratedOpenApiDocuments" AfterTargets="GenerateOpenApiDocuments">
+        <ItemGroup>
+            <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_enduser.json"
+                                       Condition="Exists('$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_enduser.json')">
+                <TargetPath>$(OpenApiDocumentsDirectory)openapi.enduser.json</TargetPath>
+            </_GeneratedOpenApiDocument>
+            <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_serviceowner.json"
+                                       Condition="Exists('$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_serviceowner.json')">
+                <TargetPath>$(OpenApiDocumentsDirectory)openapi.serviceowner.json</TargetPath>
+            </_GeneratedOpenApiDocument>
+        </ItemGroup>
+
+        <Copy SourceFiles="@(_GeneratedOpenApiDocument)"
+              DestinationFiles="@(_GeneratedOpenApiDocument->'%(TargetPath)')"
+              SkipUnchangedFiles="true" />
+        <Delete Files="@(_GeneratedOpenApiDocument)" />
+        <WriteLinesToFile File="$(BaseIntermediateOutputPath)$(MSBuildProjectName).OpenApiFiles.cache"
+                          Lines="@(_GeneratedOpenApiDocument->'%(TargetPath)')"
+                          Overwrite="true" />
     </Target>
 
 </Project>

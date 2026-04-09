@@ -59,6 +59,8 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
                 .Include(x => x.Transmissions)
                     .ThenInclude(x => x.Sender)
                     .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.ServiceOwnerContext)
+                    .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                     cancellationToken: ct), cancellationToken);

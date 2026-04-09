@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
-using Xunit;
 using Xunit.v3;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;

@@ -1,10 +1,14 @@
-﻿# Deploys the created release to yt01
+﻿# Deploys a release to yt01. Triggered manually or from the scale-on workflow.
 name: CI/CD YT01
-run-name: CI/CD YT01 ${{ github.event.client_payload.version && format('({0})', github.event.client_payload.version) || '' }}
+run-name: CI/CD YT01 ${{ inputs.version && format('({0})', inputs.version) || '(latest)' }}
 
 on:
-  repository_dispatch:
-    types: [release_created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to deploy (e.g. 1.23.4). Leave empty to auto-detect latest release."
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -12,9 +16,32 @@ concurrency:
 permissions:
   contents: read
   id-token: write
-  pull-requests: read
+  issues: write
+  pull-requests: write
 
 jobs:
+  resolve-version:
+    name: Resolve deploy version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - name: Resolve version
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$INPUT_VERSION" ]]; then
+            echo "Using provided version: $INPUT_VERSION"
+            echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            VERSION=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q '.tagName' | sed 's/^v//')
+            echo "Auto-detected latest release: $VERSION"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
@@ -34,7 +61,7 @@ jobs:
   deploy-infra:
     name: Deploy infra to yt01
     if: ${{ needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
-    needs: [check-for-changes]
+    needs: [check-for-changes, resolve-version]
     uses: ./.github/workflows/workflow-deploy-infra.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -47,24 +74,24 @@ jobs:
     with:
       environment: yt01
       region: norwayeast
-      version: ${{ github.event.client_payload.version }}
-      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+      version: ${{ needs.resolve-version.outputs.version }}
+      ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
 
   store-infra-version:
     name: Store Latest Deployed Infra Version as GitHub Variable
-    needs: [deploy-infra]
+    needs: [deploy-infra, resolve-version]
     if: ${{ needs.deploy-infra.result == 'success' }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_INFRA_VERSION
-      variable_value: ${{ github.event.client_payload.version }}
+      variable_value: ${{ needs.resolve-version.outputs.version }}
       environment: yt01
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
 
   deploy-apps:
     name: Deploy apps to yt01
-    needs: [check-for-changes, deploy-infra]
+    needs: [check-for-changes, deploy-infra, resolve-version]
     if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:
@@ -80,17 +107,27 @@ jobs:
       AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
     with:
       environment: yt01
-      version: ${{ github.event.client_payload.version }}
+      version: ${{ needs.resolve-version.outputs.version }}
       runMigration: false # DB may be off due to scale-to-zero, run migrations manually
-      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+      ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
+
+  tag-issues-with-environment:
+    name: Tag deployed PRs and issues for yt01
+    needs: [ deploy-apps, deploy-infra, resolve-version ]
+    if: ${{ always() && !failure() && !cancelled() && (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
+    uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
+    with:
+      environment-label: yt01
+      version: ${{ needs.resolve-version.outputs.version }}
+
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
-    needs: [deploy-apps]
+    needs: [deploy-apps, resolve-version]
     if: ${{ always() && !failure() && needs.deploy-apps.outputs.deployment_executed == 'true' }}
     uses: ./.github/workflows/workflow-store-github-env-variable.yml
     with:
       variable_name: LATEST_DEPLOYED_APPS_VERSION
-      variable_value: ${{ github.event.client_payload.version }}
+      variable_value: ${{ needs.resolve-version.outputs.version }}
       environment: yt01
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
@@ -99,7 +136,7 @@ jobs:
     name: "Run K6 functional end-to-end tests"
     # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
     if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
-    needs: [deploy-apps, check-for-changes]
+    needs: [deploy-apps, check-for-changes, resolve-version]
     uses: ./.github/workflows/workflow-run-k6-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
@@ -108,7 +145,7 @@ jobs:
       environment: yt01
       apiVersion: v1
       testSuitePath: tests/k6/suites/all-single-pass.js
-      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+      ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
     permissions:
       checks: write
       pull-requests: write
@@ -116,31 +153,31 @@ jobs:
   run-graphql-e2e-tests:
     name: "Run GraphQL E2E tests"
     if: ${{ always() && !failure() && !cancelled() && (needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
-    needs: [ run-e2e-tests, check-for-changes ]
+    needs: [ run-e2e-tests, check-for-changes, resolve-version ]
     uses: ./.github/workflows/workflow-run-graphql-e2e-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
       TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
     with:
       environment: yt01
-      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+      ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
 
   run-webapi-e2e-tests:
     name: "Run WebAPI E2E tests"
     if: ${{ always() && !failure() && !cancelled() && (needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
-    needs: [ run-e2e-tests, check-for-changes ]
+    needs: [ run-e2e-tests, check-for-changes, resolve-version ]
     uses: ./.github/workflows/workflow-run-webapi-e2e-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
       TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
     with:
       environment: yt01
-      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+      ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
 
   run-performance-tests:
     name: "Run K6 performance tests"
     if: ${{ always() && !failure() && !cancelled() }}
-    needs: [run-e2e-tests]
+    needs: [run-e2e-tests, resolve-version]
     uses: ./.github/workflows/workflow-run-k6-performance.yml
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -165,7 +202,7 @@ jobs:
       breakpoint: false
       abortOnFail: false
       numberOfEndUsers: 200
-      ref: "refs/tags/v${{ github.event.client_payload.version }}"
+      ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
     permissions:
       checks: write
       pull-requests: write
@@ -174,7 +211,7 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [deploy-infra, deploy-apps, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests, run-performance-tests]
+    needs: [deploy-infra, deploy-apps, tag-issues-with-environment, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests, run-performance-tests]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:
@@ -193,10 +230,10 @@ jobs:
     name: Send deployment to Swarmia
     if: ${{ always() && !failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-swarmia-deployment.yml
-    needs: [ deploy-infra, deploy-apps ]
+    needs: [ deploy-infra, deploy-apps, resolve-version ]
     with:
       app-name: dialogporten
       environment: 'yt01'
-      version: ${{ github.event.client_payload.version }}
+      version: ${{ needs.resolve-version.outputs.version }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}

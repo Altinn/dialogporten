@@ -53,13 +53,21 @@ public sealed class DialogTransmission :
     public DialogTransmissionType Type { get; set; } = null!;
 
     public void OnCreate(AggregateNode self, DateTimeOffset utcNow)
-        => _domainEvents.Add(new DialogTransmissionCreatedDomainEvent(
+    {
+        _domainEvents.Add(new DialogTransmissionCreatedDomainEvent(
             DialogId,
             Id,
+            Sender.ActorTypeId,
             Dialog.ServiceResource,
             Dialog.Party,
             Dialog.Process,
             Dialog.PrecedingProcess));
+
+        if (Dialog.VisibleFrom is { } visibleFrom && visibleFrom > utcNow)
+        {
+            CreatedAt = visibleFrom;
+        }
+    }
 
     private readonly List<IDomainEvent> _domainEvents = [];
     public IEnumerable<IDomainEvent> PopDomainEvents()

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -15,6 +14,7 @@ public interface IUserResourceRegistry
     Task<IReadOnlyCollection<string>> GetCurrentUserResourceIds(CancellationToken cancellationToken);
     bool UserCanModifyResourceType(string serviceResourceType);
     bool IsCurrentUserServiceOwnerAdmin();
+    bool CurrentUserCanChangeTransmissions();
     Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken);
 }
 
@@ -105,6 +105,8 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
     };
 
     public bool IsCurrentUserServiceOwnerAdmin() => _user.GetPrincipal().HasScope(AuthorizationScope.ServiceOwnerAdminScope);
+
+    public bool CurrentUserCanChangeTransmissions() => _user.GetPrincipal().HasScope(AuthorizationScope.ServiceProviderChangeTransmissions);
 }
 
 internal sealed class LocalDevelopmentUserResourceRegistryDecorator : IUserResourceRegistry
@@ -124,6 +126,7 @@ internal sealed class LocalDevelopmentUserResourceRegistryDecorator : IUserResou
 
     public bool UserCanModifyResourceType(string serviceResourceType) => true;
     public bool IsCurrentUserServiceOwnerAdmin() => true;
+    public bool CurrentUserCanChangeTransmissions() => true;
 
     public Task<string> GetCurrentUserOrgShortName(CancellationToken cancellationToken) =>
         _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);

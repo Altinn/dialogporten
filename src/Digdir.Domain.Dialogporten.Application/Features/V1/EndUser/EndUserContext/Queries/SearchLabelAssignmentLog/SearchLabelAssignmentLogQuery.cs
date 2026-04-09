@@ -41,6 +41,8 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
                         .ThenInclude(x => x.LabelAssignmentLogs)
                         .ThenInclude(x => x.PerformedBy)
                         .ThenInclude(x => x.ActorNameEntity)
+                    .Include(x => x.ServiceOwnerContext)
+                        .ThenInclude(x => x.ServiceOwnerLabels)
                     .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                         cancellationToken: ct),
             cancellationToken);

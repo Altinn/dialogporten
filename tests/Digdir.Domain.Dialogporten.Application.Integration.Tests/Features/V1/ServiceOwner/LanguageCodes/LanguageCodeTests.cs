@@ -9,31 +9,68 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class LanguageCodeTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
-    private sealed class CreateDialogLanguageCodeTestData : TheoryData<Action<CreateDialogCommand, FlowContext>, bool>
+    public sealed record CreateDialogLanguageCodeScenario(
+        string DisplayName,
+        Action<CreateDialogCommand, FlowContext> ModifyCommand,
+        bool ExpectSuccess) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class CreateDialogLanguageCodeTestData : TheoryData<CreateDialogLanguageCodeScenario>
     {
         public CreateDialogLanguageCodeTestData()
         {
-            Add(CreateTitleWithLanguageCode("nb"), true);
-            Add(CreateTitleWithLanguageCode("nb_NO"), true);
-            Add(CreateTitleWithLanguageCode("en"), true);
-            Add(CreateTitleWithLanguageCode("en_US"), true);
-            Add(CreateTitleWithLanguageCode("no"), false);
-            Add(CreateTitleWithLanguageCode("invalid"), false);
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Valid language code nb",
+                ModifyCommand: CreateTitleWithLanguageCode("nb"),
+                ExpectSuccess: true));
+
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Valid language code nb_NO",
+                ModifyCommand: CreateTitleWithLanguageCode("nb_NO"),
+                ExpectSuccess: true));
+
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Valid language code en",
+                ModifyCommand: CreateTitleWithLanguageCode("en"),
+                ExpectSuccess: true));
+
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Valid language code en_US",
+                ModifyCommand: CreateTitleWithLanguageCode("en_US"),
+                ExpectSuccess: true));
+
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Invalid language code no",
+                ModifyCommand: CreateTitleWithLanguageCode("no"),
+                ExpectSuccess: false));
+
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Invalid language code invalid",
+                ModifyCommand: CreateTitleWithLanguageCode("invalid"),
+                ExpectSuccess: false));
+
             // We ignore region codes, so this should be valid
-            Add(CreateTitleWithLanguageCode("nb_ignore_region_code"), true);
-            Add(CreateTitleWithLanguageCode(string.Empty), false);
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Language code with region prefix should be valid",
+                ModifyCommand: CreateTitleWithLanguageCode("nb_ignore_region_code"),
+                ExpectSuccess: true));
+
+            Add(new CreateDialogLanguageCodeScenario(
+                DisplayName: "Missing language code should fail",
+                ModifyCommand: CreateTitleWithLanguageCode(string.Empty),
+                ExpectSuccess: false));
         }
     }
 
     [Theory, ClassData(typeof(CreateDialogLanguageCodeTestData))]
-    public Task Can_Create_Localization_With_Valid_LanguageCode(
-        Action<CreateDialogCommand, FlowContext> modifyCommand,
-        bool shouldSucceed)
+    public Task Can_Create_Localization_With_Valid_LanguageCode(CreateDialogLanguageCodeScenario scenario)
         => FlowBuilder.For(Application)
-            .CreateSimpleDialog(modifyCommand)
+            .CreateSimpleDialog(scenario.ModifyCommand)
             .ExecuteAndAssert(x =>
             {
-                if (shouldSucceed)
+                if (scenario.ExpectSuccess)
                 {
                     Assert.IsType<CreateDialogSuccess>(x);
                 }

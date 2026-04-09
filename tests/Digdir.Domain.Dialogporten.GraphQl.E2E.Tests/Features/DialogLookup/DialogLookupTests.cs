@@ -3,7 +3,6 @@ using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using AwesomeAssertions;
 using StrawberryShake;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogLookup;
 
@@ -34,8 +33,10 @@ public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE
         // Arrange
         var instanceGuid = Guid.NewGuid();
         var instanceRef = $"urn:altinn:instance-id:1337/{instanceGuid}";
+        var party = string.Empty;
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
+            party = dialog.Party;
             dialog.ServiceOwnerContext = new V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
             {
                 ServiceOwnerLabels =
@@ -58,6 +59,7 @@ public class DialogLookupTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE
         lookup.Should().NotBeNull();
         lookup.DialogId.Should().Be(dialogId);
         lookup.InstanceRef.Should().Be(instanceRef.ToLowerInvariant());
+        lookup.Party.Should().NotBeEmpty().And.Be(party);
         lookup.ServiceResource.Id.Should().NotBeNullOrWhiteSpace();
         lookup.ServiceOwner.Code.Should().NotBeNullOrWhiteSpace();
     }

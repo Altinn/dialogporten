@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
@@ -95,6 +96,22 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
                 domainEvents.OfType<DialogActivityCreatedDomainEvent>().Should().HaveCount(activityCount);
             });
     }
+
+    [Fact]
+    public Task Transmission_Created_Event_Should_Have_SenderType() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddTransmission())
+            .ExecuteAndAssert<CreateDialogSuccess>(x =>
+            {
+                var domainEvents = Application.GetPublishedEvents();
+                var transmissionCreatedEvent = domainEvents
+                    .OfType<DialogTransmissionCreatedDomainEvent>()
+                    .Single();
+
+                transmissionCreatedEvent.SenderType
+                    .Should()
+                    .Be(ActorType.Values.ServiceOwner);
+            });
 
     [Fact]
     public Task Creates_CloudEvent_When_Dialog_Updates() =>

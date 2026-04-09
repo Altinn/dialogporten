@@ -8,11 +8,14 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 
 public static class DialogUnopenedContent
 {
+    public static bool IsRelevantTransmissionType(DialogTransmissionType.Values transmissionType) =>
+        transmissionType is not (DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission);
+
     public static bool HasUnopenedContent(DialogEntity dialog, ServiceResourceInformation? serviceResourceInformation)
     {
         // Checks if transmissions of all types except Correction or Submission have any activities with TransmissionOpened
         var transmissions = dialog.Transmissions
-            .Where(transmission => transmission.TypeId is not (DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission));
+            .Where(transmission => IsRelevantTransmissionType(transmission.TypeId));
 
         if (transmissions
             .Any(transmission =>
@@ -26,7 +29,6 @@ public static class DialogUnopenedContent
             dialog.Activities.All(a => a.TypeId != DialogActivityType.Values.CorrespondenceOpened);
     }
 
-    public static bool IsOpened(DialogTransmission transmission) => transmission.TypeId
-        is not (DialogTransmissionType.Values.Correction or DialogTransmissionType.Values.Submission)
+    public static bool IsOpened(DialogTransmission transmission) => IsRelevantTransmissionType(transmission.TypeId)
         && transmission.Activities.Any(x => x.TypeId == DialogActivityType.Values.TransmissionOpened);
 }

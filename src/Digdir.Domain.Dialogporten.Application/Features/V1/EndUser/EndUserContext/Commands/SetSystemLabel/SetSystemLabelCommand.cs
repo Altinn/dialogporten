@@ -49,6 +49,8 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .Include(x => x.ServiceOwnerContext)
+                .ThenInclude(x => x.ServiceOwnerLabels)
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
 
         if (dialog is null)

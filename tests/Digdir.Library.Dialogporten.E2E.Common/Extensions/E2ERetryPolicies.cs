@@ -1,7 +1,6 @@
 using Polly;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Xunit;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;
 

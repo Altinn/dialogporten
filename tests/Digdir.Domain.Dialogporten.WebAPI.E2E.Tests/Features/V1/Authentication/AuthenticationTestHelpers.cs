@@ -1,6 +1,5 @@
 using System.Reflection;
 using Refit;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 
@@ -19,6 +18,14 @@ public sealed record EndpointScenario(string Name, MethodInfo Method)
 
 public static class AuthenticationTestHelpers
 {
+    public static EndpointScenario[] GetEndpointScenarios<TApi>() =>
+        typeof(TApi)
+            .GetMethods(BindingFlags.Public | BindingFlags.Instance)
+            .Where(IsRefitHttpMethod)
+            .OrderBy(method => method.Name)
+            .Select(method => new EndpointScenario(Name: method.Name, Method: method))
+            .ToArray();
+
     public static TheoryData<AuthenticationScenario, EndpointScenario> BuildAuthenticationCases<TApi>()
     {
         var authScenarios = new[]
@@ -32,14 +39,7 @@ public static class AuthenticationTestHelpers
                 TokenOverride: "thisisnotavalidtoken",
                 ExpectedAuthenticateHeaderFragment: "error=\"invalid_token\"")
         };
-
-        var endpointScenarios = typeof(TApi)
-            .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-            .Where(IsRefitHttpMethod)
-            .OrderBy(method => method.Name)
-            .Select(method => new EndpointScenario(Name: method.Name, Method: method))
-            .ToArray();
-
+        var endpointScenarios = GetEndpointScenarios<TApi>();
         var theoryData = new TheoryData<AuthenticationScenario, EndpointScenario>();
 
         foreach (var authScenario in authScenarios)
@@ -48,6 +48,18 @@ public static class AuthenticationTestHelpers
             {
                 theoryData.Add(authScenario, endpointScenario);
             }
+        }
+
+        return theoryData;
+    }
+
+    public static TheoryData<EndpointScenario> BuildEndpointCases<TApi>()
+    {
+        var theoryData = new TheoryData<EndpointScenario>();
+
+        foreach (var endpointScenario in GetEndpointScenarios<TApi>())
+        {
+            theoryData.Add(endpointScenario);
         }
 
         return theoryData;

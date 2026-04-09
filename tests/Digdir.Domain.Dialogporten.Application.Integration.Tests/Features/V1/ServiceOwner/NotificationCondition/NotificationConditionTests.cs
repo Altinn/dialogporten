@@ -14,6 +14,13 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class NotificationConditionTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
+    public sealed record TransmissionNotificationConditionScenario(
+        string DisplayName,
+        DialogActivityType.Values ActivityType) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
     private static readonly bool[] ExpectedSendNotificationsValues = [true, false];
 
     public static IEnumerable<object[]> NotificationConditionTestData() =>
@@ -59,20 +66,21 @@ public class NotificationConditionTests(DialogApplication application) : Applica
     }
 
     [Theory, ClassData(typeof(TransmissionNotificationConditionTestData))]
-    public Task Bad_Request_On_TransmissionId_When_ActivityType_Is_Not_TransmissionOpened(DialogActivityType.Values activityType) =>
+    public Task Bad_Request_On_TransmissionId_When_ActivityType_Is_Not_TransmissionOpened(
+        TransmissionNotificationConditionScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .SendCommand((_, ctx) => new NotificationConditionQuery
             {
                 DialogId = ctx.GetDialogId(),
-                ActivityType = activityType,
+                ActivityType = scenario.ActivityType,
                 ConditionType = NotificationConditionType.Exists,
                 TransmissionId = Guid.NewGuid()
             })
             .ExecuteAndAssert<ValidationError>(x =>
                 x.ShouldHaveErrorWithText(nameof(DialogActivityType.Values.TransmissionOpened)));
 
-    public sealed class TransmissionNotificationConditionTestData : TheoryData<DialogActivityType.Values>
+    public sealed class TransmissionNotificationConditionTestData : TheoryData<TransmissionNotificationConditionScenario>
     {
         public TransmissionNotificationConditionTestData()
         {
@@ -82,7 +90,9 @@ public class NotificationConditionTests(DialogApplication application) : Applica
 
             foreach (var activityType in invalidActivityTypes)
             {
-                Add(activityType);
+                Add(new TransmissionNotificationConditionScenario(
+                    ActivityType: activityType,
+                    DisplayName: activityType.ToString()));
             }
         }
     }

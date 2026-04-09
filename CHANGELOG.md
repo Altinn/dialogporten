@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.111.2](https://github.com/Altinn/dialogporten/compare/v1.111.1...v1.111.2) (2026-04-09)
+
+
+### Bug Fixes
+
+* **perf:** Denormalize enduser systemlabel ([#3714](https://github.com/Altinn/dialogporten/issues/3714)) ([c77a5bb](https://github.com/Altinn/dialogporten/commit/c77a5bb07b24b54147a599059c0145629d320215))
+
+
+### Miscellaneous Chores
+
+* **deps:** upgrade azure cli to 2.85.0 ([#3751](https://github.com/Altinn/dialogporten/issues/3751)) ([215ebf9](https://github.com/Altinn/dialogporten/commit/215ebf9085bd1b1921e9774c5199c3cfbbd38b3e))
+
 ## [1.111.1](https://github.com/Altinn/dialogporten/compare/v1.111.0...v1.111.1) (2026-04-08)
 
 

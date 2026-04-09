@@ -55,6 +55,7 @@ finally
 static void BuildAndRun(string[] args)
 {
     var builder = WebApplication.CreateBuilder(args);
+    var isOpenApiDocGen = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
 
     builder.WebHost.ConfigureKestrel(kestrelOptions =>
     {
@@ -64,6 +65,13 @@ static void BuildAndRun(string[] args)
     builder.Configuration
         .AddAzureConfiguration(builder.Environment.EnvironmentName)
         .AddLocalConfiguration(builder.Environment);
+
+    if (isOpenApiDocGen)
+    {
+        // The build-time OpenAPI generator boots the full host. Overlay safe dummy values
+        // so the normal startup path can run without local secrets or external dependencies.
+        builder.Configuration.AddInMemoryCollection(GetOpenApiDocumentGenerationOverrides());
+    }
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .MinimumLevel.Warning()
@@ -283,6 +291,48 @@ static void BuildAndRun(string[] args)
         .UseFeatureMetrics();
 
     app.Run();
+}
+
+static Dictionary<string, string?> GetOpenApiDocumentGenerationOverrides()
+{
+    const string ed25519PrivateComponent = "ns9Mgams90E5bCNGg9iSXONvRvASFcWF_Nb_JJ8oAEA";
+    const string ed25519PublicComponent = "qIn67qFQUBiwW2kv7J-5CdUCdR67CzOSnwXPBunh0d0";
+    const string encodedJwk = "eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5Iiwia2lkIjoib3BlbmFwaS1kb2NnZW4tbWFza2lucG9ydGVuIiwieCI6InFJbjY3cUZRVUJpd1cya3Y3Si01Q2RVQ2RSNjdDek9TbndYUEJ1bmgwZDAiLCJkIjoibnM5TWdhbXM5MEU1YkNOR2c5aVNYT052UnZBU0ZjV0ZfTmJfSko4b0FFQSJ9";
+
+    return new Dictionary<string, string?>
+    {
+        [$"{InfrastructureSettings.ConfigurationSectionName}:DialogDbConnectionString"] =
+            "Host=localhost;Port=5432;Database=dialogporten;Username=postgres;Password=postgres;Timeout=1;Command Timeout=1;Pooling=false",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Redis:ConnectionString"] =
+            "localhost:6379,abortConnect=false,connectTimeout=1000",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Altinn:BaseUri"] = "https://altinn.example/",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Altinn:EventsBaseUri"] = "https://altinn.example/events/",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Altinn:SubscriptionKey"] = "openapi-docgen",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:AltinnCdn:BaseUri"] = "https://altinn-cdn.example/",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Maskinporten:Environment"] = "test",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Maskinporten:ClientId"] = "openapi-docgen",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Maskinporten:Scope"] = "altinn:events.publish",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Maskinporten:EncodedJwk"] = encodedJwk,
+        [$"{InfrastructureSettings.ConfigurationSectionName}:Maskinporten:TokenExchangeEnvironment"] = "at23",
+        [$"{InfrastructureSettings.ConfigurationSectionName}:MassTransit:Host"] =
+            "Endpoint=sb://localhost/;SharedAccessKeyName=openapi-docgen;SharedAccessKey=openapi-docgen",
+        [$"{ApplicationSettings.ConfigurationSectionName}:Dialogporten:BaseUri"] = "https://localhost:7214",
+        [$"{ApplicationSettings.ConfigurationSectionName}:Dialogporten:Ed25519KeyPairs:Primary:Kid"] = "openapi-docgen-primary",
+        [$"{ApplicationSettings.ConfigurationSectionName}:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent"] = ed25519PrivateComponent,
+        [$"{ApplicationSettings.ConfigurationSectionName}:Dialogporten:Ed25519KeyPairs:Primary:PublicComponent"] = ed25519PublicComponent,
+        [$"{ApplicationSettings.ConfigurationSectionName}:Dialogporten:Ed25519KeyPairs:Secondary:Kid"] = "openapi-docgen-secondary",
+        [$"{ApplicationSettings.ConfigurationSectionName}:Dialogporten:Ed25519KeyPairs:Secondary:PrivateComponent"] = ed25519PrivateComponent,
+        [$"{ApplicationSettings.ConfigurationSectionName}:Dialogporten:Ed25519KeyPairs:Secondary:PublicComponent"] = ed25519PublicComponent,
+        [$"{WebApiSettings.SectionName}:Authentication:JwtBearerTokenSchemas:0:Name"] = "Maskinporten",
+        [$"{WebApiSettings.SectionName}:Authentication:JwtBearerTokenSchemas:0:WellKnown"] =
+            "https://maskinporten.example/.well-known/oauth-authorization-server",
+        [$"{WebApiSettings.SectionName}:Authentication:JwtBearerTokenSchemas:1:Name"] = "Altinn",
+        [$"{WebApiSettings.SectionName}:Authentication:JwtBearerTokenSchemas:1:WellKnown"] =
+            "https://altinn.example/authentication/api/v1/openid/.well-known/openid-configuration",
+        [$"{WebApiSettings.SectionName}:Authentication:JwtBearerTokenSchemas:2:Name"] = "Idporten",
+        [$"{WebApiSettings.SectionName}:Authentication:JwtBearerTokenSchemas:2:WellKnown"] =
+            "https://idporten.example/.well-known/openid-configuration"
+    };
 }
 
 static void IgnoreEmptyCollections(JsonTypeInfo typeInfo)

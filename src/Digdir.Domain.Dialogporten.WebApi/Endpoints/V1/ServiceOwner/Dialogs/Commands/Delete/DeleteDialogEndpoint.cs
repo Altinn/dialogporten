@@ -8,6 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Delete;
 
+[OpenApiOperationId("DeleteDialog")]
 public sealed class DeleteDialogEndpoint : Endpoint<DeleteDialogRequest>
 {
     private readonly ISender _sender;

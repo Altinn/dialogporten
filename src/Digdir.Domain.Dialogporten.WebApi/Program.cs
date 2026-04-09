@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Globalization;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Digdir.Domain.Dialogporten.Application;
@@ -163,6 +164,34 @@ static void BuildAndRun(string[] args)
         .AddDialogportenAuthentication(builder.Configuration)
         .AddAuthorization();
 
+    // Built-in ASP.NET Core OpenAPI document generation (alongside existing FastEndpoints/NSwag)
+    builder.Services.AddOpenApi("enduser", options =>
+    {
+        options.ShouldInclude = (description) =>
+            description.RelativePath?.Contains("/enduser/", StringComparison.OrdinalIgnoreCase) == true;
+        options.AddOperationTransformer((operation, context, _) =>
+        {
+            var attr = context.Description.ActionDescriptor.EndpointMetadata
+                .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
+            if (attr is not null)
+                operation.OperationId = attr.OperationId;
+            return Task.CompletedTask;
+        });
+    });
+    builder.Services.AddOpenApi("serviceowner", options =>
+    {
+        options.ShouldInclude = (description) =>
+            description.RelativePath?.Contains("/serviceowner/", StringComparison.OrdinalIgnoreCase) == true;
+        options.AddOperationTransformer((operation, context, _) =>
+        {
+            var attr = context.Description.ActionDescriptor.EndpointMetadata
+                .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
+            if (attr is not null)
+                operation.OperationId = attr.OperationId;
+            return Task.CompletedTask;
+        });
+    });
+
     if (builder.Environment.IsDevelopment())
     {
         var localDevelopmentSettings = builder.Configuration.GetLocalDevelopmentSettings();
@@ -177,6 +206,7 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
     app.MapAspNetHealthChecks()
         .MapControllers();
+    app.MapOpenApi().AllowAnonymous();
 
     app.UseHttpsRedirection()
         .UseDefaultExceptionHandler()
@@ -196,10 +226,19 @@ static void BuildAndRun(string[] args)
             x.Endpoints.Configurator = endpointDefinition =>
             {
                 endpointDefinition.Description(routeHandlerBuilder
-                    => routeHandlerBuilder.Add(endpointBuilder
-                        => endpointBuilder.Metadata.Add(
+                    => routeHandlerBuilder.Add(endpointBuilder =>
+                    {
+                        endpointBuilder.Metadata.Add(
                             new EndpointNameMetadata(
-                                TypeNameConverter.ToShortName(endpointDefinition.EndpointType)))));
+                                TypeNameConverter.ToShortName(endpointDefinition.EndpointType)));
+
+                        var operationIdAttr = endpointDefinition.EndpointType
+                            .GetCustomAttribute<OpenApiOperationIdAttribute>();
+                        if (operationIdAttr is not null)
+                        {
+                            endpointBuilder.Metadata.Add(operationIdAttr);
+                        }
+                    }));
             };
             x.Serializer.Options.RespectNullableAnnotations = true;
             x.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

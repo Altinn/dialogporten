@@ -8,6 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Purge;
 
+[OpenApiOperationId("PurgeDialog")]
 public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
 {
     private readonly ISender _sender;

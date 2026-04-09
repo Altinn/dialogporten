@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.NotificationCondition;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
@@ -6,6 +7,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.NotificationCondition;
 
+[OpenApiOperationId("CheckNotificationCondition")]
 public sealed class NotificationConditionEndpoint : Endpoint<NotificationConditionQuery, NotificationConditionDto>
 {
     private readonly ISender _sender;

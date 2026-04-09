@@ -8,6 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Update;
 
+[OpenApiOperationId("UpdateDialog")]
 public sealed class UpdateDialogEndpoint : Endpoint<UpdateDialogRequest>
 {
     private readonly ISender _sender;

@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.Limits.Queries.Get;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
@@ -6,6 +7,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Metadata.Limits.Get;
 
+[OpenApiOperationId("GetLimits")]
 public sealed class GetLimitsEndpoint : EndpointWithoutRequest<GetLimitsDto>
 {
     private readonly ISender _sender;

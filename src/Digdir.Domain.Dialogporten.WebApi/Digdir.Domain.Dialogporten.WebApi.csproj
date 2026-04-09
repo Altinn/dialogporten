@@ -4,6 +4,12 @@
         <!-- In order to support doc blocks for Swagger generation in PatchDialogsController.cs -->
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>1591</NoWarn> <!-- Disable warnings for missing XML comments -->
+        <!-- ASP.NET Core built-in OpenAPI: build-time generation disabled because the app
+             requires infrastructure settings (DB, Redis, etc.) to start. Use the runtime
+             endpoint at /openapi/v1.json instead, or enable these and provide config. -->
+        <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+        <OpenApiGenerateDocumentsOnBuild>true</OpenApiGenerateDocumentsOnBuild>
+        <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/../../tmp</OpenApiDocumentsDirectory>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,6 +24,10 @@
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
         <PackageReference Include="NSwag.AspNetCore" Version="14.6.3" />
         <PackageReference Include="NSwag.MSBuild" Version="14.6.3" />
+        <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.5">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

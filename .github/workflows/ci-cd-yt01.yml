@@ -120,7 +120,8 @@ jobs:
       environment: yt01
       image_tag: ${{ needs.resolve-version.outputs.version }}
     secrets:
-      MANIFESTS_PAT: ${{ secrets.MANIFESTS_PAT }}
+      MANIFEST_APP_ID: ${{ secrets.MANIFEST_APP_ID }}
+      MANIFEST_APP_PRIVATE_KEY: ${{ secrets.MANIFEST_APP_PRIVATE_KEY }}
 
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for yt01

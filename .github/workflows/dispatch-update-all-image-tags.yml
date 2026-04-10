@@ -28,4 +28,5 @@ jobs:
       environment: ${{ inputs.environment }}
       image_tag: ${{ inputs.image_tag }}
     secrets:
-      MANIFESTS_PAT: ${{ secrets.MANIFESTS_PAT }}
+      MANIFEST_APP_ID: ${{ secrets.MANIFEST_APP_ID }}
+      MANIFEST_APP_PRIVATE_KEY: ${{ secrets.MANIFEST_APP_PRIVATE_KEY }}

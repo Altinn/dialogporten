@@ -32,6 +32,10 @@
         {
           "languageCode": "en",
           "value": "Tax fraud"
+        },
+        {
+          "languageCode": "nb",
+          "value": "Brukeren har beg\u00E5tt skattesvindel"
         }
       ],
       "extendedType": null,
@@ -293,6 +297,10 @@
             {
               "languageCode": "en",
               "value": "Transmission attachment display name"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Forsendelse visningsnavn"
             }
           ],
           "expiresAt": null,
@@ -317,6 +325,10 @@
             {
               "languageCode": "en",
               "value": "https://digdir.no/en"
+            },
+            {
+              "languageCode": "nb",
+              "value": "https://digdir.no/nb"
             }
           ]
         },
@@ -327,6 +339,10 @@
             {
               "languageCode": "en",
               "value": "Transmission summary"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Forsendelse oppsummering"
             }
           ]
         },
@@ -337,6 +353,10 @@
             {
               "languageCode": "en",
               "value": "Transmission title"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Forsendelsestittel"
             }
           ]
         }
@@ -363,6 +383,10 @@
             {
               "languageCode": "en",
               "value": "Transmission attachment display name"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Visningsnavn for forsendelsesvedlegg "
             }
           ],
           "expiresAt": null,
@@ -388,6 +412,10 @@
             {
               "languageCode": "en",
               "value": "Transmission summary"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Transmisjon oppsummering"
             }
           ]
         },
@@ -398,6 +426,10 @@
             {
               "languageCode": "en",
               "value": "Transmission title"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Forsendelsesstittel"
             }
           ]
         }
@@ -424,6 +456,10 @@
             {
               "languageCode": "en",
               "value": "Transmission attachment display name"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Visningsnavn for forsendelsesvedlegg"
             }
           ],
           "expiresAt": null,
@@ -449,6 +485,10 @@
             {
               "languageCode": "en",
               "value": "Transmission summary"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Forsendelsesoppsummering"
             }
           ]
         },
@@ -459,6 +499,10 @@
             {
               "languageCode": "en",
               "value": "Transmission title"
+            },
+            {
+              "languageCode": "nb",
+              "value": "Forsendelsetittel"
             }
           ]
         }

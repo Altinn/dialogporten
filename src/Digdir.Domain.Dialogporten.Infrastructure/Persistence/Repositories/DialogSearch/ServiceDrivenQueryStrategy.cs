@@ -17,11 +17,10 @@ internal sealed class ServiceDrivenQueryStrategy : IQueryStrategy<EndUserSearchC
 
     public string Name => "ServiceDriven";
 
-    // Service-driven is always preferred when branching logic is enabled.
     public int Score(EndUserSearchContext context)
     {
         _ = context;
-        return 100;
+        return QueryStrategyScores.Default;
     }
 
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)

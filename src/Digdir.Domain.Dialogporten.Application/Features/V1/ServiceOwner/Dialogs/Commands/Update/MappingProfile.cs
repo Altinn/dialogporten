@@ -23,7 +23,7 @@ internal sealed class MappingProfile : Profile
         CreateMap<UpdateDialogDto, DialogEntity>()
             .IgnoreComplexDestinationProperties()
             .ForMember(dest => dest.Status, opt => opt.Ignore())
-            .ForMember(dest => dest.StatusId, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.StatusId, opt => opt.Ignore())
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content));
 
         CreateMap<SearchTagDto, DialogSearchTag>()

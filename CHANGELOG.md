@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.111.2](https://github.com/Altinn/dialogporten/compare/v1.111.1...v1.111.2) (2026-04-09)
+
+
+### Bug Fixes
+
+* **perf:** Denormalize enduser systemlabel ([#3714](https://github.com/Altinn/dialogporten/issues/3714)) ([c77a5bb](https://github.com/Altinn/dialogporten/commit/c77a5bb07b24b54147a599059c0145629d320215))
+
+
+### Miscellaneous Chores
+
+* **deps:** upgrade azure cli to 2.85.0 ([#3751](https://github.com/Altinn/dialogporten/issues/3751)) ([215ebf9](https://github.com/Altinn/dialogporten/commit/215ebf9085bd1b1921e9774c5199c3cfbbd38b3e))
+
+## [1.111.1](https://github.com/Altinn/dialogporten/compare/v1.111.0...v1.111.1) (2026-04-08)
+
+
+### Bug Fixes
+
+* add check for empty accept languages ([#3736](https://github.com/Altinn/dialogporten/issues/3736)) ([ddd9db6](https://github.com/Altinn/dialogporten/commit/ddd9db6f81604904bf09d0b82eef6dad1bfb6648))
+
+
+### Miscellaneous Chores
+
+* **app:** add diagnostic details to UnreachableException in dialog search authorization ([#3741](https://github.com/Altinn/dialogporten/issues/3741)) ([53b9f0a](https://github.com/Altinn/dialogporten/commit/53b9f0a9ede8ca524c3fab847c9bab7b37b732e7))
+* **deps:** update azure/cli action to v3 ([#3720](https://github.com/Altinn/dialogporten/issues/3720)) ([91df86e](https://github.com/Altinn/dialogporten/commit/91df86eb67ed125c2b6269d807f6951df97f5fee))
+* **deps:** update dependency azure.identity to 1.20.0 ([#3740](https://github.com/Altinn/dialogporten/issues/3740)) ([864dd1f](https://github.com/Altinn/dialogporten/commit/864dd1f40072f25c5f1c1c88b5cb61c9cd27a163))
+* **deps:** update dotnet monorepo ([#3723](https://github.com/Altinn/dialogporten/issues/3723)) ([829562a](https://github.com/Altinn/dialogporten/commit/829562a7de4debf7217b7a8f851fa6a23f04fe8b))
+* **deps:** update grafana/loki docker tag to v3.7.1 ([#3726](https://github.com/Altinn/dialogporten/issues/3726)) ([e5d1509](https://github.com/Altinn/dialogporten/commit/e5d150998085b2e26f2297215f9c321c56d4a9f9))
+* **deps:** update nginx docker tag to v1.29.7 ([#3717](https://github.com/Altinn/dialogporten/issues/3717)) ([41116ec](https://github.com/Altinn/dialogporten/commit/41116ec31c889dc814740b820fe78813c75c063d))
+* **deps:** update opentelemetry-dotnet monorepo to 1.15.1 ([#3725](https://github.com/Altinn/dialogporten/issues/3725)) ([2655f38](https://github.com/Altinn/dialogporten/commit/2655f383a9f95377176f9503e9e9c8dcf500b84c))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.148.0 ([#3718](https://github.com/Altinn/dialogporten/issues/3718)) ([b06fed3](https://github.com/Altinn/dialogporten/commit/b06fed3db68f77926f369b275ec7d5c26f4ca836))
+* **deps:** update refit monorepo to 10.1.6 ([#3719](https://github.com/Altinn/dialogporten/issues/3719)) ([ad45ba4](https://github.com/Altinn/dialogporten/commit/ad45ba4ead660308f8330e01602ad6471f2933b9))
+* **deps:** update step-security/harden-runner action to v2.16.1 ([#3739](https://github.com/Altinn/dialogporten/issues/3739)) ([13f82ba](https://github.com/Altinn/dialogporten/commit/13f82baeeadddf4813755a721fa82c199f8f2d81))
+
 ## [1.111.0](https://github.com/Altinn/dialogporten/compare/v1.110.5...v1.111.0) (2026-03-31)
 
 

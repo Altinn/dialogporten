@@ -4,34 +4,33 @@ using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 
-internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchContext>
+internal sealed class ServiceDrivenSystemLabelMaskQueryStrategy : IQueryStrategy<EndUserSearchContext>
 {
-    internal const string StrategyName = "PartyDriven";
-    private readonly ILogger<PartyDrivenQueryStrategy> _logger;
+    private readonly ILogger<ServiceDrivenSystemLabelMaskQueryStrategy> _logger;
 
-    public PartyDrivenQueryStrategy(ILogger<PartyDrivenQueryStrategy> logger)
+    public ServiceDrivenSystemLabelMaskQueryStrategy(ILogger<ServiceDrivenSystemLabelMaskQueryStrategy> logger)
     {
         ArgumentNullException.ThrowIfNull(logger);
 
         _logger = logger;
     }
 
-    public string Name => StrategyName;
+    public string Name => "ServiceDrivenSystemLabelMask";
 
-    // Party-driven is kept as fallback only when branching logic is disabled.
-    public int Score(EndUserSearchContext context)
-    {
-        _ = context;
-        return 0;
-    }
+    public int Score(EndUserSearchContext context) =>
+        context.FeatureToggle.UseSystemLabelsMaskForEndUserDialogSearch
+            ? QueryStrategyScores.Preferred
+            : QueryStrategyScores.Ineligible;
 
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         var query = context.Query;
         var authorizedResources = context.AuthorizedResources;
-        var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(query, authorizedResources);
-        DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices, StrategyName);
+        var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
+            query,
+            authorizedResources);
+        DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices, Name);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
         var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, authorizedResources.DialogIds.ToArray());
         var postPermissionOrderAndLimit = BuildPostPermissionOrderAndLimit(query);
@@ -50,25 +49,19 @@ internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchCon
                 """)
             .Append(
                 $"""
-                raw_permissions AS (
-                    SELECT p.party
-                         , s.service
+                permission_groups AS (
+                    SELECT x."Parties" AS parties
+                         , x."Services" AS services
                     FROM jsonb_to_recordset({JsonSerializer.Serialize(partiesAndServices)}::jsonb) AS x("Parties" text[], "Services" text[])
-                    CROSS JOIN LATERAL unnest(x."Services") AS s(service)
-                    CROSS JOIN LATERAL unnest(x."Parties") AS p(party)
                 )
-                ,party_permission_map AS (
-                    SELECT party
-                         , ARRAY_AGG(service) AS allowed_services
-                    FROM raw_permissions
-                    GROUP BY party
+                ,service_permissions AS (
+                    SELECT s.service
+                         , pg.parties AS allowed_parties
+                    FROM permission_groups pg
+                    CROSS JOIN LATERAL unnest(pg.services) AS s(service)
                 )
                 ,permission_candidate_ids AS (
-                    SELECT d_inner."Id"
-                    FROM party_permission_map ppm
-                    CROSS JOIN LATERAL (
-                        {permissionCandidateDialogs}
-                    ) d_inner
+                    {permissionCandidateDialogs}
                 )
                 ,delegated_dialogs AS (
                     {delegatedCandidateDialogs}
@@ -88,34 +81,27 @@ internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchCon
 
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
-        var permissionCandidateFilters = BuildPermissionCandidateFilters(query, includeSearchFilter: false);
+        var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
-            .AppendIf(query.Search is null,
-                """
-                SELECT d."Id"
-                FROM "Dialog" d
-                WHERE d."Party" = ppm.party
-
-                """)
-            .AppendIf(query.Search is not null,
-                """
-                SELECT d."Id"
-                FROM search."DialogSearch" ds
-                JOIN "Dialog" d ON d."Id" = ds."DialogId"
-                CROSS JOIN searchString ss
-                WHERE ds."Party" = ppm.party AND ds."SearchVector" @@ ss.searchVector
-
-                """)
             .Append(
-                """
-                AND d."ServiceResource" = ANY(ppm.allowed_services)
+                $"""
+                SELECT d_inner."Id"
+                FROM service_permissions sp
+                CROSS JOIN LATERAL (
+                    SELECT d."Id"
+                    FROM "Dialog" d
+                    {searchJoin}
+                    WHERE d."ServiceResource" = sp.service
+                      AND d."Party" = ANY(sp.allowed_parties)
+                      {permissionCandidateFilters}
                 """)
-            .Append($"{permissionCandidateFilters}")
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .Append(
                 $"""
-                 LIMIT {query.Limit + 1}
+                    LIMIT {query.Limit + 1}
+                ) d_inner
 
                 """);
     }
@@ -124,8 +110,8 @@ internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchCon
         GetDialogsQuery query,
         Guid[] dialogIds)
     {
-        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
         var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
             .Append(
@@ -136,7 +122,6 @@ internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchCon
                 {searchJoin}
                 WHERE 1=1
                 {permissionCandidateFilters}
-
                 """);
     }
 
@@ -145,11 +130,9 @@ internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchCon
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
 
-    private static PostgresFormattableStringBuilder BuildPermissionCandidateFilters(
-        GetDialogsQuery query,
-        bool includeSearchFilter = true) =>
+    private static PostgresFormattableStringBuilder BuildPermissionCandidateFilters(GetDialogsQuery query) =>
         new PostgresFormattableStringBuilder()
-            .AppendIf(includeSearchFilter && query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
+            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
@@ -167,6 +150,6 @@ internal sealed class PartyDrivenQueryStrategy : IQueryStrategy<EndUserSearchCon
             .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-            .AppendSystemLabelFilterCondition(query.SystemLabel)
+            .AppendSystemLabelMaskFilterCondition(query.SystemLabel)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
 }

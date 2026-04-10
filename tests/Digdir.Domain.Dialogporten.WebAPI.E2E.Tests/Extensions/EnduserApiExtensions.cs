@@ -34,6 +34,17 @@ public static class EnduserApiExtensions
                 acceptedLanguages ?? new(),
                 cancellationToken);
 
+        public Task<IApiResponse> BulkSetSystemLabels(
+            Action<V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel> modify,
+            CancellationToken? cancellationToken = null)
+        {
+            var request = new V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel();
+            modify(request);
+            return enduserApi.V1EndUserEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels(
+                request,
+                cancellationToken ?? TestContext.Current.CancellationToken);
+        }
+
         public Task<IApiResponse<ICollection<V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> GetSystemLabelAssignmentLog(
             Guid dialogId,
             CancellationToken? cancellationToken = null) =>

@@ -20,5 +20,5 @@ export let options = {
 }
 
 export default function () {
-    createDialog(randomItem(serviceOwners), randomItem(endUsers), traceCalls);
+    createDialog(randomItem(serviceOwners), randomItem(endUsers), traceCalls, "Archive");
 }

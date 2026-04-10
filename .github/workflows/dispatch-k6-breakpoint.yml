@@ -53,6 +53,7 @@ on:
         type: choice
         options:
           - 'tests/k6/tests/serviceowner/performance/createDialogBreakpoint.js'
+          - 'tests/k6/tests/serviceowner/performance/createDialogBreakpointArchive.js'
           - 'tests/k6/tests/serviceowner/performance/createTransmissionsBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/serviceOwnerSearchBreakpoint.js'
           - 'tests/k6/tests/serviceowner/performance/serviceOwnerShouldSendNotification.js'

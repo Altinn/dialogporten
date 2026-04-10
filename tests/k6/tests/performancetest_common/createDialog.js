@@ -18,7 +18,7 @@ import { uuidv7 } from "../../common/uuid.js";
  * @param {Object} endUser - The end user object.
  */
 
-export function createDialog(serviceOwner, endUser, traceCalls) {
+export function createDialog(serviceOwner, endUser, traceCalls, systemLabel = null) {
     var traceparent = uuidv4();
 
     var paramsWithToken = {
@@ -35,7 +35,7 @@ export function createDialog(serviceOwner, endUser, traceCalls) {
     }
 
     describe('create dialog', () => {
-        let r = postSO('dialogs', dialogToInsert(endUser.ssn, endUser.resource), paramsWithToken);
+        let r = postSO('dialogs', dialogToInsert(endUser.ssn, endUser.resource, false, systemLabel), paramsWithToken);
         expect(r.status, 'response status').to.equal(201);
     });
 }
@@ -62,20 +62,20 @@ export function createAndRemoveDialog(serviceOwner, endUser, traceCalls) {
 
     let dialogId = 0;
     describe('create dialog', () => {
-      paramsWithToken.tags.name = 'create dialog';
-      let r = postSO('dialogs', dialogToInsert(endUser.ssn, endUser.resource), paramsWithToken);
-      expect(r.status, 'response status').to.equal(201);
-      dialogId = r.json();
+        paramsWithToken.tags.name = 'create dialog';
+        let r = postSO('dialogs', dialogToInsert(endUser.ssn, endUser.resource), paramsWithToken);
+        expect(r.status, 'response status').to.equal(201);
+        dialogId = r.json();
     });
 
     describe('remove dialog', () => {
-      traceparent = uuidv4();
-      paramsWithToken.tags.name = 'remove dialog';
-      if (dialogId) {
-          let r = purgeSO('dialogs/' + dialogId, paramsWithToken);
-          expect(r.status, 'response status').to.equal(204);
-      }
-  });
+        traceparent = uuidv4();
+        paramsWithToken.tags.name = 'remove dialog';
+        if (dialogId) {
+            let r = purgeSO('dialogs/' + dialogId, paramsWithToken);
+            expect(r.status, 'response status').to.equal(204);
+        }
+    });
 }
 
 /**
@@ -111,7 +111,7 @@ export function createTransmissions(serviceOwner, endUser, traceCalls, numberOfT
 
         relatedTransmissionId = createTransmission(dialogId, relatedTransmissionId, serviceOwner, traceCalls, testid);
         // Max transmissions in thread reached, start new thread
-        if (i%maxTransmissionsInThread === 0) {
+        if (i % maxTransmissionsInThread === 0) {
             relatedTransmissionId = 0;
         }
     }
@@ -128,31 +128,31 @@ export function createTransmissions(serviceOwner, endUser, traceCalls, numberOfT
  * @return {Array} - An array containing the dialogId, relatedTransmissionId and activityId.
  */
 export function CreateDialogTransmissionAndActivity(serviceOwner, endUser, traceCalls, testid) {
-  let traceparent = uuidv4();
+    let traceparent = uuidv4();
 
-  let paramsWithToken = {
-      headers: {
-          Authorization: "Bearer " + getEnterpriseToken(serviceOwner),
-          traceparent: traceparent
-      },
-      tags: { name: 'create dialog', testid: testid }
-  };
-  if (traceCalls) {
-      paramsWithToken.tags.traceparent = traceparent;
-      paramsWithToken.tags.enduser = endUser.ssn;
-  }
+    let paramsWithToken = {
+        headers: {
+            Authorization: "Bearer " + getEnterpriseToken(serviceOwner),
+            traceparent: traceparent
+        },
+        tags: { name: 'create dialog', testid: testid }
+    };
+    if (traceCalls) {
+        paramsWithToken.tags.traceparent = traceparent;
+        paramsWithToken.tags.enduser = endUser.ssn;
+    }
 
-  let dialogId = 0;
-  const removeTransmissionsAndActivities = true;
-  describe('create dialog', () => {
-      let r = postSO('dialogs', dialogToInsert(endUser.ssn, endUser.resource, removeTransmissionsAndActivities), paramsWithToken);
-      dialogId = r.json();
-      expect(r.status, 'response status').to.equal(201);
-  });
+    let dialogId = 0;
+    const removeTransmissionsAndActivities = true;
+    describe('create dialog', () => {
+        let r = postSO('dialogs', dialogToInsert(endUser.ssn, endUser.resource, removeTransmissionsAndActivities), paramsWithToken);
+        dialogId = r.json();
+        expect(r.status, 'response status').to.equal(201);
+    });
 
-  const relatedTransmissionId = createTransmission(dialogId, 0, serviceOwner, testid, true);
-  const activityId = createActivity(dialogId, serviceOwner, testid);
-  return [dialogId, relatedTransmissionId, activityId];
+    const relatedTransmissionId = createTransmission(dialogId, 0, serviceOwner, testid, true);
+    const activityId = createActivity(dialogId, serviceOwner, testid);
+    return [dialogId, relatedTransmissionId, activityId];
 }
 
 /**
@@ -217,25 +217,24 @@ function createActivity(dialogId, serviceOwner, testid) {
         activityId = r.json();
     });
     return activityId;
-} 
+}
 
 /**
  * Get activity body
  * @return {Object} - The activity body.
  */
-function getActivityBody() 
-{
-  return {
-    "id": uuidv7(),
-    "transmissionId": null,
-    "extendedType": "string",
-    "performedBy": {
-      "actorType": "ServiceOwner",
-      "actorId": null,
-      "actorName": null
-    },
-    "description": [],
-    "type": "DialogCreated",
-    "createdAt": new Date().toISOString()
-  };
+function getActivityBody() {
+    return {
+        "id": uuidv7(),
+        "transmissionId": null,
+        "extendedType": "string",
+        "performedBy": {
+            "actorType": "ServiceOwner",
+            "actorId": null,
+            "actorName": null
+        },
+        "description": [],
+        "type": "DialogCreated",
+        "createdAt": new Date().toISOString()
+    };
 }

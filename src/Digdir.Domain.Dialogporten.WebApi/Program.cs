@@ -307,6 +307,13 @@ static Dictionary<string, string?> GetOpenApiDocumentGenerationOverrides()
     const string ed25519KeyPairs = nameof(DialogportenSettings.Ed25519KeyPairs);
     const string authentication = nameof(WebApiSettings.Authentication);
     const string jwtBearerTokenSchemas = nameof(AuthenticationOptions.JwtBearerTokenSchemas);
+    const string infrastructureAltinn = $"{infrastructure}:{nameof(InfrastructureSettings.Altinn)}";
+    const string infrastructureMaskinporten = $"{infrastructure}:{nameof(InfrastructureSettings.Maskinporten)}";
+    const string applicationDialogporten = $"{application}:{dialogporten}";
+    const string applicationDialogportenEd25519KeyPairs = $"{applicationDialogporten}:{ed25519KeyPairs}";
+    const string primaryEd25519KeyPair = $"{applicationDialogportenEd25519KeyPairs}:{nameof(Ed25519KeyPairs.Primary)}";
+    const string secondaryEd25519KeyPair = $"{applicationDialogportenEd25519KeyPairs}:{nameof(Ed25519KeyPairs.Secondary)}";
+    const string webApiJwtBearerTokenSchemas = $"{webApi}:{authentication}:{jwtBearerTokenSchemas}";
 
     return new Dictionary<string, string?>
     {
@@ -314,30 +321,30 @@ static Dictionary<string, string?> GetOpenApiDocumentGenerationOverrides()
             "Host=localhost;Port=5432;Database=dialogporten;Username=postgres;Password=postgres;Timeout=1;Command Timeout=1;Pooling=false",
         [$"{infrastructure}:{nameof(InfrastructureSettings.Redis)}:{nameof(RedisSettings.ConnectionString)}"] =
             "localhost:6379,abortConnect=false,connectTimeout=1000",
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Altinn)}:{nameof(AltinnPlatformSettings.BaseUri)}"] = altinnExampleUri,
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Altinn)}:{nameof(AltinnPlatformSettings.EventsBaseUri)}"] = altinnExampleUri,
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Altinn)}:{nameof(AltinnPlatformSettings.SubscriptionKey)}"] = "openapi-docgen",
+        [$"{infrastructureAltinn}:{nameof(AltinnPlatformSettings.BaseUri)}"] = altinnExampleUri,
+        [$"{infrastructureAltinn}:{nameof(AltinnPlatformSettings.EventsBaseUri)}"] = altinnExampleUri,
+        [$"{infrastructureAltinn}:{nameof(AltinnPlatformSettings.SubscriptionKey)}"] = "openapi-docgen",
         [$"{infrastructure}:{nameof(InfrastructureSettings.AltinnCdn)}:{nameof(AltinnCdnPlatformSettings.BaseUri)}"] = altinnExampleUri,
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Maskinporten)}:{nameof(MaskinportenSettings.Environment)}"] = "test",
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Maskinporten)}:{nameof(MaskinportenSettings.ClientId)}"] = "openapi-docgen",
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Maskinporten)}:{nameof(MaskinportenSettings.Scope)}"] = "altinn:events.publish",
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Maskinporten)}:{nameof(MaskinportenSettings.EncodedJwk)}"] = encodedJwk,
-        [$"{infrastructure}:{nameof(InfrastructureSettings.Maskinporten)}:{nameof(MaskinportenSettings.TokenExchangeEnvironment)}"] = "at23",
+        [$"{infrastructureMaskinporten}:{nameof(MaskinportenSettings.Environment)}"] = "test",
+        [$"{infrastructureMaskinporten}:{nameof(MaskinportenSettings.ClientId)}"] = "openapi-docgen",
+        [$"{infrastructureMaskinporten}:{nameof(MaskinportenSettings.Scope)}"] = "altinn:events.publish",
+        [$"{infrastructureMaskinporten}:{nameof(MaskinportenSettings.EncodedJwk)}"] = encodedJwk,
+        [$"{infrastructureMaskinporten}:{nameof(MaskinportenSettings.TokenExchangeEnvironment)}"] = "at23",
         [$"{infrastructure}:{nameof(InfrastructureSettings.MassTransit)}:{nameof(MassTransitSettings.Host)}"] =
             "Endpoint=sb://localhost/;SharedAccessKeyName=openapi-docgen;SharedAccessKey=openapi-docgen",
-        [$"{application}:{dialogporten}:{nameof(DialogportenSettings.BaseUri)}"] = altinnExampleUri,
-        [$"{application}:{dialogporten}:{ed25519KeyPairs}:{nameof(Ed25519KeyPairs.Primary)}:{nameof(Ed25519KeyPair.Kid)}"] = "openapi-docgen-primary",
-        [$"{application}:{dialogporten}:{ed25519KeyPairs}:{nameof(Ed25519KeyPairs.Primary)}:{nameof(Ed25519KeyPair.PrivateComponent)}"] = ed25519PrivateComponent,
-        [$"{application}:{dialogporten}:{ed25519KeyPairs}:{nameof(Ed25519KeyPairs.Primary)}:{nameof(Ed25519KeyPair.PublicComponent)}"] = ed25519PublicComponent,
-        [$"{application}:{dialogporten}:{ed25519KeyPairs}:{nameof(Ed25519KeyPairs.Secondary)}:{nameof(Ed25519KeyPair.Kid)}"] = "openapi-docgen-secondary",
-        [$"{application}:{dialogporten}:{ed25519KeyPairs}:{nameof(Ed25519KeyPairs.Secondary)}:{nameof(Ed25519KeyPair.PrivateComponent)}"] = ed25519PrivateComponent,
-        [$"{application}:{dialogporten}:{ed25519KeyPairs}:{nameof(Ed25519KeyPairs.Secondary)}:{nameof(Ed25519KeyPair.PublicComponent)}"] = ed25519PublicComponent,
-        [$"{webApi}:{authentication}:{jwtBearerTokenSchemas}:0:{nameof(JwtBearerTokenSchemasOptions.Name)}"] = "Maskinporten",
-        [$"{webApi}:{authentication}:{jwtBearerTokenSchemas}:0:{nameof(JwtBearerTokenSchemasOptions.WellKnown)}"] = altinnExampleUri,
-        [$"{webApi}:{authentication}:{jwtBearerTokenSchemas}:1:{nameof(JwtBearerTokenSchemasOptions.Name)}"] = "Altinn",
-        [$"{webApi}:{authentication}:{jwtBearerTokenSchemas}:1:{nameof(JwtBearerTokenSchemasOptions.WellKnown)}"] = altinnExampleUri,
-        [$"{webApi}:{authentication}:{jwtBearerTokenSchemas}:2:{nameof(JwtBearerTokenSchemasOptions.Name)}"] = "Idporten",
-        [$"{webApi}:{authentication}:{jwtBearerTokenSchemas}:2:{nameof(JwtBearerTokenSchemasOptions.WellKnown)}"] = altinnExampleUri
+        [$"{applicationDialogporten}:{nameof(DialogportenSettings.BaseUri)}"] = altinnExampleUri,
+        [$"{primaryEd25519KeyPair}:{nameof(Ed25519KeyPair.Kid)}"] = "openapi-docgen-primary",
+        [$"{primaryEd25519KeyPair}:{nameof(Ed25519KeyPair.PrivateComponent)}"] = ed25519PrivateComponent,
+        [$"{primaryEd25519KeyPair}:{nameof(Ed25519KeyPair.PublicComponent)}"] = ed25519PublicComponent,
+        [$"{secondaryEd25519KeyPair}:{nameof(Ed25519KeyPair.Kid)}"] = "openapi-docgen-secondary",
+        [$"{secondaryEd25519KeyPair}:{nameof(Ed25519KeyPair.PrivateComponent)}"] = ed25519PrivateComponent,
+        [$"{secondaryEd25519KeyPair}:{nameof(Ed25519KeyPair.PublicComponent)}"] = ed25519PublicComponent,
+        [$"{webApiJwtBearerTokenSchemas}:0:{nameof(JwtBearerTokenSchemasOptions.Name)}"] = "Maskinporten",
+        [$"{webApiJwtBearerTokenSchemas}:0:{nameof(JwtBearerTokenSchemasOptions.WellKnown)}"] = altinnExampleUri,
+        [$"{webApiJwtBearerTokenSchemas}:1:{nameof(JwtBearerTokenSchemasOptions.Name)}"] = "Altinn",
+        [$"{webApiJwtBearerTokenSchemas}:1:{nameof(JwtBearerTokenSchemasOptions.WellKnown)}"] = altinnExampleUri,
+        [$"{webApiJwtBearerTokenSchemas}:2:{nameof(JwtBearerTokenSchemasOptions.Name)}"] = "Idporten",
+        [$"{webApiJwtBearerTokenSchemas}:2:{nameof(JwtBearerTokenSchemasOptions.WellKnown)}"] = altinnExampleUri
     };
 }
 

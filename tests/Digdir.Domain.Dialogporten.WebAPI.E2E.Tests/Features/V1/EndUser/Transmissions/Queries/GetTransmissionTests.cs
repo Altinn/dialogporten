@@ -53,6 +53,8 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             TestContext.Current.CancellationToken);
 
         // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
             JsonSerializer.Serialize(response.Content),
             fileNameSuffix: Fixture.DotnetEnvironment);

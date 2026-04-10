@@ -29,8 +29,13 @@ for (var filter of users) {
     options.thresholds[[`http_req_failed{name:${filter.label}}`]] = ['rate<=0.0'];
 }
 
+export function setup() {
+    const token = getEnterpriseToken(serviceOwners[0]);
+    return token;
+}
 
-export default function () {
+
+export default function (token) {
     const endUser = users[__ITER % users.length];
     const pid = endUser.pid;
     const label = endUser.label;
@@ -42,7 +47,7 @@ export default function () {
 
     const paramsWithToken = {
         headers: {
-            Authorization: "Bearer " + getEnterpriseToken(serviceOwners[0]),
+            Authorization: "Bearer " + token, //getEnterpriseToken(serviceOwners[0]),
         },
         tags: { name: label }
     }

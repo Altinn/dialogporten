@@ -39,7 +39,6 @@ export default function (token) {
     const endUser = users[__ITER % users.length];
     const pid = endUser.pid;
     const label = endUser.label;
-    ///endusercontext?party=urn:altinn:person:identifier-no:06917699338&Limit=1000
     const queryParams = {
         party: "urn:altinn:person:identifier-no:" + pid,
         limit: 1000
@@ -61,7 +60,6 @@ export default function (token) {
         let r = http.get(url.toString(), paramsWithToken);
         expectStatusFor(r).to.equal(200);
         expect(r, 'response').to.have.validJsonBody();
-        console.log(r.json().items.length);
         return r
     });
 }

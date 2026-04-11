@@ -1,0 +1,1968 @@
+﻿{
+  "components": {
+    "schemas": {
+      "AcceptedLanguage": {
+        "properties": {
+          "languageCode": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "languageCode",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "AcceptedLanguages": {
+        "properties": {
+          "acceptedLanguage": {
+            "items": {
+              "$ref": "#/components/schemas/AcceptedLanguage"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          }
+        },
+        "required": [
+          "acceptedLanguage"
+        ],
+        "type": "object"
+      },
+      "ActivityDto": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "extendedType": {
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transmissionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values"
+          }
+        },
+        "type": "object"
+      },
+      "ActorDto": {
+        "properties": {
+          "actorId": {
+            "description": "The identifier (national identity number or organization number) of the actor.",
+            "example": "urn:altinn:person:identifier-no:12018212345",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actorName": {
+            "description": "The name of the actor.",
+            "example": "Ola Nordmann",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actorType": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of actor; either the service owner, or someone representing the party."
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentDto": {
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentUrlDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentUrlDto": {
+        "properties": {
+          "consumerType": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of consumer the URL is intended for."
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AuthorizedPartyDto": {
+        "properties": {
+          "dateOfBirth": {
+            "description": "The date of birth of the party, if a person.",
+            "example": "1977-12-26",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hasKeyRole": {
+            "description": "Whether the authenticated user has a key role in the party.\n\nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
+            "type": "boolean"
+          },
+          "hasOnlyAccessToSubParties": {
+            "description": "If the authenticated user has only access to sub parties of this party, and not this party itself.",
+            "type": "boolean"
+          },
+          "isAccessManager": {
+            "description": "Whether the authenticated user is an access manager of the party.\n\nRead more about access managers (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#tilgangsstrying",
+            "type": "boolean"
+          },
+          "isCurrentEndUser": {
+            "description": "Whether this party represents the authenticated user.",
+            "type": "boolean"
+          },
+          "isDeleted": {
+            "description": "Whether the party is deleted or not",
+            "type": "boolean"
+          },
+          "isMainAdministrator": {
+            "description": "Whether the authenticated user is the main administrator of the party\n\nRead more about main administrator (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#hovedadministrator",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "The name of the party (verbatim from CCR, usually in all caps)",
+            "example": "CONTOSO REAL ESTATE AS",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party identifier in URN format",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "type": "string"
+          },
+          "partyId": {
+            "description": "The numeric identifier for the party.",
+            "example": 50136280,
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "partyType": {
+            "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
+            "example": "Organization",
+            "type": "string"
+          },
+          "partyUuid": {
+            "description": "The UUID for the party.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "subParties": {
+            "description": "The sub parties of this party, if any. The sub party uses the same data model.",
+            "items": {
+              "$ref": "#/components/schemas/AuthorizedPartyDto"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "BulkSetDialogSystemLabelsRequest": {
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/BulkSetSystemLabelDto"
+          }
+        },
+        "type": "object"
+      },
+      "BulkSetSystemLabelDto": {
+        "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialogs. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "dialogs": {
+            "description": "List of target dialog ids with optional revision ids",
+            "items": {
+              "$ref": "#/components/schemas/DialogRevisionDto"
+            },
+            "type": "array"
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ContentDto": {
+        "properties": {
+          "contentReference": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentValueDto",
+                "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL."
+              }
+            ]
+          },
+          "summary": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentValueDto",
+                "description": "The summary of the content."
+              }
+            ]
+          },
+          "title": {
+            "$ref": "#/components/schemas/ContentValueDto",
+            "description": "The title of the content."
+          }
+        },
+        "type": "object"
+      },
+      "ContentValueDto": {
+        "properties": {
+          "isAuthorized": {
+            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder. Can be null if not applicable.",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "mediaType": {
+            "description": "Media type of the content, this can also indicate that the content is embeddable.",
+            "type": "string"
+          },
+          "value": {
+            "description": "A list of localizations for the content.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ContinuationToken": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ContinuationTokenSetOfSearchDialogQueryOrderDefinitionAndDialogEntity": {
+        "properties": {
+          "raw": {
+            "type": "string"
+          },
+          "tokens": {
+            "items": {
+              "$ref": "#/components/schemas/ContinuationToken"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tokens",
+          "raw"
+        ],
+        "type": "object"
+      },
+      "DialogActivityDto": {
+        "properties": {
+          "createdAt": {
+            "description": "The date and time when the activity was created.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "description": "Unstructured text describing the activity. Only set if the activity type is \u0022Information\u0022.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "extendedType": {
+            "description": "An arbitrary string with a service-specific activity type.\n\nConsult the service-specific documentation provided by the service owner for details (if in use).",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the activity in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "performedBy": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The actor that performed the activity."
+          },
+          "transmissionId": {
+            "description": "If the activity is related to a particular transmission, this field will contain the transmission identifier.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of activity."
+          }
+        },
+        "type": "object"
+      },
+      "DialogDto": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/ContentDto",
+            "description": "The content of the dialog in search results."
+          },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "The date and time when the dialog was created.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dueAt": {
+            "description": "The due date for the dialog. This is the last date when the dialog is expected to be completed.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "endUserContext": {
+            "$ref": "#/components/schemas/DialogEndUserContextDto",
+            "description": "Metadata about the dialog owned by end-users."
+          },
+          "extendedStatus": {
+            "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n\nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.\n\nRefer to the service-specific documentation provided by the service owner for details (if in use).",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "guiAttachmentCount": {
+            "description": "The number of attachments in the dialog made available for browser-based frontends.",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The unique identifier for the dialog in UUIDv7 format.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
+          },
+          "latestActivity": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DialogActivityDto",
+                "description": "The latest entry in the dialog\u0027s activity log."
+              }
+            ]
+          },
+          "org": {
+            "description": "The service owner code representing the organization (service owner) related to this dialog.",
+            "example": "ske",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
+            "type": "string"
+          },
+          "precedingProcess": {
+            "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "process": {
+            "description": "Optional process identifier used to indicate a business process this dialog belongs to.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "progress": {
+            "description": "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come\nto a natural completion (successful or not).",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/DialogSeenLogDto"
+            },
+            "type": "array"
+          },
+          "seenSinceLastUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/DialogSeenLogDto"
+            },
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
+            "example": "urn:altinn:resource:some-service-identifier",
+            "type": "string"
+          },
+          "serviceResourceType": {
+            "description": "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The aggregated status of the dialog."
+          },
+          "systemLabel": {
+            "$ref": "#/components/schemas/Values",
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Values.Default, Values.Bin or Values.Archive.\nUse List\u0026lt;Values\u0026gt; DialogEndUserContextDto.SystemLabels on DialogEndUserContextDto DialogDto.EndUserContext instead."
+          },
+          "updatedAt": {
+            "description": "The date and time when the dialog was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DialogEndUserContextDto": {
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "uuid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DialogRevisionDto": {
+        "properties": {
+          "dialogId": {
+            "description": "Target dialog id for system labels",
+            "format": "uuid",
+            "type": "string"
+          },
+          "endUserContextRevision": {
+            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DialogSeenLogDto": {
+        "properties": {
+          "id": {
+            "description": "The unique identifier for the seen log entry in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "description": "Flag indicating whether the seen log entry was created by the current end user.",
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "description": "Flag indicating whether the seen log entry was created via the service owner.\n\nThis is used when the service owner uses the service owner API to implement its own frontend.",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "seenAt": {
+            "description": "The timestamp when the dialog revision was seen.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The actor that saw the dialog revision."
+          }
+        },
+        "type": "object"
+      },
+      "EndUserIdentifierLookupDto": {
+        "properties": {
+          "authorizationEvidence": {
+            "$ref": "#/components/schemas/IdentifierLookupAuthorizationEvidenceDto"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instanceRef": {
+            "type": "string"
+          },
+          "party": {
+            "type": "string"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/IdentifierLookupServiceOwnerDto"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/IdentifierLookupServiceResourceDto"
+          },
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "authorizationEvidence",
+          "instanceRef",
+          "party",
+          "serviceResource",
+          "serviceOwner"
+        ],
+        "type": "object"
+      },
+      "GetActivityRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "activityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetDialogLookupRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "instanceRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetDialogRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetSeenLogQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "seenLogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetTransmissionRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transmissionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IdentifierLookupAuthorizationEvidenceDto": {
+        "properties": {
+          "currentAuthenticationLevel": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifierLookupAuthorizationEvidenceItemDto"
+            },
+            "type": "array"
+          },
+          "viaAccessPackage": {
+            "type": "boolean"
+          },
+          "viaInstanceDelegation": {
+            "type": "boolean"
+          },
+          "viaResourceDelegation": {
+            "type": "boolean"
+          },
+          "viaRole": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "IdentifierLookupAuthorizationEvidenceItemDto": {
+        "properties": {
+          "grantType": {
+            "$ref": "#/components/schemas/IdentifierLookupGrantType"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject"
+        ],
+        "type": "object"
+      },
+      "IdentifierLookupGrantType": {
+        "type": "integer"
+      },
+      "IdentifierLookupServiceOwnerDto": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orgNumber",
+          "code"
+        ],
+        "type": "object"
+      },
+      "IdentifierLookupServiceResourceDto": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "isDelegable",
+          "minimumAuthenticationLevel"
+        ],
+        "type": "object"
+      },
+      "LabelAssignmentLogDto": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "performedBy": {
+            "$ref": "#/components/schemas/ActorDto"
+          }
+        },
+        "type": "object"
+      },
+      "LocalizationDto": {
+        "properties": {
+          "languageCode": {
+            "description": "The language code of the localization in ISO 639-1 format.",
+            "example": "nb",
+            "type": "string"
+          },
+          "value": {
+            "description": "The localized text (or URL if a front-channel embed).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "languageCode"
+        ],
+        "type": "object"
+      },
+      "NavigationalActionDto": {
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action. Will be set to \\\u0022urn:dialogporten:unauthorized\\\u0022 if the user is\nnot authorized to access the transmission, or \\\u0022urn:dialogporten:expired\\\u0022 if the action has expired.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OrderDirection": {
+        "default": 2,
+        "type": "integer"
+      },
+      "OrderOfDialogEntity": {
+        "properties": {
+          "direction": {
+            "$ref": "#/components/schemas/OrderDirection"
+          },
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "type": "object"
+      },
+      "OrderSetOfSearchDialogQueryOrderDefinitionAndDialogEntity": {
+        "properties": {
+          "orders": {
+            "items": {
+              "$ref": "#/components/schemas/OrderOfDialogEntity"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "orders"
+        ],
+        "type": "object"
+      },
+      "PaginatedListOfDialogDto": {
+        "properties": {
+          "continuationToken": {
+            "description": "The continuation token to be used to fetch the next page of items",
+            "example": "createdat_2024-07-31T09:09:03.0257090Z,id_0c089101-b7cf-a476-955c-f00a78d74a4e",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hasNextPage": {
+            "description": "Whether there are more items available that can be fetched by supplying the continuation token",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "The paginated list of items",
+            "items": {
+              "$ref": "#/components/schemas/DialogDto"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "orderBy": {
+            "description": "The current sorting order of the items",
+            "example": "createdat_desc,id_desc",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hasNextPage",
+          "orderBy"
+        ],
+        "type": "object"
+      },
+      "PartiesDto": {
+        "properties": {
+          "authorizedParties": {
+            "items": {
+              "$ref": "#/components/schemas/AuthorizedPartyDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SearchActivityRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchDialogRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "contentUpdatedAfter": {
+            "description": "Only return dialogs with content updated after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "contentUpdatedBefore": {
+            "description": "Only return dialogs with content updated before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "continuationToken": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContinuationTokenSetOfSearchDialogQueryOrderDefinitionAndDialogEntity"
+              }
+            ]
+          },
+          "createdAfter": {
+            "description": "Only return dialogs created after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdBefore": {
+            "description": "Only return dialogs created before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueAfter": {
+            "description": "Only return dialogs with due date after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueBefore": {
+            "description": "Only return dialogs with due date before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "excludeApiOnly": {
+            "description": "Whether to exclude API-only dialogs from the results. Defaults to false.",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "extendedStatus": {
+            "description": "Filter by one or more extended statuses",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "externalReference": {
+            "description": "Filter by external reference",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "limit": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "orderBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/OrderSetOfSearchDialogQueryOrderDefinitionAndDialogEntity"
+              }
+            ]
+          },
+          "org": {
+            "description": "Filter by one or more service owner codes",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "party": {
+            "description": "Filter by one or more owning parties",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "process": {
+            "description": "Filter by process",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "search": {
+            "description": "Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "searchLanguageCode": {
+            "description": "Limit free text search to texts with this language code, e.g. \u0027nb\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "serviceResource": {
+            "description": "Filter by one or more service resources",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "status": {
+            "description": "Filter by status",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "systemLabel": {
+            "description": "Filter by Display state",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "updatedAfter": {
+            "description": "Only return dialogs updated after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "updatedBefore": {
+            "description": "Only return dialogs updated before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "SearchLabelAssignmentLogQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchSeenLogQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchTransmissionRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SeenLogDto": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "type": "boolean"
+          },
+          "seenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/ActorDto"
+          }
+        },
+        "type": "object"
+      },
+      "SetDialogSystemLabelRequest": {
+        "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialog. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ifMatchEnduserContextRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialog. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TransmissionDto": {
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            },
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "content": {
+            "$ref": "#/components/schemas/ContentDto",
+            "description": "The content of the transmission."
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/NavigationalActionDto"
+            },
+            "type": "array"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sender": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The sender actor information for the transmission."
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of the transmission."
+          }
+        },
+        "type": "object"
+      },
+      "Values": {
+        "type": "integer"
+      }
+    }
+  },
+  "info": {
+    "title": "Digdir.Domain.Dialogporten.WebApi | enduser",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.1",
+  "paths": {
+    "/api/v1/enduser/dialoglookup": {
+      "get": {
+        "operationId": "GetDialogLookup",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogLookupRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogLookupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndUserIdentifierLookupDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs": {
+      "get": {
+        "operationId": "SearchDialogs",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchDialogRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfDialogDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}": {
+      "get": {
+        "operationId": "GetDialog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DialogDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/activities": {
+      "get": {
+        "operationId": "SearchDialogActivities",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchActivityRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchActivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}": {
+      "get": {
+        "operationId": "GetDialogActivity",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetActivityRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetActivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/context/labellog": {
+      "get": {
+        "operationId": "SearchDialogLabelAssignmentLogs",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchLabelAssignmentLogQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchLabelAssignmentLogQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LabelAssignmentLogDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/context/systemlabels": {
+      "put": {
+        "operationId": "SetDialogSystemLabels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDialogSystemLabelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/seenlog": {
+      "get": {
+        "operationId": "SearchDialogSeenLogs",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchSeenLogQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchSeenLogQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SeenLogDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}": {
+      "get": {
+        "operationId": "GetDialogSeenLog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSeenLogQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSeenLogQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeenLogDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/transmissions": {
+      "get": {
+        "operationId": "SearchDialogTransmissions",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchTransmissionRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchTransmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TransmissionDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}": {
+      "get": {
+        "operationId": "GetDialogTransmission",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTransmissionRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTransmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransmissionDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset": {
+      "post": {
+        "operationId": "BulkSetDialogSystemLabels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkSetDialogSystemLabelsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/enduser/parties": {
+      "get": {
+        "operationId": "GetParties",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartiesDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Digdir.Domain.Dialogporten.WebApi"
+    }
+  ]
+}

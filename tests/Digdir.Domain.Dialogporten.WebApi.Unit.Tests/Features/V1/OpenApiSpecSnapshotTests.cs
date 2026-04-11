@@ -1,5 +1,6 @@
 #if DEBUG
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously.
+#pragma warning disable xUnit1026 // Theory methods should use all of their parameters.
 #endif // DEBUG
 
 using System.Diagnostics.CodeAnalysis;

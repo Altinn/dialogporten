@@ -47,6 +47,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(response.Content));
+            JsonSerializer.Serialize(response.Content),
+            fileNameSuffix: Fixture.DotnetEnvironment);
     }
 }

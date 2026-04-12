@@ -48,10 +48,19 @@ internal sealed class SinglePartyNoInstanceNoFtsStrategy : IQueryStrategy<EndUse
                 $"""
                 SELECT d.*
                 FROM "Dialog" d
-                WHERE d."Party" = {authorization.Party}
+                JOIN (
+                    SELECT d."Id"
+                    FROM "Dialog" d
+                    WHERE d."Party" = {authorization.Party}
                 """)
             .AppendManyFilter([.. authorization.Services], nameof(GetDialogsQuery.ServiceResource))
             .Append($"{DialogEndUserSearchSqlHelpers.BuildDialogFilters(query)}")
+            .ApplyPaginationOrder(query.OrderBy!, alias: "d")
+            .ApplyPaginationLimit(query.Limit)
+            .Append(
+                """
+                ) AS sub ON d."Id" = sub."Id"
+                """)
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
     }

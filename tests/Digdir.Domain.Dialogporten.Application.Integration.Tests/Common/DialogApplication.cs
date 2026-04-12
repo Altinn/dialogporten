@@ -16,7 +16,10 @@ using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -148,8 +151,9 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenSystemLabelMaskQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoInstanceNoFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
@@ -194,8 +198,7 @@ public class DialogApplication : IAsyncLifetime
                 FeatureToggle = new FeatureToggle
                 {
                     UseAltinnAutoAuthorizedPartiesQueryParameters = true,
-                    UseCorrectPersonNameOrdering = true,
-                    UseSystemLabelsMaskForEndUserDialogSearch = true
+                    UseCorrectPersonNameOrdering = true
                 },
                 Dialogporten = new DialogportenSettings
                 {

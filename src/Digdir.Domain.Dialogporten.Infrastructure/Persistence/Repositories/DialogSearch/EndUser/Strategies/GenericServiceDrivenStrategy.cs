@@ -1,26 +1,45 @@
 using System.Text.Json;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Sql;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Selection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
+namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 
-internal sealed class ServiceDrivenSystemLabelMaskQueryStrategy : IQueryStrategy<EndUserSearchContext>
+internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearchContext>
 {
-    private readonly ILogger<ServiceDrivenSystemLabelMaskQueryStrategy> _logger;
+    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
+    private readonly ILogger<GenericServiceDrivenStrategy> _logger;
 
-    public ServiceDrivenSystemLabelMaskQueryStrategy(ILogger<ServiceDrivenSystemLabelMaskQueryStrategy> logger)
+    public GenericServiceDrivenStrategy(
+        IOptionsSnapshot<ApplicationSettings> applicationSettings,
+        ILogger<GenericServiceDrivenStrategy> logger)
     {
+        ArgumentNullException.ThrowIfNull(applicationSettings);
         ArgumentNullException.ThrowIfNull(logger);
 
+        _applicationSettings = applicationSettings;
         _logger = logger;
     }
 
-    public string Name => "ServiceDrivenSystemLabelMask";
+    public string Name => "GenericServiceDriven";
 
-    public int Score(EndUserSearchContext context) =>
-        context.FeatureToggle.UseSystemLabelsMaskForEndUserDialogSearch
+    public int Score(EndUserSearchContext context)
+    {
+        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
+            context.Query,
+            context.AuthorizedResources);
+
+        return context.Query.Search is null
+               && DialogEndUserSearchSqlHelpers.HasServiceResourceFilter(context.Query)
+               && effectivePartyCount > _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
             ? QueryStrategyScores.Preferred
-            : QueryStrategyScores.Ineligible;
+            : QueryStrategyScores.Eligible;
+    }
 
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {
@@ -81,7 +100,7 @@ internal sealed class ServiceDrivenSystemLabelMaskQueryStrategy : IQueryStrategy
 
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
-        var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
         var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
@@ -98,9 +117,9 @@ internal sealed class ServiceDrivenSystemLabelMaskQueryStrategy : IQueryStrategy
                       {permissionCandidateFilters}
                 """)
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
+            .ApplyPaginationLimit(query.Limit)
             .Append(
-                $"""
-                    LIMIT {query.Limit + 1}
+                """
                 ) d_inner
 
                 """);
@@ -110,7 +129,7 @@ internal sealed class ServiceDrivenSystemLabelMaskQueryStrategy : IQueryStrategy
         GetDialogsQuery query,
         Guid[] dialogIds)
     {
-        var permissionCandidateFilters = BuildPermissionCandidateFilters(query);
+        var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
         var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
@@ -129,27 +148,4 @@ internal sealed class ServiceDrivenSystemLabelMaskQueryStrategy : IQueryStrategy
         new PostgresFormattableStringBuilder()
             .ApplyPaginationOrder(query.OrderBy!, alias: "d")
             .ApplyPaginationLimit(query.Limit);
-
-    private static PostgresFormattableStringBuilder BuildPermissionCandidateFilters(GetDialogsQuery query) =>
-        new PostgresFormattableStringBuilder()
-            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
-            .AppendManyFilter(query.Org, nameof(query.Org))
-            .AppendManyFilter(query.Status, "StatusId", "int")
-            .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))
-            .AppendIf(query.VisibleAfter is not null, $""" AND (d."VisibleFrom" IS NULL OR d."VisibleFrom" <= {query.VisibleAfter}::timestamptz) """)
-            .AppendIf(query.ExpiresAfter is not null, $""" AND (d."ExpiresAt" IS NULL OR d."ExpiresAt" > {query.ExpiresAfter}::timestamptz) """)
-            .AppendIf(query.Deleted is not null, $""" AND d."Deleted" = {query.Deleted}::boolean """)
-            .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
-            .AppendIf(query.CreatedAfter is not null, $""" AND {query.CreatedAfter}::timestamptz <= d."CreatedAt" """)
-            .AppendIf(query.CreatedBefore is not null, $""" AND d."CreatedAt" <= {query.CreatedBefore}::timestamptz """)
-            .AppendIf(query.UpdatedAfter is not null, $""" AND {query.UpdatedAfter}::timestamptz <= d."UpdatedAt" """)
-            .AppendIf(query.UpdatedBefore is not null, $""" AND d."UpdatedAt" <= {query.UpdatedBefore}::timestamptz """)
-            .AppendIf(query.ContentUpdatedAfter is not null, $""" AND {query.ContentUpdatedAfter}::timestamptz <= d."ContentUpdatedAt" """)
-            .AppendIf(query.ContentUpdatedBefore is not null, $""" AND d."ContentUpdatedAt" <= {query.ContentUpdatedBefore}::timestamptz """)
-            .AppendIf(query.DueAfter is not null, $""" AND {query.DueAfter}::timestamptz <= d."DueAt" """)
-            .AppendIf(query.DueBefore is not null, $""" AND d."DueAt" <= {query.DueBefore}::timestamptz """)
-            .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
-            .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
-            .AppendSystemLabelMaskFilterCondition(query.SystemLabel)
-            .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
 }

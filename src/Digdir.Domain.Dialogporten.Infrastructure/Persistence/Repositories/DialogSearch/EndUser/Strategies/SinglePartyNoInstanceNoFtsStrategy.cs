@@ -8,6 +8,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 
 internal sealed class SinglePartyNoInstanceNoFtsStrategy : IQueryStrategy<EndUserSearchContext>
 {
+    // Direct single-party lookup for the common case with no FTS and no instance delegations.
+    // Uses an ID-only limited candidate subquery before fetching full rows, so the candidate scan
+    // can use covering indexes and avoid heap lookups until the final page-sized result set.
     public string Name => "SinglePartyNoInstanceNoFts";
 
     public int Score(EndUserSearchContext context) =>

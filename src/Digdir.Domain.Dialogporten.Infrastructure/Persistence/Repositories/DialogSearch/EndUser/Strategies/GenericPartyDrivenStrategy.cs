@@ -26,6 +26,10 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
         _logger = logger;
     }
 
+    // Generic party-driven fallback strategy for end-user search.
+    // Drives candidate lookup by party, which is usually preferable when there is no service filter,
+    // when FTS is present, or when the effective party set is small enough that party-ordered indexes
+    // give stable top-N pagination without service-driven fan-out.
     public string Name => "GenericPartyDriven";
 
     public int Score(EndUserSearchContext context)

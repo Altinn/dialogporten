@@ -26,6 +26,9 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
         _logger = logger;
     }
 
+    // Generic service-driven strategy for broad multi-party searches with service filtering.
+    // Drives lookup by service resource to reduce fan-out when many parties are authorized but the
+    // query narrows resources; each service group performs bounded top-N probes before final merge.
     public string Name => "GenericServiceDriven";
 
     public int Score(EndUserSearchContext context)

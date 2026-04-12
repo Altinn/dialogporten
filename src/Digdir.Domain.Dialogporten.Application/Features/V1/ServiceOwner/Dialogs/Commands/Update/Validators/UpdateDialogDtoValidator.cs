@@ -69,6 +69,8 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                 return visibleFrom is null || dueAt is null || dueAt >= visibleFrom;
             })
             .WithMessage(visibleFromErrorMessage)
+            // Due to Altinn apps/storage not having any restrictions on this, we need to
+            // drop this validation for admin-users (ie. the private API used by the adapter)
             .When((_, context) => DialogHasVisibleFrom(context) &&
                                   !userResourceRegistry.IsCurrentUserServiceOwnerAdmin());
 

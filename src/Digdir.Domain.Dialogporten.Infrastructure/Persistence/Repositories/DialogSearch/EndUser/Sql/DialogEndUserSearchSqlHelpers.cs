@@ -180,7 +180,7 @@ internal static partial class DialogEndUserSearchSqlHelpers
         const int totalPartiesCount = 1;
         const int groupsCount = 1;
         var totalServicesCount = partiesAndServices.Services.Length;
-        var groupSizes = new List<(int PartiesCount, int ServicesCount)> { (1, 1) };
+        var groupSizes = new List<(int PartiesCount, int ServicesCount)> { (1, totalServicesCount) };
 
         LogPartiesAndServicesCount(logger, strategyName, totalPartiesCount, totalServicesCount, groupsCount, groupSizes);
     }

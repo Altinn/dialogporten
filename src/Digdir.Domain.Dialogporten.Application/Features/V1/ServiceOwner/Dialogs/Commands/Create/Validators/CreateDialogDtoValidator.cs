@@ -18,6 +18,7 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         IValidator<SearchTagDto> searchTagValidator,
         IValidator<ContentDto?> contentValidator,
         IValidator<DialogServiceOwnerContextDto?> serviceOwnerContextValidator,
+        IUserResourceRegistry userResourceRegistry,
         IClock clock)
     {
         RuleFor(x => x.Id)
@@ -76,7 +77,8 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
         RuleFor(x => x.DueAt)
             .GreaterThanOrEqualTo(x => x.VisibleFrom)
             .WithMessage(FluentValidationDateTimeOffsetExtensions.InFutureOfMessage)
-            .When(x => x.VisibleFrom.HasValue, ApplyConditionTo.CurrentValidator);
+            .When(x => x.VisibleFrom.HasValue && !userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
+                ApplyConditionTo.CurrentValidator);
 
 
         RuleFor(x => x.Status)

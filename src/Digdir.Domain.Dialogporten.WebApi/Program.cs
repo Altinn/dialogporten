@@ -179,27 +179,27 @@ static void BuildAndRun(string[] args)
     // Built-in ASP.NET Core OpenAPI document generation (alongside existing FastEndpoints/NSwag)
     builder.Services.AddOpenApi("enduser", options =>
     {
-        options.ShouldInclude = (description) =>
-            description.RelativePath?.Contains("/enduser/", StringComparison.OrdinalIgnoreCase) == true;
+        options.ShouldInclude = description =>
+            description.RelativePath?.Contains("/enduser/",
+            StringComparison.OrdinalIgnoreCase) == true;
         options.AddOperationTransformer((operation, context, _) =>
         {
             var attr = context.Description.ActionDescriptor.EndpointMetadata
                 .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
-            if (attr is not null)
-                operation.OperationId = attr.OperationId;
+            operation.OperationId = attr is not null ? attr.OperationId : throw new InvalidOperationException("Missing OpenApiOperationIdAttribute");
             return Task.CompletedTask;
         });
     });
     builder.Services.AddOpenApi("serviceowner", options =>
     {
-        options.ShouldInclude = (description) =>
-            description.RelativePath?.Contains("/serviceowner/", StringComparison.OrdinalIgnoreCase) == true;
+        options.ShouldInclude = description =>
+            description.RelativePath?.Contains("/serviceowner/",
+            StringComparison.OrdinalIgnoreCase) == true;
         options.AddOperationTransformer((operation, context, _) =>
         {
             var attr = context.Description.ActionDescriptor.EndpointMetadata
                 .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
-            if (attr is not null)
-                operation.OperationId = attr.OperationId;
+            operation.OperationId = attr is not null ? attr.OperationId : throw new InvalidOperationException("Missing OpenApiOperationIdAttribute");
             return Task.CompletedTask;
         });
     });

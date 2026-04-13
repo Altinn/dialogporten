@@ -47,24 +47,23 @@
                  Text="OpenApi rename input: %(_GeneratedOpenApiDocument.Identity)" />
 
         <ItemGroup>
-            <_GeneratedOpenApiDocumentWithMetadata Include="@(_GeneratedOpenApiDocument)">
-                <DocumentName>$([System.Text.RegularExpressions.Regex]::Replace('%(Identity)','^.*$(MSBuildProjectName)_',''))</DocumentName>
-                <TargetPath>$(OpenApiDocumentsDirectory)openapi.%(DocumentName).json</TargetPath>
-            </_GeneratedOpenApiDocumentWithMetadata>
-            <_GeneratedOpenApiDocumentWithMetadata Remove="@(_GeneratedOpenApiDocumentWithMetadata)"
-                                                   Condition="'%(DocumentName)' == '' Or '%(DocumentName)' == '%(Identity)'" />
+            <_GeneratedOpenApiDocument Update="@(_GeneratedOpenApiDocument)">
+                <TargetPath>$(OpenApiDocumentsDirectory)openapi.$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)','^$([System.Text.RegularExpressions.Regex]::Escape('$(MSBuildProjectName)_'))','')).json</TargetPath>
+            </_GeneratedOpenApiDocument>
+            <_GeneratedOpenApiDocument Remove="@(_GeneratedOpenApiDocument)"
+                                       Condition="'$([System.String]::Copy('%(Filename)').Replace('$(MSBuildProjectName)_',''))' == '' Or '$([System.String]::Copy('%(Filename)').Replace('$(MSBuildProjectName)_',''))' == '%(Filename)'" />
         </ItemGroup>
 
         <Message Importance="high"
-                 Text="OpenApi rename: %(_GeneratedOpenApiDocumentWithMetadata.Identity) -> %(_GeneratedOpenApiDocumentWithMetadata.TargetPath) (DocumentName=%(_GeneratedOpenApiDocumentWithMetadata.DocumentName))" />
-        <Copy SourceFiles="@(_GeneratedOpenApiDocumentWithMetadata)"
-              DestinationFiles="@(_GeneratedOpenApiDocumentWithMetadata->'%(TargetPath)')"
+                 Text="OpenApi rename: %(_GeneratedOpenApiDocument.Identity) -> %(_GeneratedOpenApiDocument.TargetPath)" />
+        <Copy SourceFiles="@(_GeneratedOpenApiDocument)"
+              DestinationFiles="@(_GeneratedOpenApiDocument->'%(TargetPath)')"
               SkipUnchangedFiles="true" />
-        <Delete Files="@(_GeneratedOpenApiDocumentWithMetadata)" />
+        <Delete Files="@(_GeneratedOpenApiDocument)" />
         <WriteLinesToFile File="$(BaseIntermediateOutputPath)$(MSBuildProjectName).OpenApiFiles.cache"
-                          Lines="@(_GeneratedOpenApiDocumentWithMetadata->'%(TargetPath)')"
+                          Lines="@(_GeneratedOpenApiDocument->'%(TargetPath)')"
                           Overwrite="true"
-                          Condition="'@(_GeneratedOpenApiDocumentWithMetadata)' != ''" />
+                          Condition="'@(_GeneratedOpenApiDocument)' != ''" />
     </Target>
 
 </Project>

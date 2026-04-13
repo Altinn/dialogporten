@@ -1433,8 +1433,8 @@
     }
   },
   "info": {
-    "title": "Digdir.Domain.Dialogporten.WebApi | enduser",
-    "version": "1.0.0"
+    "title": "Digdir.Domain.Dialogporten.WebApi | v1.enduser",
+    "version": "v1"
   },
   "openapi": "3.1.1",
   "paths": {

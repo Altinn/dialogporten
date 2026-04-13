@@ -23,6 +23,8 @@ using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
+using Namotion.Reflection;
 using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -177,44 +179,8 @@ static void BuildAndRun(string[] args)
         .AddAuthorization();
 
     // Built-in ASP.NET Core OpenAPI document generation (alongside existing FastEndpoints/NSwag)
-    const string endUserPathPrefix = "api/v1/enduser/";
-    const string serviceOwnerPathPrefix = "api/v1/serviceowner/";
-
-    builder.Services.AddOpenApi("v1.enduser", options =>
-    {
-        options.ShouldInclude = description =>
-            description.RelativePath?.Contains(endUserPathPrefix,
-            StringComparison.OrdinalIgnoreCase) == true;
-        options.AddOperationTransformer((operation, context, _) =>
-        {
-            var attr = context.Description.ActionDescriptor.EndpointMetadata
-                .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
-            operation.OperationId = attr is not null
-                ? attr.OperationId
-                : throw new InvalidOperationException(
-                    "Missing OpenApiOperationIdAttribute for endpoint " +
-                    $"{context.Description.RelativePath ?? "<unknown>"}.");
-            return Task.CompletedTask;
-        });
-    });
-
-    builder.Services.AddOpenApi("v1.serviceowner", options =>
-    {
-        options.ShouldInclude = description =>
-            description.RelativePath?.Contains(serviceOwnerPathPrefix,
-            StringComparison.OrdinalIgnoreCase) == true;
-        options.AddOperationTransformer((operation, context, _) =>
-        {
-            var attr = context.Description.ActionDescriptor.EndpointMetadata
-                .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
-            operation.OperationId = attr is not null
-                ? attr.OperationId
-                : throw new InvalidOperationException(
-                "Missing OpenApiOperationIdAttribute for endpoint " +
-                $"{context.Description.RelativePath ?? "<unknown>"}.");
-            return Task.CompletedTask;
-        });
-    });
+    builder.Services.AddOpenApi("v1", "enduser");
+    builder.Services.AddOpenApi("v1", "serviceowner");
 
     if (builder.Environment.IsDevelopment())
     {

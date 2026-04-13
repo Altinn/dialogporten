@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.Get;
 
-[OpenApiOperationId("GetDialog")]
+// [OpenApiOperationId("GetDialog")]
 public sealed class GetDialogEndpoint : Endpoint<GetDialogRequest, DialogDto>
 {
     private readonly ISender _sender;

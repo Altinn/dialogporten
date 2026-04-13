@@ -161,7 +161,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
 
-
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
             .DisableVersionableFilter()

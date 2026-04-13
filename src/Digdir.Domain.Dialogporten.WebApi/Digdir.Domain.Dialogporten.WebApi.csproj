@@ -43,11 +43,11 @@
         </ItemGroup>
 
         <Copy SourceFiles="@(_GeneratedOpenApiDocument)"
-              DestinationFiles="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.%(Filename).json')"
+              DestinationFiles="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.$([System.String]::Copy(&quot;%(Filename)&quot;).Replace(&quot;$(MSBuildProjectName)_&quot;,&quot;&quot;)).json')"
               SkipUnchangedFiles="true" />
         <Delete Files="@(_GeneratedOpenApiDocument)" />
         <WriteLinesToFile File="$(BaseIntermediateOutputPath)$(MSBuildProjectName).OpenApiFiles.cache"
-                          Lines="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.%(Filename).json')"
+                          Lines="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.$([System.String]::Copy(&quot;%(Filename)&quot;).Replace(&quot;$(MSBuildProjectName)_&quot;,&quot;&quot;)).json')"
                           Overwrite="true"
                           Condition="'@(_GeneratedOpenApiDocument)' != ''" />
     </Target>

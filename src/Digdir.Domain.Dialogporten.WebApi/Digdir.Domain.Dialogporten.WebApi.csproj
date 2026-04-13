@@ -38,13 +38,21 @@
     </Target>
 
     <Target Name="NormalizeGeneratedOpenApiDocuments" AfterTargets="GenerateOpenApiDocuments">
+        <Message Importance="high"
+                 Text="OpenApi rename input: OpenApiDocumentsDirectory=$(OpenApiDocumentsDirectory)" />
+        <CreateItem Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_*.json">
+            <Output TaskParameter="Include" ItemName="_GeneratedOpenApiDocument" />
+        </CreateItem>
+        <Message Importance="high"
+                 Text="OpenApi rename input: %(_GeneratedOpenApiDocument.Identity)" />
+
         <ItemGroup>
-            <_GeneratedOpenApiDocumentWithMetadata Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_*.json">
-                <DocumentName>$([System.String]::Copy('%(Filename)').Replace('$(MSBuildProjectName)_',''))</DocumentName>
+            <_GeneratedOpenApiDocumentWithMetadata Include="@(_GeneratedOpenApiDocument)">
+                <DocumentName>$([System.Text.RegularExpressions.Regex]::Replace('%(Identity)','^.*$(MSBuildProjectName)_',''))</DocumentName>
                 <TargetPath>$(OpenApiDocumentsDirectory)openapi.%(DocumentName).json</TargetPath>
             </_GeneratedOpenApiDocumentWithMetadata>
             <_GeneratedOpenApiDocumentWithMetadata Remove="@(_GeneratedOpenApiDocumentWithMetadata)"
-                                                   Condition="'%(DocumentName)' == '' Or '%(DocumentName)' == '%(Filename)'" />
+                                                   Condition="'%(DocumentName)' == '' Or '%(DocumentName)' == '%(Identity)'" />
         </ItemGroup>
 
         <Message Importance="high"

@@ -234,34 +234,8 @@
       HasUnopenedContent: true,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
-      SeenSinceLastUpdate: [
-        {
-          Id: Guid_14,
-          SeenAt: DateTimeOffset_10,
-          SeenBy: {
-            ActorType: PartyRepresentative,
-            ActorName: Brando Sando,
-            ActorId: urn:altinn:person:identifier-ephemeral:scrubbed
-          },
-          IsViaServiceOwner: false,
-          IsCurrentEndUser: true
-        }
-      ],
-      SeenSinceLastContentUpdate: [
-        {
-          Id: Guid_14,
-          SeenAt: DateTimeOffset_10,
-          SeenBy: {
-            ActorType: PartyRepresentative,
-            ActorName: Brando Sando,
-            ActorId: urn:altinn:person:identifier-ephemeral:scrubbed
-          },
-          IsViaServiceOwner: false,
-          IsCurrentEndUser: true
-        }
-      ],
       EndUserContext: {
-        Revision: Guid_15,
+        Revision: Guid_14,
         SystemLabels: [
           Default
         ]

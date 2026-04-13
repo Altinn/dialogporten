@@ -17,18 +17,21 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
 
         var getDialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
         getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var dialogContent = getDialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
-        var seenLogId = dialogContent.SeenSinceLastUpdate.Single().Id;
+        getDialogResponse.Content.Should().NotBeNull();
+        getDialogResponse.Content.SeenSinceLastUpdate.Should().NotBeEmpty();
+
+        var seenLog = getDialogResponse.Content.SeenSinceLastUpdate.FirstOrDefault();
+        seenLog.Should().NotBeNull();
 
         // Act
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetSeenLogDialogSeenLog(
             dialogId,
-            seenLogId,
+            seenLog.Id,
             TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Seen log content was null.");
-        content.Id.Should().Be(seenLogId);
+        content.Id.Should().Be(seenLog.Id);
     }
 }

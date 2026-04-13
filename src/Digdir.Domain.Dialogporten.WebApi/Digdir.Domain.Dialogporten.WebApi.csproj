@@ -38,15 +38,22 @@
     </Target>
 
     <Target Name="NormalizeGeneratedOpenApiDocuments" AfterTargets="GenerateOpenApiDocuments">
+        <ReadLinesFromFile File="$(BaseIntermediateOutputPath)$(MSBuildProjectName).OpenApiFiles.cache">
+            <Output TaskParameter="Lines" ItemName="_GeneratedOpenApiDocument" />
+        </ReadLinesFromFile>
+
         <ItemGroup>
-            <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_*.json">
-                <DocumentName>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)','^$(MSBuildProjectName)_',''))</DocumentName>
-                <TargetPath>$(OpenApiDocumentsDirectory)openapi.%(DocumentName).json</TargetPath>
+            <_GeneratedOpenApiDocument Update="@(_GeneratedOpenApiDocument)">
+                <OriginalName>$([System.IO.Path]::GetFileNameWithoutExtension('%(Identity)'))</OriginalName>
+                <DocumentName>$([System.Text.RegularExpressions.Regex]::Replace('%(_GeneratedOpenApiDocument.OriginalName)','^$([System.Text.RegularExpressions.Regex]::Escape('$(MSBuildProjectName)_'))',''))</DocumentName>
+                <TargetPath>$(OpenApiDocumentsDirectory)openapi.%(_GeneratedOpenApiDocument.DocumentName).json</TargetPath>
             </_GeneratedOpenApiDocument>
             <_GeneratedOpenApiDocument Remove="@(_GeneratedOpenApiDocument)"
-                                       Condition="'%(DocumentName)' == '' Or '%(DocumentName)' == '%(Filename)'" />
+                                       Condition="'%(_GeneratedOpenApiDocument.DocumentName)' == '' Or '%(_GeneratedOpenApiDocument.DocumentName)' == '%(_GeneratedOpenApiDocument.OriginalName)'" />
         </ItemGroup>
 
+        <Message Importance="high"
+                 Text="OpenApi rename: %(_GeneratedOpenApiDocument.Identity) -> %(_GeneratedOpenApiDocument.TargetPath) (DocumentName=%(_GeneratedOpenApiDocument.DocumentName))" />
         <Copy SourceFiles="@(_GeneratedOpenApiDocument)"
               DestinationFiles="@(_GeneratedOpenApiDocument->'%(TargetPath)')"
               SkipUnchangedFiles="true" />

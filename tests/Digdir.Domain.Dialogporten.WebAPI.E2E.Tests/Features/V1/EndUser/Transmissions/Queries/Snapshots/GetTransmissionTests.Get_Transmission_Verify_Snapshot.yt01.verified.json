@@ -1,4 +1,4 @@
-﻿{
+{
   "attachments": [
     {
       "displayName": [
@@ -73,8 +73,8 @@
   ],
   "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
   "sender": {
-    "actorId": "urn:altinn:organization:identifier-no:991825827",
-    "actorName": "DIGITALISERINGSDIREKTORATET",
+    "actorId": "urn:altinn:organization:identifier-no:713431400",
+    "actorName": "UnitName1784976",
     "actorType": "PartyRepresentative"
   },
   "type": "Information"

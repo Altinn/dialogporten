@@ -93,7 +93,11 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
-        var dto = dialog.Transmissions.Select(t => t.ToDto()).ToList();
+        var dto = dialog.Transmissions
+            .OrderBy(x => x.CreatedAt)
+            .ThenBy(x => x.Id)
+            .Select(t => t.ToDto())
+            .ToList();
 
         foreach (var transmission in dto)
         {

@@ -85,6 +85,14 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public DateTimeOffset? ContentUpdatedBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs that has not been viewed or opened by the user yet.
+    /// A dialog is considered viewed if:
+    /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, or
+    /// - It has a system label MarkedAsUnopened.
+    /// </summary>
+    public bool? IsContentSeen { get; set; }
+
+    /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
     public DateTimeOffset? DueAfter { get; set; }
@@ -381,6 +389,7 @@ internal static class SearchDialogQueryExtensions
             Limit = request.Limit!.Value,
             ContentUpdatedAfter = request.ContentUpdatedAfter,
             ContentUpdatedBefore = request.ContentUpdatedBefore,
+            IsContentSeen = request.IsContentSeen,
             Search = request.Search,
             SearchLanguageCode = request.SearchLanguageCode,
             CreatedAfter = request.CreatedAfter,

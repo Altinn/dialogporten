@@ -177,10 +177,13 @@ static void BuildAndRun(string[] args)
         .AddAuthorization();
 
     // Built-in ASP.NET Core OpenAPI document generation (alongside existing FastEndpoints/NSwag)
+    const string endUserPathPrefix = "api/v1/enduser/";
+    const string serviceOwnerPathPrefix = "api/v1/serviceowner/";
+
     builder.Services.AddOpenApi("enduser", options =>
     {
         options.ShouldInclude = description =>
-            description.RelativePath?.Contains("/enduser/",
+            description.RelativePath?.Contains(endUserPathPrefix,
             StringComparison.OrdinalIgnoreCase) == true;
         options.AddOperationTransformer((operation, context, _) =>
         {
@@ -198,7 +201,7 @@ static void BuildAndRun(string[] args)
     builder.Services.AddOpenApi("serviceowner", options =>
     {
         options.ShouldInclude = description =>
-            description.RelativePath?.Contains("/serviceowner/",
+            description.RelativePath?.Contains(serviceOwnerPathPrefix,
             StringComparison.OrdinalIgnoreCase) == true;
         options.AddOperationTransformer((operation, context, _) =>
         {

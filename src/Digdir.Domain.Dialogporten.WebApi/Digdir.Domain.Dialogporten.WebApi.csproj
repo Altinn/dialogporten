@@ -39,14 +39,12 @@
 
     <Target Name="NormalizeGeneratedOpenApiDocuments" AfterTargets="GenerateOpenApiDocuments">
         <ItemGroup>
-            <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_enduser.json"
-                                       Condition="Exists('$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_enduser.json')">
-                <TargetPath>$(OpenApiDocumentsDirectory)openapi.v1.enduser.json</TargetPath>
+            <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_*.json">
+                <DocumentName>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)','^$(MSBuildProjectName)_',''))</DocumentName>
+                <TargetPath>$(OpenApiDocumentsDirectory)openapi.%(DocumentName).json</TargetPath>
             </_GeneratedOpenApiDocument>
-            <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_serviceowner.json"
-                                       Condition="Exists('$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_serviceowner.json')">
-                <TargetPath>$(OpenApiDocumentsDirectory)openapi.v1.serviceowner.json</TargetPath>
-            </_GeneratedOpenApiDocument>
+            <_GeneratedOpenApiDocument Remove="@(_GeneratedOpenApiDocument)"
+                                       Condition="'%(DocumentName)' == '' Or '%(DocumentName)' == '%(Filename)'" />
         </ItemGroup>
 
         <Copy SourceFiles="@(_GeneratedOpenApiDocument)"

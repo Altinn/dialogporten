@@ -40,14 +40,19 @@
     <Target Name="NormalizeGeneratedOpenApiDocuments" AfterTargets="GenerateOpenApiDocuments">
         <ItemGroup>
             <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_*.json" />
+            <_GeneratedOpenApiDocument Update="@(_GeneratedOpenApiDocument)">
+                <CleanName>$([System.String]::Copy('%(Filename)').Replace('$(MSBuildProjectName)_',''))</CleanName>
+            </_GeneratedOpenApiDocument>
+            <_GeneratedOpenApiDocument Remove="@(_GeneratedOpenApiDocument)"
+                                       Condition="'%(CleanName)' == '' Or '%(CleanName)' == '%(Filename)'" />
         </ItemGroup>
 
         <Copy SourceFiles="@(_GeneratedOpenApiDocument)"
-              DestinationFiles="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.$([System.String]::Copy(&quot;%(Filename)&quot;).Replace(&quot;$(MSBuildProjectName)_&quot;,&quot;&quot;)).json')"
+              DestinationFiles="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.%(CleanName).json')"
               SkipUnchangedFiles="true" />
         <Delete Files="@(_GeneratedOpenApiDocument)" />
         <WriteLinesToFile File="$(BaseIntermediateOutputPath)$(MSBuildProjectName).OpenApiFiles.cache"
-                          Lines="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.$([System.String]::Copy(&quot;%(Filename)&quot;).Replace(&quot;$(MSBuildProjectName)_&quot;,&quot;&quot;)).json')"
+                          Lines="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.%(CleanName).json')"
                           Overwrite="true"
                           Condition="'@(_GeneratedOpenApiDocument)' != ''" />
     </Target>

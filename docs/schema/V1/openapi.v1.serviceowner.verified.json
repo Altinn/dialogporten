@@ -1,0 +1,3884 @@
+﻿{
+  "components": {
+    "schemas": {
+      "AcceptedLanguage": {
+        "properties": {
+          "languageCode": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "languageCode",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "AcceptedLanguages": {
+        "properties": {
+          "acceptedLanguage": {
+            "items": {
+              "$ref": "#/components/schemas/AcceptedLanguage"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          }
+        },
+        "required": [
+          "acceptedLanguage"
+        ],
+        "type": "object"
+      },
+      "ActivityDto": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "extendedType": {
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transmissionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values"
+          }
+        },
+        "type": "object"
+      },
+      "ActorDto": {
+        "properties": {
+          "actorId": {
+            "description": "The identifier (national identity number or organization number) of the actor.",
+            "example": "urn:altinn:person:identifier-no:12018212345",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actorName": {
+            "description": "The name of the actor.",
+            "example": "Ola Nordmann",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actorType": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of actor; either the service owner, or someone representing the party."
+          }
+        },
+        "type": "object"
+      },
+      "ApiActionDto": {
+        "properties": {
+          "action": {
+            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
+            "example": "write",
+            "type": "string"
+          },
+          "authorizationAttribute": {
+            "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n\nCan also be used to refer to other service policies.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "endpoints": {
+            "description": "The endpoints associated with the action.",
+            "items": {
+              "$ref": "#/components/schemas/ApiActionEndpointDto"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of Api Actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "description": "The logical name of the operation the API action refers to.",
+            "example": "confirm",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ApiActionEndpointDto": {
+        "properties": {
+          "deprecated": {
+            "description": "Boolean indicating if the endpoint is deprecated.",
+            "type": "boolean"
+          },
+          "documentationUrl": {
+            "description": "Link to documentation for the endpoint, providing documentation for integrators. Should be a URL to a\nhuman-readable page.",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "httpMethod": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The HTTP method that the endpoint expects for this action."
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of Api Action Endpoints. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "requestSchema": {
+            "description": "Link to the request schema for the endpoint. Used to provide documentation for integrators.\nDialogporten will not validate information on this endpoint.",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "responseSchema": {
+            "description": "Link to the response schema for the endpoint. Used to provide documentation for integrators.\nDialogporten will not validate information on this endpoint.",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sunsetAt": {
+            "description": "Date and time when the endpoint will no longer function. Only set if the endpoint is deprecated. Dialogporten\nwill not enforce this date.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "url": {
+            "description": "The fully qualified URL of the API endpoint.",
+            "format": "uri",
+            "type": "string"
+          },
+          "version": {
+            "description": "Arbitrary string indicating the version of the endpoint.",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentDto": {
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentUrlDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentUrlDto": {
+        "properties": {
+          "consumerType": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of consumer the URL is intended for."
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BulkSetDialogSystemLabelsRequest": {
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/BulkSetSystemLabelDto"
+          },
+          "enduserId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "BulkSetSystemLabelDto": {
+        "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialogs. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "dialogs": {
+            "description": "List of target dialog ids with optional revision ids",
+            "items": {
+              "$ref": "#/components/schemas/DialogRevisionDto"
+            },
+            "type": "array"
+          },
+          "performedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActorDto",
+                "description": "Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted."
+              }
+            ]
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ContentDto": {
+        "properties": {
+          "contentReference": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentValueDto",
+                "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL."
+              }
+            ]
+          },
+          "summary": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentValueDto",
+                "description": "The summary of the content."
+              }
+            ]
+          },
+          "title": {
+            "$ref": "#/components/schemas/ContentValueDto",
+            "description": "The title of the content."
+          }
+        },
+        "type": "object"
+      },
+      "ContentValueDto": {
+        "properties": {
+          "isAuthorized": {
+            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder. Can be null if not applicable.",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "mediaType": {
+            "description": "Media type of the content, this can also indicate that the content is embeddable.",
+            "type": "string"
+          },
+          "value": {
+            "description": "A list of localizations for the content.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ContinuationToken": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ContinuationTokenSetOfSearchDialogEndUserContextOrderDefinitionAndDataDialogEndUserContextListItemDto": {
+        "properties": {
+          "raw": {
+            "type": "string"
+          },
+          "tokens": {
+            "items": {
+              "$ref": "#/components/schemas/ContinuationToken"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tokens",
+          "raw"
+        ],
+        "type": "object"
+      },
+      "ContinuationTokenSetOfSearchDialogQueryOrderDefinitionAndDialogEntity": {
+        "properties": {
+          "raw": {
+            "type": "string"
+          },
+          "tokens": {
+            "items": {
+              "$ref": "#/components/schemas/ContinuationToken"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tokens",
+          "raw"
+        ],
+        "type": "object"
+      },
+      "CreateActivityRequest": {
+        "properties": {
+          "createdAt": {
+            "description": "If supplied, overrides the creating date and time for the activity.\nIf not supplied, the current date /time will be used.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "description": "Unstructured text describing the activity. Only set if the activity type is \u0022Information\u0022.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "Arbitrary URI/URN describing a service-specific activity type.",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSilentUpdate": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "performedBy": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The actor that performed the activity."
+          },
+          "transmissionId": {
+            "description": "If the activity is related to a particular transmission, this field will contain the transmission identifier.\nMust be present in the request body.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of activity"
+          }
+        },
+        "type": "object"
+      },
+      "CreateDialogDto": {
+        "properties": {
+          "activities": {
+            "description": "An immutable list of activities associated with the dialog.",
+            "items": {
+              "$ref": "#/components/schemas/ActivityDto"
+            },
+            "type": "array"
+          },
+          "apiActions": {
+            "description": "The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.",
+            "items": {
+              "$ref": "#/components/schemas/ApiActionDto"
+            },
+            "type": "array"
+          },
+          "attachments": {
+            "description": "The attachments associated with the dialog (on an aggregate level).",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            },
+            "type": "array"
+          },
+          "content": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentDto",
+                "description": "The dialog unstructured text content."
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "If set, will override the date and time when the dialog is set as created.\nIf not supplied, the current date /time will be used.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueAt": {
+            "description": "The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "expiresAt": {
+            "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n\nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "extendedStatus": {
+            "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "guiActions": {
+            "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
+            "items": {
+              "$ref": "#/components/schemas/GuiActionDto"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of dialogs. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.",
+            "type": "boolean"
+          },
+          "party": {
+            "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
+            "type": "string"
+          },
+          "precedingProcess": {
+            "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "process": {
+            "description": "Optional process identifier used to indicate a business process this dialog belongs to.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "progress": {
+            "description": "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come\nto a natural completion (successful or not).",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "searchTags": {
+            "description": "A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.",
+            "items": {
+              "$ref": "#/components/schemas/SearchTagDto"
+            },
+            "type": "array"
+          },
+          "serviceOwnerContext": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DialogServiceOwnerContextDto",
+                "description": "Metadata about the dialog owned by the service owner."
+              }
+            ]
+          },
+          "serviceResource": {
+            "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a resource in the Altinn Resource Registry, which the authenticated organization\nmust own, i.e., be listed as the \u0022competent authority\u0022 in the Resource Registry entry.",
+            "example": "urn:altinn:resource:some-service-identifier",
+            "type": "string"
+          },
+          "status": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DialogStatusInput",
+                "description": "The aggregated status of the dialog."
+              }
+            ]
+          },
+          "systemLabel": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Values",
+                "description": "Set the system label of the dialog."
+              }
+            ]
+          },
+          "transmissions": {
+            "description": "The immutable list of transmissions associated with the dialog.",
+            "items": {
+              "$ref": "#/components/schemas/TransmissionDto"
+            },
+            "type": "array"
+          },
+          "updatedAt": {
+            "description": "If set, will override the date and time when the dialog is set as last updated.\nIf not supplied, the current date /time will be used.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "visibleFrom": {
+            "description": "The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be\nimmediately available.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CreateDialogRequest": {
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/CreateDialogDto"
+          },
+          "isSilentUpdate": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CreateServiceOwnerLabelRequest": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dto": {
+            "$ref": "#/components/schemas/LabelDto"
+          },
+          "ifMatchServiceOwnerContextRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CreateTransmissionRequest": {
+        "properties": {
+          "attachments": {
+            "description": "The transmission-level attachments.",
+            "items": {
+              "$ref": "#/components/schemas/TransmissionAttachmentDto"
+            },
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n\nCan also be used to refer to other service policies.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "content": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TransmissionContentDto",
+                "description": "The transmission unstructured text content."
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "If supplied, overrides the creating date and time for the transmission.\nIf not supplied, the current date /time will be used.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "Arbitrary URI/URN describing a service-specific transmission type.\n\nRefer to the service-specific documentation provided by the service owner for details (if in use).",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of transmissions.\nIf not supplied, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSilentUpdate": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/TransmissionNavigationalActionDto"
+            },
+            "type": "array"
+          },
+          "relatedTransmissionId": {
+            "description": "Reference to any other transmission that this transmission is related to.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sender": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The actor that sent the transmission."
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of transmission."
+          }
+        },
+        "type": "object"
+      },
+      "DeletedFilter": {
+        "type": "integer"
+      },
+      "DeleteDialogRequest": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSilentUpdate": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DeleteServiceOwnerLabelRequest": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ifMatchServiceOwnerContextRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DialogActivityDto": {
+        "properties": {
+          "createdAt": {
+            "description": "The date and time when the activity was created.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "description": "Unstructured text describing the activity. Only set if the activity type is \u0022Information\u0022.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "extendedType": {
+            "description": "An arbitrary string with a service-specific activity type.\n\nConsult the service-specific documentation provided by the service owner for details (if in use).",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the activity in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "performedBy": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The actor that performed the activity."
+          },
+          "transmissionId": {
+            "description": "If the activity is related to a particular transmission, this field will contain the transmission identifier.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of activity."
+          }
+        },
+        "type": "object"
+      },
+      "DialogDto": {
+        "properties": {
+          "content": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentDto",
+                "description": "The content of the dialog in search results."
+              }
+            ]
+          },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "The date and time when the dialog was created.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "If deleted, the date and time when the deletion was performed.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueAt": {
+            "description": "The due date for the dialog. This is the last date when the dialog is expected to be completed.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "endUserContext": {
+            "$ref": "#/components/schemas/DialogEndUserContextDto",
+            "description": "Metadata about the dialog owned by end-users."
+          },
+          "extendedStatus": {
+            "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n\nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.\n\nRefer to the service-specific documentation provided by the service owner for details (if in use).",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "guiAttachmentCount": {
+            "description": "The number of attachments in the dialog made available for browser-based frontends.",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The unique identifier for the dialog in UUIDv7 format.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "latestActivity": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DialogActivityDto",
+                "description": "The latest entry in the dialog\u0027s activity log."
+              }
+            ]
+          },
+          "org": {
+            "description": "The service owner code representing the organization (service owner) related to this dialog.",
+            "example": "ske",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
+            "type": "string"
+          },
+          "precedingProcess": {
+            "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "process": {
+            "description": "Optional process identifier used to indicate a business process this dialog belongs to.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "progress": {
+            "description": "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come\nto a natural completion (successful or not).",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "revision": {
+            "description": "The unique identifier for the revision in UUIDv4 format.",
+            "example": "a312cb9c-7632-43c2-aa38-69b06aed56ca",
+            "format": "uuid",
+            "type": "string"
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/DialogSeenLogDto"
+            },
+            "type": "array"
+          },
+          "seenSinceLastUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/DialogSeenLogDto"
+            },
+            "type": "array"
+          },
+          "serviceOwnerContext": {
+            "$ref": "#/components/schemas/DialogServiceOwnerContextDto",
+            "description": "Metadata about the dialog owned by the service owner."
+          },
+          "serviceResource": {
+            "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
+            "example": "urn:altinn:resource:some-service-identifier",
+            "type": "string"
+          },
+          "serviceResourceType": {
+            "description": "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The aggregated status of the dialog."
+          },
+          "systemLabel": {
+            "$ref": "#/components/schemas/Values",
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Values.Default, Values.Bin or Values.Archive.\nUse List\u0026lt;Values\u0026gt; DialogEndUserContextDto.SystemLabels on DialogEndUserContextDto DialogDto.EndUserContext instead."
+          },
+          "updatedAt": {
+            "description": "The date and time when the dialog was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "visibleFrom": {
+            "description": "The timestamp when the dialog will be made visible for authorized end users.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DialogEndUserContextDto": {
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "uuid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DialogEndUserContextItemDto": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "endUserContextRevision": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DialogRevisionDto": {
+        "properties": {
+          "dialogId": {
+            "description": "Target dialog id for system labels",
+            "format": "uuid",
+            "type": "string"
+          },
+          "endUserContextRevision": {
+            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DialogSeenLogDto": {
+        "properties": {
+          "id": {
+            "description": "The unique identifier for the seen log entry in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "description": "Flag indicating whether the seen log entry was created by the end user supplied in the query.",
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "description": "Flag indicating whether the seen log entry was created via the service owner.\n\nThis is used when the service owner uses the service owner API to implement its own frontend.",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "seenAt": {
+            "description": "The timestamp when the dialog revision was seen.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The actor that saw the dialog revision."
+          }
+        },
+        "type": "object"
+      },
+      "DialogServiceOwnerContextDto": {
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the service owner context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "uuid",
+            "type": "string"
+          },
+          "serviceOwnerLabels": {
+            "description": "A list of labels, not visible in end-user APIs.",
+            "items": {
+              "$ref": "#/components/schemas/ServiceOwnerLabelDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DialogStatusInput": {
+        "type": "integer"
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "default": "Error or field name",
+            "type": "string"
+          },
+          "reason": {
+            "default": "Error reason",
+            "type": "string"
+          },
+          "severity": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "FreezeDialogRequest": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "GetActivityQuery": {
+        "properties": {
+          "activityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetDialogLookupRequest": {
+        "properties": {
+          "acceptedLanguages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          },
+          "instanceRef": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetDialogQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "endUserId": {
+            "description": "Filter by end user id",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "GetSeenLogQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "seenLogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetServiceOwnerLabelsQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetTransmissionQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transmissionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GuiActionDto": {
+        "properties": {
+          "action": {
+            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
+            "type": "string"
+          },
+          "authorizationAttribute": {
+            "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n\nCan also be used to refer to other service policies.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "httpMethod": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Values",
+                "description": "The HTTP method that the frontend should use when redirecting the user."
+              }
+            ]
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of Gui Actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isDeleteDialogAction": {
+            "description": "Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX\nfor delete actions.",
+            "type": "boolean"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/Values",
+            "description": "Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action\npriority."
+          },
+          "prompt": {
+            "description": "If there should be a prompt asking the user for confirmation before the action is executed,\nthis field should contain the prompt text.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "title": {
+            "description": "The title of the action, this should be short and in verb form. Must be text/plain.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to\n\u0022urn:dialogporten:unauthorized\u0022 if the user is not authorized to perform the action.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IdentifierLookupServiceOwnerDto": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orgNumber",
+          "code"
+        ],
+        "type": "object"
+      },
+      "IdentifierLookupServiceResourceDto": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "isDelegable",
+          "minimumAuthenticationLevel"
+        ],
+        "type": "object"
+      },
+      "LabelDto": {
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LocalizationDto": {
+        "properties": {
+          "languageCode": {
+            "description": "The language code of the localization in ISO 639-1 format.",
+            "example": "nb",
+            "type": "string"
+          },
+          "value": {
+            "description": "The localized text (or URL if a front-channel embed).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "languageCode"
+        ],
+        "type": "object"
+      },
+      "NavigationalActionDto": {
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "example": "https://example.com/path",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationConditionDto": {
+        "properties": {
+          "sendNotification": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationConditionQuery": {
+        "properties": {
+          "activityType": {
+            "$ref": "#/components/schemas/Values"
+          },
+          "conditionType": {
+            "$ref": "#/components/schemas/NotificationConditionType"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transmissionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "NotificationConditionType": {
+        "type": "integer"
+      },
+      "Operation": {
+        "properties": {
+          "from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "op": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "operationType": {
+            "$ref": "#/components/schemas/OperationType"
+          },
+          "path": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "value": {}
+        },
+        "type": "object"
+      },
+      "OperationType": {
+        "type": "integer"
+      },
+      "OrderDirection": {
+        "default": 2,
+        "type": "integer"
+      },
+      "OrderOfDialogEntity": {
+        "properties": {
+          "direction": {
+            "$ref": "#/components/schemas/OrderDirection"
+          },
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "type": "object"
+      },
+      "OrderSetOfSearchDialogQueryOrderDefinitionAndDialogEntity": {
+        "properties": {
+          "orders": {
+            "items": {
+              "$ref": "#/components/schemas/OrderOfDialogEntity"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "orders"
+        ],
+        "type": "object"
+      },
+      "PaginatedListOfDialogDto": {
+        "properties": {
+          "continuationToken": {
+            "description": "The continuation token to be used to fetch the next page of items",
+            "example": "createdat_2024-07-31T09:09:03.0257090Z,id_0c089101-b7cf-a476-955c-f00a78d74a4e",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hasNextPage": {
+            "description": "Whether there are more items available that can be fetched by supplying the continuation token",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "The paginated list of items",
+            "items": {
+              "$ref": "#/components/schemas/DialogDto"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "orderBy": {
+            "description": "The current sorting order of the items",
+            "example": "createdat_desc,id_desc",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hasNextPage",
+          "orderBy"
+        ],
+        "type": "object"
+      },
+      "PaginatedListOfDialogEndUserContextItemDto": {
+        "properties": {
+          "continuationToken": {
+            "description": "The continuation token to be used to fetch the next page of items",
+            "example": "createdat_2024-07-31T09:09:03.0257090Z,id_0c089101-b7cf-a476-955c-f00a78d74a4e",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hasNextPage": {
+            "description": "Whether there are more items available that can be fetched by supplying the continuation token",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "The paginated list of items",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextItemDto"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "orderBy": {
+            "description": "The current sorting order of the items",
+            "example": "createdat_desc,id_desc",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hasNextPage",
+          "orderBy"
+        ],
+        "type": "object"
+      },
+      "ProblemDetails": {
+        "properties": {
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "type": "array"
+          },
+          "instance": {
+            "default": "/api/route",
+            "type": "string"
+          },
+          "status": {
+            "default": 400,
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "title": {
+            "default": "One or more validation errors occurred.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "traceId": {
+            "default": "0HMPNHL0JHL76:00000001",
+            "type": "string"
+          },
+          "type": {
+            "default": "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "PurgeDialogRequest": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSilentUpdate": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "RestoreDialogRequest": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSilentUpdate": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "SearchActivityQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchDialogEndUserContextQuery": {
+        "properties": {
+          "contentUpdatedAfter": {
+            "description": "Filter by content updated at or after this datetime",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "continuationToken": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContinuationTokenSetOfSearchDialogEndUserContextOrderDefinitionAndDataDialogEndUserContextListItemDto"
+              }
+            ]
+          },
+          "label": {
+            "description": "Filter by one or more system labels",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "limit": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "party": {
+            "description": "Filter by one or more owning parties",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SearchDialogQuery": {
+        "properties": {
+          "contentUpdatedAfter": {
+            "description": "Only return dialogs with content updated after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "contentUpdatedBefore": {
+            "description": "Only return dialogs with content updated before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "continuationToken": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContinuationTokenSetOfSearchDialogQueryOrderDefinitionAndDialogEntity"
+              }
+            ]
+          },
+          "createdAfter": {
+            "description": "Only return dialogs created after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdBefore": {
+            "description": "Only return dialogs created before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deleted": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DeletedFilter",
+                "description": "If set to \u0027include\u0027, the result will include both deleted and non-deleted dialogs. If set to \u0027exclude\u0027, the result will only include non-deleted dialogs. If set to \u0027only\u0027, the result will only include deleted dialogs"
+              }
+            ]
+          },
+          "dueAfter": {
+            "description": "Only return dialogs with due date after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueBefore": {
+            "description": "Only return dialogs with due date before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "endUserId": {
+            "description": "Filter by end user id",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "excludeApiOnly": {
+            "description": "Whether to exclude API-only dialogs from the results. Defaults to false.",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "extendedStatus": {
+            "description": "Filter by one or more extended statuses",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "externalReference": {
+            "description": "Filter by external reference",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "limit": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "orderBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/OrderSetOfSearchDialogQueryOrderDefinitionAndDialogEntity"
+              }
+            ]
+          },
+          "party": {
+            "description": "Filter by one or more owning parties",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "process": {
+            "description": "Filter by process",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "search": {
+            "description": "Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "searchLanguageCode": {
+            "description": "Limit free text search to texts with this language code, e.g. \u0027nb\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "serviceOwnerLabels": {
+            "description": "Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with \u0027*\u0027 at the end of the label. For example, \u0027label*\u0027 will match \u0027label\u0027, \u0027label1\u0027, \u0027label2\u0027, etc.",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "serviceResource": {
+            "description": "Filter by one or more service resources",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "status": {
+            "description": "Filter by status",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "systemLabel": {
+            "description": "Filter by Display state",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "updatedAfter": {
+            "description": "Only return dialogs updated after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "updatedBefore": {
+            "description": "Only return dialogs updated before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "visibleAfter": {
+            "description": "Only return dialogs with visible-from date after this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "visibleBefore": {
+            "description": "Only return dialogs with visible-from date before this date",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "SearchSeenLogQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchTagDto": {
+        "properties": {
+          "value": {
+            "description": "A search tag value.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchTransmissionQuery": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SeenLogDto": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isViaServiceOwner": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "seenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/ActorDto"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceOwnerIdentifierLookupDto": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instanceRef": {
+            "type": "string"
+          },
+          "nonSensitiveTitle": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "party": {
+            "type": "string"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/IdentifierLookupServiceOwnerDto"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/IdentifierLookupServiceResourceDto"
+          },
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "instanceRef",
+          "party",
+          "serviceResource",
+          "serviceOwner"
+        ],
+        "type": "object"
+      },
+      "ServiceOwnerLabelDto": {
+        "properties": {
+          "value": {
+            "description": "A label value.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SetDialogSystemLabelRequest": {
+        "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to target dialogs. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "enduserId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ifMatchEnduserContextRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "performedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActorDto",
+                "description": "Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted."
+              }
+            ]
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          },
+          "systemLabels": {
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/Values"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TransmissionAttachmentDto": {
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/TransmissionAttachmentUrlDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TransmissionAttachmentUrlDto": {
+        "properties": {
+          "consumerType": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of consumer the URL is intended for."
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TransmissionContentDto": {
+        "properties": {
+          "contentReference": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentValueDto",
+                "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS."
+              }
+            ]
+          },
+          "summary": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentValueDto",
+                "description": "The transmission summary."
+              }
+            ]
+          },
+          "title": {
+            "$ref": "#/components/schemas/ContentValueDto",
+            "description": "The transmission title. Must be text/plain."
+          }
+        },
+        "type": "object"
+      },
+      "TransmissionDto": {
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            },
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "content": {
+            "$ref": "#/components/schemas/ContentDto",
+            "description": "The content of the transmission."
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/NavigationalActionDto"
+            },
+            "type": "array"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sender": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The sender actor information for the transmission."
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of the transmission."
+          }
+        },
+        "type": "object"
+      },
+      "TransmissionNavigationalActionDto": {
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationDto"
+            },
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateDialogDto": {
+        "properties": {
+          "activities": {
+            "description": "An immutable list of activities associated with the dialog. When updating via PUT, any activities added here\nwill be appended to the existing list of activities.",
+            "items": {
+              "$ref": "#/components/schemas/ActivityDto"
+            },
+            "type": "array"
+          },
+          "apiActions": {
+            "description": "The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.",
+            "items": {
+              "$ref": "#/components/schemas/ApiActionDto"
+            },
+            "type": "array"
+          },
+          "attachments": {
+            "description": "The attachments associated with the dialog (on an aggregate level).",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            },
+            "type": "array"
+          },
+          "content": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContentDto",
+                "description": "The dialog unstructured text content."
+              }
+            ]
+          },
+          "dueAt": {
+            "description": "The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "expiresAt": {
+            "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n\nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "extendedStatus": {
+            "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "guiActions": {
+            "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
+            "items": {
+              "$ref": "#/components/schemas/GuiActionDto"
+            },
+            "type": "array"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.\nWhen true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.\nIf any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.",
+            "type": "boolean"
+          },
+          "precedingProcess": {
+            "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "process": {
+            "description": "Optional process identifier used to indicate a business process this dialog belongs to.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "progress": {
+            "description": "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come\nto a natural completion (successful or not).",
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "searchTags": {
+            "description": "A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.",
+            "items": {
+              "$ref": "#/components/schemas/SearchTagDto"
+            },
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DialogStatusInput",
+            "description": "The aggregated status of the dialog."
+          },
+          "transmissions": {
+            "description": "The immutable list of transmissions associated with the dialog. When updating via PUT, any transmissions\nadded here will be appended to the existing list of transmissions.",
+            "items": {
+              "$ref": "#/components/schemas/TransmissionDto"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateDialogRequest": {
+        "properties": {
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dto": {
+            "$ref": "#/components/schemas/UpdateDialogDto"
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSilentUpdate": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "UpdateTransmissionRequest": {
+        "properties": {
+          "attachments": {
+            "description": "The transmission-level attachments.",
+            "items": {
+              "$ref": "#/components/schemas/TransmissionAttachmentDto"
+            },
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n\nCan also be used to refer to other service policies.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "content": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TransmissionContentDto",
+                "description": "The transmission unstructured text content."
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "Overrides the creating date and time for the transmission.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dialogId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "Arbitrary URI/URN describing a service-specific transmission type.\n\nRefer to the service-specific documentation provided by the service owner for details (if in use).",
+            "format": "uri",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "idempotentKey": {
+            "description": "An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and the transmission is not updated.",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ifMatchDialogRevision": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isSilentUpdate": {
+            "type": "boolean"
+          },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/TransmissionNavigationalActionDto"
+            },
+            "type": "array"
+          },
+          "relatedTransmissionId": {
+            "description": "Reference to any other transmission that this transmission is related to.",
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sender": {
+            "$ref": "#/components/schemas/ActorDto",
+            "description": "The actor that sent the transmission."
+          },
+          "transmissionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Values",
+            "description": "The type of transmission."
+          }
+        },
+        "type": "object"
+      },
+      "Values": {
+        "type": "integer"
+      }
+    }
+  },
+  "info": {
+    "title": "Digdir.Domain.Dialogporten.WebApi | serviceowner",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.1",
+  "paths": {
+    "/api/v1/serviceowner/dialoglookup": {
+      "get": {
+        "operationId": "GetDialogLookup",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogLookupRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogLookupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceOwnerIdentifierLookupDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs": {
+      "get": {
+        "operationId": "SearchDialogs",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchDialogQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchDialogQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfDialogDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      },
+      "post": {
+        "operationId": "CreateDialog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}": {
+      "delete": {
+        "operationId": "DeleteDialog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDialogRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      },
+      "get": {
+        "operationId": "GetDialog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDialogQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DialogDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      },
+      "patch": {
+        "description": "Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.\nSee [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "operationId": "CreateDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "isSilentUpdate",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/*\u002Bjson": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/Operation"
+                },
+                "type": "array"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/Operation"
+                },
+                "type": "array"
+              }
+            },
+            "application/json-patch\u002Bjson": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/Operation"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Patch was successfully applied."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \\\u0022digdir:dialogporten.serviceprovider\\\u0022"
+          },
+          "403": {
+            "description": "Unauthorized to update a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found or is deleted"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The dialog with the given key is removed"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied Revision does not match the current Revision of the dialog"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          }
+        },
+        "summary": "Patch a single dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      },
+      "put": {
+        "operationId": "UpdateDialog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze": {
+      "post": {
+        "operationId": "FreezeDialog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/FreezeDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/purge": {
+      "post": {
+        "operationId": "PurgeDialog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/PurgeDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/restore": {
+      "post": {
+        "operationId": "RestoreDialog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreDialogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification": {
+      "get": {
+        "operationId": "CheckNotificationCondition",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationConditionQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationConditionQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationConditionDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/activities": {
+      "get": {
+        "operationId": "SearchDialogActivities",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchActivityQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchActivityQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      },
+      "post": {
+        "operationId": "CreateDialogActivity",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateActivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}": {
+      "get": {
+        "operationId": "GetDialogActivity",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetActivityQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetActivityQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/context/labels": {
+      "get": {
+        "operationId": "GetServiceOwnerLabels",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetServiceOwnerLabelsQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetServiceOwnerLabelsQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceOwnerLabelDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      },
+      "post": {
+        "operationId": "CreateServiceOwnerLabel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateServiceOwnerLabelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}": {
+      "delete": {
+        "operationId": "DeleteServiceOwnerLabel",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteServiceOwnerLabelRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteServiceOwnerLabelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels": {
+      "put": {
+        "operationId": "SetDialogSystemLabels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDialogSystemLabelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/seenlog": {
+      "get": {
+        "operationId": "SearchDialogSeenLogs",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchSeenLogQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchSeenLogQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SeenLogDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}": {
+      "get": {
+        "operationId": "GetDialogSeenLog",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSeenLogQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSeenLogQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeenLogDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/transmissions": {
+      "get": {
+        "operationId": "SearchDialogTransmissions",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchTransmissionQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchTransmissionQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TransmissionDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      },
+      "post": {
+        "operationId": "CreateDialogTransmission",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}": {
+      "get": {
+        "operationId": "GetDialogTransmission",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTransmissionQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTransmissionQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransmissionDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      },
+      "put": {
+        "operationId": "UpdateDialogTransmission",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTransmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "410": {
+            "description": "Gone"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/endusercontext": {
+      "get": {
+        "operationId": "SearchDialogEndUserContexts",
+        "requestBody": {
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchDialogEndUserContextQuery"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchDialogEndUserContextQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfDialogEndUserContextItemDto"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset": {
+      "post": {
+        "operationId": "BulkSetDialogSystemLabels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkSetDialogSystemLabelsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        },
+        "tags": [
+          "Digdir.Domain.Dialogporten.WebApi"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Digdir.Domain.Dialogporten.WebApi"
+    },
+    {
+      "name": "Serviceowner"
+    }
+  ]
+}

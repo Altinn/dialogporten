@@ -186,10 +186,15 @@ static void BuildAndRun(string[] args)
         {
             var attr = context.Description.ActionDescriptor.EndpointMetadata
                 .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
-            operation.OperationId = attr is not null ? attr.OperationId : throw new InvalidOperationException("Missing OpenApiOperationIdAttribute");
+            operation.OperationId = attr is not null
+                ? attr.OperationId
+                : throw new InvalidOperationException(
+                    "Missing OpenApiOperationIdAttribute for endpoint " +
+                    $"{context.Description.RelativePath ?? "<unknown>"}.");
             return Task.CompletedTask;
         });
     });
+
     builder.Services.AddOpenApi("serviceowner", options =>
     {
         options.ShouldInclude = description =>
@@ -199,7 +204,11 @@ static void BuildAndRun(string[] args)
         {
             var attr = context.Description.ActionDescriptor.EndpointMetadata
                 .OfType<OpenApiOperationIdAttribute>().FirstOrDefault();
-            operation.OperationId = attr is not null ? attr.OperationId : throw new InvalidOperationException("Missing OpenApiOperationIdAttribute");
+            operation.OperationId = attr is not null
+                ? attr.OperationId
+                : throw new InvalidOperationException(
+                "Missing OpenApiOperationIdAttribute for endpoint " +
+                $"{context.Description.RelativePath ?? "<unknown>"}.");
             return Task.CompletedTask;
         });
     });

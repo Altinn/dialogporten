@@ -8,23 +8,6 @@ namespace Digdir.Domain.Dialogporten.Architecture.Tests;
 public class OpenApiOperationIdTests
 {
     [Fact]
-    public void All_FastEndpoints_Should_Have_OpenApiOperationId()
-    {
-        var endpointTypes = WebApiAssemblyMarker.Assembly.GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false })
-            .Where(IsFastEndpoint)
-            .ToList();
-
-        var missing = endpointTypes
-            .Where(t => t.GetCustomAttribute<OpenApiOperationIdAttribute>() is null)
-            .ToList();
-
-        missing.Should().BeEmpty(
-            $"These endpoints are missing [OpenApiOperationId]: " +
-            $"{string.Join(", ", missing.Select(t => t.FullName))}");
-    }
-
-    [Fact]
     public void OpenApiOperationId_Values_Should_Be_Unique_Per_Endpoint_Group()
     {
         var endpointTypes = WebApiAssemblyMarker.Assembly.GetTypes()

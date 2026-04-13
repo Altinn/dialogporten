@@ -41,11 +41,11 @@
         <ItemGroup>
             <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_enduser.json"
                                        Condition="Exists('$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_enduser.json')">
-                <TargetPath>$(OpenApiDocumentsDirectory)openapi.enduser.json</TargetPath>
+                <TargetPath>$(OpenApiDocumentsDirectory)openapi.v1.enduser.json</TargetPath>
             </_GeneratedOpenApiDocument>
             <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_serviceowner.json"
                                        Condition="Exists('$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_serviceowner.json')">
-                <TargetPath>$(OpenApiDocumentsDirectory)openapi.serviceowner.json</TargetPath>
+                <TargetPath>$(OpenApiDocumentsDirectory)openapi.v1.serviceowner.json</TargetPath>
             </_GeneratedOpenApiDocument>
         </ItemGroup>
 

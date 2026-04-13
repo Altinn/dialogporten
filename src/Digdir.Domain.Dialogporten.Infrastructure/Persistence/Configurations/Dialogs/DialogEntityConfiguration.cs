@@ -60,6 +60,7 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.HasIndex(x => new { x.ServiceResource, x.Party, x.ContentUpdatedAt, x.Id })
             .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
             .IsDescending(false, false, true, true)
+            .IncludeProperties(x => new { x.StatusId, x.VisibleFrom, x.ExpiresAt, x.IsApiOnly, x.SystemLabelsMask })
             .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
 
         builder.Property(x => x.Org).UseCollation("C");
@@ -69,5 +70,6 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.Property(x => x.IdempotentKey).HasMaxLength(36);
         builder.Property(x => x.ContentUpdatedAt).HasDefaultValueSql("current_timestamp at time zone 'utc'");
         builder.Property(x => x.IsApiOnly).HasDefaultValue(false);
+        builder.Property(x => x.SystemLabelsMask).HasDefaultValue((short)1);
     }
 }

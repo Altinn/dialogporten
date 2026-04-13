@@ -67,6 +67,11 @@ public sealed class DialogEntity :
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
+    /// Denormalized bitmask of end-user system labels for search filtering.
+    /// </summary>
+    public short SystemLabelsMask { get; set; }
+
+    /// <summary>
     ///  Indicates whether the dialog can be updated/deleted by the service owner
     /// </summary>
     public bool Frozen { get; set; }

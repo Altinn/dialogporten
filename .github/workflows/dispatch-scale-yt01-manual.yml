@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
-      actions: write
       id-token: write
       contents: read
     steps:
@@ -292,7 +291,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
           POSTPONE_UNTIL: ${{ inputs.postpone_until }}
         shell: bash
         run: |
@@ -319,15 +317,21 @@ jobs:
               --body "$POSTPONE_UNTIL" \
               --env yt01 \
               --repo "$REPOSITORY"
-            PRETTY_DATE=$(TZ=Europe/Oslo date -d "@$POSTPONE_TS" +"%b %-d, %Y %H:%M %Z")
-            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-              -f "name=Scale YT01 on (postpone until $PRETTY_DATE)"
             echo "Shutdown postponed until $POSTPONE_UNTIL"
           else
             echo "Warning: Postpone date is in the past. Clearing any existing postpone."
             gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
               --env yt01 \
               --repo "$REPOSITORY" || true
+          fi
+
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Clear stale postpone variable
@@ -356,6 +360,15 @@ jobs:
             fi
           fi
 
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Logout from Azure
         if: ${{ always() }}
         run: az logout
@@ -365,14 +378,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
-      actions: write
       contents: read
     steps:
       - name: Clear postpone variable
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
         shell: bash
         run: |
           set -euo pipefail
@@ -382,12 +393,18 @@ jobs:
             --repo "$REPOSITORY" 2>/dev/null || echo "")
 
           if [[ -n "$POSTPONE_UNTIL" ]]; then
-            PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$POSTPONE_UNTIL")
-            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-              -f "name=Scale YT01 off (cleared postpone until $PRETTY_DATE)"
             gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
               --env yt01 \
               --repo "$REPOSITORY" || true
+          fi
+
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
           fi
 
   scale-off:

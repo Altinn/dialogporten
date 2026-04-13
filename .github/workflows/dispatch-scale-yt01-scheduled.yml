@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: yt01
     permissions:
-      actions: write
       contents: read
     outputs:
       skip: ${{ steps.check-postpone.outputs.skip }}
@@ -22,7 +21,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
 
@@ -36,22 +34,31 @@ jobs:
 
             if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then
               echo "Shutdown postponed until $POSTPONE_UNTIL. Skipping."
+              CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+                --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+              if [[ -n "$CURRENT" ]]; then
+                PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+                echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
+              fi
               echo "skip=true" >> "$GITHUB_OUTPUT"
-              PRETTY_DATE=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +"%b %-d, %Y %H:%M %Z")
-              gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-                -f "name=Scale YT01 Scheduled Shutdown — postponed until $PRETTY_DATE"
               exit 0
             else
               echo "Postpone date $POSTPONE_UNTIL is in the past. Clearing variable."
               gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
                 --env yt01 \
                 --repo "$REPOSITORY" || true
-              gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-                -f "name=Scale YT01 Scheduled Shutdown — cleared expired postpone, shutting down"
             fi
+          fi
+
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
           else
-            gh api --method PATCH "/repos/$REPOSITORY/actions/runs/$RUN_ID" \
-              -f "name=Scale YT01 Scheduled Shutdown — shutting down"
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           echo "skip=false" >> "$GITHUB_OUTPUT"

@@ -76,6 +76,30 @@ internal static class PostgresFormattableStringBuilderExtensions
             """);
     }
 
+    internal static PostgresFormattableStringBuilder AppendIsContentSeenFilterCondition(
+        this PostgresFormattableStringBuilder queryBuilder,
+        bool? isContentSeen)
+    {
+        if (isContentSeen is null)
+        {
+            return queryBuilder;
+        }
+
+        if (!TryBuildSystemLabelsMask([SystemLabel.Values.MarkedAsUnopened], out var requiredMask))
+        {
+            return queryBuilder;
+        }
+
+        queryBuilder
+            .Append($"""
+                      AND {isContentSeen}::boolean = (
+                        d."IsSeenSinceLastContentUpdate" AND d."SystemLabelsMask" & {requiredMask}::smallint = 0
+                      )
+                     """);
+
+        return queryBuilder;
+    }
+
     internal static PostgresFormattableStringBuilder AppendServiceOwnerLabelFilterCondition(
         this PostgresFormattableStringBuilder queryBuilder,
         IEnumerable<string>? serviceOwnerLabels)

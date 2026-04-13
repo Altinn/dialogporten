@@ -139,7 +139,12 @@ public sealed class DialogDto
 
     /// <summary>
     /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    ///
+    /// Obsolete: A dialog is now considered 'seen' when the dialog has:
+    /// - At least one entry in SeenSinceLastContentUpdate and
+    /// - No system label <see cref="SystemLabel.Values.MarkedAsUnopened"/>.
     /// </summary>
+    [Obsolete($"Use {nameof(SeenSinceLastContentUpdate)} and {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead")]
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>

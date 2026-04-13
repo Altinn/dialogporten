@@ -17,6 +17,7 @@
       ContentUpdatedAt: DateTimeOffset_1,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Default,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
@@ -71,6 +72,7 @@
       ContentUpdatedAt: DateTimeOffset_3,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Archive,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
@@ -125,6 +127,7 @@
       ContentUpdatedAt: DateTimeOffset_5,
       Status: NotApplicable,
       HasUnopenedContent: false,
+      SystemLabel: Default,
       IsApiOnly: false,
       LatestActivity: {
         Id: Guid_8,
@@ -178,6 +181,7 @@
       ContentUpdatedAt: DateTimeOffset_7,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Default,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
@@ -232,6 +236,7 @@
       ContentUpdatedAt: DateTimeOffset_9,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Default,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       EndUserContext: {

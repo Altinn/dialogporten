@@ -28,8 +28,34 @@
           ActorType: ServiceOwner
         }
       },
+      SeenSinceLastUpdate: [
+        {
+          Id: Guid_4,
+          SeenAt: DateTimeOffset_3,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: Guid_4,
+          SeenAt: DateTimeOffset_3,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
       ServiceOwnerContext: {
-        Revision: Guid_4,
+        Revision: Guid_5,
         ServiceOwnerLabels: [
           {
             Value: some-label
@@ -37,7 +63,7 @@
         ]
       },
       EndUserContext: {
-        Revision: Guid_5,
+        Revision: Guid_6,
         SystemLabels: [
           Default
         ]
@@ -64,9 +90,9 @@
       }
     },
     {
-      Id: Guid_6,
+      Id: Guid_7,
       Org: ttd,
-      Revision: Guid_7,
+      Revision: Guid_8,
       ServiceResource: urn:altinn:resource:1337,
       ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
@@ -76,26 +102,26 @@
       GuiAttachmentCount: 1,
       ExtendedStatus: ext-status,
       ExternalReference: external-ref,
-      CreatedAt: DateTimeOffset_3,
-      UpdatedAt: DateTimeOffset_3,
-      ContentUpdatedAt: DateTimeOffset_3,
+      CreatedAt: DateTimeOffset_4,
+      UpdatedAt: DateTimeOffset_4,
+      ContentUpdatedAt: DateTimeOffset_4,
       Status: NotApplicable,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       HasUnopenedContent: true,
       LatestActivity: {
-        Id: Guid_8,
-        CreatedAt: DateTimeOffset_4,
+        Id: Guid_9,
+        CreatedAt: DateTimeOffset_5,
         Type: DialogCreated,
         PerformedBy: {
           ActorType: ServiceOwner
         }
       },
       ServiceOwnerContext: {
-        Revision: Guid_9
+        Revision: Guid_10
       },
       EndUserContext: {
-        Revision: Guid_10,
+        Revision: Guid_11,
         SystemLabels: [
           Archive
         ]
@@ -122,9 +148,9 @@
       }
     },
     {
-      Id: Guid_11,
+      Id: Guid_12,
       Org: ttd,
-      Revision: Guid_12,
+      Revision: Guid_13,
       ServiceResource: urn:altinn:resource:1337,
       ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
@@ -134,25 +160,25 @@
       GuiAttachmentCount: 1,
       ExtendedStatus: ext-status,
       ExternalReference: external-ref,
-      CreatedAt: DateTimeOffset_5,
-      UpdatedAt: DateTimeOffset_5,
-      ContentUpdatedAt: DateTimeOffset_5,
+      CreatedAt: DateTimeOffset_6,
+      UpdatedAt: DateTimeOffset_6,
+      ContentUpdatedAt: DateTimeOffset_6,
       Status: NotApplicable,
       IsApiOnly: false,
       HasUnopenedContent: false,
       LatestActivity: {
-        Id: Guid_13,
-        CreatedAt: DateTimeOffset_6,
+        Id: Guid_14,
+        CreatedAt: DateTimeOffset_7,
         Type: DialogCreated,
         PerformedBy: {
           ActorType: ServiceOwner
         }
       },
       ServiceOwnerContext: {
-        Revision: Guid_14
+        Revision: Guid_15
       },
       EndUserContext: {
-        Revision: Guid_15,
+        Revision: Guid_16,
         SystemLabels: [
           Default
         ]
@@ -179,9 +205,9 @@
       }
     },
     {
-      Id: Guid_16,
+      Id: Guid_17,
       Org: ttd,
-      Revision: Guid_17,
+      Revision: Guid_18,
       ServiceResource: urn:altinn:resource:1337,
       ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
@@ -191,26 +217,26 @@
       GuiAttachmentCount: 0,
       ExtendedStatus: ext-status,
       ExternalReference: external-ref,
-      CreatedAt: DateTimeOffset_7,
-      UpdatedAt: DateTimeOffset_7,
-      ContentUpdatedAt: DateTimeOffset_7,
+      CreatedAt: DateTimeOffset_8,
+      UpdatedAt: DateTimeOffset_8,
+      ContentUpdatedAt: DateTimeOffset_8,
       Status: NotApplicable,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       HasUnopenedContent: true,
       LatestActivity: {
-        Id: Guid_18,
-        CreatedAt: DateTimeOffset_8,
+        Id: Guid_19,
+        CreatedAt: DateTimeOffset_9,
         Type: DialogCreated,
         PerformedBy: {
           ActorType: ServiceOwner
         }
       },
       ServiceOwnerContext: {
-        Revision: Guid_19
+        Revision: Guid_20
       },
       EndUserContext: {
-        Revision: Guid_20,
+        Revision: Guid_21,
         SystemLabels: [
           Default
         ]
@@ -237,9 +263,9 @@
       }
     },
     {
-      Id: Guid_21,
+      Id: Guid_22,
       Org: ttd,
-      Revision: Guid_22,
+      Revision: Guid_23,
       ServiceResource: urn:altinn:resource:1337,
       ServiceResourceType: GenericAccessResource,
       Party: urn:altinn:person:identifier-no:06875895484,
@@ -249,18 +275,44 @@
       GuiAttachmentCount: 1,
       ExtendedStatus: ext-status,
       ExternalReference: external-ref,
-      CreatedAt: DateTimeOffset_9,
-      UpdatedAt: DateTimeOffset_9,
-      ContentUpdatedAt: DateTimeOffset_9,
+      CreatedAt: DateTimeOffset_10,
+      UpdatedAt: DateTimeOffset_10,
+      ContentUpdatedAt: DateTimeOffset_10,
       Status: NotApplicable,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       HasUnopenedContent: true,
+      SeenSinceLastUpdate: [
+        {
+          Id: Guid_24,
+          SeenAt: DateTimeOffset_11,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: Guid_24,
+          SeenAt: DateTimeOffset_11,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorName: Brando Sando,
+            ActorId: urn:altinn:person:identifier-no:22834498646
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: false
+        }
+      ],
       ServiceOwnerContext: {
-        Revision: Guid_23
+        Revision: Guid_25
       },
       EndUserContext: {
-        Revision: Guid_24,
+        Revision: Guid_26,
         SystemLabels: [
           Default
         ]

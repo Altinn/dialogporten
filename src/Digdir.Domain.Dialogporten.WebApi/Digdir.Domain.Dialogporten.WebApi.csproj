@@ -38,30 +38,16 @@
     </Target>
 
     <Target Name="NormalizeGeneratedOpenApiDocuments" AfterTargets="GenerateOpenApiDocuments">
-        <Message Importance="high"
-                 Text="OpenApi rename input: OpenApiDocumentsDirectory=$(OpenApiDocumentsDirectory)" />
-        <CreateItem Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_*.json">
-            <Output TaskParameter="Include" ItemName="_GeneratedOpenApiDocument" />
-        </CreateItem>
-        <Message Importance="high"
-                 Text="OpenApi rename input: %(_GeneratedOpenApiDocument.Identity)" />
-
         <ItemGroup>
-            <_GeneratedOpenApiDocument Update="@(_GeneratedOpenApiDocument)">
-                <TargetPath>$(OpenApiDocumentsDirectory)openapi.$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)','^$([System.Text.RegularExpressions.Regex]::Escape('$(MSBuildProjectName)_'))','')).json</TargetPath>
-            </_GeneratedOpenApiDocument>
-            <_GeneratedOpenApiDocument Remove="@(_GeneratedOpenApiDocument)"
-                                       Condition="'$([System.String]::Copy('%(Filename)').Replace('$(MSBuildProjectName)_',''))' == '' Or '$([System.String]::Copy('%(Filename)').Replace('$(MSBuildProjectName)_',''))' == '%(Filename)'" />
+            <_GeneratedOpenApiDocument Include="$(OpenApiDocumentsDirectory)$(MSBuildProjectName)_*.json" />
         </ItemGroup>
 
-        <Message Importance="high"
-                 Text="OpenApi rename: %(_GeneratedOpenApiDocument.Identity) -> %(_GeneratedOpenApiDocument.TargetPath)" />
         <Copy SourceFiles="@(_GeneratedOpenApiDocument)"
-              DestinationFiles="@(_GeneratedOpenApiDocument->'%(TargetPath)')"
+              DestinationFiles="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.%(Filename).json')"
               SkipUnchangedFiles="true" />
         <Delete Files="@(_GeneratedOpenApiDocument)" />
         <WriteLinesToFile File="$(BaseIntermediateOutputPath)$(MSBuildProjectName).OpenApiFiles.cache"
-                          Lines="@(_GeneratedOpenApiDocument->'%(TargetPath)')"
+                          Lines="@(_GeneratedOpenApiDocument->'$(OpenApiDocumentsDirectory)openapi.%(Filename).json')"
                           Overwrite="true"
                           Condition="'@(_GeneratedOpenApiDocument)' != ''" />
     </Target>

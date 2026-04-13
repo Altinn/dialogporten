@@ -180,7 +180,7 @@ static void BuildAndRun(string[] args)
     const string endUserPathPrefix = "api/v1/enduser/";
     const string serviceOwnerPathPrefix = "api/v1/serviceowner/";
 
-    builder.Services.AddOpenApi("enduser", options =>
+    builder.Services.AddOpenApi("v1.enduser", options =>
     {
         options.ShouldInclude = description =>
             description.RelativePath?.Contains(endUserPathPrefix,
@@ -198,7 +198,7 @@ static void BuildAndRun(string[] args)
         });
     });
 
-    builder.Services.AddOpenApi("serviceowner", options =>
+    builder.Services.AddOpenApi("v1.serviceowner", options =>
     {
         options.ShouldInclude = description =>
             description.RelativePath?.Contains(serviceOwnerPathPrefix,

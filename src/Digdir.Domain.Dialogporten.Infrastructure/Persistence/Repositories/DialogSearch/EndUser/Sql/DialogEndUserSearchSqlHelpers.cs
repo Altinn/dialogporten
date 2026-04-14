@@ -10,25 +10,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.Dia
 
 internal static partial class DialogEndUserSearchSqlHelpers
 {
-    internal static PostgresFormattableStringBuilder BuildSearchJoin(bool includeSearch)
-    {
-        var builder = new PostgresFormattableStringBuilder();
-
-        if (includeSearch)
-        {
-            builder.Append(
-                """
-                JOIN search."DialogSearch" ds ON d."Id" = ds."DialogId"
-                CROSS JOIN searchString ss
-                """);
-        }
-
-        return builder;
-    }
-
     internal static PostgresFormattableStringBuilder BuildDialogFilters(GetDialogsQuery query) =>
         new PostgresFormattableStringBuilder()
-            .AppendIf(query.Search is not null, """ AND ds."SearchVector" @@ ss.searchVector """)
             .AppendManyFilter(query.Org, nameof(query.Org))
             .AppendManyFilter(query.Status, "StatusId", "int")
             .AppendManyFilter(query.ExtendedStatus, nameof(query.ExtendedStatus))

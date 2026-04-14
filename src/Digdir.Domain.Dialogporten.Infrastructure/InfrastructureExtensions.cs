@@ -132,6 +132,7 @@ public static class InfrastructureExtensions
 
             // Transient
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, FreeTextSearchStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoInstanceNoFtsStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()

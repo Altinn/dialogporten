@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Sql;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Selection;
@@ -28,19 +27,23 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
 
     // Generic party-driven fallback strategy for end-user search.
     // Drives candidate lookup by party, which is usually preferable when there is no service filter,
-    // when FTS is present, or when the effective party set is small enough that party-ordered indexes
-    // give stable top-N pagination without service-driven fan-out.
+    // or when the effective party set is small enough that party-ordered indexes give stable top-N
+    // pagination without service-driven fan-out.
     public string Name => "GenericPartyDriven";
 
     public int Score(EndUserSearchContext context)
     {
+        if (context.Query.Search is not null)
+        {
+            return QueryStrategyScores.Ineligible;
+        }
+
         var hasServiceResourceFilter = DialogEndUserSearchSqlHelpers.HasServiceResourceFilter(context.Query);
         var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
             context.Query,
             context.AuthorizedResources);
 
-        return context.Query.Search is not null
-               || !hasServiceResourceFilter
+        return !hasServiceResourceFilter
                || effectivePartyCount <= _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
             ? QueryStrategyScores.Preferred
             : QueryStrategyScores.Eligible;
@@ -49,6 +52,11 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+        if (context.Query.Search is not null)
+        {
+            throw new InvalidOperationException("Free-text search is not supported by this strategy.");
+        }
+
         var query = context.Query;
         var authorizedResources = context.AuthorizedResources;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
@@ -61,16 +69,6 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
-            .AppendIf(query.Search is not null,
-                $"""
-                searchString AS (
-                   SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
-                    ,string_to_array({query.Search}::text, ' ') AS searchTerms
-                    FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
-                    LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
-                    LIMIT 1
-                ),
-                """)
             .Append(
                 $"""
                 permission_groups AS (
@@ -106,7 +104,6 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
-        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
             .Append(
@@ -116,11 +113,9 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
                 CROSS JOIN LATERAL (
                     SELECT d."Id"
                     FROM "Dialog" d
-                    {searchJoin}
                     WHERE d."Party" = pp.party
                       AND d."ServiceResource" = ANY(pp.allowed_services)
                 """)
-            .AppendIf(query.Search is not null, """ AND ds."Party" = pp.party """)
             .Append(
                 $"""
                       {permissionCandidateFilters}
@@ -139,7 +134,6 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
         Guid[] dialogIds)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
-        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
             .Append(
@@ -147,7 +141,6 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
                 SELECT d."Id"
                 FROM unnest({dialogIds}::uuid[]) AS dd("Id")
                 JOIN "Dialog" d ON d."Id" = dd."Id"
-                {searchJoin}
                 WHERE 1=1
                 {permissionCandidateFilters}
                 """);

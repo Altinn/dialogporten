@@ -151,6 +151,7 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, FreeTextSearchStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoInstanceNoFtsStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()

@@ -33,12 +33,16 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
 
     public int Score(EndUserSearchContext context)
     {
+        if (context.Query.Search is not null)
+        {
+            return QueryStrategyScores.Ineligible;
+        }
+
         var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
             context.Query,
             context.AuthorizedResources);
 
-        return context.Query.Search is null
-               && DialogEndUserSearchSqlHelpers.HasServiceResourceFilter(context.Query)
+        return DialogEndUserSearchSqlHelpers.HasServiceResourceFilter(context.Query)
                && effectivePartyCount > _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
             ? QueryStrategyScores.Preferred
             : QueryStrategyScores.Eligible;
@@ -47,6 +51,11 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+        if (context.Query.Search is not null)
+        {
+            throw new InvalidOperationException("Free-text search is not supported by this strategy.");
+        }
+
         var query = context.Query;
         var authorizedResources = context.AuthorizedResources;
         var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
@@ -59,16 +68,6 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
-            .AppendIf(query.Search is not null,
-                $"""
-                searchString AS (
-                   SELECT websearch_to_tsquery(coalesce(isomap."TsConfigName", 'simple')::regconfig, {query.Search}::text) searchVector
-                    ,string_to_array({query.Search}::text, ' ') AS searchTerms
-                    FROM (VALUES (coalesce({query.SearchLanguageCode}::text, 'simple'))) AS v(isoCode)
-                    LEFT JOIN search."Iso639TsVectorMap" isomap ON v.isoCode = isomap."IsoCode"
-                    LIMIT 1
-                ),
-                """)
             .Append(
                 $"""
                 permission_groups AS (
@@ -104,7 +103,6 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
-        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
             .Append(
@@ -114,7 +112,6 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
                 CROSS JOIN LATERAL (
                     SELECT d."Id"
                     FROM "Dialog" d
-                    {searchJoin}
                     WHERE d."ServiceResource" = sp.service
                       AND d."Party" = ANY(sp.allowed_parties)
                       {permissionCandidateFilters}
@@ -133,7 +130,6 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
         Guid[] dialogIds)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
-        var searchJoin = DialogEndUserSearchSqlHelpers.BuildSearchJoin(query.Search is not null);
 
         return new PostgresFormattableStringBuilder()
             .Append(
@@ -141,7 +137,6 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
                 SELECT d."Id"
                 FROM unnest({dialogIds}::uuid[]) AS dd("Id")
                 JOIN "Dialog" d ON d."Id" = dd."Id"
-                {searchJoin}
                 WHERE 1=1
                 {permissionCandidateFilters}
                 """);

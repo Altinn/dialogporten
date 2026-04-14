@@ -57,6 +57,7 @@ public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
 
 public sealed class PurgeDialogRequest
 {
+    [BindFrom("dialogId")]
     public Guid DialogId { get; init; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

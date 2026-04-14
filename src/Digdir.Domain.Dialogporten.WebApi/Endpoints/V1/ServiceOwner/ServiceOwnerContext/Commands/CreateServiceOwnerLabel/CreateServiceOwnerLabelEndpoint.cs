@@ -91,6 +91,7 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
 
 public sealed class CreateServiceOwnerLabelRequest
 {
+    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromBody]

@@ -1,7 +1,9 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using FastEndpoints;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi;
 
 namespace Digdir.Domain.Dialogporten.WebApi;
 
@@ -33,6 +35,13 @@ internal static class OpenApiServiceCollectionExtensions
                     : throw new InvalidOperationException(
                         $"Missing OpenApiOperationIdAttribute for {audience} endpoint " +
                         $"{context.GetEndpointName() ?? "<unknown endpoint>"}.");
+
+                EnsurePathParameters(operation, context.Description.RelativePath);
+
+                if (string.Equals(context.Description.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase))
+                {
+                    operation.RequestBody = null;
+                }
 
                 return Task.CompletedTask;
             });
@@ -85,4 +94,37 @@ internal static class OpenApiServiceCollectionExtensions
                 $"Unknown OpenAPI audience '{normalizedAudience}'. Expected 'enduser' or 'serviceowner'.")
         };
     }
+
+    private static void EnsurePathParameters(OpenApiOperation operation, string? relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath))
+            return;
+
+        operation.Parameters ??= [];
+
+        var existingPathParameterNames = operation.Parameters
+            .Where(parameter => parameter.In == ParameterLocation.Path)
+            .Select(parameter => parameter.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (Match match in RouteParameterRegex.Matches(relativePath))
+        {
+            var parameterName = match.Groups[1].Value;
+            if (!existingPathParameterNames.Add(parameterName))
+                continue;
+
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = parameterName,
+                In = ParameterLocation.Path,
+                Required = true,
+                Schema = new OpenApiSchema
+                {
+                    Type = JsonSchemaType.String
+                }
+            });
+        }
+    }
+
+    private static readonly Regex RouteParameterRegex = new(@"\{([^}:]+)(?::[^}]+)?\}", RegexOptions.Compiled);
 }

@@ -60,6 +60,7 @@ public sealed class DeleteDialogEndpoint : Endpoint<DeleteDialogRequest>
 
 public sealed class DeleteDialogRequest
 {
+    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

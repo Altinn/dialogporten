@@ -52,7 +52,9 @@ public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionRequ
 
 public sealed class GetTransmissionRequest
 {
+    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
+    [BindFrom("transmissionId")]
     public Guid TransmissionId { get; set; }
 
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]

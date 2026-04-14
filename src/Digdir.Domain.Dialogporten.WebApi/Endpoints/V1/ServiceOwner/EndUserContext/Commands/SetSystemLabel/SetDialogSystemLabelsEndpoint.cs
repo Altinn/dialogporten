@@ -78,6 +78,7 @@ public sealed class SetDialogSystemLabelRequest
     [QueryParam]
     public string? EnduserId { get; init; }
 
+    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     /// <summary>

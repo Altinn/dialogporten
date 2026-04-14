@@ -56,6 +56,7 @@ public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
 
 public sealed class RestoreDialogRequest
 {
+    [BindFrom("dialogId")]
     public Guid DialogId { get; init; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

@@ -51,6 +51,7 @@ public sealed class SearchDialogActivityEndpoint : Endpoint<SearchActivityReques
 
 public sealed class SearchActivityRequest
 {
+    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]

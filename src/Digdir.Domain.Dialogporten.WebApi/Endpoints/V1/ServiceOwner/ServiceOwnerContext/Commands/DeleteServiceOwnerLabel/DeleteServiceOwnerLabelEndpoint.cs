@@ -89,8 +89,10 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
 
 public sealed class DeleteServiceOwnerLabelRequest
 {
+    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
+    [BindFrom("label")]
     public string Label { get; set; } = null!;
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

@@ -10,7 +10,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Create;
 
-[OpenApiOperationId("CreateDialogYooo")]
+[OpenApiOperationId("CreateDialog")]
 public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
 {
     private readonly ISender _sender;

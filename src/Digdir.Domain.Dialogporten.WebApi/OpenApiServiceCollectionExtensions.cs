@@ -7,11 +7,9 @@ namespace Digdir.Domain.Dialogporten.WebApi;
 
 internal static class OpenApiServiceCollectionExtensions
 {
-    private static readonly HashSet<string> AudiencesValidated = [];
-
     internal static IServiceCollection AddOpenApi(this IServiceCollection services, string apiVersion, string audience)
     {
-        EnsureUniqueOperationIds();
+        EnsureUniqueOperationIds(audience);
 
         return services.AddOpenApi($"{apiVersion}.{audience}", options =>
         {
@@ -51,14 +49,14 @@ internal static class OpenApiServiceCollectionExtensions
             .FullName?
             .Split(".")[^1];
 
-    private static void EnsureUniqueOperationIds()
+    private static void EnsureUniqueOperationIds(string audience)
     {
-        if (!AudiencesValidated.Add("all"))
-            return;
+        var normalizedAudience = audience.ToLowerInvariant();
 
         var endpointTypes = WebApiAssemblyMarker.Assembly.GetTypes()
             .Where(type => type is { IsClass: true, IsAbstract: false })
             .Where(type => type.GetCustomAttribute<OpenApiOperationIdAttribute>() is not null)
+            .Where(type => IsAudienceEndpoint(type, normalizedAudience))
             .ToList();
 
         var duplicates = endpointTypes
@@ -72,6 +70,19 @@ internal static class OpenApiServiceCollectionExtensions
         var details = string.Join(", ",
             duplicates.Select(duplicate => $"'{duplicate.Key}' on [{string.Join(", ", duplicate.Select(type => type.Name))}]"));
 
-        throw new InvalidOperationException($"Duplicate [OpenApiOperationId] values detected: {details}");
+        throw new InvalidOperationException(
+            $"Duplicate [OpenApiOperationId] values detected for {normalizedAudience}: {details}");
+    }
+
+    private static bool IsAudienceEndpoint(Type type, string normalizedAudience)
+    {
+        var ns = type.Namespace ?? "";
+        return normalizedAudience switch
+        {
+            "enduser" => ns.Contains(".EndUser.", StringComparison.OrdinalIgnoreCase),
+            "serviceowner" => ns.Contains(".ServiceOwner.", StringComparison.OrdinalIgnoreCase),
+            _ => throw new InvalidOperationException(
+                $"Unknown OpenAPI audience '{normalizedAudience}'. Expected 'enduser' or 'serviceowner'.")
+        };
     }
 }

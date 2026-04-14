@@ -74,9 +74,9 @@ static void BuildAndRun(string[] args)
     {
         // The build-time OpenAPI generator boots the full host. Overlay safe dummy values
         // so the normal startup path can run without local secrets or external dependencies.
-        builder.Configuration.AddInMemoryCollection(
+        builder.Configuration.AddJsonStream(
             OpenApiDocumentGenerationOverrides
-                .GetOpenApiDocumentGenerationOverrides());
+                .CreateOverridesJson());
     }
 
     builder.Host.UseSerilog((context, services, configuration) => configuration

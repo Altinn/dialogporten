@@ -23,8 +23,6 @@ using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
-using Namotion.Reflection;
 using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;

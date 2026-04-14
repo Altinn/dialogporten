@@ -1,12 +1,10 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
@@ -16,6 +14,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -32,16 +31,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 {
     private readonly IDialogDbContext _db;
     private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public GetDialogQueryHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IUnitOfWork unitOfWork,
+        IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
@@ -158,20 +157,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotVisible<DialogEntity>(dialog.VisibleFrom.Value);
         }
 
-        // TODO: What if name lookup fails
-        // https://github.com/altinn/dialogporten/issues/387
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        dialog.UpdateSeenAt(
-            currentUserInformation.UserId.ExternalIdWithPrefix,
-            currentUserInformation.UserId.Type,
-            currentUserInformation.Name);
+        var userId = _userRegistry.GetCurrentUserId();
 
-        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
-
-        dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [],
-            removeLabels: [SystemLabel.Values.MarkedAsUnopened],
-            performedBy);
+        dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
@@ -185,6 +173,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
+
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
@@ -192,12 +181,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            currentUserInformation);
+            userId.ExternalIdWithPrefix);
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            currentUserInformation);
+            userId.ExternalIdWithPrefix);
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -209,27 +198,29 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
 
+        dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+
         return dialogDto;
     }
 
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        UserInformation currentUserInformation) =>
+        string externalId) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
                 .First())
-            .Select(log => ToSeenLogDto(currentUserInformation, log))
+            .Select(log => ToSeenLogDto(externalId, log))
             .ToList();
 
-    private DialogSeenLogDto ToSeenLogDto(UserInformation currentUserInformation, DialogSeenLog log)
+    private DialogSeenLogDto ToSeenLogDto(string externalId, DialogSeenLog log)
     {
         var actorId = log.SeenBy.ActorNameEntity?.ActorId;
         var logDto = _mapper.Map<DialogSeenLogDto>(log);
-        logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
+        logDto.IsCurrentEndUser = externalId == actorId;
         return logDto;
     }
 

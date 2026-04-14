@@ -76,7 +76,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         var relevantActorNameEntities = actorNameEntities
-            .Where(x => x.ActorId is not null && !x.ActorId.StartsWith(SystemUserIdentifier.Prefix, StringComparison.InvariantCultureIgnoreCase))
+            .Where(x => x.ActorId is not null)
             .ToList();
 
         var actorNameById = (await Task.WhenAll(relevantActorNameEntities
@@ -89,15 +89,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         {
             actorName.Name = actorNameById[actorName.ActorId!];
 
-            // We don't want to fail the save operation if we are unable to look up the
-            // name for this particular actor, as it is used on enduser get operations.
-            if (!string.IsNullOrWhiteSpace(actorName.Name)
-             || actorName.ActorEntities.All(x => x is DialogSeenLogSeenByActor))
+            if (string.IsNullOrWhiteSpace(actorName.Name))
             {
-                continue;
+                _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
             }
-
-            _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
         }
 
         return _domainContext.IsValid;

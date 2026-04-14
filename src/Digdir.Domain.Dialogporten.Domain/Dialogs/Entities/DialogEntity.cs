@@ -1,5 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Attachments;
+﻿using Digdir.Domain.Dialogporten.Domain.Attachments;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -170,34 +170,25 @@ public sealed class DialogEntity :
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, string? endUserName)
+    public void OnSeen(string userId, DialogUserType.Values userTypeId)
     {
-        var lastSeenAt = SeenLog
-                         .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
-                         .MaxBy(x => x.CreatedAt)
-                         ?.CreatedAt
-         ?? DateTimeOffset.MinValue;
+        var lastSeen = SeenLog
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId)
+            .MaxBy(x => x.CreatedAt);
 
-        if (lastSeenAt >= UpdatedAt)
+        if (lastSeen is not null &&
+            lastSeen.CreatedAt > UpdatedAt &&
+            EndUserContext.DialogEndUserContextSystemLabels.All(x => x.SystemLabelId != SystemLabel.Values.MarkedAsUnopened))
         {
             return;
         }
 
-        SeenLog.Add(new DialogSeenLog
-        {
-            EndUserTypeId = userTypeId,
-            IsViaServiceOwner = userTypeId == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
-            SeenBy = new DialogSeenLogSeenByActor
-            {
-                ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntity = new ActorName
-                {
-                    Name = endUserName,
-                    ActorId = endUserId
-                }
-            }
-        });
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+        // Use a deterministic id to make the seen-log insert idempotent.
+        // If multiple seen events are produced without dialog changes in between,
+        // they represent the same logical "seen" and should not create duplicates.
+        var seenLogId = Id
+            .CreateDeterministicSubUuidV7($"{UpdatedAt:O}{userId}");
+        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, userId, userTypeId, seenLogId));
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];
@@ -208,6 +199,7 @@ public sealed class DialogEntity :
         _domainEvents.Clear();
         return events;
     }
+    public bool HasEvents() => _domainEvents.Count != 0;
 }
 
 public sealed class DialogAttachment : Attachment

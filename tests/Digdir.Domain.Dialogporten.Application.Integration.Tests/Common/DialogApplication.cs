@@ -15,11 +15,13 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
+using MediatR.NotificationPublishers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,7 +54,7 @@ public class DialogApplication : IAsyncLifetime
 
     private readonly PostgreSqlContainer _dbContainer =
         new PostgreSqlBuilder("postgres:18.2")
-        .Build();
+            .Build();
 
     public async ValueTask InitializeAsync()
     {
@@ -107,6 +109,7 @@ public class DialogApplication : IAsyncLifetime
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
+            .ReplaceTransient<INotificationPublisher, ForeachAwaitPublisher>()
             .RemoveAll<IClock>()
             .AddSingleton<IClock>(Clock)
             .AddSingleton<IUser>(User)
@@ -126,7 +129,8 @@ public class DialogApplication : IAsyncLifetime
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors()
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
-                    .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>()))
+                    .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>())
+            )
             .AddDapperTypeHandlers()
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
@@ -264,6 +268,19 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
+    public async Task PublishEvents()
+    {
+        while (GetPublishedEvents().Count != 0)
+        {
+            foreach (var value in PopPublishedEvents())
+            {
+                using var scope = _rootProvider.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
+                await mediator.Publish(value);
+            }
+        }
+    }
+
     public async ValueTask ResetState()
     {
         Clock.Reset();
@@ -304,6 +321,13 @@ public class DialogApplication : IAsyncLifetime
     }
 
     public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
+
+    public List<object> PopPublishedEvents()
+    {
+        var eventsList = _publishedEvents.ToList();
+        _publishedEvents.Clear();
+        return eventsList;
+    }
 
     public ServiceProvider GetServiceProvider() => _rootProvider;
 

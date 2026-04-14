@@ -17,10 +17,13 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
-        var getDialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
-        getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var dialogContent = getDialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
-        var seenLogId = dialogContent.SeenSinceLastUpdate.Single().Id;
+        var getDialogResponse = await E2ERetryPolicies.RetryUntilAsync(
+            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
+            degradationMessage: "Seen log creation delayed");
+
+        getDialogResponse.Content.Should().NotBeNull();
+        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Single().Id;
 
         // Act
         var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchSeenLogsDialogSeenLog(
@@ -60,9 +63,11 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         getDialogResponse2.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchSeenLogsDialogSeenLog(
-            dialogId,
-            TestContext.Current.CancellationToken);
+        var response = await E2ERetryPolicies.RetryUntilAsync(
+            operation: ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchSeenLogsDialogSeenLog(
+                dialogId, ct),
+            isSuccessful: result => result is { IsSuccessful: true, Content.Count: 2 },
+            degradationMessage: "Seen log creation delayed");
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

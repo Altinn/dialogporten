@@ -1,3 +1,7 @@
 *.received.json
 *.received.graphql
 .gitkeep
+
+# ignore new swagger files until stable
+openapi_v1.enduser.verified.json
+openapi_v1.serviceowner.verified.json

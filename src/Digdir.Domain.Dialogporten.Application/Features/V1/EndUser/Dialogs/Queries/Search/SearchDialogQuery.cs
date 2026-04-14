@@ -85,10 +85,10 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public DateTimeOffset? ContentUpdatedBefore { get; set; }
 
     /// <summary>
-    /// Only return dialogs that has not been viewed or opened by the user yet.
-    /// A dialog is considered viewed if:
-    /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, or
-    /// - It has a system label MarkedAsUnopened.
+    /// Only return dialogs that has content that has/hasn't been seen by the user.
+    /// A dialogs content is considered seen if:
+    /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
+    /// - It does not have a system label MarkedAsUnopened.
     /// </summary>
     public bool? IsContentSeen { get; set; }
 

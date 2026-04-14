@@ -2391,8 +2391,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// <br/>            
+        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
+        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
+        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3096,8 +3101,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// <br/>            
+        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
+        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
+        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -5384,7 +5394,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
         [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

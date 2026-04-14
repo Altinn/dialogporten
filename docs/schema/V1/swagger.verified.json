@@ -894,8 +894,10 @@
             "type": "array"
           },
           "hasUnopenedContent": {
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "deprecated": true,
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "type": "boolean",
+            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -1980,8 +1982,10 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "deprecated": true,
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "type": "boolean",
+            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -3343,6 +3347,7 @@
           "createdAt": {
             "description": "If supplied, overrides the creating date and time for the transmission.\nIf not supplied, the current date /time will be used.",
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "extendedType": {
@@ -4889,8 +4894,10 @@
             "type": "array"
           },
           "hasUnopenedContent": {
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "deprecated": true,
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "type": "boolean",
+            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -6057,8 +6064,10 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "deprecated": true,
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "type": "boolean",
+            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -7134,6 +7143,15 @@
               "format": "date-time",
               "nullable": true,
               "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs that has content that has/hasn\u0027t been seen by the user.\nA dialogs content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
+            "in": "query",
+            "name": "isContentSeen",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
             }
           },
           {

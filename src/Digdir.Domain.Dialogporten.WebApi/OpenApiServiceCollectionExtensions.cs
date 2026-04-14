@@ -71,6 +71,7 @@ internal static class OpenApiServiceCollectionExtensions
 
         var details = string.Join(", ",
             duplicates.Select(duplicate => $"'{duplicate.Key}' on [{string.Join(", ", duplicate.Select(type => type.Name))}]"));
+
         throw new InvalidOperationException($"Duplicate [OpenApiOperationId] values detected: {details}");
     }
 }

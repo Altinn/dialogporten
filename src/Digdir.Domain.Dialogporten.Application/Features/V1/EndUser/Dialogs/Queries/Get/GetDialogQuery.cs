@@ -159,10 +159,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         var userId = _userRegistry.GetCurrentUserId();
 
-        if (!dialog.IsContentSeen())
-        {
-            dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
-        }
+        dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()

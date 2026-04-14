@@ -159,7 +159,10 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var getDialogResult = await Fixture.EnduserApi.GetDialog(dialogId);
+        var getDialogResult = await E2ERetryPolicies.RetryUntilAsync(
+            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
+            degradationMessage: "Seen log creation delayed");
 
         // Assert
         await JsonSnapshotVerifier.VerifyJsonSnapshot(

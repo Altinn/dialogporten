@@ -185,6 +185,9 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Only return dialogs with content updated before this date")]
     public DateTimeOffset? ContentUpdatedBefore { get; init; }
 
+    [GraphQLDescription("Only return dialogs that has content that has/hasn't been seen by the user")]
+    public bool? IsContentSeen { get; set; }
+
     [GraphQLDescription("Only return dialogs updated after this date")]
     public DateTimeOffset? UpdatedAfter { get; init; }
 

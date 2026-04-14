@@ -7,7 +7,15 @@ public sealed class AspNetUtilitiesSettings
 
 public sealed class HealthCheckSettings
 {
-    public List<string> HttpGetEndpointsToCheck { get; set; } = [];
+    public List<HttpGetEndpointToCheck> HttpGetEndpointsToCheck { get; set; } = [];
+}
+
+public sealed record HttpGetEndpointToCheck
+{
+    public required string Name { get; init; }
+    public string? Url { get; init; }
+    public string? AltinnPlatformRelativePath { get; init; }
+    public bool HardDependency { get; init; }
 }
 
 public sealed class TelemetrySettings

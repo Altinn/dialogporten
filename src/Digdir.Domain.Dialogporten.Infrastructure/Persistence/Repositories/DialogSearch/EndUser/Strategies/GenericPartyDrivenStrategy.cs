@@ -26,10 +26,9 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
     }
 
     // Generic party-driven fallback strategy for end-user search.
-    // Drives candidate lookup by party, which is usually preferable when there is no service filter,
-    // or when the effective party set is small enough that party-ordered indexes give stable top-N
-    // pagination without service-driven fan-out.
-    public string Name => "GenericPartyDriven";
+    // Drives candidate lookup by party, which is usually preferable when the effective party set is
+    // small or the effective service set is too broad for stable service-driven fan-out.
+    public string Name => nameof(GenericPartyDrivenStrategy);
 
     public int Score(EndUserSearchContext context)
     {
@@ -38,13 +37,13 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
             return QueryStrategyScores.Ineligible;
         }
 
-        var hasServiceResourceFilter = DialogEndUserSearchSqlHelpers.HasServiceResourceFilter(context.Query);
         var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
             context.Query,
             context.AuthorizedResources);
+        var effectiveServiceCount = DialogEndUserSearchSqlHelpers.CountEffectiveServices(context.AuthorizedResources);
 
-        return !hasServiceResourceFilter
-               || effectivePartyCount <= _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
+        return effectivePartyCount <= _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
+               || effectiveServiceCount > _applicationSettings.Value.Limits.EndUserSearch.MaxServiceResourceFilterValues
             ? QueryStrategyScores.Preferred
             : QueryStrategyScores.Eligible;
     }
@@ -64,8 +63,11 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
             authorizedResources);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices, Name);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
-        var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, authorizedResources.DialogIds.ToArray());
+        var delegatedDialogIds = authorizedResources.DialogIds.ToArray();
+        var hasDelegatedDialogIds = delegatedDialogIds.Length > 0;
+        var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, delegatedDialogIds);
         var postPermissionOrderAndLimit = BuildPostPermissionOrderAndLimit(query);
+        var orderColumnSelection = DialogEndUserSearchSqlHelpers.BuildOrderColumnSelection(query.OrderBy!);
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
@@ -85,16 +87,38 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
                 ,permission_candidate_ids AS (
                     {permissionCandidateDialogs}
                 )
+                """)
+            .AppendIf(hasDelegatedDialogIds,
+                $"""
                 ,delegated_dialogs AS (
                     {delegatedCandidateDialogs}
                 )
+                """)
+            .Append(
+                $"""
                 ,candidate_dialogs AS (
-                    SELECT "Id" FROM permission_candidate_ids
+                    SELECT "Id", {orderColumnSelection}
+                    FROM permission_candidate_ids
+                """)
+            .AppendIf(hasDelegatedDialogIds,
+                $"""
                     UNION
-                    SELECT "Id" FROM delegated_dialogs
+                    SELECT "Id", {orderColumnSelection}
+                    FROM delegated_dialogs
+                """)
+            .Append(
+                """
                 )
                 SELECT d.*
-                FROM candidate_dialogs cd
+                FROM (
+                    SELECT cd."Id"
+                    FROM candidate_dialogs cd
+                """)
+            .ApplyPaginationOrder(query.OrderBy!, alias: "cd")
+            .ApplyPaginationLimit(query.Limit)
+            .Append(
+                $"""
+                ) cd
                 JOIN "Dialog" d ON d."Id" = cd."Id"
                 {postPermissionOrderAndLimit}
 
@@ -104,14 +128,16 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
+        var orderColumnProjection = DialogEndUserSearchSqlHelpers.BuildOrderColumnProjection(query.OrderBy!, alias: "d");
+        var innerOrderColumnProjection = DialogEndUserSearchSqlHelpers.BuildOrderColumnProjection(query.OrderBy!, alias: "d_inner");
 
         return new PostgresFormattableStringBuilder()
             .Append(
                 $"""
-                SELECT d_inner."Id"
+                SELECT d_inner."Id", {innerOrderColumnProjection}
                 FROM party_permissions pp
                 CROSS JOIN LATERAL (
-                    SELECT d."Id"
+                    SELECT d."Id", {orderColumnProjection}
                     FROM "Dialog" d
                     WHERE d."Party" = pp.party
                       AND d."ServiceResource" = ANY(pp.allowed_services)
@@ -134,11 +160,12 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
         Guid[] dialogIds)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
+        var orderColumnProjection = DialogEndUserSearchSqlHelpers.BuildOrderColumnProjection(query.OrderBy!, alias: "d");
 
         return new PostgresFormattableStringBuilder()
             .Append(
                 $"""
-                SELECT d."Id"
+                SELECT d."Id", {orderColumnProjection}
                 FROM unnest({dialogIds}::uuid[]) AS dd("Id")
                 JOIN "Dialog" d ON d."Id" = dd."Id"
                 WHERE 1=1

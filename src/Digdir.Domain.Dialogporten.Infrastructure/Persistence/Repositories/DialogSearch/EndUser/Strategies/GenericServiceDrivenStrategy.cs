@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Sql;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Selection;
@@ -26,10 +25,10 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
         _logger = logger;
     }
 
-    // Generic service-driven strategy for broad multi-party searches with service filtering.
-    // Drives lookup by service resource to reduce fan-out when many parties are authorized but the
-    // query narrows resources; each service group performs bounded top-N probes before final merge.
-    public string Name => "GenericServiceDriven";
+    // Generic service-driven strategy for broad multi-party searches with a small effective service set.
+    // Drives lookup by service resource to reduce party fan-out; each service group performs bounded
+    // top-N probes before final merge.
+    public string Name => nameof(GenericServiceDrivenStrategy);
 
     public int Score(EndUserSearchContext context)
     {
@@ -41,9 +40,10 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
         var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
             context.Query,
             context.AuthorizedResources);
+        var effectiveServiceCount = DialogEndUserSearchSqlHelpers.CountEffectiveServices(context.AuthorizedResources);
 
-        return DialogEndUserSearchSqlHelpers.HasServiceResourceFilter(context.Query)
-               && effectivePartyCount > _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
+        return effectivePartyCount > _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
+               && effectiveServiceCount <= _applicationSettings.Value.Limits.EndUserSearch.MaxServiceResourceFilterValues
             ? QueryStrategyScores.Preferred
             : QueryStrategyScores.Eligible;
     }
@@ -63,8 +63,11 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
             authorizedResources);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices, Name);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
-        var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, authorizedResources.DialogIds.ToArray());
+        var delegatedDialogIds = authorizedResources.DialogIds.ToArray();
+        var hasDelegatedDialogIds = delegatedDialogIds.Length > 0;
+        var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, delegatedDialogIds);
         var postPermissionOrderAndLimit = BuildPostPermissionOrderAndLimit(query);
+        var orderColumnSelection = DialogEndUserSearchSqlHelpers.BuildOrderColumnSelection(query.OrderBy!);
 
         return new PostgresFormattableStringBuilder()
             .Append("WITH ")
@@ -84,16 +87,38 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
                 ,permission_candidate_ids AS (
                     {permissionCandidateDialogs}
                 )
+                """)
+            .AppendIf(hasDelegatedDialogIds,
+                $"""
                 ,delegated_dialogs AS (
                     {delegatedCandidateDialogs}
                 )
+                """)
+            .Append(
+                $"""
                 ,candidate_dialogs AS (
-                    SELECT "Id" FROM permission_candidate_ids
+                    SELECT "Id", {orderColumnSelection}
+                    FROM permission_candidate_ids
+                """)
+            .AppendIf(hasDelegatedDialogIds,
+                $"""
                     UNION
-                    SELECT "Id" FROM delegated_dialogs
+                    SELECT "Id", {orderColumnSelection}
+                    FROM delegated_dialogs
+                """)
+            .Append(
+                """
                 )
                 SELECT d.*
-                FROM candidate_dialogs cd
+                FROM (
+                    SELECT cd."Id"
+                    FROM candidate_dialogs cd
+                """)
+            .ApplyPaginationOrder(query.OrderBy!, alias: "cd")
+            .ApplyPaginationLimit(query.Limit)
+            .Append(
+                $"""
+                ) cd
                 JOIN "Dialog" d ON d."Id" = cd."Id"
                 {postPermissionOrderAndLimit}
 
@@ -103,14 +128,16 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
+        var orderColumnProjection = DialogEndUserSearchSqlHelpers.BuildOrderColumnProjection(query.OrderBy!, alias: "d");
+        var innerOrderColumnProjection = DialogEndUserSearchSqlHelpers.BuildOrderColumnProjection(query.OrderBy!, alias: "d_inner");
 
         return new PostgresFormattableStringBuilder()
             .Append(
                 $"""
-                SELECT d_inner."Id"
+                SELECT d_inner."Id", {innerOrderColumnProjection}
                 FROM service_permissions sp
                 CROSS JOIN LATERAL (
-                    SELECT d."Id"
+                    SELECT d."Id", {orderColumnProjection}
                     FROM "Dialog" d
                     WHERE d."ServiceResource" = sp.service
                       AND d."Party" = ANY(sp.allowed_parties)
@@ -130,11 +157,12 @@ internal sealed class GenericServiceDrivenStrategy : IQueryStrategy<EndUserSearc
         Guid[] dialogIds)
     {
         var permissionCandidateFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
+        var orderColumnProjection = DialogEndUserSearchSqlHelpers.BuildOrderColumnProjection(query.OrderBy!, alias: "d");
 
         return new PostgresFormattableStringBuilder()
             .Append(
                 $"""
-                SELECT d."Id"
+                SELECT d."Id", {orderColumnProjection}
                 FROM unnest({dialogIds}::uuid[]) AS dd("Id")
                 JOIN "Dialog" d ON d."Id" = dd."Id"
                 WHERE 1=1

@@ -69,7 +69,8 @@ public sealed class EndUserSearchQueryLimits
     public int MaxExtendedStatusFilterValues { get; init; } = 20;
     public int MinServiceDrivenStrategyPartyCount { get; init; } = 100;
     public int MaxFreeTextSearchCandidates { get; init; } = 5000;
-    public int MaxFreeTextSearchCandidatesPerParty { get; init; } = 5000;
+    public int MinFreeTextSearchCandidatesPerParty { get; init; } = 100;
+    public int MaxDialogFirstFreeTextSearchPartyCount { get; init; } = 50;
 }
 
 public sealed class ServiceOwnerSearchQueryLimits
@@ -134,7 +135,8 @@ internal sealed class EndUserSearchQueryLimitsValidator : AbstractValidator<EndU
         RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
         RuleFor(x => x.MinServiceDrivenStrategyPartyCount).GreaterThanOrEqualTo(0);
         RuleFor(x => x.MaxFreeTextSearchCandidates).GreaterThan(0).LessThanOrEqualTo(100_000);
-        RuleFor(x => x.MaxFreeTextSearchCandidatesPerParty).GreaterThan(0).LessThanOrEqualTo(100_000);
+        RuleFor(x => x.MinFreeTextSearchCandidatesPerParty).GreaterThan(0).LessThanOrEqualTo(100_000);
+        RuleFor(x => x.MaxDialogFirstFreeTextSearchPartyCount).GreaterThanOrEqualTo(0).LessThanOrEqualTo(1000);
     }
 }
 

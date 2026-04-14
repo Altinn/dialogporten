@@ -1,7 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Models;
 using Microsoft.Extensions.Logging;
@@ -32,6 +35,12 @@ internal static partial class DialogEndUserSearchSqlHelpers
             .AppendSystemLabelMaskFilterCondition(query.SystemLabel)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
 
+    internal static PostgresFormattableStringBuilder BuildOrderColumnProjection(IOrderSet<DialogEntity> orderSet, string alias) =>
+        BuildColumnList(GetProjectedOrderColumnNames(orderSet), column => $"{alias}.\"{column}\"");
+
+    internal static PostgresFormattableStringBuilder BuildOrderColumnSelection(IOrderSet<DialogEntity> orderSet) =>
+        BuildColumnList(GetProjectedOrderColumnNames(orderSet), column => $"\"{column}\"");
+
     internal static List<PartiesAndServices> BuildPartiesAndServices(
         GetDialogsQuery query,
         DialogSearchAuthorizationResult authorizedResources) => authorizedResources.ResourcesByParties
@@ -49,7 +58,11 @@ internal static partial class DialogEndUserSearchSqlHelpers
             .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
             .ToList();
 
-    internal static bool HasServiceResourceFilter(GetDialogsQuery query) => query.ServiceResource?.Count > 0;
+    internal static int CountEffectiveServices(DialogSearchAuthorizationResult authorizedResources) =>
+        authorizedResources.ResourcesByParties
+            .SelectMany(x => x.Value)
+            .Distinct(StringComparer.Ordinal)
+            .Count();
 
     internal static int CountEffectiveParties(
         GetDialogsQuery query,
@@ -179,4 +192,38 @@ internal static partial class DialogEndUserSearchSqlHelpers
         int totalServicesCount,
         int groupsCount,
         List<(int PartiesCount, int ServicesCount)> groupSizes);
+
+    private static PostgresFormattableStringBuilder BuildColumnList(
+        IEnumerable<string> columns,
+        Func<string, string> formatColumn)
+    {
+        var builder = new PostgresFormattableStringBuilder();
+        var needsSeparator = false;
+
+        foreach (var column in columns)
+        {
+            if (needsSeparator)
+            {
+                builder.Append(", ");
+            }
+
+            builder.Append(formatColumn(column));
+            needsSeparator = true;
+        }
+
+        return builder;
+    }
+
+    private static IEnumerable<string> GetProjectedOrderColumnNames(IOrderSet<DialogEntity> orderSet) =>
+        orderSet.Orders
+            .Select(order => GetOrderColumnName(order.GetSelector().Body))
+            .Where(column => column != nameof(DialogEntity.Id))
+            .Distinct(StringComparer.Ordinal);
+
+    private static string GetOrderColumnName(Expression expression) => expression switch
+    {
+        MemberExpression memberExpression => memberExpression.Member.Name,
+        UnaryExpression { Operand: MemberExpression memberExpression } => memberExpression.Member.Name,
+        _ => throw new InvalidOperationException($"Unsupported order expression: {expression}")
+    };
 }

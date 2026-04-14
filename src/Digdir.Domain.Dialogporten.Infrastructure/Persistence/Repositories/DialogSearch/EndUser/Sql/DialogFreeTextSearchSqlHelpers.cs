@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Sql;
 

@@ -1,8 +1,8 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -187,7 +187,7 @@ public sealed class TransmissionDto
     /// If supplied, overrides the creating date and time for the transmission.
     /// If not supplied, the current date /time will be used.
     /// </summary>
-    public DateTimeOffset? CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

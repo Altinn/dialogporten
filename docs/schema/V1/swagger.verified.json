@@ -3347,7 +3347,6 @@
           "createdAt": {
             "description": "If supplied, overrides the creating date and time for the transmission.\nIf not supplied, the current date /time will be used.",
             "format": "date-time",
-            "nullable": true,
             "type": "string"
           },
           "extendedType": {

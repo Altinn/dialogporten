@@ -135,6 +135,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
 
                 /// <summary>
+                /// Only return dialogs that has content that has/hasn't been seen by the user.
+                /// A dialogs content is considered seen if:
+                /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
+                /// - It does not have a system label MarkedAsUnopened.
+                /// </summary>
+        [Query] 
+        public bool? IsContentSeen { get; set; }
+
+                /// <summary>
                 /// Only return dialogs with due date after this date
                 /// </summary>
         [Query] 

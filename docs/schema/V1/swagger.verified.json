@@ -8597,6 +8597,15 @@
             }
           },
           {
+            "description": "Only return dialogs that has content that has/hasn\u0027t been seen by the user.\nA dialogs content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
+            "in": "query",
+            "name": "isContentSeen",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Only return dialogs with due date after this date",
             "in": "query",
             "name": "dueAfter",

@@ -89,6 +89,15 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
 
                 /// <summary>
+                /// Only return dialogs that has content that has/hasn't been seen by the user.
+                /// A dialogs content is considered seen if:
+                /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
+                /// - It does not have a system label MarkedAsUnopened.
+                /// </summary>
+        [Query] 
+        public bool? IsContentSeen { get; set; }
+
+                /// <summary>
                 /// Only return dialogs with due date after this date
                 /// </summary>
         [Query] 
@@ -1483,8 +1492,13 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// <br/>            
+        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
+        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
+        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -2519,8 +2533,13 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// <br/>            
+        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
+        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
+        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>

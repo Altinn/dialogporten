@@ -620,7 +620,7 @@ input SearchDialogInput {
   contentUpdatedAfter: DateTime
   "Only return dialogs with content updated before this date"
   contentUpdatedBefore: DateTime
-  "Only return dialogs that has content that has\/hasn't been seen by the user"
+  "Only return dialogs that have content that has\/hasn't been seen by the user. A dialog is considered seen if it has been retrieved by a user, since it's last content update, and there is no SystemLabel MarkedAsUnopened."
   isContentSeen: Boolean
   "Only return dialogs updated after this date"
   updatedAfter: DateTime

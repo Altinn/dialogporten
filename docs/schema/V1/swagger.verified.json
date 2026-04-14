@@ -7146,7 +7146,7 @@
             }
           },
           {
-            "description": "Only return dialogs that has content that has/hasn\u0027t been seen by the user.\nA dialogs content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
+            "description": "Only return dialogs that have content that has/hasn\u0027t been seen.\nIf null, no filtering is applied\nIf true, returns dialogs that have been seen\nIf false, returns dialogs that have not been seen\n            \nA dialog\u0027s content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
             "in": "query",
             "name": "isContentSeen",
             "schema": {
@@ -8597,7 +8597,7 @@
             }
           },
           {
-            "description": "Only return dialogs that has content that has/hasn\u0027t been seen by the user.\nA dialogs content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
+            "description": "Only return dialogs that have content that has/hasn\u0027t been seen.\nIf null, no filtering is applied\nIf true, returns dialogs that have been seen\nIf false, returns dialogs that have not been seen\n            \nA dialog\u0027s content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
             "in": "query",
             "name": "isContentSeen",
             "schema": {

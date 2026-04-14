@@ -132,7 +132,10 @@ public sealed class DialogEntity :
         IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration();
     }
 
-    private bool WasCreatedBeforeFirstMigration() => CreatedAt < new DateTime(2025, 12, 1);
+    private bool WasCreatedBeforeFirstMigration()
+    {
+        return CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
+    }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
     {

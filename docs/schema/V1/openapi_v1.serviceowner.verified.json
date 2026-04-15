@@ -5316,7 +5316,7 @@
       },
       "patch": {
         "description": "Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.\nSee [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.\n            \nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
-        "operationId": "V1ServiceOwnerDialogsPatchDialog",
+        "operationId": "PatchDialog",
         "parameters": [
           {
             "in": "path",

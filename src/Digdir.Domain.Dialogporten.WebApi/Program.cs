@@ -130,19 +130,15 @@ static void BuildAndRun(string[] args)
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
-            ConfigureSwaggerDocument(x, "v1", "Dialogporten");
+            ConfigureV1OpenApiDocument(x, "v1", "Dialogporten");
         })
         .SwaggerDocument(x =>
         {
-            ConfigureSwaggerDocument(x, "v1.enduser", "Dialogporten EndUser");
-            x.EndpointFilter = endpoint => endpoint.EndpointType.Namespace?
-                .Contains(".EndUser.", StringComparison.OrdinalIgnoreCase) == true;
+            ConfigureV1OpenApiDocument(x, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
         })
         .SwaggerDocument(x =>
         {
-            ConfigureSwaggerDocument(x, "v1.serviceowner", "Dialogporten ServiceOwner");
-            x.EndpointFilter = endpoint => endpoint.EndpointType.Namespace?
-                .Contains(".ServiceOwner.", StringComparison.OrdinalIgnoreCase) == true;
+            ConfigureV1OpenApiDocument(x, "v1.serviceowner", "Dialogporten ServiceOwner", audience: "serviceowner");
         })
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))
             .AddNewtonsoftJson()
@@ -158,10 +154,6 @@ static void BuildAndRun(string[] args)
         .AddDialogportenAuthentication(builder.Configuration)
         .AddAuthorization();
 
-    // Built-in ASP.NET Core OpenAPI document generation (experimental branch work).
-    // builder.Services.AddOpenApi("v1", "enduser");
-    // builder.Services.AddOpenApi("v1", "serviceowner");
-
     if (builder.Environment.IsDevelopment())
     {
         var localDevelopmentSettings = builder.Configuration.GetLocalDevelopmentSettings();
@@ -176,7 +168,6 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
     app.MapAspNetHealthChecks()
         .MapControllers();
-    // app.MapOpenApi().AllowAnonymous();
 
     app.UseHttpsRedirection()
         .UseDefaultExceptionHandler()
@@ -200,8 +191,6 @@ static void BuildAndRun(string[] args)
                     {
                         endpointBuilder.Metadata.Add(
                             new EndpointNameMetadata(
-                                endpointDefinition.EndpointType
-                                    .GetCustomAttribute<OpenApiOperationIdAttribute>()?.OperationId ??
                                 TypeNameConverter.ToShortName(endpointDefinition.EndpointType)));
 
                         var operationIdAttr = endpointDefinition.EndpointType
@@ -268,7 +257,7 @@ static void IgnoreEmptyCollections(JsonTypeInfo typeInfo)
     }
 }
 
-static void ConfigureSwaggerDocument(DocumentOptions options, string documentName, string title)
+static void ConfigureV1OpenApiDocument(DocumentOptions options, string documentName, string title, string? audience = null)
 {
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;
@@ -294,6 +283,12 @@ static void ConfigureSwaggerDocument(DocumentOptions options, string documentNam
         s.EnsureJsonPatchConsumes();
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator();
+
+        if (audience is not null)
+        {
+            s.OperationProcessors.Insert(0, new OpenApiAudienceFilterOperationProcessor(audience));
+            s.OperationProcessors.Add(new OpenApiOperationIdOverrideProcessor(documentName));
+        }
 
         // Adding ResponseHeaders for PATCH MVC controller
         s.OperationProcessors.Add(new ProducesResponseHeaderOperationProcessor());

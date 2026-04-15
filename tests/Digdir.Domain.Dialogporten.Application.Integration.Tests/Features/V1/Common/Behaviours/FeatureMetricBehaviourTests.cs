@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -8,6 +9,8 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using AwesomeAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NSubstitute;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Behaviours;
 
@@ -141,4 +144,31 @@ public class FeatureMetricBehaviourTests : ApplicationCollectionFixture
         getDialogMetrics.Should().HaveCount(2);
     }
 
+    [Fact]
+    public async Task FeatureMetric_Should_Not_Throw_When_User_Principal_Is_Missing()
+    {
+        var user = Substitute.For<IUser>();
+        user.GetPrincipal().Returns(_ => throw new InvalidOperationException("No user principal found"));
+        var recorder = new FeatureMetricRecorder();
+        var resolver = new FeatureMetricServiceResourceIgnoreRequestResolver();
+        var hostEnvironment = Substitute.For<IHostEnvironment>();
+        hostEnvironment.EnvironmentName.Returns("Development");
+        var behaviour = new FeatureMetricBehaviour<FeatureMetricNoPrincipalRequest, Unit>(
+            user,
+            recorder,
+            resolver,
+            hostEnvironment);
+
+        await behaviour.Handle(
+            new FeatureMetricNoPrincipalRequest(),
+            _ => Task.FromResult(Unit.Value),
+            TestContext.Current.CancellationToken);
+
+        var metric = recorder.Records.Should().ContainSingle().Subject;
+        metric.FeatureName.Should().Be(typeof(FeatureMetricNoPrincipalRequest).FullName);
+        metric.HasAdminScope.Should().BeFalse();
+        metric.CallerOrg.Should().Be("unknown");
+    }
+
+    private sealed record FeatureMetricNoPrincipalRequest : IRequest<Unit>, IFeatureMetricServiceResourceIgnoreRequest;
 }

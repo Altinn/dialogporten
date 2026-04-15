@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -35,10 +37,12 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse> : IPipelineBeh
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        var principal = _user.GetPrincipal();
-        principal.TryGetConsumerOrgNumber(out var callerOrgNr);
+        var callerOrgNr = TryGetPrincipal(out var principal)
+                          && principal.TryGetConsumerOrgNumber(out var orgNumber)
+            ? orgNumber
+            : null;
 
-        var hasAdminScope = principal.HasScope(AuthorizationScope.ServiceOwnerAdminScope);
+        var hasAdminScope = principal?.HasScope(AuthorizationScope.ServiceOwnerAdminScope) ?? false;
         var resource = await _featureMetricServiceResourceResolver.Resolve(request, cancellationToken);
 
         _featureMetricRecorder.Record(new(
@@ -50,5 +54,19 @@ internal sealed class FeatureMetricBehaviour<TRequest, TResponse> : IPipelineBeh
             ServiceResource: resource?.ResourceId));
 
         return await next(cancellationToken);
+    }
+
+    private bool TryGetPrincipal([NotNullWhen(true)] out ClaimsPrincipal? principal)
+    {
+        try
+        {
+            principal = _user.GetPrincipal();
+        }
+        catch (InvalidOperationException)
+        {
+            principal = null;
+            return false;
+        }
+        return true;
     }
 }

@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace Altinn.ApiClients.Dialogporten.Features.V1
 {
-    public class V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams
+    public class SearchDialogEndUserContextsQueryParams
     {
-        public V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams(IEnumerable<string> party)
+        public SearchDialogEndUserContextsQueryParams(IEnumerable<string> party)
         {
             
             Party = party;
@@ -53,7 +53,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    public class V1ServiceOwnerDialogsQueriesSearchDialogQueryParams
+    public class SearchDialogsQueryParams
     {
         
                 /// <summary>
@@ -211,9 +211,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
-    public class V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams
+    public class CheckNotificationConditionQueryParams
     {
-        public V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams(V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType conditionType, DialogsEntitiesActivities_DialogActivityType activityType)
+        public CheckNotificationConditionQueryParams(V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType conditionType, DialogsEntitiesActivities_DialogActivityType activityType)
         {
             
             ConditionType = conditionType;
@@ -270,7 +270,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel>>> V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel>>> GetServiceOwnerLabels(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Add a service owner label to a dialog</summary>
         /// <remarks>
@@ -320,7 +320,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
-        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> CreateServiceOwnerLabel(System.Guid dialogId, [Body] V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Delete a service owner label for a dialog</summary>
         /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>
@@ -367,7 +367,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain")]
         [Delete("/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}")]
-        Task<IApiResponse> V1ServiceOwnerServiceOwnerContextCommandsDeleteServiceOwnerLabelServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> DeleteServiceOwnerLabel(System.Guid dialogId, string label, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Sets the system labels of a dialog</summary>
         /// <remarks>
@@ -431,7 +431,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
-        Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Query] string enduserId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
@@ -481,7 +481,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
-        Task<IApiResponse> V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
+        Task<IApiResponse> BulkSetDialogSystemLabels([Query] string enduserId, [Body] V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
@@ -522,7 +522,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission>>> V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission>>> SearchDialogTransmissions(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds a transmission to a dialog</summary>
         /// <remarks>
@@ -589,7 +589,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(System.Guid dialogId, [Body, AliasAs("CreateTransmissionRequest")] V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest createTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse<string>> CreateDialogTransmission(System.Guid dialogId, [Body, AliasAs("CreateTransmissionRequest")] V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest createTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -630,7 +630,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> SearchDialogSeenLogs(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets end user context system labels for dialogs</summary>
         /// <remarks>
@@ -666,7 +666,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/endusercontext")]
-        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem>> V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContext([Query] V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams queryParams, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem>> SearchDialogEndUserContexts([Query] SearchDialogEndUserContextsQueryParams queryParams, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -703,7 +703,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchActivities_Activity>>> V1ServiceOwnerDialogsQueriesSearchActivitiesDialogActivity(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchActivities_Activity>>> SearchDialogActivities(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds an activity to a dialog's activity history</summary>
         /// <remarks>
@@ -770,7 +770,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse<string>> CreateDialogActivity(System.Guid dialogId, [Body, AliasAs("CreateActivityRequest")] V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest createActivityRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
@@ -805,7 +805,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs")]
-        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> V1ServiceOwnerDialogsQueriesSearchDialog([Query] V1ServiceOwnerDialogsQueriesSearchDialogQueryParams queryParams, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog>> SearchDialogs([Query] SearchDialogsQueryParams queryParams, CancellationToken cancellationToken = default);
 
         /// <summary>Creates a new dialog</summary>
         /// <remarks>
@@ -858,7 +858,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs")]
-        Task<IApiResponse<string>> V1ServiceOwnerDialogsCommandsCreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
+        Task<IApiResponse<string>> CreateDialog([Body] V1ServiceOwnerDialogsCommandsCreate_Dialog dto, CancellationToken cancellationToken = default);
 
         /// <summary>Returns a boolean value based on conditions used to determine if a notification is to be sent</summary>
         /// <remarks>Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.</remarks>
@@ -892,7 +892,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition>> V1ServiceOwnerDialogsQueriesNotificationConditionNotificationCondition(System.Guid dialogId, [Query] V1ServiceOwnerDialogsQueriesNotificationConditionNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition>> CheckNotificationCondition(System.Guid dialogId, [Query] CheckNotificationConditionQueryParams queryParams, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog transmission</summary>
         /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
@@ -934,7 +934,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> GetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
         /// <summary>Replaces a transmission</summary>
         /// <remarks>
@@ -998,7 +998,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse> V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Body, AliasAs("UpdateTransmissionRequest")] V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest updateTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> UpdateDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Body, AliasAs("UpdateTransmissionRequest")] V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest updateTransmissionRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
@@ -1040,7 +1040,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> V1ServiceOwnerDialogsQueriesGetSeenLogDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog>> GetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
@@ -1082,7 +1082,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetActivity_Activity>> GetDialogActivity(System.Guid dialogId, System.Guid activityId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>
@@ -1124,7 +1124,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> V1ServiceOwnerDialogsQueriesGetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGet_Dialog>> GetDialog(System.Guid dialogId, [Query] string endUserId, CancellationToken cancellationToken = default);
 
         /// <summary>Replaces a dialog</summary>
         /// <remarks>
@@ -1187,7 +1187,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse> V1ServiceOwnerDialogsCommandsUpdateDialog(System.Guid dialogId, [Body] V1ServiceOwnerDialogsCommandsUpdate_Dialog dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> UpdateDialog(System.Guid dialogId, [Body] V1ServiceOwnerDialogsCommandsUpdate_Dialog dto, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Deletes a dialog</summary>
         /// <remarks>
@@ -1248,7 +1248,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain")]
         [Delete("/api/v1/serviceowner/dialogs/{dialogId}")]
-        Task<IApiResponse> V1ServiceOwnerDialogsCommandsDeleteDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> DeleteDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Patch a single dialog</summary>
         /// <remarks>
@@ -1358,7 +1358,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/restore")]
-        Task<IApiResponse> V1ServiceOwnerDialogsCommandsRestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> RestoreDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Permanently deletes a dialog</summary>
         /// <remarks>
@@ -1408,7 +1408,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/purge")]
-        Task<IApiResponse> V1ServiceOwnerDialogsCommandsPurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> PurgeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Freezes a dialog</summary>
         /// <remarks>
@@ -1465,7 +1465,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze")]
-        Task<IApiResponse> V1ServiceOwnerDialogsCommandsFreezeFreezeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> FreezeDialog(System.Guid dialogId, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Looks up a dialog by instance reference</summary>
         /// <remarks>Resolves dialog metadata for a supported instance reference in service owner context.</remarks>
@@ -1507,7 +1507,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialoglookup")]
-        Task<IApiResponse<V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup>> V1ServiceOwnerDialogLookupQueriesGetDialogLookup([Query] string instanceRef, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup>> GetDialogLookup([Query] string instanceRef, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
     }
 
 }

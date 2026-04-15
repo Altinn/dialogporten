@@ -12,8 +12,8 @@ public class OpenApiSpecSnapshotTests
 {
     public static TheoryData<string, string> GeneratedSpecs => new()
     {
-        { "openapi_v1.enduser.json", "openapi_v1.enduser" },
-        { "openapi_v1.serviceowner.json", "openapi_v1.serviceowner" }
+        { "openapi.v1.enduser.json", "openapi_v1.enduser" },
+        { "openapi.v1.serviceowner.json", "openapi_v1.serviceowner" }
     };
 
     [Theory]

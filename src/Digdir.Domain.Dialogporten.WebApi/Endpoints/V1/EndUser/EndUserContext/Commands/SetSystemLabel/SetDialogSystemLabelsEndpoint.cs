@@ -71,7 +71,6 @@ public sealed class SetDialogSystemLabelRequest
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchEnduserContextRevision { get; set; }
 
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     /// <summary>

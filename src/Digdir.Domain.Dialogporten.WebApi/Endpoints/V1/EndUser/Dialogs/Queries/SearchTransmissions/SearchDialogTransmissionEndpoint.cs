@@ -52,7 +52,6 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
 
 public sealed class SearchTransmissionRequest
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]

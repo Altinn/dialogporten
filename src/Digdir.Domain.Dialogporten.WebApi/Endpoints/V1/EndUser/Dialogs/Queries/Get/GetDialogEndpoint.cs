@@ -56,7 +56,6 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogRequest, DialogDto>
 
 public sealed class GetDialogRequest
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]

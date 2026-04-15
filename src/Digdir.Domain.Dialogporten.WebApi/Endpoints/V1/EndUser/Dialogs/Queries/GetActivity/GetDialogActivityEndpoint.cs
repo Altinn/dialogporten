@@ -51,10 +51,8 @@ public sealed class GetDialogActivityEndpoint : Endpoint<GetActivityRequest, Act
 
 public sealed class GetActivityRequest
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
-    [BindFrom("activityId")]
     public Guid ActivityId { get; set; }
 
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]

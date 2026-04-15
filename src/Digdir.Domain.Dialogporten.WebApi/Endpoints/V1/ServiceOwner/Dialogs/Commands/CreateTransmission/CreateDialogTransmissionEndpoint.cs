@@ -72,7 +72,6 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
 
 public sealed class CreateTransmissionRequest : CreateTransmissionDto
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

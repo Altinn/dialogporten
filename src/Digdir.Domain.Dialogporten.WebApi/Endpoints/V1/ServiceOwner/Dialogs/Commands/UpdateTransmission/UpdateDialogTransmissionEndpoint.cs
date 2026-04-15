@@ -65,9 +65,7 @@ public sealed class UpdateDialogTransmissionEndpoint : Endpoint<UpdateTransmissi
 
 public sealed class UpdateTransmissionRequest : UpdateTransmissionDto
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
-    [BindFrom("transmissionId")]
     public Guid TransmissionId { get; set; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

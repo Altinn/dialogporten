@@ -71,7 +71,6 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
 
 public sealed class CreateActivityRequest : CreateActivityDto
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

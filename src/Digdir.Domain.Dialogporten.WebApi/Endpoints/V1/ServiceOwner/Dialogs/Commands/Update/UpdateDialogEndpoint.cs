@@ -65,7 +65,6 @@ public sealed class UpdateDialogEndpoint : Endpoint<UpdateDialogRequest>
 
 public sealed class UpdateDialogRequest
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
 
     [FromBody]

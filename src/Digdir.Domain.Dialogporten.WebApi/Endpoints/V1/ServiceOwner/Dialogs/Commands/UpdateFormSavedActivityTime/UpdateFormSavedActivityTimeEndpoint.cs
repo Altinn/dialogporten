@@ -54,9 +54,7 @@ public sealed class UpdateFormSavedActivityTimeEndpoint : Endpoint<UpdateFormSav
 
 public sealed class UpdateFormSavedActivityTimeRequest
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; set; }
-    [BindFrom("activityId")]
     public Guid ActivityId { get; set; }
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]
     public Guid? IfMatchDialogRevision { get; set; }

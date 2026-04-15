@@ -63,7 +63,6 @@ public sealed class FreezeDialogEndpoint : Endpoint<FreezeDialogRequest>
 
 public sealed class FreezeDialogRequest
 {
-    [BindFrom("dialogId")]
     public Guid DialogId { get; init; }
 
     [FromHeader(headerName: Constants.IfMatch, isRequired: false, removeFromSchema: true)]

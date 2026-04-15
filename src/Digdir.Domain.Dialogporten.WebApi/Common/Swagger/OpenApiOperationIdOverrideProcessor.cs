@@ -1,4 +1,3 @@
-using System.Reflection;
 using FastEndpoints;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using NSwag.Generation.AspNetCore;
@@ -30,37 +29,19 @@ public sealed class OpenApiOperationIdOverrideProcessor(string documentName) : I
             return metadataOperationId;
         }
 
-        var endpointOperationId = context.ApiDescription.ActionDescriptor.EndpointMetadata
+        var endpointTypeName = context.ApiDescription.ActionDescriptor.EndpointMetadata
             .OfType<EndpointDefinition>()
             .SingleOrDefault()
             ?.EndpointType
-            .GetCustomAttribute<OpenApiOperationIdAttribute>()
-            ?.OperationId;
-
-        if (!string.IsNullOrWhiteSpace(endpointOperationId))
-        {
-            return endpointOperationId;
-        }
-
-        var controllerAction = context.ApiDescription.ActionDescriptor as ControllerActionDescriptor;
-        var controllerOperationId =
-            controllerAction?.MethodInfo.GetCustomAttribute<OpenApiOperationIdAttribute>()?.OperationId
-            ?? controllerAction?.ControllerTypeInfo.GetCustomAttribute<OpenApiOperationIdAttribute>()?.OperationId;
-
-        if (!string.IsNullOrWhiteSpace(controllerOperationId))
-        {
-            return controllerOperationId;
-        }
-
-        var endpointDisplayName = context.ApiDescription.ActionDescriptor.EndpointMetadata
-            .OfType<RouteNameMetadata>()
-            .LastOrDefault()
-            ?.RouteName
+            .Name
+            ?? (context.ApiDescription.ActionDescriptor as ControllerActionDescriptor)
+                ?.ControllerTypeInfo
+                .Name
             ?? context.ApiDescription.ActionDescriptor.DisplayName
             ?? context.ApiDescription.RelativePath
             ?? "<unknown endpoint>";
 
         throw new InvalidOperationException(
-            $"Missing {nameof(OpenApiOperationIdAttribute)} for document '{documentName}' on endpoint '{endpointDisplayName}'.");
+            $"Missing {nameof(OpenApiOperationIdAttribute)} for document '{documentName}' on endpoint '{endpointTypeName}'.");
     }
 }

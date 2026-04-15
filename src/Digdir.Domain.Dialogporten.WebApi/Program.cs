@@ -130,15 +130,15 @@ static void BuildAndRun(string[] args)
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
-            ConfigureV1OpenApiDocument(x, "v1", "Dialogporten");
+            ConfigureOpenApiV1Document(x, "v1", "Dialogporten");
         })
         .SwaggerDocument(x =>
         {
-            ConfigureV1OpenApiDocument(x, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
+            ConfigureOpenApiV1Document(x, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
         })
         .SwaggerDocument(x =>
         {
-            ConfigureV1OpenApiDocument(x, "v1.serviceowner", "Dialogporten ServiceOwner", audience: "serviceowner");
+            ConfigureOpenApiV1Document(x, "v1.serviceowner", "Dialogporten ServiceOwner", audience: "serviceowner");
         })
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))
             .AddNewtonsoftJson()
@@ -257,7 +257,7 @@ static void IgnoreEmptyCollections(JsonTypeInfo typeInfo)
     }
 }
 
-static void ConfigureV1OpenApiDocument(DocumentOptions options, string documentName, string title, string? audience = null)
+static void ConfigureOpenApiV1Document(DocumentOptions options, string documentName, string title, string? audience = null)
 {
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;

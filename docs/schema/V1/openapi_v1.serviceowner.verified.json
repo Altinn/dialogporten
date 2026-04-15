@@ -2705,21 +2705,6 @@
     "/api/v1/serviceowner/dialoglookup": {
       "get": {
         "operationId": "GetDialogLookup",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogLookupRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogLookupRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -2746,21 +2731,6 @@
     "/api/v1/serviceowner/dialogs": {
       "get": {
         "operationId": "SearchDialogs",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchDialogQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchDialogQuery"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -2824,6 +2794,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}": {
       "delete": {
         "operationId": "DeleteDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "*/*": {
@@ -2862,21 +2842,16 @@
       },
       "get": {
         "operationId": "GetDialog",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3095,6 +3070,16 @@
       },
       "put": {
         "operationId": "UpdateDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3130,6 +3115,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/freeze": {
       "post": {
         "operationId": "FreezeDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "*/*": {
@@ -3165,6 +3160,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/purge": {
       "post": {
         "operationId": "PurgeDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "*/*": {
@@ -3197,6 +3202,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/restore": {
       "post": {
         "operationId": "RestoreDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "*/*": {
@@ -3229,21 +3244,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification": {
       "get": {
         "operationId": "CheckNotificationCondition",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/NotificationConditionQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NotificationConditionQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3270,21 +3280,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/activities": {
       "get": {
         "operationId": "SearchDialogActivities",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchActivityQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchActivityQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3312,6 +3317,16 @@
       },
       "post": {
         "operationId": "CreateDialogActivity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3357,21 +3372,24 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
         "operationId": "GetDialogActivity",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetActivityQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetActivityQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "in": "path",
+            "name": "activityId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3401,21 +3419,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/context/labels": {
       "get": {
         "operationId": "GetServiceOwnerLabels",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetServiceOwnerLabelsQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetServiceOwnerLabelsQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3443,6 +3456,16 @@
       },
       "post": {
         "operationId": "CreateServiceOwnerLabel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3475,6 +3498,24 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/context/labels/{label}": {
       "delete": {
         "operationId": "DeleteServiceOwnerLabel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "label",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "*/*": {
@@ -3512,6 +3553,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels": {
       "put": {
         "operationId": "SetDialogSystemLabels",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3547,21 +3598,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog": {
       "get": {
         "operationId": "SearchDialogSeenLogs",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchSeenLogQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchSeenLogQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3594,21 +3640,24 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
         "operationId": "GetDialogSeenLog",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetSeenLogQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetSeenLogQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "in": "path",
+            "name": "seenLogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3638,21 +3687,16 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions": {
       "get": {
         "operationId": "SearchDialogTransmissions",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchTransmissionQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchTransmissionQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3683,6 +3727,16 @@
       },
       "post": {
         "operationId": "CreateDialogTransmission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3728,21 +3782,24 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
         "operationId": "GetDialogTransmission",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetTransmissionQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetTransmissionQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "in": "path",
+            "name": "transmissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3770,6 +3827,24 @@
       },
       "put": {
         "operationId": "UpdateDialogTransmission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "transmissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3805,21 +3880,6 @@
     "/api/v1/serviceowner/dialogs/endusercontext": {
       "get": {
         "operationId": "SearchDialogEndUserContexts",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchDialogEndUserContextQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchDialogEndUserContextQuery"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {

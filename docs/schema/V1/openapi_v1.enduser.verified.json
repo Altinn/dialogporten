@@ -1441,21 +1441,6 @@
     "/api/v1/enduser/dialoglookup": {
       "get": {
         "operationId": "GetDialogLookup",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogLookupRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogLookupRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -1482,21 +1467,6 @@
     "/api/v1/enduser/dialogs": {
       "get": {
         "operationId": "SearchDialogs",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchDialogRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchDialogRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -1520,21 +1490,16 @@
     "/api/v1/enduser/dialogs/{dialogId}": {
       "get": {
         "operationId": "GetDialog",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetDialogRequest"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1561,21 +1526,16 @@
     "/api/v1/enduser/dialogs/{dialogId}/activities": {
       "get": {
         "operationId": "SearchDialogActivities",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchActivityRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchActivityRequest"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1605,21 +1565,24 @@
     "/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}": {
       "get": {
         "operationId": "GetDialogActivity",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetActivityRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetActivityRequest"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "in": "path",
+            "name": "activityId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1646,21 +1609,16 @@
     "/api/v1/enduser/dialogs/{dialogId}/context/labellog": {
       "get": {
         "operationId": "SearchDialogLabelAssignmentLogs",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchLabelAssignmentLogQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchLabelAssignmentLogQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1693,6 +1651,16 @@
     "/api/v1/enduser/dialogs/{dialogId}/context/systemlabels": {
       "put": {
         "operationId": "SetDialogSystemLabels",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1728,21 +1696,16 @@
     "/api/v1/enduser/dialogs/{dialogId}/seenlog": {
       "get": {
         "operationId": "SearchDialogSeenLogs",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchSeenLogQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchSeenLogQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1772,21 +1735,24 @@
     "/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}": {
       "get": {
         "operationId": "GetDialogSeenLog",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetSeenLogQuery"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetSeenLogQuery"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "in": "path",
+            "name": "seenLogId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1813,21 +1779,16 @@
     "/api/v1/enduser/dialogs/{dialogId}/transmissions": {
       "get": {
         "operationId": "SearchDialogTransmissions",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchTransmissionRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchTransmissionRequest"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1860,21 +1821,24 @@
     "/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
         "operationId": "GetDialogTransmission",
-        "requestBody": {
-          "content": {
-            "*/*": {
-              "schema": {
-                "$ref": "#/components/schemas/GetTransmissionRequest"
-              }
-            },
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetTransmissionRequest"
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "in": "path",
+            "name": "transmissionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {

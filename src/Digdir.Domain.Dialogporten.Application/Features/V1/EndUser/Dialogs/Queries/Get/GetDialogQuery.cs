@@ -73,6 +73,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         {
 
             var basicDialog = await _db.Dialogs
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
 
             if (basicDialog != null)
@@ -82,6 +83,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Include(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                     .IgnoreQueryFilters()
                     .AsSingleQuery()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 var attachments = await _db.DialogAttachments
@@ -90,6 +92,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Include(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
                     .IgnoreQueryFilters()
                     .AsSingleQuery()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
 
@@ -97,12 +100,14 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Where(x => x.DialogId == request.DialogId)
                     .Include(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
                     .IgnoreQueryFilters()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 var apiActions = await _db.DialogApiActions
                     .Where(x => x.DialogId == request.DialogId)
                     .Include(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .IgnoreQueryFilters()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 var transmissions = await _db.DialogTransmissions
@@ -118,6 +123,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Include(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                         .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
                     .IgnoreQueryFilters()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 var activities = await _db.DialogActivities
@@ -127,6 +133,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                         .ThenInclude(x => x.ActorNameEntity)
                     .IgnoreQueryFilters()
                     .AsSingleQuery()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 var seenlog = await _db.DialogSeenLog
@@ -136,6 +143,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                         .ThenInclude(x => x.ActorNameEntity)
                     .IgnoreQueryFilters()
                     .AsSingleQuery()
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
                 var endUserContext = await _db.DialogEndUserContexts
@@ -143,6 +151,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Include(x => x.DialogEndUserContextSystemLabels)
                     .IgnoreQueryFilters()
                     .AsSingleQuery()
+                    .AsNoTracking()
                     .FirstAsync(cancellationToken: cancellationToken);
 
                 var serviceOwnerContext = await _db.DialogServiceOwnerContexts
@@ -150,6 +159,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .Include(x => x.ServiceOwnerLabels)
                     .IgnoreQueryFilters()
                     .AsSingleQuery()
+                    .AsNoTracking()
                     .FirstAsync(cancellationToken: cancellationToken);
 
                 basicDialog.Content = content;

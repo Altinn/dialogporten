@@ -98,6 +98,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             var guiActions = await dbCtx.DialogGuiActions
                 .Where(x => x.DialogId == request.DialogId)
                 .Include(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
                 .IgnoreQueryFilters()
                 .ToListAsync(cancellationToken: ct);
 
@@ -131,7 +132,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .AsSingleQuery()
                 .ToListAsync(cancellationToken: ct);
 
-            var seenlog = await dbCtx.DialogSeenLog
+            var seenLog = await dbCtx.DialogSeenLog
                 .Where(x => x.DialogId == request.DialogId)
                 .Where(x => x.CreatedAt >= basicDialog.ContentUpdatedAt)
                 .Include(x => x.SeenBy)
@@ -155,12 +156,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .FirstAsync(cancellationToken: ct);
 
             basicDialog.Content = content;
-            basicDialog.Attachments = attachments;
-            basicDialog.GuiActions = guiActions;
-            basicDialog.ApiActions = apiActions;
-            basicDialog.Transmissions = transmissions;
-            basicDialog.Activities = activities;
-            basicDialog.SeenLog = seenlog;
+            basicDialog.Attachments = attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
+            basicDialog.GuiActions = guiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
+            basicDialog.ApiActions = apiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
+            basicDialog.Transmissions = transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
+            basicDialog.Activities = activities.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
+            basicDialog.SeenLog = seenLog.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
             basicDialog.EndUserContext = endUserContext;
             basicDialog.ServiceOwnerContext = serviceOwnerContext;
 

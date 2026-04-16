@@ -429,7 +429,7 @@ type SearchDialog {
   "The aggregated status of the dialog."
   status: DialogStatus!
   "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
-  hasUnopenedContent: Boolean!
+  hasUnopenedContent: Boolean! @deprecated(reason: "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
   "The number of transmissions sent by the service owner"

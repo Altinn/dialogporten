@@ -101,6 +101,7 @@ public sealed class SearchDialog
     [GraphQLDescription("The aggregated status of the dialog.")]
     public DialogStatus Status { get; set; }
 
+    [GraphQLDeprecated($"Use {nameof(SeenSinceLastContentUpdate)} and {nameof(EndUserContext)}.{nameof(EndUserContext.SystemLabels)} instead")]
     [GraphQLDescription("Indicates whether the dialog contains content that has not been viewed or opened by the user yet.")]
     public bool HasUnopenedContent { get; set; }
 

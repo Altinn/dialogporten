@@ -74,7 +74,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             var basicDialog = await dbCtx.Dialogs
                 .IgnoreQueryFilters()
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: ct);
             if (basicDialog == null)
             {
@@ -86,7 +85,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .Include(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                 .IgnoreQueryFilters()
                 .AsSingleQuery()
-                .AsNoTracking()
                 .ToListAsync(cancellationToken: ct);
 
             var attachments = await dbCtx.DialogAttachments
@@ -95,21 +93,18 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .Include(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
                 .IgnoreQueryFilters()
                 .AsSingleQuery()
-                .AsNoTracking()
                 .ToListAsync(cancellationToken: ct);
 
             var guiActions = await dbCtx.DialogGuiActions
                 .Where(x => x.DialogId == request.DialogId)
                 .Include(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
                 .IgnoreQueryFilters()
-                .AsNoTracking()
                 .ToListAsync(cancellationToken: ct);
 
             var apiActions = await dbCtx.DialogApiActions
                 .Where(x => x.DialogId == request.DialogId)
                 .Include(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                 .IgnoreQueryFilters()
-                .AsNoTracking()
                 .ToListAsync(cancellationToken: ct);
 
             var transmissions = await dbCtx.DialogTransmissions
@@ -125,7 +120,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .Include(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
                 .IgnoreQueryFilters()
-                .AsNoTracking()
                 .ToListAsync(cancellationToken: ct);
 
             var activities = await dbCtx.DialogActivities
@@ -135,7 +129,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .ThenInclude(x => x.ActorNameEntity)
                 .IgnoreQueryFilters()
                 .AsSingleQuery()
-                .AsNoTracking()
                 .ToListAsync(cancellationToken: ct);
 
             var seenlog = await dbCtx.DialogSeenLog
@@ -145,7 +138,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                     .ThenInclude(x => x.ActorNameEntity)
                 .IgnoreQueryFilters()
                 .AsSingleQuery()
-                .AsNoTracking()
                 .ToListAsync(cancellationToken: ct);
 
             var endUserContext = await dbCtx.DialogEndUserContexts
@@ -153,7 +145,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .Include(x => x.DialogEndUserContextSystemLabels)
                 .IgnoreQueryFilters()
                 .AsSingleQuery()
-                .AsNoTracking()
                 .FirstAsync(cancellationToken: ct);
 
             var serviceOwnerContext = await dbCtx.DialogServiceOwnerContexts
@@ -161,7 +152,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .Include(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
                 .AsSingleQuery()
-                .AsNoTracking()
                 .FirstAsync(cancellationToken: ct);
 
             basicDialog.Content = content;

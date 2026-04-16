@@ -13,30 +13,37 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
     {
         // Arrange - create 4 dialogs with a unique sentinel tag
         var sentinelTag = Guid.NewGuid().ToString();
-        var createdIds = new List<Guid>();
         for (var i = 0; i < 4; i++)
         {
             var id = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             {
                 x.SearchTags = [new() { Value = sentinelTag }];
             });
-            createdIds.Add(id);
         }
 
-        // Act - first page with limit 2
-        var firstPage = await E2ERetryPolicies.RetryUntilAsync(
+        // Verify that all 4 dialogs are searchable
+        await E2ERetryPolicies.RetryUntilAsync(
             ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelTag,
-                Limit = 2
+                Limit = 4
             }, new(), ct),
-            isSuccessful: r => r.Content?.Items?.Count == 2,
+            isSuccessful: r => r.Content?.Items.Count == 4,
             degradationMessage: "Search indexing speed is degraded.");
+
+        // Act - first page with limit 2
+        var firstPage = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+        {
+            Party = [E2EConstants.DefaultParty],
+            Search = sentinelTag,
+            Limit = 2
+        }, new());
 
         // Assert first page
         firstPage.ShouldHaveStatusCode(HttpStatusCode.OK);
-        firstPage.Content!.Items.Should().HaveCount(2);
+        firstPage.Content.Should().NotBeNull();
+        firstPage.Content.Items.Should().HaveCount(2);
         firstPage.Content.HasNextPage.Should().BeTrue();
         firstPage.Content.ContinuationToken.Should().NotBeNullOrWhiteSpace();
 
@@ -51,10 +58,12 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Assert second page has different IDs
         secondPage.ShouldHaveStatusCode(HttpStatusCode.OK);
-        secondPage.Content!.Items.Should().HaveCount(2);
+        secondPage.Content.Should().NotBeNull();
+        secondPage.Content.HasNextPage.Should().BeFalse();
+        secondPage.Content.Items.Should().HaveCount(2);
 
-        var firstPageIds = firstPage.Content.Items!.Select(x => x.Id).ToList();
-        var secondPageIds = secondPage.Content.Items!.Select(x => x.Id).ToList();
+        var firstPageIds = firstPage.Content.Items.Select(x => x.Id).ToList();
+        var secondPageIds = secondPage.Content.Items.Select(x => x.Id).ToList();
         firstPageIds.Should().NotIntersectWith(secondPageIds);
     }
 

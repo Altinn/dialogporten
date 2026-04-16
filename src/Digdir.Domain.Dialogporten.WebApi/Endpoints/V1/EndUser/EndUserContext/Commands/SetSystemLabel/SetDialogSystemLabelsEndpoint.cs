@@ -9,6 +9,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 
+[OpenApiOperationId("SetDialogSystemLabels")]
 public sealed class SetDialogSystemLabelsEndpoint : Endpoint<SetDialogSystemLabelRequest>
 {
     private readonly ISender _sender;

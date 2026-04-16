@@ -8,6 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.ServiceOwnerContext.Queries.GetServiceOwnerLabel;
 
+[OpenApiOperationId("GetServiceOwnerLabels")]
 public sealed class GetServiceOwnerLabelEndpoint : Endpoint<GetServiceOwnerLabelsQuery, List<ServiceOwnerLabelDto>>
 {
     private readonly ISender _sender;

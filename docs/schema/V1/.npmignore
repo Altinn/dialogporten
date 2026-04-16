@@ -1,3 +1,8 @@
-swagger.received.json
-schema.received.graphql
+*.received.json
+*.received.graphql
 .gitkeep
+
+# ignore new swagger files until stable
+# https://github.com/Altinn/dialogporten/issues/3794
+openapi.v1.enduser.verified.json
+openapi.v1.serviceowner.verified.json

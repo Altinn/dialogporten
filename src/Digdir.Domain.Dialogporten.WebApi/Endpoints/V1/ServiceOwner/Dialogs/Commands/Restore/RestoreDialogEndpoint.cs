@@ -8,6 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Restore;
 
+[OpenApiOperationId("RestoreDialog")]
 public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
 {
     private readonly ISender _sender;

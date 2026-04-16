@@ -1,0 +1,3878 @@
+﻿{
+  "components": {
+    "schemas": {
+      "Actors_ActorType": {
+        "description": "",
+        "enum": [
+          "PartyRepresentative",
+          "ServiceOwner"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "PartyRepresentative",
+          "ServiceOwner"
+        ]
+      },
+      "Attachments_AttachmentUrlConsumerType": {
+        "description": "",
+        "enum": [
+          "Gui",
+          "Api"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Gui",
+          "Api"
+        ]
+      },
+      "ContinuationTokenSetOfTOrderDefinitionAndTTarget": {},
+      "DialogEndUserContextsEntities_SystemLabel": {
+        "description": "",
+        "enum": [
+          "Default",
+          "Bin",
+          "Archive",
+          "MarkedAsUnopened",
+          "Sent"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Default",
+          "Bin",
+          "Archive",
+          "MarkedAsUnopened",
+          "Sent"
+        ]
+      },
+      "DialogsEntities_DialogStatus": {
+        "description": "",
+        "enum": [
+          "InProgress",
+          "Draft",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "InProgress",
+          "Draft",
+          "RequiresAttention",
+          "Completed",
+          "NotApplicable",
+          "Awaiting"
+        ]
+      },
+      "DialogsEntitiesActions_DialogGuiActionPriority": {
+        "description": "",
+        "enum": [
+          "Primary",
+          "Secondary",
+          "Tertiary"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Primary",
+          "Secondary",
+          "Tertiary"
+        ]
+      },
+      "DialogsEntitiesActivities_DialogActivityType": {
+        "description": "",
+        "enum": [
+          "DialogCreated",
+          "DialogClosed",
+          "Information",
+          "TransmissionOpened",
+          "PaymentMade",
+          "SignatureProvided",
+          "DialogOpened",
+          "DialogDeleted",
+          "DialogRestored",
+          "SentToSigning",
+          "SentToFormFill",
+          "SentToSendIn",
+          "SentToPayment",
+          "FormSubmitted",
+          "FormSaved",
+          "CorrespondenceOpened",
+          "CorrespondenceConfirmed"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "DialogCreated",
+          "DialogClosed",
+          "Information",
+          "TransmissionOpened",
+          "PaymentMade",
+          "SignatureProvided",
+          "DialogOpened",
+          "DialogDeleted",
+          "DialogRestored",
+          "SentToSigning",
+          "SentToFormFill",
+          "SentToSendIn",
+          "SentToPayment",
+          "FormSubmitted",
+          "FormSaved",
+          "CorrespondenceOpened",
+          "CorrespondenceConfirmed"
+        ]
+      },
+      "DialogsEntitiesTransmissions_DialogTransmissionType": {
+        "description": "",
+        "enum": [
+          "Information",
+          "Acceptance",
+          "Rejection",
+          "Request",
+          "Alert",
+          "Decision",
+          "Submission",
+          "Correction"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Information",
+          "Acceptance",
+          "Rejection",
+          "Request",
+          "Alert",
+          "Decision",
+          "Submission",
+          "Correction"
+        ]
+      },
+      "Http_HttpVerb": {
+        "description": "",
+        "enum": [
+          "GET",
+          "POST",
+          "PUT",
+          "PATCH",
+          "DELETE",
+          "HEAD",
+          "OPTIONS",
+          "TRACE",
+          "CONNECT"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "GET",
+          "POST",
+          "PUT",
+          "PATCH",
+          "DELETE",
+          "HEAD",
+          "OPTIONS",
+          "TRACE",
+          "CONNECT"
+        ]
+      },
+      "OrderSetOfTOrderDefinitionAndTTarget": {},
+      "PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog": {
+        "additionalProperties": false,
+        "properties": {
+          "continuationToken": {
+            "description": "The continuation token to be used to fetch the next page of items",
+            "example": "createdat_2024-07-31T09:09:03.0257090Z,id_0c089101-b7cf-a476-955c-f00a78d74a4e",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasNextPage": {
+            "description": "Whether there are more items available that can be fetched by supplying the continuation token",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "The paginated list of items",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_Dialog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orderBy": {
+            "description": "The current sorting order of the items",
+            "example": "createdat_desc,id_desc",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProblemDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemDetails_Error"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "instance": {
+            "default": "/api/route",
+            "type": "string"
+          },
+          "status": {
+            "default": 400,
+            "format": "int32",
+            "type": "integer"
+          },
+          "title": {
+            "default": "One or more validation errors occurred.",
+            "type": "string"
+          },
+          "traceId": {
+            "default": "0HMPNHL0JHL76:00000001",
+            "type": "string"
+          },
+          "type": {
+            "default": "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProblemDetails_Error": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "default": "Error or field name",
+            "type": "string"
+          },
+          "reason": {
+            "default": "Error reason",
+            "type": "string"
+          },
+          "severity": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1AccessManagementQueriesGetParties_AuthorizedParty": {
+        "additionalProperties": false,
+        "properties": {
+          "dateOfBirth": {
+            "description": "The date of birth of the party, if a person.",
+            "example": "1977-12-26",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasKeyRole": {
+            "description": "Whether the authenticated user has a key role in the party.\n            \nRead more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#n\u00F8kkelroller",
+            "type": "boolean"
+          },
+          "hasOnlyAccessToSubParties": {
+            "description": "If the authenticated user has only access to sub parties of this party, and not this party itself.",
+            "type": "boolean"
+          },
+          "isAccessManager": {
+            "description": "Whether the authenticated user is an access manager of the party.\n            \nRead more about access managers (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#tilgangsstrying",
+            "type": "boolean"
+          },
+          "isCurrentEndUser": {
+            "description": "Whether this party represents the authenticated user.",
+            "type": "boolean"
+          },
+          "isDeleted": {
+            "description": "Whether the party is deleted or not",
+            "type": "boolean"
+          },
+          "isMainAdministrator": {
+            "description": "Whether the authenticated user is the main administrator of the party\n            \nRead more about main administrator (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#hovedadministrator",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "The name of the party (verbatim from CCR, usually in all caps)",
+            "example": "CONTOSO REAL ESTATE AS",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party identifier in URN format",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "type": "string"
+          },
+          "partyId": {
+            "description": "The numeric identifier for the party.",
+            "example": 50136280,
+            "format": "int32",
+            "type": "integer"
+          },
+          "partyType": {
+            "description": "The type of the party, either \u0022Organization\u0022 or \u0022Person\u0022.",
+            "example": "Organization",
+            "type": "string"
+          },
+          "partyUuid": {
+            "description": "The UUID for the party.",
+            "format": "guid",
+            "type": "string"
+          },
+          "subParties": {
+            "description": "The sub parties of this party, if any. The sub party uses the same data model.",
+            "items": {
+              "$ref": "#/components/schemas/V1AccessManagementQueriesGetParties_AuthorizedParty"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1AccessManagementQueriesGetParties_Parties": {
+        "additionalProperties": false,
+        "properties": {
+          "authorizedParties": {
+            "items": {
+              "$ref": "#/components/schemas/V1AccessManagementQueriesGetParties_AuthorizedParty"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonContent_ContentValue": {
+        "additionalProperties": false,
+        "properties": {
+          "isAuthorized": {
+            "description": "True if the authenticated user is authorized for this content. If not, the endpoints will\nbe replaced with a fixed placeholder. Can be null if not applicable.\n            ",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "mediaType": {
+            "description": "Media type of the content, this can also indicate that the content is embeddable.",
+            "type": "string"
+          },
+          "value": {
+            "description": "A list of localizations for the content.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_EndUserIdentifierLookup": {
+        "additionalProperties": false,
+        "properties": {
+          "authorizationEvidence": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence"
+          },
+          "dialogId": {
+            "format": "guid",
+            "type": "string"
+          },
+          "instanceRef": {
+            "type": "string"
+          },
+          "party": {
+            "type": "string"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupServiceResource"
+          },
+          "title": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "currentAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "viaAccessPackage": {
+            "type": "boolean"
+          },
+          "viaInstanceDelegation": {
+            "type": "boolean"
+          },
+          "viaResourceDelegation": {
+            "type": "boolean"
+          },
+          "viaRole": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidenceItem": {
+        "additionalProperties": false,
+        "properties": {
+          "grantType": {
+            "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupGrantType"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupGrantType": {
+        "description": "",
+        "enum": [
+          "Role",
+          "AccessPackage",
+          "ResourceDelegation",
+          "InstanceDelegation"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Role",
+          "AccessPackage",
+          "ResourceDelegation",
+          "InstanceDelegation"
+        ]
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupServiceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonIdentifierLookup_IdentifierLookupServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonLocalizations_Localization": {
+        "additionalProperties": false,
+        "properties": {
+          "languageCode": {
+            "description": "The language code of the localization in ISO 639-1 format.",
+            "example": "nb",
+            "type": "string"
+          },
+          "value": {
+            "description": "The localized text (or URL if a front-channel embed).",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserCommon_AcceptedLanguage": {
+        "additionalProperties": false,
+        "properties": {
+          "languageCode": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserCommon_AcceptedLanguages": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguage": {
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguage"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserCommonActors_Actor": {
+        "additionalProperties": false,
+        "properties": {
+          "actorId": {
+            "description": "The identifier (national identity number or organization number) of the actor.",
+            "example": "urn:altinn:person:identifier-no:12018212345",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorName": {
+            "description": "The name of the actor.",
+            "example": "Ola Nordmann",
+            "nullable": true,
+            "type": "string"
+          },
+          "actorType": {
+            "description": "The type of actor; either the service owner, or someone representing the party.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Actors_ActorType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogLookupQueriesGet_DialogLookupRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "additionalInfo": {
+            "description": "Additional information about the dialog, this may contain Markdown.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "extendedStatus": {
+            "description": "Used as the human-readable label used to describe the \u0022ExtendedStatus\u0022 field.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "mainContentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.\nContent value will be masked if the user is not authorized to read main content.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "senderName": {
+            "description": "Overridden sender name. If not supplied, assume \u0022org\u0022 as the sender name.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "A short summary of the dialog and its current state.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the dialog.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_Dialog": {
+        "additionalProperties": false,
+        "properties": {
+          "activities": {
+            "description": "An immutable list of activities associated with the dialog.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogActivity"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "apiActions": {
+            "description": "The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogApiAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "attachments": {
+            "description": "The attachments associated with the dialog (on an aggregate level).",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogAttachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "content": {
+            "description": "The dialog unstructured text content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_Content"
+              }
+            ]
+          },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "The date and time when the dialog was created.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dialogToken": {
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueAt": {
+            "description": "The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "endUserContext": {
+            "description": "Metadata about the dialog owned by end-users.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogEndUserContext"
+              }
+            ]
+          },
+          "expiresAt": {
+            "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedStatus": {
+            "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n            \nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
+            "nullable": true,
+            "type": "string"
+          },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by a service owner",
+            "format": "int32",
+            "type": "integer"
+          },
+          "guiActions": {
+            "description": "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogGuiAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The unique identifier for the dialog in UUIDv7 format.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "org": {
+            "description": "The service owner code representing the organization (service owner) related to this dialog.",
+            "example": "ske",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
+            "example": "urn:altinn:person:identifier-no:01125512345\nurn:altinn:organization:identifier-no:912345678",
+            "type": "string"
+          },
+          "precedingProcess": {
+            "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
+            "nullable": true,
+            "type": "string"
+          },
+          "process": {
+            "description": "Optional process identifier used to indicate a business process this dialog belongs to.",
+            "nullable": true,
+            "type": "string"
+          },
+          "progress": {
+            "description": "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come\nto a natural completion (successful or not).",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "revision": {
+            "description": "The unique identifier for the revision in UUIDv4 format.",
+            "example": "a312cb9c-7632-43c2-aa38-69b06aed56ca",
+            "format": "guid",
+            "type": "string"
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "seenSinceLastUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
+            "example": "urn:altinn:resource:some-service-identifier",
+            "type": "string"
+          },
+          "serviceResourceType": {
+            "description": "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).",
+            "type": "string"
+          },
+          "status": {
+            "description": "The aggregated status of the dialog.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              }
+            ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
+          },
+          "transmissions": {
+            "description": "The immutable list of transmissions associated with the dialog.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogTransmission"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "updatedAt": {
+            "description": "The date and time when the dialog was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "The date and time when the activity was created.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Unstructured text describing the activity. Only set if the activity type is \u0022Information\u0022.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "extendedType": {
+            "description": "An arbitrary URI/URN with a service-specific activity type.\n            \nConsult the service-specific documentation provided by the service owner for details (if in use).",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the activity in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "performedBy": {
+            "description": "The actor that performed the activity.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          },
+          "transmissionId": {
+            "description": "If the activity is related to a particular transmission, this field will contain the transmission identifier.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of activity.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogApiAction": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
+            "example": "write",
+            "type": "string"
+          },
+          "authorizationAttribute": {
+            "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
+            "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "endpoints": {
+            "description": "The endpoints associated with the action.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogApiActionEndpoint"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "description": "The unique identifier for the action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "True if the authenticated user is authorized for this action. If not, the action will not be available\nand all endpoints will be replaced with a fixed placeholder.",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "The logical name of the operation the API action refers to.",
+            "example": "confirm",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogApiActionEndpoint": {
+        "additionalProperties": false,
+        "properties": {
+          "deprecated": {
+            "description": "Boolean indicating if the endpoint is deprecated. Integrators should migrate to endpoints with a higher version.",
+            "type": "boolean"
+          },
+          "documentationUrl": {
+            "description": "Link to service provider documentation for the endpoint. Used for service owners to provide documentation for\nintegrators. Should be a URL to a human-readable page.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "httpMethod": {
+            "description": "The HTTP method that the endpoint expects for this action.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Http_HttpVerb"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the endpoint in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "requestSchema": {
+            "description": "Link to the request schema for the endpoint. Used by service owners to provide documentation for integrators.\nDialogporten will not validate information on this endpoint.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "responseSchema": {
+            "description": "Link to the response schema for the endpoint. Used for service owners to provide documentation for integrators.\nDialogporten will not validate information on this endpoint.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "sunsetAt": {
+            "description": "Date and time when the service owner has indicated that endpoint will no longer function. Only set if the endpoint\nis deprecated. Dialogporten will not enforce this date.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the API endpoint. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to perform the action.",
+            "example": "https://someendpoint.com/api/v1/someaction\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          },
+          "version": {
+            "description": "Arbitrary string indicating the version of the endpoint.\n            \nConsult the service-specific documentation provided by the service owner for details (if in use).",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogAttachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogAttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogAttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "What type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment.",
+            "example": "https://someendpoint.com/someattachment.pdf",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogEndUserContext": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogGuiAction": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
+            "type": "string"
+          },
+          "authorizationAttribute": {
+            "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
+            "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "httpMethod": {
+            "description": "The HTTP method that the frontend should use when redirecting the user.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Http_HttpVerb"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Whether the user is authorized to perform the action.",
+            "type": "boolean"
+          },
+          "isDeleteDialogAction": {
+            "description": "Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX\nfor delete actions.",
+            "type": "boolean"
+          },
+          "priority": {
+            "description": "Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action\npriority.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesActions_DialogGuiActionPriority"
+              }
+            ]
+          },
+          "prompt": {
+            "description": "If there should be a prompt asking the user for confirmation before the action is executed,\nthis field should contain the prompt text.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "title": {
+            "description": "The title of the action, this should be short and in verb form.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to\n\u0022urn:dialogporten:unauthorized\u0022 if the user is not authorized to perform the action.",
+            "example": "urn:dialogporten:unauthorized\nhttps://someendpoint.com/gui/some-service-instance-id",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogSeenLog": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The unique identifier for the seen log entry in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "description": "Flag indicating whether the seen log entry was created by the current end user.",
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "description": "Flag indicating whether the seen log entry was created via the service owner.\n            \nThis is used when the service owner uses the service owner API to implement its own frontend.",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "seenAt": {
+            "description": "The timestamp when the dialog revision was seen.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "description": "The actor that saw the dialog revision.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogTransmission": {
+        "additionalProperties": false,
+        "properties": {
+          "attachments": {
+            "description": "The transmission-level attachments.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogTransmissionAttachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
+            "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "description": "The transmission unstructured text content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogTransmissionContent"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "Arbitrary URI/URN describing a service-specific transmission type.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "isOpened": {
+            "description": "Indicates whether the dialog transmission has been opened.",
+            "type": "boolean"
+          },
+          "navigationalActions": {
+            "description": "The transmission-level navigational actions.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogTransmissionNavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "relatedTransmissionId": {
+            "description": "Reference to any other transmission that this transmission is related to.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "description": "The actor that sent the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogTransmissionAttachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogTransmissionAttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogTransmissionAttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogTransmissionContent": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The transmission summary.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The transmission title.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGet_DialogTransmissionNavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action. Will be set to \\\u0022urn:dialogporten:unauthorized\\\u0022 if the user is\nnot authorized to access the transmission, or \\\u0022urn:dialogporten:expired\\\u0022 if the action has expired.",
+            "example": "https://example.com/path\nurn:dialogporten:unauthorized\nurn:dialogporten:expired",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetActivity_Activity": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "extendedType": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "guid",
+            "type": "string"
+          },
+          "performedBy": {
+            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          },
+          "transmissionId": {
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetActivity_ActivityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetSeenLog_SeenLog": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "guid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "type": "boolean"
+          },
+          "seenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_Attachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_AttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_AttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The summary of the content.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_NavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action. Will be set to \\\u0022urn:dialogporten:unauthorized\\\u0022 if the user is\nnot authorized to access the transmission, or \\\u0022urn:dialogporten:expired\\\u0022 if the action has expired.",
+            "example": "https://example.com/path\nurn:dialogporten:unauthorized\nurn:dialogporten:expired",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_Transmission": {
+        "additionalProperties": false,
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_Attachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "description": "The content of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_Content"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_NavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "description": "The sender actor information for the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesGetTransmission_TransmissionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearch_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "extendedStatus": {
+            "description": "Used as the human-readable label used to describe the \u0022ExtendedStatus\u0022 field.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "senderName": {
+            "description": "Overridden sender name. If not supplied, assume \u0022org\u0022 as the sender name.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "A short summary of the dialog and its current state.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the dialog.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearch_Dialog": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "description": "The content of the dialog in search results.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_Content"
+              }
+            ]
+          },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "The date and time when the dialog was created.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dueAt": {
+            "description": "The due date for the dialog. This is the last date when the dialog is expected to be completed.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "endUserContext": {
+            "description": "Metadata about the dialog owned by end-users.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogEndUserContext"
+              }
+            ]
+          },
+          "extendedStatus": {
+            "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.\n            \nRefer to the service-specific documentation provided by the service owner for details on the possible values (if\nin use).",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
+            "nullable": true,
+            "type": "string"
+          },
+          "fromPartyTransmissionsCount": {
+            "description": "The number of transmissions sent by a party representative",
+            "format": "int32",
+            "type": "integer"
+          },
+          "fromServiceOwnerTransmissionsCount": {
+            "description": "The number of transmissions sent by the service owner",
+            "format": "int32",
+            "type": "integer"
+          },
+          "guiAttachmentCount": {
+            "description": "The number of attachments in the dialog made available for browser-based frontends.",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "hasUnopenedContent": {
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The unique identifier for the dialog in UUIDv7 format.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
+          },
+          "latestActivity": {
+            "description": "The latest entry in the dialog\u0027s activity log.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogActivity"
+              }
+            ]
+          },
+          "org": {
+            "description": "The service owner code representing the organization (service owner) related to this dialog.",
+            "example": "ske",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
+            "example": "urn:altinn:person:identifier-no:01125512345\nurn:altinn:organization:identifier-no:912345678",
+            "type": "string"
+          },
+          "precedingProcess": {
+            "description": "Optional preceding process identifier to indicate the business process that preceded the process indicated in the \u0022Process\u0022 field. Cannot be set without also \u0022Process\u0022 being set.",
+            "nullable": true,
+            "type": "string"
+          },
+          "process": {
+            "description": "Optional process identifier used to indicate a business process this dialog belongs to.",
+            "nullable": true,
+            "type": "string"
+          },
+          "progress": {
+            "description": "Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come\nto a natural completion (successful or not).",
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "seenSinceLastContentUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "seenSinceLastUpdate": {
+            "description": "The list of seen log entries for the dialog newer than the dialog UpdatedAt date.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_DialogSeenLog"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "The service identifier for the service that the dialog is related to in URN-format.\nThis corresponds to a service resource in the Altinn Resource Registry.",
+            "example": "urn:altinn:resource:some-service-identifier",
+            "type": "string"
+          },
+          "serviceResourceType": {
+            "description": "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).",
+            "type": "string"
+          },
+          "status": {
+            "description": "The aggregated status of the dialog.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              }
+            ]
+          },
+          "systemLabel": {
+            "deprecated": true,
+            "description": "System defined label used to categorize dialogs.\nThis is obsolete and will only show; Default, Bin or Archive.\nUse SystemLabels on EndUserContext instead.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              }
+            ],
+            "x-deprecatedMessage": "Use EndUserContext.SystemLabels instead."
+          },
+          "updatedAt": {
+            "description": "The date and time when the dialog was last updated.",
+            "example": "2022-12-31T23:59:59Z",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearch_DialogActivity": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "description": "The date and time when the activity was created.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Unstructured text describing the activity. Only set if the activity type is \u0022Information\u0022.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "extendedType": {
+            "description": "An arbitrary string with a service-specific activity type.\n            \nConsult the service-specific documentation provided by the service owner for details (if in use).",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the activity in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "performedBy": {
+            "description": "The actor that performed the activity.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          },
+          "transmissionId": {
+            "description": "If the activity is related to a particular transmission, this field will contain the transmission identifier.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of activity.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearch_DialogEndUserContext": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "description": "The unique identifier for the end user context revision in UUIDv4 format.",
+            "example": "0196fccd-bf48-7d27-bdfc-4ad3b0f3bee5",
+            "format": "guid",
+            "type": "string"
+          },
+          "systemLabels": {
+            "description": "System defined labels used to categorize dialogs.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearch_DialogRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearch_DialogSeenLog": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The unique identifier for the seen log entry in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "description": "Flag indicating whether the seen log entry was created by the current end user.",
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "description": "Flag indicating whether the seen log entry was created via the service owner.\n            \nThis is used when the service owner uses the service owner API to implement its own frontend.",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "seenAt": {
+            "description": "The timestamp when the dialog revision was seen.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "description": "The actor that saw the dialog revision.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchActivities_Activity": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "extendedType": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "guid",
+            "type": "string"
+          },
+          "transmissionId": {
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DialogsEntitiesActivities_DialogActivityType"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchActivities_ActivityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchSeenLogs_SeenLog": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "guid",
+            "type": "string"
+          },
+          "isCurrentEndUser": {
+            "type": "boolean"
+          },
+          "isViaServiceOwner": {
+            "type": "boolean"
+          },
+          "seenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "seenBy": {
+            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchTransmissions_Attachment": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "description": "The display name of the attachment that should be used in GUIs.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expiresAt": {
+            "description": "The UTC timestamp when the attachment expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the attachment in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "name": {
+            "description": "The logical name of the attachment.",
+            "example": "receipt",
+            "nullable": true,
+            "type": "string"
+          },
+          "urls": {
+            "description": "The URLs associated with the attachment, each referring to a different representation of the attachment.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_AttachmentUrl"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchTransmissions_AttachmentUrl": {
+        "additionalProperties": false,
+        "properties": {
+          "consumerType": {
+            "description": "The type of consumer the URL is intended for.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
+              }
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the attachment URL in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "The media type of the attachment.",
+            "example": "application/pdf\napplication/zip",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The fully qualified URL of the attachment. Will be set to \u0022urn:dialogporten:unauthorized\u0022 if the user is\nnot authorized to access the transmission.",
+            "example": "https://someendpoint.com/someattachment.pdf\nurn:dialogporten:unauthorized",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchTransmissions_Content": {
+        "additionalProperties": false,
+        "properties": {
+          "contentReference": {
+            "description": "Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "summary": {
+            "description": "The summary of the content.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          },
+          "title": {
+            "description": "The title of the content.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1CommonContent_ContentValue"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchTransmissions_NavigationalAction": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "The UTC timestamp when the navigational action expires and is no longer available.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the navigational action.",
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "url": {
+            "description": "The fully qualified URL of the navigational action. Will be set to \\\u0022urn:dialogporten:unauthorized\\\u0022 if the user is\nnot authorized to access the transmission, or \\\u0022urn:dialogporten:expired\\\u0022 if the action has expired.",
+            "example": "https://example.com/path\nurn:dialogporten:unauthorized\nurn:dialogporten:expired",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchTransmissions_Transmission": {
+        "additionalProperties": false,
+        "properties": {
+          "attachments": {
+            "description": "The attachments associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_Attachment"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "authorizationAttribute": {
+            "description": "The authorization attribute associated with the transmission.",
+            "nullable": true,
+            "type": "string"
+          },
+          "content": {
+            "description": "The content of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_Content"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "The date and time when the transmission was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedAt": {
+            "description": "The date and time when the transmission was deleted, if applicable.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedType": {
+            "description": "The extended type URI for the transmission.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "externalReference": {
+            "description": "Arbitrary string with a service-specific reference to an external system or service.",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the transmission in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and\nthe attachments will not be available.",
+            "type": "boolean"
+          },
+          "navigationalActions": {
+            "description": "The navigational actions associated with the transmission.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_NavigationalAction"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "relatedTransmissionId": {
+            "description": "The unique identifier for the related transmission, if any.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "sender": {
+            "description": "The sender actor information for the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+              }
+            ]
+          },
+          "type": {
+            "description": "The type of the transmission.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesTransmissions_DialogTransmissionType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserDialogsQueriesSearchTransmissions_TransmissionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetDialogSystemLabelsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dto": {
+            "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialogs. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "dialogs": {
+            "description": "List of target dialog ids with optional revision ids",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsBulkSetSystemLabels_DialogRevision"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialogs. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "deprecated": true,
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-deprecatedMessage": "Use AddLabels instead. This property will be removed in a future version."
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserEndUserContextCommandsBulkSetSystemLabels_DialogRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "dialogId": {
+            "description": "Target dialog id for system labels",
+            "format": "guid",
+            "type": "string"
+          },
+          "endUserContextRevision": {
+            "description": "Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "addLabels": {
+            "description": "List of system labels to add to the target dialog. If multiple instances of \u0027bin\u0027, \u0027archive\u0027, or \u0027default\u0027 are provided, the last one will be used.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "removeLabels": {
+            "description": "List of system labels to remove from the target dialog. If \u0027bin\u0027 or \u0027archive\u0027 is removed, the \u0027default\u0027 label will be added automatically unless \u0027bin\u0027 or \u0027archive\u0027 is also in the AddLabels list.",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "systemLabels": {
+            "deprecated": true,
+            "description": "List of system labels to set on target dialogs",
+            "items": {
+              "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-deprecatedMessage": "Use AddLabels instead. This property will be removed in a future version."
+          }
+        },
+        "type": "object"
+      },
+      "V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "performedBy": {
+            "$ref": "#/components/schemas/V1EndUserCommonActors_Actor"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "JWTBearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "Enter a JWT token to authorize the requests...",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
+    "title": "Dialogporten EndUser",
+    "version": "v1"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/enduser/dialoglookup": {
+      "get": {
+        "description": "Resolves dialog metadata and authorization evidence for a supported instance reference.",
+        "operationId": "GetDialogLookup",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "instanceRef",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1CommonIdentifierLookup_EndUserIdentifierLookup"
+                }
+              }
+            },
+            "description": "Successfully resolved dialog lookup metadata."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Authenticated end user is not authorized for the supplied instance reference."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "No dialog match was found for the supplied instance reference."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Looks up a dialog by instance reference",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs": {
+      "get": {
+        "description": "Performs a search for dialogs, returning a paginated list of dialogs. \n\n* All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00\u002B01:00\n* See \u0022continuationToken\u0022 in the response for how to get the next page of results.\n* hasNextPage will be set to true if there are more items to get.",
+        "operationId": "SearchDialogs",
+        "parameters": [
+          {
+            "description": "Filter by one or more service owner codes",
+            "explode": true,
+            "in": "query",
+            "name": "org",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by one or more service resources",
+            "explode": true,
+            "in": "query",
+            "name": "serviceResource",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by one or more owning parties",
+            "explode": true,
+            "in": "query",
+            "name": "party",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by one or more extended statuses",
+            "explode": true,
+            "in": "query",
+            "name": "extendedStatus",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by external reference",
+            "in": "query",
+            "name": "externalReference",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by status",
+            "explode": true,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/DialogsEntities_DialogStatus"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Only return dialogs created after this date",
+            "in": "query",
+            "name": "createdAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs created before this date",
+            "in": "query",
+            "name": "createdBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs updated after this date",
+            "in": "query",
+            "name": "updatedAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs updated before this date",
+            "in": "query",
+            "name": "updatedBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated after this date",
+            "in": "query",
+            "name": "contentUpdatedAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with content updated before this date",
+            "in": "query",
+            "name": "contentUpdatedBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with due date after this date",
+            "in": "query",
+            "name": "dueAfter",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs with due date before this date",
+            "in": "query",
+            "name": "dueBefore",
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by process",
+            "in": "query",
+            "name": "process",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by Display state",
+            "explode": true,
+            "in": "query",
+            "name": "systemLabel",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/DialogEndUserContextsEntities_SystemLabel"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Whether to exclude API-only dialogs from the results. Defaults to false.",
+            "in": "query",
+            "name": "excludeApiOnly",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate",
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Limit free text search to texts with this language code, e.g. \u0027nb\u0027, \u0027en\u0027. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes",
+            "in": "query",
+            "name": "searchLanguageCode",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
+                }
+              ]
+            }
+          },
+          {
+            "description": "Supply \u0022continuationToken\u0022 for the response to get the next page of results, if hasNextPage is true",
+            "in": "query",
+            "name": "continuationToken",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
+                }
+              ]
+            }
+          },
+          {
+            "description": "Limit the number of results per page (1-1000, default: 100)",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "nullable": true,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog list."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a list of dialogs",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}": {
+      "get": {
+        "description": "Gets a single dialog aggregate.",
+        "operationId": "GetDialog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_Dialog"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog aggregate."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a single dialog",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/activities": {
+      "get": {
+        "description": "Gets the list of activities belonging to a dialog",
+        "operationId": "SearchDialogActivities",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchActivities_Activity"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog activity list."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a list of dialog activities",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}": {
+      "get": {
+        "description": "Gets a single activity belonging to a dialog.",
+        "operationId": "GetDialogActivity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "activityId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetActivity_Activity"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog activity."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The specified dialog ID or activity ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a single dialog activity",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/context/labellog": {
+      "get": {
+        "description": "Gets the list of label assignment logs belonging to a dialog",
+        "operationId": "SearchDialogLabelAssignmentLogs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog label assignment log list."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a list of dialog label assignment logs",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/context/systemlabels": {
+      "put": {
+        "description": "Sets the system labels of the dialog.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.",
+        "operationId": "SetDialogSystemLabels",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-Match",
+            "schema": {
+              "format": "guid",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest"
+              }
+            }
+          },
+          "description": "",
+          "required": true,
+          "x-name": "SetDialogSystemLabelRequest",
+          "x-position": 1
+        },
+        "responses": {
+          "204": {
+            "description": "The dialog system label was updated successfully.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the dialog",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Sets the system labels of a dialog",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/seenlog": {
+      "get": {
+        "description": "Gets all seen log records for a dialog.",
+        "operationId": "SearchDialogSeenLogs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchSeenLogs_SeenLog"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog seen log records."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets all seen log records for a dialog",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}": {
+      "get": {
+        "description": "Gets a single dialog seen log record.",
+        "operationId": "GetDialogSeenLog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "seenLogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetSeenLog_SeenLog"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog seen log record."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a single dialog seen log record",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/transmissions": {
+      "get": {
+        "description": "Gets the list of transmissions belonging to a dialog",
+        "operationId": "SearchDialogTransmissions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_Transmission"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog transmission list."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a list of dialog transmissions",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}": {
+      "get": {
+        "description": "Gets a single transmission belonging to a dialog.",
+        "operationId": "GetDialogTransmission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "transmissionId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_Transmission"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog transmission."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The specified dialog ID or transmission ID was not found."
+          },
+          "410": {
+            "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets a single dialog transmission",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset": {
+      "post": {
+        "description": "Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.",
+        "operationId": "BulkSetDialogSystemLabels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"
+              }
+            }
+          },
+          "required": true,
+          "x-name": "dto"
+        },
+        "responses": {
+          "204": {
+            "description": "The dialog system labels was updated successfully."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+          },
+          "409": {
+            "description": "Conflict occurred while processing the request."
+          },
+          "412": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Sets system labels for multiple dialogs",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/parties": {
+      "get": {
+        "description": "Gets the list of authorized parties for the end user.",
+        "operationId": "GetParties",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1AccessManagementQueriesGetParties_Parties"
+                }
+              }
+            },
+            "description": "The list of authorized parties for the end user"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets the list of authorized parties for the end user",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    }
+  }
+}

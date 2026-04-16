@@ -698,7 +698,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>((x, ctx) =>
             {
-                var dialogDto = x.Items.First();
+                var dialogDto = x.Items.Single();
                 dialogDto.ServiceResource.Should().Be(ctx.GetServiceResource());
             });
     }
@@ -715,7 +715,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>((x, ctx) =>
             {
-                var dialogDto = x.Items.First();
+                var dialogDto = x.Items.Single();
                 dialogDto.ServiceResource.Should().Be(ctx.GetServiceResource());
             });
     }
@@ -736,7 +736,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
             {
-                var dialogDto = x.Items.First();
+                var dialogDto = x.Items.Single();
                 dialogDto.ServiceResource.Should().Be("urn:altinn:resource:app_ttd_a2-2802-10793");
             });
     }
@@ -757,7 +757,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             })
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
             {
-                var dialogDto = x.Items.First();
+                var dialogDto = x.Items.Single();
                 dialogDto.ServiceResource.Should().Be("urn:altinn:resource:app_ttd_a2-2802-10793");
             });
     }

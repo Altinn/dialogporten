@@ -7211,11 +7211,7 @@
             "name": "orderBy",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -7224,11 +7220,7 @@
             "name": "continuationToken",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -8687,11 +8679,7 @@
             "name": "orderBy",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -8700,11 +8688,7 @@
             "name": "continuationToken",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -11159,11 +11143,7 @@
             "name": "continuationToken",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {

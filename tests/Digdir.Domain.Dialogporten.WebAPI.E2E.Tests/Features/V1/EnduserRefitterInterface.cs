@@ -131,13 +131,13 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         public string SearchLanguageCode { get; set; }
 
         [Query] 
-        public OrderSetOfTOrderDefinitionAndTTarget OrderBy { get; set; }
+        public string OrderBy { get; set; }
 
                 /// <summary>
                 /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
                 /// </summary>
         [Query] 
-        public ContinuationTokenSetOfTOrderDefinitionAndTTarget ContinuationToken { get; set; }
+        public string ContinuationToken { get; set; }
 
                 /// <summary>
                 /// Limit the number of results per page (1-1000, default: 100)
@@ -745,21 +745,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogEndUserContextsEntities_SystemLabel
     {
 
@@ -936,21 +921,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"CONNECT")]
         CONNECT = 8,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class OrderSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
 
     }
 

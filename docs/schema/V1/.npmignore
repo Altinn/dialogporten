@@ -3,5 +3,5 @@
 .gitkeep
 
 # ignore new swagger files until stable
-openapi_v1.enduser.verified.json
-openapi_v1.serviceowner.verified.json
+openapi.v1.enduser.verified.json
+openapi.v1.serviceowner.verified.json

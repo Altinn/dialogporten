@@ -69,6 +69,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // However, we need to guarantee an order for sub resources of the dialog aggregate.
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
         // layer behaviours in an expected manner. Therefore, we need to be a bit more verbose about it.
+        //
+        // Earlier one EF query was used. AsSingleQuery this was very slow for complex dialogs. The generated
+        // code with AsSplitQuery had a lot of redundant joins. Currently the splitting is done manually.
+        // Most of the new queries are using AsSingleQuery, but some of them still need to be split with AsSplitQuery
+        // based on measured duration and inspection of generated code.
         var dialog = await _db.WrapWithRepeatableRead(async (dbCtx, ct) =>
         {
 

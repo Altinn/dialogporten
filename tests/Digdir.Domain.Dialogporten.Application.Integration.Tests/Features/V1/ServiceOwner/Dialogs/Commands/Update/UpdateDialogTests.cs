@@ -610,6 +610,44 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public Task Cannot_Set_DueAt_Before_Saved_VisibleFrom_When_Silent_Update_Without_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(2);
+            })
+            .UpdateDialog(x =>
+            {
+                x.IsSilentUpdate = true;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+            })
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(UpdateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Can_Set_DueAt_Before_Saved_VisibleFrom_When_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(2);
+            })
+            .AsAdminUser()
+            .UpdateDialog(x => x.Dto.DueAt = visibleFrom.AddDays(-1))
+            .ExecuteAndAssert<UpdateDialogSuccess>();
+    }
+
+    [Fact]
     public Task Cannot_Set_ExpiresAt_Before_Saved_VisibleFrom()
     {
         var visibleFrom = DateTimeOffset.UtcNow.AddDays(5);

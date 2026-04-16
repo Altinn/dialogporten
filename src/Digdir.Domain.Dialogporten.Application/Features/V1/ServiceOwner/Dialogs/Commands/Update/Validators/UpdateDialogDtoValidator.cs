@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -16,7 +17,8 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         IValidator<ApiActionDto> apiActionValidator,
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
-        IValidator<ContentDto?> contentValidator)
+        IValidator<ContentDto?> contentValidator,
+        IUserResourceRegistry userResourceRegistry)
     {
         RuleFor(x => x.Progress)
             .InclusiveBetween(0, 100);
@@ -67,7 +69,10 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                 return visibleFrom is null || dueAt is null || dueAt >= visibleFrom;
             })
             .WithMessage(visibleFromErrorMessage)
-            .When(DialogHasVisibleFrom);
+            // Due to Altinn apps/storage not having any restrictions on this, we need to
+            // drop this validation for admin-users (ie. the private API used by the adapter)
+            .When((_, context) => DialogHasVisibleFrom(context) &&
+                                  !userResourceRegistry.IsCurrentUserServiceOwnerAdmin());
 
         RuleFor(x => x.ExpiresAt)
             .Must((_, expiresAt, context) =>
@@ -76,7 +81,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                 return visibleFrom is null || expiresAt is null || expiresAt >= visibleFrom;
             })
             .WithMessage(visibleFromErrorMessage)
-            .When(DialogHasVisibleFrom);
+            .When((_, context) => DialogHasVisibleFrom(context));
 
         RuleForEach(x => x.Transmissions)
             .SetValidator(transmissionValidator);
@@ -134,7 +139,7 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
             .MaximumLength(Constants.DefaultMaxUriLength)
             .When(x => x.PrecedingProcess is not null);
     }
-    private static bool DialogHasVisibleFrom<T>(T _, IValidationContext context) =>
+    private static bool DialogHasVisibleFrom(IValidationContext context) =>
         GetVisibleFrom(context).HasValue;
 
     private static DateTimeOffset? GetVisibleFrom(IValidationContext context) =>

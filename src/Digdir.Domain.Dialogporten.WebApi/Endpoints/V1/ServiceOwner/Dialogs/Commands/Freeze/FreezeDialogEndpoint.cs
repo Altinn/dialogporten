@@ -8,6 +8,7 @@ using AuthorizationPolicy = Digdir.Domain.Dialogporten.WebApi.Common.Authorizati
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Freeze;
 
+[OpenApiOperationId("FreezeDialog")]
 public sealed class FreezeDialogEndpoint : Endpoint<FreezeDialogRequest>
 {
     private readonly ISender _sender;

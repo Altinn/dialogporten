@@ -10,6 +10,7 @@ using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.DialogLookup.Queries.Get;
 
+[OpenApiOperationId("GetDialogLookup")]
 public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, ServiceOwnerIdentifierLookupDto>
 {
     private readonly ISender _sender;

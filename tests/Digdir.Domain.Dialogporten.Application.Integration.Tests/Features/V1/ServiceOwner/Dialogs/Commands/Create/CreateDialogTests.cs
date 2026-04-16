@@ -194,6 +194,55 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public Task Cannot_Create_DueAt_Before_VisibleFrom_Without_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(1);
+            })
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(CreateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Cannot_Create_DueAt_Before_VisibleFrom_When_Silent_Update_Without_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.IsSilentUpdate = true;
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(1);
+            })
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(CreateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Can_Create_DueAt_Before_VisibleFrom_When_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .AsAdminUser()
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(1);
+            })
+            .ExecuteAndAssert<CreateDialogSuccess>();
+    }
+
+    [Fact]
     public Task Can_Create_Dialog_With_Empty_Content_Summary() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.Content!.Summary = null)

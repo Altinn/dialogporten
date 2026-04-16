@@ -162,6 +162,16 @@ var postgresStorage = storage.type == 'PremiumV2_LRS'
 
 var backupVaultNamePrefix = '${namePrefix}-backupvault'
 var restoreContainerName = toLower('${namePrefix}-postgresql-restore')
+
+/*
+ These are known (as per 2026-04-18) static PostgreSQL 18 server parameters that require a server restart when updated.
+
+ Can be fetched with:
+ az postgres flexible-server parameter list \
+  --resource-group <resource_group> \
+  --server-name <server> \
+  --query "[?isDynamicConfig==\`false\` && isReadOnly==\`false\`] | [].name"
+*/
 var staticServerConfigurationNames = [
   'autovacuum_freeze_max_age'
   'autovacuum_multixact_freeze_max_age'

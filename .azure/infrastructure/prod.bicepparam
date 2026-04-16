@@ -53,9 +53,66 @@ param postgresConfiguration = {
     iops: 24000
     throughput: 1200
   }
-  // Enabling index tuning will practically also enable query performance insight
-  enableIndexTuning: true
+  enableIndexTuning: false
   enableQueryPerformanceInsight: false
+  enableTrackIoTiming: true
+  additionalServerConfigurations: [
+    {
+      name: 'autovacuum_max_workers'
+      value: '12'
+    }
+    {
+      name: 'autovacuum_naptime'
+      value: '15'
+    }
+    {
+      name: 'autovacuum_vacuum_cost_delay'
+      value: '1'
+    }
+    {
+      name: 'autovacuum_vacuum_cost_limit'
+      value: '10000'
+    }
+    {
+      name: 'effective_io_concurrency'
+      value: '24'
+    }
+    {
+      name: 'maintenance_work_mem'
+      value: '2097151'
+    }
+    {
+      name: 'track_cost_delay_timing'
+      value: 'on'
+    }
+    {
+      name: 'vacuum_buffer_usage_limit'
+      value: '8192'
+    }
+    {
+      name: 'vacuum_cost_limit'
+      value: '10000'
+    }
+  ]
+  applyStaticServerConfigurations: false
+  staticServerConfigurations: [
+    {
+      name: 'commit_timestamp_buffers'
+      value: '1024'
+    }
+    {
+      name: 'io_max_concurrency'
+      value: '64'
+    }
+    {
+      name: 'subtransaction_buffers'
+      value: '1024'
+    }
+    {
+      name: 'transaction_buffers'
+      value: '1024'
+    }
+  ]
   backupRetentionDays: 32
   availabilityZone: '3'
   enableBackupVault: true

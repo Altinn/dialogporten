@@ -89,6 +89,26 @@ param enableQueryPerformanceInsight bool
 @description('Enable index tuning')
 param enableIndexTuning bool
 
+@description('Enable collection of database I/O timing statistics')
+param enableTrackIoTiming bool = false
+
+@export()
+type ServerConfiguration = {
+  @description('The PostgreSQL server parameter name.')
+  name: string
+  @description('The PostgreSQL server parameter value, without display units.')
+  value: string
+}
+
+@description('Additional PostgreSQL server parameters to persist as user overrides. Values must not duplicate the module-managed base/query-store settings.')
+param additionalServerConfigurations ServerConfiguration[] = []
+
+@description('Static PostgreSQL server parameters to persist but not apply unless applyStaticServerConfigurations is true.')
+param staticServerConfigurations ServerConfiguration[] = []
+
+@description('Apply static PostgreSQL server parameters. This may restart the server and should only be enabled in a planned maintenance window.')
+param applyStaticServerConfigurations bool = false
+
 @description('The name of the Application Insights workspace')
 param appInsightWorkspaceName string
 
@@ -142,6 +162,60 @@ var postgresStorage = storage.type == 'PremiumV2_LRS'
 
 var backupVaultNamePrefix = '${namePrefix}-backupvault'
 var restoreContainerName = toLower('${namePrefix}-postgresql-restore')
+var staticServerConfigurationNames = [
+  'autovacuum_freeze_max_age'
+  'autovacuum_multixact_freeze_max_age'
+  'autovacuum_worker_slots'
+  'azure_cdc.max_fabric_mirrors'
+  'commit_timestamp_buffers'
+  'cron.database_name'
+  'cron.log_run'
+  'cron.log_statement'
+  'cron.max_running_jobs'
+  'cron.timezone'
+  'duckdb.max_memory'
+  'duckdb.max_workers_per_postgres_scan'
+  'duckdb.memory_limit'
+  'duckdb.threads'
+  'duckdb.worker_threads'
+  'huge_pages'
+  'io_max_concurrency'
+  'io_method'
+  'max_active_replication_origins'
+  'max_connections'
+  'max_locks_per_transaction'
+  'max_logical_replication_workers'
+  'max_prepared_transactions'
+  'max_replication_slots'
+  'max_wal_senders'
+  'max_worker_processes'
+  'multixact_member_buffers'
+  'multixact_offset_buffers'
+  'notify_buffers'
+  'pg_stat_statements.max'
+  'serializable_buffers'
+  'shared_buffers'
+  'shared_preload_libraries'
+  'subtransaction_buffers'
+  'track_activity_query_size'
+  'track_commit_timestamp'
+  'transaction_buffers'
+  'wal_buffers'
+  'wal_level'
+]
+var additionalServerConfigurationStaticChecks = [
+  for configuration in additionalServerConfigurations: contains(staticServerConfigurationNames, toLower(configuration.name))
+]
+var additionalServerConfigurationsContainStatic = contains(additionalServerConfigurationStaticChecks, true)
+var additionalServerConfigurationsAreRestartSafe = !additionalServerConfigurationsContainStatic
+  ? true
+  : fail('Static PostgreSQL server parameters cannot be deployed through additionalServerConfigurations because they may restart the server. Remove static parameters from additionalServerConfigurations.')
+var staticServerConfigurationStaticChecks = [
+  for configuration in staticServerConfigurations: contains(staticServerConfigurationNames, toLower(configuration.name))
+]
+var staticServerConfigurationsContainOnlyStatic = !contains(staticServerConfigurationStaticChecks, false)
+  ? true
+  : fail('Only known static PostgreSQL server parameters can be deployed through staticServerConfigurations.')
 
 // Note: This provisions only the storage primitives used for PostgreSQL restores. The actual Azure Backup vault/RSV is clickopsed for now.
 module backupVaultStorageAccount '../storageAccount/main.bicep' = if (enableBackupVault) {
@@ -277,7 +351,7 @@ resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/co
 // Enable Query Store when either index tuning or query performance insight is enabled
 var enableQueryStore = enableIndexTuning || enableQueryPerformanceInsight
 
-resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableQueryStore) {
+resource track_io_timing 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = if (enableTrackIoTiming || enableQueryStore) {
   parent: postgres
   name: 'track_io_timing'
   properties: {
@@ -316,6 +390,28 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
   }
   dependsOn: [pgms_wait_sampling_query_capture_mode, pg_qs_query_capture_mode, track_io_timing, idle_transactions_timeout, enable_extensions]
 }
+
+@batchSize(1)
+resource additionalPostgresServerConfigurations 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = [for configuration in additionalServerConfigurations: if (additionalServerConfigurationsAreRestartSafe) {
+  parent: postgres
+  name: configuration.name
+  properties: {
+    value: configuration.value
+    source: 'user-override'
+  }
+  dependsOn: [index_tuning_mode, pgms_wait_sampling_query_capture_mode, pg_qs_query_capture_mode, track_io_timing, idle_transactions_timeout, enable_extensions]
+}]
+
+@batchSize(1)
+resource staticPostgresServerConfigurations 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2024-08-01' = [for configuration in staticServerConfigurations: if (applyStaticServerConfigurations && staticServerConfigurationsContainOnlyStatic) {
+  parent: postgres
+  name: configuration.name
+  properties: {
+    value: configuration.value
+    source: 'user-override'
+  }
+  dependsOn: [additionalPostgresServerConfigurations]
+}]
 
 resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: appInsightWorkspaceName

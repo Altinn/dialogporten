@@ -65,18 +65,6 @@ static void BuildAndRun(string[] args)
         .AddAzureConfiguration(builder.Environment.EnvironmentName)
         .AddLocalConfiguration(builder.Environment);
 
-    var isOpenApiDocGen = Assembly.GetEntryAssembly()?
-        .GetName().Name == "GetDocument.Insider";
-
-    if (isOpenApiDocGen)
-    {
-        // The build-time OpenAPI generator boots the full host. Overlay safe dummy values
-        // so the normal startup path can run without local secrets or external dependencies.
-        builder.Configuration.AddJsonStream(
-            OpenApiDocumentGenerationOverrides
-                .CreateOverridesJson());
-    }
-
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .MinimumLevel.Warning()
         .ReadFrom.Configuration(context.Configuration)

@@ -68,7 +68,7 @@ internal sealed class EndpointsHealthCheck : IHealthCheck
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromSeconds(TimeoutInSeconds));
 
-            var response = await client.GetAsync(endpoint.Url, cts.Token);
+            using var response = await client.GetAsync(endpoint.Url, cts.Token);
             var responseTime = Stopwatch.GetElapsedTime(startTime);
 
             if (!response.IsSuccessStatusCode)
@@ -84,6 +84,11 @@ internal sealed class EndpointsHealthCheck : IHealthCheck
             }
 
             return new(endpoint, EndpointStatus.Healthy, responseTime, $"{endpoint.Name} ({endpoint.Url}) is healthy");
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Propagate caller/request aborts; only the linked CTS timeout below should be reported as endpoint failure.
+            throw;
         }
         catch (OperationCanceledException)
         {

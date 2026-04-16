@@ -129,12 +129,17 @@ public sealed class DialogEntity :
         }
 
         ContentUpdatedAt = UpdatedAt;
-        IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration();
+        IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration() || IsFromAltinn2Instance();
     }
 
     private bool WasCreatedBeforeFirstMigration()
     {
         return CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
+    }
+
+    private bool IsFromAltinn2Instance()
+    {
+        return ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
     }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)

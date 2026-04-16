@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -19,6 +20,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
+using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -681,6 +683,82 @@ public class CreateDialogTests : ApplicationCollectionFixture
             {
                 x.HasUnopenedContent.Should().BeTrue();
                 x.Transmissions.First().IsOpened.Should().BeFalse();
+            });
+    }
+
+    [Fact]
+    public async Task Not_A2_Dialog_Is_Created_After_Migration_Defaults_To_Not_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero))
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.ServiceResource = [ctx.GetServiceResource()];
+                x.IsContentSeen = false;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>((x, ctx) =>
+            {
+                var dialogDto = x.Items.First();
+                dialogDto.ServiceResource.Should().Be(ctx.GetServiceResource());
+            });
+    }
+
+    [Fact]
+    public async Task Not_A2_Dialog_Is_Created_Before_Migration_Defaults_To_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = new DateTimeOffset(2025, 11, 30, 23, 59, 59, TimeSpan.Zero))
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.ServiceResource = [ctx.GetServiceResource()];
+                x.IsContentSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>((x, ctx) =>
+            {
+                var dialogDto = x.Items.First();
+                dialogDto.ServiceResource.Should().Be(ctx.GetServiceResource());
+            });
+    }
+
+    [Fact]
+    public async Task A2_Dialog_Is_Created_After_Migration_Defaults_To_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.ServiceResource = "urn:altinn:resource:app_ttd_a2-2802-10793";
+                x.Dto.CreatedAt = new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
+            })
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.ServiceResource = ["urn:altinn:resource:app_ttd_a2-2802-10793"];
+                x.IsContentSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
+            {
+                var dialogDto = x.Items.First();
+                dialogDto.ServiceResource.Should().Be("urn:altinn:resource:app_ttd_a2-2802-10793");
+            });
+    }
+
+    [Fact]
+    public async Task A2_Dialog_Is_Created_Before_Migration_Defaults_To_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.ServiceResource = "urn:altinn:resource:app_ttd_a2-2802-10793";
+                x.Dto.CreatedAt = new DateTimeOffset(2025, 11, 30, 23, 59, 59, TimeSpan.Zero);
+            })
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.ServiceResource = ["urn:altinn:resource:app_ttd_a2-2802-10793"];
+                x.IsContentSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
+            {
+                var dialogDto = x.Items.First();
+                dialogDto.ServiceResource.Should().Be("urn:altinn:resource:app_ttd_a2-2802-10793");
             });
     }
 

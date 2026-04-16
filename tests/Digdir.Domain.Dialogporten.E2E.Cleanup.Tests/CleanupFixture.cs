@@ -68,13 +68,7 @@ public sealed class CleanupFixture : E2EFixtureBase
 
             if (page.HasNextPage)
             {
-                queryParams.ContinuationToken = new()
-                {
-                    AdditionalProperties = new Dictionary<string, object>
-                    {
-                        ["continuationToken"] = page.ContinuationToken
-                    }
-                };
+                queryParams.ContinuationToken = page.ContinuationToken;
             }
         } while (page.HasNextPage);
     }

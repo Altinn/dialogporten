@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using NJsonSchema;
 using NSwag;
 
@@ -154,6 +155,18 @@ public static class OpenApiDocumentExtensions
         {
             statusProperty.Example = nameof(DialogStatus.Values.NotApplicable);
         }
+    }
+
+    /// <summary>
+    /// NSwag generates empty schema definitions for the generic pagination types
+    /// (ContinuationTokenSet, OrderSet) that are not useful in the OpenAPI spec.
+    /// The parameters themselves are replaced with string schemas by <see cref="PaginatedListParametersProcessor"/>,
+    /// so these schema definitions are unreferenced and should be removed.
+    /// </summary>
+    public static void RemoveUnusedPaginationSchemas(this OpenApiDocument openApiDocument)
+    {
+        openApiDocument.Components.Schemas.Remove("ContinuationTokenSetOfTOrderDefinitionAndTTarget");
+        openApiDocument.Components.Schemas.Remove("OrderSetOfTOrderDefinitionAndTTarget");
     }
 
     private static void MakeCollectionsNullable(JsonSchema schema)

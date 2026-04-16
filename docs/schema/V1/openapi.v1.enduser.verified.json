@@ -25,7 +25,6 @@
           "Api"
         ]
       },
-      "ContinuationTokenSetOfTOrderDefinitionAndTTarget": {},
       "DialogEndUserContextsEntities_SystemLabel": {
         "description": "",
         "enum": [
@@ -170,7 +169,6 @@
           "CONNECT"
         ]
       },
-      "OrderSetOfTOrderDefinitionAndTTarget": {},
       "PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,
         "properties": {
@@ -2796,11 +2794,7 @@
             "name": "orderBy",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -2809,11 +2803,7 @@
             "name": "continuationToken",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {

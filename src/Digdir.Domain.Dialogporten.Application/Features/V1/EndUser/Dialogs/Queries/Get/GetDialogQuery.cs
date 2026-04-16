@@ -69,52 +69,113 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // However, we need to guarantee an order for sub resources of the dialog aggregate.
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
         // layer behaviours in an expected manner. Therefore, we need to be a bit more verbose about it.
-        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
-                dbCtx.Dialogs
-                    .Include(x => x.Content)
-                        .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                    .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Content.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Sender)
-                        .ThenInclude(x => x.ActorNameEntity)
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Activities)
-                        .ThenInclude(x => x.Description!.Localizations)
-                    .Include(x => x.Activities)
-                        .ThenInclude(x => x.PerformedBy)
-                        .ThenInclude(x => x.ActorNameEntity)
-                    .Include(x => x.SeenLog
-                        .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
-                        .OrderBy(x => x.CreatedAt))
-                        .ThenInclude(x => x.SeenBy)
-                        .ThenInclude(x => x.ActorNameEntity)
-                    .Include(x => x.EndUserContext)
-                        .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-                    .Include(x => x.ServiceOwnerContext)
-                        .ThenInclude(x => x.ServiceOwnerLabels)
-                    .IgnoreQueryFilters()
-                    .FirstOrDefaultAsync(x => x.Id == request.DialogId, ct),
-            cancellationToken);
+        //
+        // Earlier one EF query was used. AsSingleQuery this was very slow for complex dialogs. The generated
+        // code with AsSplitQuery had a lot of redundant joins. Currently the splitting is done manually.
+        // Most of the new queries are using AsSingleQuery, but some of them still need to be split with AsSplitQuery
+        // based on measured duration and inspection of generated code.
+        var dialog = await _db.WrapWithRepeatableRead(async (dbCtx, ct) =>
+        {
+
+            var basicDialog = await dbCtx.Dialogs
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: ct);
+            if (basicDialog == null)
+            {
+                return null;
+            }
+
+            var content = await dbCtx.DialogContents
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var attachments = await dbCtx.DialogAttachments
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var guiActions = await dbCtx.DialogGuiActions
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .ToListAsync(cancellationToken: ct);
+
+            var apiActions = await dbCtx.DialogApiActions
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .IgnoreQueryFilters()
+                .ToListAsync(cancellationToken: ct);
+
+            var transmissions = await dbCtx.DialogTransmissions
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Content.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .ToListAsync(cancellationToken: ct);
+
+            var activities = await dbCtx.DialogActivities
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.Description!.Localizations)
+                .Include(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var seenLog = await dbCtx.DialogSeenLog
+                .Where(x => x.DialogId == request.DialogId && x.CreatedAt >= basicDialog.ContentUpdatedAt)
+                .OrderBy(x => x.CreatedAt)
+                .Include(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var endUserContext = await dbCtx.DialogEndUserContexts
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.DialogEndUserContextSystemLabels)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .FirstAsync(cancellationToken: ct);
+
+            var serviceOwnerContext = await dbCtx.DialogServiceOwnerContexts
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.ServiceOwnerLabels)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .FirstAsync(cancellationToken: ct);
+
+            basicDialog.Content = content;
+            basicDialog.Attachments = attachments;
+            basicDialog.GuiActions = guiActions;
+            basicDialog.ApiActions = apiActions;
+            basicDialog.Transmissions = transmissions;
+            basicDialog.Activities = activities;
+            basicDialog.SeenLog = seenLog;
+            basicDialog.EndUserContext = endUserContext;
+            basicDialog.ServiceOwnerContext = serviceOwnerContext;
+
+            return basicDialog;
+        }, cancellationToken);
 
         if (dialog is null)
         {

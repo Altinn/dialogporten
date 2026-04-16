@@ -4,10 +4,6 @@
         <!-- In order to support doc blocks for Swagger generation in PatchDialogsController.cs -->
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>1591</NoWarn> <!-- Disable warnings for missing XML comments -->
-        <!-- <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments> -->
-        <!-- <OpenApiGenerateDocumentsOnBuild>true</OpenApiGenerateDocumentsOnBuild> -->
-        <!-- <OpenApiGenerateDocumentsOptions>-file-name openapi</OpenApiGenerateDocumentsOptions> -->
-        <!-- <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/</OpenApiDocumentsDirectory> -->
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,13 +15,8 @@
         <PackageReference Include="FastEndpoints.Swagger" Version="5.35.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.5" />
-        <!-- <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" /> -->
         <PackageReference Include="NSwag.AspNetCore" Version="14.6.3" />
         <PackageReference Include="NSwag.MSBuild" Version="14.6.3" />
-        <!-- <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.5">
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-            <PrivateAssets>all</PrivateAssets>
-        </PackageReference> -->
     </ItemGroup>
 
     <ItemGroup>

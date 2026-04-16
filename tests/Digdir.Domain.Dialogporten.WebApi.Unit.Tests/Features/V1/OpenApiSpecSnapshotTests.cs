@@ -75,8 +75,8 @@ public class OpenApiSpecSnapshotTests
                         sortedProperties[property.Name] = SortElement(property.Value);
                     }
 
-                    var jsonDocument = JsonDocument.Parse(JsonSerializer.Serialize(sortedProperties));
-                    return jsonDocument.RootElement;
+                    using var jsonDocument = JsonDocument.Parse(JsonSerializer.Serialize(sortedProperties));
+                    return jsonDocument.RootElement.Clone();
                 }
             case JsonValueKind.Array:
                 {
@@ -84,8 +84,8 @@ public class OpenApiSpecSnapshotTests
                         .EnumerateArray()
                         .Select(SortElement)
                         .ToList();
-                    var arrayDocument = JsonDocument.Parse(JsonSerializer.Serialize(sortedArray));
-                    return arrayDocument.RootElement;
+                    using var arrayDocument = JsonDocument.Parse(JsonSerializer.Serialize(sortedArray));
+                    return arrayDocument.RootElement.Clone();
                 }
             default:
                 return element;

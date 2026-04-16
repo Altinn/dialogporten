@@ -15,7 +15,6 @@
         <PackageReference Include="FastEndpoints.Swagger" Version="5.35.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.5" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
         <PackageReference Include="NSwag.AspNetCore" Version="14.6.3" />
         <PackageReference Include="NSwag.MSBuild" Version="14.6.3" />
     </ItemGroup>
@@ -26,8 +25,25 @@
         <ProjectReference Include="..\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <OpenApiDocument Include="v1">
+            <OutputFileName>swagger.json</OutputFileName>
+        </OpenApiDocument>
+        <OpenApiDocument Include="v1.enduser">
+            <OutputFileName>openapi.v1.enduser.json</OutputFileName>
+        </OpenApiDocument>
+        <OpenApiDocument Include="v1.serviceowner">
+            <OutputFileName>openapi.v1.serviceowner.json</OutputFileName>
+        </OpenApiDocument>
+    </ItemGroup>
+
     <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">
-        <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_Net100) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /output:$(TargetDir)swagger.json /verbose:true"/>
+        <Exec
+            WorkingDirectory="$(ProjectDir)"
+            EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development"
+            Command="$(NSwagExe_Net100) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /documentName:%(OpenApiDocument.Identity) /output:$(TargetDir)%(OpenApiDocument.OutputFileName) /verbose:true"
+            StandardOutputImportance="High"
+            StandardErrorImportance="High" />
     </Target>
 
 </Project>

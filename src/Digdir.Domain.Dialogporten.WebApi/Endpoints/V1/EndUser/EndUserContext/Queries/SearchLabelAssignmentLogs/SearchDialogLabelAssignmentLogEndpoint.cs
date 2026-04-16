@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -7,6 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLogs;
 
+[OpenApiOperationId("SearchDialogLabelAssignmentLogs")]
 public sealed class SearchDialogLabelAssignmentLogEndpoint : Endpoint<SearchLabelAssignmentLogQuery, List<LabelAssignmentLogDto>>
 {
     private readonly ISender _sender;

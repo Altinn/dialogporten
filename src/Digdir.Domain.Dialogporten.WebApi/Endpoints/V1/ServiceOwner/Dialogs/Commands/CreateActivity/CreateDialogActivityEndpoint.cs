@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -10,6 +11,7 @@ using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
+[OpenApiOperationId("CreateDialogActivity")]
 public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityRequest>
 {
     private readonly ISender _sender;

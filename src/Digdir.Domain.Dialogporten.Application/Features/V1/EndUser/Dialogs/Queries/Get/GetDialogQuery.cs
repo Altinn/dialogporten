@@ -89,6 +89,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             var attachments = await dbCtx.DialogAttachments
                 .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
                 .Include(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                 .Include(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
                 .IgnoreQueryFilters()
@@ -97,6 +98,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             var guiActions = await dbCtx.DialogGuiActions
                 .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
                 .Include(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
                 .IgnoreQueryFilters()
@@ -104,12 +106,14 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             var apiActions = await dbCtx.DialogApiActions
                 .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
                 .Include(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                 .IgnoreQueryFilters()
                 .ToListAsync(cancellationToken: ct);
 
             var transmissions = await dbCtx.DialogTransmissions
                 .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
                 .Include(x => x.Content.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
                     .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(x => x.Sender)
@@ -133,8 +137,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .ToListAsync(cancellationToken: ct);
 
             var seenLog = await dbCtx.DialogSeenLog
-                .Where(x => x.DialogId == request.DialogId)
-                .Where(x => x.CreatedAt >= basicDialog.ContentUpdatedAt)
+                .Where(x => x.DialogId == request.DialogId && x.CreatedAt >= basicDialog.ContentUpdatedAt)
+                .OrderBy(x => x.CreatedAt)
                 .Include(x => x.SeenBy)
                     .ThenInclude(x => x.ActorNameEntity)
                 .IgnoreQueryFilters()
@@ -156,12 +160,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 .FirstAsync(cancellationToken: ct);
 
             basicDialog.Content = content;
-            basicDialog.Attachments = attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
-            basicDialog.GuiActions = guiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
-            basicDialog.ApiActions = apiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
-            basicDialog.Transmissions = transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
-            basicDialog.Activities = activities.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
-            basicDialog.SeenLog = seenLog.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id).ToList();
+            basicDialog.Attachments = attachments;
+            basicDialog.GuiActions = guiActions;
+            basicDialog.ApiActions = apiActions;
+            basicDialog.Transmissions = transmissions;
+            basicDialog.Activities = activities;
+            basicDialog.SeenLog = seenLog;
             basicDialog.EndUserContext = endUserContext;
             basicDialog.ServiceOwnerContext = serviceOwnerContext;
 

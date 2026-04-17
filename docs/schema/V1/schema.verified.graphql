@@ -429,7 +429,7 @@ type SearchDialog {
   "The aggregated status of the dialog."
   status: DialogStatus!
   "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
-  hasUnopenedContent: Boolean!
+  hasUnopenedContent: Boolean! @deprecated(reason: "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
   "The number of transmissions sent by the service owner"
@@ -620,6 +620,8 @@ input SearchDialogInput {
   contentUpdatedAfter: DateTime
   "Only return dialogs with content updated before this date"
   contentUpdatedBefore: DateTime
+  "Only return dialogs that have content that has\/hasn't been seen by the user. A dialog is considered seen if it has been retrieved by a user, since it's last content update, and there is no SystemLabel MarkedAsUnopened."
+  isContentSeen: Boolean
   "Only return dialogs updated after this date"
   updatedAfter: DateTime
   "Only return dialogs updated before this date"

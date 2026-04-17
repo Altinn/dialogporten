@@ -1,13 +1,13 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+﻿using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Search;
 
@@ -58,4 +58,76 @@ public class SearchDialogTests : ApplicationCollectionFixture
                 dialog.FromPartyTransmissionsCount.Should().Be(1);
                 dialog.FromServiceOwnerTransmissionsCount.Should().Be(1);
             });
+
+    [Fact]
+    public Task Filter_On_IsContentSeen_True_Should_Return_Expected_Dialogs_When_Dialog_Created_And_Opened_And_Marked_As_Unopened_And_Opened_Again() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .ConsumeEvents()
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = true;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = true;
+            })
+            .AssertResult<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().Be(ctx.GetDialogId()))
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = true;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().Be(ctx.GetDialogId()));
+
+    [Fact]
+    public Task Filter_On_IsContentSeen_False_Should_Return_Expected_Dialogs_When_Dialog_Created_And_Opened_And_Marked_As_Unopened_And_Opened_Again() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateSimpleDialog()
+            .ConsumeEvents()
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = false;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(2))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = false;
+            })
+            .AssertResult<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().NotBe(ctx.GetDialogId()))
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = false;
+            })
+            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(2))
+            .GetEndUserDialog()
+            .ConsumeEvents()
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.Party = [ctx.GetParty()];
+                x.IsContentSeen = false;
+            })
+            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().NotBe(ctx.GetDialogId()));
 }

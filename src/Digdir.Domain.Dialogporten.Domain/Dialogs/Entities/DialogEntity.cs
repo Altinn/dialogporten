@@ -72,6 +72,11 @@ public sealed class DialogEntity :
     public short SystemLabelsMask { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool IsSeenSinceLastContentUpdate { get; set; }
+
+    /// <summary>
     ///  Indicates whether the dialog can be updated/deleted by the service owner
     /// </summary>
     public bool Frozen { get; set; }
@@ -124,6 +129,17 @@ public sealed class DialogEntity :
         }
 
         ContentUpdatedAt = UpdatedAt;
+        IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration() || IsFromAltinn2Instance();
+    }
+
+    private bool WasCreatedBeforeFirstMigration()
+    {
+        return CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
+    }
+
+    private bool IsFromAltinn2Instance()
+    {
+        return ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
     }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
@@ -134,6 +150,7 @@ public sealed class DialogEntity :
         {
             UpdatedAt = visibleFrom;
             ContentUpdatedAt = visibleFrom;
+            IsSeenSinceLastContentUpdate = false;
             return;
         }
 
@@ -145,6 +162,7 @@ public sealed class DialogEntity :
         if (ContentHasChanged(self))
         {
             ContentUpdatedAt = utcNow;
+            IsSeenSinceLastContentUpdate = false;
         }
     }
 
@@ -172,23 +190,31 @@ public sealed class DialogEntity :
 
     public void OnSeen(string userId, DialogUserType.Values userTypeId)
     {
-        var lastSeen = SeenLog
-            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId)
-            .MaxBy(x => x.CreatedAt);
-
-        if (lastSeen is not null &&
-            lastSeen.CreatedAt > UpdatedAt &&
-            EndUserContext.DialogEndUserContextSystemLabels.All(x => x.SystemLabelId != SystemLabel.Values.MarkedAsUnopened))
+        if (IsSeenBy(userId) && !IsMarkedAsUnopened() && IsSeenSinceLastContentUpdate)
         {
             return;
         }
-
         // Use a deterministic id to make the seen-log insert idempotent.
         // If multiple seen events are produced without dialog changes in between,
         // they represent the same logical "seen" and should not create duplicates.
-        var seenLogId = Id
-            .CreateDeterministicSubUuidV7($"{UpdatedAt:O}{userId}");
+        var seenLogId = Id.CreateDeterministicSubUuidV7($"{UpdatedAt:O}{IsSeenSinceLastContentUpdate}{userId}");
         _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, userId, userTypeId, seenLogId));
+    }
+
+    private bool IsSeenBy(string userId)
+    {
+        var lastSeenByThisActor = SeenLog
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId)
+            .MaxBy(x => x.CreatedAt);
+
+        return lastSeenByThisActor is not null && lastSeenByThisActor.CreatedAt > UpdatedAt;
+    }
+
+    private bool IsMarkedAsUnopened()
+    {
+        return EndUserContext
+            .DialogEndUserContextSystemLabels
+            .Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];

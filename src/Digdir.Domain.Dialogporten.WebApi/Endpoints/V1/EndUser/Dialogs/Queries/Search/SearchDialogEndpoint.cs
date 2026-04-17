@@ -109,6 +109,18 @@ public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDial
     public DateTimeOffset? ContentUpdatedBefore { get; set; }
 
     /// <summary>
+    /// Only return dialogs that have content that has/hasn't been seen.
+    /// If null, no filtering is applied
+    /// If true, returns dialogs that have been seen
+    /// If false, returns dialogs that have not been seen
+    ///
+    /// A dialog's content is considered seen if:
+    /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
+    /// - It does not have a system label MarkedAsUnopened.
+    /// </summary>
+    public bool? IsContentSeen { get; set; }
+
+    /// <summary>
     /// Only return dialogs with due date after this date
     /// </summary>
     public DateTimeOffset? DueAfter { get; set; }

@@ -12,6 +12,7 @@
       UpdatedAt: DateTimeOffset_1,
       ContentUpdatedAt: DateTimeOffset_1,
       Status: NotApplicable,
+      SystemLabel: Default,
       IsApiOnly: false,
       HasUnopenedContent: false,
       LatestActivity: {
@@ -65,6 +66,7 @@
       UpdatedAt: DateTimeOffset_3,
       ContentUpdatedAt: DateTimeOffset_3,
       Status: NotApplicable,
+      SystemLabel: Default,
       IsApiOnly: false,
       HasUnopenedContent: false,
       LatestActivity: {
@@ -118,6 +120,7 @@
       UpdatedAt: DateTimeOffset_5,
       ContentUpdatedAt: DateTimeOffset_5,
       Status: NotApplicable,
+      SystemLabel: Default,
       IsApiOnly: false,
       HasUnopenedContent: false,
       LatestActivity: {

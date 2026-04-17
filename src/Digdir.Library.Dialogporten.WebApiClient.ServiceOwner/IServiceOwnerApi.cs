@@ -1,5 +1,3 @@
-using Altinn.ApiClients.Dialogporten.ServiceOwner.V1;
-
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner;
 
 /// <summary>
@@ -10,5 +8,5 @@ public interface IServiceOwnerApi
     /// <summary>
     /// Gets the V1 ServiceOwner API.
     /// </summary>
-    IServiceOwnerV1 V1 { get; }
+    Features.V1.IServiceownerApi V1 { get; }
 }

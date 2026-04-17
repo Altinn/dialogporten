@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Common;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Infrastructure;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Services;
-using Altinn.ApiClients.Dialogporten.ServiceOwner.V1;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,7 +61,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IEdDsaSecurityKeysCache>(x => x.GetRequiredService<DefaultEdDsaSecurityKeysCache>());
         services.TryAddTransient<IClock, DefaultClock>();
 
-        services.TryAddTransient<IServiceOwnerV1, ServiceOwnerV1>();
         services.TryAddTransient<IServiceOwnerApi, ServiceOwnerApi>();
 
         return services;

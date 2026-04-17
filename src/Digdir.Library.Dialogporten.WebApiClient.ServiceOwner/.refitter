@@ -1,0 +1,18 @@
+{
+    "openApiPath": "../Digdir.Domain.Dialogporten.WebApi/bin/Release/net10.0/openapi.v1.serviceowner.json",
+    "namespace": "Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1",
+    "outputFolder": "Features/V1",
+    "operationNameGenerator": "SingleClientFromOperationId",
+    "trimUnusedSchema": true,
+    "multipleInterfaces": "ByTag",
+    "includeTags": [
+        "Serviceowner"
+    ],
+    "useCancellationTokens": true,
+    "returnIApiResponse": true,
+    "useDynamicQuerystringParameters": true,
+    "outputFilename": "RefitterInterface.cs",
+    "codeGeneratorSettings": {
+        "dateFormat": "yyyy-MM-ddTHH:mm:ssZ"
+    }
+}

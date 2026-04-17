@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <Company>Digitaliseringsdirektoratet</Company>
+        <PackageTags>digdir;altinn;dialogporten</PackageTags>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/altinn/dialogporten</RepositoryUrl>
+        <PackageId>Altinn.ApiClients.Dialogporten.EndUser</PackageId>
+        <AssemblyName>Altinn.ApiClients.Dialogporten.EndUser</AssemblyName>
+        <RootNamespace>Altinn.ApiClients.Dialogporten.EndUser</RootNamespace>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591,1573</NoWarn>
+        <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+        <BuildInParallel>false</BuildInParallel>
+        <ImplicitUsings>true</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="/"/>
+        <None Include="../../LICENSE" Pack="true" PackagePath="/"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(Configuration)' == 'Release'">
+        <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
+                          ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
+        <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
+        <PackageReference Include="Refit" Version="10.1.6" />
+        <PackageReference Include="Refit.HttpClientFactory" Version="10.1.6" />
+        <PackageReference Include="Refitter.SourceGenerator" Version="1.7.3" Condition="$(Configuration)=='Release'">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.EndUser.Unit.Tests"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
+    </ItemGroup>
+
+</Project>

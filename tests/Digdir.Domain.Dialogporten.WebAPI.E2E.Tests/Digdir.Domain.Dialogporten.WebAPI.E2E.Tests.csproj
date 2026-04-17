@@ -20,6 +20,11 @@
         <PackageReference Include="xunit.v3" Version="3.2.2" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(Configuration)' == 'Release'">
+        <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
+                          ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
     <ItemGroup>
         <Content Include="..\Digdir.Library.Dialogporten.E2E.Common\appsettings*.json" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>

@@ -1,35 +1,35 @@
 ﻿[
   {
-    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-    "description": null,
-    "extendedType": "uri:dialog-opened",
     "id": "00000000-0000-0000-0000-000000000000",
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": "uri:dialog-opened",
+    "type": "DialogOpened",
     "transmissionId": null,
-    "type": "DialogOpened"
+    "description": null
   },
   {
+    "id": "00000000-0000-0000-0000-000000000000",
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": null,
+    "type": "Information",
+    "transmissionId": null,
     "description": [
       {
-        "languageCode": "en",
-        "value": "Test activity"
+        "value": "Test activity",
+        "languageCode": "en"
       },
       {
-        "languageCode": "nb",
-        "value": "Test-aktivitet"
+        "value": "Test-aktivitet",
+        "languageCode": "nb"
       }
-    ],
-    "extendedType": null,
-    "id": "00000000-0000-0000-0000-000000000000",
-    "transmissionId": null,
-    "type": "Information"
+    ]
   },
   {
-    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-    "description": null,
-    "extendedType": null,
     "id": "00000000-0000-0000-0000-000000000000",
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": null,
+    "type": "TransmissionOpened",
     "transmissionId": "00000000-0000-0000-0000-000000000000",
-    "type": "TransmissionOpened"
+    "description": null
   }
 ]

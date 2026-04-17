@@ -260,6 +260,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();
+            document.RemoveUnusedPaginationSchemas();
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;

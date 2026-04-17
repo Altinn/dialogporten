@@ -169,10 +169,18 @@ spec:
     metadata:
       labels:
         k6-test: $name
+    nodeSelector:
+      kubernetes.azure.com/scalesetpriority: spot
+      spot8cpu28gbmem: 'true'
     resources:
       requests:
         cpu: 250m
         memory: 200Mi
+    tolerations:
+      - effect: NoSchedule
+        key: kubernetes.azure.com/scalesetpriority
+        operator: Equal
+        value: spot
     
 EOF
 # Apply the config.yml configuration

@@ -7,16 +7,19 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events;
 
 public sealed class DialogSeenEvent(
     IDialogDbContext db,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    ILogger<DialogSeenEvent> logger,
 ) : INotificationHandler<DialogSeenDomainEvent>
 {
     private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
     private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+    private readonly ILogger<DialogSeenEvent> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async Task Handle(DialogSeenDomainEvent dialogSeenDomainEvent, CancellationToken cancellationToken)
     {
@@ -89,14 +92,20 @@ public sealed class DialogSeenEvent(
             success => { },
             domainError =>
             {
+                _logger.LogError("Domain errors occured in seen event handler: {DomainErrors}",
+                    domainError.Errors.Select(x => x.ErrorMessage));
+
                 if (IsDuplicateActorNameError(domainError))
                 {
                     throw new InvalidOperationException(domainError.Errors.First().ErrorMessage);
                 }
+
                 if (!IsDuplicateSeenLogIdError(domainError))
                 {
                     throw new UnreachableException("Should not get domain error when updating SeenAt.");
                 }
+
+                throw new UnreachableException("Unexpected domain error when updating SeenAt.");
             },
             concurrencyError =>
                 throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),

@@ -1,5 +1,6 @@
 using System.Net;
 using AwesomeAssertions;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
@@ -93,7 +94,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         });
 
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new SearchDialogsQueryParams
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelLabel

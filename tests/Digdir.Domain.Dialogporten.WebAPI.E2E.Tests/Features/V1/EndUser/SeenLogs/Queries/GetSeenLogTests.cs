@@ -27,7 +27,7 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         seenLog.Should().NotBeNull();
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetSeenLogDialogSeenLog(
+        var response = await Fixture.EnduserApi.V1.GetDialogSeenLog(
             dialogId,
             seenLog.Id,
             TestContext.Current.CancellationToken);

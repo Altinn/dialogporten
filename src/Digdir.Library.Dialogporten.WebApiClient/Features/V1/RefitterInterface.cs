@@ -3100,13 +3100,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by the service owner
+        /// The number of transmissions sent by the service owner.
         /// </summary>
         [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
         public int FromServiceOwnerTransmissionsCount { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by a party representative
+        /// The number of transmissions sent by a party representative.
         /// </summary>
         [JsonPropertyName("fromPartyTransmissionsCount")]
         public int FromPartyTransmissionsCount { get; set; }

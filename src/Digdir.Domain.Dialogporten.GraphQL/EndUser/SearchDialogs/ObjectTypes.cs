@@ -105,7 +105,7 @@ public sealed class SearchDialog
     [GraphQLDescription("Indicates whether the dialog contains content that has not been viewed or opened by the user yet.")]
     public bool HasUnopenedContent { get; set; }
 
-    [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
+    [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.")]
     public bool IsApiOnly { get; set; }
 
     [GraphQLDescription("The number of transmissions sent by the service owner")]

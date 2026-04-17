@@ -2690,12 +2690,12 @@
             "type": "string"
           },
           "fromPartyTransmissionsCount": {
-            "description": "The number of transmissions sent by a party representative",
+            "description": "The number of transmissions sent by a party representative.",
             "format": "int32",
             "type": "integer"
           },
           "fromServiceOwnerTransmissionsCount": {
-            "description": "The number of transmissions sent by the service owner",
+            "description": "The number of transmissions sent by the service owner.",
             "format": "int32",
             "type": "integer"
           },

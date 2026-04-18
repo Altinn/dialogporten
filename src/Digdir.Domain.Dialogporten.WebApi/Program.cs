@@ -131,13 +131,22 @@ static void BuildAndRun(string[] args)
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))
             .AddNewtonsoftJson()
             .Services
-        // Add health checks with the retrieved URLs
-        .AddAspNetHealthChecks((x, y) => x.HealthCheckSettings.HttpGetEndpointsToCheck = y
-            .GetRequiredService<IOptions<WebApiSettings>>().Value?
-            .Authentication?
-            .JwtBearerTokenSchemas?
-            .Select(z => z.WellKnown)
-            .ToList() ?? [])
+        // Add health checks with configured endpoints and well-known auth metadata endpoints
+        .AddAspNetHealthChecks((x, y) =>
+        {
+            var settings = y.GetRequiredService<IOptions<WebApiSettings>>().Value;
+            var altinnBaseUri = y.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri;
+
+            x.HealthCheckSettings.HttpGetEndpointsToCheck = AspNetUtilitiesExtensions.ResolveHttpGetEndpointsToCheck(
+                settings.HealthCheckSettings.HttpGetEndpointsToCheck,
+                altinnBaseUri,
+                settings.Authentication.JwtBearerTokenSchemas.Select(schema => new HttpGetEndpointToCheck
+                {
+                    Name = schema.Name,
+                    Url = schema.WellKnown,
+                    HardDependency = false
+                }));
+        })
         // Auth
         .AddDialogportenAuthentication(builder.Configuration)
         .AddAuthorization();

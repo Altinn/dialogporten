@@ -32,6 +32,7 @@ internal static partial class DialogEndUserSearchSqlHelpers
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
             .AppendSystemLabelMaskFilterCondition(query.SystemLabel)
+            .AppendIsContentSeenFilterCondition(query.IsContentSeen)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d");
 
     internal static PostgresFormattableStringBuilder BuildOrderColumnProjection(IOrderSet<DialogEntity> orderSet, string alias) =>

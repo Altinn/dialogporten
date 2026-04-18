@@ -62,12 +62,12 @@ jobs:
         with:
           working-directory: docs/schema/V1
 
-  vulnerability-diff:
+  vulnerabilities-introduced:
     # Fails the PR if it introduces a package@version pair that is vulnerable on the PR head
     # but was not vulnerable on the base commit. Covers both direct and transitive dependencies
     # via `dotnet list package --vulnerable --include-transitive`, since GitHub's dependency graph
     # does not parse packages.lock.json for NuGet.
-    name: Vulnerability diff
+    name: Vulnerabilities introduced
     runs-on: ubuntu-latest
     permissions:
       contents: read

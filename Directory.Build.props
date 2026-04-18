@@ -5,6 +5,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UserSecretsId>750256a4-f332-4783-8802-8a7d9566f9ca</UserSecretsId>
+        <!-- Commit packages.lock.json so GitHub's dependency graph (and the dependency-review job)
+             can see transitive NuGet dependencies, not just direct PackageReferences. -->
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <PropertyGroup>

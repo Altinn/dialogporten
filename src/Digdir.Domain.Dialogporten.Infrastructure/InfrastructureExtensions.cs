@@ -133,6 +133,7 @@ public static class InfrastructureExtensions
             .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenSystemLabelMaskQueryStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()

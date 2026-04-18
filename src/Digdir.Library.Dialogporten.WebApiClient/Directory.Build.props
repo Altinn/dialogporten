@@ -1,6 +1,2 @@
 <!-- Overrides root Directory.Build.props to ensure correct framework targets. -->
-<Project>
-    <PropertyGroup>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    </PropertyGroup>
-</Project>
+<Project />

@@ -19,7 +19,7 @@
       <env name="LocalDevelopment__UseLocalDevelopmentPartyNameRegistry" value="false" />
       <env name="LocalDevelopment__UseLocalDevelopmentAltinnAuthorization" value="false" />
       <env name="LocalDevelopment__UseLocalDevelopmentCloudEventBus" value="true" />
-      <env name="LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator" value="true" />
+      <env name="LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator" value="false" />
       <env name="LocalDevelopment__DisableCache" value="false" />
       <env name="LocalDevelopment__DisableAuth" value="false" />
       <env name="LocalDevelopment__UseInMemoryServiceBusTransport" value="true" />

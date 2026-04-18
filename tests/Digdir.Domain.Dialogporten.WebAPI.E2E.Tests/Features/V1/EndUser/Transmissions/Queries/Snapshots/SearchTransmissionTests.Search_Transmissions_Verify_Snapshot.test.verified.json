@@ -1,0 +1,115 @@
+﻿[
+  {
+    "attachments": null,
+    "authorizationAttribute": null,
+    "content": {
+      "contentReference": null,
+      "summary": null,
+      "title": {
+        "isAuthorized": null,
+        "mediaType": "text/plain",
+        "value": [
+          {
+            "languageCode": "nb",
+            "value": "Melding med vedlegg"
+          }
+        ]
+      }
+    },
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "deletedAt": null,
+    "extendedType": null,
+    "externalReference": "first-transmission",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "isAuthorized": true,
+    "navigationalActions": null,
+    "relatedTransmissionId": null,
+    "sender": {
+      "actorId": null,
+      "actorName": null,
+      "actorType": "ServiceOwner"
+    },
+    "type": "Information"
+  },
+  {
+    "attachments": [
+      {
+        "displayName": [
+          {
+            "languageCode": "nb",
+            "value": "Attachment display name"
+          }
+        ],
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "id": "00000000-0000-0000-0000-000000000000",
+        "name": "attachment-name",
+        "urls": [
+          {
+            "consumerType": "Gui",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "mediaType": "application/pdf",
+            "url": "https://digdir.com/attachment-url"
+          }
+        ]
+      }
+    ],
+    "authorizationAttribute": null,
+    "content": {
+      "contentReference": {
+        "isAuthorized": null,
+        "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+        "value": [
+          {
+            "languageCode": "nb",
+            "value": "https://digdir.com/content-reference"
+          }
+        ]
+      },
+      "summary": {
+        "isAuthorized": null,
+        "mediaType": "text/plain",
+        "value": [
+          {
+            "languageCode": "nb",
+            "value": "Summary"
+          }
+        ]
+      },
+      "title": {
+        "isAuthorized": null,
+        "mediaType": "text/plain",
+        "value": [
+          {
+            "languageCode": "nb",
+            "value": "Melding med vedlegg"
+          }
+        ]
+      }
+    },
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "deletedAt": null,
+    "extendedType": "https://digdir.com/transmission-type",
+    "externalReference": "second-transmission",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "isAuthorized": true,
+    "navigationalActions": [
+      {
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "title": [
+          {
+            "languageCode": "nb",
+            "value": "Action title"
+          }
+        ],
+        "url": "https://digdir.com/action-url"
+      }
+    ],
+    "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
+    "sender": {
+      "actorId": "urn:altinn:organization:identifier-no:991825827",
+      "actorName": "DIGITALISERINGSDIREKTORATET",
+      "actorType": "PartyRepresentative"
+    },
+    "type": "Information"
+  }
+]

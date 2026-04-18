@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.Jwks.Queries.Get;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
@@ -7,6 +8,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.WellKnown.Jwks.Get;
 
+[OpenApiOperationId("GetJwks")]
 public sealed class GetJwksEndpoint : EndpointWithoutRequest<GetJwksDto>
 {
     private readonly ISender _sender;

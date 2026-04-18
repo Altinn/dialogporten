@@ -1,12 +1,10 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
@@ -16,6 +14,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -32,16 +31,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 {
     private readonly IDialogDbContext _db;
     private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public GetDialogQueryHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IUnitOfWork unitOfWork,
+        IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
@@ -70,52 +69,113 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // However, we need to guarantee an order for sub resources of the dialog aggregate.
         // This is to ensure that the get is consistent, and that PATCH in the API presentation
         // layer behaviours in an expected manner. Therefore, we need to be a bit more verbose about it.
-        var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
-                dbCtx.Dialogs
-                    .Include(x => x.Content)
-                        .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                    .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.GuiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.ApiActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Content.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Sender)
-                        .ThenInclude(x => x.ActorNameEntity)
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Transmissions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                        .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
-                    .Include(x => x.Activities)
-                        .ThenInclude(x => x.Description!.Localizations)
-                    .Include(x => x.Activities)
-                        .ThenInclude(x => x.PerformedBy)
-                        .ThenInclude(x => x.ActorNameEntity)
-                    .Include(x => x.SeenLog
-                        .Where(x => x.CreatedAt >= x.Dialog.ContentUpdatedAt)
-                        .OrderBy(x => x.CreatedAt))
-                        .ThenInclude(x => x.SeenBy)
-                        .ThenInclude(x => x.ActorNameEntity)
-                    .Include(x => x.EndUserContext)
-                        .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-                    .Include(x => x.ServiceOwnerContext)
-                        .ThenInclude(x => x.ServiceOwnerLabels)
-                    .IgnoreQueryFilters()
-                    .FirstOrDefaultAsync(x => x.Id == request.DialogId, ct),
-            cancellationToken);
+        //
+        // Earlier one EF query was used. AsSingleQuery this was very slow for complex dialogs. The generated
+        // code with AsSplitQuery had a lot of redundant joins. Currently the splitting is done manually.
+        // Most of the new queries are using AsSingleQuery, but some of them still need to be split with AsSplitQuery
+        // based on measured duration and inspection of generated code.
+        var dialog = await _db.WrapWithRepeatableRead(async (dbCtx, ct) =>
+        {
+
+            var basicDialog = await dbCtx.Dialogs
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: ct);
+            if (basicDialog == null)
+            {
+                return null;
+            }
+
+            var content = await dbCtx.DialogContents
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var attachments = await dbCtx.DialogAttachments
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var guiActions = await dbCtx.DialogGuiActions
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Title!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Prompt!.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .ToListAsync(cancellationToken: ct);
+
+            var apiActions = await dbCtx.DialogApiActions
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Endpoints.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .IgnoreQueryFilters()
+                .ToListAsync(cancellationToken: ct);
+
+            var transmissions = await dbCtx.DialogTransmissions
+                .Where(x => x.DialogId == request.DialogId)
+                .OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
+                .Include(x => x.Content.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.Sender)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
+                .IgnoreQueryFilters()
+                .ToListAsync(cancellationToken: ct);
+
+            var activities = await dbCtx.DialogActivities
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.Description!.Localizations)
+                .Include(x => x.PerformedBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var seenLog = await dbCtx.DialogSeenLog
+                .Where(x => x.DialogId == request.DialogId && x.CreatedAt >= basicDialog.ContentUpdatedAt)
+                .OrderBy(x => x.CreatedAt)
+                .Include(x => x.SeenBy)
+                    .ThenInclude(x => x.ActorNameEntity)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .ToListAsync(cancellationToken: ct);
+
+            var endUserContext = await dbCtx.DialogEndUserContexts
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.DialogEndUserContextSystemLabels)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .FirstAsync(cancellationToken: ct);
+
+            var serviceOwnerContext = await dbCtx.DialogServiceOwnerContexts
+                .Where(x => x.DialogId == request.DialogId)
+                .Include(x => x.ServiceOwnerLabels)
+                .IgnoreQueryFilters()
+                .AsSingleQuery()
+                .FirstAsync(cancellationToken: ct);
+
+            basicDialog.Content = content;
+            basicDialog.Attachments = attachments;
+            basicDialog.GuiActions = guiActions;
+            basicDialog.ApiActions = apiActions;
+            basicDialog.Transmissions = transmissions;
+            basicDialog.Activities = activities;
+            basicDialog.SeenLog = seenLog;
+            basicDialog.EndUserContext = endUserContext;
+            basicDialog.ServiceOwnerContext = serviceOwnerContext;
+
+            return basicDialog;
+        }, cancellationToken);
 
         if (dialog is null)
         {
@@ -158,20 +218,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotVisible<DialogEntity>(dialog.VisibleFrom.Value);
         }
 
-        // TODO: What if name lookup fails
-        // https://github.com/altinn/dialogporten/issues/387
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        dialog.UpdateSeenAt(
-            currentUserInformation.UserId.ExternalIdWithPrefix,
-            currentUserInformation.UserId.Type,
-            currentUserInformation.Name);
+        var userId = _userRegistry.GetCurrentUserId();
 
-        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
-
-        dialog.EndUserContext.UpdateSystemLabels(
-            addLabels: [],
-            removeLabels: [SystemLabel.Values.MarkedAsUnopened],
-            performedBy);
+        dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
@@ -185,6 +234,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 throw new UnreachableException("Should not get concurrencyError when updating SeenAt."),
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
+
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
@@ -192,12 +242,12 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            currentUserInformation);
+            userId.ExternalIdWithPrefix);
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            currentUserInformation);
+            userId.ExternalIdWithPrefix);
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -209,27 +259,29 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
 
+        dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+
         return dialogDto;
     }
 
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        UserInformation currentUserInformation) =>
+        string externalId) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
                 .First())
-            .Select(log => ToSeenLogDto(currentUserInformation, log))
+            .Select(log => ToSeenLogDto(externalId, log))
             .ToList();
 
-    private DialogSeenLogDto ToSeenLogDto(UserInformation currentUserInformation, DialogSeenLog log)
+    private DialogSeenLogDto ToSeenLogDto(string externalId, DialogSeenLog log)
     {
         var actorId = log.SeenBy.ActorNameEntity?.ActorId;
         var logDto = _mapper.Map<DialogSeenLogDto>(log);
-        logDto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == actorId;
+        logDto.IsCurrentEndUser = externalId == actorId;
         return logDto;
     }
 

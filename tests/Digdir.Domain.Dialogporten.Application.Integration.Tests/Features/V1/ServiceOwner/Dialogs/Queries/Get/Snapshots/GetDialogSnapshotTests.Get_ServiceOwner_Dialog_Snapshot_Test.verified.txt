@@ -13,6 +13,7 @@
   UpdatedAt: DateTimeOffset_1,
   ContentUpdatedAt: DateTimeOffset_1,
   Status: NotApplicable,
+  SystemLabel: Default,
   IsApiOnly: false,
   HasUnopenedContent: true,
   Content: {

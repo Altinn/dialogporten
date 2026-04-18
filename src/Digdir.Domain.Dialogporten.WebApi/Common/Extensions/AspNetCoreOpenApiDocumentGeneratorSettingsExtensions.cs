@@ -14,7 +14,8 @@ internal static class AspNetCoreOpenApiDocumentGeneratorSettingsExtensions
     {
         settings.OperationProcessors.Add(new PaginatedListParametersProcessor());
 
-        // Attempt to remove the definitions that NSwag generates for this
+        // Prevent NSwag from fully expanding these generic types into complex schemas.
+        // The resulting empty schema definitions are removed in PostProcess by RemoveUnusedPaginationSchemas.
         foreach (var ignoreType in new[]
         {
             typeof(ContinuationTokenSet<,>),

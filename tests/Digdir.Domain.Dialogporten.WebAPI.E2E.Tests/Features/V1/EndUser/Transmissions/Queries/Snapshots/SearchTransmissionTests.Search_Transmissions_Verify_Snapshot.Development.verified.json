@@ -19,7 +19,7 @@
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
     "deletedAt": null,
     "extendedType": null,
-    "externalReference": null,
+    "externalReference": "first-transmission",
     "id": "00000000-0000-0000-0000-000000000000",
     "isAuthorized": true,
     "navigationalActions": null,
@@ -89,7 +89,7 @@
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
     "deletedAt": null,
     "extendedType": "https://digdir.com/transmission-type",
-    "externalReference": "external-reference",
+    "externalReference": "second-transmission",
     "id": "00000000-0000-0000-0000-000000000000",
     "isAuthorized": true,
     "navigationalActions": [

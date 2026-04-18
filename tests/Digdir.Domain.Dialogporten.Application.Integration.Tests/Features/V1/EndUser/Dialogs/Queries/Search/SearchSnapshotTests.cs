@@ -27,6 +27,7 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
                 x.Dto.Activities.Clear();
             })
             .GetEndUserDialog() // Trigger seen log
+            .ConsumeEvents()
             .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();

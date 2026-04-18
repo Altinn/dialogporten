@@ -7,6 +7,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 
+[OpenApiOperationId("UpdateFormSavedActivityTime")]
 public sealed class UpdateFormSavedActivityTimeEndpoint : Endpoint<UpdateFormSavedActivityTimeRequest>
 {
     private readonly ISender _sender;

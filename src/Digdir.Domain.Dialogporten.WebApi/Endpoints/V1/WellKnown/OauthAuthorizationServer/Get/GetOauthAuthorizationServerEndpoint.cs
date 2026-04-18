@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.WellKnown.OauthAuthorizationServer.Queries.Get;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
@@ -7,6 +8,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.WellKnown.OauthAuthorizationServer.Get;
 
+[OpenApiOperationId("GetOauthAuthorizationServer")]
 public sealed class GetOauthAuthorizationServerEndpoint : EndpointWithoutRequest<GetOauthAuthorizationServerDto>
 {
     private readonly ISender _sender;

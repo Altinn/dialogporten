@@ -11,7 +11,11 @@ internal static class TransmissionTestData
     {
         var transmissionId = Guid.CreateVersion7();
         dialog.Transmissions.Clear();
-        dialog.AddTransmission(t => t.Id = transmissionId);
+        dialog.AddTransmission(t =>
+        {
+            t.ExternalReference = "first-transmission";
+            t.Id = transmissionId;
+        });
         dialog.AddTransmission(t =>
         {
             t.Sender = new()
@@ -28,7 +32,7 @@ internal static class TransmissionTestData
             t.RelatedTransmissionId = transmissionId;
             t.ExtendedType = new Uri("https://digdir.com/transmission-type");
             t.IdempotentKey = "idempotent-key";
-            t.ExternalReference = "external-reference";
+            t.ExternalReference = "second-transmission";
             t.NavigationalActions =
             [
                 new()

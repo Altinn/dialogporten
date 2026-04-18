@@ -1,8 +1,10 @@
-﻿using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+﻿using Digdir.Domain.Dialogporten.WebApi.Common;
+using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using FastEndpoints;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Testing;
 
+[OpenApiOperationId("ThrowException")]
 public sealed class ExceptionEndpoint : Endpoint<ExceptionEndpointRequest>
 {
     public override void Configure()

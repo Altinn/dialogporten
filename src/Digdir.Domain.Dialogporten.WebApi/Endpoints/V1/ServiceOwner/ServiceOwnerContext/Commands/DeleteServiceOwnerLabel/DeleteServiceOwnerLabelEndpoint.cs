@@ -13,6 +13,7 @@ using ServiceOwnerLabelDto =
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.ServiceOwnerContext.Commands.DeleteServiceOwnerLabel;
 
+[OpenApiOperationId("DeleteServiceOwnerLabel")]
 public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwnerLabelRequest>
 {
     private readonly ISender _sender;

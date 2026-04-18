@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using OneOf;
@@ -68,8 +69,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         if (request.EndUserId is not null)
         {
-            var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-
             var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
                 dialog,
                 cancellationToken);
@@ -79,10 +78,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 return new EntityNotFound<DialogEntity>(request.DialogId);
             }
 
-            dialog.UpdateSeenAt(
-                currentUserInformation.UserId.ExternalIdWithPrefix,
-                currentUserInformation.UserId.Type,
-                currentUserInformation.Name);
+            var userId = _userRegistry.GetCurrentUserId();
+
+            dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
 
             var saveResult = await _unitOfWork
                 .DisableUpdatableFilter()
@@ -109,6 +107,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             dialog.ContentUpdatedAt,
             request.EndUserId);
 
+        if (request.EndUserId is not null)
+        {
+            dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
+        }
         return dialogDto;
     }
 

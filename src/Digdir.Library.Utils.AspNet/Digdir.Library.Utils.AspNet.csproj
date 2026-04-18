@@ -27,4 +27,8 @@
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.Infrastructure\Digdir.Domain.Dialogporten.Infrastructure.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.WebApi.Unit.Tests" />
+    </ItemGroup>
+
 </Project>

@@ -17,6 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"/>
+        <ProjectReference Include="..\..\src\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj"/>
     </ItemGroup>
 
 </Project>

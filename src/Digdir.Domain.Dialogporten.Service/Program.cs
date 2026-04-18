@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Service.Common;
 using Digdir.Library.Utils.AspNet;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Metrics;
 
 // Using two-stage initialization to catch startup errors.
@@ -81,7 +82,14 @@ static void BuildAndRun(string[] args)
             })
             .Build()
         .AddTransient<IUser, ServiceUser>()
-        .AddAspNetHealthChecks();
+        .AddAspNetHealthChecks((x, y) =>
+        {
+            builder.Configuration.GetSection(nameof(HealthCheckSettings)).Bind(x.HealthCheckSettings);
+
+            x.HealthCheckSettings.HttpGetEndpointsToCheck = AspNetUtilitiesExtensions.ResolveHttpGetEndpointsToCheck(
+                x.HealthCheckSettings.HttpGetEndpointsToCheck,
+                y.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri);
+        });
 
     var app = builder.Build();
     app.MapAspNetHealthChecks();

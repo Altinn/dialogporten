@@ -31,7 +31,6 @@ internal sealed class SinglePartyFtsStrategy : IQueryStrategy<EndUserSearchConte
     public int Score(EndUserSearchContext context) =>
         context.Query.Search is not null
         && DialogEndUserSearchSqlHelpers.TryGetSinglePartyAuthorization(
-            context.Query,
             context.AuthorizedResources,
             out _)
             ? QueryStrategyScores.HighlyPreferred
@@ -46,9 +45,8 @@ internal sealed class SinglePartyFtsStrategy : IQueryStrategy<EndUserSearchConte
         }
 
         if (!DialogEndUserSearchSqlHelpers.TryGetSinglePartyAuthorization(
-                context.Query,
-                context.AuthorizedResources,
-                out var authorization))
+            context.AuthorizedResources,
+            out var authorization))
         {
             throw new InvalidOperationException("Single-party authorization is required for this strategy.");
         }

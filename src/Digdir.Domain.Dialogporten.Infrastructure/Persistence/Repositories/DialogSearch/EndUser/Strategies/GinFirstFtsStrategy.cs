@@ -35,9 +35,7 @@ internal sealed class GinFirstFtsStrategy : IQueryStrategy<EndUserSearchContext>
             return QueryStrategyScores.Ineligible;
         }
 
-        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
-            context.Query,
-            context.AuthorizedResources);
+        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(context.AuthorizedResources);
 
         return effectivePartyCount >
                _applicationSettings.Value.Limits.EndUserSearch.MaxDialogFirstFreeTextSearchPartyCount
@@ -56,12 +54,10 @@ internal sealed class GinFirstFtsStrategy : IQueryStrategy<EndUserSearchContext>
         var query = context.Query;
         var authorizedResources = context.AuthorizedResources;
         var settings = _applicationSettings.Value.Limits.EndUserSearch;
-        var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
-            query,
-            authorizedResources);
+        var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(authorizedResources);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices, Name);
 
-        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(query, authorizedResources);
+        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(authorizedResources);
         var candidateCap = settings.MaxFreeTextSearchCandidates;
         var candidateCapPerParty = DialogFreeTextSearchSqlHelpers.GetCandidateLimitPerParty(
             effectivePartyCount,

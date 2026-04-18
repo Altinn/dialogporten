@@ -37,9 +37,7 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
             return QueryStrategyScores.Ineligible;
         }
 
-        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
-            context.Query,
-            context.AuthorizedResources);
+        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(context.AuthorizedResources);
         var effectiveServiceCount = DialogEndUserSearchSqlHelpers.CountEffectiveServices(context.AuthorizedResources);
 
         return effectivePartyCount <= _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
@@ -58,9 +56,7 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
 
         var query = context.Query;
         var authorizedResources = context.AuthorizedResources;
-        var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(
-            query,
-            authorizedResources);
+        var partiesAndServices = DialogEndUserSearchSqlHelpers.BuildPartiesAndServices(authorizedResources);
         DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesAndServices, Name);
         var permissionCandidateDialogs = BuildPermissionCandidateDialogs(query);
         var delegatedDialogIds = authorizedResources.DialogIds.ToArray();

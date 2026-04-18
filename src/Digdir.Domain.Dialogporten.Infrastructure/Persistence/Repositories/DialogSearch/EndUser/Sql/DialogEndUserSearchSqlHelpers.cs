@@ -42,19 +42,12 @@ internal static partial class DialogEndUserSearchSqlHelpers
         BuildColumnList(GetProjectedOrderColumnNames(orderSet), column => $"\"{column}\"");
 
     internal static List<PartiesAndServices> BuildPartiesAndServices(
-        GetDialogsQuery query,
         DialogSearchAuthorizationResult authorizedResources) => authorizedResources.ResourcesByParties
             .Select(x => (party: x.Key, services: x.Value))
             .GroupBy(x => x.services, new HashSetEqualityComparer<string>())
             .Select(x => new PartiesAndServices(
-                x.Select(k => k.party)
-                    .Where(p => query.Party.IsNullOrEmpty() || query.Party.Contains(p))
-                    .ToArray(),
-                x.Key
-                    .Where(s => query.ServiceResource.IsNullOrEmpty() || query.ServiceResource.Contains(s))
-                    .ToArray()
-               )
-            )
+                x.Select(k => k.party).ToArray(),
+                x.Key.ToArray()))
             .Where(x => x.Parties.Length > 0 && x.Services.Length > 0)
             .ToList();
 
@@ -64,88 +57,28 @@ internal static partial class DialogEndUserSearchSqlHelpers
             .Distinct(StringComparer.Ordinal)
             .Count();
 
-    internal static int CountEffectiveParties(
-        GetDialogsQuery query,
-        DialogSearchAuthorizationResult authorizedResources)
-    {
-        var queryParties = query.Party?.Count > 0
-            ? query.Party.ToHashSet(StringComparer.Ordinal)
-            : null;
-        var queryServices = query.ServiceResource?.Count > 0
-            ? query.ServiceResource.ToHashSet(StringComparer.Ordinal)
-            : null;
-
-        return authorizedResources.ResourcesByParties.Count(x =>
-            (queryParties is null || queryParties.Contains(x.Key))
-            && (queryServices is null
-                ? x.Value.Count > 0
-                : x.Value.Any(queryServices.Contains)));
-    }
+    internal static int CountEffectiveParties(DialogSearchAuthorizationResult authorizedResources) =>
+        authorizedResources.ResourcesByParties.Count(x => x.Value.Count > 0);
 
     internal static bool TryGetSinglePartyAuthorization(
-        GetDialogsQuery query,
         DialogSearchAuthorizationResult authorizedResources,
         [NotNullWhen(true)] out SinglePartyAndServices? authorization)
     {
         authorization = null;
-
-        var queryParties = query.Party?.Count > 0
-            ? query.Party.ToHashSet(StringComparer.Ordinal)
-            : null;
-        var queryServices = query.ServiceResource?.Count > 0
-            ? query.ServiceResource.ToHashSet(StringComparer.Ordinal)
-            : null;
-
-        if (query.Party is [var party])
-        {
-            return TryCreateSinglePartyAuthorization(
-                party,
-                authorizedResources.ResourcesByParties,
-                queryServices,
-                out authorization);
-        }
-
-        var effectiveAuthorizations = authorizedResources.ResourcesByParties
-            .Where(x => queryParties is null || queryParties.Contains(x.Key))
-            .Select(x => CreateSinglePartyAuthorization(x.Key, x.Value, queryServices))
-            .Where(x => x.Services.Length > 0)
-            .Take(2)
-            .ToArray();
-
-        if (effectiveAuthorizations.Length != 1)
+        if (authorizedResources.ResourcesByParties.Count != 1)
         {
             return false;
         }
 
-        authorization = effectiveAuthorizations.Single();
+        var (party, services) = authorizedResources.ResourcesByParties.Single();
+        if (services.Count == 0)
+        {
+            return false;
+        }
+
+        authorization = new SinglePartyAndServices(party, [.. services]);
         return true;
     }
-
-    private static bool TryCreateSinglePartyAuthorization(
-        string party,
-        Dictionary<string, HashSet<string>> resourcesByParties,
-        HashSet<string>? queryServices,
-        [NotNullWhen(true)] out SinglePartyAndServices? authorization)
-    {
-        authorization = null;
-        if (!resourcesByParties.TryGetValue(party, out var authorizedServices))
-        {
-            return false;
-        }
-
-        authorization = CreateSinglePartyAuthorization(party, authorizedServices, queryServices);
-        return authorization.Services.Length > 0;
-    }
-
-    private static SinglePartyAndServices CreateSinglePartyAuthorization(
-        string party,
-        HashSet<string> authorizedServices,
-        HashSet<string>? queryServices)
-        => new(
-            party,
-            authorizedServices
-                .Where(service => queryServices is null || queryServices.Contains(service))
-                .ToArray());
 
     internal static void LogPartiesAndServicesCount(
         ILogger logger,

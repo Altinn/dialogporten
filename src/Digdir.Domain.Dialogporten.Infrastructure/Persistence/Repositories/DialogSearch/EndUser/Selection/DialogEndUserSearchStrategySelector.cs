@@ -48,9 +48,7 @@ internal sealed partial class DialogEndUserSearchStrategySelector(
             x => x.Strategy.Name,
             x => x.Score,
             StringComparer.Ordinal));
-        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(
-            context.Query,
-            context.AuthorizedResources);
+        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(context.AuthorizedResources);
         var hasScoreTie = scoredStrategies.Count(x => x.Score == selected.Score) > 1;
 
         LogQueryStrategyEndUser(

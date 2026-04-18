@@ -2690,12 +2690,12 @@
             "type": "string"
           },
           "fromPartyTransmissionsCount": {
-            "description": "The number of transmissions sent by a party representative",
+            "description": "The number of transmissions sent by a party representative.",
             "format": "int32",
             "type": "integer"
           },
           "fromServiceOwnerTransmissionsCount": {
-            "description": "The number of transmissions sent by the service owner",
+            "description": "The number of transmissions sent by the service owner.",
             "format": "int32",
             "type": "integer"
           },
@@ -2708,8 +2708,10 @@
             "type": "array"
           },
           "hasUnopenedContent": {
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "deprecated": true,
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "type": "boolean",
+            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -3876,8 +3878,10 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "deprecated": true,
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "type": "boolean",
+            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -4830,6 +4834,15 @@
               "format": "date-time",
               "nullable": true,
               "type": "string"
+            }
+          },
+          {
+            "description": "Only return dialogs that have content that has/hasn\u0027t been seen.\nIf null, no filtering is applied\nIf true, returns dialogs that have been seen\nIf false, returns dialogs that have not been seen\n            \nA dialog\u0027s content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
+            "in": "query",
+            "name": "isContentSeen",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
             }
           },
           {

@@ -71,5 +71,6 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.Property(x => x.ContentUpdatedAt).HasDefaultValueSql("current_timestamp at time zone 'utc'");
         builder.Property(x => x.IsApiOnly).HasDefaultValue(false);
         builder.Property(x => x.SystemLabelsMask).HasDefaultValue((short)1);
+        builder.Property(x => x.IsSeenSinceLastContentUpdate).HasDefaultValue(true);
     }
 }

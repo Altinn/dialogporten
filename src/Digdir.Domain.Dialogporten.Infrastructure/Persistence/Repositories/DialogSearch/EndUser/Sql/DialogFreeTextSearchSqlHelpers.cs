@@ -43,16 +43,23 @@ internal static partial class DialogFreeTextSearchSqlHelpers
             .Select(match => match.Value)
             .ToArray();
 
-        if (terms.Length == 0 || terms.Any(IsExplicitBooleanOperator))
+        if (terms.Length == 0)
         {
             return search;
+        }
+
+        if (terms.Any(IsExplicitOrOperator) || terms.Any(IsExplicitAndOperator))
+        {
+            return string.Join(" ", terms.Where(term => !IsExplicitAndOperator(term)));
         }
 
         return string.Join(" OR ", terms);
     }
 
-    private static bool IsExplicitBooleanOperator(string term) =>
-        term.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
+    private static bool IsExplicitAndOperator(string term) =>
+        term.Equals("AND", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsExplicitOrOperator(string term) =>
         term.Equals("OR", StringComparison.OrdinalIgnoreCase);
 
     private static string GetTsConfigName(string? languageCode) => languageCode switch

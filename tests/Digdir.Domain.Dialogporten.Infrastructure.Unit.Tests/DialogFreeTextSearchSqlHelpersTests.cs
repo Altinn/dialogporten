@@ -22,17 +22,21 @@ public sealed class DialogFreeTextSearchSqlHelpersTests
     }
 
     [Theory]
-    [InlineData("melding AND betaling")]
-    [InlineData("melding and betaling")]
-    [InlineData("melding OR betaling")]
-    [InlineData("melding or betaling")]
-    public void CreateFreeTextSearchQuery_ShouldPreserveExplicitBooleanOperators(string search)
+    [InlineData("melding AND betaling", "melding betaling")]
+    [InlineData("melding and betaling", "melding betaling")]
+    [InlineData("\"oppsummeringstekst inneholde\" AND melding", "\"oppsummeringstekst inneholde\" melding")]
+    [InlineData("melding AND betaling OR skatt", "melding betaling OR skatt")]
+    [InlineData("melding OR betaling", "melding OR betaling")]
+    [InlineData("melding or betaling", "melding or betaling")]
+    public void CreateFreeTextSearchQuery_ShouldPreserveExplicitBooleanOperators(
+        string search,
+        string expectedSearchString)
     {
         var query = CreateQuery(search);
 
         var ftsQuery = DialogFreeTextSearchSqlHelpers.CreateFreeTextSearchQuery(query);
 
-        Assert.Equal(search, ftsQuery.SearchString);
+        Assert.Equal(expectedSearchString, ftsQuery.SearchString);
     }
 
     private static GetDialogsQuery CreateQuery(string search) =>

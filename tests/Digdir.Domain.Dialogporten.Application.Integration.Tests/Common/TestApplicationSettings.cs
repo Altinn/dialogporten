@@ -6,7 +6,9 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 internal sealed class TestApplicationSettings : IOptionsSnapshot<ApplicationSettings>
 {
-    public ApplicationSettings Value { get; private set; } = CreateDefault();
+    private static ApplicationSettings _default = CreateDefaultWithGeneratedKeys();
+
+    public ApplicationSettings Value { get; private set; } = _default;
 
     public ApplicationSettings Get(string? name) => Value;
 
@@ -16,8 +18,15 @@ internal sealed class TestApplicationSettings : IOptionsSnapshot<ApplicationSett
         Value = value;
     }
 
-    public void Reset() =>
-        Value = CreateDefault();
+    public void Reset(bool regenerate = false)
+    {
+        if (regenerate)
+        {
+            _default = CreateDefaultWithGeneratedKeys();
+        }
+
+        Value = _default;
+    }
 
     public static ApplicationSettings CreateDefault(
         FeatureToggle? featureToggle = null,
@@ -26,14 +35,23 @@ internal sealed class TestApplicationSettings : IOptionsSnapshot<ApplicationSett
         BadDataHandling? badDataHandling = null) =>
         new()
         {
-            FeatureToggle = featureToggle ?? new FeatureToggle
+            FeatureToggle = featureToggle ?? _default.FeatureToggle,
+            Dialogporten = dialogporten ?? _default.Dialogporten,
+            Limits = limits ?? _default.Limits,
+            BadDataHandling = badDataHandling ?? _default.BadDataHandling
+        };
+
+    private static ApplicationSettings CreateDefaultWithGeneratedKeys() =>
+        new()
+        {
+            FeatureToggle = new FeatureToggle
             {
                 UseAltinnAutoAuthorizedPartiesQueryParameters = true,
                 UseCorrectPersonNameOrdering = true
             },
-            Dialogporten = dialogporten ?? CreateDefaultDialogportenSettings(),
-            Limits = limits ?? new LimitsSettings(),
-            BadDataHandling = badDataHandling ?? BadDataHandling.WarnAndContinue
+            Dialogporten = CreateDefaultDialogportenSettings(),
+            Limits = new LimitsSettings(),
+            BadDataHandling = BadDataHandling.WarnAndContinue
         };
 
     private static DialogportenSettings CreateDefaultDialogportenSettings() =>

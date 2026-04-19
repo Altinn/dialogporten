@@ -12,16 +12,9 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using NSubstitute;
+using DialogGenerator = Digdir.Tool.Dialogporten.GenerateFakeData.DialogGenerator;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-
-#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
@@ -399,56 +392,15 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         DialogApplication.AltinnAuthorization.Configure(x =>
             x.ConfigureGetAuthorizedResourcesForSearch(authorization));
 
-    private void ConfigureApplicationSettings(int maxPartyFilterValues)
-    {
-        var settings = CreateApplicationSettings(maxPartyFilterValues);
-        var optionsSnapshot = Substitute.For<IOptionsSnapshot<ApplicationSettings>>();
-        optionsSnapshot.Value.Returns(settings);
-
-        Application.ConfigureServices(services =>
-        {
-            services.RemoveAll<IOptionsSnapshot<ApplicationSettings>>();
-            services.RemoveAll<IOptions<ApplicationSettings>>();
-            services.AddSingleton(optionsSnapshot);
-            services.AddSingleton<IOptions<ApplicationSettings>>(Microsoft.Extensions.Options.Options.Create(settings));
-        });
-    }
-
-    private static ApplicationSettings CreateApplicationSettings(int maxPartyFilterValues) =>
-        new()
-        {
-            Dialogporten = new DialogportenSettings
-            {
-                BaseUri = new Uri("https://integration.test"),
-                Ed25519KeyPairs = new Ed25519KeyPairs
-                {
-                    Primary = CreateKeyPair("primary"),
-                    Secondary = CreateKeyPair("secondary")
-                }
-            },
-            Limits = new LimitsSettings
+    private static void ConfigureApplicationSettings(int maxPartyFilterValues) =>
+        DialogApplication.Settings.Set(TestApplicationSettings.CreateDefault(
+            limits: new LimitsSettings
             {
                 EndUserSearch = new EndUserSearchQueryLimits
                 {
-                    MaxPartyFilterValues = maxPartyFilterValues,
-                    MaxServiceResourceFilterValues = 20,
-                    MaxOrgFilterValues = 20,
-                    MaxExtendedStatusFilterValues = 20,
-                    MinServiceDrivenStrategyPartyCount = 100,
-                    MaxFreeTextSearchCandidates = 5000,
-                    MinFreeTextSearchCandidatesPerParty = 100,
-                    MaxDialogFirstFreeTextSearchPartyCount = 50
+                    MaxPartyFilterValues = maxPartyFilterValues
                 }
-            }
-        };
-
-    private static Ed25519KeyPair CreateKeyPair(string name) =>
-        new()
-        {
-            Kid = $"integration-test-{name}",
-            PrivateComponent = "private",
-            PublicComponent = "public"
-        };
+            }));
 
     private static DialogSearchAuthorizationResult CreateAuthorization(
         IReadOnlyCollection<string> parties,
@@ -524,12 +476,18 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
             .Select(x => $"{ServicePrefix}-{x:D3}")
             .ToArray();
 
-    private static string[] CreateParties(int count) =>
-        Enumerable.Range(1, count * 3)
+    private static string[] CreateParties(int count)
+    {
+        var parties = Enumerable.Range(1, count * 10)
             .Select(x => DialogGenerator.GenerateRandomParty(new Randomizer(x), forcePerson: true).ToLowerInvariant())
             .Distinct(StringComparer.Ordinal)
             .Take(count)
             .ToArray();
+
+        return parties.Length == count
+            ? parties
+            : throw new InvalidOperationException($"Unable to generate {count} unique parties.");
+    }
 
     private static OrderSet<SearchDialogQueryOrderDefinition, DialogEntity> CreatedAtDescendingOrder() =>
         OrderSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse("createdAt", out var orderSet)

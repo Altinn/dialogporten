@@ -192,7 +192,7 @@
           },
           "orderBy": {
             "description": "The current sorting order of the items",
-            "example": "createdat_desc,id_desc",
+            "example": "contentupdatedat_desc,id_desc",
             "type": "string"
           }
         },

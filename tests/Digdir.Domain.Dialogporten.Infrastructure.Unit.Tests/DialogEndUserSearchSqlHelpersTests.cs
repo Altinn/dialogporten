@@ -83,6 +83,25 @@ public sealed class DialogEndUserSearchSqlHelpersTests
     }
 
     [Fact]
+    public void TryGetSinglePartyAuthorization_ShouldReturnSingleEffectiveParty_WhenOtherPartiesHaveEmptyServiceSets()
+    {
+        var authorization = CreateAuthorization(
+            ("party1", ["resource-a", "resource-b"]),
+            ("party2", []));
+
+        var found = DialogEndUserSearchSqlHelpers.TryGetSinglePartyAuthorization(
+            authorization,
+            out var singlePartyAuthorization);
+
+        Assert.True(found);
+        Assert.NotNull(singlePartyAuthorization);
+        Assert.Equal("party1", singlePartyAuthorization.Party);
+        Assert.Equal(
+            ["resource-a", "resource-b"],
+            singlePartyAuthorization.Services.OrderBy(x => x, StringComparer.Ordinal).ToArray());
+    }
+
+    [Fact]
     public void TryGetSinglePartyAuthorization_ShouldReturnFalse_ForMultipleEffectiveParties()
     {
         var authorization = CreateAuthorization(

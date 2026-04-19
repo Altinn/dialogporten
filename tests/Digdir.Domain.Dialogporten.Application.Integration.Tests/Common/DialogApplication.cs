@@ -32,7 +32,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
-using NSec.Cryptography;
 using NSubstitute;
 using Respawn;
 using Respawn.Graph;
@@ -54,6 +53,7 @@ public class DialogApplication : IAsyncLifetime
     internal static TestClock Clock { get; } = new();
     internal static TestUser User { get; } = new();
     internal static TestAltinnAuthorization AltinnAuthorization { get; } = new();
+    internal static TestApplicationSettings Settings { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
         new PostgreSqlBuilder("postgres:18.2")
@@ -140,8 +140,9 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
-            .AddScoped<IOptionsSnapshot<ApplicationSettings>>(_ => CreateApplicationSettingsSubstitute())
-            .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>())
+            .AddSingleton(Settings)
+            .AddScoped<IOptionsSnapshot<ApplicationSettings>>(x => x.GetRequiredService<TestApplicationSettings>())
+            .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<TestApplicationSettings>())
             .AddSingleton<IFusionCacheProvider>(_ => CreateNullFusionCacheProvider())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
@@ -174,61 +175,6 @@ public class DialogApplication : IAsyncLifetime
             .Returns("Brando Sando");
 
         return nameRegistrySubstitute;
-    }
-
-    private static string Base64UrlEncode(byte[] input) => Convert.ToBase64String(input).Replace("+", "-").Replace("/", "_").TrimEnd('=');
-
-    private static IOptionsSnapshot<ApplicationSettings> CreateApplicationSettingsSubstitute()
-    {
-        var applicationSettingsSubstitute = Substitute.For<IOptionsSnapshot<ApplicationSettings>>();
-
-        using var primaryKeyPair = Key.Create(SignatureAlgorithm.Ed25519,
-            new KeyCreationParameters
-            {
-                ExportPolicy = KeyExportPolicies.AllowPlaintextExport
-            });
-        var primaryPublicKey = primaryKeyPair.Export(KeyBlobFormat.RawPublicKey);
-        var primaryPrivateKey = primaryKeyPair.Export(KeyBlobFormat.RawPrivateKey);
-
-        using var secondaryKeyPair = Key.Create(SignatureAlgorithm.Ed25519,
-            new KeyCreationParameters
-            {
-                ExportPolicy = KeyExportPolicies.AllowPlaintextExport
-            });
-        var secondaryPublicKey = secondaryKeyPair.Export(KeyBlobFormat.RawPublicKey);
-        var secondaryPrivateKey = secondaryKeyPair.Export(KeyBlobFormat.RawPrivateKey);
-
-        applicationSettingsSubstitute
-            .Value
-            .Returns(new ApplicationSettings
-            {
-                FeatureToggle = new FeatureToggle
-                {
-                    UseAltinnAutoAuthorizedPartiesQueryParameters = true,
-                    UseCorrectPersonNameOrdering = true
-                },
-                Dialogporten = new DialogportenSettings
-                {
-                    BaseUri = new Uri("https://integration.test"),
-                    Ed25519KeyPairs = new Ed25519KeyPairs
-                    {
-                        Primary = new Ed25519KeyPair
-                        {
-                            Kid = "integration-test-primary-signing-key",
-                            PrivateComponent = Base64UrlEncode(primaryPrivateKey),
-                            PublicComponent = Base64UrlEncode(primaryPublicKey)
-                        },
-                        Secondary = new Ed25519KeyPair
-                        {
-                            Kid = "integration-test-secondary-signing-key",
-                            PrivateComponent = Base64UrlEncode(secondaryPrivateKey),
-                            PublicComponent = Base64UrlEncode(secondaryPublicKey)
-                        }
-                    }
-                }
-            });
-
-        return applicationSettingsSubstitute;
     }
 
     private static IServiceOwnerNameRegistry CreateServiceOwnerNameRegistrySubstitute()
@@ -292,6 +238,7 @@ public class DialogApplication : IAsyncLifetime
         Clock.Reset();
         User.Reset();
         AltinnAuthorization.Reset();
+        Settings.Reset();
         _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
         await connection.OpenAsync();

@@ -48,7 +48,7 @@ internal static partial class DialogFreeTextSearchSqlHelpers
             return search;
         }
 
-        if (terms.Any(IsExplicitOrOperator) || terms.Any(IsExplicitAndOperator))
+        if (terms.Any(IsExplicitOrOperator) || terms.Any(IsExplicitAndOperator) || terms.Any(IsNegatedTerm))
         {
             return string.Join(" ", terms.Where(term => !IsExplicitAndOperator(term)));
         }
@@ -61,6 +61,9 @@ internal static partial class DialogFreeTextSearchSqlHelpers
 
     private static bool IsExplicitOrOperator(string term) =>
         term.Equals("OR", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsNegatedTerm(string term) =>
+        term.StartsWith('-');
 
     private static string GetTsConfigName(string? languageCode) => languageCode switch
     {

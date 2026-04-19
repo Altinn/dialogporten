@@ -39,6 +39,41 @@ public sealed class DialogFreeTextSearchSqlHelpersTests
         Assert.Equal(expectedSearchString, ftsQuery.SearchString);
     }
 
+    [Theory]
+    [InlineData("invoice -paid", "invoice -paid")]
+    [InlineData("invoice   -paid", "invoice -paid")]
+    [InlineData("invoice AND -paid", "invoice -paid")]
+    [InlineData("invoice OR -paid", "invoice OR -paid")]
+    [InlineData("\"payment reminder\" -paid", "\"payment reminder\" -paid")]
+    public void CreateFreeTextSearchQuery_ShouldPreserveImplicitAnd_WhenNegatedTermsArePresent(
+        string search,
+        string expectedSearchString)
+    {
+        var query = CreateQuery(search);
+
+        var ftsQuery = DialogFreeTextSearchSqlHelpers.CreateFreeTextSearchQuery(query);
+
+        Assert.Equal(expectedSearchString, ftsQuery.SearchString);
+    }
+
+    [Theory]
+    [InlineData("   ", "   ")]
+    [InlineData("AND", "")]
+    [InlineData("and", "")]
+    [InlineData("OR", "OR")]
+    [InlineData("or", "or")]
+    [InlineData("the", "the")]
+    public void CreateFreeTextSearchQuery_ShouldReturnExpectedString_ForEmptyOrOperatorOnlyInputs(
+        string search,
+        string expectedSearchString)
+    {
+        var query = CreateQuery(search);
+
+        var ftsQuery = DialogFreeTextSearchSqlHelpers.CreateFreeTextSearchQuery(query);
+
+        Assert.Equal(expectedSearchString, ftsQuery.SearchString);
+    }
+
     private static GetDialogsQuery CreateQuery(string search) =>
         new()
         {

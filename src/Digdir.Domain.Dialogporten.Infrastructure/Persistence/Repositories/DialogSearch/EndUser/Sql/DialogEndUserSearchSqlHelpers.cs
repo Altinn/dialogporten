@@ -65,18 +65,16 @@ internal static partial class DialogEndUserSearchSqlHelpers
         [NotNullWhen(true)] out SinglePartyAndServices? authorization)
     {
         authorization = null;
-        if (authorizedResources.ResourcesByParties.Count != 1)
+        var effectiveAuthorizations = BuildPartiesAndServices(authorizedResources);
+        if (effectiveAuthorizations.Sum(x => x.Parties.Length) != 1)
         {
             return false;
         }
 
-        var (party, services) = authorizedResources.ResourcesByParties.Single();
-        if (services.Count == 0)
-        {
-            return false;
-        }
-
-        authorization = new SinglePartyAndServices(party, [.. services]);
+        var effectiveAuthorization = effectiveAuthorizations.Single();
+        authorization = new SinglePartyAndServices(
+            effectiveAuthorization.Parties.Single(),
+            effectiveAuthorization.Services);
         return true;
     }
 

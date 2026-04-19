@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Sql;
@@ -35,11 +36,6 @@ internal sealed partial class DialogEndUserSearchStrategySelector(
         (IQueryStrategy<EndUserSearchContext> Strategy, int Score)[] scoredStrategies,
         (IQueryStrategy<EndUserSearchContext> Strategy, int Score) selected)
     {
-        if (!logger.IsEnabled(LogLevel.Information))
-        {
-            return;
-        }
-
         var delegatedDialogCount = context.AuthorizedResources.DialogIds.Count;
         var runnerUpScore = scoredStrategies.Length > 1
             ? scoredStrategies[1].Score
@@ -71,6 +67,7 @@ internal sealed partial class DialogEndUserSearchStrategySelector(
         Level = LogLevel.Information,
         SkipEnabledCheck = true,
         Message = "QueryStrategyEndUser: s={SelectedStrategy}, r={StrategyScoresJson}, fts={HasFreeTextSearch}, ind={HasInstanceDelegations}, pc={EffectivePartyCount}, qpc={QueryPartyCount}, qsc={QueryServiceResourceCount}, dc={DelegatedDialogCount}, ss={SelectedScore}, sm={ScoreMargin}, tie={HasScoreTie}")]
+    [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "LoggerMessage source-generated method requires individual parameters for structured logging; bundling would break the generator")]
     private static partial void LogQueryStrategyEndUser(
         ILogger logger,
         string selectedStrategy,

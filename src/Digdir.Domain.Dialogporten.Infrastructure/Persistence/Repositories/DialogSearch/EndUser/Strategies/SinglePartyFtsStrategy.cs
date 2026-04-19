@@ -26,6 +26,8 @@ internal sealed class SinglePartyFtsStrategy : IQueryStrategy<EndUserSearchConte
 
     // Specialized FTS strategy for a single effective party. It keeps the Dialog-first candidate
     // probe direct, avoiding the permission JSON/unnest machinery used by the generic FTS strategy.
+    // The ordered dialog candidate set is capped before probing DialogSearch, so broad terms remain
+    // bounded for whale parties, at the cost of not searching beyond the capped ordered window.
     public string Name => nameof(SinglePartyFtsStrategy);
 
     public int Score(EndUserSearchContext context) =>

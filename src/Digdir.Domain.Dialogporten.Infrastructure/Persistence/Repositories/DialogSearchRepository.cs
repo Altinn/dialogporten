@@ -267,6 +267,9 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
         DialogSearchAuthorizationResult authorizedResources,
         CancellationToken cancellationToken)
     {
+        // The authorization result is expected to already be constrained by query.Party and
+        // query.ServiceResource. Strategies treat ResourcesByParties as the effective authorization
+        // scope and do not re-apply those query filters when building permission CTEs.
         if (authorizedResources.HasNoAuthorizations)
         {
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());

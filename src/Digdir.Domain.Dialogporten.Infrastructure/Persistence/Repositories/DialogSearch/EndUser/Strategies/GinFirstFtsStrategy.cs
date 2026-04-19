@@ -24,8 +24,10 @@ internal sealed class GinFirstFtsStrategy : IQueryStrategy<EndUserSearchContext>
         _logger = logger;
     }
 
-    // FTS-specific strategy. It drives candidate lookup through the GIN index and caps the candidate
-    // set before applying the wider dialog filters and final ordering.
+    // FTS-specific strategy for large effective party sets. It drives candidate lookup through the
+    // GIN index and caps matches per party and globally before applying dialog filters/final ordering.
+    // This bounds broad-term searches across many parties, but FTS hits are unsorted at the cap point:
+    // authorized/recent dialogs can be missed if they fall outside the capped GIN candidate set.
     public string Name => nameof(GinFirstFtsStrategy);
 
     public int Score(EndUserSearchContext context)

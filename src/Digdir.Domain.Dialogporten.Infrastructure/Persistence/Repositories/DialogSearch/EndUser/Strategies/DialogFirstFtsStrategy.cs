@@ -24,8 +24,11 @@ internal sealed class DialogFirstFtsStrategy : IQueryStrategy<EndUserSearchConte
         _logger = logger;
     }
 
-    // Drives lookup from the ordered, authorized Dialog side before probing DialogSearch.
-    // This preserves the requested ordering/windowing semantics while keeping the FTS probes bounded.
+    // Drives lookup from the ordered, authorized Dialog side before probing DialogSearch. Candidate
+    // counts are capped per party and globally to make broad terms predictable under whale parties,
+    // but the cap means older/later matching dialogs outside the sampled ordered window can be missed.
+    // This is intentional: search remains bounded and respects requested ordering/windowing for the
+    // sampled candidates instead of letting common terms scan an unbounded authorization set.
     public string Name => nameof(DialogFirstFtsStrategy);
 
     public int Score(EndUserSearchContext context)

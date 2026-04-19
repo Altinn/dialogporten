@@ -41,13 +41,19 @@ internal static partial class DialogFreeTextSearchSqlHelpers
         var terms = SearchTermRegex()
             .Matches(search)
             .Select(match => match.Value)
-            .Where(term => !term.Equals("OR", StringComparison.OrdinalIgnoreCase))
             .ToArray();
 
-        return terms.Length == 0
-            ? search
-            : string.Join(" OR ", terms);
+        if (terms.Length == 0 || terms.Any(IsExplicitBooleanOperator))
+        {
+            return search;
+        }
+
+        return string.Join(" OR ", terms);
     }
+
+    private static bool IsExplicitBooleanOperator(string term) =>
+        term.Equals("AND", StringComparison.OrdinalIgnoreCase) ||
+        term.Equals("OR", StringComparison.OrdinalIgnoreCase);
 
     private static string GetTsConfigName(string? languageCode) => languageCode switch
     {

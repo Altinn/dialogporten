@@ -24,7 +24,7 @@ internal sealed class DialogSeenLogWriter(
         var actorName = await partyNameRegistry.GetName(normalizedActorId, cancellationToken);
         if (string.IsNullOrWhiteSpace(actorName))
         {
-            throw new InvalidOperationException($"Unable to look up name for actor id: {normalizedActorId}");
+            throw new InvalidOperationException("Unable to look up actor name.");
         }
 
         var actorNameId = await EnsureActorName(normalizedActorId, actorName, cancellationToken);

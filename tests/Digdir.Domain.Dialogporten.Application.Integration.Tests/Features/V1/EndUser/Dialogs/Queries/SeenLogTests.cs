@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using OneOf.Types;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
@@ -267,7 +268,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             seenAt,
             cancellationToken);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        var saveResult = await unitOfWork.SaveChangesAsync(cancellationToken);
+        saveResult.Value.Should().BeOfType<Success>();
         return result;
     }
 

@@ -59,12 +59,7 @@ public sealed class DialogSeenEvent(
         var performedBy = new LabelAssignmentLogActor
         {
             ActorTypeId = ActorType.Values.PartyRepresentative,
-            ActorNameEntity = new ActorName
-            {
-                Id = seenLogWriteResult.ActorNameId,
-                ActorId = seenLogWriteResult.ActorId,
-                Name = seenLogWriteResult.ActorName
-            }
+            ActorNameEntityId = seenLogWriteResult.ActorNameId
         };
 
         dialog.EndUserContext.UpdateSystemLabels(

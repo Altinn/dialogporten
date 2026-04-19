@@ -135,6 +135,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
 
                 /// <summary>
+                /// Only return dialogs that have content that has/hasn't been seen.
+                /// If null, no filtering is applied
+                /// If true, returns dialogs that have been seen
+                /// If false, returns dialogs that have not been seen
+                /// 
+                /// A dialog's content is considered seen if:
+                /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
+                /// - It does not have a system label MarkedAsUnopened.
+                /// </summary>
+        [Query] 
+        public bool? IsContentSeen { get; set; }
+
+                /// <summary>
                 /// Only return dialogs with due date after this date
                 /// </summary>
         [Query] 
@@ -2376,8 +2389,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// <br/>            
+        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
+        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
+        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3066,8 +3084,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// <br/>            
+        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
+        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
+        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3077,13 +3100,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by the service owner
+        /// The number of transmissions sent by the service owner.
         /// </summary>
         [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
         public int FromServiceOwnerTransmissionsCount { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by a party representative
+        /// The number of transmissions sent by a party representative.
         /// </summary>
         [JsonPropertyName("fromPartyTransmissionsCount")]
         public int FromPartyTransmissionsCount { get; set; }

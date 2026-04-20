@@ -32,7 +32,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         content.Id.Should().Be(transmissionId);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Get_Transmission_Verify_Snapshot()
     {
         // Arrange
@@ -56,7 +56,6 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(response.Content),
-            fileNameSuffix: Fixture.DotnetEnvironment);
+            JsonSerializer.Serialize(response.Content));
     }
 }

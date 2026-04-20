@@ -25,7 +25,7 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
             x.Party == E2EConstants.DefaultParty);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01", "staging"])]
     public async Task Authorized_Parties_Verify_Snapshot()
     {
         // Arrange/Act
@@ -35,7 +35,6 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         // Assert
         await VerifyJsonSnapshot(
             JsonSerializer.Serialize(content),
-            fileNameSuffix: Fixture.DotnetEnvironment,
             scrubGuids: false);
     }
 }

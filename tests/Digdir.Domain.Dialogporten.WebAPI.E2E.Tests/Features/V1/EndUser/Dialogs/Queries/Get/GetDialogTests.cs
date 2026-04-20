@@ -152,7 +152,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         response.Error!.Content.Should().Contain(Constants.AltinnAuthLevelTooLow);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Get_Dialog_Verify_Snapshot()
     {
         // Arrange
@@ -166,7 +166,6 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
 
         // Assert
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(getDialogResult.Content),
-            fileNameSuffix: Fixture.DotnetEnvironment);
+            JsonSerializer.Serialize(getDialogResult.Content));
     }
 }

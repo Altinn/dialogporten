@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
 namespace Digdir.Library.Dialogporten.E2E.Common;
 

@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Microsoft.Extensions.Configuration;
 using Xunit.v3;
 
@@ -21,6 +22,8 @@ public static class E2EExplicitOptions
 
 public sealed class E2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute
 {
+    public string[] SkipOnEnvironments { get; init; } = [];
+
     public E2EFactAttribute(
         [CallerFilePath] string? sourceFilePath = null,
         [CallerLineNumber] int sourceLineNumber = 0)
@@ -35,6 +38,10 @@ public sealed class E2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute
         {
             hooks.BeforeTest();
         }
+
+        var env = Environment.GetDotnetEnvironment();
+        if (SkipOnEnvironments.Contains(env, StringComparer.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"{DynamicSkipToken.Value}Skipped in {env} environment.");
     }
 
     public void After(MethodInfo methodUnderTest, IXunitTest test)
@@ -48,6 +55,8 @@ public sealed class E2EFactAttribute : FactAttribute, IBeforeAfterTestAttribute
 
 public sealed class E2ETheoryAttribute : TheoryAttribute, IBeforeAfterTestAttribute
 {
+    public string[] SkipOnEnvironments { get; init; } = [];
+
     public E2ETheoryAttribute(
         [CallerFilePath] string? sourceFilePath = null,
         [CallerLineNumber] int sourceLineNumber = 0)
@@ -62,6 +71,10 @@ public sealed class E2ETheoryAttribute : TheoryAttribute, IBeforeAfterTestAttrib
         {
             hooks.BeforeTest();
         }
+
+        var env = Environment.GetDotnetEnvironment();
+        if (SkipOnEnvironments.Contains(env, StringComparer.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"{DynamicSkipToken.Value}Skipped in {env} environment.");
     }
 
     public void After(MethodInfo methodUnderTest, IXunitTest test)

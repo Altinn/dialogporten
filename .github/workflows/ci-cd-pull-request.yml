@@ -62,6 +62,81 @@ jobs:
         with:
           working-directory: docs/schema/V1
 
+  vulnerabilities-introduced:
+    # Fails the PR if it introduces a package@version pair that is vulnerable on the PR head
+    # but was not vulnerable on the base commit. Covers both direct and transitive dependencies
+    # via `dotnet list package --vulnerable --include-transitive`, since GitHub's dependency graph
+    # does not parse packages.lock.json for NuGet.
+    name: Vulnerabilities introduced
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout PR head
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: pr
+
+      - name: Checkout base
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          global-json-file: pr/global.json
+
+      - name: Scan base (${{ github.event.pull_request.base.ref }})
+        working-directory: base
+        run: |
+          dotnet restore
+          dotnet list package --vulnerable --include-transitive --format json > "$GITHUB_WORKSPACE/base-vulns.json"
+
+      - name: Scan PR head
+        working-directory: pr
+        run: |
+          dotnet restore
+          dotnet list package --vulnerable --include-transitive --format json > "$GITHUB_WORKSPACE/pr-vulns.json"
+
+      - name: Fail on newly-introduced vulnerabilities
+        run: |
+          set -euo pipefail
+          extract() {
+            jq -r '
+              .projects[]?.frameworks[]? |
+              (.topLevelPackages // []) + (.transitivePackages // []) |
+              .[] |
+              select(.vulnerabilities) |
+              .vulnerabilities[] as $v |
+              "\(.id)@\(.resolvedVersion) [\($v.severity)] \($v.advisoryurl)"
+            ' "$1" | sort -u
+          }
+          extract base-vulns.json > base.txt
+          extract pr-vulns.json > pr.txt
+
+          new=$(comm -13 base.txt pr.txt || true)
+          if [ -n "$new" ]; then
+            {
+              echo "## New vulnerable dependencies introduced by this PR"
+              echo ""
+              echo '```'
+              echo "$new"
+              echo '```'
+              echo ""
+              echo "These package@version pairs are vulnerable on the PR head but were not vulnerable on \`${{ github.event.pull_request.base.ref }}\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::New vulnerable dependencies introduced:"
+            echo "$new"
+            exit 1
+          fi
+          echo "No new vulnerable dependencies introduced." >> "$GITHUB_STEP_SUMMARY"
+
   build-infrastructure:
     uses: ./.github/workflows/workflow-build-infrastructure.yml
     needs: [ check-for-changes ]

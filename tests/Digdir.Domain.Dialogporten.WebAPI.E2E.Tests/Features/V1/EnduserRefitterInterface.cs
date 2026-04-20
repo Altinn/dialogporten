@@ -230,7 +230,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>503</term>
@@ -260,7 +260,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -298,7 +298,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -337,7 +337,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -374,7 +374,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -425,7 +425,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -478,7 +478,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -516,7 +516,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -554,7 +554,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -597,7 +597,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>
@@ -642,7 +642,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </item>
         /// <item>
         /// <term>401</term>
-        /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
+        /// <description>Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
         /// <term>403</term>

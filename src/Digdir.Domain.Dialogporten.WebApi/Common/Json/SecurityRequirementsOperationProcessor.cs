@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.NotificationCondition;
 using NSwag;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
@@ -27,6 +28,9 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
         securityRequirement[JwtBearerAuth] =
             context.OperationDescription.Operation.Tags.FirstOrDefault() switch
             {
+                _ when context.OperationDescription.Path.Contains("/api/v1/serviceowner/dialogs/{dialogId}/actions/should-send-notification") =>
+                    new[] { AuthorizationScope.ServiceProvider, AuthorizationScope.NotificationConditionCheck },
+
                 var tag when string.Equals(tag, ServiceOwnerGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
                     => IsServiceOwnerSearchEndpoint(context.OperationDescription)
                         ? new[] { AuthorizationScope.ServiceProvider, AuthorizationScope.ServiceProviderSearch }

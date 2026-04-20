@@ -12,11 +12,13 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events;
 
 public sealed class DialogSeenEvent(
     IDialogDbContext db,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IDialogSeenLogWriter seenLogWriter
 ) : INotificationHandler<DialogSeenDomainEvent>
 {
     private readonly IDialogDbContext _db = db ?? throw new ArgumentNullException(nameof(db));
     private readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+    private readonly IDialogSeenLogWriter _seenLogWriter = seenLogWriter ?? throw new ArgumentNullException(nameof(seenLogWriter));
 
     public async Task Handle(DialogSeenDomainEvent dialogSeenDomainEvent, CancellationToken cancellationToken)
     {
@@ -45,33 +47,19 @@ public sealed class DialogSeenEvent(
             return;
         }
 
-        var actorNameEntity = new ActorName { ActorId = dialogSeenDomainEvent.UserId };
-
-        if (dialog.SeenLog.Count == 0)
-        {
-            var dialogSeenLogSeenByActor = new DialogSeenLogSeenByActor
-            {
-                ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntity = actorNameEntity
-            };
-
-            var seenLog = new DialogSeenLog
-            {
-                Id = dialogSeenDomainEvent.SeenLogId.Value,
-                EndUserTypeId = dialogSeenDomainEvent.UserType.Value,
-                IsViaServiceOwner = dialogSeenDomainEvent.UserType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
-                SeenBy = dialogSeenLogSeenByActor,
-                CreatedAt = dialogSeenDomainEvent.OccurredAt
-            };
-
-            dialog.SeenLog.Add(seenLog);
-            _db.DialogSeenLog.Add(seenLog);
-        }
+        await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
+        var seenLogWriteResult = await _seenLogWriter.EnsureSeenLog(
+            dialogSeenDomainEvent.SeenLogId.Value,
+            dialogSeenDomainEvent.DialogId,
+            dialogSeenDomainEvent.UserId,
+            dialogSeenDomainEvent.UserType.Value,
+            dialogSeenDomainEvent.OccurredAt,
+            cancellationToken);
 
         var performedBy = new LabelAssignmentLogActor
         {
             ActorTypeId = ActorType.Values.PartyRepresentative,
-            ActorNameEntity = actorNameEntity
+            ActorNameEntityId = seenLogWriteResult.ActorNameId
         };
 
         dialog.EndUserContext.UpdateSystemLabels(

@@ -174,7 +174,7 @@ spec:
       spot8cpu28gbmem: 'true'
     resources:
       requests:
-        cpu: 250m
+        cpu: 6
         memory: 200Mi
     tolerations:
       - effect: NoSchedule

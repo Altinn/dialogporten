@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -9,6 +10,8 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialog
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
+    private static readonly HttpClient HttpClient = new();
+
     [E2EFact]
     public async Task Should_Return_SeenSinceLastUpdate_When_Dialog_Has_Been_Viewed()
     {
@@ -142,15 +145,27 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
     [E2EFact]
     public async Task Should_Return_400_When_SystemLabel_Is_Invalid()
     {
-        // Act - use raw HTTP to pass an invalid system label string
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+        // Refit cannot serialize invalid enum values for query params,
+        // so this negative test must send a raw value.
+        var token = await TestTokenGenerator.GenerateTokenAsync(
+            TokenKind.EndUser,
+            Fixture.Settings,
+            TestContext.Current.CancellationToken);
+
+        var uriBuilder = new UriBuilder(Fixture.Settings.DialogportenBaseUri)
         {
-            Party = [E2EConstants.DefaultParty],
-            SystemLabel = [(DialogEndUserContextsEntities_SystemLabel)999]
-        }, new());
+            Port = Fixture.Settings.WebAPiPort
+        };
+        uriBuilder.Path = $"{uriBuilder.Path.TrimEnd('/')}/api/v1/enduser/dialogs";
+        uriBuilder.Query = $"party={Uri.EscapeDataString(E2EConstants.DefaultParty)}" +
+                           $"&systemLabel={Uri.EscapeDataString("invalid")}";
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var response = await HttpClient.SendAsync(request, TestContext.Current.CancellationToken);
 
         // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [E2EFact]

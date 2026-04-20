@@ -82,7 +82,7 @@ Use the shared E2E base class and custom attributes so hooks and explicit behavi
 - GraphQL: inherit `E2ETestBase<GraphQlE2EFixture>`.
 - Keep tests under `Features/*`.
 - Use `[E2EFact]` or `[E2ETheory]` on every test (do not use `[Fact]`/`[Theory]`).
-- Explicit behavior is centralized in `E2EExplicitOptions` in [Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs](../src/Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs).
+- Explicit behavior is centralized in `E2EExplicitOptions` in [Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs](../tests/Digdir.Library.Dialogporten.E2E.Common/E2ETestAttributes.cs).
 
 Tests must not assume a clean environment. When listing dialogs (or similar), account for other dialogs that may exist for the same test org
 or service resource.

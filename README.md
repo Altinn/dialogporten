@@ -126,12 +126,12 @@ If you need do debug the WebApi/GraphQl projects in an IDE, you can alternativel
 First, create a dotnet user secret for the DB connection string.
 
 ```powershell
-dotnet user-secrets set -p "./src/Digdir.Domain.Dialogporten.WebApi" "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
+dotnet user-secrets set -p "./src/Digdir.Domain.Dialogporten.WebApi" "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=15432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
 ```
 
 Then run `podman compose` without the WebAPI/GraphQl projects.
 ```powershell
-podman compose -f docker-compose-no-webapi.yml up 
+podman compose -f docker-compose-db-redis.yml up 
 ```
 
 ## DB development
@@ -296,7 +296,7 @@ This is to ensure that the SDK version used in the local development environment
 `global.json` is used when building the solution in CI/CD.
 
 ## Development in local and test environments
-To generate test tokens, see https://github.com/Altinn/AltinnTestTools. There is a request in the Postman collection for this.
+To generate test tokens, see https://github.com/Altinn/AltinnTestTools. There is a request in the [Bruno collection](https://github.com/Altinn/dialogporten-bruno) for this.  
 
 ### Local development settings
 We are able to toggle some external resources in local development. This is done through the `appsettings.Development.json` file. The following settings are available:
@@ -404,7 +404,7 @@ Infrastructure definitions for the project are located in the `.azure/infrastruc
 
 For example, to add a new storage account, you would:
 - Create or update a Bicep file within the `.azure/infrastructure` folder to include the storage account resource definition.
-- Ensure that the Bicep file is referenced correctly in `.azure/infrastructure/infrastructure.bicep` to be included in the deployment process.
+- Ensure that the Bicep file is referenced correctly in `.azure/infrastructure/main.bicep` to be included in the deployment process.
 
 Refer to [docs/Infrastructure.md](docs/Infrastructure.md) for more detailed information.
 

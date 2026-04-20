@@ -2213,13 +2213,13 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         public string DialogToken { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by a service owner
+        /// The number of transmissions sent by a service owner.
         /// </summary>
         [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
         public int FromServiceOwnerTransmissionsCount { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by a party representative
+        /// The number of transmissions sent by a party representative.
         /// </summary>
         [JsonPropertyName("fromPartyTransmissionsCount")]
         public int FromPartyTransmissionsCount { get; set; }

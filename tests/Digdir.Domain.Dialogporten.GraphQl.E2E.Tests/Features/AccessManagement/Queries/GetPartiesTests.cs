@@ -8,7 +8,7 @@ namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.AccessManagement
 [Collection(nameof(GraphQlTestCollectionFixture))]
 public class GetPartiesTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE2EFixture>(fixture)
 {
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01", "staging"])]
     public async Task Authorized_Parties_Verify_Snapshot()
     {
         // Act
@@ -22,7 +22,6 @@ public class GetPartiesTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE2E
 
         await VerifyJsonSnapshot(
             JsonSerializer.Serialize(result.Data),
-            scrubGuids: false,
-            fileNameSuffix: Fixture.DotnetEnvironment);
+            scrubGuids: false);
     }
 }

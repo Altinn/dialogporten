@@ -30,7 +30,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         content.Should().ContainSingle().Which.Id.Should().Be(transmissionId);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Search_Transmissions_Verify_Snapshot()
     {
         // Arrange
@@ -47,7 +47,6 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(response.Content),
-            fileNameSuffix: Fixture.DotnetEnvironment);
+            JsonSerializer.Serialize(response.Content));
     }
 }

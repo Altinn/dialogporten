@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "00000000-0000-0000-0000-000000000000",
   "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "authorizationAttribute": null,
@@ -10,8 +10,8 @@
   "type": "Information",
   "sender": {
     "actorType": "PartyRepresentative",
-    "actorName": "UnitName1784976",
-    "actorId": "urn:altinn:organization:identifier-no:713431400"
+    "actorName": "DIGITALISERINGSDIREKTORATET",
+    "actorId": "urn:altinn:organization:identifier-no:991825827"
   },
   "content": {
     "title": {

@@ -1,11 +1,17 @@
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetSeenLog;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using AwesomeAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using OneOf.Types;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
@@ -170,6 +176,43 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         });
 
     [Fact]
+    public async Task Concurrent_SeenLog_Writes_For_Same_SeenLog_Should_Be_Idempotent()
+    {
+        var createResult = await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ExecuteAndAssert<CreateDialogSuccess>();
+        var dialog = (await Application.GetDbEntities<DialogEntity>())
+            .Single(x => x.Id == createResult.DialogId);
+        var seenLogId = Guid.CreateVersion7();
+        var gate = new ConcurrentSeenLogWriterGate(parallelism: 8);
+
+        var results = await Task.WhenAll(Enumerable
+            .Range(0, 8)
+            .Select(_ => EnsureSeenLog(
+                gate,
+                seenLogId,
+                dialog.Id,
+                TestUsers.DefaultParty,
+                DialogUserType.Values.Person,
+                DateTimeOffset.UtcNow)));
+
+        var seenLogs = await Application.GetDbEntities<DialogSeenLog>();
+        var seenByActors = await Application.GetDbEntities<DialogSeenLogSeenByActor>();
+        var actorNames = await Application.GetDbEntities<ActorName>();
+        var actorId = TestUsers.DefaultParty.ToLowerInvariant();
+        var actorName = actorNames.Should().ContainSingle(x =>
+            x.ActorId == actorId
+         && x.Name == "Brando Sando").Subject;
+
+        seenLogs.Should().ContainSingle(x => x.Id == seenLogId);
+        seenByActors.Should().ContainSingle(x => x.DialogSeenLogId == seenLogId);
+        results
+            .Select(x => x.ActorNameId)
+            .Should()
+            .OnlyContain(x => x == actorName.Id);
+    }
+
+    [Fact]
     public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastUpdate_On_Dialog_Search() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
@@ -201,6 +244,35 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
     }
 
+    private async Task<DialogSeenLogWriteResult> EnsureSeenLog(
+        ConcurrentSeenLogWriterGate gate,
+        Guid seenLogId,
+        Guid dialogId,
+        string actorId,
+        DialogUserType.Values userType,
+        DateTimeOffset seenAt)
+    {
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var seenLogWriter = scope.ServiceProvider.GetRequiredService<IDialogSeenLogWriter>();
+
+        await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
+        await gate.WaitUntilAllWritersAreReady(cancellationToken);
+
+        var result = await seenLogWriter.EnsureSeenLog(
+            seenLogId,
+            dialogId,
+            actorId,
+            userType,
+            seenAt,
+            cancellationToken);
+
+        var saveResult = await unitOfWork.SaveChangesAsync(cancellationToken);
+        saveResult.Value.Should().BeOfType<Success>();
+        return result;
+    }
+
     [Fact]
     public Task CaseInsensitive_Party_Match_For_IsCurrentUser() =>
         FlowBuilder.For(Application)
@@ -213,6 +285,22 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .ExecuteAndAssert<DialogDto>(x =>
                 x.SeenSinceLastUpdate.Should().ContainSingle()
                     .Which.IsCurrentEndUser.Should().BeTrue());
+
+    private sealed class ConcurrentSeenLogWriterGate(int parallelism)
+    {
+        private readonly TaskCompletionSource _allWritersAreReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private int _entered;
+
+        public async Task WaitUntilAllWritersAreReady(CancellationToken cancellationToken)
+        {
+            if (Interlocked.Increment(ref _entered) == parallelism)
+            {
+                _allWritersAreReady.TrySetResult();
+            }
+
+            await _allWritersAreReady.Task.WaitAsync(cancellationToken);
+        }
+    }
 }
 
 internal static class SeenLogAssertionExtensions

@@ -1,115 +1,115 @@
 ﻿[
   {
-    "attachments": null,
-    "authorizationAttribute": null,
-    "content": {
-      "contentReference": null,
-      "summary": null,
-      "title": {
-        "isAuthorized": null,
-        "mediaType": "text/plain",
-        "value": [
-          {
-            "languageCode": "nb",
-            "value": "Melding med vedlegg"
-          }
-        ]
-      }
-    },
+    "id": "00000000-0000-0000-0000-000000000000",
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-    "deletedAt": null,
+    "authorizationAttribute": null,
+    "isAuthorized": true,
     "extendedType": null,
     "externalReference": "first-transmission",
-    "id": "00000000-0000-0000-0000-000000000000",
-    "isAuthorized": true,
-    "navigationalActions": null,
     "relatedTransmissionId": null,
+    "deletedAt": null,
+    "type": "Information",
     "sender": {
-      "actorId": null,
+      "actorType": "ServiceOwner",
       "actorName": null,
-      "actorType": "ServiceOwner"
+      "actorId": null
     },
-    "type": "Information"
-  },
-  {
-    "attachments": [
-      {
-        "displayName": [
+    "content": {
+      "title": {
+        "value": [
           {
-            "languageCode": "nb",
-            "value": "Attachment display name"
+            "value": "Melding med vedlegg",
+            "languageCode": "nb"
           }
         ],
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "mediaType": "text/plain",
+        "isAuthorized": null
+      },
+      "summary": null,
+      "contentReference": null
+    },
+    "attachments": null,
+    "navigationalActions": null
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "authorizationAttribute": null,
+    "isAuthorized": true,
+    "extendedType": "https://digdir.com/transmission-type",
+    "externalReference": "second-transmission",
+    "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
+    "deletedAt": null,
+    "type": "Information",
+    "sender": {
+      "actorType": "PartyRepresentative",
+      "actorName": "DIGITALISERINGSDIREKTORATET",
+      "actorId": "urn:altinn:organization:identifier-no:991825827"
+    },
+    "content": {
+      "title": {
+        "value": [
+          {
+            "value": "Melding med vedlegg",
+            "languageCode": "nb"
+          }
+        ],
+        "mediaType": "text/plain",
+        "isAuthorized": null
+      },
+      "summary": {
+        "value": [
+          {
+            "value": "Summary",
+            "languageCode": "nb"
+          }
+        ],
+        "mediaType": "text/plain",
+        "isAuthorized": null
+      },
+      "contentReference": {
+        "value": [
+          {
+            "value": "https://digdir.com/content-reference",
+            "languageCode": "nb"
+          }
+        ],
+        "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+        "isAuthorized": null
+      }
+    },
+    "attachments": [
+      {
         "id": "00000000-0000-0000-0000-000000000000",
+        "displayName": [
+          {
+            "value": "Attachment display name",
+            "languageCode": "nb"
+          }
+        ],
         "name": "attachment-name",
         "urls": [
           {
-            "consumerType": "Gui",
             "id": "00000000-0000-0000-0000-000000000000",
+            "url": "https://digdir.com/attachment-url",
             "mediaType": "application/pdf",
-            "url": "https://digdir.com/attachment-url"
-          }
-        ]
-      }
-    ],
-    "authorizationAttribute": null,
-    "content": {
-      "contentReference": {
-        "isAuthorized": null,
-        "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
-        "value": [
-          {
-            "languageCode": "nb",
-            "value": "https://digdir.com/content-reference"
-          }
-        ]
-      },
-      "summary": {
-        "isAuthorized": null,
-        "mediaType": "text/plain",
-        "value": [
-          {
-            "languageCode": "nb",
-            "value": "Summary"
-          }
-        ]
-      },
-      "title": {
-        "isAuthorized": null,
-        "mediaType": "text/plain",
-        "value": [
-          {
-            "languageCode": "nb",
-            "value": "Melding med vedlegg"
-          }
-        ]
-      }
-    },
-    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-    "deletedAt": null,
-    "extendedType": "https://digdir.com/transmission-type",
-    "externalReference": "second-transmission",
-    "id": "00000000-0000-0000-0000-000000000000",
-    "isAuthorized": true,
-    "navigationalActions": [
-      {
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
-        "title": [
-          {
-            "languageCode": "nb",
-            "value": "Action title"
+            "consumerType": "Gui"
           }
         ],
-        "url": "https://digdir.com/action-url"
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
       }
     ],
-    "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
-    "sender": {
-      "actorId": "urn:altinn:organization:identifier-no:991825827",
-      "actorName": "DIGITALISERINGSDIREKTORATET",
-      "actorType": "PartyRepresentative"
-    },
-    "type": "Information"
+    "navigationalActions": [
+      {
+        "title": [
+          {
+            "value": "Action title",
+            "languageCode": "nb"
+          }
+        ],
+        "url": "https://digdir.com/action-url",
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+      }
+    ]
   }
 ]

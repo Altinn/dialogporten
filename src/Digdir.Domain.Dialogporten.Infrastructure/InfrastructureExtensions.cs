@@ -140,6 +140,7 @@ public static class InfrastructureExtensions
             .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
@@ -328,13 +329,14 @@ public static class InfrastructureExtensions
                 customConfiguration(x);
             }
 
+            ConfigureServiceBusHealthCheck(x);
+
             if (builderContext.Environment.IsDevelopment() && builderContext.DevSettings.UseInMemoryServiceBusTransport)
             {
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 return;
             }
 
-            x.ConfigureHealthCheckOptions(options => options.Tags.Add("dependencies"));
             x.AddConfigureEndpointsCallback((_, cfg) =>
             {
                 if (cfg is IServiceBusReceiveEndpointConfigurator sb)
@@ -349,6 +351,8 @@ public static class InfrastructureExtensions
                 cfg.ConfigureEndpoints(context);
             });
         });
+
+        builderContext.Services.AddServiceBusHealthCheck();
 
         new DummyRequestExecutorBuilder { Services = builderContext.Services }
             .AddRedisSubscriptions(_ => ConnectionMultiplexer.Connect(builderContext.InfraSettings.Redis.ConnectionString),
@@ -371,6 +375,8 @@ public static class InfrastructureExtensions
                 o.DisableInboxCleanupService();
             });
 
+            ConfigureServiceBusHealthCheck(x);
+
             if (builderContext.Environment.IsDevelopment() && builderContext.DevSettings.UseInMemoryServiceBusTransport)
             {
                 x.UsingInMemory();
@@ -379,6 +385,8 @@ public static class InfrastructureExtensions
 
             x.UsingAzureServiceBus();
         });
+
+        builderContext.Services.AddServiceBusHealthCheck();
 
         new DummyRequestExecutorBuilder { Services = builderContext.Services }
             .AddRedisSubscriptions(_ => ConnectionMultiplexer.Connect(builderContext.InfraSettings.Redis.ConnectionString),
@@ -432,10 +440,27 @@ public static class InfrastructureExtensions
         return services;
     }
 
+    private static void ConfigureServiceBusHealthCheck(IBusRegistrationConfigurator configurator) =>
+        configurator.ConfigureHealthCheckOptions(options =>
+        {
+            options.Name = ServiceBusHealthCheck.InnerHealthCheckName;
+            options.Tags.Add(ServiceBusHealthCheck.InnerHealthCheckTag);
+        });
+
+    private static IServiceCollection AddServiceBusHealthCheck(this IServiceCollection services)
+    {
+        services.AddHealthChecks()
+            .AddCheck<ServiceBusHealthCheck>("servicebus", tags: ["dependencies"]);
+
+        services.AddSingleton<ServiceBusHealthCheck>();
+
+        return services;
+    }
+
     private static IServiceCollection AddCustomHealthChecks(this IServiceCollection services)
     {
         services.AddHealthChecks()
-            .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies", "redis"])
+            .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies"])
             .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
 
         services.AddSingleton<RedisHealthCheck>();

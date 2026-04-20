@@ -57,7 +57,7 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
 // private endpoint name max characters is 80
 var serviceBusPrivateEndpointName = uniqueResourceName('${namePrefix}-service-bus-pe', 80)
 
-resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = if (vnetEnabled) {
+resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2025-05-01' = if (vnetEnabled) {
   name: serviceBusPrivateEndpointName
   location: location
   properties: {

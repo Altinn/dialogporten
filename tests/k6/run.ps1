@@ -10,7 +10,7 @@ param (
 
     [Parameter(Mandatory=$true)]
     [String]$TokenGeneratorPassword,
-    
+
     [Parameter(Mandatory=$true)]
     [string]$FilePath,
 
@@ -50,7 +50,6 @@ if (-not (Test-Path $FilePath)) {
 
 # Generate tests
 & "$PSScriptRoot\scripts\generate_all_tests.ps1" "$PSScriptRoot\tests\serviceowner\" > $null
-& "$PSScriptRoot\scripts\generate_all_tests.ps1" "$PSScriptRoot\tests\enduser\" > $null
 
 # Handle environment settings
 $insecureSkipTLS = $null
@@ -69,7 +68,7 @@ $env:TOKEN_GENERATOR_PASSWORD = $TokenGeneratorPassword
 if (($k6Available -and -not $ForceDocker) -or (-not $dockerAvailable)) {
     Write-Host "Using local k6 installation"
     k6 run @K6Args $FilePath
-} else {   
+} else {
     Write-Host "Using dockerized k6"
 
     $FilePath = $FilePath.Replace('\', '/')

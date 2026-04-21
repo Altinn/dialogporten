@@ -24,7 +24,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Verify that all 4 dialogs are searchable
         await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelTag,
@@ -34,7 +34,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             degradationMessage: "Search indexing speed is degraded.");
 
         // Act - first page with limit 2
-        var firstPage = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+        var firstPage = await Fixture.EnduserApi.V1.SearchDialogs(new()
         {
             Party = [E2EConstants.DefaultParty],
             Search = sentinelTag,
@@ -49,7 +49,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         firstPage.Content.ContinuationToken.Should().NotBeNullOrWhiteSpace();
 
         // Act - second page using continuation token
-        var secondPage = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+        var secondPage = await Fixture.EnduserApi.V1.SearchDialogs(new()
         {
             Party = [E2EConstants.DefaultParty],
             Search = sentinelTag,

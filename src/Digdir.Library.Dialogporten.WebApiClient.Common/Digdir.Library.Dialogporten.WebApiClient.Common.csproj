@@ -14,4 +14,14 @@
         <PackageReference Include="Refit" Version="10.1.6" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Altinn.ApiClients.Dialogporten" />
+        <InternalsVisibleTo Include="Altinn.ApiClients.Dialogporten.EndUser" />
+        <InternalsVisibleTo Include="Altinn.ApiClients.Dialogporten.ServiceOwner" />
+        <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.Unit.Tests" />
+        <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.EndUser.Unit.Tests" />
+        <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.Unit.Tests" />
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    </ItemGroup>
+
 </Project>

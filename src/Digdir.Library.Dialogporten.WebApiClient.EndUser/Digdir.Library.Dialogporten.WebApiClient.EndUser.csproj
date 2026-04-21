@@ -24,10 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Common\IClock.cs" Link="Common\IClock.cs" />
-        <Compile Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Common\ByteSpanExtensions.cs" Link="Common\ByteSpanExtensions.cs" />
-        <Compile Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Common\ClaimsPrincipalExtensions.cs" Link="Common\ClaimsPrincipalExtensions.cs" />
-        <Compile Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Infrastructure\IInternalDialogportenApi.cs" Link="Infrastructure\IInternalDialogportenApi.cs" />
+        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(Configuration)' == 'Release'">

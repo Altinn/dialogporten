@@ -14,6 +14,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Arrange
         var extendedStatus1 = $"status:{Guid.NewGuid()}";
         var extendedStatus2 = $"status:{Guid.NewGuid()}";
+        var controlExtendedStatus = $"status:{Guid.NewGuid()}";
 
         var dialogId1 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
         {
@@ -25,6 +26,11 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             x.ExtendedStatus = extendedStatus2;
         });
 
+        var controlDialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+        {
+            x.ExtendedStatus = controlExtendedStatus;
+        });
+
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
             ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
@@ -34,7 +40,8 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             }, new(), ct),
             isSuccessful: r => r.Content?.Items
                 .Count(x => x.Id == dialogId1 ||
-                            x.Id == dialogId2) == 2,
+                            x.Id == dialogId2) == 2 &&
+                            r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
@@ -42,6 +49,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         searchResult.Content.Should().NotBeNull();
         searchResult.Content.Items.Should().Contain(x => x.Id == dialogId1);
         searchResult.Content.Items.Should().Contain(x => x.Id == dialogId2);
+        searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }
 
     [E2EFact]
@@ -54,6 +62,8 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             x.ServiceResource = auxResource;
         });
 
+        var controlDialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
             ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
@@ -61,7 +71,8 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 Party = [E2EConstants.DefaultParty],
                 ServiceResource = [auxResource]
             }, new(), ct),
-            isSuccessful: r => r.Content?.Items.Any(x => x.Id == dialogId) is true,
+            isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
+                               r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
@@ -69,16 +80,24 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         searchResult.Content.Should().NotBeNull();
         searchResult.Content.Items.Single(x => x.Id == dialogId)
             .ServiceResource.Should().Be(auxResource);
+        searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }
 
     [E2EFact]
     public async Task Should_Filter_By_Process()
     {
         // Arrange
-        const string process = "urn:test:process:1";
+        var process = $"urn:test:process:{Guid.NewGuid()}";
+        var controlProcess = $"urn:test:process:{Guid.NewGuid()}";
+
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
         {
             x.Process = process;
+        });
+
+        var controlDialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+        {
+            x.Process = controlProcess;
         });
 
         // Act
@@ -88,7 +107,8 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 Party = [E2EConstants.DefaultParty],
                 Process = process
             }, new(), ct),
-            isSuccessful: r => r.Content?.Items.Any(x => x.Id == dialogId) is true,
+            isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
+                               r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
@@ -96,6 +116,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         searchResult.Content.Should().NotBeNull();
         searchResult.Content.Items.Single(x => x.Id == dialogId)
             .Process.Should().Be(process);
+        searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }
 
     [E2EFact]
@@ -103,6 +124,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var controlDialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Set system label to Bin via service owner API
         var setLabelResponse = await Fixture.ServiceownerApi.SetSystemLabel(
@@ -111,6 +133,12 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             x => x.AddLabels = [Altinn.ApiClients.Dialogporten.Features.V1.DialogEndUserContextsEntities_SystemLabel.Bin]);
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
+        var controlSetLabelResponse = await Fixture.ServiceownerApi.SetSystemLabel(
+            controlDialogId,
+            E2EConstants.DefaultEndUserSsn,
+            x => x.AddLabels = [Altinn.ApiClients.Dialogporten.Features.V1.DialogEndUserContextsEntities_SystemLabel.Archive]);
+        controlSetLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
             ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
@@ -118,7 +146,8 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 Party = [E2EConstants.DefaultParty],
                 SystemLabel = [DialogEndUserContextsEntities_SystemLabel.Bin]
             }, new(), ct),
-            isSuccessful: r => r.Content?.Items.Any(x => x.Id == dialogId) is true,
+            isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
+                               r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
@@ -126,6 +155,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         searchResult.Content.Should().NotBeNull();
         var dialog = searchResult.Content.Items.Single(x => x.Id == dialogId);
         dialog.EndUserContext.SystemLabels.Should().Contain(DialogEndUserContextsEntities_SystemLabel.Bin);
+        searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }
 
 }

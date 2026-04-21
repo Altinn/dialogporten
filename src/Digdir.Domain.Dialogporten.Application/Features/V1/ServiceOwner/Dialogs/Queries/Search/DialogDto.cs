@@ -151,7 +151,7 @@ public sealed class DialogDto
     /// <summary>
     /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
-    [Obsolete($"Use {nameof(IsContentSeen)} instead")]
+    [Obsolete($"Use {nameof(IsContentSeen)} instead. See the new field's description for an explanation of the new behavior.")]
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
@@ -170,8 +170,9 @@ public sealed class DialogDto
     public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
 
     /// <summary>
-    /// Indicates whether the dialog has been seen by at least one end user since the last content update.
-    /// This flag's value is affected by <see cref="DialogEndUserContextDto.SystemLabels"/> and <see cref="SystemLabel.Values.MarkedAsUnopened"/>
+    /// A dialog is considered seen if
+    /// - it has been retrieved by a user, since its last content update, and
+    /// - there is no <see cref="DialogEndUserContextDto.SystemLabels"/> <see cref="SystemLabel.Values.MarkedAsUnopened"/>
     /// </summary>
     public bool IsContentSeen { get; set; }
 

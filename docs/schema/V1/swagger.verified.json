@@ -895,7 +895,7 @@
             "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -908,7 +908,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "org": {
@@ -1987,7 +1987,7 @@
             "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -2000,7 +2000,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "latestActivity": {
@@ -4902,7 +4902,7 @@
             "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -4920,7 +4920,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "org": {
@@ -6076,7 +6076,7 @@
             "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -6089,7 +6089,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "latestActivity": {

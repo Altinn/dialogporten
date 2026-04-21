@@ -2391,7 +2391,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use IsContentSeen instead")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -2413,8 +2413,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog has been seen by at least one end user since the last content update.
-        /// <br/>This flag's value is affected by SystemLabels and MarkedAsUnopened
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
         /// </summary>
         [JsonPropertyName("isContentSeen")]
         public bool IsContentSeen { get; set; }
@@ -3089,7 +3090,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use IsContentSeen instead")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3159,8 +3160,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog has been seen by at least one end user since the last content update.
-        /// <br/>This flag's value is affected by SystemLabels and MarkedAsUnopened
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
         /// </summary>
         [JsonPropertyName("isContentSeen")]
         public bool IsContentSeen { get; set; }

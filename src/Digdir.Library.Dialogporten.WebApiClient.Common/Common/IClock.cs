@@ -1,11 +1,11 @@
-namespace Altinn.ApiClients.Dialogporten.EndUser.Common;
+namespace Altinn.ApiClients.Dialogporten.Common;
 
 internal interface IClock
 {
     DateTimeOffset UtcNow { get; }
 }
 
-internal class DefaultClock : IClock
+internal sealed class DefaultClock : IClock
 {
     public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 }

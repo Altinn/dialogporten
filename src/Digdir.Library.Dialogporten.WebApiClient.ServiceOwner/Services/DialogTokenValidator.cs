@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using Altinn.ApiClients.Dialogporten.ServiceOwner.Common;
+using Altinn.ApiClients.Dialogporten.Common;
 using NSec.Cryptography;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Services;

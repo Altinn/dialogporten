@@ -23,6 +23,7 @@
     <Project Path="src/Digdir.Library.Entity.EntityFrameworkCore/Digdir.Library.Entity.EntityFrameworkCore.csproj" />
   </Folder>
   <Folder Name="/src/Libraries/WebApiClient/">
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.Common/Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
     <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj" />
     <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj" />
     <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.WebApiSample/Digdir.Library.Dialogporten.WebApiClient.WebApiSample.csproj" />

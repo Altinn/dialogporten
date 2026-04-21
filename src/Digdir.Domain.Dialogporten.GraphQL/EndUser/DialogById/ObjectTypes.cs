@@ -97,6 +97,7 @@ public sealed class Dialog
     [GraphQLDescription("The aggregated status of the dialog.")]
     public DialogStatus Status { get; set; }
 
+    [GraphQLDeprecated($"Use {nameof(IsContentSeen)} instead")]
     [GraphQLDescription("Indicates whether the dialog contains content that has not been viewed or opened by the user yet.")]
     public bool HasUnopenedContent { get; set; }
 
@@ -130,8 +131,8 @@ public sealed class Dialog
     [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.")]
     public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 
-    [GraphQLDescription("Indicates whether the dialog has been seen by at least one end user since the last content update. Note: This flag's value is not affected by the MarkedAsUnopened SystemLabel")]
-    public bool IsSeenSinceLastContentUpdate { get; set; }
+    [GraphQLDescription("Indicates whether the dialog has been seen by at least one end user since the last content update. Note: This flag's value is affected by the MarkedAsUnopened SystemLabel")]
+    public bool IsContentSeen { get; set; }
 
     [GraphQLDescription("The immutable list of transmissions associated with the dialog.")]
     public List<Transmission> Transmissions { get; set; } = [];

@@ -893,9 +893,9 @@
           },
           "hasUnopenedContent": {
             "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -905,6 +905,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
             "type": "boolean"
           },
           "org": {
@@ -1981,9 +1985,9 @@
           },
           "hasUnopenedContent": {
             "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -1993,6 +1997,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
             "type": "boolean"
           },
           "latestActivity": {
@@ -4892,9 +4900,9 @@
           },
           "hasUnopenedContent": {
             "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -4909,6 +4917,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
             "type": "boolean"
           },
           "org": {
@@ -6062,9 +6074,9 @@
           },
           "hasUnopenedContent": {
             "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.\n            \nObsolete: A dialog is now considered \u0027seen\u0027 when the dialog has:\n- At least one entry in SeenSinceLastContentUpdate and\n- No system label MarkedAsUnopened.",
+            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
             "type": "boolean",
-            "x-deprecatedMessage": "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead"
+            "x-deprecatedMessage": "Use IsContentSeen instead"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -6074,6 +6086,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "Indicates whether the dialog has been seen by at least one end user since the last content update.\nThis flag\u0027s value is affected by SystemLabels and MarkedAsUnopened",
             "type": "boolean"
           },
           "latestActivity": {

@@ -40,9 +40,9 @@ services:
   dialogporten-redisinsight:
     image: redis/redisinsight
     ports:
-      - "7216:80"
+      - "7216:5540"
     environment:
-      RI_APP_PORT: 80
+      RI_APP_PORT: 5540
       RI_APP_HOST: '0.0.0.0'
     volumes:
       - redisinsight_cache:/data

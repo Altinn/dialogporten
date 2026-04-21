@@ -130,6 +130,9 @@ public sealed class Dialog
     [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.")]
     public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 
+    [GraphQLDescription("Indicates whether the dialog has been seen by at least one end user since the last content update. Note: This flag's value is not affected by the MarkedAsUnopened SystemLabel")]
+    public bool IsSeenSinceLastContentUpdate { get; set; }
+
     [GraphQLDescription("The immutable list of transmissions associated with the dialog.")]
     public List<Transmission> Transmissions { get; set; } = [];
 

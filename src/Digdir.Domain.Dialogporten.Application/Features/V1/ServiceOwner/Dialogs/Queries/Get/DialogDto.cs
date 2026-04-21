@@ -219,6 +219,12 @@ public sealed class DialogDto
     public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
 
     /// <summary>
+    /// Indicates whether the dialog has been seen by at least one end user since the last content update.
+    /// Note: This flag's value is not affected by <see cref="DialogEndUserContextDto.SystemLabels"/> with <see cref="SystemLabel.Values.MarkedAsUnopened"/>
+    /// </summary>
+    public bool IsSeenSinceLastContentUpdate { get; set; }
+
+    /// <summary>
     /// Metadata about the dialog owned by the service owner.
     /// </summary>
     public DialogServiceOwnerContextDto ServiceOwnerContext { get; set; } = null!;

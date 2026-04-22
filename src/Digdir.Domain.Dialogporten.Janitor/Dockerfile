@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.6@sha256:fe3843e29aed3cf72b2e1ef83ba4b6ef3912daa0268761bcb82772289555bb94 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.7@sha256:55e37c7795bfaf6b9cc5d77c155811d9569f529d86e20647704bc1d7dd9741d4 AS base
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0.203@sha256:2fce889b02c8db4795e8bfa5b4da5d03f67787d7ce3c614cc8df33daff3c42bb AS build

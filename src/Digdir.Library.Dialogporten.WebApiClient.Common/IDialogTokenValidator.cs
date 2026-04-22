@@ -50,7 +50,7 @@ public class DialogTokenValidationParameters
 }
 
 /// <summary>
-/// Represents the result of a dialog token validation. 
+/// Represents the result of a dialog token validation.
 /// </summary>
 public interface IValidationResult
 {

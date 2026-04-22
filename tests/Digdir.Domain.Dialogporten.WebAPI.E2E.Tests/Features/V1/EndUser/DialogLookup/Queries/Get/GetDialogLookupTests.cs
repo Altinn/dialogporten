@@ -1,4 +1,5 @@
 using System.Net;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -16,7 +17,7 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var instanceRef = $"urn:altinn:instance-id:1337/{Guid.NewGuid()}";
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogLookupQueriesGetDialogLookup(
+        var response = await Fixture.EnduserApi.V1.GetDialogLookup(
             instanceRef,
             new(),
             TestContext.Current.CancellationToken);
@@ -48,7 +49,7 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         });
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogLookupQueriesGetDialogLookup(
+        var response = await Fixture.EnduserApi.V1.GetDialogLookup(
             instanceRef,
             new(),
             TestContext.Current.CancellationToken);

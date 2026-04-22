@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -20,7 +21,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             dialog.AddTransmission(transmission => transmission.Id = transmissionId));
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetTransmissionDialogTransmission(
+        var response = await Fixture.EnduserApi.V1.GetDialogTransmission(
             dialogId,
             transmissionId,
             new V1EndUserCommon_AcceptedLanguages(),
@@ -46,7 +47,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             .Single(t => t.RelatedTransmissionId is not null).Id;
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetTransmissionDialogTransmission(
+        var response = await Fixture.EnduserApi.V1.GetDialogTransmission(
             dialogId,
             transmissionId,
             new V1EndUserCommon_AcceptedLanguages(),

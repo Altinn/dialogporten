@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 #nullable enable annotations
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
+namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 {
-    public class V1EndUserDialogsQueriesSearchDialogQueryParams
+    public class SearchDialogsQueryParams
     {
         
                 /// <summary>
@@ -203,7 +203,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/context/labellog")]
-        Task<IApiResponse<ICollection<V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> V1EndUserEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> SearchDialogLabelAssignmentLogs(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Sets the system labels of a dialog</summary>
         /// <remarks>
@@ -266,7 +266,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/enduser/dialogs/{dialogId}/context/systemlabels")]
-        Task<IApiResponse> V1EndUserEndUserContextCommandsSetSystemLabelSetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
@@ -315,7 +315,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset")]
-        Task<IApiResponse> V1EndUserEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels([Body] V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
+        Task<IApiResponse> BulkSetDialogSystemLabels([Body] V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
@@ -357,7 +357,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<V1EndUserDialogsQueriesSearchTransmissions_Transmission>>> V1EndUserDialogsQueriesSearchTransmissionsDialogTransmission(System.Guid dialogId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1EndUserDialogsQueriesSearchTransmissions_Transmission>>> SearchDialogTransmissions(System.Guid dialogId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -394,7 +394,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<V1EndUserDialogsQueriesSearchSeenLogs_SeenLog>>> V1EndUserDialogsQueriesSearchSeenLogsDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1EndUserDialogsQueriesSearchSeenLogs_SeenLog>>> SearchDialogSeenLogs(System.Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -432,7 +432,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<ICollection<V1EndUserDialogsQueriesSearchActivities_Activity>>> V1EndUserDialogsQueriesSearchActivitiesDialogActivity(System.Guid dialogId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<V1EndUserDialogsQueriesSearchActivities_Activity>>> SearchDialogActivities(System.Guid dialogId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
@@ -468,7 +468,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/dialogs")]
-        Task<IApiResponse<PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog>> V1EndUserDialogsQueriesSearchDialog([Query] V1EndUserDialogsQueriesSearchDialogQueryParams queryParams, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog>> SearchDialogs([Query] SearchDialogsQueryParams queryParams, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog transmission</summary>
         /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
@@ -511,7 +511,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<V1EndUserDialogsQueriesGetTransmission_Transmission>> V1EndUserDialogsQueriesGetTransmissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1EndUserDialogsQueriesGetTransmission_Transmission>> GetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
@@ -549,7 +549,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<V1EndUserDialogsQueriesGetSeenLog_SeenLog>> V1EndUserDialogsQueriesGetSeenLogDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1EndUserDialogsQueriesGetSeenLog_SeenLog>> GetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
@@ -588,7 +588,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<V1EndUserDialogsQueriesGetActivity_Activity>> V1EndUserDialogsQueriesGetActivityDialogActivity(System.Guid dialogId, System.Guid activityId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1EndUserDialogsQueriesGetActivity_Activity>> GetDialogActivity(System.Guid dialogId, System.Guid activityId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>Gets a single dialog aggregate.</remarks>
@@ -626,7 +626,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}")]
-        Task<IApiResponse<V1EndUserDialogsQueriesGet_Dialog>> V1EndUserDialogsQueriesGetDialog(System.Guid dialogId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1EndUserDialogsQueriesGet_Dialog>> GetDialog(System.Guid dialogId, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Looks up a dialog by instance reference</summary>
         /// <remarks>Resolves dialog metadata and authorization evidence for a supported instance reference.</remarks>
@@ -668,7 +668,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialoglookup")]
-        Task<IApiResponse<V1CommonIdentifierLookup_EndUserIdentifierLookup>> V1EndUserDialogLookupQueriesGetDialogLookup([Query] string instanceRef, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1CommonIdentifierLookup_EndUserIdentifierLookup>> GetDialogLookup([Query] string instanceRef, [Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
 
         /// <summary>Gets the list of authorized parties for the end user</summary>
         /// <remarks>Gets the list of authorized parties for the end user.</remarks>
@@ -700,7 +700,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/parties")]
-        Task<IApiResponse<V1AccessManagementQueriesGetParties_Parties>> V1EndUserAccessManagementQueriesGetPartiesParties(CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1AccessManagementQueriesGetParties_Parties>> GetParties(CancellationToken cancellationToken = default);
     }
 
 }
@@ -727,11 +727,94 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 #pragma warning disable 8625 // Disable "CS8625 Cannot convert null literal to non-nullable reference type"
 #pragma warning disable 8765 // Disable "CS8765 Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes)."
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
+namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 {
     using System = global::System;
 
     
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog
+    {
+
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        [JsonPropertyName("performedBy")]
+        public V1EndUserCommonActors_Actor PerformedBy { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1EndUserCommonActors_Actor
+    {
+
+        /// <summary>
+        /// The type of actor; either the service owner, or someone representing the party.
+        /// </summary>
+        [JsonPropertyName("actorType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
+        public Actors_ActorType ActorType { get; set; }
+
+        /// <summary>
+        /// The name of the actor.
+        /// </summary>
+        [JsonPropertyName("actorName")]
+        public string ActorName { get; set; }
+
+        /// <summary>
+        /// The identifier (national identity number or organization number) of the actor.
+        /// </summary>
+        [JsonPropertyName("actorId")]
+        public string ActorId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Actors_ActorType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
+        PartyRepresentative = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
+        ServiceOwner = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
+    {
+
+        /// <summary>
+        /// List of system labels to set on target dialogs
+        /// </summary>
+        [JsonPropertyName("systemLabels")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to add to the target dialog. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
+        /// </summary>
+        [JsonPropertyName("addLabels")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> AddLabels { get; set; }
+
+        /// <summary>
+        /// List of system labels to remove from the target dialog. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
+        /// </summary>
+        [JsonPropertyName("removeLabels")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
+
+    }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails
@@ -796,358 +879,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Sent")]
         Sent = 4,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Actors_ActorType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PartyRepresentative")]
-        PartyRepresentative = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ServiceOwner")]
-        ServiceOwner = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntitiesTransmissions_DialogTransmissionType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
-        Information = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Acceptance")]
-        Acceptance = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Rejection")]
-        Rejection = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Request")]
-        Request = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Alert")]
-        Alert = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Decision")]
-        Decision = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Submission")]
-        Submission = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Correction")]
-        Correction = 7,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1CommonContent_ContentValue
-    {
-
-        /// <summary>
-        /// A list of localizations for the content.
-        /// </summary>
-        [JsonPropertyName("value")]
-        public ICollection<V1CommonLocalizations_Localization> Value { get; set; }
-
-        /// <summary>
-        /// Media type of the content, this can also indicate that the content is embeddable.
-        /// </summary>
-        [JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
-
-        /// <summary>
-        /// True if the authenticated user is authorized for this content. If not, the endpoints will
-        /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
-        /// <br/>            
-        /// </summary>
-        [JsonPropertyName("isAuthorized")]
-        public bool? IsAuthorized { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1CommonLocalizations_Localization
-    {
-
-        /// <summary>
-        /// The localized text (or URL if a front-channel embed).
-        /// </summary>
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
-
-        /// <summary>
-        /// The language code of the localization in ISO 639-1 format.
-        /// </summary>
-        [JsonPropertyName("languageCode")]
-        public string LanguageCode { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Attachments_AttachmentUrlConsumerType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Gui")]
-        Gui = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Api")]
-        Api = 1,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntitiesActivities_DialogActivityType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogCreated")]
-        DialogCreated = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogClosed")]
-        DialogClosed = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
-        Information = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TransmissionOpened")]
-        TransmissionOpened = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PaymentMade")]
-        PaymentMade = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SignatureProvided")]
-        SignatureProvided = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogOpened")]
-        DialogOpened = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogDeleted")]
-        DialogDeleted = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DialogRestored")]
-        DialogRestored = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToSigning")]
-        SentToSigning = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToFormFill")]
-        SentToFormFill = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToSendIn")]
-        SentToSendIn = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SentToPayment")]
-        SentToPayment = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"FormSubmitted")]
-        FormSubmitted = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"FormSaved")]
-        FormSaved = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceOpened")]
-        CorrespondenceOpened = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceConfirmed")]
-        CorrespondenceConfirmed = 16,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntities_DialogStatus
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
-        InProgress = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
-        Draft = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
-        RequiresAttention = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
-        Completed = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
-        NotApplicable = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
-        Awaiting = 5,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum DialogsEntitiesActions_DialogGuiActionPriority
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Primary")]
-        Primary = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Secondary")]
-        Secondary = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Tertiary")]
-        Tertiary = 2,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum Http_HttpVerb
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"GET")]
-        GET = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"POST")]
-        POST = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PUT")]
-        PUT = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PATCH")]
-        PATCH = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DELETE")]
-        DELETE = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"HEAD")]
-        HEAD = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"OPTIONS")]
-        OPTIONS = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TRACE")]
-        TRACE = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"CONNECT")]
-        CONNECT = 8,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceResource
-    {
-
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("isDelegable")]
-        public bool IsDelegable { get; set; }
-
-        [JsonPropertyName("minimumAuthenticationLevel")]
-        public int MinimumAuthenticationLevel { get; set; }
-
-        [JsonPropertyName("name")]
-        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceOwner
-    {
-
-        [JsonPropertyName("orgNumber")]
-        public string OrgNumber { get; set; }
-
-        [JsonPropertyName("code")]
-        public string Code { get; set; }
-
-        [JsonPropertyName("name")]
-        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1EndUserCommon_AcceptedLanguages
-    {
-
-        [JsonPropertyName("acceptedLanguage")]
-        public ICollection<V1EndUserCommon_AcceptedLanguage> AcceptedLanguage { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1EndUserCommon_AcceptedLanguage
-    {
-
-        [JsonPropertyName("languageCode")]
-        public string LanguageCode { get; set; }
-
-        [JsonPropertyName("weight")]
-        public int Weight { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog
-    {
-
-        [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("action")]
-        public string Action { get; set; }
-
-        [JsonPropertyName("performedBy")]
-        public V1EndUserCommonActors_Actor PerformedBy { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1EndUserCommonActors_Actor
-    {
-
-        /// <summary>
-        /// The type of actor; either the service owner, or someone representing the party.
-        /// </summary>
-        [JsonPropertyName("actorType")]
-        [JsonConverter(typeof(JsonStringEnumConverter<Actors_ActorType>))]
-        public Actors_ActorType ActorType { get; set; }
-
-        /// <summary>
-        /// The name of the actor.
-        /// </summary>
-        [JsonPropertyName("actorName")]
-        public string ActorName { get; set; }
-
-        /// <summary>
-        /// The identifier (national identity number or organization number) of the actor.
-        /// </summary>
-        [JsonPropertyName("actorId")]
-        public string ActorId { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
-    {
-
-        /// <summary>
-        /// List of system labels to set on target dialogs
-        /// </summary>
-        [JsonPropertyName("systemLabels")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-        public ICollection<DialogEndUserContextsEntities_SystemLabel> SystemLabels { get; set; }
-
-        /// <summary>
-        /// List of system labels to add to the target dialog. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
-        /// </summary>
-        [JsonPropertyName("addLabels")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public ICollection<DialogEndUserContextsEntities_SystemLabel> AddLabels { get; set; }
-
-        /// <summary>
-        /// List of system labels to remove from the target dialog. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
-        /// </summary>
-        [JsonPropertyName("removeLabels")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public ICollection<DialogEndUserContextsEntities_SystemLabel> RemoveLabels { get; set; }
 
     }
 
@@ -1290,6 +1021,36 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesTransmissions_DialogTransmissionType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
+        Information = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Acceptance")]
+        Acceptance = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Rejection")]
+        Rejection = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Request")]
+        Request = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Alert")]
+        Alert = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Decision")]
+        Decision = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Submission")]
+        Submission = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Correction")]
+        Correction = 7,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1EndUserDialogsQueriesSearchTransmissions_Content
     {
 
@@ -1310,6 +1071,50 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("contentReference")]
         public V1CommonContent_ContentValue ContentReference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonContent_ContentValue
+    {
+
+        /// <summary>
+        /// A list of localizations for the content.
+        /// </summary>
+        [JsonPropertyName("value")]
+        public ICollection<V1CommonLocalizations_Localization> Value { get; set; }
+
+        /// <summary>
+        /// Media type of the content, this can also indicate that the content is embeddable.
+        /// </summary>
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// True if the authenticated user is authorized for this content. If not, the endpoints will
+        /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
+        /// <br/>            
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonLocalizations_Localization
+    {
+
+        /// <summary>
+        /// The localized text (or URL if a front-channel embed).
+        /// </summary>
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+        /// <summary>
+        /// The language code of the localization in ISO 639-1 format.
+        /// </summary>
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; }
 
     }
 
@@ -1382,6 +1187,18 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Attachments_AttachmentUrlConsumerType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Gui")]
+        Gui = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Api")]
+        Api = 1,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1EndUserDialogsQueriesSearchTransmissions_NavigationalAction
     {
 
@@ -1403,6 +1220,27 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1EndUserCommon_AcceptedLanguages
+    {
+
+        [JsonPropertyName("acceptedLanguage")]
+        public ICollection<V1EndUserCommon_AcceptedLanguage> AcceptedLanguage { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1EndUserCommon_AcceptedLanguage
+    {
+
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; }
+
+        [JsonPropertyName("weight")]
+        public int Weight { get; set; }
 
     }
 
@@ -1449,6 +1287,63 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         [JsonPropertyName("description")]
         public ICollection<V1CommonLocalizations_Localization> Description { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesActivities_DialogActivityType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogCreated")]
+        DialogCreated = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogClosed")]
+        DialogClosed = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
+        Information = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"TransmissionOpened")]
+        TransmissionOpened = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PaymentMade")]
+        PaymentMade = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SignatureProvided")]
+        SignatureProvided = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogOpened")]
+        DialogOpened = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogDeleted")]
+        DialogDeleted = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DialogRestored")]
+        DialogRestored = 8,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToSigning")]
+        SentToSigning = 9,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToFormFill")]
+        SentToFormFill = 10,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToSendIn")]
+        SentToSendIn = 11,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SentToPayment")]
+        SentToPayment = 12,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FormSubmitted")]
+        FormSubmitted = 13,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FormSaved")]
+        FormSaved = 14,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceOpened")]
+        CorrespondenceOpened = 15,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CorrespondenceConfirmed")]
+        CorrespondenceConfirmed = 16,
 
     }
 
@@ -1664,6 +1559,30 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("content")]
         public V1EndUserDialogsQueriesSearch_Content Content { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntities_DialogStatus
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
+        InProgress = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
+        Draft = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RequiresAttention")]
+        RequiresAttention = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
+        Completed = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NotApplicable")]
+        NotApplicable = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Awaiting")]
+        Awaiting = 5,
 
     }
 
@@ -2676,6 +2595,54 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesActions_DialogGuiActionPriority
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Primary")]
+        Primary = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Secondary")]
+        Secondary = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Tertiary")]
+        Tertiary = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Http_HttpVerb
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"GET")]
+        GET = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"POST")]
+        POST = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PUT")]
+        PUT = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PATCH")]
+        PATCH = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DELETE")]
+        DELETE = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"HEAD")]
+        HEAD = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"OPTIONS")]
+        OPTIONS = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"TRACE")]
+        TRACE = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CONNECT")]
+        CONNECT = 8,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1EndUserDialogsQueriesGet_DialogApiAction
     {
 
@@ -2922,6 +2889,39 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         [JsonPropertyName("authorizationEvidence")]
         public V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceResource
+    {
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonIdentifierLookup_IdentifierLookupServiceOwner
+    {
+
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
 
     }
 

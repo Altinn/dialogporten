@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using AwesomeAssertions;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -24,7 +25,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty]
             }, new(), ct),
@@ -61,7 +62,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelTag
@@ -92,7 +93,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Verify that all 4 dialogs are searchable
         await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelTag,
@@ -102,7 +103,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             degradationMessage: "Search indexing speed is degraded.");
 
         // Act - first page with limit 2
-        var firstPage = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+        var firstPage = await Fixture.EnduserApi.V1.SearchDialogs(new()
         {
             Party = [E2EConstants.DefaultParty],
             Search = sentinelTag,
@@ -117,7 +118,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         firstPage.Content.ContinuationToken.Should().NotBeNullOrWhiteSpace();
 
         // Act - second page using continuation token
-        var secondPage = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+        var secondPage = await Fixture.EnduserApi.V1.SearchDialogs(new()
         {
             Party = [E2EConstants.DefaultParty],
             Search = sentinelTag,
@@ -140,7 +141,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
     public async Task Should_Return_400_When_Process_Is_Invalid()
     {
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+        var response = await Fixture.EnduserApi.V1.SearchDialogs(new()
         {
             Party = [E2EConstants.DefaultParty],
             Process = "inval|d"
@@ -208,7 +209,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = uniqueTitle
@@ -258,7 +259,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = uniqueAdditionalInfo
@@ -299,7 +300,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = uniqueSenderName
@@ -341,7 +342,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         });
 
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(new()
+            ct => Fixture.EnduserApi.V1.SearchDialogs(new SearchDialogsQueryParams
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelLabel

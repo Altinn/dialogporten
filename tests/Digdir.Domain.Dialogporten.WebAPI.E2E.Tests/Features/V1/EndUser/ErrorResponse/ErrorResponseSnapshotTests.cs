@@ -1,4 +1,5 @@
 using System.Net;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -31,7 +32,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1EndUserDialogsQueriesSearchActivitiesDialogActivity(nonExistentDialogId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.SearchDialogActivities(nonExistentDialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -47,7 +48,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1EndUserDialogsQueriesGetActivityDialogActivity(dialogId, nonExistentActivityId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.GetDialogActivity(dialogId, nonExistentActivityId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -63,7 +64,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1EndUserDialogsQueriesGetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.GetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Gone);
@@ -80,7 +81,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1EndUserDialogsQueriesGetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.GetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);

@@ -1,6 +1,4 @@
-// ReSharper disable InconsistentNaming
-// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1;
+namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 
 public partial class V1EndUserCommon_AcceptedLanguages
 {
@@ -12,7 +10,6 @@ public partial class V1EndUserCommon_AcceptedLanguages
 
 public partial class V1EndUserCommon_AcceptedLanguage
 {
-    // Weight is 0–100 scale matching the server's internal representation (q * 100)
     public override string ToString() =>
         Weight >= 100
             ? LanguageCode

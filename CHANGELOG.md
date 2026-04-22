@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.114.0](https://github.com/Altinn/dialogporten/compare/v1.113.0...v1.114.0) (2026-04-22)
+
+
+### Features
+
+* Add IsContentSeen to DTOs ([#3817](https://github.com/Altinn/dialogporten/issues/3817)) ([664e8e0](https://github.com/Altinn/dialogporten/commit/664e8e0cf8240a44618fcefdeb95572b1fbe11b3))
+
+
+### Miscellaneous Chores
+
+* **deps:** update microsoft dependencies to 10.0.6 ([#3821](https://github.com/Altinn/dialogporten/issues/3821)) ([d32e402](https://github.com/Altinn/dialogporten/commit/d32e402368260e3f354a9819aed137496801c6ff))
+* **deps:** update opentelemetry-dotnet monorepo to 1.15.2 ([#3822](https://github.com/Altinn/dialogporten/issues/3822)) ([913eb65](https://github.com/Altinn/dialogporten/commit/913eb651cc40822e09878eeb3c4b882f8768f6ed))
+* **infra:** persist postgresql overrides for production in iac ([#3795](https://github.com/Altinn/dialogporten/issues/3795)) ([3b6cbe5](https://github.com/Altinn/dialogporten/commit/3b6cbe561b06a5e9f6b1fed8d1dc4b21d332d7e1))
+
 ## [1.113.0](https://github.com/Altinn/dialogporten/compare/v1.112.0...v1.113.0) (2026-04-20)
 
 

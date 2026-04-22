@@ -1,7 +1,7 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0.5 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0.6@sha256:902cb7375e347f20c93d959bf1feba884e0a9232e0087991ace8eb4f82d2986d AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.201 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.203@sha256:6d7f69bc7bc9d4510ca255977b1f53ce52a79307e048a91450b2aecd63627cc3 AS build
 WORKDIR /src
 
 ENV PATH="/root/.dotnet/tools:${PATH}"

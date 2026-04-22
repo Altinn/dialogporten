@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.114.1](https://github.com/Altinn/dialogporten/compare/v1.114.0...v1.114.1) (2026-04-22)
+
+
+### Miscellaneous Chores
+
+* Add Microsoft.EntityFrameworkCore.Design dependency ([#3827](https://github.com/Altinn/dialogporten/issues/3827)) ([28c5acd](https://github.com/Altinn/dialogporten/commit/28c5acd89123ba85ddbb7b971c02cdb82c2f3887))
+* **deps:** update dependency dotnet-sdk to v10.0.203 ([#3820](https://github.com/Altinn/dialogporten/issues/3820)) ([80b84d6](https://github.com/Altinn/dialogporten/commit/80b84d6fc31d29e638bb574cbed6f390b84f69fc))
+
 ## [1.114.0](https://github.com/Altinn/dialogporten/compare/v1.113.0...v1.114.0) (2026-04-22)
 
 

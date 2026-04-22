@@ -28,6 +28,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_3,
         SystemLabels: [
@@ -83,6 +84,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_6,
         SystemLabels: [
@@ -137,6 +139,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_9,
         SystemLabels: [
@@ -192,6 +195,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_12,
         SystemLabels: [
@@ -265,6 +269,7 @@
           IsCurrentEndUser: true
         }
       ],
+      IsContentSeen: true,
       EndUserContext: {
         Revision: Guid_15,
         SystemLabels: [

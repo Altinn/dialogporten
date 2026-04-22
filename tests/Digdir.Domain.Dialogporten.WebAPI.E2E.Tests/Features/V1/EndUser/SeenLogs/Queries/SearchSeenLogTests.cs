@@ -26,7 +26,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Single().Id;
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchSeenLogsDialogSeenLog(
+        var response = await Fixture.EnduserApi.V1.SearchDialogSeenLogs(
             dialogId,
             TestContext.Current.CancellationToken);
 
@@ -64,7 +64,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
 
         // Act
         var response = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EnduserApi.V1EndUserDialogsQueriesSearchSeenLogsDialogSeenLog(
+            operation: ct => Fixture.EnduserApi.V1.SearchDialogSeenLogs(
                 dialogId, ct),
             isSuccessful: result => result is { IsSuccessful: true, Content.Count: 2 },
             degradationMessage: "Seen log creation delayed");

@@ -24,6 +24,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_3,
         SystemLabels: [
@@ -74,6 +75,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_6,
         SystemLabels: [
@@ -124,6 +126,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_9,
         SystemLabels: [

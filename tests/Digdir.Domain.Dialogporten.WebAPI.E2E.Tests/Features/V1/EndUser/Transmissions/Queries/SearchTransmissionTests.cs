@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -19,7 +20,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             dialog.AddTransmission(transmission => transmission.Id = transmissionId));
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchTransmissionsDialogTransmission(
+        var response = await Fixture.EnduserApi.V1.SearchDialogTransmissions(
             dialogId,
             new V1EndUserCommon_AcceptedLanguages(),
             TestContext.Current.CancellationToken);
@@ -30,7 +31,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         content.Should().ContainSingle().Which.Id.Should().Be(transmissionId);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Search_Transmissions_Verify_Snapshot()
     {
         // Arrange
@@ -38,7 +39,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             TransmissionTestData.AddComplexTransmissions);
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchTransmissionsDialogTransmission(
+        var response = await Fixture.EnduserApi.V1.SearchDialogTransmissions(
             dialogId,
             new V1EndUserCommon_AcceptedLanguages(),
             TestContext.Current.CancellationToken);
@@ -47,7 +48,6 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(response.Content),
-            fileNameSuffix: Fixture.DotnetEnvironment);
+            JsonSerializer.Serialize(response.Content));
     }
 }

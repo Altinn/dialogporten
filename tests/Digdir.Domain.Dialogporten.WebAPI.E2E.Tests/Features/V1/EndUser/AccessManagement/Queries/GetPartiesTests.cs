@@ -14,7 +14,7 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
     public async Task Should_Return_Three_Authorized_Parties()
     {
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserAccessManagementQueriesGetPartiesParties(TestContext.Current.CancellationToken);
+        var response = await Fixture.EnduserApi.V1.GetParties(TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -25,17 +25,16 @@ public class GetPartiesTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
             x.Party == E2EConstants.DefaultParty);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01", "staging"])]
     public async Task Authorized_Parties_Verify_Snapshot()
     {
         // Arrange/Act
-        var response = await Fixture.EnduserApi.V1EndUserAccessManagementQueriesGetPartiesParties(TestContext.Current.CancellationToken);
+        var response = await Fixture.EnduserApi.V1.GetParties(TestContext.Current.CancellationToken);
         var content = response.Content ?? throw new InvalidOperationException("Parties content was null.");
 
         // Assert
         await VerifyJsonSnapshot(
             JsonSerializer.Serialize(content),
-            fileNameSuffix: Fixture.DotnetEnvironment,
             scrubGuids: false);
     }
 }

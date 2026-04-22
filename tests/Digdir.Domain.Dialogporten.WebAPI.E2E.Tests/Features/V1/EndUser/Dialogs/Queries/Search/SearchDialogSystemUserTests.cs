@@ -1,4 +1,5 @@
 using System.Net;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -31,13 +32,13 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
 
         // Act
         using var _ = Fixture.UseSystemUserTokenOverrides();
-        var queryParams = new V1EndUserDialogsQueriesSearchDialogQueryParams
+        var queryParams = new SearchDialogsQueryParams
         {
             Search = "system-title",
             Party = [E2EConstants.DefaultParty]
         };
 
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchDialog(
+        var response = await Fixture.EnduserApi.V1.SearchDialogs(
             queryParams,
             accept_Language: new());
 

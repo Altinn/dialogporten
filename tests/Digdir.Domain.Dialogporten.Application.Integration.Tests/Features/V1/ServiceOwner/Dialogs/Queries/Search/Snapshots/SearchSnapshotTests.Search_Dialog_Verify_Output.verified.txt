@@ -55,6 +55,7 @@
           IsCurrentEndUser: false
         }
       ],
+      IsContentSeen: true,
       ServiceOwnerContext: {
         Revision: Guid_5,
         ServiceOwnerLabels: [
@@ -119,6 +120,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       ServiceOwnerContext: {
         Revision: Guid_10
       },
@@ -177,6 +179,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       ServiceOwnerContext: {
         Revision: Guid_15
       },
@@ -236,6 +239,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       ServiceOwnerContext: {
         Revision: Guid_20
       },
@@ -313,6 +317,7 @@
           IsCurrentEndUser: false
         }
       ],
+      IsContentSeen: true,
       ServiceOwnerContext: {
         Revision: Guid_25
       },

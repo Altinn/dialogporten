@@ -25,6 +25,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       ServiceOwnerContext: {
         Revision: Guid_4
       },
@@ -79,6 +80,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       ServiceOwnerContext: {
         Revision: Guid_9
       },
@@ -133,6 +135,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       ServiceOwnerContext: {
         Revision: Guid_14
       },

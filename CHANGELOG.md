@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.114.0](https://github.com/Altinn/dialogporten/compare/v1.113.0...v1.114.0) (2026-04-22)
+
+
+### Features
+
+* Add IsContentSeen to DTOs ([#3817](https://github.com/Altinn/dialogporten/issues/3817)) ([664e8e0](https://github.com/Altinn/dialogporten/commit/664e8e0cf8240a44618fcefdeb95572b1fbe11b3))
+
+
+### Miscellaneous Chores
+
+* **deps:** update microsoft dependencies to 10.0.6 ([#3821](https://github.com/Altinn/dialogporten/issues/3821)) ([d32e402](https://github.com/Altinn/dialogporten/commit/d32e402368260e3f354a9819aed137496801c6ff))
+* **deps:** update opentelemetry-dotnet monorepo to 1.15.2 ([#3822](https://github.com/Altinn/dialogporten/issues/3822)) ([913eb65](https://github.com/Altinn/dialogporten/commit/913eb651cc40822e09878eeb3c4b882f8768f6ed))
+* **infra:** persist postgresql overrides for production in iac ([#3795](https://github.com/Altinn/dialogporten/issues/3795)) ([3b6cbe5](https://github.com/Altinn/dialogporten/commit/3b6cbe561b06a5e9f6b1fed8d1dc4b21d332d7e1))
+
+## [1.113.0](https://github.com/Altinn/dialogporten/compare/v1.112.0...v1.113.0) (2026-04-20)
+
+
+### Features
+
+* Add filter IsContentSeen ([#3782](https://github.com/Altinn/dialogporten/issues/3782)) ([c89557b](https://github.com/Altinn/dialogporten/commit/c89557be0a651e101e8eb87a0f7f28b37e1c0a5f))
+
+
+### Bug Fixes
+
+* handle seenlog update conflicts ([#3808](https://github.com/Altinn/dialogporten/issues/3808)) ([410ae6b](https://github.com/Altinn/dialogporten/commit/410ae6b6499ba595594688f7ee6e1d577da188ca))
+* **perf:** improve enduser single dialog performance ([#3793](https://github.com/Altinn/dialogporten/issues/3793)) ([8baffff](https://github.com/Altinn/dialogporten/commit/8baffff84199ab63298bce11989fc4dc7ce04f82))
+* **sdk:** OpenApi pagination types ([#3798](https://github.com/Altinn/dialogporten/issues/3798)) ([15c8c1b](https://github.com/Altinn/dialogporten/commit/15c8c1bd64e9ede684472fb5b61c88ad8cc8e666))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency strawberryshake.server to 15.1.14 ([#3802](https://github.com/Altinn/dialogporten/issues/3802)) ([64009cb](https://github.com/Altinn/dialogporten/commit/64009cb8f993eeb316b5e757b840df61702a3432))
+* **deps:** update dependency strawberryshake.tools to v15.1.14 ([#3803](https://github.com/Altinn/dialogporten/issues/3803)) ([780a7f9](https://github.com/Altinn/dialogporten/commit/780a7f9062df3b968056e6677be217f28970ea92))
+* **deps:** update hotchocolate monorepo to 15.1.14 ([#3804](https://github.com/Altinn/dialogporten/issues/3804)) ([a49cd3c](https://github.com/Altinn/dialogporten/commit/a49cd3c750d947f863006c1eb142deb3cd143631))
+* improve health endpoint ([#3786](https://github.com/Altinn/dialogporten/issues/3786)) ([8933a95](https://github.com/Altinn/dialogporten/commit/8933a958e8a7a7a508d59cfab9768b15d9f0d695))
+
 ## [1.112.0](https://github.com/Altinn/dialogporten/compare/v1.111.2...v1.112.0) (2026-04-16)
 
 

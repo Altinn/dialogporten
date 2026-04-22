@@ -56,7 +56,7 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
                 attachment.Name == transmissionAttachmentName);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Get_Dialog_Verify_Snapshot()
     {
         // Arrange
@@ -67,7 +67,6 @@ public class GetDialogTests : E2ETestBase<WebApiE2EFixture>
 
         // Assert
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(getDialogResult.Content),
-            fileNameSuffix: Fixture.DotnetEnvironment);
+            JsonSerializer.Serialize(getDialogResult.Content));
     }
 }

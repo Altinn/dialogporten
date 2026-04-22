@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -20,7 +21,7 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId);
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchActivitiesDialogActivity(
+        var response = await Fixture.EnduserApi.V1.SearchDialogActivities(
             dialogId,
             new V1EndUserCommon_AcceptedLanguages(),
             TestContext.Current.CancellationToken);
@@ -77,7 +78,7 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         await Fixture.EnduserApi.GetDialog(dialogId);
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesSearchActivitiesDialogActivity(
+        var response = await Fixture.EnduserApi.V1.SearchDialogActivities(
             dialogId,
             new V1EndUserCommon_AcceptedLanguages(),
             TestContext.Current.CancellationToken);

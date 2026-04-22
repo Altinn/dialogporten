@@ -1593,13 +1593,9 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// <br/>            
-        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
-        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
-        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -1648,6 +1644,14 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("seenSinceLastContentUpdate")]
         public ICollection<V1EndUserDialogsQueriesSearch_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+
+        /// <summary>
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// </summary>
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by end-users.
@@ -2190,13 +2194,9 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// <br/>            
-        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
-        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
-        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -2265,6 +2265,14 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1
         /// </summary>
         [JsonPropertyName("seenSinceLastContentUpdate")]
         public ICollection<V1EndUserDialogsQueriesGet_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+
+        /// <summary>
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// </summary>
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by end-users.

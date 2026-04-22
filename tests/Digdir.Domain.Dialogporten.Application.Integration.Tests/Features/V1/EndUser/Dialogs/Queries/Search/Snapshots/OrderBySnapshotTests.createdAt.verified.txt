@@ -22,6 +22,7 @@
         SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_2,
           SystemLabels: [
@@ -70,6 +71,7 @@
         SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_4,
           SystemLabels: [
@@ -124,6 +126,7 @@
         SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_6,
           SystemLabels: [
@@ -172,6 +175,7 @@
         SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_8,
           SystemLabels: [
@@ -226,6 +230,7 @@
         SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_10,
           SystemLabels: [

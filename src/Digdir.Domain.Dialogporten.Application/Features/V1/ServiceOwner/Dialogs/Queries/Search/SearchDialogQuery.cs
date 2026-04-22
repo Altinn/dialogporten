@@ -279,6 +279,9 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                     .GroupBy(x => x.SeenBy.ActorId)
                     .Select(g => g.OrderByDescending(x => x.SeenAt).First())
                     .ToList() ?? [],
+                IsContentSeen = dialog.IsSeenSinceLastContentUpdate && endUserContextByDialogIdTask
+                    .Result[dialog.Id]
+                    .SystemLabels.All(x => x != SystemLabel.Values.MarkedAsUnopened),
                 EndUserContext = endUserContextByDialogIdTask.Result[dialog.Id],
                 Content = contentByDialogIdTask.Result.GetValueOrDefault(dialog.Id),
                 DeletedAt = dialog.DeletedAt,

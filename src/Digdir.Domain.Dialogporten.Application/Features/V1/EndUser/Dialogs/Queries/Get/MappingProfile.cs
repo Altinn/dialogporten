@@ -30,7 +30,11 @@ internal sealed class MappingProfile : Profile
                 .MapFrom(src => (int)src.FromPartyTransmissionsCount))
             .ForMember(dest => dest.FromServiceOwnerTransmissionsCount, opt => opt
                 .MapFrom(src => (int)src.FromServiceOwnerTransmissionsCount))
-            .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore());
+            .ForMember(dest => dest.SeenSinceLastUpdate, opt => opt.Ignore())
+            .ForMember(
+                dest => dest.IsContentSeen,
+                opt => opt.MapFrom(src => src.IsSeenSinceLastContentUpdate && !src.IsMarkedAsUnopened())
+            );
 
         CreateMap<DialogEndUserContext, DialogEndUserContextDto>()
             .ForMember(dest => dest.SystemLabels, opt => opt

@@ -89,7 +89,12 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.Party = [ctx.GetParty()];
                 x.IsContentSeen = true;
             })
-            .AssertResult<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().Be(ctx.GetDialogId()))
+            .AssertResult<PaginatedList<DialogDto>>((x, ctx) =>
+            {
+                var dialog = x.Items.Single();
+                dialog.Id.Should().Be(ctx.GetDialogId());
+                dialog.IsContentSeen.Should().BeTrue();
+            })
             .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
             .SearchEndUserDialogs((x, ctx) =>
             {
@@ -104,7 +109,12 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.Party = [ctx.GetParty()];
                 x.IsContentSeen = true;
             })
-            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().Be(ctx.GetDialogId()));
+            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) =>
+            {
+                var dialog = x.Items.Single();
+                dialog.Id.Should().Be(ctx.GetDialogId());
+                dialog.IsContentSeen.Should().BeTrue();
+            });
 
     [Fact]
     public Task Filter_On_IsContentSeen_False_Should_Return_Expected_Dialogs_When_Dialog_Created_And_Opened_And_Marked_As_Unopened_And_Opened_Again() =>
@@ -117,7 +127,12 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.Party = [ctx.GetParty()];
                 x.IsContentSeen = false;
             })
-            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(2))
+            .AssertResult<PaginatedList<DialogDto>>(x =>
+            {
+                var dialogs = x.Items;
+                dialogs.Should().HaveCount(2);
+                dialogs.Should().AllSatisfy(d => d.IsContentSeen.Should().BeFalse());
+            })
             .GetEndUserDialog()
             .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
@@ -125,14 +140,24 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.Party = [ctx.GetParty()];
                 x.IsContentSeen = false;
             })
-            .AssertResult<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().NotBe(ctx.GetDialogId()))
+            .AssertResult<PaginatedList<DialogDto>>((x, ctx) =>
+            {
+                var dialog = x.Items.Single();
+                dialog.Id.Should().NotBe(ctx.GetDialogId());
+                dialog.IsContentSeen.Should().BeFalse();
+            })
             .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
             .SearchEndUserDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
                 x.IsContentSeen = false;
             })
-            .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(2))
+            .AssertResult<PaginatedList<DialogDto>>(x =>
+            {
+                var dialogs = x.Items;
+                dialogs.Should().HaveCount(2);
+                dialogs.Should().AllSatisfy(d => d.IsContentSeen.Should().BeFalse());
+            })
             .GetEndUserDialog()
             .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
@@ -140,7 +165,12 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 x.Party = [ctx.GetParty()];
                 x.IsContentSeen = false;
             })
-            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) => x.Items.Single().Id.Should().NotBe(ctx.GetDialogId()));
+            .ExecuteAndAssert<PaginatedList<DialogDto>>((x, ctx) =>
+            {
+                var dialog = x.Items.Single();
+                dialog.Id.Should().NotBe(ctx.GetDialogId());
+                dialog.IsContentSeen.Should().BeFalse();
+            });
 
     [Fact]
     public async Task Search_Should_Populate_EnduserContextRevision()

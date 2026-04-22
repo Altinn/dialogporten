@@ -214,7 +214,7 @@ type Dialog {
   "The aggregated status of the dialog."
   status: DialogStatus!
   "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
-  hasUnopenedContent: Boolean!
+  hasUnopenedContent: Boolean! @deprecated(reason: "Use IsContentSeen instead. See the new field's description for an explanation of the new behavior.")
   "The number of transmissions sent by the service owner"
   fromServiceOwnerTransmissionsCount: Int!
   "The number of transmissions sent by a party representative"
@@ -235,6 +235,8 @@ type Dialog {
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
   seenSinceLastContentUpdate: [SeenLog!]!
+  "A dialog is considered seen if it has been retrieved by a user since its last content update, and there is no SystemLabel MarkedAsUnopened"
+  isContentSeen: Boolean!
   "The immutable list of transmissions associated with the dialog."
   transmissions: [Transmission!]!
   "Metadata about the dialog owned by end-users."
@@ -429,7 +431,7 @@ type SearchDialog {
   "The aggregated status of the dialog."
   status: DialogStatus!
   "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
-  hasUnopenedContent: Boolean! @deprecated(reason: "Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")
+  hasUnopenedContent: Boolean! @deprecated(reason: "Use IsContentSeen instead. See the new field's description for an explanation of the new behavior.")
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans."
   isApiOnly: Boolean!
   "The number of transmissions sent by the service owner"
@@ -444,6 +446,8 @@ type SearchDialog {
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
   seenSinceLastContentUpdate: [SeenLog!]!
+  "A dialog is considered seen if it has been retrieved by a user since its last content update, and there is no SystemLabel MarkedAsUnopened"
+  isContentSeen: Boolean!
   "Metadata about the dialog owned by end-users."
   endUserContext: EndUserContext!
 }

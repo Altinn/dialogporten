@@ -518,6 +518,7 @@
       "isCurrentEndUser": true
     }
   ],
+  "isContentSeen": true,
   "endUserContext": {
     "revision": "00000000-0000-0000-0000-000000000000",
     "systemLabels": [

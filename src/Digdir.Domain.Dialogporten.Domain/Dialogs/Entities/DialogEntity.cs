@@ -210,7 +210,7 @@ public sealed class DialogEntity :
         return lastSeenByThisActor is not null && lastSeenByThisActor.CreatedAt > UpdatedAt;
     }
 
-    private bool IsMarkedAsUnopened()
+    public bool IsMarkedAsUnopened()
     {
         return EndUserContext
             .DialogEndUserContextSystemLabels

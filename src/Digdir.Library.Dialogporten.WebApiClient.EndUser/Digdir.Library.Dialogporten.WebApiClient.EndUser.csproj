@@ -27,6 +27,11 @@
         <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
     </ItemGroup>
 
+    <!--
+        Build the WebApi first so Refitter.SourceGenerator has a fresh OpenAPI spec to generate
+        Refit clients from. Scoped to net10.0 to avoid building the WebApi once per target framework;
+        a single build is enough to produce the spec consumed by the source generator.
+    -->
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' and '$(Configuration)' == 'Release'">
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.WebApi\Digdir.Domain.Dialogporten.WebApi.csproj"
                           ReferenceOutputAssembly="false" />

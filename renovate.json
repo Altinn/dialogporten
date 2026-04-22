@@ -47,16 +47,16 @@
       "groupName": "HotChocolate dependencies"
     },
     {
+      "matchPackageNames": ["/^Azure\\./"],
+      "groupName": "Azure SDK dependencies"
+    },
+    {
       "matchPackageNames": [
         "/^OpenTelemetry/",
         "/\\.OpenTelemetry$/",
         "Azure.Monitor.OpenTelemetry.AspNetCore"
       ],
       "groupName": "OpenTelemetry dependencies"
-    },
-    {
-      "matchPackageNames": ["/^Azure\\./"],
-      "groupName": "Azure SDK dependencies"
     },
     {
       "matchPackageNames": ["/^MassTransit/"],

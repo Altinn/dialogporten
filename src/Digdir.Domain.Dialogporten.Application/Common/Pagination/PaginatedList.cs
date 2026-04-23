@@ -24,7 +24,7 @@ public sealed class PaginatedList<T>
     /// <summary>
     /// The current sorting order of the items
     /// </summary>
-    /// <example>createdat_desc,id_desc</example>
+    /// <example>contentupdatedat_desc,id_desc</example>
     public string OrderBy { get; }
 
     public PaginatedList(IEnumerable<T> items, bool hasNextPage, string? @continue, string orderBy)

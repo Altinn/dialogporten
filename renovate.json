@@ -7,6 +7,13 @@
     "before 7am on Sunday",
     "before 7am on Wednesday"
   ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 7am on Sunday",
+      "before 7am on Wednesday"
+    ]
+  },
   "updateNotScheduled": false,
   "minimumReleaseAge": "7 days",
   "packageRules": [

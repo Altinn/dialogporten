@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Dapper;
-using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
@@ -12,9 +11,9 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -23,23 +22,19 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
 {
     private readonly DialogDbContext _db;
     private readonly NpgsqlDataSource _dataSource;
-    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
     private readonly ISearchStrategySelector<EndUserSearchContext> _endUserSearchStrategySelector;
 
     public DialogSearchRepository(
         DialogDbContext dbContext,
         NpgsqlDataSource dataSource,
-        IOptionsSnapshot<ApplicationSettings> applicationSettings,
         ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(dataSource);
-        ArgumentNullException.ThrowIfNull(applicationSettings);
         ArgumentNullException.ThrowIfNull(endUserSearchStrategySelector);
 
         _db = dbContext;
         _dataSource = dataSource;
-        _applicationSettings = applicationSettings;
         _endUserSearchStrategySelector = endUserSearchStrategySelector;
     }
 
@@ -272,12 +267,15 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
         DialogSearchAuthorizationResult authorizedResources,
         CancellationToken cancellationToken)
     {
+        // The authorization result is expected to already be constrained by query.Party and
+        // query.ServiceResource. Strategies treat ResourcesByParties as the effective authorization
+        // scope and do not re-apply those query filters when building permission CTEs.
         if (authorizedResources.HasNoAuthorizations)
         {
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());
         }
 
-        var context = new EndUserSearchContext(query, authorizedResources, _applicationSettings.Value.FeatureToggle);
+        var context = new EndUserSearchContext(query, authorizedResources);
         var strategy = _endUserSearchStrategySelector.Select(context);
         return await GetDialogsAsEndUserInternal(strategy, context, cancellationToken);
     }

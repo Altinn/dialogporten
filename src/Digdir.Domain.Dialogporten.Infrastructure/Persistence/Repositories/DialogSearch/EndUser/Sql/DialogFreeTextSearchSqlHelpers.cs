@@ -48,12 +48,40 @@ internal static partial class DialogFreeTextSearchSqlHelpers
             return search;
         }
 
-        if (terms.Any(IsExplicitOrOperator) || terms.Any(IsExplicitAndOperator) || terms.Any(IsNegatedTerm))
+        var implicitSeparator = terms.Any(IsNegatedTerm) ? " " : " OR ";
+        var searchStringBuilder = new System.Text.StringBuilder();
+        var hasWrittenOperand = false;
+        string? pendingOperator = null;
+
+        foreach (var term in terms)
         {
-            return string.Join(" ", terms.Where(term => !IsExplicitAndOperator(term)));
+            if (IsExplicitAndOperator(term) || IsExplicitOrOperator(term))
+            {
+                pendingOperator = term;
+                continue;
+            }
+
+            if (hasWrittenOperand)
+            {
+                searchStringBuilder.Append(pendingOperator switch
+                {
+                    null => implicitSeparator,
+                    var explicitOperator when IsExplicitOrOperator(explicitOperator) => $" {explicitOperator} ",
+                    _ => " "
+                });
+            }
+
+            searchStringBuilder.Append(term);
+            hasWrittenOperand = true;
+            pendingOperator = null;
         }
 
-        return string.Join(" OR ", terms);
+        if (hasWrittenOperand)
+        {
+            return searchStringBuilder.ToString();
+        }
+
+        return string.Join(" ", terms.Where(IsExplicitOrOperator));
     }
 
     private static bool IsExplicitAndOperator(string term) =>

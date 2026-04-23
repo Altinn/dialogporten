@@ -106,7 +106,11 @@ public class DialogApplication : IAsyncLifetime
         var serviceCollection = new ServiceCollection();
 
         var publishEndpointSubstitute = Substitute.For<IPublishEndpoint>();
+        var busSubstitute = Substitute.For<IBus>();
         publishEndpointSubstitute
+            .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
+            .Do(x => _publishedEvents.Add(x[0]));
+        busSubstitute
             .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
             .Do(x => _publishedEvents.Add(x[0]));
 
@@ -122,7 +126,9 @@ public class DialogApplication : IAsyncLifetime
             .AddLogging()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
+            .AddScoped<IFastLaneDomainEventPublisher, MassTransitFastLaneDomainEventPublisher>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
+            .AddTransient(x => new Lazy<IBus>(x.GetRequiredService<IBus>))
             .AddSingleton<NpgsqlDataSource>(_ => new NpgsqlDataSourceBuilder(_dbContainer.GetConnectionString() + ";Include Error Detail=true").Build())
             .AddDbContext<DialogDbContext>((services, options) =>
                 options.UseNpgsql(services.GetRequiredService<NpgsqlDataSource>(), o =>
@@ -146,7 +152,9 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<IFusionCacheProvider>(_ => CreateNullFusionCacheProvider())
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
+            .AddScoped<IBus>(_ => busSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
+            .AddScoped<Lazy<IBus>>(sp => new Lazy<IBus>(() => sp.GetRequiredService<IBus>()))
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()

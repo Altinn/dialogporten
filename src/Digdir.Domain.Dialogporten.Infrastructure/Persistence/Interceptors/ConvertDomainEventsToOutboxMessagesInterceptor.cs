@@ -1,10 +1,12 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
+using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 using HotChocolate.Subscriptions;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +18,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private readonly Lazy<ITopicEventSender> _topicEventSender;
     private readonly ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> _logger;
     private readonly Lazy<IPublishEndpoint> _publishEndpoint;
+    private readonly IFastLaneDomainEventPublisher _fastLaneDomainEventPublisher;
     private readonly IApplicationContext _applicationContext;
 
     private List<IDomainEvent> _domainEvents = [];
@@ -25,18 +28,21 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         Lazy<ITopicEventSender> topicEventSender,
         ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> logger,
         Lazy<IPublishEndpoint> publishEndpoint,
+        IFastLaneDomainEventPublisher fastLaneDomainEventPublisher,
         IApplicationContext applicationContext)
     {
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(topicEventSender);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(publishEndpoint);
+        ArgumentNullException.ThrowIfNull(fastLaneDomainEventPublisher);
         ArgumentNullException.ThrowIfNull(applicationContext);
 
         _transactionTime = transactionTime;
         _topicEventSender = topicEventSender;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
+        _fastLaneDomainEventPublisher = fastLaneDomainEventPublisher;
         _applicationContext = applicationContext;
     }
 
@@ -45,8 +51,6 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        EnsureLazyLoadedServices();
-
         var dbContext = eventData.Context;
 
         if (dbContext is null)
@@ -72,6 +76,16 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         {
             domainEvent.Metadata = _applicationContext.Metadata;
             domainEvent.OccurredAt = _transactionTime.Value;
+        }
+
+        // If all pending events are fast lane events, and no pending changes are present in the change tracker,
+        // we attempt to bypass the outbox and publish directly on the bus for significantly better latency.
+        // Failures here, or timeouts due to transient bus issues, will fall back to the outbox publish as normal.
+        // This may cause duplicate events, so it's important that any consumers of these events are idempotent
+        // and can handle at-least-once semantics.
+        if (CanUseFastLane(dbContext) && await _fastLaneDomainEventPublisher.TryPublishAsync(_domainEvents, cancellationToken))
+        {
+            return result;
         }
 
         await Task.WhenAll(_domainEvents
@@ -135,6 +149,11 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
             throw new InvalidOperationException("Failed to ensure lazy-loaded services. Is the presentation layer registered with publishing capabilities?", e);
         }
     }
+
+    private bool CanUseFastLane(DbContext dbContext) =>
+        !dbContext.ChangeTracker.HasChanges()
+        && _domainEvents.Count != 0
+        && _domainEvents.All(x => x is IFastLaneDomainEvent);
 
     // This is an optimization to include only include dialog create and update events when doing
     // silent updates, as these are (currently) the only events consumed that are not effectively no-ops. This avoids

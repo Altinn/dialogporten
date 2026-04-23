@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 
-public sealed record DialogSeenDomainEvent : DomainEvent, IProcessEvent
+public sealed record DialogSeenDomainEvent : DomainEvent, IProcessEvent, IFastLaneDomainEvent
 {
     public Guid DialogId { get; }
     public string ServiceResource { get; }

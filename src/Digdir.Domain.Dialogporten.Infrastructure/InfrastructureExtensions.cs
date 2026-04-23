@@ -129,6 +129,7 @@ public static class InfrastructureExtensions
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
+            .AddScoped<IFastLaneDomainEventPublisher, MassTransitFastLaneDomainEventPublisher>()
 
             // Transient
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
@@ -145,6 +146,7 @@ public static class InfrastructureExtensions
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
+            .AddTransient(x => new Lazy<IBus>(x.GetRequiredService<IBus>))
             .AddTransient(x => new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
             // Singleton
@@ -251,7 +253,8 @@ public static class InfrastructureExtensions
             .ReplaceTransient<IResourceRegistry, LocalDevelopmentResourceRegistry>(predicate: localDeveloperSettings.UseLocalDevelopmentResourceRegister)
             .ReplaceTransient<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>(predicate: localDeveloperSettings.UseLocalDevelopmentAltinnAuthorization)
             .ReplaceSingleton<IFusionCache, NullFusionCache>(predicate: localDeveloperSettings.DisableCache)
-            .ReplaceSingleton<IPartyNameRegistry, LocalPartNameRegistryClient>(predicate: localDeveloperSettings.UseLocalDevelopmentPartyNameRegistry);
+            .ReplaceSingleton<IPartyNameRegistry, LocalPartNameRegistryClient>(predicate: localDeveloperSettings.UseLocalDevelopmentPartyNameRegistry)
+            .ReplaceScoped<IFastLaneDomainEventPublisher, DisabledFastLaneDomainEventPublisher>(predicate: localDeveloperSettings.UseInMemoryServiceBusTransport);
     }
 
     private static string FormatOtelDbParameterValue(object? value)

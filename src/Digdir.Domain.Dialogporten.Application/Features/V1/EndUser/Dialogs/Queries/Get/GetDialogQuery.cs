@@ -263,8 +263,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         // label nor be unseen, but since the seen event is handled asynchronously
         // (even via the fast-lane), we anticipate/fake the resulting state here.
         // The seen log itself will remain empty until the seen event is actually handled.
-         dialogDto.IsContentSeen = true;
-         dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
         dialogDto.IsContentSeen = true;
         dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
 

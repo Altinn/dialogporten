@@ -95,13 +95,13 @@ jobs:
       - name: Scan base (${{ github.event.pull_request.base.ref }})
         working-directory: base
         run: |
-          dotnet restore
+          dotnet restore --locked-mode
           dotnet list package --vulnerable --include-transitive --format json > "$GITHUB_WORKSPACE/base-vulns.json"
 
       - name: Scan PR head
         working-directory: pr
         run: |
-          dotnet restore
+          dotnet restore --locked-mode
           dotnet list package --vulnerable --include-transitive --format json > "$GITHUB_WORKSPACE/pr-vulns.json"
 
       - name: Fail on newly-introduced vulnerabilities

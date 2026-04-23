@@ -30,6 +30,10 @@ internal sealed partial class MassTransitFastLaneDomainEventPublisher(
             LogFastLaneFallback(logger, "timed out", domainEvents.Count);
             return false;
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception e)
         {
             logger.LogWarning(e, "Fast-lane publish failed for {EventCount} domain events, falling back to the outbox.", domainEvents.Count);

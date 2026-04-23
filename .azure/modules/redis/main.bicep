@@ -36,6 +36,9 @@ type Sku = {
 @description('The SKU of the Redis instance')
 param sku Sku
 
+@description('Whether to enable public network access')
+param publicNetworkAccess bool = false
+
 var redisNameMaxLength = 63
 var redisName = uniqueResourceName('${namePrefix}-redis', redisNameMaxLength)
 
@@ -54,7 +57,7 @@ resource redis 'Microsoft.Cache/Redis@2024-11-01' = {
       'maxmemory-policy': 'allkeys-lru'
     }
     redisVersion: version
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: publicNetworkAccess ? 'Enabled' : 'Disabled'
   }
   tags: tags
 }

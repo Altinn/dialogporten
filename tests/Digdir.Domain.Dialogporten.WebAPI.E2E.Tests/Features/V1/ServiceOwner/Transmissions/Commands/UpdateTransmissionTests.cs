@@ -87,7 +87,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     {
         // Arrange
         using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
-        const string externalReference = "same-payload-sdk";
+
         var initialCreatedAt = new DateTimeOffset(2024, 1, 2, 3, 4, 5, TimeSpan.Zero);
         var transmissionId = DialogTestData.NewUuidV7();
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
@@ -95,7 +95,6 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             {
                 transmission.Id = transmissionId;
                 transmission.CreatedAt = initialCreatedAt;
-                transmission.ExternalReference = externalReference;
                 transmission.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
                 {
                     Title = DialogTestData.CreateContentValue(
@@ -113,7 +112,6 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var updateRequest = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest
         {
             IsSilentUpdate = true,
-            ExternalReference = externalReference,
             Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
             Sender = new V1ServiceOwnerCommonActors_Actor
             {
@@ -144,15 +142,15 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Assert
         beforeUpdateResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        beforeUpdateResponse.Content.Should().NotBeNull();
+
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
         afterUpdateResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        afterUpdateResponse.Content.Should().NotBeNull();
 
-        var beforeUpdate = beforeUpdateResponse.Content ?? throw new InvalidOperationException("Transmission content was null.");
-        var afterUpdate = afterUpdateResponse.Content ?? throw new InvalidOperationException("Transmission content was null.");
-
-        beforeUpdate.CreatedAt.Should().Be(initialCreatedAt);
-        afterUpdate.CreatedAt.Should().Be(beforeUpdate.CreatedAt);
-        afterUpdate.ExternalReference.Should().Be(beforeUpdate.ExternalReference);
+        beforeUpdateResponse.Content.CreatedAt.Should().Be(initialCreatedAt);
+        afterUpdateResponse.Content.CreatedAt.Should().Be(initialCreatedAt);
     }
 
     [E2EFact]

@@ -9,11 +9,14 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
 internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChangesInterceptor
 {
+    private static readonly ConcurrentDictionary<Type, bool> FastLaneDomainEventTypes = [];
+
     private readonly ITransactionTime _transactionTime;
     private readonly Lazy<ITopicEventSender> _topicEventSender;
     private readonly ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> _logger;
@@ -83,14 +86,12 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         // Failures here, or timeouts due to transient bus issues, will fall back to the outbox publish as normal.
         // This may cause duplicate events, so it's important that any consumers of these events are idempotent
         // and can handle at-least-once semantics.
-        if (CanUseFastLane(dbContext) && await _fastLaneDomainEventPublisher.TryPublishAsync(_domainEvents, cancellationToken))
+        if (!CanUseFastLane(dbContext) || !await _fastLaneDomainEventPublisher.TryPublishAsync(_domainEvents, cancellationToken))
         {
-            return result;
+            await Task.WhenAll(_domainEvents
+                .Select(x => _publishEndpoint.Value
+                    .Publish(x, x.GetType(), cancellationToken)));
         }
-
-        await Task.WhenAll(_domainEvents
-            .Select(x => _publishEndpoint.Value
-                .Publish(x, x.GetType(), cancellationToken)));
 
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
@@ -153,7 +154,12 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private bool CanUseFastLane(DbContext dbContext) =>
         !dbContext.ChangeTracker.HasChanges()
         && _domainEvents.Count != 0
-        && _domainEvents.All(x => x is IFastLaneDomainEvent);
+        && _domainEvents.All(IsFastLaneDomainEvent);
+
+    private static bool IsFastLaneDomainEvent(IDomainEvent domainEvent) =>
+        FastLaneDomainEventTypes.GetOrAdd(
+            domainEvent.GetType(),
+            static type => type.IsDefined(typeof(FastLaneDomainEventAttribute), inherit: false));
 
     // This is an optimization to include only include dialog create and update events when doing
     // silent updates, as these are (currently) the only events consumed that are not effectively no-ops. This avoids

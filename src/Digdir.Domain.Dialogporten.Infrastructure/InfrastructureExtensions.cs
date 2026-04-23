@@ -386,7 +386,10 @@ public static class InfrastructureExtensions
                 return;
             }
 
-            x.UsingAzureServiceBus();
+            x.UsingAzureServiceBus((_, cfg) =>
+            {
+                cfg.Host(builderContext.InfraSettings.MassTransit.Host);
+            });
         });
 
         builderContext.Services.AddServiceBusHealthCheck();

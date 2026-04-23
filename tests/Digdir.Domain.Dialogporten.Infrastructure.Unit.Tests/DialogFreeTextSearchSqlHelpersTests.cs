@@ -28,6 +28,10 @@ public sealed class DialogFreeTextSearchSqlHelpersTests
     [InlineData("melding AND betaling OR skatt", "melding betaling OR skatt")]
     [InlineData("melding OR betaling", "melding OR betaling")]
     [InlineData("melding or betaling", "melding or betaling")]
+    [InlineData("melding AND betaling skatt", "melding betaling OR skatt")]
+    [InlineData("melding OR betaling skatt", "melding OR betaling OR skatt")]
+    [InlineData("melding skatt OR betaling", "melding OR skatt OR betaling")]
+    [InlineData("\"oppsummeringstekst inneholde\" OR melding betaling", "\"oppsummeringstekst inneholde\" OR melding OR betaling")]
     public void CreateFreeTextSearchQuery_ShouldPreserveExplicitBooleanOperators(
         string search,
         string expectedSearchString)

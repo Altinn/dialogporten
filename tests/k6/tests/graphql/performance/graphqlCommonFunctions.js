@@ -19,7 +19,7 @@ const breakpoint = (__ENV.BREAKPOINT ?? 'false') === 'true';
 const abort_on_fail = (__ENV.ABORT_ON_FAIL ?? 'false') === 'true';
 const stages_duration = __ENV.stages_duration ?? '5m';
 const stages_target = __ENV.stages_target ?? 10;
-const max_number_of_parties = __ENV.MAX_NUMBER_OF_PARTIES ? parseInt(__ENV.MAX_NUMBER_OF_PARTIES) : 99;
+const max_number_of_parties = __ENV.MAX_NUMBER_OF_PARTIES ? parseInt(__ENV.MAX_NUMBER_OF_PARTIES) : 100;
 
 export function log(json, enduser, duration) {
   if (!traceCalls) {
@@ -155,6 +155,7 @@ function getPartiesFromResponse(json, all) {
   const parties = [];
   if (json.data && json.data.parties && json.data.parties.length > 0) {
     for (const party of json.data.parties) {
+      if (parties.length >= max_number_of_parties) break;
       if (party.isDeleted || !(party.party.includes("organization"))) continue;
       parties.push(party.party);
 
@@ -163,7 +164,6 @@ function getPartiesFromResponse(json, all) {
         parties.push(subParty.party);
         if (parties.length >= max_number_of_parties) break;
       }
-      if (parties.length >= max_number_of_parties) break;
     }
   }
   if (all === false && parties.length > 0) {

@@ -325,6 +325,8 @@ Toggling these flags will enable/disable the external resources. The `DisableAut
 During local development, it is natural to tweak configurations. Some of these configurations are _meant_ to be shared through git, such as the endpoint for a new integration that may be used during local development. Other configurations are only meant for a specific debug session or a developer's personal preferences, which _should not be shared_ through git, such as lowering the log level below warning.
 
 The configuration in the `appsettings.local.json` file takes precedence over **all** other configurations and is only loaded in the **Development environment**. Additionally, it is ignored by git through the `.gitignore` file.
+Local E2E launchers set `RUNNING_E2E_TESTS=true`, which skips `appsettings.local.json` for the runtime projects so E2E runs use the checked-in development configuration instead of developer-specific overrides.
+This does not affect the E2E test-project `appsettings.local.json` used for `ExplicitTests`.
 
 If developers need to add configuration that should be shared, they should use `appsettings.Development.json`. If the configuration is not meant to be shared, they can create an `appsettings.local.json` file to override the desired settings.
 
@@ -364,6 +366,7 @@ builder.Configuration
 
 // Left out for brevity
 ```
+`AddLocalConfiguration` also skips `appsettings.local.json` when `RUNNING_E2E_TESTS=true`.
 
 ## Additional documentation
 - [CI/CD](docs/CI-CD.md)
@@ -382,6 +385,8 @@ Besides ordinary unit and integration tests, the primary end-to-end tests are th
 - [E2E tests (WebAPI + GraphQL)](docs/E2E-Tests.md)
 - [Scripts E2E](scripts/e2e/README.md)
 - [K6 testing](tests/k6/README.md)
+
+If you use Rider for local E2E, the repository includes ready-made `.run/` profiles for `WebApi (E2E)`, `GraphQL (E2E)`, `Service (E2E)`, and `E2E (WebAPI/GQL/Service)`.
 
 ## Pull requests
 For pull requests, the title must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).

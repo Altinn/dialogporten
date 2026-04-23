@@ -31,14 +31,18 @@ The tests can also be run with the scripts at [scripts/e2e/README.md](../scripts
 
 ## Prerequisites
 - Dialogporten running locally (see repo [README.md](../README.md)).
-  - WebAPI E2E: WebAPI only.
-  - GraphQL E2E: WebAPI + GraphQL.
+  - WebAPI E2E: WebApi + Service.
+  - GraphQL E2E: WebApi + GraphQL + Service.
 - Access to Altinn testtools token generator credentials.
 
 ## Setup
-1. Start Dialogporten locally.
-   - Make sure DB/Redis are running: `podman compose -f docker-compose-db-redis.yml up -d`.
-   - Ensure `appsettings.Development.json` or `appsettings.local.json` for the relevant projects are set to:
+1. Start DB/Redis locally:
+   - `podman compose -f docker-compose-db-redis.yml up -d`
+2. Configure user secrets for the runtime projects you will start locally:
+   - Set the required project-scoped secrets for `src/Digdir.Domain.Dialogporten.WebApi`, `src/Digdir.Domain.Dialogporten.GraphQL`, and `src/Digdir.Domain.Dialogporten.Service` as needed.
+   - The checked-in `appsettings.Development.json` files already target AT23. Keep your secret values aligned with the same environment, preferably AT23, when running local E2E in `Development`.
+   - In practice, that means local DB/Redis values can stay local, while external values such as `Infrastructure:Maskinporten:ClientId`, `Infrastructure:Maskinporten:EncodedJwk`, `Infrastructure:Altinn:SubscriptionKey`, and `Application:Dialogporten:Ed25519KeyPairs:*` must belong to the same external environment as the rest of the development config.
+   - If you override environment-specific values in `appsettings.local.json` or user secrets, make sure they still match the AT23-oriented defaults in `appsettings.Development.json`, such as:
 ```json
 {
   "LocalDevelopment": {
@@ -59,11 +63,12 @@ The tests can also be run with the scripts at [scripts/e2e/README.md](../scripts
   }
 }
 ```
-2. Set the environment for the tests:
+3. Set the environment for local E2E:
 ```bash
 export DOTNET_ENVIRONMENT=Development
 ```
-3. Configure token generator credentials (user secrets):
+   - In `Development`, the E2E token generator uses `at23`.
+4. Configure token generator credentials (user secrets) for the E2E test projects:
 These are the same user/pass as in the `dialogporten-bruno` repo `.env` file.
 Ask the team on Slack if you do not have them.
 This can be done in the Solution Explorer in JetBrains Rider, right-click on the project, select `Tools => .NET User Secrets`.
@@ -75,6 +80,11 @@ dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.WebAPI.E2E.Tests Tok
 dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests TokenGeneratorUser "<user>"
 dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests TokenGeneratorPassword "<password>"
 ```
+5. Start Dialogporten locally:
+   - Shell script: [scripts/e2e/run-webapi-e2e.zsh](../scripts/e2e/run-webapi-e2e.zsh)
+   - Rider: use the checked-in `.run` profiles `WebApi (E2E)`, `GraphQL (E2E)`, `Service (E2E)`, or the compound `E2E (WebAPI/GQL/Service)`.
+   - The shell script and Rider E2E profiles set `RUNNING_E2E_TESTS=true`, which prevents `appsettings.local.json` from being loaded for `WebApi`, `GraphQL`, and `Service`. This avoids accidental local overrides during E2E runs.
+   - The test-project file `tests/Digdir.Library.Dialogporten.E2E.Common/appsettings.local.json` is unaffected and is still the place to set `ExplicitTests=false` if you want explicit tests to run by default in your IDE.
 
 ## Writing tests
 Use the shared E2E base class and custom attributes so hooks and explicit behavior are consistent:

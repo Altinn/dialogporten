@@ -107,6 +107,8 @@ param redisConfiguration {
   publicNetworkAccess: bool?
 }
 
+var redisPublicNetworkAccess = redisConfiguration.?publicNetworkAccess ?? false
+
 var secrets = {
   dialogportenPgAdminPassword: dialogportenPgAdminPassword
   sourceKeyVaultSubscriptionId: sourceKeyVaultSubscriptionId
@@ -276,7 +278,7 @@ module redis '../modules/redis/main.bicep' = {
     environmentKeyVaultName: environmentKeyVault.outputs.name
     sku: redisConfiguration.sku
     version: redisConfiguration.version
-    publicNetworkAccess: redisConfiguration.publicNetworkAccess ?? false
+    publicNetworkAccess: redisPublicNetworkAccess
     subnetId: vnet.outputs.redisSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     tags: tags

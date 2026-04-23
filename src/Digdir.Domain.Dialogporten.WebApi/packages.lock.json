@@ -4,13 +4,11 @@
     "net10.0": {
       "Azure.Identity": {
         "type": "Direct",
-        "requested": "[1.20.0, )",
-        "resolved": "1.20.0",
-        "contentHash": "yWOcmVL3SP5aVZqJ24V8IXdGRT6GW3/SD/al2w1Xe0MIcT8DuXpPOyKE9Pbk8/XxMtjHX14A82U6gwvDaU/GIw==",
+        "requested": "[1.21.0, )",
+        "resolved": "1.21.0",
+        "contentHash": "GeFv8sGwRKvDKwI2WFy8r0mhmlxEVZg24Sit2NogTjiSO8RVjllWM65OT6e1sKjOvG8V74y7hAbaELUUPjZQSw==",
         "dependencies": {
-          "Azure.Core": "1.52.0",
-          "Microsoft.Identity.Client": "4.83.1",
-          "Microsoft.Identity.Client.Extensions.Msal": "4.83.1"
+          "Azure.Core": "1.53.0"
         }
       },
       "FastEndpoints.Swagger": {
@@ -148,10 +146,12 @@
       },
       "Azure.Core": {
         "type": "Transitive",
-        "resolved": "1.52.0",
-        "contentHash": "If2gP0B4kDAwOw3kvMFs7gEounDhLyeleoWMih0xPdGAvhKpcWQwoPI3L/L0gmcQt0hrtqDnRni1jaIaxwdL7w==",
+        "resolved": "1.53.0",
+        "contentHash": "x9c/toFMOtRrlTdFuE7rlGCVAduQzWVfKmLz5juj41zJAXEhYD5hluiUyyAEzJ6OxpBnKtiaBztzwpZITAVjtg==",
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "10.0.3",
+          "Microsoft.Identity.Client": "4.83.1",
+          "Microsoft.Identity.Client.Extensions.Msal": "4.83.1",
           "System.ClientModel": "1.10.0",
           "System.Memory.Data": "10.0.3"
         }
@@ -1400,7 +1400,7 @@
         "type": "Project",
         "dependencies": {
           "AspNetCore.HealthChecks.UI.Client": "[9.0.0, )",
-          "Azure.Identity": "[1.20.0, )",
+          "Azure.Identity": "[1.21.0, )",
           "Azure.Monitor.OpenTelemetry.AspNetCore": "[1.4.0, )",
           "Digdir.Domain.Dialogporten.Infrastructure": "[1.0.0, )",
           "HotChocolate.Diagnostics": "[15.1.14, )",

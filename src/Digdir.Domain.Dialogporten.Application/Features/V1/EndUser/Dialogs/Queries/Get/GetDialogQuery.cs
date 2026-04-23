@@ -260,9 +260,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceExpiredAttachmentUrls(dialogDto);
 
         // Logically, a dialog fetched by id should never have a MarkedAsUnopened
-        // label nor be unseen, but as this is handled asynchronously, there is a
-        // we need to anticipate/fake it here. The seen log however will be
-        // empty until the seen event is actually handled.
+        // label nor be unseen, but since the seen event is handled asynchronously
+        // (even via the fast-lane), we anticipate/fake the resulting state here.
+        // The seen log itself will remain empty until the seen event is actually handled.
+         dialogDto.IsContentSeen = true;
+         dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
         dialogDto.IsContentSeen = true;
         dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
 

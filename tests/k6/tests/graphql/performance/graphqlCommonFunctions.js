@@ -3,8 +3,8 @@
  */
 import { randomItem } from '../../../common/k6-utils.js';
 import { getEndUserTokens } from '../../../common/token.js';
-import { 
-  getGraphqlRequestBodyForAllDialogsForParty, 
+import {
+  getGraphqlRequestBodyForAllDialogsForParty,
   getGraphqlRequestBodyForAllDialogsForCount,
   getPartiesRequestBody,
   getSearchAutoCompleteRequestBody,
@@ -19,26 +19,26 @@ const breakpoint = (__ENV.BREAKPOINT ?? 'false') === 'true';
 const abort_on_fail = (__ENV.ABORT_ON_FAIL ?? 'false') === 'true';
 const stages_duration = __ENV.stages_duration ?? '5m';
 const stages_target = __ENV.stages_target ?? 10;
-
+const max_number_of_parties = __ENV.MAX_NUMBER_OF_PARTIES ? parseInt(__ENV.MAX_NUMBER_OF_PARTIES) : 99;
 
 export function log(json, enduser, duration) {
   if (!traceCalls) {
-      return;
+    return;
   }
   if (!json) {
-      if (traceCalls) {
-          console.log("No data in response for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));
-      }
-      return;
+    if (traceCalls) {
+      console.log("No data in response for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));
+    }
+    return;
   }
   if (json.data?.searchDialogs?.items?.length) {
-      console.log("Found " + json.data.searchDialogs.items.length + " dialogs" + " for " + enduser + (duration ? (" in " + duration + " ms") : "")); 
+    console.log("Found " + json.data.searchDialogs.items.length + " dialogs" + " for " + enduser + (duration ? (" in " + duration + " ms") : ""));
   } else if (json.data?.searchDialogs?.errors?.length) {
-      console.log("Found errors " + JSON.stringify(json.data.searchDialogs.errors) + " for " + enduser + (duration ? (" in " + duration + " ms") : "")); 
-  } else if (json.data?.parties?.length ) {
-      console.log("Found " + json.data.parties.length + " parties" + " for " + enduser + (duration ? (" in " + duration + " ms") : ""));
+    console.log("Found errors " + JSON.stringify(json.data.searchDialogs.errors) + " for " + enduser + (duration ? (" in " + duration + " ms") : ""));
+  } else if (json.data?.parties?.length) {
+    console.log("Found " + json.data.parties.length + " parties" + " for " + enduser + (duration ? (" in " + duration + " ms") : ""));
   } else {
-      console.log("Found no data for " + enduser + (duration ? (" in " + duration + " ms") : ""));
+    console.log("Found no data for " + enduser + (duration ? (" in " + duration + " ms") : ""));
   }
 }
 /**
@@ -60,7 +60,7 @@ export function getOptions(labels) {
       options.thresholds[`http_req_duration{name:${label}}`] = [{ threshold: "max<5000", abortOnFail: abort_on_fail }];
       options.thresholds[`http_req_failed{name:${label}}`] = [{ threshold: 'rate<=0.0', abortOnFail: abort_on_fail }];
     }
-    
+
     options.stages = [
       { duration: stages_duration, target: stages_target },
     ];
@@ -98,7 +98,7 @@ export function _default(data) {
     },
     tags: { name: label }
   }
-  
+
   describe('Perform graphql dialog list', () => {
     let r = postGQ(createBody(endUser, queryType), paramsWithToken);
     expectStatusFor(r).to.equal(200);
@@ -128,7 +128,7 @@ export function _defaultForParties(data, all = true) {
     return;
   }
   paramsWithToken.tags = { name: dialogs_label }
-  
+
   describe('Perform graphql dialog list', () => {
     let r = postGQ(createBodyForMultiParties(parties, queryType), paramsWithToken);
     expectStatusFor(r).to.equal(200);
@@ -138,7 +138,7 @@ export function _defaultForParties(data, all = true) {
   });
 }
 
-export function getParties(endUser, paramsWithToken, all) {  
+export function getParties(endUser, paramsWithToken, all) {
   const queryType = "getParties"
   var response = {};
   describe('Get parties for enduser', () => {
@@ -161,9 +161,9 @@ function getPartiesFromResponse(json, all) {
       for (const subParty of party.subParties) {
         if (subParty.isDeleted || !(subParty.party.includes("organization"))) continue;
         parties.push(subParty.party);
-        if (parties.length >= 19) break; 
+        if (parties.length >= max_number_of_parties) break;
       }
-      if (parties.length >= 19) break;
+      if (parties.length >= max_number_of_parties) break;
     }
   }
   if (all === false && parties.length > 0) {

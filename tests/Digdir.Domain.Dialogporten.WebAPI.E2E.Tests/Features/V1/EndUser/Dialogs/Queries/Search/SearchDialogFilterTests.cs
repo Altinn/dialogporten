@@ -145,7 +145,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             ct => Fixture.EnduserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
-                SystemLabel = [DialogEndUserContextsEntities_SystemLabel.Bin]
+                SystemLabel = [SystemLabel.Bin]
             }, new(), ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
@@ -155,7 +155,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
         searchResult.Content.Should().NotBeNull();
         var dialog = searchResult.Content.Items.Single(x => x.Id == dialogId);
-        dialog.EndUserContext.SystemLabels.Should().Contain(DialogEndUserContextsEntities_SystemLabel.Bin);
+        dialog.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Bin);
         searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }
 

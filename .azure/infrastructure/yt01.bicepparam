@@ -6,14 +6,7 @@ param keyVaultSourceKeys = json(readEnvironmentVariable('AZURE_KEY_VAULT_SOURCE_
 
 param appInsightsPurgeDataOn30Days = true
 
-param redisConfiguration = {
-  version: '6.0'
-  sku: {
-    name: 'Basic'
-    family: 'C'
-    capacity: 1
-  }
-}
+param redisVersion = '6.0'
 
 param containerAppEnvZoneRedundancyEnabled = false
 
@@ -56,6 +49,12 @@ param postgresConfiguration = {
 }
 
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Dev'
+
+param redisSku = {
+  name: 'Basic'
+  family: 'C'
+  capacity: 1
+}
 
 param serviceBusSku = {
   name: 'Standard'

@@ -96,7 +96,6 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             new ServiceResourceMinimumAuthenticationLevelResolver(
                 db,
                 Substitute.For<ILogger<ServiceResourceMinimumAuthenticationLevelResolver>>()),
-            Substitute.For<IResourceRegistry>(),
             Substitute.For<IPartyResourceReferenceRepository>(),
             Substitute.For<ILogger<AltinnAuthorizationClient>>(),
             Substitute.For<IServiceScopeFactory>(),

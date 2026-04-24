@@ -155,9 +155,9 @@ function getPartiesFromResponse(json, all) {
   const parties = [];
   if (json.data && json.data.parties && json.data.parties.length > 0) {
     for (const party of json.data.parties) {
-      if (parties.length >= max_number_of_parties) break;
       if (party.isDeleted || !(party.party.includes("organization"))) continue;
       parties.push(party.party);
+      if (parties.length >= max_number_of_parties) break;
 
       for (const subParty of party.subParties) {
         if (subParty.isDeleted || !(subParty.party.includes("organization"))) continue;

@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.114.2](https://github.com/Altinn/dialogporten/compare/v1.114.1...v1.114.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* **perf:** single party strategy, service filtering strategy, fts improvements ([#3778](https://github.com/Altinn/dialogporten/issues/3778)) ([d2b9e61](https://github.com/Altinn/dialogporten/commit/d2b9e6153019110ff84ae2a4f7c745b4be803679))
+
+
+### Miscellaneous Chores
+
+* add optional public network access for redis ([#3597](https://github.com/Altinn/dialogporten/issues/3597)) ([bfa7667](https://github.com/Altinn/dialogporten/commit/bfa7667038046f000c150207297582f7318921dc))
+* **deps:** update actions/upload-artifact action to v7.0.1 ([#3819](https://github.com/Altinn/dialogporten/issues/3819)) ([512df3c](https://github.com/Altinn/dialogporten/commit/512df3c14f9430101b0b952b84ac3e72de186c76))
+* **deps:** update dependency azure.identity to 1.21.0 ([#3824](https://github.com/Altinn/dialogporten/issues/3824)) ([4f47257](https://github.com/Altinn/dialogporten/commit/4f4725725b28bf70f07b3152a445954a1464adee))
+* **deps:** update docker/build-push-action action to v7.1.0 ([#3825](https://github.com/Altinn/dialogporten/issues/3825)) ([00e91e4](https://github.com/Altinn/dialogporten/commit/00e91e44890d20b17ba5fff5e0d861bb64003f53))
+* modernize renovate config and expand grouping ([#3823](https://github.com/Altinn/dialogporten/issues/3823)) ([bb4de30](https://github.com/Altinn/dialogporten/commit/bb4de30608298775d9ee39aea56f9c3d231fd1a0))
+
 ## [1.114.1](https://github.com/Altinn/dialogporten/compare/v1.114.0...v1.114.1) (2026-04-22)
 
 

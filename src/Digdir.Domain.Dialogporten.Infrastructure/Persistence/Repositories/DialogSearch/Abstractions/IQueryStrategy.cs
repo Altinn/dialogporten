@@ -1,4 +1,4 @@
-namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
+namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
 
 internal interface IQueryStrategy<in TContext>
 {

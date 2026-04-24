@@ -101,9 +101,13 @@ param serviceBusSku ServiceBusSku
 param serviceBusVnetEnabled bool = true
 
 import { Sku as RedisSku } from '../modules/redis/main.bicep'
-param redisSku RedisSku
-@minLength(1)
-param redisVersion string
+param redisConfiguration {
+  version: string
+  sku: RedisSku
+  publicNetworkAccess: bool?
+}
+
+var redisPublicNetworkAccess = redisConfiguration.?publicNetworkAccess ?? false
 
 var secrets = {
   dialogportenPgAdminPassword: dialogportenPgAdminPassword
@@ -272,8 +276,9 @@ module redis '../modules/redis/main.bicep' = {
     namePrefix: namePrefix
     location: location
     environmentKeyVaultName: environmentKeyVault.outputs.name
-    sku: redisSku
-    version: redisVersion
+    sku: redisConfiguration.sku
+    version: redisConfiguration.version
+    publicNetworkAccess: redisPublicNetworkAccess
     subnetId: vnet.outputs.redisSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     tags: tags

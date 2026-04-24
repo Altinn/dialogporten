@@ -75,11 +75,10 @@ public sealed class SearchDialogQueryOrderDefinition : IOrderDefinition<DialogEn
 {
     public static IOrderOptions<DialogEntity> Configure(IOrderOptionsBuilder<DialogEntity> options) =>
         options.AddId(x => x.Id)
-            .AddDefault("createdAt", x => x.CreatedAt)
+            .AddDefault("contentUpdatedAt", x => x.ContentUpdatedAt)
             .AddOption("updatedAt", x => x.UpdatedAt)
-            .AddOption("contentUpdatedAt", x => x.ContentUpdatedAt)
+            .AddOption("createdAt", x => x.CreatedAt)
             .AddOption("dueAt", x => x.DueAt)
-            .AddOption("searchRank", x => x.Status)
             .Build();
 }
 

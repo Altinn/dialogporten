@@ -28,7 +28,10 @@ using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 using HotChocolate.Subscriptions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -129,8 +132,12 @@ public static class InfrastructureExtensions
 
             // Transient
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenSystemLabelMaskQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, DialogFirstFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GinFirstFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()

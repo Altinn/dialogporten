@@ -109,8 +109,14 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         if (request.EndUserId is not null)
         {
+            // Logically, a dialog fetched by id should never have a MarkedAsUnopened
+            // label nor be unseen, but since the seen event is handled asynchronously
+            // (even via the fast-lane), we anticipate/fake the resulting state here.
+            // The seen log itself will remain empty until the seen event is actually handled.
+            dialogDto.IsContentSeen = true;
             dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
         }
+
         return dialogDto;
     }
 

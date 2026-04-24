@@ -1,6 +1,7 @@
 /**
  * The performance test for GraphQL search.
- * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetAllDialogsForParties.js --vus 1 --iterations 1 -e env=yt01
+ * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetAllDialogsForUserWorstCase.js --vus 1 --iterations 15 -e env=yt01
+ * TODO: Find real cases for staging and test environments, or remove those environments from the test. Currently using the same test data for all environments.
  */
 import { getEnduserTokenFromGenerator } from '../../../common/token.js';
 import { getOptions, _setup, _defaultForParties, log } from './graphqlCommonFunctions.js';
@@ -11,6 +12,7 @@ import { postGQ } from '../../../common/request.js';
 const queryType = "getAllDialogsForParties";
 const environment = __ENV.API_ENVIRONMENT || "yt01";
 
+// The label format is: label_pid_totaldialogs, e.g. a_06917699338_73k means that the end user with pid 06917699338 has 73k dialogs.
 const endUsersByEnvironment = {
   yt01: [
     { pid: "06917699338", label: "a_06917699338_73k" },

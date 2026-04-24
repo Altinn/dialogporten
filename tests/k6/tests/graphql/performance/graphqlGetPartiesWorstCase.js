@@ -1,6 +1,6 @@
 /**
  * The performance test for GraphQL search.
- * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetParties.js --vus 1 --iterations 1 -e env=yt01
+ * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetPartiesWorstCase.js --vus 1 --iterations 30 -e env=yt01
  */
 
 import { _default, getOptions, _setup, createBody, log } from './graphqlCommonFunctions.js';
@@ -10,6 +10,9 @@ import { postGQ } from '../../../common/request.js';
 import { getEnduserTokenFromGenerator } from '../../../common/token.js';
 
 const environment = __ENV.API_ENVIRONMENT || "yt01";
+
+// The label format is: label_pid_totalparties_partiesreturned, e.g. a_14022216091_84k_84k means 
+// that the end user with pid 14022216091 has 84k parties, and all of them are returned by the query. 
 const endUsersByEnvironment = {
   yt01: [
     { pid: "14022216091", label: "a_14022216091_84k_84k" },

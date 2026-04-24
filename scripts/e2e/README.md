@@ -33,9 +33,9 @@ Default `.env` values in this folder:
 ```bash
 WEBAPI_ENVIRONMENT=Development
 DialogportenBaseUri=https://localhost
-WEBAPI_PORT=7214
-GRAPHQL_PORT=5181
-SERVICE_PORT=56842
+WEBAPI_PORT=7215
+GRAPHQL_PORT=5180
+SERVICE_PORT=56843
 LocalDevelopment__UseLocalDevelopmentUser=false
 LocalDevelopment__UseLocalDevelopmentResourceRegister=false
 LocalDevelopment__UseLocalDevelopmentOrganizationRegister=false
@@ -54,9 +54,9 @@ LocalDevelopment__UseLocalMetricsAggregationStorage=true
 
 Optional overrides (if set in `.env` or the shell):
 ```bash
-WEBAPI_PORT=7214
-GRAPHQL_PORT=5181
-SERVICE_PORT=56842
+WEBAPI_PORT=7215
+GRAPHQL_PORT=5180
+SERVICE_PORT=56843
 ```
 
 ## Optional

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.114.3](https://github.com/Altinn/dialogporten/compare/v1.114.2...v1.114.3) (2026-04-24)
+
+
+### Bug Fixes
+
+* correctly use redisAccessKeys for primaryKey ([#3848](https://github.com/Altinn/dialogporten/issues/3848)) ([6afad7d](https://github.com/Altinn/dialogporten/commit/6afad7d022ffced08667b7ff3177d0f9f99897ae))
+* **infra:** redis public network access bicep issue ([#3839](https://github.com/Altinn/dialogporten/issues/3839)) ([99cf932](https://github.com/Altinn/dialogporten/commit/99cf932e2408844dd6e2a99c582279635b6ffc6d))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency opentelemetry.exporter.opentelemetryprotocol to 1.15.3 [security] ([#3843](https://github.com/Altinn/dialogporten/issues/3843)) ([f7ca5c2](https://github.com/Altinn/dialogporten/commit/f7ca5c2836793883e895d3b8feb30d9fd4c9f260))
+* **infra:** revert redis changes ([#3847](https://github.com/Altinn/dialogporten/issues/3847)) ([e0f5756](https://github.com/Altinn/dialogporten/commit/e0f5756522835b9da5a49caac2e15a996c8424b5))
+
 ## [1.114.2](https://github.com/Altinn/dialogporten/compare/v1.114.1...v1.114.2) (2026-04-23)
 
 

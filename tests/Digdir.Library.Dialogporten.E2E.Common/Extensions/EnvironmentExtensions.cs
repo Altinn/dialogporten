@@ -6,9 +6,7 @@ public static class EnvironmentExtensions
 {
     extension(Environment)
     {
-        public static string GetDotnetEnvironment() =>
-            Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
-            ?? Environments.Development;
+        public static string GetDotnetEnvironment() => "staging";
 
         public static string GetTokenGeneratorEnvironment() =>
             Environment.GetDotnetEnvironment() switch

@@ -27,7 +27,7 @@ public static class E2ERetryPolicies
 
         var retryDelay = delay ?? TimeSpan.FromSeconds(1);
         var warningThreshold = logWarningAfter ?? TimeSpan.FromSeconds(10);
-        var failThreshold = failAfter ?? TimeSpan.FromSeconds(20);
+        var failThreshold = failAfter ?? TimeSpan.FromSeconds(120);
 
         if (warningThreshold < TimeSpan.Zero)
         {

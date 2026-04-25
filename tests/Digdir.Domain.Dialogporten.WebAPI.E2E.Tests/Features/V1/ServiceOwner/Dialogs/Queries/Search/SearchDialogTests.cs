@@ -8,7 +8,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.D
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
-
     [E2ETheory]
     [InlineData(true)]
     [InlineData(false)]

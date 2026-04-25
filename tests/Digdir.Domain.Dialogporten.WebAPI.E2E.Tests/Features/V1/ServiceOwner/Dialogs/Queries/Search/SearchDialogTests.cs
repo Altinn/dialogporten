@@ -46,4 +46,42 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         content.Items.Single().ServiceResource.Should()
             .Be(E2EConstants.AlternateServiceResource);
     }
+
+    [E2EFact]
+    public async Task Should_Filter_By_ServiceResource()
+    {
+        // Arrange
+        var sentinelLabel = Guid.NewGuid().ToString();
+
+        var dialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
+        {
+            dialog.ServiceResource = E2EConstants.AlternateServiceResource;
+        });
+
+        var controlDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel);
+
+        // Act
+        var searchResult = await E2ERetryPolicies.RetryUntilAsync(
+            ct => Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(new()
+            {
+                ServiceOwnerLabels = [sentinelLabel],
+                ServiceResource = [E2EConstants.AlternateServiceResource],
+                EndUserId = null!
+            }, ct),
+            isSuccessful: response =>
+                response.Content is { Items.Count: 1 } content
+                && content.Items.Single().Id == dialogId
+                && content.Items.All(x => x.Id != controlDialogId),
+            degradationMessage: "Search indexing speed is degraded.");
+
+        // Assert
+        searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
+        searchResult.Content.Should().NotBeNull();
+
+        var content = searchResult.Content;
+        content.Items.Should().ContainSingle();
+        content.Items.Single().Id.Should().Be(dialogId);
+        content.Items.Single().ServiceResource.Should()
+            .Be(E2EConstants.AlternateServiceResource);
+    }
 }

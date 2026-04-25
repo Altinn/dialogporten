@@ -12,25 +12,26 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
     [E2ETheory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task Should_Filter_By_ServiceResource(bool withEndUserId)
+    public async Task Should_Filter_By_ServiceOwnerLabels(bool withEndUserId)
     {
         // Arrange
         var sentinelLabel = Guid.NewGuid().ToString();
+        var controlLabel = Guid.NewGuid().ToString();
 
-        var dialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
-        {
-            dialog.ServiceResource = E2EConstants.AlternateServiceResource;
-        });
-
-        var controlDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel);
+        var dialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel);
+        var controlDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(controlLabel);
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
             ct => Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(new()
             {
                 ServiceOwnerLabels = [sentinelLabel],
-                ServiceResource = [E2EConstants.AlternateServiceResource],
-                EndUserId = withEndUserId ? E2EConstants.DefaultParty : null!
+                Party = withEndUserId
+                    ? [E2EConstants.DefaultParty]
+                    : null!,
+                EndUserId = withEndUserId
+                    ? E2EConstants.DefaultParty
+                    : null!
             }, ct),
             isSuccessful: response =>
                 response.Content is { Items.Count: 1 } content
@@ -45,7 +46,5 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         var content = searchResult.Content;
         content.Items.Should().ContainSingle();
         content.Items.Single().Id.Should().Be(dialogId);
-        content.Items.Single().ServiceResource.Should()
-            .Be(E2EConstants.AlternateServiceResource);
     }
 }

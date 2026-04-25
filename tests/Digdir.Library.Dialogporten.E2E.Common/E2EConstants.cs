@@ -33,7 +33,6 @@ public static class E2EConstants
     public const string EphemeralDialogUrn = "digdir:dialogporten:ephemeral-dialog";
 
     public const string DefaultServiceResource = "urn:altinn:resource:ttd-dialogporten-automated-tests";
-    public const string AlternateServiceResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-2";
     public static readonly string DefaultParty = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{DefaultEndUserSsn}";
 
     public const string AvailableExternalResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence";

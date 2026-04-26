@@ -176,6 +176,29 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .UpdateTransmission((x, _) => x.Dto.IdempotentKey = "This is a key")
             .ExecuteAndAssert<UpdateTransmissionSuccess>();
 
+    private const string InitialTransmissionCreatedAtKey = "initial-transmission-created-at";
+
+    [Fact]
+    public Task UpdateTransmission_Should_Preserve_CreatedAt_When_Not_Specified()
+        => FlowBuilder.For(Application)
+            .AsChangeTransmissionUser()
+            .CreateSimpleDialog()
+            .CreateTransmission()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+                ctx.Bag[InitialTransmissionCreatedAtKey] = dialog.Transmissions.Single().CreatedAt)
+            .UpdateTransmission((x, _) =>
+            {
+                x.Dto.ExternalReference = "preserve-created-at";
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
+            {
+                var expectedCreatedAt = (DateTimeOffset)ctx.Bag[InitialTransmissionCreatedAtKey]!;
+                dialog.Transmissions.Should().ContainSingle()
+                    .Which.CreatedAt.Should().Be(expectedCreatedAt);
+            });
+
     [Theory]
     [ClassData(typeof(UpdateTransmissionBasicFieldTestData))]
     public Task UpdateTransmission_Persists_Changes_When_Silent_Update_And_Scope_Are_Present(

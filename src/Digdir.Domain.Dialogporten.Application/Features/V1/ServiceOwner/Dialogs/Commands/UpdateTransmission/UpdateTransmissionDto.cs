@@ -17,7 +17,7 @@ public class UpdateTransmissionDto
     /// <summary>
     /// Overrides the creating date and time for the transmission.
     /// </summary>
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? CreatedAt { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

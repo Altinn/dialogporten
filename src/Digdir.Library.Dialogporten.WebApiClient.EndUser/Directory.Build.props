@@ -1,2 +1,7 @@
-<!-- Overrides root Directory.Build.props to ensure correct framework targets. -->
-<Project />
+<!-- Overrides root Directory.Build.props to ensure correct framework targets,
+     while keeping the lock-file regime from the root file. -->
+<Project>
+    <PropertyGroup>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    </PropertyGroup>
+</Project>

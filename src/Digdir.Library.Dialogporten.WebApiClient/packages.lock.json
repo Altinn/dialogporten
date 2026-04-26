@@ -47,16 +47,6 @@
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
       },
-      "Refitter.SourceGenerator": {
-        "type": "Direct",
-        "requested": "[1.7.3, )",
-        "resolved": "1.7.3",
-        "contentHash": "h1s2JTDRRZNCvnuJ0m8hreEhLntqBCnlIdRuyuQHFkkKyQ6fVbxX2+b1Jh4bB1a0MK7kuOBupIJNrJf5pRsfaQ==",
-        "dependencies": {
-          "OasReader": "1.6.16.16",
-          "Refit": "9.0.2"
-        }
-      },
       "libsodium": {
         "type": "Transitive",
         "resolved": "1.0.20.1",
@@ -235,28 +225,6 @@
           "Microsoft.IdentityModel.Logging": "8.15.0"
         }
       },
-      "Microsoft.OpenApi": {
-        "type": "Transitive",
-        "resolved": "1.6.22",
-        "contentHash": "aBvunmrdu/x+4CaA/UP1Jx4xWGwk4kymhoIRnn2Vp+zi5/KOPQJ9EkSXHRUr01WcGKtYl3Au7XfkPJbU1G2sjQ=="
-      },
-      "Microsoft.OpenApi.Readers": {
-        "type": "Transitive",
-        "resolved": "1.6.22",
-        "contentHash": "F4h4yJp2UVVGGbH7KN0DTZnI/ABjS40w2+YgfhlWXfp3em+qlWexTRbisHfcRt42oi2Tf+6hfcD5X2QaaIi9jg==",
-        "dependencies": {
-          "Microsoft.OpenApi": "1.6.22",
-          "SharpYaml": "2.1.1"
-        }
-      },
-      "OasReader": {
-        "type": "Transitive",
-        "resolved": "1.6.16.16",
-        "contentHash": "Cw+wTDi6QfKzNstvkvRt+0ZT6zlUsTrO+m0Xe+Ahw3Ltg4uVwe83YMsZrXhPal75RNLx5iPo1H2K77SP0Njz2g==",
-        "dependencies": {
-          "Microsoft.OpenApi.Readers": "1.6.22"
-        }
-      },
       "Refit.HttpClientFactory": {
         "type": "Transitive",
         "resolved": "10.1.6",
@@ -265,11 +233,6 @@
           "Microsoft.Extensions.Http": "9.0.3",
           "Refit": "10.1.6"
         }
-      },
-      "SharpYaml": {
-        "type": "Transitive",
-        "resolved": "2.1.1",
-        "contentHash": "BISoFuW2AwZYXxrZGaBnedo21BvrdgC4kkWd6QYrOdhOGSsZB0RSqcBw09l9caUE1g3sykJoRfSbtSzZS6tYig=="
       },
       "System.IdentityModel.Tokens.Jwt": {
         "type": "Transitive",
@@ -336,16 +299,6 @@
         "requested": "[10.1.6, )",
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
-      },
-      "Refitter.SourceGenerator": {
-        "type": "Direct",
-        "requested": "[1.7.3, )",
-        "resolved": "1.7.3",
-        "contentHash": "h1s2JTDRRZNCvnuJ0m8hreEhLntqBCnlIdRuyuQHFkkKyQ6fVbxX2+b1Jh4bB1a0MK7kuOBupIJNrJf5pRsfaQ==",
-        "dependencies": {
-          "OasReader": "1.6.16.16",
-          "Refit": "9.0.2"
-        }
       },
       "libsodium": {
         "type": "Transitive",
@@ -527,28 +480,6 @@
           "Microsoft.IdentityModel.Logging": "8.15.0"
         }
       },
-      "Microsoft.OpenApi": {
-        "type": "Transitive",
-        "resolved": "1.6.22",
-        "contentHash": "aBvunmrdu/x+4CaA/UP1Jx4xWGwk4kymhoIRnn2Vp+zi5/KOPQJ9EkSXHRUr01WcGKtYl3Au7XfkPJbU1G2sjQ=="
-      },
-      "Microsoft.OpenApi.Readers": {
-        "type": "Transitive",
-        "resolved": "1.6.22",
-        "contentHash": "F4h4yJp2UVVGGbH7KN0DTZnI/ABjS40w2+YgfhlWXfp3em+qlWexTRbisHfcRt42oi2Tf+6hfcD5X2QaaIi9jg==",
-        "dependencies": {
-          "Microsoft.OpenApi": "1.6.22",
-          "SharpYaml": "2.1.1"
-        }
-      },
-      "OasReader": {
-        "type": "Transitive",
-        "resolved": "1.6.16.16",
-        "contentHash": "Cw+wTDi6QfKzNstvkvRt+0ZT6zlUsTrO+m0Xe+Ahw3Ltg4uVwe83YMsZrXhPal75RNLx5iPo1H2K77SP0Njz2g==",
-        "dependencies": {
-          "Microsoft.OpenApi.Readers": "1.6.22"
-        }
-      },
       "Refit.HttpClientFactory": {
         "type": "Transitive",
         "resolved": "10.1.6",
@@ -557,11 +488,6 @@
           "Microsoft.Extensions.Http": "9.0.3",
           "Refit": "10.1.6"
         }
-      },
-      "SharpYaml": {
-        "type": "Transitive",
-        "resolved": "2.1.1",
-        "contentHash": "BISoFuW2AwZYXxrZGaBnedo21BvrdgC4kkWd6QYrOdhOGSsZB0RSqcBw09l9caUE1g3sykJoRfSbtSzZS6tYig=="
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
@@ -634,16 +560,6 @@
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
       },
-      "Refitter.SourceGenerator": {
-        "type": "Direct",
-        "requested": "[1.7.3, )",
-        "resolved": "1.7.3",
-        "contentHash": "h1s2JTDRRZNCvnuJ0m8hreEhLntqBCnlIdRuyuQHFkkKyQ6fVbxX2+b1Jh4bB1a0MK7kuOBupIJNrJf5pRsfaQ==",
-        "dependencies": {
-          "OasReader": "1.6.16.16",
-          "Refit": "9.0.2"
-        }
-      },
       "libsodium": {
         "type": "Transitive",
         "resolved": "1.0.20.1",
@@ -824,28 +740,6 @@
           "Microsoft.IdentityModel.Logging": "8.15.0"
         }
       },
-      "Microsoft.OpenApi": {
-        "type": "Transitive",
-        "resolved": "1.6.22",
-        "contentHash": "aBvunmrdu/x+4CaA/UP1Jx4xWGwk4kymhoIRnn2Vp+zi5/KOPQJ9EkSXHRUr01WcGKtYl3Au7XfkPJbU1G2sjQ=="
-      },
-      "Microsoft.OpenApi.Readers": {
-        "type": "Transitive",
-        "resolved": "1.6.22",
-        "contentHash": "F4h4yJp2UVVGGbH7KN0DTZnI/ABjS40w2+YgfhlWXfp3em+qlWexTRbisHfcRt42oi2Tf+6hfcD5X2QaaIi9jg==",
-        "dependencies": {
-          "Microsoft.OpenApi": "1.6.22",
-          "SharpYaml": "2.1.1"
-        }
-      },
-      "OasReader": {
-        "type": "Transitive",
-        "resolved": "1.6.16.16",
-        "contentHash": "Cw+wTDi6QfKzNstvkvRt+0ZT6zlUsTrO+m0Xe+Ahw3Ltg4uVwe83YMsZrXhPal75RNLx5iPo1H2K77SP0Njz2g==",
-        "dependencies": {
-          "Microsoft.OpenApi.Readers": "1.6.22"
-        }
-      },
       "Refit.HttpClientFactory": {
         "type": "Transitive",
         "resolved": "10.1.6",
@@ -854,11 +748,6 @@
           "Microsoft.Extensions.Http": "9.0.3",
           "Refit": "10.1.6"
         }
-      },
-      "SharpYaml": {
-        "type": "Transitive",
-        "resolved": "2.1.1",
-        "contentHash": "BISoFuW2AwZYXxrZGaBnedo21BvrdgC4kkWd6QYrOdhOGSsZB0RSqcBw09l9caUE1g3sykJoRfSbtSzZS6tYig=="
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",

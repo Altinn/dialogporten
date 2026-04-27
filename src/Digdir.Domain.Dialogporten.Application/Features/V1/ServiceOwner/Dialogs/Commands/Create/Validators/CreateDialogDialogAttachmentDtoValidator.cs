@@ -25,6 +25,9 @@ internal sealed class CreateDialogDialogAttachmentDtoValidator : AbstractValidat
             .When(x => x.Name is not null);
 
         RuleFor(x => x.Urls)
+            .UniqueBy(x => x.Id);
+
+        RuleFor(x => x.Urls)
             .NotEmpty()
             .ForEach(x => x.SetValidator(urlValidator));
 

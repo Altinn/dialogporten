@@ -20,6 +20,7 @@
     - [Installing Podman (Windows)](#installing-podman-windows)
   - [Running the project](#running-the-project)
   - [Running the WebApi/GraphQl in an IDE](#running-the-webapigraphql-in-an-ide)
+  - [NuGet lock files](#nuget-lock-files)
 - [DB development](#db-development)
   - [DB development through PMC](#db-development-through-pmc)
   - [DB development through CLI](#db-development-through-cli)
@@ -133,6 +134,9 @@ Then run `podman compose` without the WebAPI/GraphQl projects.
 ```powershell
 podman compose -f docker-compose-db-redis.yml up 
 ```
+
+### NuGet lock files
+NuGet restore writes `packages.lock.json` for each project, and CI/Docker restores use `--locked-mode` so dependency graph changes must be committed. After changing package references locally, run `dotnet restore` and include the updated lock files in the PR; Renovate updates them in dependency PRs.
 
 ## DB development
 This project uses Entity Framework Core to manage DB migrations. DB development can either be done through Visual Studio's Package Manager Console (PMC) or through the CLI. 

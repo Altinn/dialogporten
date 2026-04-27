@@ -4,14 +4,7 @@ param environment = 'prod'
 param location = 'norwayeast'
 param keyVaultSourceKeys = json(readEnvironmentVariable('AZURE_KEY_VAULT_SOURCE_KEYS'))
 
-param redisConfiguration = {
-  version: '6.0'
-  sku: {
-    name: 'Standard'
-    family: 'C'
-    capacity: 1
-  }
-}
+param redisVersion = '6.0'
 
 param containerAppEnvZoneRedundancyEnabled = true
 
@@ -126,6 +119,12 @@ param postgresConfiguration = {
 }
 
 param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
+
+param redisSku = {
+  name: 'Standard'
+  family: 'C'
+  capacity: 1
+}
 
 param serviceBusSku = {
   name: 'Premium'

@@ -36,9 +36,6 @@ type Sku = {
 @description('The SKU of the Redis instance')
 param sku Sku
 
-@description('Whether to enable public network access')
-param publicNetworkAccess bool = false
-
 var redisNameMaxLength = 63
 var redisName = uniqueResourceName('${namePrefix}-redis', redisNameMaxLength)
 
@@ -57,10 +54,12 @@ resource redis 'Microsoft.Cache/Redis@2024-11-01' = {
       'maxmemory-policy': 'allkeys-lru'
     }
     redisVersion: version
-    publicNetworkAccess: publicNetworkAccess ? 'Enabled' : 'Disabled'
+    publicNetworkAccess: 'Disabled'
   }
   tags: tags
 }
+
+var redisAccessKeys = redis.listKeys()
 
 // private endpoint name max characters is 80
 var redisPrivateEndpointName = uniqueResourceName('${namePrefix}-redis-pe', 80)
@@ -115,7 +114,7 @@ module redisConnectionString '../keyvault/upsertSecret.bicep' = {
   params: {
     destKeyVaultName: environmentKeyVaultName
     secretName: 'dialogportenRedisConnectionString'
-    secretValue: '${redis.properties.hostName}:${redis.properties.sslPort},password=${redis.properties.accessKeys.primaryKey},ssl=True,abortConnect=False'
+    secretValue: '${redis.properties.hostName}:${redis.properties.sslPort},password=${redisAccessKeys.primaryKey},ssl=True,abortConnect=False'
     tags: tags
   }
 }

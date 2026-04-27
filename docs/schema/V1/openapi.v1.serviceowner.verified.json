@@ -2472,6 +2472,7 @@
           "createdAt": {
             "description": "Overrides the creating date and time for the transmission.",
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "extendedType": {

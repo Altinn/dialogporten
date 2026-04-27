@@ -3916,7 +3916,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Overrides the creating date and time for the transmission.
         /// </summary>
         [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

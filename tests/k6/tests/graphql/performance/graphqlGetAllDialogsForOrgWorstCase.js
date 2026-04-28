@@ -13,6 +13,7 @@ const queryType = "getAllDialogsForParties";
 const environment = __ENV.API_ENVIRONMENT || "yt01";
 
 // The label format is: label_orgno_totaldialogs, e.g. a_313274527_73k means that the orgno 313274527 has 73k dialogs.
+// TODO: Find real cases for staging and test environments, or remove those environments from the test. Currently using the same test data for all environments.
 const endUsersByEnvironment = {
   yt01: [
     { pid: "06917699338", orgno: "313274527", label: "a_313274527_73k" },

@@ -40,6 +40,7 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
     const items = response.json().items;
     if (!items?.length) return;
     const dialogId = items[0].id;
+    const serviceResourceType = items[0].serviceResourceType;
     if (!dialogId) return;
     if (getFunction == getSO) {
         const r = getDialog(dialogId, paramsWithToken, 'get dialog', getFunction);
@@ -53,7 +54,9 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
     }
     getContentChain(dialogId, paramsWithToken, 'get dialog activities', 'get dialog activity', '/activities/', getFunction);
     getContentChain(dialogId, paramsWithToken, 'get seenlogs', 'get seenlog', '/seenlog/', getFunction);
-    getDialogLookup(dialogId, paramsWithToken, getFunction);
+    if (serviceResourceType !== "CorrespondenceService") {
+        getDialogLookup(dialogId, paramsWithToken, getFunction);
+    }
     if (getFunction == getEU) {
         getContent(dialogId, paramsWithToken, 'get labellog', '/context/labellog', getFunction);
     }

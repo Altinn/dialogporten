@@ -2389,13 +2389,9 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// <br/>
-        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
-        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
-        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -2415,6 +2411,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </summary>
         [JsonPropertyName("seenSinceLastContentUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+
+        /// <summary>
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// </summary>
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
@@ -3084,13 +3088,9 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
-        /// <br/>
-        /// <br/>Obsolete: A dialog is now considered 'seen' when the dialog has:
-        /// <br/>- At least one entry in SeenSinceLastContentUpdate and
-        /// <br/>- No system label MarkedAsUnopened.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use SeenSinceLastContentUpdate and EndUserContext.SystemLabels instead")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3158,6 +3158,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </summary>
         [JsonPropertyName("seenSinceLastContentUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+
+        /// <summary>
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// </summary>
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
@@ -4335,7 +4343,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     {
 
         /// <summary>
-        /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
+        /// A self-defined UUIDv7 may be provided to support idempotent additions and updates of attachment URLs. If not provided, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
@@ -5334,6 +5342,12 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of attachment URLs. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// The fully qualified URL of the attachment.

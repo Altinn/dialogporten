@@ -47,6 +47,16 @@
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
       },
+      "Refit.HttpClientFactory": {
+        "type": "Direct",
+        "requested": "[10.1.6, )",
+        "resolved": "10.1.6",
+        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Http": "9.0.3",
+          "Refit": "10.1.6"
+        }
+      },
       "libsodium": {
         "type": "Transitive",
         "resolved": "1.0.20.1",
@@ -225,15 +235,6 @@
           "Microsoft.IdentityModel.Logging": "8.15.0"
         }
       },
-      "Refit.HttpClientFactory": {
-        "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Http": "9.0.3",
-          "Refit": "10.1.6"
-        }
-      },
       "System.IdentityModel.Tokens.Jwt": {
         "type": "Transitive",
         "resolved": "8.15.0",
@@ -299,6 +300,16 @@
         "requested": "[10.1.6, )",
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
+      },
+      "Refit.HttpClientFactory": {
+        "type": "Direct",
+        "requested": "[10.1.6, )",
+        "resolved": "10.1.6",
+        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Http": "9.0.3",
+          "Refit": "10.1.6"
+        }
       },
       "libsodium": {
         "type": "Transitive",
@@ -478,15 +489,6 @@
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
           "Microsoft.IdentityModel.Logging": "8.15.0"
-        }
-      },
-      "Refit.HttpClientFactory": {
-        "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Http": "9.0.3",
-          "Refit": "10.1.6"
         }
       },
       "System.Diagnostics.DiagnosticSource": {
@@ -560,6 +562,16 @@
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
       },
+      "Refit.HttpClientFactory": {
+        "type": "Direct",
+        "requested": "[10.1.6, )",
+        "resolved": "10.1.6",
+        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Http": "9.0.3",
+          "Refit": "10.1.6"
+        }
+      },
       "libsodium": {
         "type": "Transitive",
         "resolved": "1.0.20.1",
@@ -738,15 +750,6 @@
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
           "Microsoft.IdentityModel.Logging": "8.15.0"
-        }
-      },
-      "Refit.HttpClientFactory": {
-        "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Http": "9.0.3",
-          "Refit": "10.1.6"
         }
       },
       "System.Diagnostics.DiagnosticSource": {

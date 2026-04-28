@@ -50,7 +50,6 @@ internal sealed class MappingProfile : Profile
 
         CreateMap<AttachmentUrlDto, AttachmentUrl>()
             .IgnoreComplexDestinationProperties()
-            .ForMember(x => x.Id, opt => opt.Ignore())
             .ForMember(dest => dest.ConsumerType, opt => opt.Ignore())
             .ForMember(dest => dest.ConsumerTypeId, opt => opt.MapFrom(src => src.ConsumerType));
 

@@ -437,6 +437,16 @@
           "Refit": "[10.1.6, )",
           "Refit.HttpClientFactory": "[10.1.6, )"
         }
+      },
+      "Altinn.ApiClients.Dialogporten.Common": {
+        "type": "Project",
+        "dependencies": {
+          "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.5, )",
+          "NSec.Cryptography": "[25.4.0, )",
+          "Refit": "[10.1.6, )",
+          "Refit.HttpClientFactory": "[10.1.6, )"
+        }
       }
     }
   }

@@ -97,6 +97,15 @@
           "Refit": "[10.1.6, )",
           "Refit.HttpClientFactory": "[10.1.6, )"
         }
+      },
+      "Altinn.ApiClients.Dialogporten.Common": {
+        "type": "Project",
+        "dependencies": {
+          "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
+          "NSec.Cryptography": "[25.4.0, )",
+          "Refit": "[10.1.6, )",
+          "Refit.HttpClientFactory": "[10.1.6, )"
+        }
       }
     }
   }

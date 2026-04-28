@@ -21,4 +21,10 @@
         <AnalysisLevel>10</AnalysisLevel>
     </PropertyGroup>
 
+    <ItemGroup>
+        <!-- See https://github.com/Altinn/dialogporten/issues/967
+             Suppressed until we remove automapper. -->
+        <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
+    </ItemGroup>
+
 </Project>

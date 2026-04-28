@@ -4,8 +4,7 @@
  * TODO: Find real cases for staging and test environments, or remove those environments from the test. Currently using the same test data for all environments.
  */
 import { getEnduserTokenFromGenerator } from '../../../common/token.js';
-import { getOptions, _setup, _defaultForParties, log } from './graphqlCommonFunctions.js';
-import { createBodyForAllDialogsForPartiesFts } from './graphqlCommonFunctions.js';
+import { getOptions, log, createBodyForAllDialogsForPartiesFts } from './graphqlCommonFunctions.js';
 import { expect, expectStatusFor } from "../../../common/testimports.js";
 import { describe } from '../../../common/describe.js';
 import { postGQ } from '../../../common/request.js';
@@ -13,7 +12,7 @@ const environment = __ENV.API_ENVIRONMENT || "yt01";
 
 // The label format is: label_orgno_totaldialogs_searchterm, e.g. a_313274527_73k_dolor means that the orgno 313274527 has 73k dialogs and the search term is "dolor". 
 // This is to test the worst case scenario for FTS, where the search term is very common and appears in many dialogs, which can potentially slow down the response time.
-// TODO: Find real cases for staging and test environments, or remove those environments from the test. Currently using the same test data for all environments.
+// Find real cases for staging and test environments, or remove those environments from the test. Currently using the same test data for all environments.
 const endUsersByEnvironment = {
   yt01: [
     { pid: "06917699338", orgno: "213325612", label: "a_213325612_71k_dolor", word: "dolor" },

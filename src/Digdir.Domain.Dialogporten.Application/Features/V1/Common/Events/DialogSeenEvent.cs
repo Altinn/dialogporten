@@ -3,7 +3,6 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +66,9 @@ public sealed class DialogSeenEvent(
             removeLabels: [SystemLabel.Values.MarkedAsUnopened],
             performedBy);
 
-        dialog.IsSeenSinceLastContentUpdate = true;
+        await _db.Dialogs
+            .Where(x => x.Id == dialog.Id && x.ContentUpdatedAt == dialog.ContentUpdatedAt)
+            .ExecuteUpdateAsync(s => s.SetProperty(d => d.IsSeenSinceLastContentUpdate, true), cancellationToken);
 
         var result = await _unitOfWork
             .DisableUpdatableFilter()

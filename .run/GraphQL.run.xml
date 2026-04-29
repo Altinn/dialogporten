@@ -12,6 +12,7 @@
     <envs>
       <env name="ASPNETCORE_ENVIRONMENT" value="Development" />
       <env name="DOTNET_ENVIRONMENT" value="Development" />
+      <env name="RUNNING_E2E_TESTS" value="true" />
       <env name="LocalDevelopment__UseLocalDevelopmentUser" value="false" />
       <env name="LocalDevelopment__UseLocalDevelopmentResourceRegister" value="false" />
       <env name="LocalDevelopment__UseLocalDevelopmentOrganizationRegister" value="false" />
@@ -19,7 +20,7 @@
       <env name="LocalDevelopment__UseLocalDevelopmentPartyNameRegistry" value="false" />
       <env name="LocalDevelopment__UseLocalDevelopmentAltinnAuthorization" value="false" />
       <env name="LocalDevelopment__UseLocalDevelopmentCloudEventBus" value="true" />
-      <env name="LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator" value="true" />
+      <env name="LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator" value="false" />
       <env name="LocalDevelopment__DisableCache" value="false" />
       <env name="LocalDevelopment__DisableAuth" value="false" />
       <env name="LocalDevelopment__UseInMemoryServiceBusTransport" value="true" />

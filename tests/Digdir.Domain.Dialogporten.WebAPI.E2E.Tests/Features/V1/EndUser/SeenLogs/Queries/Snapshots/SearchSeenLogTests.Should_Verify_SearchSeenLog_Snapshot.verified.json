@@ -1,0 +1,24 @@
+﻿[
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "seenBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    },
+    "isViaServiceOwner": false,
+    "isCurrentEndUser": true
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "seenBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    },
+    "isViaServiceOwner": true,
+    "isCurrentEndUser": true
+  }
+]

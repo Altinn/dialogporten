@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -18,6 +20,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
+using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -190,6 +193,55 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
                 dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
             });
+    }
+
+    [Fact]
+    public Task Cannot_Create_DueAt_Before_VisibleFrom_Without_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(1);
+            })
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(CreateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Cannot_Create_DueAt_Before_VisibleFrom_When_Silent_Update_Without_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.IsSilentUpdate = true;
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(1);
+            })
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(CreateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Can_Create_DueAt_Before_VisibleFrom_When_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .AsAdminUser()
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(1);
+            })
+            .ExecuteAndAssert<CreateDialogSuccess>();
     }
 
     [Fact]
@@ -683,6 +735,82 @@ public class CreateDialogTests : ApplicationCollectionFixture
             });
     }
 
+    [Fact]
+    public async Task Not_A2_Dialog_Is_Created_After_Migration_Defaults_To_Not_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero))
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.ServiceResource = [ctx.GetServiceResource()];
+                x.IsContentSeen = false;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>((x, ctx) =>
+            {
+                var dialogDto = x.Items.Single();
+                dialogDto.ServiceResource.Should().Be(ctx.GetServiceResource());
+            });
+    }
+
+    [Fact]
+    public async Task Not_A2_Dialog_Is_Created_Before_Migration_Defaults_To_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = new DateTimeOffset(2025, 11, 30, 23, 59, 59, TimeSpan.Zero))
+            .SearchServiceOwnerDialogs((x, ctx) =>
+            {
+                x.ServiceResource = [ctx.GetServiceResource()];
+                x.IsContentSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>((x, ctx) =>
+            {
+                var dialogDto = x.Items.Single();
+                dialogDto.ServiceResource.Should().Be(ctx.GetServiceResource());
+            });
+    }
+
+    [Fact]
+    public async Task A2_Dialog_Is_Created_After_Migration_Defaults_To_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.ServiceResource = "urn:altinn:resource:app_ttd_a2-2802-10793";
+                x.Dto.CreatedAt = new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
+            })
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.ServiceResource = ["urn:altinn:resource:app_ttd_a2-2802-10793"];
+                x.IsContentSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
+            {
+                var dialogDto = x.Items.Single();
+                dialogDto.ServiceResource.Should().Be("urn:altinn:resource:app_ttd_a2-2802-10793");
+            });
+    }
+
+    [Fact]
+    public async Task A2_Dialog_Is_Created_Before_Migration_Defaults_To_Seen()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.ServiceResource = "urn:altinn:resource:app_ttd_a2-2802-10793";
+                x.Dto.CreatedAt = new DateTimeOffset(2025, 11, 30, 23, 59, 59, TimeSpan.Zero);
+            })
+            .SearchServiceOwnerDialogs(x =>
+            {
+                x.ServiceResource = ["urn:altinn:resource:app_ttd_a2-2802-10793"];
+                x.IsContentSeen = true;
+            })
+            .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x =>
+            {
+                var dialogDto = x.Items.Single();
+                dialogDto.ServiceResource.Should().Be("urn:altinn:resource:app_ttd_a2-2802-10793");
+            });
+    }
+
     [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
     public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
         AddingEndUserTransmissionSentLabelScenario scenario) =>
@@ -758,6 +886,18 @@ public class CreateDialogTests : ApplicationCollectionFixture
                         .Should().BeTrue();
                 }
             });
+
+#pragma warning disable CS0618 // Type or member is obsolete
+    [Theory]
+    [InlineData(DialogStatusInput.New, DialogStatus.Values.NotApplicable)]
+    [InlineData(DialogStatusInput.Sent, DialogStatus.Values.Awaiting)]
+    public Task Can_Create_Dialog_With_Deprecated_DialogStatus(
+        DialogStatusInput initialStatus, DialogStatus.Values expectedStatus) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.Status = initialStatus)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Status.Should().Be(expectedStatus));
+#pragma warning restore CS0618 // Type or member is obsolete
 
     [Fact]
     public Task Can_Create_Dialog_Without_Supplying_Dialog_Status() =>

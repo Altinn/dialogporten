@@ -25,7 +25,6 @@
           "Api"
         ]
       },
-      "ContinuationTokenSetOfTOrderDefinitionAndTTarget": {},
       "DialogEndUserContextsEntities_SystemLabel": {
         "description": "",
         "enum": [
@@ -216,7 +215,6 @@
           "Invalid"
         ]
       },
-      "OrderSetOfTOrderDefinitionAndTTarget": {},
       "PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,
         "properties": {
@@ -240,7 +238,7 @@
           },
           "orderBy": {
             "description": "The current sorting order of the items",
-            "example": "createdat_desc,id_desc",
+            "example": "contentupdatedat_desc,id_desc",
             "type": "string"
           }
         },
@@ -269,7 +267,7 @@
           },
           "orderBy": {
             "description": "The current sorting order of the items",
-            "example": "createdat_desc,id_desc",
+            "example": "contentupdatedat_desc,id_desc",
             "type": "string"
           }
         },
@@ -298,7 +296,7 @@
           },
           "orderBy": {
             "description": "The current sorting order of the items",
-            "example": "createdat_desc,id_desc",
+            "example": "contentupdatedat_desc,id_desc",
             "type": "string"
           }
         },
@@ -514,6 +512,13 @@
             "type": "array"
           }
         },
+        "required": [
+          "instanceRef",
+          "party",
+          "serviceResource",
+          "serviceOwner",
+          "authorizationEvidence"
+        ],
         "type": "object"
       },
       "V1CommonIdentifierLookup_IdentifierLookupAuthorizationEvidence": {
@@ -555,6 +560,9 @@
             "type": "string"
           }
         },
+        "required": [
+          "subject"
+        ],
         "type": "object"
       },
       "V1CommonIdentifierLookup_IdentifierLookupGrantType": {
@@ -590,6 +598,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "orgNumber",
+          "code"
+        ],
         "type": "object"
       },
       "V1CommonIdentifierLookup_IdentifierLookupServiceResource": {
@@ -613,6 +625,11 @@
             "type": "array"
           }
         },
+        "required": [
+          "id",
+          "isDelegable",
+          "minimumAuthenticationLevel"
+        ],
         "type": "object"
       },
       "V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup": {
@@ -649,6 +666,12 @@
             "type": "array"
           }
         },
+        "required": [
+          "instanceRef",
+          "party",
+          "serviceResource",
+          "serviceOwner"
+        ],
         "type": "object"
       },
       "V1CommonLocalizations_Localization": {
@@ -664,6 +687,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "value",
+          "languageCode"
+        ],
         "type": "object"
       },
       "V1EndUserCommon_AcceptedLanguage": {
@@ -876,12 +903,12 @@
             "type": "string"
           },
           "fromPartyTransmissionsCount": {
-            "description": "The number of transmissions sent by a party representative",
+            "description": "The number of transmissions sent by a party representative.",
             "format": "int32",
             "type": "integer"
           },
           "fromServiceOwnerTransmissionsCount": {
-            "description": "The number of transmissions sent by a service owner",
+            "description": "The number of transmissions sent by a service owner.",
             "format": "int32",
             "type": "integer"
           },
@@ -894,8 +921,10 @@
             "type": "array"
           },
           "hasUnopenedContent": {
+            "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "type": "boolean",
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -905,6 +934,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "org": {
@@ -1980,8 +2013,10 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
+            "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "type": "boolean",
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -1991,6 +2026,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.\nWhen true, human-readable content like title and summary are not required.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "latestActivity": {
@@ -2207,6 +2246,13 @@
             "format": "date-time",
             "type": "string"
           },
+          "description": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "extendedType": {
             "format": "uri",
             "nullable": true,
@@ -2214,10 +2260,6 @@
           },
           "id": {
             "format": "guid",
-            "type": "string"
-          },
-          "seenByEndUserIdHash": {
-            "nullable": true,
             "type": "string"
           },
           "transmissionId": {
@@ -2933,6 +2975,13 @@
                 "$ref": "#/components/schemas/Attachments_AttachmentUrlConsumerType"
               }
             ]
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of attachment URLs. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
           },
           "mediaType": {
             "description": "The media type of the attachment.",
@@ -3991,7 +4040,7 @@
             ]
           },
           "id": {
-            "description": "A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.",
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions and updates of attachment URLs. If not provided, a new UUIDv7 will be generated.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -4650,6 +4699,7 @@
           "createdAt": {
             "description": "Overrides the creating date and time for the transmission.",
             "format": "date-time",
+            "nullable": true,
             "type": "string"
           },
           "extendedType": {
@@ -4868,12 +4918,12 @@
             "type": "string"
           },
           "fromPartyTransmissionsCount": {
-            "description": "The number of transmissions sent by a party representative",
+            "description": "The number of transmissions sent by a party representative.",
             "format": "int32",
             "type": "integer"
           },
           "fromServiceOwnerTransmissionsCount": {
-            "description": "The number of transmissions sent by the service owner",
+            "description": "The number of transmissions sent by the service owner.",
             "format": "int32",
             "type": "integer"
           },
@@ -4886,8 +4936,10 @@
             "type": "array"
           },
           "hasUnopenedContent": {
+            "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "type": "boolean",
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -4902,6 +4954,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "org": {
@@ -6054,8 +6110,10 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
+            "deprecated": true,
             "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean"
+            "type": "boolean",
+            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -6065,6 +6123,10 @@
           },
           "isApiOnly": {
             "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "isContentSeen": {
+            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
             "type": "boolean"
           },
           "latestActivity": {
@@ -7134,6 +7196,15 @@
             }
           },
           {
+            "description": "Only return dialogs that have content that has/hasn\u0027t been seen.\nIf null, no filtering is applied\nIf true, returns dialogs that have been seen\nIf false, returns dialogs that have not been seen\n            \nA dialog\u0027s content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
+            "in": "query",
+            "name": "isContentSeen",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Only return dialogs with due date after this date",
             "in": "query",
             "name": "dueAfter",
@@ -7208,11 +7279,7 @@
             "name": "orderBy",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -7221,11 +7288,7 @@
             "name": "continuationToken",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -8576,6 +8639,15 @@
             }
           },
           {
+            "description": "Only return dialogs that have content that has/hasn\u0027t been seen.\nIf null, no filtering is applied\nIf true, returns dialogs that have been seen\nIf false, returns dialogs that have not been seen\n            \nA dialog\u0027s content is considered seen if:\n- It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and\n- It does not have a system label MarkedAsUnopened.",
+            "in": "query",
+            "name": "isContentSeen",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Only return dialogs with due date after this date",
             "in": "query",
             "name": "dueAfter",
@@ -8684,11 +8756,7 @@
             "name": "orderBy",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/OrderSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -8697,11 +8765,7 @@
             "name": "continuationToken",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {
@@ -11156,11 +11220,7 @@
             "name": "continuationToken",
             "schema": {
               "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ContinuationTokenSetOfTOrderDefinitionAndTTarget"
-                }
-              ]
+              "type": "string"
             }
           },
           {

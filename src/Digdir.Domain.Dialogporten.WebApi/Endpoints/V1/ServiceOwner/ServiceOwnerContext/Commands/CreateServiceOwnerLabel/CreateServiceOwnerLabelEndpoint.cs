@@ -12,6 +12,7 @@ using ServiceOwnerLabelDto =
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.ServiceOwnerContext.Commands.CreateServiceOwnerLabel;
 
+[OpenApiOperationId("CreateServiceOwnerLabel")]
 public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwnerLabelRequest>
 {
     private readonly ISender _sender;

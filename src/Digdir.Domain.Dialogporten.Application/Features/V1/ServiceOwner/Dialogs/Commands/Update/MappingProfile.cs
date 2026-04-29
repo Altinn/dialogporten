@@ -23,7 +23,7 @@ internal sealed class MappingProfile : Profile
         CreateMap<UpdateDialogDto, DialogEntity>()
             .IgnoreComplexDestinationProperties()
             .ForMember(dest => dest.Status, opt => opt.Ignore())
-            .ForMember(dest => dest.StatusId, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.StatusId, opt => opt.Ignore())
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content));
 
         CreateMap<SearchTagDto, DialogSearchTag>()
@@ -50,7 +50,6 @@ internal sealed class MappingProfile : Profile
 
         CreateMap<AttachmentUrlDto, AttachmentUrl>()
             .IgnoreComplexDestinationProperties()
-            .ForMember(x => x.Id, opt => opt.Ignore())
             .ForMember(dest => dest.ConsumerType, opt => opt.Ignore())
             .ForMember(dest => dest.ConsumerTypeId, opt => opt.MapFrom(src => src.ConsumerType));
 

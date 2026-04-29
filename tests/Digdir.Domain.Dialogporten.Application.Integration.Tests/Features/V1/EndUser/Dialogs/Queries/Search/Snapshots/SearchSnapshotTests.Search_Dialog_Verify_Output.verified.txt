@@ -17,6 +17,7 @@
       ContentUpdatedAt: DateTimeOffset_1,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Default,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
@@ -27,6 +28,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_3,
         SystemLabels: [
@@ -71,6 +73,7 @@
       ContentUpdatedAt: DateTimeOffset_3,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Archive,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
@@ -81,6 +84,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_6,
         SystemLabels: [
@@ -125,6 +129,7 @@
       ContentUpdatedAt: DateTimeOffset_5,
       Status: NotApplicable,
       HasUnopenedContent: false,
+      SystemLabel: Default,
       IsApiOnly: false,
       LatestActivity: {
         Id: Guid_8,
@@ -134,6 +139,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_9,
         SystemLabels: [
@@ -178,6 +184,7 @@
       ContentUpdatedAt: DateTimeOffset_7,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Default,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
@@ -188,6 +195,7 @@
           ActorType: ServiceOwner
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_12,
         SystemLabels: [
@@ -232,6 +240,7 @@
       ContentUpdatedAt: DateTimeOffset_9,
       Status: NotApplicable,
       HasUnopenedContent: true,
+      SystemLabel: Default,
       IsApiOnly: false,
       FromServiceOwnerTransmissionsCount: 1,
       SeenSinceLastUpdate: [
@@ -260,6 +269,7 @@
           IsCurrentEndUser: true
         }
       ],
+      IsContentSeen: true,
       EndUserContext: {
         Revision: Guid_15,
         SystemLabels: [
@@ -289,5 +299,5 @@
     }
   ],
   HasNextPage: false,
-  OrderBy: createdat_desc,id_desc
+  OrderBy: contentupdatedat_desc,id_desc
 }

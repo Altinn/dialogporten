@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Digdir.Library.Utils.AspNet;
 
@@ -39,5 +40,38 @@ public static class AspNetUtilitiesExtensions
     {
         app.MapHealthChecks(path, new HealthCheckOptions { Predicate = predicate, ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
         return app;
+    }
+
+    public static List<HttpGetEndpointToCheck> ResolveHttpGetEndpointsToCheck(
+        IEnumerable<HttpGetEndpointToCheck> endpoints,
+        Uri altinnBaseUri,
+        IEnumerable<HttpGetEndpointToCheck>? additionalEndpoints = null) =>
+        [
+            ..endpoints.Select(endpoint => ResolveHttpGetEndpointToCheck(endpoint, altinnBaseUri)),
+            ..(additionalEndpoints ?? []).Select(endpoint => ResolveHttpGetEndpointToCheck(endpoint, altinnBaseUri))
+        ];
+
+    public static HttpGetEndpointToCheck ResolveHttpGetEndpointToCheck(HttpGetEndpointToCheck endpoint, Uri altinnBaseUri)
+    {
+        if (HasAbsoluteUrl(endpoint, out var url))
+        {
+            return endpoint with
+            {
+                Url = url,
+                AltinnPlatformRelativePath = null
+            };
+        }
+
+        return endpoint with
+        {
+            Url = new Uri(altinnBaseUri, endpoint.AltinnPlatformRelativePath).AbsoluteUri,
+            AltinnPlatformRelativePath = null
+        };
+    }
+
+    private static bool HasAbsoluteUrl(HttpGetEndpointToCheck endpoint, [NotNullWhen(true)] out string? url)
+    {
+        url = endpoint.Url;
+        return !string.IsNullOrWhiteSpace(url);
     }
 }

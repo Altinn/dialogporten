@@ -19,8 +19,10 @@
         DueAt: 2123-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
+        SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_2,
           SystemLabels: [
@@ -66,8 +68,10 @@
         DueAt: 2124-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
+        SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_4,
           SystemLabels: [
@@ -119,8 +123,10 @@
         DueAt: 2125-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
+        SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_6,
           SystemLabels: [
@@ -166,8 +172,10 @@
         DueAt: 2126-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
+        SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_8,
           SystemLabels: [
@@ -219,8 +227,10 @@
         DueAt: 2127-01-01 +0,
         Status: NotApplicable,
         HasUnopenedContent: true,
+        SystemLabel: Default,
         IsApiOnly: false,
         FromServiceOwnerTransmissionsCount: 1,
+        IsContentSeen: true,
         EndUserContext: {
           Revision: Guid_10,
           SystemLabels: [

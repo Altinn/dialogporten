@@ -44,7 +44,11 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         CreateDialogDto createDto = null!;
 
         await FlowBuilder.For(Application)
-            .CreateComplexDialog((x, _) => createDto = x.Dto)
+            .CreateComplexDialog((x, _) =>
+            {
+                EnsureDialogAttachmentUrlIds(x.Dto);
+                createDto = x.Dto;
+            })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
@@ -121,7 +125,11 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         CreateDialogDto createDto = null!;
 
         await FlowBuilder.For(Application)
-            .CreateComplexDialog((x, _) => createDto = x.Dto)
+            .CreateComplexDialog((x, _) =>
+            {
+                EnsureDialogAttachmentUrlIds(x.Dto);
+                createDto = x.Dto;
+            })
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
@@ -316,4 +324,14 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.Transmissions.Count.Should().NotBe(0);
                 x.Transmissions.Should().AllSatisfy(a => a.IsAuthorized.Should().BeFalse());
             });
+
+    private static void EnsureDialogAttachmentUrlIds(CreateDialogDto dto)
+    {
+        foreach (var attachmentUrl in dto.Attachments
+                     .SelectMany(x => x.Urls)
+                     .Where(x => x.Id is null))
+        {
+            attachmentUrl.Id = NewUuidV7();
+        }
+    }
 }

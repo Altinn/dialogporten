@@ -1,0 +1,42 @@
+﻿[
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "name": "systemlabel:Bin",
+    "action": "set",
+    "performedBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    }
+  },
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "name": "systemlabel:Archive",
+    "action": "set",
+    "performedBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    }
+  },
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "name": "systemlabel:Bin",
+    "action": "remove",
+    "performedBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    }
+  },
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "name": "systemlabel:Archive",
+    "action": "remove",
+    "performedBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    }
+  }
+]

@@ -127,7 +127,7 @@ public sealed class DialogDto
 
     /// <summary>
     /// System defined label used to categorize dialogs.
-    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="SystemLabel.Values.Bin"/> or <see cref="SystemLabel.Values.Archive"/>.
+    /// This is obsolete and will only show; <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Default"/>, <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Bin"/> or <see cref="Domain.DialogEndUserContexts.Entities.SystemLabel.Values.Archive"/>.
     /// Use <see cref="DialogEndUserContextDto.SystemLabels"/> on <see cref="EndUserContext"/> instead.
     /// </summary>
     [Obsolete($"Use {nameof(EndUserContext)}.{nameof(DialogEndUserContextDto.SystemLabels)} instead.")]
@@ -151,6 +151,7 @@ public sealed class DialogDto
     /// <summary>
     /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
     /// </summary>
+    [Obsolete($"Use {nameof(IsContentSeen)} instead. See the new field's description for an explanation of the new behavior.")]
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
@@ -167,6 +168,13 @@ public sealed class DialogDto
     /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
     /// </summary>
     public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
+
+    /// <summary>
+    /// A dialog is considered seen if
+    /// - it has been retrieved by a user, since its last content update, and
+    /// - there is no <see cref="DialogEndUserContextDto.SystemLabels"/> <see cref="SystemLabel.Values.MarkedAsUnopened"/>
+    /// </summary>
+    public bool IsContentSeen { get; set; }
 
     /// <summary>
     /// Metadata about the dialog owned by the service owner.

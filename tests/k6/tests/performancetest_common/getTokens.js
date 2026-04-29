@@ -1,6 +1,6 @@
 import { fetchToken } from "../../common/token.js";
+import { tokenGeneratorEnv } from "../../common/config.js";
 
-const tokenGeneratorEnv = __ENV.API_ENVIRONMENT || 'yt01';
 const tokenTtl = __ENV.TTL || 3600;
 
 export function getEnterpriseToken(serviceOwner) {
@@ -20,4 +20,4 @@ export function getPersonalToken(endUser) {
     }
     const url = `https://altinn-testtools-token-generator.azurewebsites.net/api/GetPersonalToken?env=${tokenGeneratorEnv}&scopes=${encodeURIComponent(tokenOptions.scopes)}&pid=${tokenOptions.ssn}&ttl=${tokenTtl}`;
     return fetchToken(url, tokenOptions, `end user (ssn:${tokenOptions.ssn}, tokenGeneratorEnv:${tokenGeneratorEnv})`);
-  }
+}

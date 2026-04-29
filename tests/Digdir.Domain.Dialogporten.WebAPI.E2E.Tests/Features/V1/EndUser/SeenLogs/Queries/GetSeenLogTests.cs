@@ -15,20 +15,26 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
-        var getDialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
-        getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var dialogContent = getDialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
-        var seenLogId = dialogContent.SeenSinceLastUpdate.Single().Id;
+        var getDialogResponse = await E2ERetryPolicies.RetryUntilAsync(
+            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
+            degradationMessage: "Seen log creation delayed");
+
+        getDialogResponse.Content.Should().NotBeNull();
+        var seenLog = getDialogResponse.Content
+            .SeenSinceLastUpdate.FirstOrDefault();
+
+        seenLog.Should().NotBeNull();
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetSeenLogDialogSeenLog(
+        var response = await Fixture.EnduserApi.V1.GetDialogSeenLog(
             dialogId,
-            seenLogId,
+            seenLog.Id,
             TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = response.Content ?? throw new InvalidOperationException("Seen log content was null.");
-        content.Id.Should().Be(seenLogId);
+        response.Content.Should().NotBeNull();
+        response.Content.Id.Should().Be(seenLog.Id);
     }
 }

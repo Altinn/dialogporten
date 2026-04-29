@@ -1,4 +1,4 @@
-import {default as createDialogPayload} from "../serviceowner/testdata/01-create-dialog.js"
+import { default as createDialogPayload } from "../serviceowner/testdata/01-create-dialog.js"
 import { sentinelPerformanceValue } from "../../common/config.js";
 
 function cleanUp(originalPayload) {
@@ -21,7 +21,7 @@ function cleanUp(originalPayload) {
  * @returns {Object} Dialog payload
  * @throws {Error} If inputs are invalid
  */
-export default function (endUser, resource, stripDialog = false) {
+export default function (endUser, resource, stripDialog = false, label = null) {
     if (!endUser?.match(/^\d{11}$/)) {
         throw new Error('endUser must be a 11-digit number');
     }
@@ -34,8 +34,11 @@ export default function (endUser, resource, stripDialog = false) {
         payload.activities = [];
         payload.attachments = []
     }
-    payload.serviceResource = "urn:altinn:resource:" +resource;
+    payload.serviceResource = "urn:altinn:resource:" + resource;
     payload.party = "urn:altinn:person:identifier-no:" + endUser;
+    if (label) {
+        payload.systemLabel = label;
+    }
     delete payload.visibleFrom;
 
     return cleanUp(payload);

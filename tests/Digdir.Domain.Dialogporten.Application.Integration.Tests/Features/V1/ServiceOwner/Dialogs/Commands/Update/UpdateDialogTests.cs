@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
@@ -334,6 +335,20 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .AssertSuccessAndUpdateDialog(x => x.Dto.IsApiOnly = false)
             .ExecuteAndAssert<ValidationError>(x => x.ShouldHaveErrorWithText(nameof(UpdateDialogDto.Content)));
 
+#pragma warning disable CS0618 // Type or member is obsolete
+    [Theory]
+    [InlineData(DialogStatusInput.New, DialogStatus.Values.NotApplicable)]
+    [InlineData(DialogStatusInput.Sent, DialogStatus.Values.Awaiting)]
+    public Task Can_Update_Dialog_With_Deprecated_DialogStatus(
+        DialogStatusInput updateStatus, DialogStatus.Values expectedStatus) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.Dto.Status = DialogStatusInput.Completed)
+            .UpdateDialog(x => x.Dto.Status = updateStatus)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Status.Should().Be(expectedStatus));
+#pragma warning restore CS0618 // Type or member is obsolete
+
     [Fact]
     public Task Cannot_Update_IsApiOnly_To_False_If_Transmission_Content_Is_Null() =>
         FlowBuilder.For(Application)
@@ -592,6 +607,44 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .UpdateDialog(x => x.Dto.DueAt = visibleFrom.AddDays(-1))
             .ExecuteAndAssert<ValidationError>(error =>
                 error.ShouldHaveErrorWithText(nameof(UpdateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Cannot_Set_DueAt_Before_Saved_VisibleFrom_When_Silent_Update_Without_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(2);
+            })
+            .UpdateDialog(x =>
+            {
+                x.IsSilentUpdate = true;
+                x.Dto.DueAt = visibleFrom.AddDays(-1);
+            })
+            .ExecuteAndAssert<ValidationError>(error =>
+                error.ShouldHaveErrorWithText(nameof(UpdateDialogDto.DueAt)));
+    }
+
+    [Fact]
+    public Task Can_Set_DueAt_Before_Saved_VisibleFrom_When_Admin_Scope()
+    {
+        var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.DueAt = visibleFrom.AddDays(1);
+                x.Dto.ExpiresAt = visibleFrom.AddDays(2);
+            })
+            .AsAdminUser()
+            .UpdateDialog(x => x.Dto.DueAt = visibleFrom.AddDays(-1))
+            .ExecuteAndAssert<UpdateDialogSuccess>();
     }
 
     [Fact]

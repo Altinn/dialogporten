@@ -26,9 +26,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 {
     private const string AuthorizeUrl = "authorization/api/v1/authorize";
     private const string AuthorizedPartiesBaseUrl = "/accessmanagement/api/v1/resourceowner/authorizedparties";
-    private const string AltinnAppResourceType = "altinnapp";
-    private const string CorrespondenceServiceResourceType = "correspondenceservice";
-    private const string GenericAccessResourceType = "genericaccessresource";
 
     private readonly HttpClient _httpClient;
     private readonly IFusionCache _pdpCache;
@@ -37,7 +34,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private readonly IUser _user;
     private readonly IDialogDbContext _db;
     private readonly IServiceResourceMinimumAuthenticationLevelResolver _serviceResourceMinimumAuthenticationLevelResolver;
-    private readonly IResourceRegistry _resourceRegistry;
     private readonly IPartyResourceReferenceRepository _partyResourceReferenceRepository;
     private readonly ILogger _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -55,7 +51,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         IUser user,
         IDialogDbContext db,
         IServiceResourceMinimumAuthenticationLevelResolver serviceResourceMinimumAuthenticationLevelResolver,
-        IResourceRegistry resourceRegistry,
         IPartyResourceReferenceRepository partyResourceReferenceRepository,
         ILogger<AltinnAuthorizationClient> logger,
         IServiceScopeFactory serviceScopeFactory,
@@ -66,7 +61,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(serviceResourceMinimumAuthenticationLevelResolver);
-        ArgumentNullException.ThrowIfNull(resourceRegistry);
         ArgumentNullException.ThrowIfNull(partyResourceReferenceRepository);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
@@ -88,7 +82,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         _user = user;
         _db = db;
         _serviceResourceMinimumAuthenticationLevelResolver = serviceResourceMinimumAuthenticationLevelResolver;
-        _resourceRegistry = resourceRegistry;
         _partyResourceReferenceRepository = partyResourceReferenceRepository;
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
@@ -187,13 +180,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         {
             authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
                 => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
-        }
-
-        // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
-        // https://github.com/Altinn/dialogporten/issues/3579
-        if (authorizedPartiesRequest.IncludeInstances)
-        {
-            await PopulateMissingInstanceRefs(authorizedParties, cancellationToken);
         }
 
         return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
@@ -329,133 +315,21 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(authorizedPartiesDto, authorizedPartiesRequest);
     }
 
-    // Polyfill: populate AuthorizedResource.InstanceRef until Access Management provides this field upstream.
-    // https://github.com/Altinn/dialogporten/issues/3579
-    private async Task PopulateMissingInstanceRefs(
-        AuthorizedPartiesResult authorizedPartiesResult,
-        CancellationToken cancellationToken)
-    {
-        var instancesWithoutRef = EnumerateAuthorizedParties(authorizedPartiesResult.AuthorizedParties)
-            .SelectMany(x => x.AuthorizedInstances
-                .Select(instance => new AuthorizedInstanceBinding(x.PartyId, instance)))
-            .Where(x =>
-                string.IsNullOrWhiteSpace(x.Instance.InstanceRef)
-                && !string.IsNullOrWhiteSpace(x.Instance.ResourceId))
-            .ToList();
-
-        if (instancesWithoutRef.Count == 0)
-        {
-            return;
-        }
-
-        var resourceTypesById = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-        var resourceIds = instancesWithoutRef
-            .Select(x => NormalizeResourceId(x.Instance.ResourceId))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        var resourceInformationTasks = resourceIds.ToDictionary(
-            resourceId => resourceId,
-            resourceId => _resourceRegistry.GetResourceInformation(resourceId, cancellationToken),
-            StringComparer.OrdinalIgnoreCase);
-
-        await Task.WhenAll(resourceInformationTasks.Values);
-
-        foreach (var (resourceId, resourceInformationTask) in resourceInformationTasks)
-        {
-            resourceTypesById[resourceId] = resourceInformationTask.Result?.ResourceType;
-        }
-
-        foreach (var binding in instancesWithoutRef)
-        {
-            var normalizedResourceId = NormalizeResourceId(binding.Instance.ResourceId);
-            if (!resourceTypesById.TryGetValue(normalizedResourceId, out var resourceType))
-            {
-                continue;
-            }
-
-            var instanceRef = resourceType switch
-            {
-                AltinnAppResourceType => TryCreateAppInstanceRef(binding.PartyId, binding.Instance.InstanceId),
-                CorrespondenceServiceResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, AltinnAuthorizationConstants.CorrespondenceRefPrefix),
-                GenericAccessResourceType => TryCreateResourceInstanceRef(binding.Instance.InstanceId, AltinnAuthorizationConstants.DialogRefPrefix),
-                _ => null
-            };
-
-            if (instanceRef is null)
-            {
-                continue;
-            }
-
-            binding.Instance.InstanceRef = instanceRef;
-        }
-    }
-
-    private static IEnumerable<AuthorizedParty> EnumerateAuthorizedParties(IEnumerable<AuthorizedParty> parties)
-    {
-        foreach (var party in parties)
-        {
-            yield return party;
-
-            if (party.SubParties is null)
-            {
-                continue;
-            }
-
-            foreach (var subParty in EnumerateAuthorizedParties(party.SubParties))
-            {
-                yield return subParty;
-            }
-        }
-    }
-
-    private static string NormalizeResourceId(string resourceId)
-        => resourceId.StartsWith(Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
-            ? resourceId.ToLowerInvariant()
-            : (Domain.Common.Constants.ServiceResourcePrefix + resourceId).ToLowerInvariant();
-
-    private static string? TryCreateAppInstanceRef(int partyId, string instanceId)
-    {
-        if (string.IsNullOrWhiteSpace(instanceId))
-        {
-            return null;
-        }
-
-        var normalized = instanceId.ToLowerInvariant();
-        if (normalized.StartsWith(AltinnAuthorizationConstants.AppInstanceRefPrefix, StringComparison.Ordinal))
-        {
-            return normalized;
-        }
-
-        if (!Guid.TryParse(instanceId, out _))
-        {
-            return null;
-        }
-
-        return $"{AltinnAuthorizationConstants.AppInstanceRefPrefix}{partyId}/{instanceId}".ToLowerInvariant();
-    }
-
-    private static string? TryCreateResourceInstanceRef(string instanceId, string prefix)
-    {
-        if (string.IsNullOrWhiteSpace(instanceId))
-        {
-            return null;
-        }
-
-        var normalized = instanceId.ToLowerInvariant();
-        if (normalized.StartsWith(prefix, StringComparison.Ordinal))
-        {
-            return normalized;
-        }
-
-        return prefix + normalized;
-    }
-
-    private sealed record AuthorizedInstanceBinding(int PartyId, AuthorizedResource Instance);
-
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
     {
-        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier() ?? throw new UnreachableException();
+        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier();
+        if (partyIdentifier is null)
+        {
+            var (userType, externalId) = _user.GetPrincipal().GetUserType();
+            var safeExternalId = userType is DialogUserType.Values.Person
+                or DialogUserType.Values.ServiceOwnerOnBehalfOfPerson
+                or DialogUserType.Values.IdportenEmailIdentifiedUser
+                ? "<redacted>"
+                : externalId;
+            throw new UnreachableException(
+                $"GetEndUserPartyIdentifier returned null. UserType={userType}, ExternalId={safeExternalId}");
+        }
+
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
             partyIdentifier,
             includeAccessPackages: true,

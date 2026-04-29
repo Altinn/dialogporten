@@ -21,6 +21,7 @@ public static class Constants
     [
         "GenericAccessResource",
         "AltinnApp",
+        "MigratedApp",
         "CorrespondenceService"
     ];
 }

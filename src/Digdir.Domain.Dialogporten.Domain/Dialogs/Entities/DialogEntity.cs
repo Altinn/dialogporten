@@ -1,5 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Attachments;
+﻿using Digdir.Domain.Dialogporten.Domain.Attachments;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -67,6 +67,16 @@ public sealed class DialogEntity :
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
+    /// Denormalized bitmask of end-user system labels for search filtering.
+    /// </summary>
+    public short SystemLabelsMask { get; set; }
+
+    /// <summary>
+    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// </summary>
+    public bool IsSeenSinceLastContentUpdate { get; set; }
+
+    /// <summary>
     ///  Indicates whether the dialog can be updated/deleted by the service owner
     /// </summary>
     public bool Frozen { get; set; }
@@ -119,6 +129,17 @@ public sealed class DialogEntity :
         }
 
         ContentUpdatedAt = UpdatedAt;
+        IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration() || IsFromAltinn2Instance();
+    }
+
+    private bool WasCreatedBeforeFirstMigration()
+    {
+        return CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
+    }
+
+    private bool IsFromAltinn2Instance()
+    {
+        return ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
     }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
@@ -129,6 +150,7 @@ public sealed class DialogEntity :
         {
             UpdatedAt = visibleFrom;
             ContentUpdatedAt = visibleFrom;
+            IsSeenSinceLastContentUpdate = false;
             return;
         }
 
@@ -140,6 +162,7 @@ public sealed class DialogEntity :
         if (ContentHasChanged(self))
         {
             ContentUpdatedAt = utcNow;
+            IsSeenSinceLastContentUpdate = false;
         }
     }
 
@@ -165,34 +188,33 @@ public sealed class DialogEntity :
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-    public void UpdateSeenAt(string endUserId, DialogUserType.Values userTypeId, string? endUserName)
+    public void OnSeen(string userId, DialogUserType.Values userTypeId)
     {
-        var lastSeenAt = SeenLog
-                         .Where(x => x.SeenBy.ActorNameEntity?.ActorId == endUserId)
-                         .MaxBy(x => x.CreatedAt)
-                         ?.CreatedAt
-         ?? DateTimeOffset.MinValue;
-
-        if (lastSeenAt >= UpdatedAt)
+        if (IsSeenBy(userId) && !IsMarkedAsUnopened() && IsSeenSinceLastContentUpdate)
         {
             return;
         }
+        // Use a deterministic id to make the seen-log insert idempotent.
+        // If multiple seen events are produced without dialog changes in between,
+        // they represent the same logical "seen" and should not create duplicates.
+        var seenLogId = Id.CreateDeterministicSubUuidV7($"{UpdatedAt:O}{IsSeenSinceLastContentUpdate}{userId}");
+        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, userId, userTypeId, seenLogId));
+    }
 
-        SeenLog.Add(new DialogSeenLog
-        {
-            EndUserTypeId = userTypeId,
-            IsViaServiceOwner = userTypeId == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson,
-            SeenBy = new DialogSeenLogSeenByActor
-            {
-                ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntity = new ActorName
-                {
-                    Name = endUserName,
-                    ActorId = endUserId
-                }
-            }
-        });
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+    private bool IsSeenBy(string userId)
+    {
+        var lastSeenByThisActor = SeenLog
+            .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId)
+            .MaxBy(x => x.CreatedAt);
+
+        return lastSeenByThisActor is not null && lastSeenByThisActor.CreatedAt > UpdatedAt;
+    }
+
+    public bool IsMarkedAsUnopened()
+    {
+        return EndUserContext
+            .DialogEndUserContextSystemLabels
+            .Any(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
     }
 
     private readonly List<IDomainEvent> _domainEvents = [];
@@ -203,6 +225,7 @@ public sealed class DialogEntity :
         _domainEvents.Clear();
         return events;
     }
+    public bool HasEvents() => _domainEvents.Count != 0;
 }
 
 public sealed class DialogAttachment : Attachment

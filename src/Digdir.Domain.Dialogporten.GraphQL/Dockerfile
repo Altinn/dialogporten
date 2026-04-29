@@ -1,8 +1,8 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0.5@sha256:ccdca44cd4f256d50187f920dc8ccc2a9ea7a8a4597ac1d51e08fddb2e3b3205 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0.7@sha256:55e37c7795bfaf6b9cc5d77c155811d9569f529d86e20647704bc1d7dd9741d4 AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.201@sha256:f061e5a7532b36fa1d1b684857fe1f504ba92115b9934f154643266613c44c62 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.203@sha256:8a90a473da5205a16979de99d2fc20975e922c68304f5c79d564e666dc3982fc AS build
 WORKDIR /src
 
 COPY [".editorconfig", "."]
@@ -10,16 +10,23 @@ COPY ["Directory.Build.props", "."]
 
 # Main project
 COPY ["src/Digdir.Domain.Dialogporten.GraphQL/Digdir.Domain.Dialogporten.GraphQL.csproj", "Digdir.Domain.Dialogporten.GraphQL/"]
+COPY ["src/Digdir.Domain.Dialogporten.GraphQL/packages.lock.json", "Digdir.Domain.Dialogporten.GraphQL/"]
 # Dependencies
 COPY ["src/Digdir.Domain.Dialogporten.Application/Digdir.Domain.Dialogporten.Application.csproj", "Digdir.Domain.Dialogporten.Application/"]
+COPY ["src/Digdir.Domain.Dialogporten.Application/packages.lock.json", "Digdir.Domain.Dialogporten.Application/"]
 COPY ["src/Digdir.Domain.Dialogporten.Domain/Digdir.Domain.Dialogporten.Domain.csproj", "Digdir.Domain.Dialogporten.Domain/"]
+COPY ["src/Digdir.Domain.Dialogporten.Domain/packages.lock.json", "Digdir.Domain.Dialogporten.Domain/"]
 COPY ["src/Digdir.Library.Entity.Abstractions/Digdir.Library.Entity.Abstractions.csproj", "Digdir.Library.Entity.Abstractions/"]
+COPY ["src/Digdir.Library.Entity.Abstractions/packages.lock.json", "Digdir.Library.Entity.Abstractions/"]
 COPY ["src/Digdir.Library.Entity.EntityFrameworkCore/Digdir.Library.Entity.EntityFrameworkCore.csproj", "Digdir.Library.Entity.EntityFrameworkCore/"]
+COPY ["src/Digdir.Library.Entity.EntityFrameworkCore/packages.lock.json", "Digdir.Library.Entity.EntityFrameworkCore/"]
 COPY ["src/Digdir.Domain.Dialogporten.Infrastructure/Digdir.Domain.Dialogporten.Infrastructure.csproj", "Digdir.Domain.Dialogporten.Infrastructure/"]
+COPY ["src/Digdir.Domain.Dialogporten.Infrastructure/packages.lock.json", "Digdir.Domain.Dialogporten.Infrastructure/"]
 COPY ["src/Digdir.Library.Utils.AspNet/Digdir.Library.Utils.AspNet.csproj", "Digdir.Library.Utils.AspNet/"]
+COPY ["src/Digdir.Library.Utils.AspNet/packages.lock.json", "Digdir.Library.Utils.AspNet/"]
 
 # Restore project
-RUN dotnet restore "Digdir.Domain.Dialogporten.GraphQL/Digdir.Domain.Dialogporten.GraphQL.csproj"
+RUN dotnet restore "Digdir.Domain.Dialogporten.GraphQL/Digdir.Domain.Dialogporten.GraphQL.csproj" --locked-mode
 
 # Copy source
 COPY ["src/", "."]

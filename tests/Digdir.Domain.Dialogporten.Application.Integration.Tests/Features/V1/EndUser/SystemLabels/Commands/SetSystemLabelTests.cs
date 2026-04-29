@@ -10,6 +10,7 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -17,6 +18,19 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class SetSystemLabelTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
+    [Fact]
+    public Task Create_Sets_Default_System_Labels_Mask_On_Dialog() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .Do(async (_, ctx) =>
+            {
+                var dialogs = await Application.GetDbEntities<DialogEntity>();
+                dialogs.Should().ContainSingle(x =>
+                    x.Id == ctx.GetDialogId() &&
+                    x.SystemLabelsMask == 1);
+            })
+            .ExecuteAsync();
+
     [Fact]
     public Task Set_Updates_System_Label() =>
         FlowBuilder.For(Application)
@@ -90,6 +104,30 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
 
         dialogSystemLabels.Should().NotContain(x => x.SystemLabelId == SystemLabel.Values.MarkedAsUnopened);
         dialogSystemLabels.Should().ContainSingle(x => x.SystemLabelId == SystemLabel.Values.Default);
+
+        var dialogs = await Application.GetDbEntities<DialogEntity>();
+        dialogs.Should().ContainSingle(x =>
+            x.Id == dialogId &&
+            x.SystemLabelsMask == 1);
+    }
+
+    [Fact]
+    public async Task Set_Updates_Dialog_System_Labels_Mask()
+    {
+        var dialogId = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId)
+            .SetSystemLabelsEndUser(x =>
+                x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .ExecuteAndAssert<SetSystemLabelSuccess>();
+
+        short expectedMask = 1 | (1 << ((int)SystemLabel.Values.MarkedAsUnopened - 1));
+        var dialogs = await Application.GetDbEntities<DialogEntity>();
+
+        dialogs.Should().ContainSingle(x =>
+            x.Id == dialogId &&
+            x.SystemLabelsMask == expectedMask);
     }
 
     [Fact]

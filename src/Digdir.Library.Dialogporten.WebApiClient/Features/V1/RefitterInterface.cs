@@ -43,7 +43,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
                 /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
                 /// </summary>
         [Query] 
-        public ContinuationTokenSetOfTOrderDefinitionAndTTarget ContinuationToken { get; set; }
+        public string ContinuationToken { get; set; }
 
                 /// <summary>
                 /// Limit the number of results per page (1-1000, default: 100)
@@ -135,6 +135,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
 
                 /// <summary>
+                /// Only return dialogs that have content that has/hasn't been seen.
+                /// If null, no filtering is applied
+                /// If true, returns dialogs that have been seen
+                /// If false, returns dialogs that have not been seen
+                /// 
+                /// A dialog's content is considered seen if:
+                /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
+                /// - It does not have a system label MarkedAsUnopened.
+                /// </summary>
+        [Query] 
+        public bool? IsContentSeen { get; set; }
+
+                /// <summary>
                 /// Only return dialogs with due date after this date
                 /// </summary>
         [Query] 
@@ -195,13 +208,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string SearchLanguageCode { get; set; }
 
         [Query] 
-        public OrderSetOfTOrderDefinitionAndTTarget OrderBy { get; set; }
+        public string OrderBy { get; set; }
 
                 /// <summary>
                 /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
                 /// </summary>
         [Query] 
-        public ContinuationTokenSetOfTOrderDefinitionAndTTarget ContinuationToken { get; set; }
+        public string ContinuationToken { get; set; }
 
                 /// <summary>
                 /// Limit the number of results per page (1-1000, default: 100)
@@ -2133,21 +2146,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ContinuationTokenSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesActivities_DialogActivityType
     {
 
@@ -2393,6 +2391,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -2412,6 +2411,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("seenSinceLastContentUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+
+        /// <summary>
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// </summary>
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
@@ -2645,21 +2652,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("sendNotification")]
         public bool SendNotification { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class OrderSetOfTOrderDefinitionAndTTarget
-    {
-
-        private IDictionary<string, object> _additionalProperties;
-
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalProperties
-        {
-            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
-            set { _additionalProperties = value; }
-        }
 
     }
 
@@ -3098,6 +3090,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
+        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3107,13 +3100,13 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public V1ServiceOwnerDialogsQueriesGet_Content Content { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by the service owner
+        /// The number of transmissions sent by the service owner.
         /// </summary>
         [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
         public int FromServiceOwnerTransmissionsCount { get; set; }
 
         /// <summary>
-        /// The number of transmissions sent by a party representative
+        /// The number of transmissions sent by a party representative.
         /// </summary>
         [JsonPropertyName("fromPartyTransmissionsCount")]
         public int FromPartyTransmissionsCount { get; set; }
@@ -3165,6 +3158,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("seenSinceLastContentUpdate")]
         public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+
+        /// <summary>
+        /// A dialog is considered seen if
+        /// <br/>- it has been retrieved by a user, since its last content update, and
+        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// </summary>
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
@@ -3915,7 +3916,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// Overrides the creating date and time for the transmission.
         /// </summary>
         [JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        public System.DateTimeOffset? CreatedAt { get; set; }
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -4342,7 +4343,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
-        /// A UUIDv7 used for merging existing data, unknown IDs will be ignored as this entity does not support user-defined IDs.
+        /// A self-defined UUIDv7 may be provided to support idempotent additions and updates of attachment URLs. If not provided, a new UUIDv7 will be generated.
         /// </summary>
         [JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
@@ -5341,6 +5342,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of attachment URLs. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// The fully qualified URL of the attachment.

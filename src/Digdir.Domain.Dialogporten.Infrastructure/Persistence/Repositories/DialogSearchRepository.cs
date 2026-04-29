@@ -11,7 +11,8 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -112,6 +113,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             .AppendIf(query.ExternalReference is not null, $""" AND d."ExternalReference" = {query.ExternalReference}::text """)
             .AppendIf(query.Process is not null, $""" AND d."Process" = {query.Process}::text """)
             .AppendIf(query.ExcludeApiOnly is not null, $""" AND ({query.ExcludeApiOnly}::boolean = false OR {query.ExcludeApiOnly}::boolean = true AND d."IsApiOnly" = false) """)
+            .AppendIsContentSeenFilterCondition(query.IsContentSeen)
             .AppendSystemLabelFilterCondition(query.SystemLabel)
             .AppendServiceOwnerLabelFilterCondition(query.ServiceOwnerLabels)
             .ApplyPaginationCondition(query.OrderBy!, query.ContinuationToken, alias: "d")
@@ -265,6 +267,9 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
         DialogSearchAuthorizationResult authorizedResources,
         CancellationToken cancellationToken)
     {
+        // The authorization result is expected to already be constrained by query.Party and
+        // query.ServiceResource. Strategies treat ResourcesByParties as the effective authorization
+        // scope and do not re-apply those query filters when building permission CTEs.
         if (authorizedResources.HasNoAuthorizations)
         {
             return new PaginatedList<DialogEntity>([], false, null, query.OrderBy!.GetOrderString());

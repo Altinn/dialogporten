@@ -101,10 +101,11 @@ public sealed class SearchDialog
     [GraphQLDescription("The aggregated status of the dialog.")]
     public DialogStatus Status { get; set; }
 
+    [GraphQLDeprecated($"Use {nameof(IsContentSeen)} instead. See the new field's description for an explanation of the new behavior.")]
     [GraphQLDescription("Indicates whether the dialog contains content that has not been viewed or opened by the user yet.")]
     public bool HasUnopenedContent { get; set; }
 
-    [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
+    [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.")]
     public bool IsApiOnly { get; set; }
 
     [GraphQLDescription("The number of transmissions sent by the service owner")]
@@ -124,6 +125,9 @@ public sealed class SearchDialog
 
     [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.")]
     public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
+
+    [GraphQLDescription("A dialog is considered seen if it has been retrieved by a user since its last content update, and there is no SystemLabel MarkedAsUnopened")]
+    public bool IsContentSeen { get; set; }
 
     [GraphQLDescription("Metadata about the dialog owned by end-users.")]
     public EndUserContext EndUserContext { get; set; } = null!;
@@ -184,6 +188,9 @@ public sealed class SearchDialogInput
 
     [GraphQLDescription("Only return dialogs with content updated before this date")]
     public DateTimeOffset? ContentUpdatedBefore { get; init; }
+
+    [GraphQLDescription("Only return dialogs that have content that has/hasn't been seen by the user. A dialog is considered seen if it has been retrieved by a user, since it's last content update, and there is no SystemLabel MarkedAsUnopened.")]
+    public bool? IsContentSeen { get; set; }
 
     [GraphQLDescription("Only return dialogs updated after this date")]
     public DateTimeOffset? UpdatedAfter { get; init; }

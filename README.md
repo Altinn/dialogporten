@@ -20,6 +20,7 @@
     - [Installing Podman (Windows)](#installing-podman-windows)
   - [Running the project](#running-the-project)
   - [Running the WebApi/GraphQl in an IDE](#running-the-webapigraphql-in-an-ide)
+  - [NuGet lock files](#nuget-lock-files)
 - [DB development](#db-development)
   - [DB development through PMC](#db-development-through-pmc)
   - [DB development through CLI](#db-development-through-cli)
@@ -126,13 +127,16 @@ If you need do debug the WebApi/GraphQl projects in an IDE, you can alternativel
 First, create a dotnet user secret for the DB connection string.
 
 ```powershell
-dotnet user-secrets set -p "./src/Digdir.Domain.Dialogporten.WebApi" "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=5432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
+dotnet user-secrets set -p "./src/Digdir.Domain.Dialogporten.WebApi" "Infrastructure:DialogDbConnectionString" "Server=localhost;Port=15432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;"
 ```
 
 Then run `podman compose` without the WebAPI/GraphQl projects.
 ```powershell
-podman compose -f docker-compose-no-webapi.yml up 
+podman compose -f docker-compose-db-redis.yml up 
 ```
+
+### NuGet lock files
+NuGet restore writes `packages.lock.json` for each project, and CI/Docker restores use `--locked-mode` so dependency graph changes must be committed. After changing package references locally, run `dotnet restore` and include the updated lock files in the PR; Renovate updates them in dependency PRs.
 
 ## DB development
 This project uses Entity Framework Core to manage DB migrations. DB development can either be done through Visual Studio's Package Manager Console (PMC) or through the CLI. 
@@ -296,7 +300,7 @@ This is to ensure that the SDK version used in the local development environment
 `global.json` is used when building the solution in CI/CD.
 
 ## Development in local and test environments
-To generate test tokens, see https://github.com/Altinn/AltinnTestTools. There is a request in the Postman collection for this.
+To generate test tokens, see https://github.com/Altinn/AltinnTestTools. There is a request in the [Bruno collection](https://github.com/Altinn/dialogporten-bruno) for this.  
 
 ### Local development settings
 We are able to toggle some external resources in local development. This is done through the `appsettings.Development.json` file. The following settings are available:
@@ -325,6 +329,8 @@ Toggling these flags will enable/disable the external resources. The `DisableAut
 During local development, it is natural to tweak configurations. Some of these configurations are _meant_ to be shared through git, such as the endpoint for a new integration that may be used during local development. Other configurations are only meant for a specific debug session or a developer's personal preferences, which _should not be shared_ through git, such as lowering the log level below warning.
 
 The configuration in the `appsettings.local.json` file takes precedence over **all** other configurations and is only loaded in the **Development environment**. Additionally, it is ignored by git through the `.gitignore` file.
+Local E2E launchers set `RUNNING_E2E_TESTS=true`, which skips `appsettings.local.json` for the runtime projects so E2E runs use the checked-in development configuration instead of developer-specific overrides.
+This does not affect the E2E test-project `appsettings.local.json` used for `ExplicitTests`.
 
 If developers need to add configuration that should be shared, they should use `appsettings.Development.json`. If the configuration is not meant to be shared, they can create an `appsettings.local.json` file to override the desired settings.
 
@@ -364,6 +370,7 @@ builder.Configuration
 
 // Left out for brevity
 ```
+`AddLocalConfiguration` also skips `appsettings.local.json` when `RUNNING_E2E_TESTS=true`.
 
 ## Additional documentation
 - [CI/CD](docs/CI-CD.md)
@@ -382,6 +389,8 @@ Besides ordinary unit and integration tests, the primary end-to-end tests are th
 - [E2E tests (WebAPI + GraphQL)](docs/E2E-Tests.md)
 - [Scripts E2E](scripts/e2e/README.md)
 - [K6 testing](tests/k6/README.md)
+
+If you use Rider for local E2E, the repository includes ready-made `.run/` profiles for `WebApi (E2E)`, `GraphQL (E2E)`, `Service (E2E)`, and `E2E (WebAPI/GQL/Service)`.
 
 ## Pull requests
 For pull requests, the title must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
@@ -404,7 +413,7 @@ Infrastructure definitions for the project are located in the `.azure/infrastruc
 
 For example, to add a new storage account, you would:
 - Create or update a Bicep file within the `.azure/infrastructure` folder to include the storage account resource definition.
-- Ensure that the Bicep file is referenced correctly in `.azure/infrastructure/infrastructure.bicep` to be included in the deployment process.
+- Ensure that the Bicep file is referenced correctly in `.azure/infrastructure/main.bicep` to be included in the deployment process.
 
 Refer to [docs/Infrastructure.md](docs/Infrastructure.md) for more detailed information.
 

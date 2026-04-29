@@ -128,13 +128,22 @@ static void BuildAndRun(string[] args)
                     };
                 }))
 
-        // Add health checks with the well-known URLs
-        .AddAspNetHealthChecks((x, y) => x.HealthCheckSettings.HttpGetEndpointsToCheck = y
-            .GetRequiredService<IOptions<GraphQlSettings>>().Value?
-            .Authentication?
-            .JwtBearerTokenSchemas?
-            .Select(z => z.WellKnown)
-            .ToList() ?? [])
+        // Add health checks with configured endpoints and well-known auth metadata endpoints
+        .AddAspNetHealthChecks((x, y) =>
+        {
+            var settings = y.GetRequiredService<IOptions<GraphQlSettings>>().Value;
+            var altinnBaseUri = y.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri;
+
+            x.HealthCheckSettings.HttpGetEndpointsToCheck = AspNetUtilitiesExtensions.ResolveHttpGetEndpointsToCheck(
+                settings.HealthCheckSettings.HttpGetEndpointsToCheck,
+                altinnBaseUri,
+                settings.Authentication.JwtBearerTokenSchemas.Select(schema => new HttpGetEndpointToCheck
+                {
+                    Name = schema.Name,
+                    Url = schema.WellKnown,
+                    HardDependency = false
+                }));
+        })
 
         // Auth
         .AddDialogportenAuthentication(builder.Configuration)

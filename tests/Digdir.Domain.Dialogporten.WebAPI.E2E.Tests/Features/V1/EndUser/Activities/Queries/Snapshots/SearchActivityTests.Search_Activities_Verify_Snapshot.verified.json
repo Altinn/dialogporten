@@ -1,0 +1,35 @@
+﻿[
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": "uri:dialog-opened",
+    "type": "DialogOpened",
+    "transmissionId": null,
+    "description": null
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": null,
+    "type": "Information",
+    "transmissionId": null,
+    "description": [
+      {
+        "value": "Test activity",
+        "languageCode": "en"
+      },
+      {
+        "value": "Test-aktivitet",
+        "languageCode": "nb"
+      }
+    ]
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "extendedType": null,
+    "type": "TransmissionOpened",
+    "transmissionId": "00000000-0000-0000-0000-000000000000",
+    "description": null
+  }
+]

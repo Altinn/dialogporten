@@ -12,6 +12,7 @@
       ContentUpdatedAt: DateTimeOffset_1,
       Status: NotApplicable,
       HasUnopenedContent: false,
+      SystemLabel: Default,
       IsApiOnly: false,
       LatestActivity: {
         Id: Guid_2,
@@ -23,6 +24,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_3,
         SystemLabels: [
@@ -61,6 +63,7 @@
       ContentUpdatedAt: DateTimeOffset_3,
       Status: NotApplicable,
       HasUnopenedContent: false,
+      SystemLabel: Default,
       IsApiOnly: false,
       LatestActivity: {
         Id: Guid_5,
@@ -72,6 +75,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_6,
         SystemLabels: [
@@ -110,6 +114,7 @@
       ContentUpdatedAt: DateTimeOffset_5,
       Status: NotApplicable,
       HasUnopenedContent: false,
+      SystemLabel: Default,
       IsApiOnly: false,
       LatestActivity: {
         Id: Guid_8,
@@ -121,6 +126,7 @@
           ActorName: Beth Pfannerstill
         }
       },
+      IsContentSeen: false,
       EndUserContext: {
         Revision: Guid_9,
         SystemLabels: [
@@ -149,5 +155,5 @@
     }
   ],
   HasNextPage: false,
-  OrderBy: createdat_desc,id_desc
+  OrderBy: contentupdatedat_desc,id_desc
 }

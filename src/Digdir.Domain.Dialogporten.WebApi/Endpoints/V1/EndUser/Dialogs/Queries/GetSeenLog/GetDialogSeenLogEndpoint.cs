@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetSeenLog;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
@@ -7,6 +8,7 @@ using MediatR;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.GetSeenLog;
 
+[OpenApiOperationId("GetDialogSeenLog")]
 public sealed class GetDialogSeenLogEndpoint : Endpoint<GetSeenLogQuery, SeenLogDto>
 {
     private readonly ISender _sender;

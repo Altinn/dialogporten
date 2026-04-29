@@ -21,14 +21,26 @@ on:
         description: "Backend related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasBackendChanges }}
       hasWebApiClientChanges:
-        description: "WebApiClient related files changed"
+        description: "Legacy WebApiClient related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasWebApiClientChanges }}
+      hasWebApiEndUserClientChanges:
+        description: "WebApi EndUser client related files changed"
+        value: ${{ jobs.check-for-changes.outputs.hasWebApiEndUserClientChanges }}
+      hasWebApiServiceOwnerClientChanges:
+        description: "WebApi ServiceOwner client related files changed"
+        value: ${{ jobs.check-for-changes.outputs.hasWebApiServiceOwnerClientChanges }}
       hasTestChanges:
         description: "Test related files changed"
         value: ${{ jobs.check-for-changes.outputs.hasTestChanges }}
       hasSwaggerSchemaChanges:
-        description: "Swagger schema has changed"
+        description: "Legacy swagger schema has changed"
         value: ${{ jobs.check-for-changes.outputs.hasSwaggerSchemaChanges }}
+      hasOpenApiEndUserSchemaChanges:
+        description: "EndUser OpenAPI schema has changed"
+        value: ${{ jobs.check-for-changes.outputs.hasOpenApiEndUserSchemaChanges }}
+      hasOpenApiServiceOwnerSchemaChanges:
+        description: "ServiceOwner OpenAPI schema has changed"
+        value: ${{ jobs.check-for-changes.outputs.hasOpenApiServiceOwnerSchemaChanges }}
       hasGqlSchemaChanges:
         description: "GraphQL schema has changed"
         value: ${{ jobs.check-for-changes.outputs.hasGqlSchemaChanges }}
@@ -50,12 +62,16 @@ jobs:
       hasBackendChanges: ${{ steps.filter-backend.outputs.backend_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}
       hasTestChanges: ${{ steps.filter-backend.outputs.tests_any_modified == 'true' }}
       hasSwaggerSchemaChanges: ${{ steps.filter-backend.outputs.swagger_schema_any_modified == 'true'}}
+      hasOpenApiEndUserSchemaChanges: ${{ steps.filter-backend.outputs.openapi_enduser_schema_any_modified == 'true'}}
+      hasOpenApiServiceOwnerSchemaChanges: ${{ steps.filter-backend.outputs.openapi_serviceowner_schema_any_modified == 'true'}}
       hasGqlSchemaChanges: ${{ steps.filter-backend.outputs.gql_schema_any_modified == 'true'}}
       hasMigrationChanges: ${{ steps.filter-backend.outputs.migration_any_modified == 'true'}}
       hasWebApiClientChanges: ${{ steps.filter-backend.outputs.web_api_client_any_modified == 'true'}}
+      hasWebApiEndUserClientChanges: ${{ steps.filter-backend.outputs.web_api_enduser_client_any_modified == 'true'}}
+      hasWebApiServiceOwnerClientChanges: ${{ steps.filter-backend.outputs.web_api_serviceowner_client_any_modified == 'true'}}
       hasSchemaPackageChanges: ${{ steps.filter-backend.outputs.schema_package_any_modified == 'true'}}
     steps:
-      - uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+      - uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
         with:
           egress-policy: audit
 
@@ -64,7 +80,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: step-security/changed-files@60967b822d3001fa82242f8d6b4ed46bc3600a68 # v47.0.1
+      - uses: step-security/changed-files@2e07db73e5ccdb319b9a6c7766bd46d39d304bad # v47.0.5
         id: filter
         with:
           base_sha: ${{ inputs.infra_base_sha }}
@@ -87,7 +103,7 @@ jobs:
           echo "Changed github workflows files:"
           echo "${{ steps.filter.outputs.github_workflows_modified_files }}"
 
-      - uses: step-security/changed-files@60967b822d3001fa82242f8d6b4ed46bc3600a68 # v47.0.1
+      - uses: step-security/changed-files@2e07db73e5ccdb319b9a6c7766bd46d39d304bad # v47.0.5
         id: filter-backend
         with:
           base_sha: ${{ inputs.apps_base_sha }}
@@ -100,8 +116,19 @@ jobs:
               - 'tests/**/*'
             web_api_client:
               - 'src/Digdir.Library.Dialogporten.WebApiClient/**/*'
+              - 'src/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
+            web_api_enduser_client:
+              - 'src/Digdir.Library.Dialogporten.WebApiClient.EndUser/**/*'
+              - 'src/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
+            web_api_serviceowner_client:
+              - 'src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/**/*'
+              - 'src/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
             swagger_schema:
               - 'docs/schema/V1/swagger.verified.json'
+            openapi_enduser_schema:
+              - 'docs/schema/V1/openapi.v1.enduser.verified.json'
+            openapi_serviceowner_schema:
+              - 'docs/schema/V1/openapi.v1.serviceowner.verified.json'
             gql_schema:
               - 'docs/schema/V1/schema.verified.graphql'
             migration: 
@@ -113,8 +140,12 @@ jobs:
         run: |
           echo "Backend changes detected: ${{ steps.filter-backend.outputs.backend_any_modified }}"
           echo "Test changes detected: ${{ steps.filter-backend.outputs.tests_any_modified }}"
-          echo "Web API client changes detected: ${{ steps.filter-backend.outputs.web_api_client_any_modified }}"
-          echo "Swagger schema changes detected: ${{ steps.filter-backend.outputs.swagger_schema_any_modified }}"
+          echo "Legacy Web API client changes detected: ${{ steps.filter-backend.outputs.web_api_client_any_modified }}"
+          echo "Web API EndUser client changes detected: ${{ steps.filter-backend.outputs.web_api_enduser_client_any_modified }}"
+          echo "Web API ServiceOwner client changes detected: ${{ steps.filter-backend.outputs.web_api_serviceowner_client_any_modified }}"
+          echo "Legacy swagger schema changes detected: ${{ steps.filter-backend.outputs.swagger_schema_any_modified }}"
+          echo "EndUser OpenAPI schema changes detected: ${{ steps.filter-backend.outputs.openapi_enduser_schema_any_modified }}"
+          echo "ServiceOwner OpenAPI schema changes detected: ${{ steps.filter-backend.outputs.openapi_serviceowner_schema_any_modified }}"
           echo "GraphQL schema changes detected: ${{ steps.filter-backend.outputs.gql_schema_any_modified }}"
           echo "Migration changes detected: ${{ steps.filter-backend.outputs.migration_any_modified }}"
           echo "Schema package changes detected: ${{ steps.filter-backend.outputs.schema_package_any_modified }}"

@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -22,23 +21,21 @@ public sealed partial class SearchLabelAssignmentLogResult : OneOfBase<List<Labe
 internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<SearchLabelAssignmentLogQuery, SearchLabelAssignmentLogResult>
 {
     private readonly IDialogDbContext _dialogDbContext;
-    private readonly IMapper _mapper;
     private readonly IAltinnAuthorization _altinnAuthorization;
 
-    public SearchLabelAssignmentLogQueryHandler(IDialogDbContext dialogDbContext, IMapper mapper, IAltinnAuthorization altinnAuthorization)
+    public SearchLabelAssignmentLogQueryHandler(IDialogDbContext dialogDbContext, IAltinnAuthorization altinnAuthorization)
     {
         ArgumentNullException.ThrowIfNull(dialogDbContext);
-        ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
 
         _dialogDbContext = dialogDbContext;
-        _mapper = mapper;
         _altinnAuthorization = altinnAuthorization;
     }
 
     public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
     {
-        var dialog = await _dialogDbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+        var dialog = await _dialogDbContext
+            .WrapWithRepeatableRead((dbCtx, ct) =>
                 dbCtx.Dialogs
                     .AsNoTracking()
                     .Include(x => x.EndUserContext)
@@ -72,6 +69,11 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        return _mapper.Map<List<LabelAssignmentLogDto>>(dialog.EndUserContext.LabelAssignmentLogs);
+        return dialog.EndUserContext
+            .LabelAssignmentLogs
+            .OrderBy(x => x.CreatedAt)
+            .ThenBy(x => x.Id)
+            .Select(x => x.ToDto())
+            .ToList();
     }
 }

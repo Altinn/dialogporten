@@ -14,6 +14,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using MediatR;
 using OneOf;
+
 #pragma warning disable CS0618 // Type or member is obsolete
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search;
@@ -88,6 +89,18 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// Only return dialogs with content updated before this date
     /// </summary>
     public DateTimeOffset? ContentUpdatedBefore { get; set; }
+
+    /// <summary>
+    /// Only return dialogs that have content that has/hasn't been seen.
+    /// If null, no filtering is applied
+    /// If true, returns dialogs that have been seen
+    /// If false, returns dialogs that have not been seen
+    ///
+    /// A dialog's content is considered seen if:
+    /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
+    /// - It does not have a system label MarkedAsUnopened.
+    /// </summary>
+    public bool? IsContentSeen { get; set; }
 
     /// <summary>
     /// Only return dialogs with due date after this date
@@ -266,6 +279,9 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                     .GroupBy(x => x.SeenBy.ActorId)
                     .Select(g => g.OrderByDescending(x => x.SeenAt).First())
                     .ToList() ?? [],
+                IsContentSeen = dialog.IsSeenSinceLastContentUpdate && endUserContextByDialogIdTask
+                    .Result[dialog.Id]
+                    .SystemLabels.All(x => x != SystemLabel.Values.MarkedAsUnopened),
                 EndUserContext = endUserContextByDialogIdTask.Result[dialog.Id],
                 Content = contentByDialogIdTask.Result.GetValueOrDefault(dialog.Id),
                 DeletedAt = dialog.DeletedAt,
@@ -406,6 +422,7 @@ internal static class SearchDialogQueryExtensions
             Limit = request.Limit!.Value,
             ContentUpdatedAfter = request.ContentUpdatedAfter,
             ContentUpdatedBefore = request.ContentUpdatedBefore,
+            IsContentSeen = request.IsContentSeen,
             Search = request.Search,
             SearchLanguageCode = request.SearchLanguageCode,
             CreatedAfter = request.CreatedAfter,

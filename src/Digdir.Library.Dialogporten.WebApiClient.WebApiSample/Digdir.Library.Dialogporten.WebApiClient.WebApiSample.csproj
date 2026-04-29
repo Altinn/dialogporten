@@ -5,10 +5,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
         <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj"/>
     </ItemGroup>
 

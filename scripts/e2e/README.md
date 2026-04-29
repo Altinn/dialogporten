@@ -1,12 +1,14 @@
-# WebAPI/GraphQL E2E Script
+# WebAPI/GraphQL/Service E2E Script
 
-Runs the WebAPI and/or GraphQL end-to-end tests and manages the local API processes.
+Runs the local E2E setup for WebAPI, Service, and optionally GraphQL, then executes the matching E2E tests.
 
 ## Prerequisites
 - DB/Redis are running locally:
 ```bash
 podman compose -f docker-compose-db-redis.yml up -d
 ```
+- User secrets are configured for the projects you start locally (`WebApi`, `GraphQL`, `Service`) and for the E2E test projects.
+  See [docs/E2E-Tests.md](../../docs/E2E-Tests.md).
 
 ## Run
 From this directory:
@@ -21,6 +23,9 @@ Modes:
 ./run-webapi-e2e.zsh both
 ```
 
+The script always starts `WebApi` and `Service`. `graphql` and `both` also start `GraphQL`.
+It exports `RUNNING_E2E_TESTS=true`, so `appsettings.local.json` is ignored for the runtime projects during E2E runs.
+
 ## Configuration (.env)
 The script loads `.env` from this folder by default. You can override by setting `ENV_FILE` to a different path.
 
@@ -28,6 +33,9 @@ Default `.env` values in this folder:
 ```bash
 WEBAPI_ENVIRONMENT=Development
 DialogportenBaseUri=https://localhost
+WEBAPI_PORT=7215
+GRAPHQL_PORT=5180
+SERVICE_PORT=56843
 LocalDevelopment__UseLocalDevelopmentUser=false
 LocalDevelopment__UseLocalDevelopmentResourceRegister=false
 LocalDevelopment__UseLocalDevelopmentOrganizationRegister=false
@@ -47,7 +55,8 @@ LocalDevelopment__UseLocalMetricsAggregationStorage=true
 Optional overrides (if set in `.env` or the shell):
 ```bash
 WEBAPI_PORT=7215
-GRAPHQL_PORT=5181
+GRAPHQL_PORT=5180
+SERVICE_PORT=56843
 ```
 
 ## Optional

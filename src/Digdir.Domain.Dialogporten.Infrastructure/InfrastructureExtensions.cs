@@ -28,7 +28,10 @@ using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 using HotChocolate.Subscriptions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -129,10 +132,15 @@ public static class InfrastructureExtensions
 
             // Transient
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, PartyDrivenQueryStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, ServiceDrivenQueryStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, DialogFirstFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GinFirstFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
@@ -321,13 +329,14 @@ public static class InfrastructureExtensions
                 customConfiguration(x);
             }
 
+            ConfigureServiceBusHealthCheck(x);
+
             if (builderContext.Environment.IsDevelopment() && builderContext.DevSettings.UseInMemoryServiceBusTransport)
             {
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 return;
             }
 
-            x.ConfigureHealthCheckOptions(options => options.Tags.Add("dependencies"));
             x.AddConfigureEndpointsCallback((_, cfg) =>
             {
                 if (cfg is IServiceBusReceiveEndpointConfigurator sb)
@@ -342,6 +351,8 @@ public static class InfrastructureExtensions
                 cfg.ConfigureEndpoints(context);
             });
         });
+
+        builderContext.Services.AddServiceBusHealthCheck();
 
         new DummyRequestExecutorBuilder { Services = builderContext.Services }
             .AddRedisSubscriptions(_ => ConnectionMultiplexer.Connect(builderContext.InfraSettings.Redis.ConnectionString),
@@ -364,6 +375,8 @@ public static class InfrastructureExtensions
                 o.DisableInboxCleanupService();
             });
 
+            ConfigureServiceBusHealthCheck(x);
+
             if (builderContext.Environment.IsDevelopment() && builderContext.DevSettings.UseInMemoryServiceBusTransport)
             {
                 x.UsingInMemory();
@@ -372,6 +385,8 @@ public static class InfrastructureExtensions
 
             x.UsingAzureServiceBus();
         });
+
+        builderContext.Services.AddServiceBusHealthCheck();
 
         new DummyRequestExecutorBuilder { Services = builderContext.Services }
             .AddRedisSubscriptions(_ => ConnectionMultiplexer.Connect(builderContext.InfraSettings.Redis.ConnectionString),
@@ -425,10 +440,27 @@ public static class InfrastructureExtensions
         return services;
     }
 
+    private static void ConfigureServiceBusHealthCheck(IBusRegistrationConfigurator configurator) =>
+        configurator.ConfigureHealthCheckOptions(options =>
+        {
+            options.Name = ServiceBusHealthCheck.InnerHealthCheckName;
+            options.Tags.Add(ServiceBusHealthCheck.InnerHealthCheckTag);
+        });
+
+    private static IServiceCollection AddServiceBusHealthCheck(this IServiceCollection services)
+    {
+        services.AddHealthChecks()
+            .AddCheck<ServiceBusHealthCheck>("servicebus", tags: ["dependencies"]);
+
+        services.AddSingleton<ServiceBusHealthCheck>();
+
+        return services;
+    }
+
     private static IServiceCollection AddCustomHealthChecks(this IServiceCollection services)
     {
         services.AddHealthChecks()
-            .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies", "redis"])
+            .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies"])
             .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
 
         services.AddSingleton<RedisHealthCheck>();

@@ -65,7 +65,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+      - uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
         with:
           egress-policy: audit
 
@@ -82,7 +82,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy migration job (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -102,7 +102,7 @@ jobs:
           parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Deploy migration job (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -176,7 +176,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -200,7 +200,7 @@ jobs:
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -259,7 +259,7 @@ jobs:
           - name: custom-metrics-job
             environments: ['test', 'staging', 'prod']
     steps:
-      - uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+      - uses: step-security/harden-runner@fe104658747b27e96e4f7e80cd0a94068e53901d # v2.16.1
         with:
           egress-policy: audit
 
@@ -276,7 +276,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
         if: ${{ inputs.dryRun && (!matrix.environments[0] || contains(matrix.environments, inputs.environment)) }}
         id: deploy-dry-run
         env:
@@ -298,7 +298,7 @@ jobs:
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4d5dc29bf04d05546dd5df9c665c54b9c5213207 # v2.2.0
+        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
         if: ${{ !inputs.dryRun && (!matrix.environments[0] || contains(matrix.environments, inputs.environment)) }}
         id: deploy
         env:

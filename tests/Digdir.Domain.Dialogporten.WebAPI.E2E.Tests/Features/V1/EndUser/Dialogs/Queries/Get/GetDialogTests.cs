@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
@@ -19,7 +20,21 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+
+        // Get a dialog to trigger a dialogSeenEvent
+        var getDialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
+
+        getDialogResponse.IsSuccessful.Should().BeTrue();
+        getDialogResponse.Content.Should().NotBeNull();
+
+        // Since seenlog is created async we except 0 seenlogs on first get
+        getDialogResponse.Content.SeenSinceLastUpdate.Should().BeNull();
+
+        // Seen log is created async so we retry until a seen log is created
+        var response = await E2ERetryPolicies.RetryUntilAsync(
+            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            isSuccessful: result => result.IsSuccessful && result.Content.SeenSinceLastUpdate.Count == 1,
+            degradationMessage: "SeenLog creation speed is degraded");
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -138,18 +153,20 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         response.Error!.Content.Should().Contain(Constants.AltinnAuthLevelTooLow);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Get_Dialog_Verify_Snapshot()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var getDialogResult = await Fixture.EnduserApi.GetDialog(dialogId);
+        var getDialogResult = await E2ERetryPolicies.RetryUntilAsync(
+            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
+            degradationMessage: "Seen log creation delayed");
 
         // Assert
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(getDialogResult.Content),
-            fileNameSuffix: Fixture.DotnetEnvironment);
+            JsonSerializer.Serialize(getDialogResult.Content));
     }
 }

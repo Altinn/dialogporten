@@ -18,7 +18,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
@@ -939,6 +939,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
+                    b.Property<bool>("IsSeenSinceLastContentUpdate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Org")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -981,6 +986,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("StatusId")
                         .HasColumnType("integer");
+
+                    b.Property<short>("SystemLabelsMask")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)1);
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -1053,6 +1063,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsDescending(false, false, true, true)
                         .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
                         .HasFilter("\"Deleted\" = false");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ServiceResource", "Party", "ContentUpdatedAt", "Id"), new[] { "StatusId", "VisibleFrom", "ExpiresAt", "IsApiOnly", "SystemLabelsMask" });
 
                     b.ToTable("Dialog", (string)null);
                 });

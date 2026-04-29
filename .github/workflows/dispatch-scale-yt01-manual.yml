@@ -16,7 +16,7 @@ on:
         type: boolean
         default: true
       postpone_until:
-        description: "Postpone scheduled shutdown until this datetime (ISO 8601, e.g. 2026-03-01T20:00:00+01:00). Only used with 'on'."
+        description: "Postpone scheduled shutdown until this datetime in Norwegian time (e.g. 2026-03-01 20:00). Full ISO 8601 also accepted. Only used with 'on'."
         required: false
         type: string
 
@@ -296,8 +296,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Validate the date is in the future
-          POSTPONE_TS=$(date -d "$POSTPONE_UNTIL" +%s 2>/dev/null || echo "0")
+          # Validate input is a single parseable datetime
+          if [[ ${#POSTPONE_UNTIL} -gt 35 ]]; then
+            echo "Error: postpone_until looks malformed (too long). Got: $POSTPONE_UNTIL"
+            exit 1
+          fi
+          if ! TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +%s > /dev/null 2>&1; then
+            echo "Error: postpone_until is not a valid datetime. Got: $POSTPONE_UNTIL"
+            exit 1
+          fi
+
+          # Canonicalize to UTC. Plain datetimes (without offset) are interpreted
+          # as Norwegian time (Europe/Oslo) so users don't need to think about DST.
+          POSTPONE_TS=$(TZ=Europe/Oslo date -d "$POSTPONE_UNTIL" +%s)
+          POSTPONE_UNTIL=$(date -u -d "@$POSTPONE_TS" +"%Y-%m-%dT%H:%M:%SZ")
           NOW_TS=$(date +%s)
 
           if [[ "$POSTPONE_TS" -gt "$NOW_TS" ]]; then
@@ -311,6 +323,15 @@ jobs:
             gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
               --env yt01 \
               --repo "$REPOSITORY" || true
+          fi
+
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Clear stale postpone variable
@@ -339,6 +360,15 @@ jobs:
             fi
           fi
 
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Logout from Azure
         if: ${{ always() }}
         run: az logout
@@ -358,10 +388,24 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "Clearing any existing postpone variable before scale-off..."
-          gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+          POSTPONE_UNTIL=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
             --env yt01 \
-            --repo "$REPOSITORY" || true
+            --repo "$REPOSITORY" 2>/dev/null || echo "")
+
+          if [[ -n "$POSTPONE_UNTIL" ]]; then
+            gh variable delete YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+              --env yt01 \
+              --repo "$REPOSITORY" || true
+          fi
+
+          CURRENT=$(gh variable get YT01_DB_SHUTDOWN_POSTPONE_UNTIL \
+            --env yt01 --repo "$REPOSITORY" 2>/dev/null || echo "")
+          if [[ -n "$CURRENT" ]]; then
+            PRETTY=$(TZ=Europe/Oslo date -d "$CURRENT" +"%b %-d, %Y %H:%M %Z" 2>/dev/null || echo "$CURRENT")
+            echo "## Postpone active until $PRETTY" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## No postpone set" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   scale-off:
     if: inputs.state == 'off'

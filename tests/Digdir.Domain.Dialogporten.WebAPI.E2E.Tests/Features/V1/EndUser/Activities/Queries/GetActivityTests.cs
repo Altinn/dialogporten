@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -29,7 +30,7 @@ public class GetActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
         });
 
         // Act
-        var response = await Fixture.EnduserApi.V1EndUserDialogsQueriesGetActivityDialogActivity(
+        var response = await Fixture.EnduserApi.V1.GetDialogActivity(
             dialogId,
             activityId,
             new V1EndUserCommon_AcceptedLanguages(),

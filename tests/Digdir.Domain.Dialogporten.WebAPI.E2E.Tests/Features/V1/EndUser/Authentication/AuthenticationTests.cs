@@ -1,4 +1,5 @@
 using System.Net;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -21,7 +22,7 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         using var _ = Fixture.UseEndUserTokenOverrides(tokenOverride: authenticationScenario.TokenOverride);
 
         var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
-            Fixture.EnduserApi, endpointScenario.Method, TestContext.Current.CancellationToken);
+            Fixture.EnduserApi.V1, endpointScenario.Method, TestContext.Current.CancellationToken);
 
         response.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
 

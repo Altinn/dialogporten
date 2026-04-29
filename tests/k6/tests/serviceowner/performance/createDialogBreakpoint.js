@@ -19,6 +19,6 @@ export let options = {
     ],
 }
 
-export default function() {
+export default function () {
     createDialog(randomItem(serviceOwners), randomItem(endUsers), traceCalls);
 }

@@ -17,6 +17,7 @@ export const emptySearchThresholds = {
     "http_req_duration{name:get seenlog}": [],
     "http_req_duration{name:get transmissions}": [],
     "http_req_duration{name:get transmission}": [],
+    "http_req_duration{name:get dialoglookup}": [],
     "http_reqs{scenario:default}": [],
     "http_reqs{name:get dialog activities}": [],
     "http_reqs{name:get dialog activity}": [],
@@ -25,6 +26,7 @@ export const emptySearchThresholds = {
     "http_reqs{name:get transmissions}": [],
     "http_reqs{name:get transmission}": [],
     "http_reqs{name:get dialog}": [],
+    "http_reqs{name:get dialoglookup}": [],
 }
 
 /**
@@ -38,19 +40,23 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
     const items = response.json().items;
     if (!items?.length) return;
     const dialogId = items[0].id;
+    const serviceResourceType = items[0].serviceResourceType;
     if (!dialogId) return;
     if (getFunction == getSO) {
-      const r = getDialog(dialogId, paramsWithToken, 'get dialog', getFunction);
-      if (r != 200) {
-          console.warn(`Dialog ${dialogId} not found for serviceowner.`);
-          return;
-      }
+        const r = getDialog(dialogId, paramsWithToken, 'get dialog', getFunction);
+        if (r != 200) {
+            console.warn(`Dialog ${dialogId} not found for serviceowner.`);
+            return;
+        }
     }
     else {
-      getContent(dialogId, paramsWithToken, 'get dialog', '', getFunction);
+        getContent(dialogId, paramsWithToken, 'get dialog', '', getFunction);
     }
     getContentChain(dialogId, paramsWithToken, 'get dialog activities', 'get dialog activity', '/activities/', getFunction);
     getContentChain(dialogId, paramsWithToken, 'get seenlogs', 'get seenlog', '/seenlog/', getFunction);
+    if (serviceResourceType !== "CorrespondenceService") {
+        getDialogLookup(dialogId, paramsWithToken, getFunction);
+    }
     if (getFunction == getEU) {
         getContent(dialogId, paramsWithToken, 'get labellog', '/context/labellog', getFunction);
     }
@@ -59,7 +65,7 @@ function retrieveDialogContent(response, paramsWithToken, getFunction = getEU) {
 
 export function log(items, traceCalls, enduser, duration = null) {
     if (items?.length && traceCalls) {
-        console.log("Found " + items.length + " dialogs" + " for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));  
+        console.log("Found " + items.length + " dialogs" + " for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));
     } else if (traceCalls) {
         console.log("Found no dialogs for enduser " + enduser + (duration ? (" in " + duration + " ms") : ""));
     }
@@ -116,7 +122,7 @@ export function getDialog(dialogId, paramsWithToken, tag, getFunction = getSO) {
     expect(r.status, 'response status').to.be.oneOf([200, 404]);
     expect(r, 'response').to.have.validJsonBody();
     return r.status;
-  
+
 }
 
 /**
@@ -160,6 +166,15 @@ export function getContentChain(dialogId, paramsWithToken, tag, subtag, endpoint
         };
         getUrl('dialogs/' + dialogId + endpoint + randomItem(json).id, detailParams, getFunction);
     }
+}
+
+export function getDialogLookup(dialogId, paramsWithToken, getFunction = getEU) {
+    const listParams = {
+        ...paramsWithToken,
+        tags: { ...paramsWithToken.tags, name: 'get dialoglookup' }
+    };
+    const queryParams = "?instanceRef=urn:altinn:dialog-id:" + dialogId;
+    getUrl('dialoglookup' + queryParams, listParams, getFunction);
 }
 
 /**
@@ -221,29 +236,29 @@ export function serviceownerSearch(serviceowner, enduser, tag_name, traceCalls, 
  * @param {*} tag_name
  */
 export function serviceownerPartySearch(serviceowner, party, tag_name, traceCalls, doSubqueries = true) {
-  let traceparent = uuidv4();
-  let paramsWithToken = {
-      headers: {
-          Authorization: "Bearer " + getEnterpriseToken(serviceowner),
-          traceparent: traceparent
-      },
-      tags: { name: tag_name }
-  }
+    let traceparent = uuidv4();
+    let paramsWithToken = {
+        headers: {
+            Authorization: "Bearer " + getEnterpriseToken(serviceowner),
+            traceparent: traceparent
+        },
+        tags: { name: tag_name }
+    }
 
-  if (traceCalls) {
-      paramsWithToken.tags.traceparent = traceparent;
-  }
+    if (traceCalls) {
+        paramsWithToken.tags.traceparent = traceparent;
+    }
 
-  let partyid = encodeURIComponent(`urn:altinn:organization:identifier-no:${party.partyId}`);
-  let defaultFilter = `?party=${partyid}`;
-  describe('Perform serviceowner dialog list', () => {
-      let r = getSO('dialogs' + defaultFilter, paramsWithToken);
-      expectStatusFor(r).to.equal(200);
-      expect(r, 'response').to.have.validJsonBody();
-      if (doSubqueries) {
-          retrieveDialogContent(r, paramsWithToken, getSO);
-      }
-      log(r.json().items, traceCalls, party.partyId);
-      return r
-  });
+    let partyid = encodeURIComponent(`urn:altinn:organization:identifier-no:${party.partyId}`);
+    let defaultFilter = `?party=${partyid}`;
+    describe('Perform serviceowner dialog list', () => {
+        let r = getSO('dialogs' + defaultFilter, paramsWithToken);
+        expectStatusFor(r).to.equal(200);
+        expect(r, 'response').to.have.validJsonBody();
+        if (doSubqueries) {
+            retrieveDialogContent(r, paramsWithToken, getSO);
+        }
+        log(r.json().items, traceCalls, party.partyId);
+        return r
+    });
 }

@@ -83,6 +83,77 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     }
 
     [E2EFact]
+    public async Task Should_Preserve_CreatedAt_When_Updating_Transmission_Without_CreatedAt_In_Request()
+    {
+        // Arrange
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
+
+        var initialCreatedAt = new DateTimeOffset(2024, 1, 2, 3, 4, 5, TimeSpan.Zero);
+        var transmissionId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+            dialog.AddTransmission(transmission =>
+            {
+                transmission.Id = transmissionId;
+                transmission.CreatedAt = initialCreatedAt;
+                transmission.Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
+                {
+                    Title = DialogTestData.CreateContentValue(
+                        value: "Transmission without createdAt in SDK update request",
+                        languageCode: "nb")
+                };
+            }));
+
+        var beforeUpdateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                TestContext.Current.CancellationToken);
+
+        var updateRequest = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest
+        {
+            IsSilentUpdate = true,
+            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+            Sender = new V1ServiceOwnerCommonActors_Actor
+            {
+                ActorType = Actors_ActorType.ServiceOwner
+            },
+            Content = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionContent
+            {
+                Title = DialogTestData.CreateContentValue(
+                    value: "Transmission without createdAt in SDK update request",
+                    languageCode: "nb")
+            },
+        };
+
+        // Act
+        var updateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                updateRequest,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        var afterUpdateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        beforeUpdateResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        beforeUpdateResponse.Content.Should().NotBeNull();
+
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        afterUpdateResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        afterUpdateResponse.Content.Should().NotBeNull();
+
+        beforeUpdateResponse.Content.CreatedAt.Should().Be(initialCreatedAt);
+        afterUpdateResponse.Content.CreatedAt.Should().Be(initialCreatedAt);
+    }
+
+    [E2EFact]
     public async Task Should_Return_PreconditionFailed_When_IfMatch_DialogRevision_Is_Changed()
     {
         // Arrange

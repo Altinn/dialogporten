@@ -146,7 +146,8 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         var olderUpdatedAt = new DateTimeOffset(2024, 12, 7, 10, 13, 0, TimeSpan.Zero);
         var newerUpdatedAt = new DateTimeOffset(2025, 12, 7, 10, 13, 0, TimeSpan.Zero);
 
-        var dueDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
+        // Highest due date, so always first in descending and last in ascending.
+        var highestDueAtDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
         {
             dialog.Content.Title = DialogTestData.CreateContentValue(Guid.NewGuid().ToString(), "nb");
             dialog.DueAt = new DateTimeOffset(2033, 12, 7, 10, 13, 0, TimeSpan.Zero);
@@ -154,14 +155,16 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             dialog.UpdatedAt = olderUpdatedAt;
         });
 
-        var updatedDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
+        // Same due date as the next dialog, but newer updatedAt, so it wins the tie-breaker.
+        var newerSharedDueAtDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
         {
             dialog.DueAt = sharedDueAt;
             dialog.CreatedAt = newerUpdatedAt;
             dialog.UpdatedAt = newerUpdatedAt;
         });
 
-        var lastDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
+        // Same due date as the previous dialog, but older updatedAt, so it loses the tie-breaker.
+        var olderSharedDueAtDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
         {
             dialog.Content.Title = DialogTestData.CreateContentValue(Guid.NewGuid().ToString(), "nb");
             dialog.DueAt = sharedDueAt;
@@ -171,16 +174,16 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
 
         Guid[] expectedDescendingOrder =
         [
-            dueDialogId,
-            updatedDialogId,
-            lastDialogId
+            highestDueAtDialogId,
+            newerSharedDueAtDialogId,
+            olderSharedDueAtDialogId
         ];
 
         Guid[] expectedAscendingOrder =
         [
-            updatedDialogId,
-            lastDialogId,
-            dueDialogId
+            newerSharedDueAtDialogId,
+            olderSharedDueAtDialogId,
+            highestDueAtDialogId
         ];
 
         // Act

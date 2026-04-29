@@ -142,35 +142,32 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
     {
         // Arrange
         var sentinelLabel = Guid.NewGuid().ToString();
+        var sharedDueAt = new DateTimeOffset(2028, 12, 7, 10, 13, 0, TimeSpan.Zero);
+        var olderUpdatedAt = new DateTimeOffset(2024, 12, 7, 10, 13, 0, TimeSpan.Zero);
+        var newerUpdatedAt = new DateTimeOffset(2025, 12, 7, 10, 13, 0, TimeSpan.Zero);
 
         var dueDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
         {
             dialog.Content.Title = DialogTestData.CreateContentValue(Guid.NewGuid().ToString(), "nb");
             dialog.DueAt = new DateTimeOffset(2033, 12, 7, 10, 13, 0, TimeSpan.Zero);
+            dialog.CreatedAt = olderUpdatedAt;
+            dialog.UpdatedAt = olderUpdatedAt;
         });
 
-        var updatedDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel);
+        var updatedDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
+        {
+            dialog.DueAt = sharedDueAt;
+            dialog.CreatedAt = newerUpdatedAt;
+            dialog.UpdatedAt = newerUpdatedAt;
+        });
 
         var lastDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel, dialog =>
         {
             dialog.Content.Title = DialogTestData.CreateContentValue(Guid.NewGuid().ToString(), "nb");
+            dialog.DueAt = sharedDueAt;
+            dialog.CreatedAt = olderUpdatedAt;
+            dialog.UpdatedAt = olderUpdatedAt;
         });
-
-        var updateResponse = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsUpdateDialog(
-            updatedDialogId,
-            new V1ServiceOwnerDialogsCommandsUpdate_Dialog
-            {
-                Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.NotApplicable,
-                Process = $"urn:test:process:{Guid.NewGuid()}",
-                Content = new()
-                {
-                    Title = DialogTestData.CreateContentValue(Guid.NewGuid().ToString(), "nb")
-                }
-            },
-            if_Match: null,
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        updateResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         Guid[] expectedDescendingOrder =
         [
@@ -195,7 +192,8 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
                 OrderBy = "dueAt_desc,updatedAt_desc"
             }, ct),
             isSuccessful: response =>
-                response.Content?.Items.Select(x => x.Id).SequenceEqual(expectedDescendingOrder) == true,
+                response.Content?.Items.Select(x => x.Id)
+                    .SequenceEqual(expectedDescendingOrder) == true,
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert descending order
@@ -213,7 +211,8 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
                 OrderBy = "dueAt_asc,updatedAt_desc"
             }, ct),
             isSuccessful: response =>
-                response.Content?.Items.Select(x => x.Id).SequenceEqual(expectedAscendingOrder) == true,
+                response.Content?.Items.Select(x => x.Id)
+                    .SequenceEqual(expectedAscendingOrder) == true,
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert ascending order

@@ -33,7 +33,7 @@ public class GetActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
         var response = await Fixture.EnduserApi.V1.GetDialogActivity(
             dialogId,
             activityId,
-            new V1EndUserCommon_AcceptedLanguages(),
+            new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
 
         // Assert

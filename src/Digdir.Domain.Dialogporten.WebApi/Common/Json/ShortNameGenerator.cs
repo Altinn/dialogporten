@@ -16,8 +16,12 @@ internal sealed class ShortNameGenerator(string documentName) : ISchemaNameGener
         }
 
         var currentName = TypeNameConverter.ToShortName(type);
-        return OpenApiTypeNameOverrides.TryGetOverride(documentName, currentName, out var overrideName)
-            ? overrideName
-            : currentName;
+        if (OpenApiTypeNameOverrides.TryGetOverride(documentName, currentName, out var overrideName))
+        {
+            return overrideName;
+        }
+
+        OpenApiTypeNameOverrides.ThrowIfMissingOverride(documentName, type, currentName);
+        return currentName;
     }
 }

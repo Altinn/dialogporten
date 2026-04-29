@@ -24,7 +24,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var response = await Fixture.EnduserApi.V1.GetDialogTransmission(
             dialogId,
             transmissionId,
-            new V1EndUserCommon_AcceptedLanguages(),
+            new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -50,7 +50,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var response = await Fixture.EnduserApi.V1.GetDialogTransmission(
             dialogId,
             transmissionId,
-            new V1EndUserCommon_AcceptedLanguages(),
+            new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
 
         // Assert

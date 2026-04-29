@@ -23,7 +23,7 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Act
         var response = await Fixture.EnduserApi.V1.SearchDialogActivities(
             dialogId,
-            new V1EndUserCommon_AcceptedLanguages(),
+            new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -80,7 +80,7 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Act
         var response = await Fixture.EnduserApi.V1.SearchDialogActivities(
             dialogId,
-            new V1EndUserCommon_AcceptedLanguages(),
+            new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
 
         // Assert

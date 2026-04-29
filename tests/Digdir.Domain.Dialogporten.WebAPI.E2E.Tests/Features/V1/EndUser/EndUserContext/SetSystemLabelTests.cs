@@ -4,7 +4,7 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.DialogEndUserContextsEntities_SystemLabel;
+using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUserContext;
 
@@ -46,7 +46,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         labelLog.Should().HaveCount(1);
         labelLog.Should().ContainSingle(x => x.Action == "set")
             .Which.PerformedBy.ActorType.Should()
-            .Be(Actors_ActorType.PartyRepresentative);
+            .Be(ActorType.PartyRepresentative);
     }
 
     [E2EFact]
@@ -82,7 +82,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         labelLog.Should().AllSatisfy(x =>
                 x.PerformedBy.Should().NotBeNull())
             .And.AllSatisfy(x => x.PerformedBy.ActorType
-                .Should().Be(Actors_ActorType.PartyRepresentative));
+                .Should().Be(ActorType.PartyRepresentative));
 
         labelLog.Where(x => x.Action == "set").Should().HaveCount(2);
         labelLog.Should().ContainSingle(x => x.Action == "remove");
@@ -166,10 +166,10 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         labelLog.Should().ContainSingle(x => x.Action == "set")
             .Which.PerformedBy.ActorType.Should()
-            .Be(Actors_ActorType.PartyRepresentative);
+            .Be(ActorType.PartyRepresentative);
 
         labelLog.Should().ContainSingle(x => x.Action == "remove")
             .Which.PerformedBy.ActorType.Should()
-            .Be(Actors_ActorType.ServiceOwner);
+            .Be(ActorType.ServiceOwner);
     }
 }

@@ -26,6 +26,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.WebApi.Unit.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <OpenApiDocument Include="v1">
             <OutputFileName>swagger.json</OutputFileName>
         </OpenApiDocument>

@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.114.4](https://github.com/Altinn/dialogporten/compare/v1.114.3...v1.114.4) (2026-04-29)
+
+
+### Bug Fixes
+
+* add missing serviceowner label on enduserid search ([#3857](https://github.com/Altinn/dialogporten/issues/3857)) ([61db8a3](https://github.com/Altinn/dialogporten/commit/61db8a371d396c06d2c7c333c19b918e484d17fb))
+* add new migrated app type to whitelist ([#3852](https://github.com/Altinn/dialogporten/issues/3852)) ([9048b61](https://github.com/Altinn/dialogporten/commit/9048b61a8b035577b868b6f394dd0c64b093829f))
+* make update transmission dto CreatedAt nullable ([#3863](https://github.com/Altinn/dialogporten/issues/3863)) ([8d0fe6b](https://github.com/Altinn/dialogporten/commit/8d0fe6b7e47330b4c22e1020f7fe88fd886b72e2))
+* respect user-supplied attachment url ids ([#3868](https://github.com/Altinn/dialogporten/issues/3868)) ([09cd511](https://github.com/Altinn/dialogporten/commit/09cd511ce325a43d3f4961ba023ccaead96f9071))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v6.4.0 ([#3877](https://github.com/Altinn/dialogporten/issues/3877)) ([d5aed7d](https://github.com/Altinn/dialogporten/commit/d5aed7d3491a20f467294c2affb24a27a87752df))
+* **deps:** update azure/bicep-deploy action to v2.3.0 ([#3860](https://github.com/Altinn/dialogporten/issues/3860)) ([2853174](https://github.com/Altinn/dialogporten/commit/28531746974d353c476ae93e4d9fa84275d0f493))
+* **deps:** update dependency microsoft.extensions.hosting.abstractions to 10.0.6 ([#3826](https://github.com/Altinn/dialogporten/issues/3826)) ([f40bcd6](https://github.com/Altinn/dialogporten/commit/f40bcd68c5c9ca0025d5adfcd3e934070da11149))
+* **deps:** update dependency parquet.net to 5.6.0 ([#3861](https://github.com/Altinn/dialogporten/issues/3861)) ([93e34c9](https://github.com/Altinn/dialogporten/commit/93e34c9036f3780c0f1388fc1f5899c62148fc9f))
+* **deps:** update dependency verify.xunitv3 to 31.16.1 ([#3862](https://github.com/Altinn/dialogporten/issues/3862)) ([6c4d9a4](https://github.com/Altinn/dialogporten/commit/6c4d9a4860c5dc9602aead0c5b9fe1ac2bba47aa))
+* enable RestorePackagesWithLockFile ([#3831](https://github.com/Altinn/dialogporten/issues/3831)) ([d335734](https://github.com/Altinn/dialogporten/commit/d335734d452a595e303931beafbcda6bce75c293))
+* **perf:** added dialoglookup to tests ([#3864](https://github.com/Altinn/dialogporten/issues/3864)) ([7910407](https://github.com/Altinn/dialogporten/commit/79104071929e5116e01467ed25a78dbb41813516))
+* remove instanceref polyfill ([#3853](https://github.com/Altinn/dialogporten/issues/3853)) ([def4a0c](https://github.com/Altinn/dialogporten/commit/def4a0c435e1bebe4d4e7087dc987e36ece4d773))
+* suppress automapper audit (GHSA-rvv3-g6hj-g44x) ([#3873](https://github.com/Altinn/dialogporten/issues/3873)) ([d929a4a](https://github.com/Altinn/dialogporten/commit/d929a4a3da378f18b8e7ef274f5be4335d37da7a))
+
 ## [1.114.3](https://github.com/Altinn/dialogporten/compare/v1.114.2...v1.114.3) (2026-04-24)
 
 

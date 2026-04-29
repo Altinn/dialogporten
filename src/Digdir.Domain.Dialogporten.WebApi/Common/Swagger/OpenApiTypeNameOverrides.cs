@@ -3,6 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 
+// Temporary bridge for SDK-facing schema names until endpoint families are migrated to
+// WebApi-owned request/response contract types with their own OpenAPI type names.
 internal static class OpenApiTypeNameOverrides
 {
     private static readonly FrozenDictionary<string, string> CommonOverrides = new Dictionary<string, string>(StringComparer.Ordinal)

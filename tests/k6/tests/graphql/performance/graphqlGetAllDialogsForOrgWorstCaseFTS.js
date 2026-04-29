@@ -1,6 +1,6 @@
 /**
  * The performance test for GraphQL search.
- * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetAllDialogsForOrgWorstCaseFTS.js --vus 1 --iterations 15 -e env=yt01
+ * Run: k6 run tests/k6/tests/graphql/performance/graphqlGetAllDialogsForOrgWorstCaseFTS.js --vus 1 --iterations 15 -e API_ENVIRONMENT=yt01
  * TODO: Find real cases for staging and test environments, or remove those environments from the test. Currently using the same test data for all environments.
  */
 import { getEnduserTokenFromGenerator } from '../../../common/token.js';

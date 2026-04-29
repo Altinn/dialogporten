@@ -17,121 +17,121 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     {
         public SearchDialogEndUserContextsQueryParams(IEnumerable<string> party)
         {
-
+            
             Party = party;
         }
-
+        
                 /// <summary>
                 /// Filter by one or more owning parties
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> Party { get; set; }
 
                 /// <summary>
                 /// Only return context for dialogs with contentUpdatedAt greater than or equal to the supplied date-time.
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Filter by one or more system labels
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<DialogEndUserContextsEntities_SystemLabel> Label { get; set; }
 
                 /// <summary>
                 /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
                 /// </summary>
-        [Query]
+        [Query] 
         public string ContinuationToken { get; set; }
 
                 /// <summary>
                 /// Limit the number of results per page (1-1000, default: 100)
                 /// </summary>
-        [Query]
+        [Query] 
         public int? Limit { get; set; }
 
     }
 
     public class SearchDialogsQueryParams
     {
-
+        
                 /// <summary>
                 /// Filter by one or more service resources
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> ServiceResource { get; set; }
 
                 /// <summary>
                 /// Filter by one or more owning parties
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> Party { get; set; }
 
                 /// <summary>
                 /// Filter by end user id
                 /// </summary>
-        [Query]
+        [Query] 
         public string EndUserId { get; set; }
 
                 /// <summary>
                 /// Filter by one or more extended statuses
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> ExtendedStatus { get; set; }
 
                 /// <summary>
                 /// Filter by external reference
                 /// </summary>
-        [Query]
+        [Query] 
         public string ExternalReference { get; set; }
 
                 /// <summary>
                 /// Filter by status
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<DialogsEntities_DialogStatus> Status { get; set; }
 
                 /// <summary>
                 /// If set to 'include', the result will include both deleted and non-deleted dialogs. If set to 'exclude', the result will only include non-deleted dialogs. If set to 'only', the result will only include deleted dialogs
                 /// </summary>
-        [Query]
+        [Query] 
         public V1Common_DeletedFilter? Deleted { get; set; }
 
                 /// <summary>
                 /// Only return dialogs created after this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? CreatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs created before this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? CreatedBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs updated after this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? UpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs updated before this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? UpdatedBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with content updated after this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with content updated before this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
 
                 /// <summary>
@@ -139,87 +139,87 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
                 /// If null, no filtering is applied
                 /// If true, returns dialogs that have been seen
                 /// If false, returns dialogs that have not been seen
-                ///
+                /// 
                 /// A dialog's content is considered seen if:
                 /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
                 /// - It does not have a system label MarkedAsUnopened.
                 /// </summary>
-        [Query]
+        [Query] 
         public bool? IsContentSeen { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with due date after this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? DueAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with due date before this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? DueBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with visible-from date after this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? VisibleAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with visible-from date before this date
                 /// </summary>
-        [Query]
+        [Query] 
         public System.DateTimeOffset? VisibleBefore { get; set; }
 
                 /// <summary>
                 /// Filter by process
                 /// </summary>
-        [Query]
+        [Query] 
         public string Process { get; set; }
 
                 /// <summary>
                 /// Filter by Display state
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<DialogEndUserContextsEntities_SystemLabel> SystemLabel { get; set; }
 
                 /// <summary>
                 /// Whether to exclude API-only dialogs from the results. Defaults to false.
                 /// </summary>
-        [Query]
+        [Query] 
         public bool? ExcludeApiOnly { get; set; }
 
                 /// <summary>
                 /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
                 /// </summary>
-        [Query]
+        [Query] 
         public string Search { get; set; }
 
                 /// <summary>
                 /// Filter by one or more labels. Multiple labels are combined with AND, i.e., all labels must match. Supports prefix matching with '*' at the end of the label. For example, 'label*' will match 'label', 'label1', 'label2', etc.
                 /// </summary>
-        [Query(CollectionFormat.Multi)]
+        [Query(CollectionFormat.Multi)] 
         public IEnumerable<string> ServiceOwnerLabels { get; set; }
 
                 /// <summary>
                 /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
                 /// </summary>
-        [Query]
+        [Query] 
         public string SearchLanguageCode { get; set; }
 
-        [Query]
+        [Query] 
         public string OrderBy { get; set; }
 
                 /// <summary>
                 /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
                 /// </summary>
-        [Query]
+        [Query] 
         public string ContinuationToken { get; set; }
 
                 /// <summary>
                 /// Limit the number of results per page (1-1000, default: 100)
                 /// </summary>
-        [Query]
+        [Query] 
         public int? Limit { get; set; }
 
     }
@@ -228,18 +228,18 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     {
         public CheckNotificationConditionQueryParams(V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType conditionType, DialogsEntitiesActivities_DialogActivityType activityType)
         {
-
+            
             ConditionType = conditionType;
             ActivityType = activityType;
         }
-
-        [Query]
+        
+        [Query] 
         public V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType ConditionType { get; set; }
 
-        [Query]
+        [Query] 
         public DialogsEntitiesActivities_DialogActivityType ActivityType { get; set; }
 
-        [Query]
+        [Query] 
         public System.Guid? TransmissionId { get; set; }
 
     }
@@ -385,7 +385,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Sets the system labels of a dialog</summary>
         /// <remarks>
         /// Sets the system labels of the dialog.
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -540,7 +540,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Adds a transmission to a dialog</summary>
         /// <remarks>
         /// The transmission is created with the given configuration.
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -648,7 +648,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Gets end user context system labels for dialogs</summary>
         /// <remarks>
         /// Performs a search for dialog end user context labels, returning a paginated list of dialog ids and end user context revisions.
-        ///
+        /// 
         /// * Party is required.
         /// * System labels are matched with OR semantics.
         /// * See \"continuationToken\" in the response for how to get the next page of results.
@@ -721,7 +721,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Adds an activity to a dialog's activity history</summary>
         /// <remarks>
         /// The activity is created with the given configuration.
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -788,7 +788,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
         /// Performs a search for dialogs, returning a paginated list of dialogs.
-        ///
+        /// 
         /// * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
         /// * See "continuationToken" in the response for how to get the next page of results.
         /// * hasNextPage will be set to true if there are more items to get.
@@ -823,7 +823,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Creates a new dialog</summary>
         /// <remarks>
         /// The dialog is created with the given configuration.
-        ///
+        /// 
         /// For detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)
         /// </remarks>
         /// <param name="dto">dto parameter</param>
@@ -952,7 +952,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Replaces a transmission</summary>
         /// <remarks>
         /// Replaces a given transmission with the supplied model.
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -1100,7 +1100,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Gets a single dialog</summary>
         /// <remarks>
         /// Gets a single dialog aggregate.
-        ///
+        /// 
         /// Note that this operation may return deleted dialogs (see the field `DeletedAt`).
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -1142,7 +1142,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Replaces a dialog</summary>
         /// <remarks>
         /// Replaces a given dialog with the supplied model.
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -1205,10 +1205,10 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Deletes a dialog</summary>
         /// <remarks>
         /// Deletes a given dialog (soft delete).
-        ///
+        /// 
         /// Note that the dialog will still be available on the single details endpoint, but will have a deleted status. It will not appear on the list endpoint for either service owners nor end users.
         /// If end users attempt to access the dialog via the details endpoint, they will get a 410 Gone response.
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -1267,7 +1267,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <remarks>
         /// Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.
         /// See [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -1376,7 +1376,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>Permanently deletes a dialog</summary>
         /// <remarks>
         /// Deletes a given dialog (hard delete).
-        ///
+        /// 
         /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -1551,7 +1551,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 {
     using System = global::System;
 
-
+    
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel
@@ -1927,7 +1927,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// True if the authenticated user is authorized for this content. If not, the endpoints will
         /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool? IsAuthorized { get; set; }
@@ -2301,7 +2301,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
@@ -2310,7 +2310,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("externalReference")]
@@ -2482,7 +2482,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// An arbitrary string with a service-specific activity type.
-        /// <br/>
+        /// <br/>            
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -2539,7 +2539,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
-        /// <br/>
+        /// <br/>            
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
         [JsonPropertyName("isViaServiceOwner")]
@@ -2944,7 +2944,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.
-        /// <br/>
+        /// <br/>            
         /// </summary>
         [JsonPropertyName("idempotentKey")]
         public string IdempotentKey { get; set; }
@@ -3002,7 +3002,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
@@ -3011,7 +3011,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("externalReference")]
@@ -3037,7 +3037,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>
+        /// <br/>            
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed by the service
         /// <br/>owner after the dialog has been created.
@@ -3342,7 +3342,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3356,7 +3356,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -3554,7 +3554,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3671,7 +3671,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3709,7 +3709,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary string indicating the version of the endpoint.
-        /// <br/>
+        /// <br/>            
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("version")]
@@ -3782,7 +3782,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// An arbitrary URI/URN with a service-specific activity type.
-        /// <br/>
+        /// <br/>            
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -3839,7 +3839,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
-        /// <br/>
+        /// <br/>            
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
         [JsonPropertyName("isViaServiceOwner")]
@@ -3921,7 +3921,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3929,7 +3929,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -4136,7 +4136,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>
+        /// <br/>            
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
         /// </summary>
@@ -4396,7 +4396,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -4404,7 +4404,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -4590,7 +4590,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -4653,7 +4653,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -4817,7 +4817,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -4825,7 +4825,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -5114,7 +5114,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>
+        /// <br/>            
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
         /// </summary>
@@ -5396,7 +5396,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -5404,7 +5404,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>
+        /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -5590,7 +5590,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -5653,7 +5653,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>
+        /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]

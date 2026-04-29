@@ -387,6 +387,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "orgNumber",
+          "code"
+        ],
         "type": "object"
       },
       "V1CommonIdentifierLookup_IdentifierLookupServiceResource": {
@@ -410,6 +414,11 @@
             "type": "array"
           }
         },
+        "required": [
+          "id",
+          "isDelegable",
+          "minimumAuthenticationLevel"
+        ],
         "type": "object"
       },
       "V1CommonIdentifierLookup_ServiceOwnerIdentifierLookup": {
@@ -446,6 +455,12 @@
             "type": "array"
           }
         },
+        "required": [
+          "instanceRef",
+          "party",
+          "serviceResource",
+          "serviceOwner"
+        ],
         "type": "object"
       },
       "V1CommonLocalizations_Localization": {
@@ -461,6 +476,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "value",
+          "languageCode"
+        ],
         "type": "object"
       },
       "V1EndUserCommon_AcceptedLanguage": {

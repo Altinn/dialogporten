@@ -113,7 +113,7 @@ jobs:
 
   update-manifests:
     name: Update manifest image tags for yt01
-    needs: [deploy-apps, check-for-changes, resolve-version]
+    needs: [check-for-changes, deploy-infra, resolve-version]
     if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-dispatch-update-manifests.yml
     with:

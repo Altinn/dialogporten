@@ -109,7 +109,7 @@ jobs:
 
   update-manifests:
     name: Update manifest image tags for prod
-    needs: [deploy-apps, check-for-changes]
+    needs: [check-for-changes, deploy-infra]
     if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
     uses: ./.github/workflows/workflow-dispatch-update-manifests.yml
     with:

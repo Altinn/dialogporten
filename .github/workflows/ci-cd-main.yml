@@ -54,7 +54,7 @@ jobs:
   update-manifests:
     name: Update manifest image tags for at23
     needs: [get-current-version, generate-git-short-sha, publish-docker-images, check-for-changes]
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
     uses: ./.github/workflows/workflow-dispatch-update-manifests.yml
     with:
       environment: at23

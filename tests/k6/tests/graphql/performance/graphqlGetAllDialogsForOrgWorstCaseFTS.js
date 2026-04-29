@@ -43,11 +43,15 @@ const endUserLabels = endUsers.map(user => user.label);
 export const options = getOptions(endUserLabels);
 
 export default function () {
-  const users = endUsersByEnvironment[environment];
-  const endUser = users[__ITER % users.length].pid;
-  const label = users[__ITER % users.length].label;
-  const orgno = users[__ITER % users.length].orgno;
-  const searchWord = users[__ITER % users.length].word;
+  const users = endUsersByEnvironment[environment] || [];
+  if (users.length === 0) {
+    throw new Error(`No test users configured for API_ENVIRONMENT="${environment}"`);
+  }
+  const user = users[__ITER % users.length];
+  const endUser = user.pid;
+  const label = user.label;
+  const orgno = user.orgno;
+  const searchWord = user.word;
 
   const tokenOptions = {
     scopes: "digdir:dialogporten",

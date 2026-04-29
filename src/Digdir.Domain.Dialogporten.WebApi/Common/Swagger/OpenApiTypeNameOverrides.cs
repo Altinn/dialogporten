@@ -7,6 +7,8 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 // WebApi-owned request/response contract types with their own OpenAPI type names.
 internal static class OpenApiTypeNameOverrides
 {
+    private const string NamespaceClassSeparator = "_";
+
     private static readonly FrozenDictionary<string, string> CommonOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["Actors_ActorType"] = "ActorType",
@@ -55,6 +57,7 @@ internal static class OpenApiTypeNameOverrides
         ["V1EndUserDialogsQueriesGet_DialogTransmissionNavigationalAction"] = "DialogTransmissionNavigationalAction",
         ["V1EndUserDialogsQueriesGetActivity_Activity"] = "DialogActivityDetails",
         ["V1EndUserDialogsQueriesGetActivity_ActivityRequest"] = "GetDialogActivityRequest",
+        ["V1EndUserDialogsQueriesGetSeenLog_SeenLogQuery"] = "GetDialogSeenLogRequest",
         ["V1EndUserDialogsQueriesGetSeenLog_SeenLog"] = "DialogSeenLogDetails",
         ["V1EndUserDialogsQueriesGetTransmission_Attachment"] = "DialogTransmissionAttachmentDetails",
         ["V1EndUserDialogsQueriesGetTransmission_AttachmentUrl"] = "DialogTransmissionAttachmentUrlDetails",
@@ -70,6 +73,7 @@ internal static class OpenApiTypeNameOverrides
         ["V1EndUserDialogsQueriesSearch_DialogSeenLog"] = "DialogSeenLogListItem",
         ["V1EndUserDialogsQueriesSearchActivities_Activity"] = "DialogActivitySearchItem",
         ["V1EndUserDialogsQueriesSearchActivities_ActivityRequest"] = "SearchDialogActivitiesRequest",
+        ["V1EndUserDialogsQueriesSearchSeenLogs_SeenLogQuery"] = "SearchDialogSeenLogsRequest",
         ["V1EndUserDialogsQueriesSearchSeenLogs_SeenLog"] = "DialogSeenLogSearchItem",
         ["V1EndUserDialogsQueriesSearchTransmissions_Attachment"] = "DialogTransmissionSearchAttachment",
         ["V1EndUserDialogsQueriesSearchTransmissions_AttachmentUrl"] = "DialogTransmissionSearchAttachmentUrl",
@@ -81,6 +85,7 @@ internal static class OpenApiTypeNameOverrides
         ["V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"] = "BulkSetSystemLabel",
         ["V1EndUserEndUserContextCommandsBulkSetSystemLabels_DialogRevision"] = "DialogRevision",
         ["V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest"] = "SetDialogSystemLabelRequest",
+        ["V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLogQuery"] = "SearchDialogLabelAssignmentLogsRequest",
         ["V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog"] = "LabelAssignmentLog"
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
@@ -120,6 +125,10 @@ internal static class OpenApiTypeNameOverrides
         ["V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent"] = "CreateTransmissionContent",
         ["V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction"] = "CreateTransmissionNavigationalAction",
         ["V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest"] = "CreateTransmissionRequest",
+        ["V1ServiceOwnerDialogsCommandsDelete_DialogRequest"] = "DeleteDialogRequest",
+        ["V1ServiceOwnerDialogsCommandsFreeze_FreezeDialogRequest"] = "FreezeDialogRequest",
+        ["V1ServiceOwnerDialogsCommandsPurge_DialogRequest"] = "PurgeDialogRequest",
+        ["V1ServiceOwnerDialogsCommandsRestore_DialogRequest"] = "RestoreDialogRequest",
         ["V1ServiceOwnerDialogsCommandsUpdate_Activity"] = "UpdateDialogActivity",
         ["V1ServiceOwnerDialogsCommandsUpdate_ApiAction"] = "UpdateDialogApiAction",
         ["V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint"] = "UpdateDialogApiActionEndpoint",
@@ -140,8 +149,10 @@ internal static class OpenApiTypeNameOverrides
         ["V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionContent"] = "UpdateTransmissionContent",
         ["V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionNavigationalAction"] = "UpdateTransmissionNavigationalAction",
         ["V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest"] = "UpdateTransmissionRequest",
+        ["V1ServiceOwnerDialogsCommandsUpdateFormSavedActivityTime_FormSavedActivityTimeRequest"] = "UpdateFormSavedActivityTimeRequest",
         ["V1ServiceOwnerDialogsQueriesGet_Content"] = "Content",
         ["V1ServiceOwnerDialogsQueriesGet_Dialog"] = "Dialog",
+        ["V1ServiceOwnerDialogsQueriesGet_DialogQuery"] = "GetDialogRequest",
         ["V1ServiceOwnerDialogsQueriesGet_DialogActivity"] = "DialogActivity",
         ["V1ServiceOwnerDialogsQueriesGet_DialogApiAction"] = "DialogApiAction",
         ["V1ServiceOwnerDialogsQueriesGet_DialogApiActionEndpoint"] = "DialogApiActionEndpoint",
@@ -158,29 +169,38 @@ internal static class OpenApiTypeNameOverrides
         ["V1ServiceOwnerDialogsQueriesGet_DialogTransmissionContent"] = "DialogTransmissionContent",
         ["V1ServiceOwnerDialogsQueriesGet_DialogTransmissionNavigationalAction"] = "DialogTransmissionNavigationalAction",
         ["V1ServiceOwnerDialogsQueriesGet_Tag"] = "DialogTag",
+        ["V1ServiceOwnerDialogsQueriesGetActivity_ActivityQuery"] = "GetDialogActivityRequest",
         ["V1ServiceOwnerDialogsQueriesGetActivity_Activity"] = "DialogActivityDetails",
+        ["V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLogQuery"] = "GetDialogSeenLogRequest",
         ["V1ServiceOwnerDialogsQueriesGetSeenLog_SeenLog"] = "DialogSeenLogDetails",
         ["V1ServiceOwnerDialogsQueriesGetTransmission_Attachment"] = "DialogTransmissionAttachmentDetails",
         ["V1ServiceOwnerDialogsQueriesGetTransmission_AttachmentUrl"] = "DialogTransmissionAttachmentUrlDetails",
         ["V1ServiceOwnerDialogsQueriesGetTransmission_Content"] = "DialogTransmissionContentDetails",
         ["V1ServiceOwnerDialogsQueriesGetTransmission_NavigationalAction"] = "DialogTransmissionNavigationalActionDetails",
+        ["V1ServiceOwnerDialogsQueriesGetTransmission_TransmissionQuery"] = "GetDialogTransmissionRequest",
         ["V1ServiceOwnerDialogsQueriesGetTransmission_Transmission"] = "DialogTransmissionDetails",
+        ["V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionQuery"] = "CheckNotificationConditionRequest",
         ["V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationCondition"] = "NotificationCondition",
         ["V1ServiceOwnerDialogsQueriesNotificationCondition_NotificationConditionType"] = "NotificationConditionType",
         ["V1ServiceOwnerDialogsQueriesSearch_Content"] = "DialogContentSummary",
+        ["V1ServiceOwnerDialogsQueriesSearch_DialogQuery"] = "SearchDialogsRequest",
         ["V1ServiceOwnerDialogsQueriesSearch_Dialog"] = "DialogListItem",
         ["V1ServiceOwnerDialogsQueriesSearch_DialogActivity"] = "DialogActivityListItem",
         ["V1ServiceOwnerDialogsQueriesSearch_DialogEndUserContext"] = "DialogListItemEndUserContext",
         ["V1ServiceOwnerDialogsQueriesSearch_DialogSeenLog"] = "DialogSeenLogListItem",
         ["V1ServiceOwnerDialogsQueriesSearch_DialogServiceOwnerContext"] = "DialogServiceOwnerContextListItem",
         ["V1ServiceOwnerDialogsQueriesSearch_ServiceOwnerLabel"] = "DialogServiceOwnerLabelListItem",
+        ["V1ServiceOwnerDialogsQueriesSearchActivities_ActivityQuery"] = "SearchDialogActivitiesRequest",
         ["V1ServiceOwnerDialogsQueriesSearchActivities_Activity"] = "DialogActivitySearchItem",
+        ["V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextQuery"] = "SearchDialogEndUserContextsRequest",
         ["V1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem"] = "DialogEndUserContextItem",
+        ["V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLogQuery"] = "SearchDialogSeenLogsRequest",
         ["V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog"] = "DialogSeenLogSearchItem",
         ["V1ServiceOwnerDialogsQueriesSearchTransmissions_Attachment"] = "DialogTransmissionSearchAttachment",
         ["V1ServiceOwnerDialogsQueriesSearchTransmissions_AttachmentUrl"] = "DialogTransmissionSearchAttachmentUrl",
         ["V1ServiceOwnerDialogsQueriesSearchTransmissions_Content"] = "DialogTransmissionSearchContent",
         ["V1ServiceOwnerDialogsQueriesSearchTransmissions_NavigationalAction"] = "DialogTransmissionSearchNavigationalAction",
+        ["V1ServiceOwnerDialogsQueriesSearchTransmissions_TransmissionQuery"] = "SearchDialogTransmissionsRequest",
         ["V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission"] = "DialogTransmissionSearchItem",
         ["V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetDialogSystemLabelsRequest"] = "BulkSetDialogSystemLabelsRequest",
         ["V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"] = "BulkSetSystemLabel",
@@ -188,6 +208,8 @@ internal static class OpenApiTypeNameOverrides
         ["V1ServiceOwnerEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest"] = "SetDialogSystemLabelRequest",
         ["V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label"] = "CreateServiceOwnerLabel",
         ["V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_ServiceOwnerLabelRequest"] = "CreateServiceOwnerLabelRequest",
+        ["V1ServiceOwnerServiceOwnerContextCommandsDeleteServiceOwnerLabel_ServiceOwnerLabelRequest"] = "DeleteServiceOwnerLabelRequest",
+        ["V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabelsQuery"] = "GetServiceOwnerLabelsRequest",
         ["V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel"] = "ServiceOwnerLabel"
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
@@ -218,5 +240,20 @@ internal static class OpenApiTypeNameOverrides
 
         overrideName = null;
         return false;
+    }
+
+    public static void ThrowIfMissingOverride(string documentName, Type type, string currentName)
+    {
+        if (documentName is not ("v1.enduser" or "v1.serviceowner")
+            || type.Namespace?.StartsWith("System", StringComparison.Ordinal) == true
+            || !currentName.Contains(NamespaceClassSeparator, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"Missing temporary OpenAPI type-name override for '{type.FullName}' in '{documentName}'. " +
+            $"The generated fallback name '{currentName}' still contains namespace segments, so add a mapping " +
+            $"to {nameof(OpenApiTypeNameOverrides)} or move the contract to a WebApi-owned type with an explicit OpenAPI name.");
     }
 }

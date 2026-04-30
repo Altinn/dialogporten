@@ -71,9 +71,21 @@ internal static class PostgresFormattableStringBuilderExtensions
             return queryBuilder;
         }
 
-        return queryBuilder.Append($"""
-            AND (d."SystemLabelsMask" & {requiredMask}::smallint) = {requiredMask}::smallint
-            """);
+        var excluded = new List<int>();
+        for (var value = 0; value <= 31; value++)
+        {
+            if ((value & requiredMask) != requiredMask)
+                excluded.Add(value);
+        }
+
+        if (excluded.Count == 0)
+            return queryBuilder;
+
+        queryBuilder.Append("AND ");
+        return queryBuilder.Append(string.Join(
+            " AND ",
+            excluded.Select(v => $"d.\"SystemLabelsMask\" != {v}")
+        ));
     }
 
     internal static PostgresFormattableStringBuilder AppendIsContentSeenFilterCondition(

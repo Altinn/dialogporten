@@ -130,6 +130,14 @@ public static class OpenApiDocumentExtensions
         }
     }
 
+    public static void RemoveRequiredPropertiesFromSchemas(this OpenApiDocument openApiDocument)
+    {
+        foreach (var schema in openApiDocument.Components.Schemas.Values)
+        {
+            schema.RequiredProperties.Clear();
+        }
+    }
+
     /// <summary>
     /// Changing the dialog status example to "NotApplicable" since the "New" status is deprecated.
     /// </summary>

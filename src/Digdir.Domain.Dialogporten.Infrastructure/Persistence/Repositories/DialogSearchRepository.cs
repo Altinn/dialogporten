@@ -290,6 +290,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
 
         var efQuery = _db.Dialogs
             .FromSql(queryBuilder.ToFormattableString())
+            .TagWith($"Strategy:{strategy.Name}")
             .IgnoreQueryFilters()
             .AsNoTracking();
 

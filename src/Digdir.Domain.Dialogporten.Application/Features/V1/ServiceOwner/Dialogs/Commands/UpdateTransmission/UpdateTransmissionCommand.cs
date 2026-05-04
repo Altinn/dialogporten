@@ -168,6 +168,10 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         {
             _mapper.Map(source, destination);
             destination.Urls = _mapper.Map<List<AttachmentUrl>>(source.Urls);
+            foreach (var url in destination.Urls)
+            {
+                _db.AttachmentUrls.Add(url);
+            }
         }
     }
 

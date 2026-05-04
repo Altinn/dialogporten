@@ -36,6 +36,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDialogSeenLogWriter _dialogSeenLogWriter;
 
     public GetDialogQueryHandler(
         IDialogDbContext db,
@@ -44,7 +45,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
-        IDialogTokenGenerator dialogTokenGenerator)
+        IDialogTokenGenerator dialogTokenGenerator,
+        IDialogSeenLogWriter dialogSeenLogWriter)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(mapper);
@@ -53,6 +55,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ArgumentNullException.ThrowIfNull(userRegistry);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
         ArgumentNullException.ThrowIfNull(dialogTokenGenerator);
+        ArgumentNullException.ThrowIfNull(dialogSeenLogWriter);
 
         _db = db;
         _mapper = mapper;
@@ -61,6 +64,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         _userRegistry = userRegistry;
         _altinnAuthorization = altinnAuthorization;
         _dialogTokenGenerator = dialogTokenGenerator;
+        _dialogSeenLogWriter = dialogSeenLogWriter;
     }
 
     public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
@@ -220,7 +224,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         var userId = _userRegistry.GetCurrentUserId();
 
-        dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
+        await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()

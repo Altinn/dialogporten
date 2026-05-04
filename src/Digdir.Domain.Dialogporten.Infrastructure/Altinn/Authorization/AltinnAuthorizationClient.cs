@@ -19,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
@@ -38,6 +39,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private readonly ILogger _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IOptionsMonitor<ApplicationSettings> _applicationSettings;
+    private readonly IPartyNameRegistry _partyNameRegistry;
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -54,7 +56,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         IPartyResourceReferenceRepository partyResourceReferenceRepository,
         ILogger<AltinnAuthorizationClient> logger,
         IServiceScopeFactory serviceScopeFactory,
-        IOptionsMonitor<ApplicationSettings> applicationSettings)
+        IOptionsMonitor<ApplicationSettings> applicationSettings,
+        IPartyNameRegistry partyNameRegistry
+    )
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(cacheProvider);
@@ -65,6 +69,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
         ArgumentNullException.ThrowIfNull(applicationSettings);
+        ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
         var pdpCache = cacheProvider.GetCache(nameof(Authorization));
         ArgumentNullException.ThrowIfNull(pdpCache);
@@ -86,6 +91,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
         _applicationSettings = applicationSettings;
+        _partyNameRegistry = partyNameRegistry;
     }
 
     public async Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
@@ -181,6 +187,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
                 => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
         }
+
+        var partyToName = authorizedParties.AuthorizedParties.Select(x => (x.Party, x.Name)).ToDictionary();
+        _partyNameRegistry.CacheNames(partyToName);
 
         return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
     }
@@ -394,7 +403,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             var partyAuthorizedInstances = party.AuthorizedInstances
                 .Where(instance =>
                     constraintResources is null
-                    || constraintResources.Contains($"{Domain.Common.Constants.ServiceResourcePrefix}{instance.ResourceId}"))
+                    || constraintResources.Contains($"{Constants.ServiceResourcePrefix}{instance.ResourceId}"))
                 .ToList();
 
             if (partyAuthorizedInstances.Count == 0)

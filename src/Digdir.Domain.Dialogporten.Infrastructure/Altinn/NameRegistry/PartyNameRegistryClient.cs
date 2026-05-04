@@ -48,18 +48,36 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>
         await _cache.GetOrSetAsync<string?>(
             GetCacheKey(externalIdWithPrefix),
-            async (ctx, ct) =>
-            {
-                var name = await GetNameFromRegister(externalIdWithPrefix, ct);
-                if (name is null)
-                {
-                    // Short negative cache
-                    ctx.Options.Duration = TimeSpan.FromSeconds(10);
-                }
-
-                return name;
-            },
+            GetNameFactory(externalIdWithPrefix),
             token: cancellationToken);
+
+    private Func<FusionCacheFactoryExecutionContext<string?>, CancellationToken, Task<string?>> GetNameFactory(
+        string externalIdWithPrefix
+    )
+    {
+        return async (ctx, ct) =>
+        {
+            var name = await GetNameFromRegister(externalIdWithPrefix, ct);
+            if (name is null)
+            {
+                // Short negative cache
+                ctx.Options.Duration = TimeSpan.FromSeconds(10);
+            }
+
+            return name;
+        };
+    }
+
+    public void CacheNames(Dictionary<string, string> actorIdToName)
+    {
+        foreach (var (actorId, name) in actorIdToName)
+        {
+            if (PartyIdentifier.TryParse(actorId, out var partyIdentifier))
+            {
+                _cache.Set(GetCacheKey(actorId), FlipNameIfPerson(partyIdentifier, name));
+            }
+        }
+    }
 
     private string GetCacheKey(string externalIdWithPrefix)
     {
@@ -70,8 +88,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
-        const string apiUrl = "register/api/v1/dialogporten/parties/query";
-
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
         {
             return null;
@@ -99,6 +115,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             return null;
         }
 
+        const string apiUrl = "register/api/v1/dialogporten/parties/query";
         var nameLookupResult = await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
             apiUrl,
             nameLookup,
@@ -115,6 +132,13 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does
         // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
+        name = FlipNameIfPerson(partyIdentifier, name);
+
+        return name;
+    }
+
+    private string FlipNameIfPerson(IPartyIdentifier partyIdentifier, string name)
+    {
         if (!_useCorrectPersonNameOrdering && partyIdentifier is NorwegianPersonIdentifier)
         {
             // Flip the order of the name parts: "A B C" -> "C A B" / "A B" -> "B A"
@@ -159,5 +183,20 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
 internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
 {
-    public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) => Task.FromResult<string?>("Gunnar Gunnarson");
+    private readonly Dictionary<string, string> _fakeCache = new();
+    public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
+    {
+        return _fakeCache.TryGetValue(externalIdWithPrefix, out var cachedName)
+            ? Task.FromResult<string?>(cachedName)
+            : Task.FromResult<string?>("Gunnar Gunnarson");
+    }
+
+    public void CacheNames(Dictionary<string, string> idToName)
+    {
+        foreach (var keyValuePair in idToName)
+        {
+            _fakeCache.Remove(keyValuePair.Key);
+            _fakeCache.Add(keyValuePair.Key, keyValuePair.Value);
+        }
+    }
 }

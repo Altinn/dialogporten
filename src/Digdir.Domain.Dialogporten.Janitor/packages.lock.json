@@ -153,16 +153,6 @@
           "Serilog": "4.3.0"
         }
       },
-      "Serilog.Sinks.ApplicationInsights": {
-        "type": "Direct",
-        "requested": "[5.0.0, )",
-        "resolved": "5.0.0",
-        "contentHash": "1gNxpRR2vZ9RScScpgfrj2utrSHgVDiAgPFdmplSlGCMONaLV+LBDe1uKeD4b/E5sQjtYKGyJ/rgVwSZcdTcZQ==",
-        "dependencies": {
-          "Microsoft.ApplicationInsights": "2.23.0",
-          "Serilog": "4.3.0"
-        }
-      },
       "Serilog.Sinks.Console": {
         "type": "Direct",
         "requested": "[6.1.1, )",

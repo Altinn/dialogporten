@@ -270,6 +270,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();
+            OpenApiRequiredArraysPostProcessor.Process(document);
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;

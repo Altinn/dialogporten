@@ -1942,12 +1942,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The localized text (or URL if a front-channel embed).
         /// </summary>
         [JsonPropertyName("value")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Value { get; set; }
 
         /// <summary>
         /// The language code of the localization in ISO 639-1 format.
         /// </summary>
         [JsonPropertyName("languageCode")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string LanguageCode { get; set; }
 
     }
@@ -5797,16 +5799,20 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid DialogId { get; set; }
 
         [JsonPropertyName("instanceRef")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string InstanceRef { get; set; }
 
         [JsonPropertyName("party")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Party { get; set; }
 
         [JsonPropertyName("serviceResource")]
-        public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; }
+        [System.ComponentModel.DataAnnotations.Required]
+        public V1CommonIdentifierLookup_IdentifierLookupServiceResource ServiceResource { get; set; } = new V1CommonIdentifierLookup_IdentifierLookupServiceResource();
 
         [JsonPropertyName("serviceOwner")]
-        public V1CommonIdentifierLookup_IdentifierLookupServiceOwner ServiceOwner { get; set; }
+        [System.ComponentModel.DataAnnotations.Required]
+        public V1CommonIdentifierLookup_IdentifierLookupServiceOwner ServiceOwner { get; set; } = new V1CommonIdentifierLookup_IdentifierLookupServiceOwner();
 
         [JsonPropertyName("title")]
         public ICollection<V1CommonLocalizations_Localization> Title { get; set; }
@@ -5821,6 +5827,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         [JsonPropertyName("id")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Id { get; set; }
 
         [JsonPropertyName("isDelegable")]
@@ -5839,9 +5846,11 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         [JsonPropertyName("orgNumber")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string OrgNumber { get; set; }
 
         [JsonPropertyName("code")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Code { get; set; }
 
         [JsonPropertyName("name")]

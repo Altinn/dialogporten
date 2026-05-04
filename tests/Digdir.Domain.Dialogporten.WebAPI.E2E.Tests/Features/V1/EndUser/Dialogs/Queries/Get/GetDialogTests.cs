@@ -66,7 +66,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
 
         var secondAction = content.GuiActions.Last();
         secondAction.Prompt.Should().NotBeEmpty();
-        secondAction.HttpMethod.Should().Be(Http_HttpVerb.POST);
+        secondAction.HttpMethod.Should().Be(HttpVerb.POST);
     }
 
     [E2EFact]

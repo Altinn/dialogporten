@@ -32,7 +32,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1.SearchDialogActivities(nonExistentDialogId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.SearchDialogActivities(nonExistentDialogId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -48,7 +48,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1.GetDialogActivity(dialogId, nonExistentActivityId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.GetDialogActivity(dialogId, nonExistentActivityId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -64,7 +64,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1.GetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.GetDialog(dialogId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Gone);
@@ -81,7 +81,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Act
         var response = await Fixture.EnduserApi
-            .V1.GetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
+            .V1.GetDialog(dialogId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);

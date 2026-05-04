@@ -22,7 +22,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Act
         var response = await Fixture.EnduserApi.V1.SearchDialogTransmissions(
             dialogId,
-            new V1EndUserCommon_AcceptedLanguages(),
+            new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -41,7 +41,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Act
         var response = await Fixture.EnduserApi.V1.SearchDialogTransmissions(
             dialogId,
-            new V1EndUserCommon_AcceptedLanguages(),
+            new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
 
         // Assert

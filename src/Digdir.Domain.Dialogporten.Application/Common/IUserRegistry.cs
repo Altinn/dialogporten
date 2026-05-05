@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -54,13 +55,43 @@ public sealed class UserRegistry : IUserRegistry
 
     public UserId GetCurrentUserId()
     {
-        var (userType, externalId) = _user.GetPrincipal().GetUserType();
+        var principal = _user.GetPrincipal();
+        var (userType, externalId) = principal.GetUserType();
         if (userType == UserIdType.Unknown)
         {
-            throw new InvalidOperationException("User external id not found");
+            throw CreateUserExternalIdNotFoundException(principal);
         }
 
         return new() { Type = userType, ExternalId = externalId };
+    }
+
+    private static InvalidOperationException CreateUserExternalIdNotFoundException(ClaimsPrincipal principal)
+    {
+        var identities = principal.Identities.ToArray();
+        var claims = principal.Claims.ToArray();
+        var authenticationTypes = FormatDiagnosticValues(identities.Select(x => x.AuthenticationType));
+        var claimTypes = FormatDiagnosticValues(claims.Select(x => x.Type));
+
+        return new(
+            "User external id not found. " +
+            $"IsAuthenticated={principal.Identity?.IsAuthenticated.ToString() ?? "False"}, " +
+            $"AuthenticatedIdentityCount={identities.Count(x => x.IsAuthenticated)}, " +
+            $"AuthenticationTypes={authenticationTypes}, " +
+            $"ClaimTypes={claimTypes}, " +
+            $"ClaimCount={claims.Length}");
+    }
+
+    private static string FormatDiagnosticValues(IEnumerable<string?> values)
+    {
+        var formattedValues = values
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(x => x, StringComparer.Ordinal)
+            .ToArray();
+
+        return formattedValues.Length == 0
+            ? "<none>"
+            : string.Join(", ", formattedValues);
     }
 
     public async Task<UserInformation> GetCurrentUserInformation(CancellationToken cancellationToken)

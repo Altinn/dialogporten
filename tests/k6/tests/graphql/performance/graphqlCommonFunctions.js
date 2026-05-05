@@ -212,11 +212,11 @@ function createBodyForAllDialogsForParties(parties) {
   return getGraphqlRequestBodyForAllDialogsForParty(variables);
 }
 
-function createBodyForAllDialogsForPartiesFts(parties) {
+export function createBodyForAllDialogsForPartiesFts(parties, searchTerm = "officia") {
   const variables = {
     partyURIs: [...parties],
     limit: 100,
-    search: "officia"
+    search: searchTerm
   }
   return getGraphqlRequestBodyForAllDialogsForParty(variables);
 }

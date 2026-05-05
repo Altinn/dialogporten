@@ -9,6 +9,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 internal static class PostgresFormattableStringBuilderExtensions
 {
+    private const int SupportedSystemLabelsMaskBitCount = 5;
+    private const int MaxSupportedSystemLabelsMask = (1 << SupportedSystemLabelsMaskBitCount) - 1;
+
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
     internal static PostgresFormattableStringBuilder ApplyPaginationOrder<T>(this PostgresFormattableStringBuilder builder, IOrderSet<T> orderSet, string alias)
     {
@@ -72,7 +75,7 @@ internal static class PostgresFormattableStringBuilderExtensions
         }
 
         var excluded = new List<int>();
-        for (var value = 0; value <= 31; value++)
+        for (var value = 0; value <= MaxSupportedSystemLabelsMask; value++)
         {
             if ((value & requiredMask) != requiredMask)
                 excluded.Add(value);
@@ -270,10 +273,12 @@ internal static class PostgresFormattableStringBuilderExtensions
                 throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids must be greater than zero.");
             }
 
-            // `short` in C# maps to `smallint` in PostgreSQL, and both are 16-bit signed integers. So, to avoid touching the sign bit, there are 15 distinct values that can be used.
-            if (systemLabelId > 15)
+            if (systemLabelId > SupportedSystemLabelsMaskBitCount)
             {
-                throw new ArgumentOutOfRangeException(nameof(labels), systemLabelId, "System label ids above 15 are not supported by the bitmask.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(labels),
+                    systemLabelId,
+                    $"System label ids above {SupportedSystemLabelsMaskBitCount} require updating the search mask predicate.");
             }
 
             requiredMask |= (short)(1 << (systemLabelId - 1));

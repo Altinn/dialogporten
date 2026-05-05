@@ -5,7 +5,7 @@ namespace Digdir.Domain.Dialogporten.Application.Externals;
 
 public interface IDialogSeenLogWriter
 {
-    Task<DialogSeenResult?> OnSeen(DialogEntity result, UserId userId, CancellationToken cancellationToken);
+    Task<DialogSeenResult?> OnSeen(DialogEntity dialog, UserId userId, CancellationToken cancellationToken);
 }
 
 public sealed record DialogSeenResult(

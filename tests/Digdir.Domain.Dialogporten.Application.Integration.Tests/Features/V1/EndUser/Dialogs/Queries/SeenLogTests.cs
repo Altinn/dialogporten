@@ -1,5 +1,6 @@
-using Digdir.Domain.Dialogporten.Application.Externals;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetSeenLog;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
@@ -9,9 +10,9 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using AwesomeAssertions;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using OneOf.Types;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
@@ -31,8 +32,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
-            .ConsumeEvents()
-            .GetEndUserDialog()
             .AssertResult<DialogDto>(result =>
                 result.SeenSinceLastUpdate.AssertSingleActorIdHashed())
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
@@ -45,8 +44,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     public Task Get_SeenLog_Should_Not_Return_User_Ids_Unhashed() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .GetEndUserDialog()
-            .ConsumeEvents()
             .GetEndUserDialog()
             .AssertResult<DialogDto>()
             .SendCommand(x => new GetSeenLogQuery
@@ -66,8 +63,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .GetEndUserDialog()
-            .ConsumeEvents()
-            .GetEndUserDialog()
             .AssertResult<DialogDto>()
             .SendCommand(x => new SearchSeenLogQuery { DialogId = x.Id })
             .ExecuteAndAssert<List<SearchSeenLogDto>>(result => result.Single()
@@ -77,19 +72,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 .StartWith(NorwegianPersonIdentifier.HashPrefixWithSeparator));
 
     [Fact]
-    public Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users() =>
+    public Task SeenLogs_Should_Track_ContentUpdatedAt_For_Different_Users() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .GetEndUserDialog() // Default integration test user
-            .ConsumeEvents()
             .GetEndUserDialog() // Default integration test user
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .GetEndUserDialog()
-            .ConsumeEvents()
-            .GetEndUserDialog() // Default integration test user
             .ExecuteAndAssert<DialogDto>(x =>
             {
                 // Both users should be in SeenSinceLastContentUpdate
@@ -100,21 +91,58 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             });
 
     [Fact]
-    public Task Multiple_Updates_Should_Result_In_Single_Entry_In_SeenSinceLastContentUpdate() =>
+    public Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_Different_Users() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
+            .AsIntegrationTestUser(x => x.WithPid("06326702550"))
             .GetEndUserDialog()
-            .ConsumeEvents()
+            .AsIntegrationTestUser(x => x.WithPid("15242005985"))
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.SeenSinceLastContentUpdate.Count.Should().Be(2);
+                x.SeenSinceLastUpdate.Count.Should().Be(2);
+                x.SeenSinceLastContentUpdate.Select(l => l.SeenBy.ActorId).Distinct().Count().Should().Be(2);
+                x.SeenSinceLastUpdate.Select(l => l.SeenBy.ActorId).Distinct().Count().Should().Be(2);
+            });
+
+    [Fact]
+    public Task Multiple_Non_content_Updates_Should_Result_In_New_Entry_In_Both_Seen_Logs() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
             .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .GetEndUserDialog()
-            .ConsumeEvents()
-            .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
             .GetEndUserDialog()
-            .ConsumeEvents()
+            .ExecuteAndAssert<DialogDto>(BothSeenLogsContainsOneHashedEntry);
+
+    [Fact]
+    public Task Multiple_Content_Updates_Should_Result_In_Single_Entry_In_Both_Seen_Logs() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
+            .UpdateDialog(x => x.Dto.Content!.Title.Value =
+            [
+                new LocalizationDto
+                {
+                    Value = "updated",
+                    LanguageCode = "nb"
+                }
+            ])
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
+            .UpdateDialog(x => x.Dto.Content!.Title.Value =
+            [
+                new LocalizationDto
+                {
+                    Value = "updated again",
+                    LanguageCode = "nb"
+                }
+            ])
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(BothSeenLogsContainsOneHashedEntry);
 
@@ -130,14 +158,11 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Id = dialogId;
             })
             .GetEndUserDialog() // Default integration test user
-            .ConsumeEvents()
-            .GetEndUserDialog()
             .AssertResult<DialogDto>(BothSeenLogsContainsOneHashedEntry)
             // Non-content update
             .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
             .AsIntegrationTestUser(x => x.WithPid("13213312833"))
             .SendCommand(_ => new GetDialogQuery { DialogId = dialogId })
-            .ConsumeEvents()
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(result =>
             {
@@ -150,9 +175,9 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     [Fact]
     public Task Multiple_Gets_Should_Only_Create_One_SeenLogs() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
-        .GetEndUserDialog()
-        .GetEndUserDialog()
         .ConsumeEvents()
+        .GetEndUserDialog()
+        .GetEndUserDialog()
         .GetEndUserSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
@@ -166,8 +191,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         .CreateSimpleDialog()
         .GetEndUserDialog()
         .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-        .GetEndUserDialog()
         .ConsumeEvents()
+        .GetEndUserDialog()
         .GetEndUserSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
@@ -181,35 +206,31 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         var createResult = await FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ExecuteAndAssert<CreateDialogSuccess>();
-        var dialog = (await Application.GetDbEntities<DialogEntity>())
-            .Single(x => x.Id == createResult.DialogId);
-        var seenLogId = Guid.CreateVersion7();
+
+        var ct = TestContext.Current.CancellationToken;
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var dialog = DialogApplication.QueryDbEntities<DialogEntity>(scope)
+            .Where(x => x.Id == createResult.DialogId)
+            .Include(x => x.EndUserContext)
+            .Single();
         var gate = new ConcurrentSeenLogWriterGate(parallelism: 8);
 
-        var results = await Task.WhenAll(Enumerable
+        await Task.WhenAll(Enumerable
             .Range(0, 8)
-            .Select(_ => EnsureSeenLog(
-                gate,
-                seenLogId,
-                dialog.Id,
-                TestUsers.DefaultParty,
-                DialogUserType.Values.Person,
-                DateTimeOffset.UtcNow)));
+            .Select(_ => OnSeen(gate, dialog))
+        );
 
-        var seenLogs = await Application.GetDbEntities<DialogSeenLog>();
+        var seenLogs = await DialogApplication
+            .QueryDbEntities<DialogSeenLog>(scope)
+            .Include(x => x.SeenBy)
+            .ToListAsync(ct);
         var seenByActors = await Application.GetDbEntities<DialogSeenLogSeenByActor>();
         var actorNames = await Application.GetDbEntities<ActorName>();
         var actorId = TestUsers.DefaultParty.ToLowerInvariant();
-        var actorName = actorNames.Should().ContainSingle(x =>
-            x.ActorId == actorId
-         && x.Name == "Brando Sando").Subject;
 
-        seenLogs.Should().ContainSingle(x => x.Id == seenLogId);
-        seenByActors.Should().ContainSingle(x => x.DialogSeenLogId == seenLogId);
-        results
-            .Select(x => x.ActorNameId)
-            .Should()
-            .OnlyContain(x => x == actorName.Id);
+        var actor = actorNames.Should().ContainSingle(x => x.ActorId == actorId && x.Name == "Brando Sando");
+        var seenLog = seenLogs.Should().ContainSingle(x => x.SeenBy.ActorNameEntityId == actor.Subject.Id);
+        seenByActors.Should().ContainSingle(x => x.DialogSeenLogId == seenLog.Subject.Id);
     }
 
     [Fact]
@@ -217,7 +238,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = DummyService)
             .GetEndUserDialog()
-            .ConsumeEvents()
             .AssertResult<DialogDto>()
             //.Assert bare en event igjen
             .UpdateDialog(x =>
@@ -225,53 +245,15 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.ExternalReference = "foo:bar";
             })
             .GetEndUserDialog()
-            .ConsumeEvents()
             .AssertResult<DialogDto>()
             .UpdateDialog(x => x.Dto.ExternalReference = "bar:baz")
             .GetEndUserDialog()
-            .ConsumeEvents()
             .AssertResult<DialogDto>()
             .SearchEndUserDialogs(x => x.ServiceResource = [DummyService])
-            .ConsumeEvents()
             .ExecuteAndAssert<PaginatedList<SearchDialogDto>>(x => x.Items
                 .Single()
                 .SeenSinceLastContentUpdate
                 .AssertSingleActorIdHashed());
-
-    private static void BothSeenLogsContainsOneHashedEntry(DialogDto x)
-    {
-        x.SeenSinceLastContentUpdate.AssertSingleActorIdHashed();
-        x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
-    }
-
-    private async Task<DialogSeenLogWriteResult> EnsureSeenLog(
-        ConcurrentSeenLogWriterGate gate,
-        Guid seenLogId,
-        Guid dialogId,
-        string actorId,
-        DialogUserType.Values userType,
-        DateTimeOffset seenAt)
-    {
-        using var scope = Application.GetServiceProvider().CreateScope();
-        var cancellationToken = TestContext.Current.CancellationToken;
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var seenLogWriter = scope.ServiceProvider.GetRequiredService<IDialogSeenLogWriter>();
-
-        await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
-        await gate.WaitUntilAllWritersAreReady(cancellationToken);
-
-        var result = await seenLogWriter.EnsureSeenLog(
-            seenLogId,
-            dialogId,
-            actorId,
-            userType,
-            seenAt,
-            cancellationToken);
-
-        var saveResult = await unitOfWork.SaveChangesAsync(cancellationToken);
-        saveResult.Value.Should().BeOfType<Success>();
-        return result;
-    }
 
     [Fact]
     public Task CaseInsensitive_Party_Match_For_IsCurrentUser() =>
@@ -280,13 +262,33 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.Dto.Party = IdportenEmailUserIdentifier.PrefixWithSeparator + "Test@Test.no")
             .AsIntegrationEmailUser()
             .GetEndUserDialog()
-            .ConsumeEvents()
-            .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
-                x.SeenSinceLastUpdate.Should().ContainSingle()
-                    .Which.IsCurrentEndUser.Should().BeTrue());
+                x.SeenSinceLastUpdate.Should().ContainSingle().Which.IsCurrentEndUser.Should().BeTrue());
 
-    private sealed class ConcurrentSeenLogWriterGate(int parallelism)
+    private static void BothSeenLogsContainsOneHashedEntry(DialogDto x)
+    {
+        x.SeenSinceLastContentUpdate.AssertSingleActorIdHashed();
+        x.SeenSinceLastUpdate.AssertSingleActorIdHashed();
+    }
+
+    private async Task OnSeen(ConcurrentSeenLogWriterGate gate, DialogEntity dialogEntity)
+    {
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+        await gate.WaitUntilAllWritersAreReady(cancellationToken);
+
+        var result = await mediator.Send(new GetDialogQuery
+        {
+            DialogId = dialogEntity.Id,
+            AcceptedLanguages = []
+        }, cancellationToken);
+
+        result.Value.Should().BeOfType<DialogDto>();
+    }
+
+    public sealed class ConcurrentSeenLogWriterGate(int parallelism)
     {
         private readonly TaskCompletionSource _allWritersAreReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private int _entered;

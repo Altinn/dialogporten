@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -5,7 +6,6 @@ using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -99,6 +99,8 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             Substitute.For<IPartyResourceReferenceRepository>(),
             Substitute.For<ILogger<AltinnAuthorizationClient>>(),
             Substitute.For<IServiceScopeFactory>(),
-            Substitute.For<IOptionsMonitor<ApplicationSettings>>());
+            Substitute.For<IOptionsMonitor<ApplicationSettings>>(),
+            Substitute.For<IPartyNameRegistry>()
+        );
     }
 }

@@ -33,12 +33,15 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRegistry _userRegistry;
     private readonly IDataLoaderContext _dataLoaderContext;
+    private readonly IDialogSeenLogWriter _dialogSeenLogWriter;
 
     public GetDialogQueryHandler(
         IMapper mapper,
         IAltinnAuthorization altinnAuthorization,
         IUnitOfWork unitOfWork, IUserRegistry userRegistry,
-        IDataLoaderContext dataLoaderContext)
+        IDataLoaderContext dataLoaderContext,
+        IDialogSeenLogWriter dialogSeenLogWriter
+    )
     {
         ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
@@ -51,6 +54,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         _unitOfWork = unitOfWork;
         _userRegistry = userRegistry;
         _dataLoaderContext = dataLoaderContext;
+        _dialogSeenLogWriter = dialogSeenLogWriter;
     }
 
     public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
@@ -66,6 +70,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
+        DialogSeenResult? seenResult = null;
 
         if (request.EndUserId is not null)
         {
@@ -80,7 +85,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             var userId = _userRegistry.GetCurrentUserId();
 
-            dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
+            seenResult = await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);
 
             var saveResult = await _unitOfWork
                 .DisableUpdatableFilter()
@@ -100,12 +105,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            request.EndUserId);
+            request.EndUserId,
+            seenResult?.NewSeenLog
+        );
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            request.EndUserId);
+            request.EndUserId,
+            seenResult?.NewSeenLog
+        );
 
         if (request.EndUserId is not null)
         {
@@ -117,13 +126,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        string? endUserId) =>
+        string? endUserId,
+        DialogSeenLog? newSeenLog) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
+            .Concat(newSeenLog is null ? [] : [newSeenLog])
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
-                .First())
+                .First()
+            )
             .Select(log => ToSeenDialogDto(endUserId, log))
             .ToList();
 

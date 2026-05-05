@@ -201,7 +201,7 @@ public sealed class DialogEntity :
         _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, userId, userTypeId, seenLogId));
     }
 
-    private bool IsSeenBy(string userId)
+    public bool IsSeenBy(string userId)
     {
         var lastSeenByThisActor = SeenLog
             .Where(x => x.SeenBy.ActorNameEntity?.ActorId == userId)

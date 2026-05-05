@@ -191,6 +191,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         var flattenedParties = authorizedParties.Flatten();
         var nameByActorId = flattenedParties
             .AuthorizedParties
+            .Where(x => x.Party is not null && x.Name is not null)
             .DistinctBy(x => x.Party)
             .Select(x => (x.Party, x.Name))
             .ToDictionary();

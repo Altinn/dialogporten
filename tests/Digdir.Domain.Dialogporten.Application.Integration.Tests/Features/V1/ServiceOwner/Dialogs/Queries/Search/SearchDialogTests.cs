@@ -72,7 +72,6 @@ public class SearchDialogTests : ApplicationCollectionFixture
             })
             .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchServiceOwnerDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -92,7 +91,6 @@ public class SearchDialogTests : ApplicationCollectionFixture
             })
             .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchServiceOwnerDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -123,7 +121,6 @@ public class SearchDialogTests : ApplicationCollectionFixture
                 dialogs.Should().AllSatisfy(d => d.IsContentSeen.Should().BeFalse());
             })
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchServiceOwnerDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -148,7 +145,6 @@ public class SearchDialogTests : ApplicationCollectionFixture
                 dialogs.Should().AllSatisfy(d => d.IsContentSeen.Should().BeFalse());
             })
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchServiceOwnerDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];

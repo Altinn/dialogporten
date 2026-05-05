@@ -22,7 +22,7 @@ public sealed class TestUser : IUser
 
 internal static class TestUsers
 {
-    private static string DefaultPid => "22834498646";
+    public static string DefaultPid => "22834498646";
     private static string DefaultUserName => "UserName";
     private static string DefaultEmail => "TEST@TEST.NO";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;

@@ -224,7 +224,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         var userId = _userRegistry.GetCurrentUserId();
 
-        await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);
+        var seenResult = await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
@@ -246,12 +246,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            userId.ExternalIdWithPrefix);
+            userId.ExternalIdWithPrefix,
+            seenResult?.NewSeenLog
+        );
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            userId.ExternalIdWithPrefix);
+            userId.ExternalIdWithPrefix,
+            seenResult?.NewSeenLog
+        );
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -263,6 +267,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
 
+        dialogDto.IsContentSeen = seenResult?.IsContentSeen ?? dialogDto.IsContentSeen;
         dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
 
         return dialogDto;
@@ -271,13 +276,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        string externalId) =>
+        string externalId,
+        DialogSeenLog? newSeenLog) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
+            .Concat(newSeenLog is null ? [] : [newSeenLog])
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
-                .First())
+                .First()
+            )
             .Select(log => ToSeenLogDto(externalId, log))
             .ToList();
 

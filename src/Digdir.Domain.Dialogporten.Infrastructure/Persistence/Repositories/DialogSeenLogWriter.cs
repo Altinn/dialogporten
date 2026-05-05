@@ -27,14 +27,18 @@ internal sealed class DialogSeenLogWriter(
     /// <param name="dialog"></param>
     /// <param name="userId"></param>
     /// <param name="cancellationToken"></param>
-    public async Task OnSeen(DialogEntity dialog, UserId userId, CancellationToken cancellationToken)
+    public async Task<DialogSeenResult?> OnSeen(
+        DialogEntity dialog,
+        UserId userId,
+        CancellationToken cancellationToken
+    )
     {
         var isSeen = dialog.IsSeenBy(userId.ExternalIdWithPrefix) &&
                      !dialog.IsMarkedAsUnopened() &&
                      dialog.IsSeenSinceLastContentUpdate;
         if (isSeen)
         {
-            return;
+            return null;
         }
 
         // Use a deterministic id to make the seen-log insert idempotent.
@@ -46,7 +50,7 @@ internal sealed class DialogSeenLogWriter(
         var seenLogExists = dialog.SeenLog.Any(s => s.Id == seenLogId);
         if (seenLogExists && !dialog.IsMarkedAsUnopened())
         {
-            return;
+            return null;
         }
 
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
@@ -68,12 +72,20 @@ internal sealed class DialogSeenLogWriter(
             }
         );
 
-        await db.Dialogs
+        var rowsUpdated = await db.Dialogs
             .Where(x => x.Id == dialog.Id && x.ContentUpdatedAt == dialog.ContentUpdatedAt)
             .ExecuteUpdateAsync(s => s.SetProperty(d => d.IsSeenSinceLastContentUpdate, true), cancellationToken);
+        var newIsSeenSinceLastContentUpdate = rowsUpdated > 0 || dialog.IsSeenSinceLastContentUpdate;
+
+        return new DialogSeenResult(seenLogWriteResult.DialogSeenLog, newIsSeenSinceLastContentUpdate);
     }
 
-    public async Task<DialogSeenLogWriteResult> EnsureSeenLog(
+    private sealed record EnsureSeenLogResult(
+        Guid ActorNameId,
+        DialogSeenLog? DialogSeenLog
+    );
+
+    private async Task<EnsureSeenLogResult> EnsureSeenLog(
         Guid seenLogId,
         Guid dialogId,
         string actorId,
@@ -89,10 +101,29 @@ internal sealed class DialogSeenLogWriter(
         }
 
         var actorNameId = await EnsureActorName(normalizedActorId, actorName, cancellationToken);
-        await EnsureSeenLog(seenLogId, dialogId, userType, seenAt, cancellationToken);
-        await EnsureSeenByActor(seenLogId, actorNameId, cancellationToken);
+        var actorType = ActorType.Values.PartyRepresentative;
 
-        return new DialogSeenLogWriteResult(actorNameId, normalizedActorId, actorName);
+        var rowsUpdated = await EnsureSeenLog(seenLogId, dialogId, userType, seenAt, cancellationToken);
+        await EnsureSeenByActor(seenLogId, actorNameId, actorType, cancellationToken);
+
+        return new EnsureSeenLogResult
+        (
+            actorNameId,
+            rowsUpdated == 0 ? null : new DialogSeenLog
+            {
+                Id = seenLogId,
+                CreatedAt = seenAt,
+                SeenBy = new DialogSeenLogSeenByActor
+                {
+                    ActorNameEntity = new ActorName
+                    {
+                        ActorId = normalizedActorId,
+                        Name = actorName
+                    },
+                    ActorTypeId = actorType
+                }
+            }
+        );
     }
 
     private async Task<Guid> EnsureActorName(string actorId, string actorName, CancellationToken cancellationToken)
@@ -114,14 +145,14 @@ internal sealed class DialogSeenLogWriter(
             .SingleAsync(cancellationToken);
     }
 
-    private async Task EnsureSeenLog(
+    private async Task<int> EnsureSeenLog(
         Guid seenLogId,
         Guid dialogId,
         DialogUserType.Values userType,
         DateTimeOffset seenAt,
         CancellationToken cancellationToken)
     {
-        await db.Database.ExecuteSqlInterpolatedAsync($"""
+        return await db.Database.ExecuteSqlInterpolatedAsync($"""
                                                        INSERT INTO "DialogSeenLog" ("Id", "CreatedAt", "DialogId", "EndUserTypeId", "IsViaServiceOwner")
                                                        VALUES (
                                                            {seenLogId},
@@ -136,6 +167,7 @@ internal sealed class DialogSeenLogWriter(
     private async Task EnsureSeenByActor(
         Guid seenLogId,
         Guid actorNameId,
+        ActorType.Values actorType,
         CancellationToken cancellationToken)
     {
         await db.Database.ExecuteSqlInterpolatedAsync($"""
@@ -143,7 +175,7 @@ internal sealed class DialogSeenLogWriter(
                                                        VALUES (
                                                            {Guid.CreateVersion7()},
                                                            {actorNameId},
-                                                           {(int)ActorType.Values.PartyRepresentative},
+                                                           {(int)actorType},
                                                            {transactionTime.Value},
                                                            {seenLogId},
                                                            {nameof(DialogSeenLogSeenByActor)})

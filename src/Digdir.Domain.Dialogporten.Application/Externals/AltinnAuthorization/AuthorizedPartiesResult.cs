@@ -2,7 +2,88 @@ namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
 public sealed class AuthorizedPartiesResult
 {
+    private static readonly List<string> EmptyStringList = [];
+    private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
+
     public List<AuthorizedParty> AuthorizedParties { get; set; } = [];
+
+    public Dictionary<string, string> GetNameAsParty()
+    {
+        return AuthorizedParties
+            .DistinctBy(x => x.Party)
+            .Select(x => (x.Party, x.Name))
+            .ToDictionary();
+    }
+
+    public AuthorizedPartiesResult Flatten()
+    {
+        var topLevelCount = AuthorizedParties.Count;
+
+        var totalCapacity = topLevelCount;
+        for (var i = 0; i < topLevelCount; i++)
+        {
+            var party = AuthorizedParties[i];
+            if (party.SubParties != null)
+            {
+                totalCapacity += party.SubParties.Count;
+            }
+        }
+
+        // Preallocate the exact size needed
+        var flattenedList = new List<AuthorizedParty>(totalCapacity);
+
+        for (var i = 0; i < topLevelCount; i++)
+        {
+            var party = AuthorizedParties[i];
+
+            flattenedList.Add(new AuthorizedParty
+            {
+                Party = party.Party,
+                PartyId = party.PartyId,
+                DateOfBirth = party.DateOfBirth,
+                ParentParty = null,
+                AuthorizedResources = party.AuthorizedResources.Count > 0
+                    ? [.. party.AuthorizedResources]
+                    : EmptyStringList,
+                AuthorizedRolesAndAccessPackages = party.AuthorizedRolesAndAccessPackages.Count > 0
+                    ? [.. party.AuthorizedRolesAndAccessPackages]
+                    : EmptyStringList,
+                AuthorizedInstances = party.AuthorizedInstances.Count > 0
+                    ? [.. party.AuthorizedInstances]
+                    : [],
+                SubParties = EmptySubPartiesList
+            });
+
+            if (!(party.SubParties?.Count > 0)) continue;
+            var subCount = party.SubParties.Count;
+            for (var j = 0; j < subCount; j++)
+            {
+                var subParty = party.SubParties[j];
+                flattenedList.Add(new AuthorizedParty
+                {
+                    Party = subParty.Party,
+                    PartyId = subParty.PartyId,
+                    ParentParty = party.Party,
+                    DateOfBirth = subParty.DateOfBirth,
+                    AuthorizedResources = subParty.AuthorizedResources.Count > 0
+                        ? [.. subParty.AuthorizedResources]
+                        : EmptyStringList,
+                    AuthorizedRolesAndAccessPackages = subParty.AuthorizedRolesAndAccessPackages.Count > 0
+                        ? [.. subParty.AuthorizedRolesAndAccessPackages]
+                        : EmptyStringList,
+                    AuthorizedInstances = subParty.AuthorizedInstances.Count > 0
+                        ? [.. subParty.AuthorizedInstances]
+                        : [],
+                    SubParties = EmptySubPartiesList
+                });
+            }
+        }
+
+        return new AuthorizedPartiesResult
+        {
+            AuthorizedParties = flattenedList
+        };
+    }
 }
 
 public sealed class AuthorizedParty

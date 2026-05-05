@@ -188,10 +188,16 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
                 => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
         }
 
-        var partyToName = authorizedParties.AuthorizedParties.Select(x => (x.Party, x.Name)).ToDictionary();
-        _partyNameRegistry.CacheNames(partyToName);
+        var flattenedParties = authorizedParties.Flatten();
+        var nameByActorId = flattenedParties
+            .AuthorizedParties
+            .DistinctBy(x => x.Party)
+            .Select(x => (x.Party, x.Name))
+            .ToDictionary();
 
-        return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
+        _partyNameRegistry.CacheNames(nameByActorId);
+
+        return flatten ? flattenedParties : authorizedParties;
     }
 
     private AuthorizedPartiesResult GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(
@@ -231,80 +237,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     public async Task<bool> UserHasRequiredAuthLevel(string serviceResource, CancellationToken cancellationToken) =>
         UserHasRequiredAuthLevel(await _serviceResourceMinimumAuthenticationLevelResolver
             .GetMinimumAuthenticationLevel(serviceResource, cancellationToken));
-
-    // Create static empty lists to reuse and avoid allocations
-    private static readonly List<string> EmptyStringList = [];
-    private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
-
-    private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
-    {
-        var topLevelCount = authorizedParties.AuthorizedParties.Count;
-
-        var totalCapacity = topLevelCount;
-        for (var i = 0; i < topLevelCount; i++)
-        {
-            var party = authorizedParties.AuthorizedParties[i];
-            if (party.SubParties != null)
-            {
-                totalCapacity += party.SubParties.Count;
-            }
-        }
-
-        // Preallocate the exact size needed
-        var flattenedList = new List<AuthorizedParty>(totalCapacity);
-
-        for (var i = 0; i < topLevelCount; i++)
-        {
-            var party = authorizedParties.AuthorizedParties[i];
-
-            flattenedList.Add(new AuthorizedParty
-            {
-                Party = party.Party,
-                PartyId = party.PartyId,
-                DateOfBirth = party.DateOfBirth,
-                ParentParty = null,
-                AuthorizedResources = party.AuthorizedResources.Count > 0
-                    ? [.. party.AuthorizedResources]
-                    : EmptyStringList,
-                AuthorizedRolesAndAccessPackages = party.AuthorizedRolesAndAccessPackages.Count > 0
-                    ? [.. party.AuthorizedRolesAndAccessPackages]
-                    : EmptyStringList,
-                AuthorizedInstances = party.AuthorizedInstances.Count > 0
-                    ? [.. party.AuthorizedInstances]
-                    : [],
-                SubParties = EmptySubPartiesList
-            });
-
-            if (!(party.SubParties?.Count > 0)) continue;
-            var subCount = party.SubParties.Count;
-            for (var j = 0; j < subCount; j++)
-            {
-                var subParty = party.SubParties[j];
-                flattenedList.Add(new AuthorizedParty
-                {
-                    Party = subParty.Party,
-                    PartyId = subParty.PartyId,
-                    ParentParty = party.Party,
-                    DateOfBirth = subParty.DateOfBirth,
-                    AuthorizedResources = subParty.AuthorizedResources.Count > 0
-                        ? [.. subParty.AuthorizedResources]
-                        : EmptyStringList,
-                    AuthorizedRolesAndAccessPackages = subParty.AuthorizedRolesAndAccessPackages.Count > 0
-                        ? [.. subParty.AuthorizedRolesAndAccessPackages]
-                        : EmptyStringList,
-                    AuthorizedInstances = subParty.AuthorizedInstances.Count > 0
-                        ? [.. subParty.AuthorizedInstances]
-                        : [],
-                    SubParties = EmptySubPartiesList
-                });
-            }
-        }
-
-        return new AuthorizedPartiesResult
-        {
-            AuthorizedParties = flattenedList
-        };
-    }
 
     private async Task<AuthorizedPartiesResult> PerformAuthorizedPartiesRequest(AuthorizedPartiesRequest authorizedPartiesRequest,
         CancellationToken cancellationToken)

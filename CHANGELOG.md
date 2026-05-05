@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.114.6](https://github.com/Altinn/dialogporten/compare/v1.114.5...v1.114.6) (2026-05-05)
+
+
+### Bug Fixes
+
+* stabilize WebApiClient locked restore ([#3894](https://github.com/Altinn/dialogporten/issues/3894)) ([f2c4f82](https://github.com/Altinn/dialogporten/commit/f2c4f82b6f1d2c8c66c3f3c2f3f8f0337e885919))
+
+
+### Miscellaneous Chores
+
+* **deps:** update slackapi/slack-github-action action to v3.0.2 ([#3888](https://github.com/Altinn/dialogporten/issues/3888)) ([74a9b6d](https://github.com/Altinn/dialogporten/commit/74a9b6d32f7b293af8bdf5d38fd2fac764e9613c))
+
 ## [1.114.5](https://github.com/Altinn/dialogporten/compare/v1.114.4...v1.114.5) (2026-05-04)
 
 

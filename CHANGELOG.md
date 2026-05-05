@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.114.7](https://github.com/Altinn/dialogporten/compare/v1.114.6...v1.114.7) (2026-05-05)
+
+
+### Bug Fixes
+
+* **perf:** systemlabelmask filter logic ([#3884](https://github.com/Altinn/dialogporten/issues/3884)) ([7a30eb1](https://github.com/Altinn/dialogporten/commit/7a30eb11171692ce744350cbb141801d5cee5ebc))
+
 ## [1.114.6](https://github.com/Altinn/dialogporten/compare/v1.114.5...v1.114.6) (2026-05-05)
 
 

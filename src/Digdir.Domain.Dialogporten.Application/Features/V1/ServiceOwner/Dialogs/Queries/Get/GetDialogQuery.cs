@@ -118,6 +118,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         if (request.EndUserId is not null)
         {
+            dialogDto.IsContentSeen = seenResult?.IsContentSeen ?? dialogDto.IsContentSeen;
             dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
         }
         return dialogDto;

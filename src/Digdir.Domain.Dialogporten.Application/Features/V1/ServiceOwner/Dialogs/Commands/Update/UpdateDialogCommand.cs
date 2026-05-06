@@ -449,9 +449,19 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 .Merge(updateSet.Source.Urls,
                     destinationKeySelector: x => x.Id,
                     sourceKeySelector: x => x.Id,
-                    create: _mapper.Map<List<AttachmentUrl>>,
+                    create: CreateAttachmentUrls,
                     update: _mapper.Update,
                     delete: DeleteDelegate.Default);
+        }
+    }
+
+    private IEnumerable<AttachmentUrl> CreateAttachmentUrls(IEnumerable<AttachmentUrlDto> creatables)
+    {
+        foreach (var dto in creatables)
+        {
+            var url = _mapper.Map<AttachmentUrl>(dto);
+            _db.AttachmentUrls.Add(url);
+            yield return url;
         }
     }
 }

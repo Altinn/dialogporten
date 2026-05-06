@@ -2,8 +2,6 @@ namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
 public sealed class AuthorizedPartiesResult
 {
-    private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
-
     public List<AuthorizedParty> AuthorizedParties { get; set; } = [];
 
     public Dictionary<string, string> GetNameAsParty()
@@ -44,7 +42,7 @@ public sealed class AuthorizedPartiesResult
                 var subParty = party.SubParties[j];
                 flattenedList.Add(subParty);
             }
-            party.SubParties = EmptySubPartiesList;
+            party.SubParties = [];
         }
 
         return new AuthorizedPartiesResult
@@ -56,8 +54,6 @@ public sealed class AuthorizedPartiesResult
 
 public sealed class AuthorizedParty
 {
-    private static readonly List<string> EmptyStringList = [];
-
     public required string Party { get; init; } = null!;
     public required Guid PartyUuid { get; init; }
     public required int PartyId { get; init; }
@@ -98,10 +94,10 @@ public sealed class AuthorizedParty
             HasOnlyAccessToSubParties = HasOnlyAccessToSubParties,
             AuthorizedResources = AuthorizedResources.Count > 0
                 ? [.. AuthorizedResources]
-                : EmptyStringList,
+                : [],
             AuthorizedRolesAndAccessPackages = AuthorizedRolesAndAccessPackages.Count > 0
                 ? [.. AuthorizedRolesAndAccessPackages]
-                : EmptyStringList,
+                : [],
             AuthorizedInstances = AuthorizedInstances.Count > 0
                 ? AuthorizedInstances.Select(x => x.Clone()).ToList()
                 : [],

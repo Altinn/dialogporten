@@ -22,7 +22,7 @@ internal sealed class DialogSeenLogWriter(
     /// - Adds a remove-entry to the LabelAssignmentLog if we removed a SystemLabel
     ///
     /// Important: To prevent excessive row-locking, we allow race conditions.
-    /// This means this method must only do atomic updates in single sql statements.
+    /// This means this method must only do atomic and thread-safe updates in single sql statements.
     /// </summary>
     /// <param name="dialog"></param>
     /// <param name="userId"></param>

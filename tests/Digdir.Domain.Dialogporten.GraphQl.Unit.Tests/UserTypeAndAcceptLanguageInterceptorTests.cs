@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using HotChocolate;
 using HotChocolate.Execution;
@@ -19,12 +20,13 @@ public class UserTypeAndAcceptLanguageInterceptorTests
             User = new ClaimsPrincipal(new ClaimsIdentity(claims: [], AuthenticationType))
         };
 
-        var ex = await Assert.ThrowsAsync<GraphQLException>(async () =>
+        var act = async () =>
             await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),
-                TestContext.Current.CancellationToken));
+                TestContext.Current.CancellationToken);
 
-        var error = Assert.Single(ex.Errors);
-        Assert.Equal("AUTH_USER_TYPE_UNKNOWN", error.Code);
+        var ex = await act.Should().ThrowAsync<GraphQLException>();
+        ex.Which.Errors.Should().ContainSingle()
+            .Which.Code.Should().Be("AUTH_USER_TYPE_UNKNOWN");
     }
 
     [Fact]
@@ -38,10 +40,10 @@ public class UserTypeAndAcceptLanguageInterceptorTests
                 AuthenticationType))
         };
 
-        var exception = await Record.ExceptionAsync(async () =>
+        var act = async () =>
             await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),
-                TestContext.Current.CancellationToken));
+                TestContext.Current.CancellationToken);
 
-        Assert.Null(exception);
+        await act.Should().NotThrowAsync();
     }
 }

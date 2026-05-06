@@ -120,7 +120,7 @@ internal sealed class IdentifierLookupDialogResolver : IIdentifierLookupDialogRe
                 return AltinnAuthorizationConstants.CorrespondenceRefPrefix + correspondenceId;
             }
 
-            throw new InvalidOperationException("Unable to determine correspondence ID instance reference for correspondence dialog. No label found and FCE URL is not in expected format.");
+            throw new InvalidOperationException($"Unable to determine correspondence ID instance reference for correspondence dialog {dialogData.DialogId}. No label found and FCE URL is not in expected format.");
         }
 
         return outputInstanceRef.Value;

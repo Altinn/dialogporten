@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests;
 
-public class UserTypeValidationInterceptorTests
+public class UserTypeAndAcceptLanguageInterceptorTests
 {
     private const string AuthenticationType = "Bearer";
 
     [Fact]
     public async Task Authenticated_user_with_unknown_user_type_throws_graphql_exception()
     {
-        var interceptor = new UserTypeValidationInterceptor();
+        var interceptor = new UserTypeAndAcceptLanguageInterceptor();
         var context = new DefaultHttpContext
         {
             User = new ClaimsPrincipal(new ClaimsIdentity(claims: [], AuthenticationType))
@@ -30,7 +30,7 @@ public class UserTypeValidationInterceptorTests
     [Fact]
     public async Task Authenticated_user_with_known_user_type_passes_through()
     {
-        var interceptor = new UserTypeValidationInterceptor();
+        var interceptor = new UserTypeAndAcceptLanguageInterceptor();
         var context = new DefaultHttpContext
         {
             User = new ClaimsPrincipal(new ClaimsIdentity(

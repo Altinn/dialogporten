@@ -147,6 +147,15 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     }
 
     [Fact]
+    public Task Get_Should_Set_IsContentSeen_To_True_If_EndUserId_Supplied() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.IsContentSeen.Should().BeFalse())
+            .GetServiceOwnerDialogAsEndUser()
+            .ExecuteAndAssert<DialogDto>(x => x.IsContentSeen.Should().BeTrue());
+
+    [Fact]
     [Obsolete("Testing obsolete SystemLabel, will be removed in future versions.")]
     public Task Get_Should_Populate_Obsolete_SystemLabel() =>
         FlowBuilder.For(Application)

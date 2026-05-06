@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
+using DialogDtoSo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -481,6 +482,15 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
             .ExecuteAndAssert<DialogDto>(x =>
                 x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened));
+
+    [Fact]
+    public Task Get_Should_Set_IsContentSeen_To_True() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDtoSo>(x => x.IsContentSeen.Should().BeFalse())
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.IsContentSeen.Should().BeTrue());
 
     [Fact]
     [Obsolete("Testing obsolete SystemLabel, will be removed in future versions.")]

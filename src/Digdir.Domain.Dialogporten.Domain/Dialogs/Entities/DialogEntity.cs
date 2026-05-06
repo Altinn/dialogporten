@@ -1,5 +1,4 @@
 ﻿using Digdir.Domain.Dialogporten.Domain.Attachments;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -187,19 +186,6 @@ public sealed class DialogEntity :
 
     public void OnRestore(AggregateNode self, DateTimeOffset utcNow)
         => _domainEvents.Add(new DialogRestoredDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
-
-    public void OnSeen(string userId, DialogUserType.Values userTypeId)
-    {
-        if (IsSeenBy(userId) && !IsMarkedAsUnopened() && IsSeenSinceLastContentUpdate)
-        {
-            return;
-        }
-        // Use a deterministic id to make the seen-log insert idempotent.
-        // If multiple seen events are produced without dialog changes in between,
-        // they represent the same logical "seen" and should not create duplicates.
-        var seenLogId = Id.CreateDeterministicSubUuidV7($"{UpdatedAt:O}{IsSeenSinceLastContentUpdate}{userId}");
-        _domainEvents.Add(new DialogSeenDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess, userId, userTypeId, seenLogId));
-    }
 
     public bool IsSeenBy(string userId)
     {

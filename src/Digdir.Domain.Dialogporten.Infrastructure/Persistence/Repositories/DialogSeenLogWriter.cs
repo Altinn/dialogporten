@@ -45,7 +45,7 @@ internal sealed class DialogSeenLogWriter(
         // If multiple seen events are produced without dialog changes in between,
         // they represent the same logical "seen" and should not create duplicates.
         var seenLogId = dialog.Id.CreateDeterministicSubUuidV7(
-            $"{dialog.UpdatedAt:O}{dialog.IsSeenSinceLastContentUpdate}{userId}");
+            $"{dialog.UpdatedAt:O}{dialog.IsSeenSinceLastContentUpdate}{userId.ExternalIdWithPrefix}");
 
         var seenLogExists = dialog.SeenLog.Any(s => s.Id == seenLogId);
         if (seenLogExists && !dialog.IsMarkedAsUnopened())

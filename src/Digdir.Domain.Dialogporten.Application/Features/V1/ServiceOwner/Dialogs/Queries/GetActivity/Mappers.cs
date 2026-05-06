@@ -16,7 +16,7 @@ internal static class DialogActivityMapExtensions
             Type = activity.TypeId,
             TransmissionId = activity.TransmissionId,
             PerformedBy = activity.PerformedBy.ToDto(),
-            Description = activity.Description.ToDtoList() ?? []
+            Description = activity.Description.ToDtoList()!
         };
     }
 }

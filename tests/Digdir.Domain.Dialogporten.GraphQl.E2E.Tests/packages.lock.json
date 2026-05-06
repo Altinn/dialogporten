@@ -54,13 +54,13 @@
       },
       "StrawberryShake.Server": {
         "type": "Direct",
-        "requested": "[15.1.14, )",
-        "resolved": "15.1.14",
-        "contentHash": "syp51u2tyfg9GgN6xxlWfQ8Fzuh2MKqEbHrWkBOEBd4PHthiz9Q0lT7/gKkUHQNelFwuHtVYvABNmamLTVyFCQ==",
+        "requested": "[15.1.15, )",
+        "resolved": "15.1.15",
+        "contentHash": "nf/MlF+GqBofHI08TcbVu73SJ7n6eyfxR9JA2QPXHQjKw2YSgj1t8z7uFLswB9al160jIFHhc3vaCu6zdBIwkg==",
         "dependencies": {
-          "StrawberryShake.Core": "15.1.14",
-          "StrawberryShake.Transport.Http": "15.1.14",
-          "StrawberryShake.Transport.WebSockets": "15.1.14"
+          "StrawberryShake.Core": "15.1.15",
+          "StrawberryShake.Transport.Http": "15.1.15",
+          "StrawberryShake.Transport.WebSockets": "15.1.15"
         }
       },
       "xunit.runner.visualstudio": {
@@ -151,43 +151,43 @@
       },
       "HotChocolate.Language.SyntaxTree": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "oDmlmQ1BzycTNKx3th2dnM6kXj+E1iR/BUFppU0UkS90vIstMpWf3JhZXu0RaZzowe7fvOQq725ihNXs0kOqbQ==",
+        "resolved": "15.1.15",
+        "contentHash": "rnQGVB30JQFK8GzzIf3LwbNrz0Bn0pTs3YHFLAgFhjzpqXq9VYYcfKphYzUalLGOJs3beguO4WFFKovICBNajw==",
         "dependencies": {
           "Microsoft.Extensions.ObjectPool": "9.0.2"
         }
       },
       "HotChocolate.Transport.Abstractions": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "qv2XxMyx8INeOso8eoSDqlk+oZ+V35sg3Y1FmBXYwp/tC1cO2tArABSHgBZ+RwmJwISim0LkhIeWT4WWPFGT/Q==",
+        "resolved": "15.1.15",
+        "contentHash": "dFmyUhIp/n8rCnK+x1jK2cEVXrTGI0rYB+jY2HuXThUZIJsuEe4BEK9WL2kfg//J0WzuY4k0EasKSCDNYuCxYg==",
         "dependencies": {
-          "HotChocolate.Language.SyntaxTree": "15.1.14",
-          "HotChocolate.Utilities.Buffers": "15.1.14"
+          "HotChocolate.Language.SyntaxTree": "15.1.15",
+          "HotChocolate.Utilities.Buffers": "15.1.15"
         }
       },
       "HotChocolate.Transport.Http": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "ZVv9LtrvSAIqfEjeD3ZiQ/fmlnSCRRAckX9h0vdf6paD3ePkNbsEOkW/IrE/YkCzfJGE0TWtW1l8KfNQSeEsLg==",
+        "resolved": "15.1.15",
+        "contentHash": "orDZi7S/pcl9aKLoAvKIs2jGqMhemGGL9C+MTSBu6Of2AjrQS7LiHGLhNz+J1QeGzueH3ba1P7+o1ZiUaXaBbw==",
         "dependencies": {
-          "HotChocolate.Transport.Abstractions": "15.1.14",
-          "HotChocolate.Utilities": "15.1.14",
-          "HotChocolate.Utilities.Buffers": "15.1.14"
+          "HotChocolate.Transport.Abstractions": "15.1.15",
+          "HotChocolate.Utilities": "15.1.15",
+          "HotChocolate.Utilities.Buffers": "15.1.15"
         }
       },
       "HotChocolate.Utilities": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "rcFB6pbQEx33G6erHt2/pugHy95oz0hOt+JYc0c3Qi9TSWWAbATJSYBieh5RIQ3cZG3Vml10roADrX5pDKsoeQ==",
+        "resolved": "15.1.15",
+        "contentHash": "+DpL/TwBXYGMFK9TN5TbF/cX1DK8fkQNHhVDYOFmxJrz3vO90/6Hy+jQuXt3+BVgAdVsVyFBE4Xd7OUnYMKJcA==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.2"
         }
       },
       "HotChocolate.Utilities.Buffers": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "edtgX0f9NIxn9YqfZ03oQCil96LrB55FW5QGnByO6m5RxMhe2M3N+tNIonxE2sDFRTPvsXEE9k3ws4CuJrxIEA=="
+        "resolved": "15.1.15",
+        "contentHash": "pmhVDRjd8iXAVvzb5njtXiFrdjnfgiROSjCQ3eQ4iXJldpku487+4bqJI/yciiFXEp1ZrYyTOXBrpYm13I6kXw=="
       },
       "HtmlAgilityPack": {
         "type": "Transitive",
@@ -735,38 +735,38 @@
       },
       "StrawberryShake.Core": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "Uq8DvjN9gXVvmKQMgG1xHEqhTm8PfFPzBuKcyozHliRX4O9YGQnOn/Sh50ZXTcokb0BxwJIfyHs5dJz48yqdNg==",
+        "resolved": "15.1.15",
+        "contentHash": "t8cziMVu7/D31GVN4v+gap5vQtllhFIAW0O2N020M3Hoad8cBwVG3JRvi48rDX9dUgGmOFKnygS/OLzFA74jIA==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.2",
-          "StrawberryShake.Resources": "15.1.14"
+          "StrawberryShake.Resources": "15.1.15"
         }
       },
       "StrawberryShake.Resources": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "49aMSz22CoqsRESf8stjbIOYirqflJQrGWAPxesCbGirlT+V0558Z4wqkfBALh//JXOzoGjhVQAmEalZNIgmbA=="
+        "resolved": "15.1.15",
+        "contentHash": "XvSBLCH46+7gQRdcOZLGMRHghqBJHG7Am5TzRMrSqGXMW3Jy7vbpXcj9UwxEfoJgIYNQ2P0AI0CQ3lm7UU9aaw=="
       },
       "StrawberryShake.Transport.Http": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "BSo1urwCZpKRXqB6/0Jkfj2BWe6B9Q32o1Vuei6pOjNfF/+C98R6xkBL+RfWzQUFrqp29A1wFKf3B9QULIYRaQ==",
+        "resolved": "15.1.15",
+        "contentHash": "BPe9RMhaE1F72slhPeDx5tlpb/pHJhzfnhc0fXdIIzCjdXPidPFxEVBwhOYgGoc7un9nkrvD9vCJUv00+BTjtQ==",
         "dependencies": {
-          "HotChocolate.Transport.Http": "15.1.14",
+          "HotChocolate.Transport.Http": "15.1.15",
           "Microsoft.AspNetCore.WebUtilities": "9.0.2",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.2",
           "Microsoft.Extensions.Http": "9.0.2",
-          "StrawberryShake.Core": "15.1.14"
+          "StrawberryShake.Core": "15.1.15"
         }
       },
       "StrawberryShake.Transport.WebSockets": {
         "type": "Transitive",
-        "resolved": "15.1.14",
-        "contentHash": "ef8FiuQshswTYakm3gU6Lq1QAQx3hP/k16OgiN9psheW2sykLe+Qbmf2IeP8I3bXbHh2FUKS8Hms7+QlO49aUA==",
+        "resolved": "15.1.15",
+        "contentHash": "xacZnYDRrzVW4mGKQX7LIA5Ql+JzlYtEwN//kGjuiGpbGzysKQViX9jxbRcbGra96qErgrFTw8fILZD84pkWiA==",
         "dependencies": {
           "Microsoft.Extensions.Options": "9.0.2",
-          "StrawberryShake.Core": "15.1.14",
-          "StrawberryShake.Resources": "15.1.14"
+          "StrawberryShake.Core": "15.1.15",
+          "StrawberryShake.Resources": "15.1.15"
         }
       },
       "System.Diagnostics.EventLog": {

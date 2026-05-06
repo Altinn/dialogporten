@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Altinn.ApiClients.Dialogporten.Common;
 
 internal static class AcceptedLanguagesHeaderFormatter
@@ -12,5 +14,6 @@ internal static class AcceptedLanguagesHeaderFormatter
     public static string FormatAcceptedLanguage(string languageCode, int weight) =>
         weight >= 100
             ? languageCode
-            : $"{languageCode};q={weight / 100.0:0.##}";
+            : $"{languageCode};q={(weight / 100.0)
+                .ToString("0.##", CultureInfo.InvariantCulture)}";
 }

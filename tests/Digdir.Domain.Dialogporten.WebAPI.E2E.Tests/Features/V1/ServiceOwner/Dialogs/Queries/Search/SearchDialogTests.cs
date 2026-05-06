@@ -346,7 +346,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
                 response.Content is { } content &&
                 content.Items.Count(x => x.Id == dialogId) == 1 &&
                 content.Items.All(x => x.Id != controlDialogId),
-           degradationMessage: "Search indexing speed is degraded.");
+            degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);

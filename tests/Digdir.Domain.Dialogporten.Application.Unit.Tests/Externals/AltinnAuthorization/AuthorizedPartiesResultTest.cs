@@ -15,7 +15,7 @@ public class AuthorizedPartiesResultTest
                 new()
                 {
                     Party = "parent",
-                    PartyUuid = default,
+                    PartyUuid = Guid.NewGuid(),
                     PartyId = 0,
                     Name = "parent",
                     DateOfBirth = null,
@@ -34,7 +34,7 @@ public class AuthorizedPartiesResultTest
                         new()
                         {
                             Party = "child1",
-                            PartyUuid = default,
+                            PartyUuid = Guid.NewGuid(),
                             PartyId = 0,
                             Name = "child1",
                             DateOfBirth = null,
@@ -54,7 +54,7 @@ public class AuthorizedPartiesResultTest
                         new()
                         {
                             Party = "child2",
-                            PartyUuid = default,
+                            PartyUuid = Guid.NewGuid(),
                             PartyId = 0,
                             Name = "child2",
                             DateOfBirth = null,
@@ -78,7 +78,7 @@ public class AuthorizedPartiesResultTest
                 new()
                 {
                     Party = "independent",
-                    PartyUuid = default,
+                    PartyUuid = Guid.NewGuid(),
                     PartyId = 0,
                     Name = "independent",
                     DateOfBirth = null,

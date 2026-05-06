@@ -109,7 +109,6 @@ internal static class OpenApiTypeNameOverrides
         ["V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl"] = "CreateDialogAttachmentUrl",
         ["V1ServiceOwnerDialogsCommandsCreate_Content"] = "CreateDialogContent",
         ["V1ServiceOwnerDialogsCommandsCreate_Dialog"] = "CreateDialog",
-        ["V1ServiceOwnerDialogsCommandsCreate_DialogRequest"] = "CreateDialogRequest",
         ["V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext"] = "CreateDialogServiceOwnerContext",
         ["V1ServiceOwnerDialogsCommandsCreate_GuiAction"] = "CreateDialogGuiAction",
         ["V1ServiceOwnerDialogsCommandsCreate_ServiceOwnerLabel"] = "CreateDialogServiceOwnerLabel",

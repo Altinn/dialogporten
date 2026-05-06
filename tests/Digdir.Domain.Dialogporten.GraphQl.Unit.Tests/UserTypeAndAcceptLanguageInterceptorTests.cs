@@ -38,7 +38,10 @@ public class UserTypeAndAcceptLanguageInterceptorTests
                 AuthenticationType))
         };
 
-        await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),
-            TestContext.Current.CancellationToken);
+        var exception = await Record.ExceptionAsync(async () =>
+            await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),
+                TestContext.Current.CancellationToken));
+
+        Assert.Null(exception);
     }
 }

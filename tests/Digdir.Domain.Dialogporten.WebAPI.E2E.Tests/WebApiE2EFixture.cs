@@ -9,9 +9,10 @@ using static System.Text.Json.Serialization.JsonIgnoreCondition;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public sealed class WebApiE2EFixture : E2EFixtureBase
 {
-    public IEndUserApi EnduserApi { get; private set; } = null!;
+    public IEndUserApi EndUserApi { get; private set; } = null!;
 
     protected override bool IncludeGraphQlPreflight => false;
 
@@ -43,6 +44,6 @@ public sealed class WebApiE2EFixture : E2EFixtureBase
 
     protected override void AfterServiceProviderBuilt(ServiceProvider serviceProvider)
     {
-        EnduserApi = serviceProvider.GetRequiredService<IEndUserApi>();
+        EndUserApi = serviceProvider.GetRequiredService<IEndUserApi>();
     }
 }

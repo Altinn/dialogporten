@@ -25,7 +25,7 @@ public class SearchLabelAssignmentLogSnapshotTests(WebApiE2EFixture fixture) : E
         await SetLabel(dialogId, Default);
 
         // Act
-        var response = await Fixture.EnduserApi.GetSystemLabelAssignmentLog(dialogId);
+        var response = await Fixture.EndUserApi.GetSystemLabelAssignmentLog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -37,7 +37,7 @@ public class SearchLabelAssignmentLogSnapshotTests(WebApiE2EFixture fixture) : E
 
     private Task<IApiResponse> SetLabel(Guid dialogId,
         SystemLabel label) =>
-        Fixture.EnduserApi.SetSystemLabels(
+        Fixture.EndUserApi.SetSystemLabels(
             dialogId,
             request => request.AddLabels = [label]);
 }

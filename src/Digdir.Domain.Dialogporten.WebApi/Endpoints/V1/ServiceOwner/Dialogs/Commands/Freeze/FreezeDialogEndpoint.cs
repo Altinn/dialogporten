@@ -61,6 +61,7 @@ public sealed class FreezeDialogEndpoint : Endpoint<FreezeDialogRequest>
     }
 }
 
+[OpenApiTypeName(nameof(FreezeDialogRequest))]
 public sealed class FreezeDialogRequest
 {
     public Guid DialogId { get; init; }

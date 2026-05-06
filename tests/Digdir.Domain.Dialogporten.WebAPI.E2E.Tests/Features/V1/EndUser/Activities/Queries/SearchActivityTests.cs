@@ -21,7 +21,7 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId);
 
         // Act
-        var response = await Fixture.EnduserApi.V1.SearchDialogActivities(
+        var response = await Fixture.EndUserApi.V1.SearchDialogActivities(
             dialogId,
             new AcceptedLanguages(),
             TestContext.Current.CancellationToken);
@@ -75,10 +75,10 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             ];
         });
 
-        await Fixture.EnduserApi.GetDialog(dialogId);
+        await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Act
-        var response = await Fixture.EnduserApi.V1.SearchDialogActivities(
+        var response = await Fixture.EndUserApi.V1.SearchDialogActivities(
             dialogId,
             new AcceptedLanguages(),
             TestContext.Current.CancellationToken);

@@ -3,6 +3,7 @@ using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using Refit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialogs.Queries.Search;
 
@@ -34,7 +35,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
+            ct => Fixture.EndUserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 ExtendedStatus = [extendedStatus1, extendedStatus2]
@@ -67,7 +68,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
+            ct => Fixture.EndUserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 ServiceResource = [auxResource]
@@ -103,7 +104,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
+            ct => Fixture.EndUserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 Process = process
@@ -142,7 +143,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Act
         var searchResult = await E2ERetryPolicies.RetryUntilAsync(
-            ct => Fixture.EnduserApi.V1.SearchDialogs(new()
+            ct => Fixture.EndUserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty],
                 SystemLabel = [SystemLabel.Bin]

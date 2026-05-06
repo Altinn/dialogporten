@@ -21,7 +21,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             dialog.AddTransmission(transmission => transmission.Id = transmissionId));
 
         // Act
-        var response = await Fixture.EnduserApi.V1.GetDialogTransmission(
+        var response = await Fixture.EndUserApi.V1.GetDialogTransmission(
             dialogId,
             transmissionId,
             new AcceptedLanguages(),
@@ -40,14 +40,14 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(
             TransmissionTestData.AddComplexTransmissions);
 
-        var dialog = await Fixture.EnduserApi.GetDialog(dialogId);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
         dialog.Content.Should().NotBeNull();
 
         var transmissionId = dialog.Content.Transmissions
             .Single(t => t.RelatedTransmissionId is not null).Id;
 
         // Act
-        var response = await Fixture.EnduserApi.V1.GetDialogTransmission(
+        var response = await Fixture.EndUserApi.V1.GetDialogTransmission(
             dialogId,
             transmissionId,
             new AcceptedLanguages(),

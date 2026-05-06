@@ -50,6 +50,7 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
     }
 }
 
+[OpenApiTypeName("SearchDialogTransmissionsRequest")]
 public sealed class SearchTransmissionRequest
 {
     public Guid DialogId { get; set; }

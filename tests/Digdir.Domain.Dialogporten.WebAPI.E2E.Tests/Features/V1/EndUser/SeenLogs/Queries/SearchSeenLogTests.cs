@@ -18,7 +18,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         var getDialogResponse = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            operation: ct => Fixture.EndUserApi.GetDialog(dialogId, cancellationToken: ct),
             isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
             degradationMessage: "Seen log creation delayed");
 
@@ -26,7 +26,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Single().Id;
 
         // Act
-        var response = await Fixture.EnduserApi.V1.SearchDialogSeenLogs(
+        var response = await Fixture.EndUserApi.V1.SearchDialogSeenLogs(
             dialogId,
             TestContext.Current.CancellationToken);
 
@@ -43,7 +43,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Trigger seen log
-        var getDialogResponse1 = await Fixture.EnduserApi.GetDialog(dialogId);
+        var getDialogResponse1 = await Fixture.EndUserApi.GetDialog(dialogId);
         getDialogResponse1.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         var patchResponse = await Fixture.ServiceownerApi
@@ -64,7 +64,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
 
         // Act
         var response = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EnduserApi.V1.SearchDialogSeenLogs(
+            operation: ct => Fixture.EndUserApi.V1.SearchDialogSeenLogs(
                 dialogId, ct),
             isSuccessful: result => result is { IsSuccessful: true, Content.Count: 2 },
             degradationMessage: "Seen log creation delayed");

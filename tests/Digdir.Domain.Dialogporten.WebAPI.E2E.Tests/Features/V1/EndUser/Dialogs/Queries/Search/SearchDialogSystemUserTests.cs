@@ -18,7 +18,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
 
         // Act
         using var _ = Fixture.UseSystemUserTokenOverrides();
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -38,7 +38,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
             Party = [E2EConstants.DefaultParty]
         };
 
-        var response = await Fixture.EnduserApi.V1.SearchDialogs(
+        var response = await Fixture.EndUserApi.V1.SearchDialogs(
             queryParams,
             accept_Language: new());
 

@@ -17,14 +17,14 @@ public class SearchLabelAssignmentLogTests(WebApiE2EFixture fixture) : E2ETestBa
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
-        var setLabelResponse = await Fixture.EnduserApi.SetSystemLabels(
+        var setLabelResponse = await Fixture.EndUserApi.SetSystemLabels(
             dialogId,
             request => request.AddLabels = [Bin]);
 
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         // Act
-        var response = await Fixture.EnduserApi.GetSystemLabelAssignmentLog(dialogId);
+        var response = await Fixture.EndUserApi.GetSystemLabelAssignmentLog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

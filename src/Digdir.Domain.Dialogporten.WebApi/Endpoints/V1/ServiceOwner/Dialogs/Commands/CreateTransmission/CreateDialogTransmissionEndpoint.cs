@@ -70,6 +70,7 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
     }
 }
 
+[OpenApiTypeName(nameof(CreateTransmissionRequest))]
 public sealed class CreateTransmissionRequest : CreateTransmissionDto
 {
     public Guid DialogId { get; set; }

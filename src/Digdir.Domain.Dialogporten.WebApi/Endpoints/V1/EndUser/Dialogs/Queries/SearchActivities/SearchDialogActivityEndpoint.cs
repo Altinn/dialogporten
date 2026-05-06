@@ -49,6 +49,7 @@ public sealed class SearchDialogActivityEndpoint : Endpoint<SearchActivityReques
     }
 }
 
+[OpenApiTypeName("SearchDialogActivitiesRequest")]
 public sealed class SearchActivityRequest
 {
     public Guid DialogId { get; set; }

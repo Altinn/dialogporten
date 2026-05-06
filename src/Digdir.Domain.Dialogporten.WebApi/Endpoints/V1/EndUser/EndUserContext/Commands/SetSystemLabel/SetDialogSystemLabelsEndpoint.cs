@@ -64,6 +64,7 @@ public sealed class SetDialogSystemLabelsEndpoint : Endpoint<SetDialogSystemLabe
     }
 }
 
+[OpenApiTypeName(nameof(SetDialogSystemLabelRequest))]
 public sealed class SetDialogSystemLabelRequest
 {
     private readonly List<SystemLabel.Values> _addLabels = [];

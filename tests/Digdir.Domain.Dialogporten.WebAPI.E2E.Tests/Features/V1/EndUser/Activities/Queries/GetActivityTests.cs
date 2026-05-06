@@ -30,7 +30,7 @@ public class GetActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
         });
 
         // Act
-        var response = await Fixture.EnduserApi.V1.GetDialogActivity(
+        var response = await Fixture.EndUserApi.V1.GetDialogActivity(
             dialogId,
             activityId,
             new AcceptedLanguages(),

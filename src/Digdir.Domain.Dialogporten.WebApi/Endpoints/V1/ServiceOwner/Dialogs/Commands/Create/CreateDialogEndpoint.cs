@@ -53,7 +53,8 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
     }
 }
 
-public sealed class CreateDialogRequest
+[OpenApiTypeName(nameof(CreateDialogRequest))]
+public sealed class CreateDialogRequest : Object
 {
     [HideFromDocs]
     public bool? IsSilentUpdate { get; init; }

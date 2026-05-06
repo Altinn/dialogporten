@@ -1,0 +1,18 @@
+﻿{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "extendedType": "http://localhost/",
+  "type": "Information",
+  "transmissionId": null,
+  "performedBy": {
+    "actorType": "PartyRepresentative",
+    "actorName": "leif",
+    "actorId": "urn:altinn:person:legacy-selfidentified:leif"
+  },
+  "description": [
+    {
+      "value": "Test activity",
+      "languageCode": "en"
+    }
+  ]
+}

@@ -10,7 +10,6 @@ public sealed class MappingProfile : Profile
     {
         CreateMap<DialogActivity, ActivityDto>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId))
-            .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.Dialog.DeletedAt))
             .ForMember(dest => dest.PerformedBy, opt => opt.MapFrom(src => src.PerformedBy.ToDto()));
     }
 }

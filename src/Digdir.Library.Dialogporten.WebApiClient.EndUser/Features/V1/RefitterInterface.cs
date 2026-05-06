@@ -1108,14 +1108,12 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// The localized text (or URL if a front-channel embed).
         /// </summary>
         [JsonPropertyName("value")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Value { get; set; }
 
         /// <summary>
         /// The language code of the localization in ISO 639-1 format.
         /// </summary>
         [JsonPropertyName("languageCode")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string LanguageCode { get; set; }
 
     }
@@ -2875,27 +2873,22 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public System.Guid DialogId { get; set; }
 
         [JsonPropertyName("instanceRef")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string InstanceRef { get; set; }
 
         [JsonPropertyName("party")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Party { get; set; }
 
         [JsonPropertyName("serviceResource")]
-        [System.ComponentModel.DataAnnotations.Required]
-        public IdentifierLookupServiceResource ServiceResource { get; set; } = new IdentifierLookupServiceResource();
+        public IdentifierLookupServiceResource ServiceResource { get; set; }
 
         [JsonPropertyName("serviceOwner")]
-        [System.ComponentModel.DataAnnotations.Required]
-        public IdentifierLookupServiceOwner ServiceOwner { get; set; } = new IdentifierLookupServiceOwner();
+        public IdentifierLookupServiceOwner ServiceOwner { get; set; }
 
         [JsonPropertyName("title")]
         public ICollection<Localization> Title { get; set; }
 
         [JsonPropertyName("authorizationEvidence")]
-        [System.ComponentModel.DataAnnotations.Required]
-        public IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; } = new IdentifierLookupAuthorizationEvidence();
+        public IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; }
 
     }
 
@@ -2904,7 +2897,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
     {
 
         [JsonPropertyName("id")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Id { get; set; }
 
         [JsonPropertyName("isDelegable")]
@@ -2923,11 +2915,9 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
     {
 
         [JsonPropertyName("orgNumber")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string OrgNumber { get; set; }
 
         [JsonPropertyName("code")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Code { get; set; }
 
         [JsonPropertyName("name")]
@@ -2968,7 +2958,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public IdentifierLookupGrantType GrantType { get; set; }
 
         [JsonPropertyName("subject")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Subject { get; set; }
 
     }

@@ -2,7 +2,6 @@ namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
 public sealed class AuthorizedPartiesResult
 {
-    private static readonly List<string> EmptyStringList = [];
     private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
 
     public List<AuthorizedParty> AuthorizedParties { get; set; } = [];
@@ -34,49 +33,18 @@ public sealed class AuthorizedPartiesResult
 
         for (var i = 0; i < topLevelCount; i++)
         {
-            var party = AuthorizedParties[i];
+            var party = AuthorizedParties[i].Clone();
 
-            flattenedList.Add(new AuthorizedParty
-            {
-                Party = party.Party,
-                PartyId = party.PartyId,
-                DateOfBirth = party.DateOfBirth,
-                ParentParty = null,
-                AuthorizedResources = party.AuthorizedResources.Count > 0
-                    ? [.. party.AuthorizedResources]
-                    : EmptyStringList,
-                AuthorizedRolesAndAccessPackages = party.AuthorizedRolesAndAccessPackages.Count > 0
-                    ? [.. party.AuthorizedRolesAndAccessPackages]
-                    : EmptyStringList,
-                AuthorizedInstances = party.AuthorizedInstances.Count > 0
-                    ? [.. party.AuthorizedInstances]
-                    : [],
-                SubParties = EmptySubPartiesList
-            });
+            flattenedList.Add(party);
 
             if (!(party.SubParties?.Count > 0)) continue;
             var subCount = party.SubParties.Count;
             for (var j = 0; j < subCount; j++)
             {
                 var subParty = party.SubParties[j];
-                flattenedList.Add(new AuthorizedParty
-                {
-                    Party = subParty.Party,
-                    PartyId = subParty.PartyId,
-                    ParentParty = party.Party,
-                    DateOfBirth = subParty.DateOfBirth,
-                    AuthorizedResources = subParty.AuthorizedResources.Count > 0
-                        ? [.. subParty.AuthorizedResources]
-                        : EmptyStringList,
-                    AuthorizedRolesAndAccessPackages = subParty.AuthorizedRolesAndAccessPackages.Count > 0
-                        ? [.. subParty.AuthorizedRolesAndAccessPackages]
-                        : EmptyStringList,
-                    AuthorizedInstances = subParty.AuthorizedInstances.Count > 0
-                        ? [.. subParty.AuthorizedInstances]
-                        : [],
-                    SubParties = EmptySubPartiesList
-                });
+                flattenedList.Add(subParty);
             }
+            party.SubParties = EmptySubPartiesList;
         }
 
         return new AuthorizedPartiesResult
@@ -88,21 +56,23 @@ public sealed class AuthorizedPartiesResult
 
 public sealed class AuthorizedParty
 {
-    public string Party { get; init; } = null!;
-    public Guid PartyUuid { get; init; }
-    public int PartyId { get; init; }
-    public string Name { get; init; } = null!;
-    public string? DateOfBirth { get; init; }
-    public AuthorizedPartyType PartyType { get; init; }
-    public bool IsDeleted { get; init; }
-    public bool HasKeyRole { get; init; }
-    public bool IsCurrentEndUser { get; set; }
-    public bool IsMainAdministrator { get; init; }
-    public bool IsAccessManager { get; init; }
-    public bool HasOnlyAccessToSubParties { get; init; }
-    public List<string> AuthorizedResources { get; init; } = [];
-    public List<string> AuthorizedRolesAndAccessPackages { get; init; } = [];
-    public List<AuthorizedResource> AuthorizedInstances { get; init; } = [];
+    private static readonly List<string> EmptyStringList = [];
+
+    public required string Party { get; init; } = null!;
+    public required Guid PartyUuid { get; init; }
+    public required int PartyId { get; init; }
+    public required string Name { get; init; } = null!;
+    public required string? DateOfBirth { get; init; }
+    public required AuthorizedPartyType PartyType { get; init; }
+    public required bool IsDeleted { get; init; }
+    public required bool HasKeyRole { get; init; }
+    public required bool IsCurrentEndUser { get; set; }
+    public required bool IsMainAdministrator { get; init; }
+    public required bool IsAccessManager { get; init; }
+    public required bool HasOnlyAccessToSubParties { get; init; }
+    public required List<string> AuthorizedResources { get; init; } = [];
+    public required List<string> AuthorizedRolesAndAccessPackages { get; init; } = [];
+    public required List<AuthorizedResource> AuthorizedInstances { get; init; } = [];
 
     // Only populated in case of flatten = false
     public List<AuthorizedParty>? SubParties { get; set; }
@@ -110,13 +80,54 @@ public sealed class AuthorizedParty
     // Only populated in case of flatten = true
     public string? ParentParty { get; set; }
 
+    public AuthorizedParty Clone()
+    {
+        return new AuthorizedParty
+        {
+            Party = Party,
+            PartyUuid = PartyUuid,
+            PartyId = PartyId,
+            Name = Name,
+            DateOfBirth = DateOfBirth,
+            PartyType = PartyType,
+            IsDeleted = IsDeleted,
+            HasKeyRole = HasKeyRole,
+            IsCurrentEndUser = IsCurrentEndUser,
+            IsMainAdministrator = IsMainAdministrator,
+            IsAccessManager = IsAccessManager,
+            HasOnlyAccessToSubParties = HasOnlyAccessToSubParties,
+            AuthorizedResources = AuthorizedResources.Count > 0
+                ? [.. AuthorizedResources]
+                : EmptyStringList,
+            AuthorizedRolesAndAccessPackages = AuthorizedRolesAndAccessPackages.Count > 0
+                ? [.. AuthorizedRolesAndAccessPackages]
+                : EmptyStringList,
+            AuthorizedInstances = AuthorizedInstances.Count > 0
+                ? AuthorizedInstances.Select(x => x.Clone()).ToList()
+                : [],
+            SubParties = SubParties?.Count > 0
+                ? SubParties.Select(x => x.Clone()).ToList()
+                : SubParties,
+            ParentParty = ParentParty
+        };
+    }
 }
 
 public sealed class AuthorizedResource
 {
-    public string ResourceId { get; set; } = null!;
-    public string InstanceId { get; set; } = null!;
-    public string? InstanceRef { get; set; }
+    public required string ResourceId { get; set; } = null!;
+    public required string InstanceId { get; set; } = null!;
+    public required string? InstanceRef { get; set; }
+
+    public AuthorizedResource Clone()
+    {
+        return new AuthorizedResource
+        {
+            ResourceId = ResourceId,
+            InstanceId = InstanceId,
+            InstanceRef = InstanceRef
+        };
+    }
 }
 
 public enum AuthorizedPartyType

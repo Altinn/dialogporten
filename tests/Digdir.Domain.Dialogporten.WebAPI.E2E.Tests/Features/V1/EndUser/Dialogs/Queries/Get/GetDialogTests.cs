@@ -27,18 +27,9 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         getDialogResponse.IsSuccessful.Should().BeTrue();
         getDialogResponse.Content.Should().NotBeNull();
 
-        // Since seenlog is created async we except 0 seenlogs on first get
-        getDialogResponse.Content.SeenSinceLastUpdate.Should().BeNull();
-
-        // Seen log is created async so we retry until a seen log is created
-        var response = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
-            isSuccessful: result => result.IsSuccessful && result.Content.SeenSinceLastUpdate.Count == 1,
-            degradationMessage: "SeenLog creation speed is degraded");
-
         // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        var content = getDialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
         content.SeenSinceLastUpdate.Should().HaveCount(1);
 
         var seenEntry = content.SeenSinceLastUpdate.Single();

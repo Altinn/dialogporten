@@ -157,9 +157,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         bool flatten,
         CancellationToken cancellationToken)
     {
-        AuthorizedPartiesResult authorizedParties;
-
-
         // Self-identified/Feide users are not currently supported in the access management API, so we need to emulate it.
         // Assume they can only represent themselves, and have no delegated rights.
 
@@ -181,19 +178,18 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             default:
                 break;
         }
+        AuthorizedPartiesResult authorizedParties;
 
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
-            authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
-                => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
+            authorizedParties = await _partiesCache.GetOrSetAsync(
+                authorizedPartiesRequest.GenerateCacheKey(),
+                async token => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token),
+                token: cancellationToken
+            );
         }
 
-        var flattenedParties = authorizedParties.Flatten();
-        var nameByActorId = flattenedParties.GetNameByParty();
-
-        _partyNameRegistry.CacheNames(nameByActorId);
-
-        return flatten ? flattenedParties : authorizedParties;
+        return flatten ? authorizedParties.Flatten() : authorizedParties;
     }
 
     private AuthorizedPartiesResult GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(
@@ -234,8 +230,10 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         UserHasRequiredAuthLevel(await _serviceResourceMinimumAuthenticationLevelResolver
             .GetMinimumAuthenticationLevel(serviceResource, cancellationToken));
 
-    private async Task<AuthorizedPartiesResult> PerformAuthorizedPartiesRequest(AuthorizedPartiesRequest authorizedPartiesRequest,
-        CancellationToken cancellationToken)
+    private async Task<AuthorizedPartiesResult> PerformAuthorizedPartiesRequest(
+        AuthorizedPartiesRequest authorizedPartiesRequest,
+        CancellationToken cancellationToken
+    )
     {
         var authorizedPartiesDto = await SendAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken);
         // System users might have no rights whatsoever, which is not an error condition. Other user types (persons, SI users)
@@ -249,7 +247,15 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 
-        return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(authorizedPartiesDto, authorizedPartiesRequest);
+        var authorizedParties = AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(
+            authorizedPartiesDto,
+            authorizedPartiesRequest
+        );
+        var authorizedPartiesFlattened = authorizedParties.Flatten();
+
+        _partyNameRegistry.CacheNames(authorizedPartiesFlattened.GetNameByParty());
+
+        return authorizedParties;
     }
 
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)

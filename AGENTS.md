@@ -32,7 +32,7 @@ The SwaggerSnapshot test will fail if these files are not identical. It will als
 - Enable nullable reference types and keep entities immutable. Use OneOf for union returns when applicable.
 - Tests use xUnit with the fixture pattern and Verify for snapshot tests.
 - New WebAPI E2E tests should use `response.ShouldHaveStatusCode(statusCode);` instead of `.StatusCode.Should().Be(statusCode);`.
-- In test assertions, prefer explicit FluentAssertions null checks over null-coalescing throws for response content. Use `response.Content.Should().NotBeNull();` followed by assertions on `response.Content` instead of `var content = response.Content ?? throw new InvalidOperationException(...)`.
+- In test assertions, prefer explicit AwesomeAssertions null checks over null-coalescing throws for response content. Use `response.Content.Should().NotBeNull();` followed by assertions on `response.Content` instead of `var content = response.Content ?? throw new InvalidOperationException(...)`.
 - "Try"-methods should return a boolean indicating success and a nullable `out` parameter annotated with [NotNullWhen(true)] for the result, e.g. `bool TryGetUser(int id, [NotNullWhen(true)] out User? user)`.
 
 ### LINQ & Collection Style

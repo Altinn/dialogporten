@@ -189,11 +189,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         }
 
         var flattenedParties = authorizedParties.Flatten();
-        var nameByActorId = flattenedParties
-            .AuthorizedParties
-            .DistinctBy(x => x.Party)
-            .Select(x => (x.Party, x.Name))
-            .ToDictionary();
+        var nameByActorId = flattenedParties.GetNameByParty();
 
         _partyNameRegistry.CacheNames(nameByActorId);
 

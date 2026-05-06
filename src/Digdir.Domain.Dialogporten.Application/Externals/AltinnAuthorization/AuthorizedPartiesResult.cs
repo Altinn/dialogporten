@@ -4,7 +4,7 @@ public sealed class AuthorizedPartiesResult
 {
     public List<AuthorizedParty> AuthorizedParties { get; set; } = [];
 
-    public Dictionary<string, string> GetNameAsParty()
+    public Dictionary<string, string> GetNameByParty()
     {
         return AuthorizedParties
             .DistinctBy(x => x.Party)

@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
         <PackageReference Include="AwesomeAssertions" Version="9.4.0"/>
         <PackageReference Include="NSubstitute" Version="5.3.0"/>
@@ -22,10 +21,6 @@
         <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj"/>
         <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.Infrastructure\Digdir.Domain.Dialogporten.Infrastructure.csproj"/>
         <ProjectReference Include="..\..\src\Digdir.Tool.Dialogporten.GenerateFakeData\Digdir.Tool.Dialogporten.GenerateFakeData.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Externals\AltinnAuthorization\" />
     </ItemGroup>
 
 </Project>

@@ -185,8 +185,8 @@
       },
       "DeterministicGuids": {
         "type": "Transitive",
-        "resolved": "1.0.10",
-        "contentHash": "R0Z2dmYBDqYrYo7Qgw1sUzea1cePGGAOEqLfOR8zkmn9q6eKShrPZoYMCisEUiKyZstRUsKdVuDWXRoTMtTsHw=="
+        "resolved": "1.0.11",
+        "contentHash": "wEhcv8QYNfxWG2mMByiOcqQY+NOYgaDMAuj5Tygx2x6pUEVUPHwyHzktrhrO5ry58JRx9nZIzgpM/WX02Achug=="
       },
       "DiffEngine": {
         "type": "Transitive",
@@ -1241,7 +1241,7 @@
       "digdir.domain.dialogporten.domain": {
         "type": "Project",
         "dependencies": {
-          "DeterministicGuids": "[1.0.10, )",
+          "DeterministicGuids": "[1.0.11, )",
           "Digdir.Library.Entity.Abstractions": "[1.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.7, )"
         }

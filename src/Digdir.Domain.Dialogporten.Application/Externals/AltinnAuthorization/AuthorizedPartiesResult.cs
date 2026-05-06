@@ -92,11 +92,12 @@ public sealed class AuthorizedParty
     /// <param name="maxDepth">
     /// The maximum recursion level for SubParties.
     /// If we reach maxDepth, SubParties will be set to an empty list.
+    /// If maxDepth is 0, children will be removed
     /// </param>
     /// <returns>A deep copy of this instance.</returns>
     public AuthorizedParty Clone(int maxDepth = 100)
     {
-        var depth = 0;
+        var nextMaxDepth = maxDepth - 1;
         return new AuthorizedParty
         {
             Party = Party,
@@ -120,10 +121,8 @@ public sealed class AuthorizedParty
             AuthorizedInstances = AuthorizedInstances.Count > 0
                 ? AuthorizedInstances.Select(x => x.Clone()).ToList()
                 : [],
-            SubParties = depth >= maxDepth
-                ? []
-                : SubParties?.Count > 0
-                    ? SubParties.Select(x => x.Clone(++depth)).ToList()
+            SubParties = SubParties?.Count > 0
+                    ? maxDepth <= 0 ? [] : SubParties.Select(x => x.Clone(nextMaxDepth)).ToList()
                     : SubParties,
             ParentParty = ParentParty
         };

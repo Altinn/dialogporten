@@ -37,8 +37,40 @@ public class GetActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = response.Content ?? throw new InvalidOperationException("Activity content was null.");
+        response.Content.Should().NotBeNull();
+        response.Content.Id.Should().Be(activityId);
+
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(response.Content));
+    }
+
+    [E2EFact]
+    public async Task Should_Get_TransmissionOpened_Activity_By_Id_Verify_Snapshot()
+    {
+        // Arrange
+        var transmissionId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+            x.AddTransmission(t => t.Id = transmissionId));
+
+        var activityId = await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId, null, x =>
+        {
+            x.Type = TransmissionOpened;
+            x.TransmissionId = transmissionId;
+        });
+
+        // Act
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetActivityDialogActivity(
+            dialogId,
+            activityId,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        response.Content.Should().NotBeNull();
+
+        var content = response.Content;
         content.Id.Should().Be(activityId);
+        content.TransmissionId.Should().Be(transmissionId);
 
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
             JsonSerializer.Serialize(response.Content));

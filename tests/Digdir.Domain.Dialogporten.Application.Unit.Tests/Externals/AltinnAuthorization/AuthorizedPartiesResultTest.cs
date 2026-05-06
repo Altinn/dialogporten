@@ -49,7 +49,7 @@ public class AuthorizedPartiesResultTest
                             AuthorizedRolesAndAccessPackages = ["role2"],
                             AuthorizedInstances = [],
                             SubParties = [],
-                            ParentParty = "parent"
+                            ParentParty = null
                         },
                         new()
                         {
@@ -69,7 +69,7 @@ public class AuthorizedPartiesResultTest
                             AuthorizedRolesAndAccessPackages = [],
                             AuthorizedInstances = [],
                             SubParties = [],
-                            ParentParty = "parent"
+                            ParentParty = null
                         }
                     ],
                     ParentParty = null

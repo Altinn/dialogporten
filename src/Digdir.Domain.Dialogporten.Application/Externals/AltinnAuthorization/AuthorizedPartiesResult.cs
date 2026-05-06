@@ -12,6 +12,14 @@ public sealed class AuthorizedPartiesResult
             .ToDictionary();
     }
 
+    /// <summary>
+    /// - Moves all depth 1 SubParties to the root AuthorizedParties.
+    /// - Sets all the SubParties references to null
+    /// - Sets the ParentParty of all flattened SubParties to a reference of its parent AuthorizedParty.
+    ///
+    /// Limitation: Only considers the first level of SubParties
+    /// </summary>
+    /// <returns>A new instance with all depth 1 SubParties flattened to AuthorizedParties</returns>
     public AuthorizedPartiesResult Flatten()
     {
         var topLevelCount = AuthorizedParties.Count;
@@ -31,7 +39,7 @@ public sealed class AuthorizedPartiesResult
 
         for (var i = 0; i < topLevelCount; i++)
         {
-            var party = AuthorizedParties[i].Clone();
+            var party = AuthorizedParties[i].Clone(maxDepth: 1);
 
             flattenedList.Add(party);
 
@@ -40,6 +48,8 @@ public sealed class AuthorizedPartiesResult
             for (var j = 0; j < subCount; j++)
             {
                 var subParty = party.SubParties[j];
+                subParty.SubParties?.Clear();
+                subParty.ParentParty = party.Party;
                 flattenedList.Add(subParty);
             }
             party.SubParties = [];
@@ -76,8 +86,17 @@ public sealed class AuthorizedParty
     // Only populated in case of flatten = true
     public string? ParentParty { get; set; }
 
-    public AuthorizedParty Clone()
+    /// <summary>
+    /// Deep clone this instance
+    /// </summary>
+    /// <param name="maxDepth">
+    /// The maximum recursion level for SubParties.
+    /// If we reach maxDepth, SubParties will be set to an empty list.
+    /// </param>
+    /// <returns>A deep copy of this instance.</returns>
+    public AuthorizedParty Clone(int maxDepth = 100)
     {
+        var depth = 0;
         return new AuthorizedParty
         {
             Party = Party,
@@ -101,9 +120,11 @@ public sealed class AuthorizedParty
             AuthorizedInstances = AuthorizedInstances.Count > 0
                 ? AuthorizedInstances.Select(x => x.Clone()).ToList()
                 : [],
-            SubParties = SubParties?.Count > 0
-                ? SubParties.Select(x => x.Clone()).ToList()
-                : SubParties,
+            SubParties = depth >= maxDepth
+                ? []
+                : SubParties?.Count > 0
+                    ? SubParties.Select(x => x.Clone(++depth)).ToList()
+                    : SubParties,
             ParentParty = ParentParty
         };
     }

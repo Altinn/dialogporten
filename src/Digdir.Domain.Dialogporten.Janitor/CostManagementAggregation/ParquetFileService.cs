@@ -75,13 +75,13 @@ public sealed partial class ParquetFileService
         {
             using var rowGroup = parquetWriter.CreateRowGroup();
 
-            await rowGroup.WriteAsync(environmentField, environment);
-            await rowGroup.WriteAsync(serviceField, service);
-            await rowGroup.WriteAsync(adminField, admin);
-            await rowGroup.WriteAsync(consumerOrgNumberField, consumerOrgNumber);
-            await rowGroup.WriteAsync(ownerOrgNumberField, ownerOrgNumber);
-            await rowGroup.WriteAsync(transactionTypeField, transactionType);
-            await rowGroup.WriteAsync(failedField, failed);
+            await rowGroup.WriteAsync(environmentField, environment, cancellationToken: cancellationToken);
+            await rowGroup.WriteAsync(serviceField, service, cancellationToken: cancellationToken);
+            await rowGroup.WriteAsync(adminField, admin, cancellationToken: cancellationToken);                                                                                                                                                                                      
+            await rowGroup.WriteAsync(consumerOrgNumberField, consumerOrgNumber, cancellationToken: cancellationToken);                                                                                                                                                              
+            await rowGroup.WriteAsync(ownerOrgNumberField, ownerOrgNumber, cancellationToken: cancellationToken);                                                                                                                                                                    
+            await rowGroup.WriteAsync(transactionTypeField, transactionType, cancellationToken: cancellationToken);                                                                                                                                                                  
+            await rowGroup.WriteAsync(failedField, failed, cancellationToken: cancellationToken);                                                                                                                                                                                                                                                                                          
             await rowGroup.WriteAsync<long>(countField, count, cancellationToken: cancellationToken);
             await rowGroup.WriteAsync<decimal>(relativeResourceUsageField, relativeResourceUsage, cancellationToken: cancellationToken);
         }

@@ -3465,11 +3465,6 @@
             "nullable": true,
             "type": "string"
           },
-          "deletedAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
           "description": {
             "items": {
               "$ref": "#/components/schemas/V1CommonLocalizations_Localization"

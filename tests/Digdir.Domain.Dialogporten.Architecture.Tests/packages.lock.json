@@ -285,8 +285,8 @@
       },
       "CommunityToolkit.HighPerformance": {
         "type": "Transitive",
-        "resolved": "8.4.1",
-        "contentHash": "BqHc86nn0Dop4zVvA6kDHrREd9Xv+k+qJUpAtxq3VVAdGaCj6xNshIM3FMGynGYxFJc7V2I+HiU3XerLBYwXgA=="
+        "resolved": "8.4.2",
+        "contentHash": "2hmtrrU18x6NL3mbuAqwy0KpnoEEJOuK6sH5RKQfD/jHijn2pqvqBUC7WGy9dgNBL9BDA7eOC0kirsNPMp2f4Q=="
       },
       "Dapper": {
         "type": "Transitive",
@@ -1815,14 +1815,14 @@
       },
       "Parquet.Net": {
         "type": "Transitive",
-        "resolved": "5.6.0",
-        "contentHash": "pM/odjFB5YqpKnI5Jcr18VPC4gcv5Ef4/0IOnN0MRUspYWvn8Y/VZ+e20BibHiKc5UCXWyxIdPqu5K6clxid0g==",
+        "resolved": "6.0.0",
+        "contentHash": "fci8KG6D6GJByyHxSG0sS35jPgWuJyx9amd67O4OPTjadlxUGfLc7G7ig5P71lXwZoJLl/MjoyH3T361JdhrGw==",
         "dependencies": {
-          "CommunityToolkit.HighPerformance": "8.4.1",
+          "CommunityToolkit.HighPerformance": "8.4.2",
           "K4os.Compression.LZ4": "1.3.8",
           "Microsoft.IO.RecyclableMemoryStream": "3.0.1",
-          "Snappier": "1.3.0",
-          "ZstdSharp.Port": "0.8.7"
+          "Snappier": "1.3.1",
+          "ZstdSharp.Port": "0.8.8"
         }
       },
       "Pipelines.Sockets.Unofficial": {
@@ -1996,8 +1996,8 @@
       },
       "Snappier": {
         "type": "Transitive",
-        "resolved": "1.3.0",
-        "contentHash": "yYANMXm5MUiF9jzsOI7WH5Cj1HYzcWEIEVI2Ljq8N7hS/zwLCBx+GoGeyc7aJFAvpRcbSIbdNaelVomHqd6UDQ=="
+        "resolved": "1.3.1",
+        "contentHash": "DOdDQiO8YZ5rBtVLY+6CmR1yp9WYoJRgEEktPBrR0tEj9QO2djA/zv0O3DX0OZpEAfosbY8pytQ9tQUogwQsEA=="
       },
       "StackExchange.Redis": {
         "type": "Transitive",
@@ -2258,8 +2258,8 @@
       },
       "ZstdSharp.Port": {
         "type": "Transitive",
-        "resolved": "0.8.7",
-        "contentHash": "+4VpxvzEKaHpfTjsLRMhQHx6brqGBkIA+fjUM3wUW8ZoWpPFAeKrO2Nf4uZDeBjjzNDNxSRvLQH4b3S9Ku4JJQ=="
+        "resolved": "0.8.8",
+        "contentHash": "UIDFkA5DC3en3tOJ3Mof11yBx9kUQLsaeo/oFdvN6Bbkr9E9+VCqfIadHci8cu+I51K2Sl7XYWVl2R/mA75NBQ=="
       },
       "Altinn.ApiClients.Dialogporten": {
         "type": "Project",
@@ -2383,7 +2383,7 @@
           "Microsoft.Extensions.Configuration.UserSecrets": "[10.0.7, )",
           "Microsoft.Extensions.DependencyInjection": "[10.0.7, )",
           "Microsoft.Extensions.Hosting": "[10.0.7, )",
-          "Parquet.Net": "[5.6.0, )",
+          "Parquet.Net": "[6.0.0, )",
           "Serilog.Extensions.Hosting": "[10.0.0, )",
           "Serilog.Settings.Configuration": "[10.0.0, )",
           "Serilog.Sinks.Console": "[6.1.1, )"

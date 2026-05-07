@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.114.8](https://github.com/Altinn/dialogporten/compare/v1.114.7...v1.114.8) (2026-05-07)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency deterministicguids to 1.0.11 ([#3900](https://github.com/Altinn/dialogporten/issues/3900)) ([1e7461c](https://github.com/Altinn/dialogporten/commit/1e7461c26bbd519a790d81632dee115f7e411b31))
+* **deps:** update dependency strawberryshake.tools to v15.1.15 ([#3885](https://github.com/Altinn/dialogporten/issues/3885)) ([043ffbc](https://github.com/Altinn/dialogporten/commit/043ffbc76e613132efeeaa0291a1bc0ee530312e))
+* **deps:** update grafana/setup-k6-action action to v1.2.0 ([#3901](https://github.com/Altinn/dialogporten/issues/3901)) ([3ca6a2b](https://github.com/Altinn/dialogporten/commit/3ca6a2b505de1dff22202e75b610daec8551a1f3))
+* **deps:** update hotchocolate dependencies to 15.1.15 ([#3887](https://github.com/Altinn/dialogporten/issues/3887)) ([f3f22dc](https://github.com/Altinn/dialogporten/commit/f3f22dc3dbebfdd8696736f64ae81f8bcbe02a96))
+* **deps:** update nginx docker tag to v1.30.0 ([#3902](https://github.com/Altinn/dialogporten/issues/3902)) ([c2f0dd7](https://github.com/Altinn/dialogporten/commit/c2f0dd7753239b16d0495e171bfccbdb9a1d901c))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.151.0 ([#3903](https://github.com/Altinn/dialogporten/issues/3903)) ([f4805bc](https://github.com/Altinn/dialogporten/commit/f4805bcba016fbf05ce9750863934603b77f6494))
+* **deps:** upgrade Parquet.Net to v6 ([#3913](https://github.com/Altinn/dialogporten/issues/3913)) ([95d2806](https://github.com/Altinn/dialogporten/commit/95d2806549fd8865b787127ca23fe05a98996108))
+
 ## [1.114.7](https://github.com/Altinn/dialogporten/compare/v1.114.6...v1.114.7) (2026-05-05)
 
 

@@ -50,7 +50,9 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = searchResult.Content ?? throw new InvalidOperationException("Search content was null.");
+        searchResult.Content.Should().NotBeNull();
+
+        var content = searchResult.Content;
         content.Items.Should().HaveCount(2);
         content.Items.Should().Contain(x => x.Id == dialogId1);
         content.Items.Should().Contain(x => x.Id == dialogId2);
@@ -87,14 +89,18 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = searchResult.Content ?? throw new InvalidOperationException("Search content was null.");
+        searchResult.Content.Should().NotBeNull();
+
+        var content = searchResult.Content;
         content.Items.Should().ContainSingle();
         content.Items.Single().Id.Should().Be(dialogId);
         content.Items.Single().Party.Should().Be(auxParty);
     }
 
-    [E2EFact]
-    public async Task Should_Filter_By_ServiceResource()
+    [E2ETheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Should_Filter_By_ServiceResource(bool withEndUserId)
     {
         // Arrange
         var sentinelLabel = Guid.NewGuid().ToString();
@@ -111,21 +117,63 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             ct => Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(new()
             {
                 ServiceOwnerLabels = [sentinelLabel],
-                ServiceResource = [E2EConstants.AlternateServiceResource]
+                ServiceResource = [E2EConstants.AlternateServiceResource],
+                EndUserId = withEndUserId ? E2EConstants.DefaultParty : null!
             }, ct),
             isSuccessful: response =>
-                response.Content is { } content &&
-                content.Items.Count == 1 &&
-                content.Items.Single().Id == dialogId &&
-                content.Items.All(x => x.Id != controlDialogId),
+                response.Content is { Items.Count: 1 } content
+                && content.Items.Single().Id == dialogId
+                && content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = searchResult.Content ?? throw new InvalidOperationException("Search content was null.");
+        searchResult.Content.Should().NotBeNull();
+
+        var content = searchResult.Content;
         content.Items.Should().ContainSingle();
         content.Items.Single().Id.Should().Be(dialogId);
-        content.Items.Single().ServiceResource.Should().Be(E2EConstants.AlternateServiceResource);
+        content.Items.Single().ServiceResource.Should()
+            .Be(E2EConstants.AlternateServiceResource);
+    }
+
+    [E2ETheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Should_Filter_By_ServiceOwnerLabels(bool withEndUserId)
+    {
+        // Arrange
+        var sentinelLabel = Guid.NewGuid().ToString();
+        var controlLabel = Guid.NewGuid().ToString();
+
+        var dialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel);
+        var controlDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(controlLabel);
+
+        // Act
+        var searchResult = await E2ERetryPolicies.RetryUntilAsync(
+            ct => Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(new()
+            {
+                ServiceOwnerLabels = [sentinelLabel],
+                Party = withEndUserId
+                    ? [E2EConstants.DefaultParty]
+                    : null!,
+                EndUserId = withEndUserId
+                    ? E2EConstants.DefaultParty
+                    : null!
+            }, ct),
+            isSuccessful: response =>
+                response.Content is { Items.Count: 1 } content
+                && content.Items.Single().Id == dialogId
+                && content.Items.All(x => x.Id != controlDialogId),
+            degradationMessage: "Search indexing speed is degraded.");
+
+        // Assert
+        searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
+        searchResult.Content.Should().NotBeNull();
+
+        var content = searchResult.Content;
+        content.Items.Should().ContainSingle();
+        content.Items.Single().Id.Should().Be(dialogId);
     }
 
     [E2EFact]
@@ -175,7 +223,9 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = searchResult.Content ?? throw new InvalidOperationException("Search content was null.");
+        searchResult.Content.Should().NotBeNull();
+
+        var content = searchResult.Content;
         content.Items.Should().ContainSingle();
         content.Items.Single().Id.Should().Be(dialogId);
         content.Items.Single().Process.Should().Be(process);

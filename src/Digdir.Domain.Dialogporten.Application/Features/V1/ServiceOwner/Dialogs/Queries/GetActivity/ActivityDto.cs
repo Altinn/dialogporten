@@ -12,8 +12,6 @@ public sealed class ActivityDto
 
     public DialogActivityType.Values Type { get; set; }
 
-    public DateTimeOffset? DeletedAt { get; set; }
-
     public Guid? TransmissionId { get; set; }
 
     public ActorDto PerformedBy { get; set; } = null!;

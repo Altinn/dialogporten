@@ -1955,15 +1955,6 @@
           "Serilog": "4.3.0"
         }
       },
-      "Serilog.Sinks.ApplicationInsights": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "1gNxpRR2vZ9RScScpgfrj2utrSHgVDiAgPFdmplSlGCMONaLV+LBDe1uKeD4b/E5sQjtYKGyJ/rgVwSZcdTcZQ==",
-        "dependencies": {
-          "Microsoft.ApplicationInsights": "2.23.0",
-          "Serilog": "4.3.0"
-        }
-      },
       "Serilog.Sinks.Console": {
         "type": "Transitive",
         "resolved": "6.1.1",
@@ -2395,7 +2386,6 @@
           "Parquet.Net": "[5.6.0, )",
           "Serilog.Extensions.Hosting": "[10.0.0, )",
           "Serilog.Settings.Configuration": "[10.0.0, )",
-          "Serilog.Sinks.ApplicationInsights": "[5.0.0, )",
           "Serilog.Sinks.Console": "[6.1.1, )"
         }
       },

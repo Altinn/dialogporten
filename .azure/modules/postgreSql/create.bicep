@@ -328,6 +328,8 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   tags: tags
 }
 
+// Admin records must have a unique objectId per server; the RP does not dedupe by
+// objectId when principalName differs, so a stray duplicate will hang this write.
 resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2024-08-01' = {
   name: deployer().objectId
   parent: postgres

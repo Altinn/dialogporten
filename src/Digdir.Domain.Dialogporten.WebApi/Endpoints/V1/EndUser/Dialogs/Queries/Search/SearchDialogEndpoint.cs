@@ -46,6 +46,7 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
     }
 }
 
+[OpenApiTypeName("SearchDialogsRequest")]
 public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDialogQueryOrderDefinition, DialogEntity>
 {
     /// <summary>

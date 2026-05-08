@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Refit;
-using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.DialogEndUserContextsEntities_SystemLabel;
+using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabel;
 using static Digdir.Library.Dialogporten.E2E.Common.JsonSnapshotVerifier;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUserContext;
@@ -25,7 +25,7 @@ public class SearchLabelAssignmentLogSnapshotTests(WebApiE2EFixture fixture) : E
         await SetLabel(dialogId, Default);
 
         // Act
-        var response = await Fixture.EnduserApi.GetSystemLabelAssignmentLog(dialogId);
+        var response = await Fixture.EndUserApi.GetSystemLabelAssignmentLog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -36,8 +36,8 @@ public class SearchLabelAssignmentLogSnapshotTests(WebApiE2EFixture fixture) : E
     }
 
     private Task<IApiResponse> SetLabel(Guid dialogId,
-        DialogEndUserContextsEntities_SystemLabel label) =>
-        Fixture.EnduserApi.SetSystemLabels(
+        SystemLabel label) =>
+        Fixture.EndUserApi.SetSystemLabels(
             dialogId,
             request => request.AddLabels = [label]);
 }

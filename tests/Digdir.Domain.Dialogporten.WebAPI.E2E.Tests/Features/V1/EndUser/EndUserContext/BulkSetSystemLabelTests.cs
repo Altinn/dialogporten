@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.DialogEndUserContextsEntities_SystemLabel;
+using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUserContext;
 
@@ -20,7 +20,7 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var dialogId2 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var response = await Fixture.EnduserApi.BulkSetSystemLabels(request =>
+        var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
         {
             request.Dialogs =
             [
@@ -34,8 +34,8 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var dialog1Response = await Fixture.EnduserApi.GetDialog(dialogId1);
-        var dialog2Response = await Fixture.EnduserApi.GetDialog(dialogId2);
+        var dialog1Response = await Fixture.EndUserApi.GetDialog(dialogId1);
+        var dialog2Response = await Fixture.EndUserApi.GetDialog(dialogId2);
 
         dialog1Response.ShouldHaveStatusCode(HttpStatusCode.OK);
         dialog2Response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -62,7 +62,7 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                                $"{E2EConstants.GetDefaultServiceOwnerOrgNr()}");
 
         // Act
-        var response = await Fixture.EnduserApi.BulkSetSystemLabels(request =>
+        var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
         {
             request.Dialogs =
             [

@@ -55,6 +55,7 @@ public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
     }
 }
 
+[OpenApiTypeName(nameof(PurgeDialogRequest))]
 public sealed class PurgeDialogRequest
 {
     public Guid DialogId { get; init; }

@@ -19,7 +19,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         using var _ = Fixture.UseEndUserTokenOverrides(scopes: "wrong-scope");
 
         var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
-            Fixture.EnduserApi.V1, endpointScenario.Method, TestContext.Current.CancellationToken);
+            Fixture.EndUserApi.V1, endpointScenario.Method, TestContext.Current.CancellationToken);
 
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }

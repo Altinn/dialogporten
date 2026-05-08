@@ -2918,9 +2918,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
         public DialogActivityType Type { get; set; }
 
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }
 

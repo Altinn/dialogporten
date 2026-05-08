@@ -53,6 +53,7 @@ public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, S
     }
 }
 
+[OpenApiTypeName(nameof(GetDialogLookupRequest))]
 public sealed class GetDialogLookupRequest
 {
     [QueryParam]

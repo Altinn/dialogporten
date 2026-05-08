@@ -58,6 +58,7 @@ public sealed class DeleteDialogEndpoint : Endpoint<DeleteDialogRequest>
     }
 }
 
+[OpenApiTypeName(nameof(DeleteDialogRequest))]
 public sealed class DeleteDialogRequest
 {
     public Guid DialogId { get; set; }

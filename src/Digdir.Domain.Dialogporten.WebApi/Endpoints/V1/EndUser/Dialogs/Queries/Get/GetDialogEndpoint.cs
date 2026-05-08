@@ -54,6 +54,7 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogRequest, DialogDto>
     }
 }
 
+[OpenApiTypeName(nameof(GetDialogRequest))]
 public sealed class GetDialogRequest
 {
     public Guid DialogId { get; set; }

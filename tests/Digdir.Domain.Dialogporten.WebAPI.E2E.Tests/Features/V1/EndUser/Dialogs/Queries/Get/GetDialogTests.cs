@@ -22,7 +22,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         // Act
 
         // Get a dialog to trigger a dialogSeenEvent
-        var getDialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
+        var getDialogResponse = await Fixture.EndUserApi.GetDialog(dialogId);
 
         getDialogResponse.IsSuccessful.Should().BeTrue();
         getDialogResponse.Content.Should().NotBeNull();
@@ -32,7 +32,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
 
         // Seen log is created async so we retry until a seen log is created
         var response = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            operation: ct => Fixture.EndUserApi.GetDialog(dialogId, cancellationToken: ct),
             isSuccessful: result => result.IsSuccessful && result.Content.SeenSinceLastUpdate.Count == 1,
             degradationMessage: "SeenLog creation speed is degraded");
 
@@ -53,7 +53,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -66,7 +66,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
 
         var secondAction = content.GuiActions.Last();
         secondAction.Prompt.Should().NotBeEmpty();
-        secondAction.HttpMethod.Should().Be(Http_HttpVerb.POST);
+        secondAction.HttpMethod.Should().Be(HttpVerb.POST);
     }
 
     [E2EFact]
@@ -76,7 +76,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -100,7 +100,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -131,7 +131,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
             .V1ServiceOwnerDialogsCommandsPurgeDialog(dialogId, if_Match: null);
         purgeResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -146,7 +146,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
             x.ServiceResource = "urn:altinn:resource:ttd-dialogporten-transmissions-test");
 
         // Act
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
@@ -161,7 +161,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
 
         // Act
         var getDialogResult = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            operation: ct => Fixture.EndUserApi.GetDialog(dialogId, cancellationToken: ct),
             isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
             degradationMessage: "Seen log creation delayed");
 

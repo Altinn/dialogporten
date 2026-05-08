@@ -13,7 +13,6 @@ public sealed class MappingProfile : Profile
     {
         CreateMap<DialogTransmission, TransmissionDto>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId))
-            .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.Dialog.DeletedAt))
             .ForMember(dest => dest.Sender, opt => opt.MapFrom(src => src.Sender.ToDto()));
 
         CreateMap<List<DialogTransmissionContent>?, ContentDto?>()

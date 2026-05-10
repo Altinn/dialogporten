@@ -47,8 +47,8 @@
     },
     {
       "matchPackageNames": [
-        "/^HotChocolate/",
-        "/^StrawberryShake/",
+        "/^HotChocolate/i",
+        "/^StrawberryShake/i",
         "AppAny.HotChocolate.FluentValidation"
       ],
       "groupName": "HotChocolate dependencies"

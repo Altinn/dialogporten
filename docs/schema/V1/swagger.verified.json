@@ -5864,12 +5864,6 @@
             "format": "date-time",
             "type": "string"
           },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
           "extendedType": {
             "description": "The extended type URI for the transmission.",
             "format": "uri",

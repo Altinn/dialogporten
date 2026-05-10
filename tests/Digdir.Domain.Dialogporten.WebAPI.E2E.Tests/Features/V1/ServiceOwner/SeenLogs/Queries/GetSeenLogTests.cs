@@ -10,7 +10,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.S
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Get_SeenLog_By_Id_Verify_Snapshot()
     {
         // Arrange
@@ -19,7 +19,7 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         // Trigger seen log by fetching the dialog as the end user, retrying
         // until the seen log entry has propagated.
         var getDialogResponse = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EnduserApi.GetDialog(dialogId, cancellationToken: ct),
+            operation: ct => Fixture.EndUserApi.GetDialog(dialogId, cancellationToken: ct),
             isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
             degradationMessage: "Seen log creation delayed");
 

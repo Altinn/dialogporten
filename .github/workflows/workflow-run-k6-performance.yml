@@ -83,7 +83,7 @@ jobs:
           exit 1
         fi
     - name: Setup k6
-      uses: grafana/setup-k6-action@70839b2df2ef373adf890a6ce75653774378bffc # v1.2.0
+      uses: grafana/setup-k6-action@db07bd9765aac508ef18982e52ab937fe633a065 # v1.2.1
     - name: Run K6 tests (${{ inputs.testSuitePath }})
       run: |
         echo "Running k6 test suite ${TEST_SUITE_PATH} with ${VUS} VUs for ${DURATION} on ${PARALLELISM} parallelism"

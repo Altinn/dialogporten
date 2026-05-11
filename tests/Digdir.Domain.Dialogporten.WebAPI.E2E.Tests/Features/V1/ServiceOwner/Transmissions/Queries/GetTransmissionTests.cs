@@ -23,7 +23,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             .Single(t => t.RelatedTransmissionId is not null).Id;
 
         // Act
-        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
             dialogId,
             transmissionId,
             TestContext.Current.CancellationToken);

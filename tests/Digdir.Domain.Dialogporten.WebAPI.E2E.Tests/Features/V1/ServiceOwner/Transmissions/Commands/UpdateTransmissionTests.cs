@@ -67,7 +67,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 TestContext.Current.CancellationToken);
 
         var getResponse = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
+            .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
                 dialogId,
                 transmissionId,
                 TestContext.Current.CancellationToken);
@@ -104,7 +104,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             }));
 
         var beforeUpdateResponse = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
+            .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
                 dialogId,
                 transmissionId,
                 TestContext.Current.CancellationToken);
@@ -135,7 +135,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 TestContext.Current.CancellationToken);
 
         var afterUpdateResponse = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
+            .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
                 dialogId,
                 transmissionId,
                 TestContext.Current.CancellationToken);

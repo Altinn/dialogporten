@@ -471,7 +471,7 @@ module adoConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublishC
   params: {
     destKeyVaultName: environmentKeyVaultName
     secretName: 'dialogportenAdoConnectionString'
-    secretValue: 'Server=${postgres.properties.fullyQualifiedDomainName};Database=${databaseName};Port=5432;User Id=${administratorLogin};Password=${administratorLoginPassword};Ssl Mode=Require;Trust Server Certificate=true;Include Error Detail=True;'
+    secretValue: 'Server=${postgres.properties.fullyQualifiedDomainName};Database=${databaseName};Port=5432;User Id=${administratorLogin};Password=${administratorLoginPassword};Ssl Mode=Require;Trust Server Certificate=true;Include Error Detail=True;Maximum Pool Size=300;'
     tags: tags
   }
 }

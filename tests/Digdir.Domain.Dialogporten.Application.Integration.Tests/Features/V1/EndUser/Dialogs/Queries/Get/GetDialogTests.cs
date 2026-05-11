@@ -5,11 +5,12 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -471,17 +472,39 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             });
 
     [Fact]
-    public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel() =>
+    public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel_And_Create_A_LabelLog() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .SendCommand((_, ctx) => new SetSystemLabelCommand
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDtoSo>(x =>
             {
-                DialogId = ctx.GetDialogId(),
-                AddLabels = [SystemLabel.Values.MarkedAsUnopened]
+                x.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Values.MarkedAsUnopened);
             })
-            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
-            .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened));
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(x =>
+                {
+                    x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened);
+                }
+            )
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Count.Should().Be(2);
+                x[0].CreatedAt.Should().BeBefore(DateTimeOffset.Now);
+                x[0].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[0].Action.Should().Be("set");
+                x[0].PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                x[0].PerformedBy.ActorName.Should().Be("Brando Sando");
+                x[0].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+
+                x[1].CreatedAt.Should().BeBefore(DateTimeOffset.Now).And.BeAfter(x[0].CreatedAt);
+                x[1].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[1].Action.Should().Be("remove");
+                x[1].PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                x[1].PerformedBy.ActorName.Should().Be("Brando Sando");
+                x[1].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+            });
 
     [Fact]
     public Task Get_Should_Set_IsContentSeen_To_True() =>

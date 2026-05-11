@@ -68,7 +68,10 @@ internal sealed class DialogSeenLogWriter(
             new LabelAssignmentLogActor
             {
                 ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntityId = seenLogWriteResult.ActorNameId
+                ActorNameEntity = new ActorName
+                {
+                    ActorId = userId.ExternalIdWithPrefix,
+                }
             }
         );
 

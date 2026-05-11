@@ -82,6 +82,7 @@ public sealed class DialogEndUserContext : IEntity, IVersionableEntity
             PerformedBy = new LabelAssignmentLogActor
             {
                 ActorTypeId = performedBy.ActorTypeId,
+                ActorNameEntityId = performedBy.ActorNameEntityId,
                 ActorNameEntity = performedBy.ActorNameEntity is null
                     ? null
                     : new ActorName

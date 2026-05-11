@@ -23,7 +23,9 @@ public class SearchLabelAssignmentLogSnapshotTests(WebApiE2EFixture fixture) : E
         await SetLabel(dialogId, Bin);
         await SetLabel(dialogId, Archive);
         await SetLabel(dialogId, Default);
+        await SetLabel(dialogId, MarkedAsUnopened);
 
+        await Fixture.EnduserApi.GetDialog(dialogId); // Remove MarkedAsUnopened automatically
         // Act
         var response = await Fixture.EnduserApi.GetSystemLabelAssignmentLog(dialogId);
 

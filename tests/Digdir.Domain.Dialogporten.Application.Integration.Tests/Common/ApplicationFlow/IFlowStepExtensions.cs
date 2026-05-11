@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
@@ -192,6 +193,16 @@ public static class IFlowStepExtensions
             };
 
             initialState?.Invoke(command, step.Context);
+            return command;
+        });
+
+    public static IFlowExecutor<SearchLabelAssignmentLogResult> GetLabelAssignmentLogs(this IFlowStep step) =>
+        step.SendCommand(x =>
+        {
+            var command = new SearchLabelAssignmentLogQuery
+            {
+                DialogId = x.GetDialogId(),
+            };
             return command;
         });
 

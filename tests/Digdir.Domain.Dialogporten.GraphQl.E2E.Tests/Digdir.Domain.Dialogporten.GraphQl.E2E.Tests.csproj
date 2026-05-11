@@ -24,4 +24,38 @@
       <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
     </ItemGroup>
 
+    <!-- StrawberryShake.Server 15.1.16 ships its code-gen tool as a net9.0 DLL and the package's
+         MSBuild targets invoke it without runtime roll-forward, so on a .NET 10-only machine the
+         build fails with "framework version '9.0.0' not found". We require the .NET 10 SDK (see
+         global.json), so enable roll-forward for the code-gen invocation. Remove this once
+         StrawberryShake ships net10 binaries. -->
+    <UsingTask TaskName="SetEnvVar"
+               TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <Name ParameterType="System.String" Required="true" />
+            <Value ParameterType="System.String" />
+            <PreviousValue ParameterType="System.String" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Code Type="Fragment" Language="cs">
+                PreviousValue = System.Environment.GetEnvironmentVariable(Name);
+                System.Environment.SetEnvironmentVariable(Name, string.IsNullOrEmpty(Value) ? null : Value);
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <Target Name="EnableStrawberryShakeRollForward" BeforeTargets="GenerateGraphQLCode">
+        <SetEnvVar Name="DOTNET_ROLL_FORWARD" Value="LatestMajor">
+            <Output TaskParameter="PreviousValue" PropertyName="PrevDOTNET_ROLL_FORWARD" />
+        </SetEnvVar>
+    </Target>
+
+    <Target Name="EnsureStrawberryShakeRollForward" BeforeTargets="_GraphQLCodeGenerationRoot"
+            DependsOnTargets="EnableStrawberryShakeRollForward" />
+
+    <Target Name="RestoreStrawberryShakeRollForward" AfterTargets="_GenerateGraphQLCode">
+        <SetEnvVar Name="DOTNET_ROLL_FORWARD" Value="$(PrevDOTNET_ROLL_FORWARD)" />
+    </Target>
+
 </Project>

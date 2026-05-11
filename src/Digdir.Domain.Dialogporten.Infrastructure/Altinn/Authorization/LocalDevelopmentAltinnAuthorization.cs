@@ -57,21 +57,48 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
         => await Task.FromResult(new AuthorizedPartiesResult
         {
             AuthorizedParties = [new()
-            {
-                Name = "Local Party",
-                Party = authenticatedParty.FullId,
-                PartyUuid = Guid.NewGuid(),
-                IsCurrentEndUser = true,
-                SubParties = [
-                    new()
-                    {
-                        Name = "Local Sub Party",
-                        Party = LocalSubParty,
-                        PartyUuid = Guid.NewGuid(),
-                        IsCurrentEndUser = true
-                    }
-                ]
-            }]
+                {
+                    Party = authenticatedParty.FullId,
+                    PartyUuid = Guid.NewGuid(),
+                    PartyId = 0,
+                    Name = "Local Party",
+                    DateOfBirth = null,
+                    PartyType = AuthorizedPartyType.Person,
+                    IsDeleted = false,
+                    HasKeyRole = false,
+                    IsCurrentEndUser = true,
+                    IsMainAdministrator = false,
+                    IsAccessManager = false,
+                    HasOnlyAccessToSubParties = false,
+                    AuthorizedResources = [],
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedInstances = [],
+                    SubParties =
+                    [
+                        new()
+                        {
+                            Party = LocalSubParty,
+                            PartyUuid = Guid.NewGuid(),
+                            PartyId = 0,
+                            Name = "Local Sub Party",
+                            DateOfBirth = null,
+                            PartyType = AuthorizedPartyType.Person,
+                            IsDeleted = false,
+                            HasKeyRole = false,
+                            IsCurrentEndUser = true,
+                            IsMainAdministrator = false,
+                            IsAccessManager = false,
+                            HasOnlyAccessToSubParties = false,
+                            AuthorizedResources = [],
+                            AuthorizedRolesAndAccessPackages = [],
+                            AuthorizedInstances = [],
+                            SubParties = null,
+                            ParentParty = null
+                        }
+                    ],
+                    ParentParty = null
+                }
+            ]
         });
 
     public async Task<AuthorizedPartiesResult> GetAuthorizedPartiesForLookup(
@@ -98,11 +125,18 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
             AuthorizedParties = parties
                 .Select((party, index) => new AuthorizedParty
                 {
-                    Name = "Local Party",
                     Party = party,
                     PartyUuid = Guid.NewGuid(),
                     PartyId = index + 1,
+                    Name = "Local Party",
+                    DateOfBirth = null,
+                    PartyType = AuthorizedPartyType.Person,
+                    IsDeleted = false,
+                    HasKeyRole = false,
                     IsCurrentEndUser = string.Equals(party, authenticatedParty.FullId, StringComparison.OrdinalIgnoreCase),
+                    IsMainAdministrator = false,
+                    IsAccessManager = false,
+                    HasOnlyAccessToSubParties = false,
                     AuthorizedResources = [.. authorizedResources],
                     AuthorizedRolesAndAccessPackages = [],
                     AuthorizedInstances = []

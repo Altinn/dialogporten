@@ -1,5 +1,5 @@
-using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Xunit;
@@ -88,10 +88,22 @@ public class AuthorizationHelperTests
                 new()
                 {
                     Party = party,
+                    PartyUuid = default,
                     PartyId = 313130983,
-                    AuthorizedRolesAndAccessPackages = [],
+                    Name = party,
+                    DateOfBirth = null,
+                    PartyType = AuthorizedPartyType.Person,
+                    IsDeleted = false,
+                    HasKeyRole = false,
+                    IsCurrentEndUser = false,
+                    IsMainAdministrator = false,
+                    IsAccessManager = false,
+                    HasOnlyAccessToSubParties = false,
                     AuthorizedResources = [resourceA, resourceB],
-                    AuthorizedInstances = []
+                    AuthorizedRolesAndAccessPackages = [],
+                    AuthorizedInstances = [],
+                    SubParties = null,
+                    ParentParty = null
                 }
             ]
         };
@@ -283,14 +295,37 @@ public class AuthorizationHelperTests
                      * - resource6 (from accesspackage1)
                      */
                     Party = "party1",
+                    PartyUuid = default,
                     PartyId = 111,
-                    AuthorizedRolesAndAccessPackages = ["role1", "role2", "accesspackage1"],
+                    Name = "party1",
+                    DateOfBirth = null,
+                    PartyType = AuthorizedPartyType.Person,
+                    IsDeleted = false,
+                    HasKeyRole = false,
+                    IsCurrentEndUser = false,
+                    IsMainAdministrator = false,
+                    IsAccessManager = false,
+                    HasOnlyAccessToSubParties = false,
                     AuthorizedResources = ["resource1", "resource5"],
+                    AuthorizedRolesAndAccessPackages = ["role1", "role2", "accesspackage1"],
                     AuthorizedInstances =
                     [
-                        new() { InstanceId = "00000000-0000-0000-0000-000000000001", ResourceId = "app_org_app-1" },
-                        new() { InstanceId = "00000000-0000-0000-0000-000000000002", ResourceId = "app_org_app-2" }
-                    ]
+                        new()
+                        {
+                            InstanceId = "00000000-0000-0000-0000-000000000001",
+                            InstanceRef = null,
+                            ResourceId = "app_org_app-1",
+
+                        },
+                        new()
+                        {
+                            InstanceId = "00000000-0000-0000-0000-000000000002",
+                            InstanceRef = null,
+                            ResourceId = "app_org_app-2",
+                        }
+                    ],
+                    SubParties = null,
+                    ParentParty = null
                 },
 
                 new()
@@ -307,13 +342,30 @@ public class AuthorizationHelperTests
                      * - resource8 (from accesspackage2)
                      */
                     Party = "party2",
+                    PartyUuid = default,
                     PartyId = 222,
-                    AuthorizedRolesAndAccessPackages = ["role2", "accesspackage1", "accesspackage2"],
+                    Name = "party2",
+                    DateOfBirth = null,
+                    PartyType = AuthorizedPartyType.Person,
+                    IsDeleted = false,
+                    HasKeyRole = false,
+                    IsCurrentEndUser = false,
+                    IsMainAdministrator = false,
+                    IsAccessManager = false,
+                    HasOnlyAccessToSubParties = false,
                     AuthorizedResources = ["resource1", "resource2", "resource5"],
+                    AuthorizedRolesAndAccessPackages = ["role2", "accesspackage1", "accesspackage2"],
                     AuthorizedInstances =
                     [
-                        new() { InstanceId = "00000000-0000-0000-0000-000000000003", ResourceId = "app_org_app-2" }
-                    ]
+                        new()
+                        {
+                            InstanceId = "00000000-0000-0000-0000-000000000003",
+                            InstanceRef = null,
+                            ResourceId = "app_org_app-2",
+                        }
+                    ],
+                    SubParties = null,
+                    ParentParty = null
                 },
 
                 new()
@@ -324,9 +376,22 @@ public class AuthorizationHelperTests
                      * - resource6 (from AuthorizedResources)
                      */
                     Party = "party3",
+                    PartyUuid = default,
                     PartyId = 333,
+                    Name = "party3",
+                    DateOfBirth = null,
+                    PartyType = AuthorizedPartyType.Person,
+                    IsDeleted = false,
+                    HasKeyRole = false,
+                    IsCurrentEndUser = false,
+                    IsMainAdministrator = false,
+                    IsAccessManager = false,
+                    HasOnlyAccessToSubParties = false,
+                    AuthorizedResources = ["resource6"],
                     AuthorizedRolesAndAccessPackages = ["role3"],
-                    AuthorizedResources = ["resource6"]
+                    AuthorizedInstances = [],
+                    SubParties = null,
+                    ParentParty = null
                 },
 
                 new()
@@ -335,16 +400,45 @@ public class AuthorizationHelperTests
                      * Should be flattened to:
                      * - resource7 (from AuthorizedResources)
                      */
+
                     Party = "party4",
+                    PartyUuid = default,
                     PartyId = 444,
-                    AuthorizedRolesAndAccessPackages = [],
+                    Name = "party4",
+                    DateOfBirth = null,
+                    PartyType = AuthorizedPartyType.Person,
+                    IsDeleted = false,
+                    HasKeyRole = false,
+                    IsCurrentEndUser = false,
+                    IsMainAdministrator = false,
+                    IsAccessManager = false,
+                    HasOnlyAccessToSubParties = false,
                     AuthorizedResources = ["resource7"],
+                    AuthorizedRolesAndAccessPackages = [],
                     AuthorizedInstances =
                     [
-                        new() { InstanceId = "00000000-0000-0000-0000-000000000004", ResourceId = "app_org_app-3" },
-                        new() { InstanceId = "00000000-0000-0000-0000-000000000005", ResourceId = "not-an-app" },
-                        new() { InstanceId = "invalid-instance-id", ResourceId = "app_org_app-3" }
-                    ]
+                        new()
+                        {
+                            InstanceId = "00000000-0000-0000-0000-000000000004",
+                            InstanceRef = null,
+                            ResourceId = "app_org_app-3",
+                        },
+                        new()
+                        {
+                            InstanceId = "00000000-0000-0000-0000-000000000005",
+                            InstanceRef = null,
+                            ResourceId = "not-an-app",
+
+                        },
+                        new()
+                        {
+                            InstanceId = "invalid-instance-id",
+                            InstanceRef = null,
+                            ResourceId = "app_org_app-3",
+                        }
+                    ],
+                    SubParties = null,
+                    ParentParty = null
                 }
             ]
         };

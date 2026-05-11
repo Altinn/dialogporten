@@ -38,5 +38,25 @@
       "actorName": "LITTERATUR UROMANTISK",
       "actorId": "urn:altinn:person:identifier-ephemeral:**********"
     }
+  },
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "name": "systemlabel:MarkedAsUnopened",
+    "action": "set",
+    "performedBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    }
+  },
+  {
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "name": "systemlabel:MarkedAsUnopened",
+    "action": "remove",
+    "performedBy": {
+      "actorType": "PartyRepresentative",
+      "actorName": "LITTERATUR UROMANTISK",
+      "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+    }
   }
 ]

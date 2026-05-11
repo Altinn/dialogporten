@@ -1,26 +1,26 @@
 using System.Collections.ObjectModel;
 using System.Reflection;
 using AutoMapper;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
-using Digdir.Library.Entity.Abstractions.Features.Lookup;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
+using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using HotChocolate.Subscriptions;
 using MassTransit;
 using MediatR;
@@ -293,6 +293,14 @@ public class DialogApplication : IAsyncLifetime
             .Set<T>()
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public static IQueryable<T> QueryDbEntities<T>(IServiceScope scope) where T : class
+    {
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        return db
+            .Set<T>()
+            .AsNoTracking();
     }
 
     private ReadOnlyCollection<Table> GetLookupTables()

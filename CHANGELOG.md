@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.114.9](https://github.com/Altinn/dialogporten/compare/v1.114.8...v1.114.9) (2026-05-11)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency strawberryshake.tools to v15.1.16 ([#3920](https://github.com/Altinn/dialogporten/issues/3920)) ([526fa3b](https://github.com/Altinn/dialogporten/commit/526fa3bd1052fb1c12d149309ecc39b9c750d613))
+* **deps:** update grafana/setup-k6-action action to v1.2.1 ([#3921](https://github.com/Altinn/dialogporten/issues/3921)) ([e72cbce](https://github.com/Altinn/dialogporten/commit/e72cbcebcae6df1ea8fd7a60365cfadbc0bae8c2))
+* **deps:** update hotchocolate dependencies to 15.1.16 ([#3922](https://github.com/Altinn/dialogporten/issues/3922)) ([be7df55](https://github.com/Altinn/dialogporten/commit/be7df5570677a13aac66d88282afd041a0f82db0))
+* **deps:** update slackapi/slack-github-action action to v3.0.3 ([#3923](https://github.com/Altinn/dialogporten/issues/3923)) ([71a6bee](https://github.com/Altinn/dialogporten/commit/71a6beeb5fef33cc9fb36ab6eeca6256d599a5be))
+* **renovate:** group hotchocolate and strawberryshake updates ([#3925](https://github.com/Altinn/dialogporten/issues/3925)) ([ce58e33](https://github.com/Altinn/dialogporten/commit/ce58e333758665a5ef375aa688ab0556a83b0f4c))
+
 ## [1.114.8](https://github.com/Altinn/dialogporten/compare/v1.114.7...v1.114.8) (2026-05-07)
 
 

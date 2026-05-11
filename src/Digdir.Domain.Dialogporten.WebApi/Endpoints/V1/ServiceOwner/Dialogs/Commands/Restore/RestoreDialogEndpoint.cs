@@ -54,6 +54,7 @@ public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
     }
 }
 
+[OpenApiTypeName(nameof(RestoreDialogRequest))]
 public sealed class RestoreDialogRequest
 {
     public Guid DialogId { get; init; }

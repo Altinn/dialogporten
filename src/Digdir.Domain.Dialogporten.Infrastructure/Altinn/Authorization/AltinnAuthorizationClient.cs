@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.Authorization.ABAC.Xacml.JsonProfile;
@@ -260,18 +261,8 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
     {
-        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier();
-        if (partyIdentifier is null)
-        {
-            var (userType, externalId) = _user.GetPrincipal().GetUserType();
-            var safeExternalId = userType is DialogUserType.Values.Person
-                or DialogUserType.Values.ServiceOwnerOnBehalfOfPerson
-                or DialogUserType.Values.IdportenEmailIdentifiedUser
-                ? "<redacted>"
-                : externalId;
-            throw new UnreachableException(
-                $"GetEndUserPartyIdentifier returned null. UserType={userType}, ExternalId={safeExternalId}");
-        }
+        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier()
+            ?? throw CreateMissingEndUserPartyIdentifierException(_user.GetPrincipal());
 
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
             partyIdentifier,
@@ -312,6 +303,16 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             cancellationToken);
 
         return result;
+    }
+
+    private static UnreachableException CreateMissingEndUserPartyIdentifierException(ClaimsPrincipal principal)
+    {
+        var (userType, _) = principal.GetUserType();
+
+        return new(
+            "GetEndUserPartyIdentifier returned null. " +
+            $"UserType={userType}, " +
+            principal.GetDiagnosticSummary());
     }
 
     private async Task PopulateDialogIdsFromInstanceRefs(

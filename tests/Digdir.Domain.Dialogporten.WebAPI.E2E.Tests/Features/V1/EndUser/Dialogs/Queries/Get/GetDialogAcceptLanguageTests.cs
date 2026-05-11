@@ -16,11 +16,11 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var dialogId = await CreateDialogWithMultilingualContent();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages
+        var languages = new AcceptedLanguages
         {
-            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "nb", Weight = 1 }]
+            AcceptedLanguage = [new AcceptedLanguage { LanguageCode = "nb", Weight = 1 }]
         };
-        var response = await Fixture.EnduserApi.V1.GetDialog(dialogId, languages);
+        var response = await Fixture.EndUserApi.V1.GetDialog(dialogId, languages);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -42,11 +42,11 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var dialogId = await CreateDialogWithMultilingualContent();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages
+        var languages = new AcceptedLanguages
         {
-            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "invalid;;;", Weight = 1 }]
+            AcceptedLanguage = [new AcceptedLanguage { LanguageCode = "invalid;;;", Weight = 1 }]
         };
-        var response = await Fixture.EnduserApi.V1.GetDialog(dialogId, languages);
+        var response = await Fixture.EndUserApi.V1.GetDialog(dialogId, languages);
         response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
         response.Error!.Content.Should().Contain("Accept-Language");
     }
@@ -58,11 +58,11 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var dialogId = await CreateDialogWithMultilingualContent();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages
+        var languages = new AcceptedLanguages
         {
-            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "sv", Weight = 1 }]
+            AcceptedLanguage = [new AcceptedLanguage { LanguageCode = "sv", Weight = 1 }]
         };
-        var response = await Fixture.EnduserApi.V1.GetDialog(dialogId, languages);
+        var response = await Fixture.EndUserApi.V1.GetDialog(dialogId, languages);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -84,11 +84,11 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var dialogId = await CreateDialogWithMultilingualContent();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages
+        var languages = new AcceptedLanguages
         {
-            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "da", Weight = 1 }]
+            AcceptedLanguage = [new AcceptedLanguage { LanguageCode = "da", Weight = 1 }]
         };
-        var response = await Fixture.EnduserApi.V1.GetDialog(dialogId, languages);
+        var response = await Fixture.EndUserApi.V1.GetDialog(dialogId, languages);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -110,11 +110,11 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var dialogId = await CreateDialogWithMultilingualContent();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages
+        var languages = new AcceptedLanguages
         {
-            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "*", Weight = 1 }]
+            AcceptedLanguage = [new AcceptedLanguage { LanguageCode = "*", Weight = 1 }]
         };
-        var response = await Fixture.EnduserApi.V1.GetDialog(dialogId, languages);
+        var response = await Fixture.EndUserApi.V1.GetDialog(dialogId, languages);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -136,11 +136,11 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var dialogId = await CreateDialogWithMultilingualContent();
 
         // Act
-        var languages = new V1EndUserCommon_AcceptedLanguages
+        var languages = new AcceptedLanguages
         {
-            AcceptedLanguage = [new V1EndUserCommon_AcceptedLanguage { LanguageCode = "it", Weight = 1 }]
+            AcceptedLanguage = [new AcceptedLanguage { LanguageCode = "it", Weight = 1 }]
         };
-        var response = await Fixture.EnduserApi.V1.GetDialog(dialogId, languages);
+        var response = await Fixture.EndUserApi.V1.GetDialog(dialogId, languages);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -163,9 +163,9 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         var dialogId = await CreateDialogWithMultilingualContent();
 
         // Act — the SDK sends an empty Accept-Language header rather than omitting it
-        var response = await Fixture.EnduserApi.V1.GetDialog(
+        var response = await Fixture.EndUserApi.V1.GetDialog(
             dialogId,
-            new V1EndUserCommon_AcceptedLanguages());
+            new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

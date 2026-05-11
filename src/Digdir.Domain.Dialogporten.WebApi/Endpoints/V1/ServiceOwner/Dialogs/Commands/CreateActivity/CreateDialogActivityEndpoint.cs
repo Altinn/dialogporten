@@ -69,6 +69,7 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
     }
 }
 
+[OpenApiTypeName("CreateDialogActivityRequest")]
 public sealed class CreateActivityRequest : CreateActivityDto
 {
     public Guid DialogId { get; set; }

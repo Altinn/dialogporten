@@ -10,11 +10,11 @@ public static class EnduserApiExtensions
     {
         public Task<IApiResponse> SetSystemLabels(
             Guid dialogId,
-            Action<V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest>? modify = null,
+            Action<SetDialogSystemLabelRequest>? modify = null,
             Guid? revision = null,
             CancellationToken? cancellationToken = null)
         {
-            var request = new V1EndUserEndUserContextCommandsSetSystemLabel_SetDialogSystemLabelRequest
+            var request = new SetDialogSystemLabelRequest
             {
                 AddLabels = []
             };
@@ -26,9 +26,9 @@ public static class EnduserApiExtensions
                 cancellationToken ?? TestContext.Current.CancellationToken);
         }
 
-        public Task<IApiResponse<V1EndUserDialogsQueriesGet_Dialog>> GetDialog(
+        public Task<IApiResponse<Dialog>> GetDialog(
             Guid dialogId,
-            V1EndUserCommon_AcceptedLanguages? acceptedLanguages = null,
+            AcceptedLanguages? acceptedLanguages = null,
             CancellationToken cancellationToken = default) =>
             enduserApi.V1.GetDialog(
                 dialogId,
@@ -36,17 +36,17 @@ public static class EnduserApiExtensions
                 cancellationToken);
 
         public Task<IApiResponse> BulkSetSystemLabels(
-            Action<V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel> modify,
+            Action<BulkSetSystemLabel> modify,
             CancellationToken? cancellationToken = null)
         {
-            var request = new V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel();
+            var request = new BulkSetSystemLabel();
             modify(request);
             return enduserApi.V1.BulkSetDialogSystemLabels(
                 request,
                 cancellationToken ?? TestContext.Current.CancellationToken);
         }
 
-        public Task<IApiResponse<ICollection<V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> GetSystemLabelAssignmentLog(
+        public Task<IApiResponse<ICollection<LabelAssignmentLog>>> GetSystemLabelAssignmentLog(
             Guid dialogId,
             CancellationToken? cancellationToken = null) =>
             enduserApi.V1.SearchDialogLabelAssignmentLogs(

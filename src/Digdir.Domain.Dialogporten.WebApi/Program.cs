@@ -270,6 +270,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();
+            document.RemoveRequiredPropertiesFromSchemas();
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;
@@ -280,7 +281,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.CleanupPaginatedLists();
         s.EnsureJsonPatchConsumes();
 
-        s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator();
+        s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
 
         if (audience is not null)
         {

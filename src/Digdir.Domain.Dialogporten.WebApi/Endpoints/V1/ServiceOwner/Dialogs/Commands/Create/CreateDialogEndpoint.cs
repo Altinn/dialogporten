@@ -53,6 +53,7 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
     }
 }
 
+[OpenApiTypeName(nameof(CreateDialogRequest))]
 public sealed class CreateDialogRequest
 {
     [HideFromDocs]

@@ -52,6 +52,7 @@ public sealed class UpdateFormSavedActivityTimeEndpoint : Endpoint<UpdateFormSav
     }
 }
 
+[OpenApiTypeName(nameof(UpdateFormSavedActivityTimeRequest))]
 public sealed class UpdateFormSavedActivityTimeRequest
 {
     public Guid DialogId { get; set; }

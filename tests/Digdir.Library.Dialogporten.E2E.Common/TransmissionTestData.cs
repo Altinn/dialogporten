@@ -1,11 +1,10 @@
 using Altinn.ApiClients.Dialogporten.Features.V1;
-using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using static Altinn.ApiClients.Dialogporten.Features.V1.Attachments_AttachmentUrlConsumerType;
 
-namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Transmissions.Queries;
+namespace Digdir.Library.Dialogporten.E2E.Common;
 
-internal static class TransmissionTestData
+public static class TransmissionTestData
 {
     public static void AddComplexTransmissions(V1ServiceOwnerDialogsCommandsCreate_Dialog dialog)
     {
@@ -20,7 +19,7 @@ internal static class TransmissionTestData
         {
             t.Sender = new()
             {
-                ActorType = Altinn.ApiClients.Dialogporten.Features.V1.Actors_ActorType.PartyRepresentative,
+                ActorType = Actors_ActorType.PartyRepresentative,
                 ActorId = $"urn:altinn:organization:identifier-no:{E2EConstants.GetDefaultServiceOwnerOrgNr()}"
             };
             t.Content.Summary = new() { Value = [DialogTestData.CreateLocalization("Summary")] };

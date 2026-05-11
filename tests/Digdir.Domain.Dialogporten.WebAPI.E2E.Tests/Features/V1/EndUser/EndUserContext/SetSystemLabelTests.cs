@@ -4,7 +4,7 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.DialogEndUserContextsEntities_SystemLabel;
+using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUserContext;
 
@@ -18,7 +18,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var response = await Fixture.EnduserApi
+        var response = await Fixture.EndUserApi
             .SetSystemLabels(dialogId, request => request.AddLabels = [Bin]);
 
         // Assert
@@ -32,13 +32,13 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelResponse = await Fixture.EnduserApi
+        var setLabelResponse = await Fixture.EndUserApi
             .SetSystemLabels(dialogId, request => request.AddLabels = [Bin]);
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var labelLogResponse = await Fixture.EnduserApi
+        var labelLogResponse = await Fixture.EndUserApi
             .GetSystemLabelAssignmentLog(dialogId);
 
         labelLogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -46,7 +46,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         labelLog.Should().HaveCount(1);
         labelLog.Should().ContainSingle(x => x.Action == "set")
             .Which.PerformedBy.ActorType.Should()
-            .Be(Actors_ActorType.PartyRepresentative);
+            .Be(ActorType.PartyRepresentative);
     }
 
     [E2EFact]
@@ -56,7 +56,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act - First set Bin label
-        var firstSetLabelResponse = await Fixture.EnduserApi
+        var firstSetLabelResponse = await Fixture.EndUserApi
             .SetSystemLabels(
                 dialogId,
                 request => request.AddLabels = [Bin]);
@@ -64,7 +64,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         firstSetLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         // Act - Then change to Archive label
-        var secondSetLabelResponse = await Fixture.EnduserApi
+        var secondSetLabelResponse = await Fixture.EndUserApi
             .SetSystemLabels(
                 dialogId,
                 request => request.AddLabels = [Archive]);
@@ -72,7 +72,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Assert
         secondSetLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var labelLogResponse = await Fixture.EnduserApi
+        var labelLogResponse = await Fixture.EndUserApi
             .GetSystemLabelAssignmentLog(dialogId);
 
         labelLogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -82,7 +82,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         labelLog.Should().AllSatisfy(x =>
                 x.PerformedBy.Should().NotBeNull())
             .And.AllSatisfy(x => x.PerformedBy.ActorType
-                .Should().Be(Actors_ActorType.PartyRepresentative));
+                .Should().Be(ActorType.PartyRepresentative));
 
         labelLog.Where(x => x.Action == "set").Should().HaveCount(2);
         labelLog.Should().ContainSingle(x => x.Action == "remove");
@@ -95,12 +95,12 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act
-        var setLabelResponse = await Fixture.EnduserApi
+        var setLabelResponse = await Fixture.EndUserApi
             .SetSystemLabels(
                 dialogId,
                 request => request.AddLabels = [Bin, Archive]);
 
-        var dialogResponse = await Fixture.EnduserApi.GetDialog(dialogId);
+        var dialogResponse = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
@@ -120,7 +120,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Act
         var invalidRevision = Guid.NewGuid();
 
-        var setLabelResponse = await Fixture.EnduserApi
+        var setLabelResponse = await Fixture.EndUserApi
             .SetSystemLabels(
                 dialogId,
                 request => request.AddLabels = [Bin],
@@ -138,7 +138,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .CreateSimpleDialogAsync(x => x.Progress = 68);
 
         // Set Archive label
-        await Fixture.EnduserApi
+        await Fixture.EndUserApi
             .SetSystemLabels(
                 dialogId,
                 request => request.AddLabels = [Archive]);
@@ -157,7 +157,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Assert
         patchResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var labelLogResponse = await Fixture.EnduserApi
+        var labelLogResponse = await Fixture.EndUserApi
             .GetSystemLabelAssignmentLog(dialogId);
 
         labelLogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -166,10 +166,10 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         labelLog.Should().ContainSingle(x => x.Action == "set")
             .Which.PerformedBy.ActorType.Should()
-            .Be(Actors_ActorType.PartyRepresentative);
+            .Be(ActorType.PartyRepresentative);
 
         labelLog.Should().ContainSingle(x => x.Action == "remove")
             .Which.PerformedBy.ActorType.Should()
-            .Be(Actors_ActorType.ServiceOwner);
+            .Be(ActorType.ServiceOwner);
     }
 }

@@ -10,8 +10,12 @@ namespace Digdir.Domain.Dialogporten.WebApi.Unit.Tests.Features.V1;
 
 public class OpenApiSpecSnapshotTests
 {
+    // The snapshot files are located at /docs/schema/V1 on the solution root.
+    // Committing a change to these files will trigger a build and publish
+    // of the npm package located in the same folder.
     public static TheoryData<string, string> GeneratedSpecs => new()
     {
+        { "swagger.json", "swagger" },
         { "openapi.v1.enduser.json", "openapi.v1.enduser" },
         { "openapi.v1.serviceowner.json", "openapi.v1.serviceowner" }
     };

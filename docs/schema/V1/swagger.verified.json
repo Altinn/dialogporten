@@ -5656,11 +5656,6 @@
             "nullable": true,
             "type": "string"
           },
-          "deletedAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
           "description": {
             "items": {
               "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
@@ -5867,12 +5862,6 @@
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
-            "type": "string"
-          },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
             "type": "string"
           },
           "extendedType": {

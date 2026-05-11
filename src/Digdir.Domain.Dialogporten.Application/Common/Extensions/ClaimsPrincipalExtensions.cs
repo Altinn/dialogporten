@@ -36,6 +36,22 @@ public static class ClaimsPrincipalExtensions
     public const string ScopeClaim = "scope";
     public const string AltinnOrgClaim = "urn:altinn:org";
 
+    extension(ClaimsPrincipal claimsPrincipal)
+    {
+        public string GetDiagnosticSummary()
+        {
+            ArgumentNullException.ThrowIfNull(claimsPrincipal);
+
+            // Takes the first 30 claims and formats them with a maximum length of 50 characters
+            // User data is included in the diagnostic summary.
+            return string.Join(", ", claimsPrincipal.Claims.Take(30).Select(claim =>
+            {
+                var s = claim.ToString();
+                return s[..Math.Min(s.Length, 50)];
+            }));
+        }
+    }
+
     public static bool TryGetClaimValue(this ClaimsPrincipal claimsPrincipal, string claimType,
         [NotNullWhen(true)] out string? value)
     {

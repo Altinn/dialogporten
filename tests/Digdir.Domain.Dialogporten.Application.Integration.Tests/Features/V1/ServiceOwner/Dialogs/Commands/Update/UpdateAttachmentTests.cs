@@ -73,6 +73,25 @@ public class UpdateAttachmentTests(DialogApplication application) : ApplicationC
     }
 
     [Fact]
+    public Task Can_Add_New_Attachment_Url_With_User_Defined_Id_To_Existing_Attachment()
+    {
+        var newUrlId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.AddAttachment())
+            .AssertSuccessAndUpdateDialog(x =>
+                x.Dto.Attachments.Single().Urls.Add(new AttachmentUrlDto
+                {
+                    Id = newUrlId,
+                    Url = new Uri("https://example.com/new.pdf"),
+                    ConsumerType = AttachmentUrlConsumerType.Values.Gui
+                }))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Attachments.Single().Urls.Should().Contain(u => u.Id == newUrlId));
+    }
+
+    [Fact]
     public Task Does_Not_Recreate_Dialog_Attachment_Url_When_User_Defined_Id_Is_Unchanged()
     {
         const string CreatedAtKey = "attachment-url-created-at";

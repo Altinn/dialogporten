@@ -1758,12 +1758,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public System.Guid? RelatedTransmissionId { get; set; }
 
         /// <summary>
-        /// The date and time when the transmission was deleted, if applicable.
-        /// </summary>
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        /// <summary>
         /// The type of the transmission.
         /// </summary>
         [JsonPropertyName("type")]

@@ -32,7 +32,7 @@ The SwaggerSnapshot test will fail if these files are not identical. It will als
 ## Code Style Guidelines
 - Use file-scoped namespaces with `using` directives outside the namespace.
 - 4‑space indentation (2 for JSON/YAML) with LF line endings.
-- PascalCase for classes and methods, camelCase for variables and parameters. Exception: test method names keep underscore-separated naming (e.g. `Should_Get_SeenLog_By_Id_Verify_Snapshot`).
+- PascalCase for classes and methods, camelCase for variables and parameters. Exception: test method names should have Snake_Case naming (e.g. `Should_Get_SeenLog_By_Id_Verify_Snapshot`).
 - Organize by feature folders following Clean Architecture (Domain/Application/Infrastructure/API layers).
 - Prefer expression bodies for single-line members and use `var` when the type is apparent.
 - Apply CQRS, domain events, repository pattern and rich domain result objects.

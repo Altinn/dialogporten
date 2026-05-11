@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.114.10](https://github.com/Altinn/dialogporten/compare/v1.114.9...v1.114.10) (2026-05-11)
+
+
+### Bug Fixes
+
+* Make seen log saves synchronous and fix IsContentSeen race condition ([#3892](https://github.com/Altinn/dialogporten/issues/3892)) ([5a5b800](https://github.com/Altinn/dialogporten/commit/5a5b800d079c8b1f7dcc7c8356ca93482efb70b1))
+
 ## [1.114.9](https://github.com/Altinn/dialogporten/compare/v1.114.8...v1.114.9) (2026-05-11)
 
 

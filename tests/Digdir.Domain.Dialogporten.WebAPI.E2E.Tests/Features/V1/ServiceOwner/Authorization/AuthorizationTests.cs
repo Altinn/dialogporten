@@ -141,7 +141,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             scenario,
             async (dialogId, transmissionId, _) =>
             {
-                var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
+                var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
                     dialogId,
                     transmissionId,
                     TestContext.Current.CancellationToken);

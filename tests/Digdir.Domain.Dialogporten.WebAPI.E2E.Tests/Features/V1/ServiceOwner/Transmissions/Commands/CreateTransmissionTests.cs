@@ -31,7 +31,7 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         var response =
             await Fixture.ServiceownerApi
-                .V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(
+                .V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
                     dialogId, transmissionId, TestContext.Current.CancellationToken);
 
         // Assert

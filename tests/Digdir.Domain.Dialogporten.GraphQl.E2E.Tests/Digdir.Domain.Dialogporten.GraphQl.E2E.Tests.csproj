@@ -34,17 +34,28 @@
                AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
             <Name ParameterType="System.String" Required="true" />
-            <Value ParameterType="System.String" Required="true" />
+            <Value ParameterType="System.String" />
+            <PreviousValue ParameterType="System.String" Output="true" />
         </ParameterGroup>
         <Task>
             <Code Type="Fragment" Language="cs">
-                System.Environment.SetEnvironmentVariable(Name, Value);
+                PreviousValue = System.Environment.GetEnvironmentVariable(Name);
+                System.Environment.SetEnvironmentVariable(Name, string.IsNullOrEmpty(Value) ? null : Value);
             </Code>
         </Task>
     </UsingTask>
 
-    <Target Name="EnableStrawberryShakeRollForward" BeforeTargets="_GenerateGraphQLCode">
-        <SetEnvVar Name="DOTNET_ROLL_FORWARD" Value="LatestMajor" />
+    <Target Name="EnableStrawberryShakeRollForward" BeforeTargets="GenerateGraphQLCode">
+        <SetEnvVar Name="DOTNET_ROLL_FORWARD" Value="LatestMajor">
+            <Output TaskParameter="PreviousValue" PropertyName="PrevDOTNET_ROLL_FORWARD" />
+        </SetEnvVar>
+    </Target>
+
+    <Target Name="EnsureStrawberryShakeRollForward" BeforeTargets="_GraphQLCodeGenerationRoot"
+            DependsOnTargets="EnableStrawberryShakeRollForward" />
+
+    <Target Name="RestoreStrawberryShakeRollForward" AfterTargets="_GenerateGraphQLCode">
+        <SetEnvVar Name="DOTNET_ROLL_FORWARD" Value="$(PrevDOTNET_ROLL_FORWARD)" />
     </Target>
 
 </Project>

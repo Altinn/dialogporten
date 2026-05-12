@@ -248,15 +248,17 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 
-        var authorizedParties = AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(
+        var result = AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(
             authorizedPartiesDto,
             authorizedPartiesRequest
         );
-        var authorizedPartiesFlattened = authorizedParties.Flatten();
+        var currentUser = result.AuthorizedParties.Find(p => p.IsCurrentEndUser);
+        if (currentUser is not null)
+        {
+            _partyNameRegistry.CacheName(currentUser.Party, currentUser.Name);
+        }
 
-        _partyNameRegistry.CacheNames(authorizedPartiesFlattened.GetNameByParty());
-
-        return authorizedParties;
+        return result;
     }
 
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)

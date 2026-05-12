@@ -47,6 +47,16 @@
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
       },
+      "Refit.HttpClientFactory": {
+        "type": "Direct",
+        "requested": "[10.1.6, )",
+        "resolved": "10.1.6",
+        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Http": "9.0.3",
+          "Refit": "10.1.6"
+        }
+      },
       "Refitter.SourceGenerator": {
         "type": "Direct",
         "requested": "[1.7.3, )",
@@ -257,15 +267,6 @@
           "Microsoft.OpenApi.Readers": "1.6.22"
         }
       },
-      "Refit.HttpClientFactory": {
-        "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Http": "9.0.3",
-          "Refit": "10.1.6"
-        }
-      },
       "SharpYaml": {
         "type": "Transitive",
         "resolved": "2.1.1",
@@ -284,7 +285,7 @@
         "type": "Project",
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
-          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.5, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.7, )",
           "NSec.Cryptography": "[25.4.0, )",
           "Refit": "[10.1.6, )",
           "Refit.HttpClientFactory": "[10.1.6, )"
@@ -337,6 +338,16 @@
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
       },
+      "Refit.HttpClientFactory": {
+        "type": "Direct",
+        "requested": "[10.1.6, )",
+        "resolved": "10.1.6",
+        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Http": "9.0.3",
+          "Refit": "10.1.6"
+        }
+      },
       "Refitter.SourceGenerator": {
         "type": "Direct",
         "requested": "[1.7.3, )",
@@ -549,15 +560,6 @@
           "Microsoft.OpenApi.Readers": "1.6.22"
         }
       },
-      "Refit.HttpClientFactory": {
-        "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Http": "9.0.3",
-          "Refit": "10.1.6"
-        }
-      },
       "SharpYaml": {
         "type": "Transitive",
         "resolved": "2.1.1",
@@ -581,7 +583,7 @@
         "type": "Project",
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
-          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.5, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.7, )",
           "NSec.Cryptography": "[25.4.0, )",
           "Refit": "[10.1.6, )",
           "Refit.HttpClientFactory": "[10.1.6, )"
@@ -634,6 +636,16 @@
         "resolved": "10.1.6",
         "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
       },
+      "Refit.HttpClientFactory": {
+        "type": "Direct",
+        "requested": "[10.1.6, )",
+        "resolved": "10.1.6",
+        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Http": "9.0.3",
+          "Refit": "10.1.6"
+        }
+      },
       "Refitter.SourceGenerator": {
         "type": "Direct",
         "requested": "[1.7.3, )",
@@ -846,15 +858,6 @@
           "Microsoft.OpenApi.Readers": "1.6.22"
         }
       },
-      "Refit.HttpClientFactory": {
-        "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Http": "9.0.3",
-          "Refit": "10.1.6"
-        }
-      },
       "SharpYaml": {
         "type": "Transitive",
         "resolved": "2.1.1",
@@ -878,7 +881,7 @@
         "type": "Project",
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
-          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.5, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.7, )",
           "NSec.Cryptography": "[25.4.0, )",
           "Refit": "[10.1.6, )",
           "Refit.HttpClientFactory": "[10.1.6, )"

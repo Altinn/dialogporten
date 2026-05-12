@@ -24,7 +24,6 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
                 x.Dto.Activities.Clear();
             })
             .GetEndUserDialog() // Trigger seen log
-            .ConsumeEvents()
             .CreateComplexDialog((x, _) =>
             {
                 x.Dto = SnapshotDialog.Create();
@@ -49,7 +48,6 @@ public class SearchSnapshotTests : ApplicationCollectionFixture
                 };
             })
             .GetEndUserDialog() // Trigger seen log
-            .ConsumeEvents()
             .SearchServiceOwnerDialogs(_ => { })
             .VerifySnapshot(x =>
                 x.IgnoreMember(nameof(PaginatedList<>.ContinuationToken)))

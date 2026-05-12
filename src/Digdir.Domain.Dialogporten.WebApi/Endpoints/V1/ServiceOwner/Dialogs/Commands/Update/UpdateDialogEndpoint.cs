@@ -63,6 +63,7 @@ public sealed class UpdateDialogEndpoint : Endpoint<UpdateDialogRequest>
     }
 }
 
+[OpenApiTypeName(nameof(UpdateDialogRequest))]
 public sealed class UpdateDialogRequest
 {
     public Guid DialogId { get; set; }

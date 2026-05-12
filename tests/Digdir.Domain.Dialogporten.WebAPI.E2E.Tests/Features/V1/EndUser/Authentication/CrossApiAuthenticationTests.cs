@@ -25,7 +25,7 @@ public class CrossApiAuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase
         using var _ = Fixture.UseEndUserTokenOverrides(tokenOverride: serviceOwnerToken);
 
         var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
-            Fixture.EnduserApi.V1, endpointScenario.Method, TestContext.Current.CancellationToken);
+            Fixture.EndUserApi.V1, endpointScenario.Method, TestContext.Current.CancellationToken);
 
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }

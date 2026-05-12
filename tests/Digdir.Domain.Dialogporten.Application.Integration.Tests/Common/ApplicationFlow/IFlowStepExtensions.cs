@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
@@ -73,6 +73,10 @@ using SetSystemLabelCommandSO =
 using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionAttachmentDto;
 using TransmissionAttachmentUrlDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionAttachmentUrlDto;
 using TransmissionNavigationalActionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.TransmissionNavigationalActionDto;
+using SearchSeenLogQueryEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs.SearchSeenLogQuery;
+using SearchSeenLogResultEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs.SearchSeenLogResult;
+using SearchSeenLogQuerySo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchSeenLogs.SearchSeenLogQuery;
+using SearchSeenLogResultSo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchSeenLogs.SearchSeenLogResult;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -189,6 +193,16 @@ public static class IFlowStepExtensions
             };
 
             initialState?.Invoke(command, step.Context);
+            return command;
+        });
+
+    public static IFlowExecutor<SearchLabelAssignmentLogResult> GetLabelAssignmentLogs(this IFlowStep step) =>
+        step.SendCommand(x =>
+        {
+            var command = new SearchLabelAssignmentLogQuery
+            {
+                DialogId = x.GetDialogId(),
+            };
             return command;
         });
 
@@ -385,8 +399,11 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<GetDialogResultEU> GetEndUserDialog(this IFlowStep step, Guid? dialogId = null) =>
         step.SendCommand(ctx => new GetDialogQueryEU { DialogId = dialogId ?? ctx.GetDialogId() });
 
-    public static IFlowExecutor<SearchSeenLogResult> GetEndUserSeenLogs(this IFlowStep step) =>
-        step.SendCommand(ctx => new SearchSeenLogQuery { DialogId = ctx.GetDialogId() });
+    public static IFlowExecutor<SearchSeenLogResultEu> GetEndUserSeenLogs(this IFlowStep step) =>
+        step.SendCommand(ctx => new SearchSeenLogQueryEu { DialogId = ctx.GetDialogId() });
+
+    public static IFlowExecutor<SearchSeenLogResultSo> GetServiceOwnerSeenLogs(this IFlowStep step) =>
+        step.SendCommand(ctx => new SearchSeenLogQuerySo { DialogId = ctx.GetDialogId() });
 
     public static IFlowExecutor<GetTransmissionResultSO> GetServiceOwnerTransmission(this IFlowStep step,
         Guid transmissionId) =>

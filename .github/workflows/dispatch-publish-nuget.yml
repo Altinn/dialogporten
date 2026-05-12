@@ -1,0 +1,60 @@
+name: Dispatch Publish NuGet
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "SDK project to publish"
+        required: true
+        type: choice
+        options:
+          - ServiceOwner (Legacy)
+          - ServiceOwner
+          - EndUser
+      version:
+        description: "Version to publish (e.g., `1.23.4`)"
+        required: true
+        type: string
+      publish_as_stable:
+        description: "Publish as stable release. If unchecked, publishes as RC (`<version>-rc+<shortSha>`)."
+        default: false
+        required: false
+        type: boolean
+      source:
+        description: "NuGet source"
+        required: true
+        default: "https://api.nuget.org/v3/index.json"
+        type: string
+      ref:
+        description: "Branch or tag ref to publish from. Defaults to the workflow ref."
+        required: false
+        type: string
+
+run-name: Dispatch publish nuget ${{ inputs.project }} v${{ inputs.version }}${{ inputs.publish_as_stable && ' (stable)' || ' (rc)' }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ inputs.project }}-${{ inputs.version }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  generate-git-short-sha:
+    name: Generate git short sha
+    uses: ./.github/workflows/workflow-generate-git-short-sha.yml
+
+  publish-nuget:
+    name: Publish ${{ inputs.project }} v${{ inputs.version }}
+    needs: [generate-git-short-sha]
+    uses: ./.github/workflows/workflow-publish-nuget.yml
+    with:
+      version: ${{ inputs.publish_as_stable && inputs.version || format('{0}-rc+{1}', inputs.version, needs.generate-git-short-sha.outputs.gitShortSha) }}
+      path: ${{ (inputs.project == 'ServiceOwner (Legacy)' && 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj') || (inputs.project == 'ServiceOwner' && 'src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj') || 'src/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj' }}
+      source: ${{ inputs.source }}
+      ref: ${{ inputs.ref || github.ref }}
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    permissions:
+      contents: read
+      packages: write

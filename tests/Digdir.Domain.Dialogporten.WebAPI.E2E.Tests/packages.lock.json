@@ -109,8 +109,8 @@
       },
       "DeterministicGuids": {
         "type": "Transitive",
-        "resolved": "1.0.10",
-        "contentHash": "R0Z2dmYBDqYrYo7Qgw1sUzea1cePGGAOEqLfOR8zkmn9q6eKShrPZoYMCisEUiKyZstRUsKdVuDWXRoTMtTsHw=="
+        "resolved": "1.0.11",
+        "contentHash": "wEhcv8QYNfxWG2mMByiOcqQY+NOYgaDMAuj5Tygx2x6pUEVUPHwyHzktrhrO5ry58JRx9nZIzgpM/WX02Achug=="
       },
       "DiffEngine": {
         "type": "Transitive",
@@ -769,18 +769,8 @@
       "Altinn.ApiClients.Dialogporten": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Dialogporten.Common": "[1.0.0, )",
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
           "Microsoft.Extensions.Hosting.Abstractions": "[10.0.7, )",
-          "NSec.Cryptography": "[25.4.0, )",
-          "Refit": "[10.1.6, )"
-        }
-      },
-      "Altinn.ApiClients.Dialogporten.Common": {
-        "type": "Project",
-        "dependencies": {
-          "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
-          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.5, )",
           "NSec.Cryptography": "[25.4.0, )",
           "Refit": "[10.1.6, )",
           "Refit.HttpClientFactory": "[10.1.6, )"
@@ -789,11 +779,11 @@
       "Altinn.ApiClients.Dialogporten.EndUser": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Dialogporten.Common": "[1.0.0, )",
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
-          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.5, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.7, )",
           "NSec.Cryptography": "[25.4.0, )",
-          "Refit": "[10.1.6, )"
+          "Refit": "[10.1.6, )",
+          "Refit.HttpClientFactory": "[10.1.6, )"
         }
       },
       "digdir.domain.dialogporten.application": {
@@ -819,7 +809,7 @@
       "digdir.domain.dialogporten.domain": {
         "type": "Project",
         "dependencies": {
-          "DeterministicGuids": "[1.0.10, )",
+          "DeterministicGuids": "[1.0.11, )",
           "Digdir.Library.Entity.Abstractions": "[1.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.7, )"
         }

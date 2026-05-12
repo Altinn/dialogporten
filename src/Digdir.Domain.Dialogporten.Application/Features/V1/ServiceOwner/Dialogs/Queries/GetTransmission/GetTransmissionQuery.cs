@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -23,17 +22,14 @@ public sealed partial class GetTransmissionResult : OneOfBase<TransmissionDto, E
 
 internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmissionQuery, GetTransmissionResult>
 {
-    private readonly IMapper _mapper;
     private readonly IDialogDbContext _dbContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
-    public GetTransmissionQueryHandler(IMapper mapper, IDialogDbContext dbContext, IUserResourceRegistry userResourceRegistry)
+    public GetTransmissionQueryHandler(IDialogDbContext dbContext, IUserResourceRegistry userResourceRegistry)
     {
-        ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
 
-        _mapper = mapper;
         _dbContext = dbContext;
         _userResourceRegistry = userResourceRegistry;
     }
@@ -81,7 +77,7 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         var transmission = dialog.Transmissions.FirstOrDefault();
 
         return transmission is null
-            ? (GetTransmissionResult)new EntityNotFound<DialogTransmission>(request.TransmissionId)
-            : _mapper.Map<TransmissionDto>(transmission);
+            ? new EntityNotFound<DialogTransmission>(request.TransmissionId)
+            : transmission.ToDto();
     }
 }

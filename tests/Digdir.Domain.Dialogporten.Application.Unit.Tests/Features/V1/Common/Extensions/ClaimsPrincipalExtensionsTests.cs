@@ -10,6 +10,24 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Features.V1.Common.E
 public class ClaimsPrincipalExtensionsTests
 {
     [Fact]
+    public void GetDiagnosticSummary_Should_Include_Claim_Keys_And_Claim_Values()
+    {
+        // Arrange
+        const string sensitiveClaimValue = "sensitive-value";
+        var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim("custom_claim", sensitiveClaimValue),
+            new Claim("scope", "dialogporten:enduser"),
+            new Claim("acr", "Level4")
+        ], "Bearer"));
+
+        // Act
+        var summary = claimsPrincipal.GetDiagnosticSummary();
+
+        // Assert
+        Assert.Contains("custom_claim: sensitive-value, scope: dialogporten:enduser, acr: Level4", summary);
+    }
+
+    [Fact]
     public void GetAuthenticationLevel_Should_Parse_Idporten_Acr_Claim_For_Level3()
     {
         // Arrange

@@ -50,6 +50,7 @@ public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionRequ
     }
 }
 
+[OpenApiTypeName("GetDialogTransmissionRequest")]
 public sealed class GetTransmissionRequest
 {
     public Guid DialogId { get; set; }

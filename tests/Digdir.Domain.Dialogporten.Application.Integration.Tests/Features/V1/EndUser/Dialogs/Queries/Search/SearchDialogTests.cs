@@ -75,7 +75,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -83,7 +82,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             })
             .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -103,7 +101,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             })
             .AssertResult<PaginatedList<DialogDto>>(x => x.Items.Should().HaveCount(0))
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -121,7 +118,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .CreateSimpleDialog()
-            .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -134,7 +130,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 dialogs.Should().AllSatisfy(d => d.IsContentSeen.Should().BeFalse());
             })
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];
@@ -159,7 +154,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 dialogs.Should().AllSatisfy(d => d.IsContentSeen.Should().BeFalse());
             })
             .GetEndUserDialog()
-            .ConsumeEvents()
             .SearchEndUserDialogs((x, ctx) =>
             {
                 x.Party = [ctx.GetParty()];

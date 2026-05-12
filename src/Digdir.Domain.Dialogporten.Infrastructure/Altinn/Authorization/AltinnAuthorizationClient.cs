@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.Authorization.ABAC.Xacml.JsonProfile;
@@ -19,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
@@ -38,6 +40,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private readonly ILogger _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IOptionsMonitor<ApplicationSettings> _applicationSettings;
+    private readonly IPartyNameRegistry _partyNameRegistry;
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -54,7 +57,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         IPartyResourceReferenceRepository partyResourceReferenceRepository,
         ILogger<AltinnAuthorizationClient> logger,
         IServiceScopeFactory serviceScopeFactory,
-        IOptionsMonitor<ApplicationSettings> applicationSettings)
+        IOptionsMonitor<ApplicationSettings> applicationSettings,
+        IPartyNameRegistry partyNameRegistry
+    )
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(cacheProvider);
@@ -65,6 +70,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(serviceScopeFactory);
         ArgumentNullException.ThrowIfNull(applicationSettings);
+        ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
         var pdpCache = cacheProvider.GetCache(nameof(Authorization));
         ArgumentNullException.ThrowIfNull(pdpCache);
@@ -86,6 +92,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
         _applicationSettings = applicationSettings;
+        _partyNameRegistry = partyNameRegistry;
     }
 
     public async Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
@@ -151,9 +158,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         bool flatten,
         CancellationToken cancellationToken)
     {
-        AuthorizedPartiesResult authorizedParties;
-
-
         // Self-identified/Feide users are not currently supported in the access management API, so we need to emulate it.
         // Assume they can only represent themselves, and have no delegated rights.
 
@@ -175,14 +179,18 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             default:
                 break;
         }
+        AuthorizedPartiesResult authorizedParties;
 
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
-            authorizedParties = await _partiesCache.GetOrSetAsync(authorizedPartiesRequest.GenerateCacheKey(), async token
-                => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token), token: cancellationToken);
+            authorizedParties = await _partiesCache.GetOrSetAsync(
+                authorizedPartiesRequest.GenerateCacheKey(),
+                async token => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token),
+                token: cancellationToken
+            );
         }
 
-        return flatten ? GetFlattenedAuthorizedParties(authorizedParties) : authorizedParties;
+        return flatten ? authorizedParties.Flatten() : authorizedParties;
     }
 
     private AuthorizedPartiesResult GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(
@@ -223,82 +231,10 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         UserHasRequiredAuthLevel(await _serviceResourceMinimumAuthenticationLevelResolver
             .GetMinimumAuthenticationLevel(serviceResource, cancellationToken));
 
-    // Create static empty lists to reuse and avoid allocations
-    private static readonly List<string> EmptyStringList = [];
-    private static readonly List<AuthorizedParty> EmptySubPartiesList = [];
-
-    private static AuthorizedPartiesResult GetFlattenedAuthorizedParties(AuthorizedPartiesResult authorizedParties)
-    {
-        var topLevelCount = authorizedParties.AuthorizedParties.Count;
-
-        var totalCapacity = topLevelCount;
-        for (var i = 0; i < topLevelCount; i++)
-        {
-            var party = authorizedParties.AuthorizedParties[i];
-            if (party.SubParties != null)
-            {
-                totalCapacity += party.SubParties.Count;
-            }
-        }
-
-        // Preallocate the exact size needed
-        var flattenedList = new List<AuthorizedParty>(totalCapacity);
-
-        for (var i = 0; i < topLevelCount; i++)
-        {
-            var party = authorizedParties.AuthorizedParties[i];
-
-            flattenedList.Add(new AuthorizedParty
-            {
-                Party = party.Party,
-                PartyId = party.PartyId,
-                DateOfBirth = party.DateOfBirth,
-                ParentParty = null,
-                AuthorizedResources = party.AuthorizedResources.Count > 0
-                    ? [.. party.AuthorizedResources]
-                    : EmptyStringList,
-                AuthorizedRolesAndAccessPackages = party.AuthorizedRolesAndAccessPackages.Count > 0
-                    ? [.. party.AuthorizedRolesAndAccessPackages]
-                    : EmptyStringList,
-                AuthorizedInstances = party.AuthorizedInstances.Count > 0
-                    ? [.. party.AuthorizedInstances]
-                    : [],
-                SubParties = EmptySubPartiesList
-            });
-
-            if (!(party.SubParties?.Count > 0)) continue;
-            var subCount = party.SubParties.Count;
-            for (var j = 0; j < subCount; j++)
-            {
-                var subParty = party.SubParties[j];
-                flattenedList.Add(new AuthorizedParty
-                {
-                    Party = subParty.Party,
-                    PartyId = subParty.PartyId,
-                    ParentParty = party.Party,
-                    DateOfBirth = subParty.DateOfBirth,
-                    AuthorizedResources = subParty.AuthorizedResources.Count > 0
-                        ? [.. subParty.AuthorizedResources]
-                        : EmptyStringList,
-                    AuthorizedRolesAndAccessPackages = subParty.AuthorizedRolesAndAccessPackages.Count > 0
-                        ? [.. subParty.AuthorizedRolesAndAccessPackages]
-                        : EmptyStringList,
-                    AuthorizedInstances = subParty.AuthorizedInstances.Count > 0
-                        ? [.. subParty.AuthorizedInstances]
-                        : [],
-                    SubParties = EmptySubPartiesList
-                });
-            }
-        }
-
-        return new AuthorizedPartiesResult
-        {
-            AuthorizedParties = flattenedList
-        };
-    }
-
-    private async Task<AuthorizedPartiesResult> PerformAuthorizedPartiesRequest(AuthorizedPartiesRequest authorizedPartiesRequest,
-        CancellationToken cancellationToken)
+    private async Task<AuthorizedPartiesResult> PerformAuthorizedPartiesRequest(
+        AuthorizedPartiesRequest authorizedPartiesRequest,
+        CancellationToken cancellationToken
+    )
     {
         var authorizedPartiesDto = await SendAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken);
         // System users might have no rights whatsoever, which is not an error condition. Other user types (persons, SI users)
@@ -312,23 +248,21 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             throw new UpstreamServiceException("access-management returned no authorized parties, missing Altinn profile?");
         }
 
-        return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(authorizedPartiesDto, authorizedPartiesRequest);
+        var authorizedParties = AuthorizedPartiesHelper.CreateAuthorizedPartiesResult(
+            authorizedPartiesDto,
+            authorizedPartiesRequest
+        );
+        var authorizedPartiesFlattened = authorizedParties.Flatten();
+
+        _partyNameRegistry.CacheNames(authorizedPartiesFlattened.GetNameByParty());
+
+        return authorizedParties;
     }
 
     private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
     {
-        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier();
-        if (partyIdentifier is null)
-        {
-            var (userType, externalId) = _user.GetPrincipal().GetUserType();
-            var safeExternalId = userType is DialogUserType.Values.Person
-                or DialogUserType.Values.ServiceOwnerOnBehalfOfPerson
-                or DialogUserType.Values.IdportenEmailIdentifiedUser
-                ? "<redacted>"
-                : externalId;
-            throw new UnreachableException(
-                $"GetEndUserPartyIdentifier returned null. UserType={userType}, ExternalId={safeExternalId}");
-        }
+        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier()
+            ?? throw CreateMissingEndUserPartyIdentifierException(_user.GetPrincipal());
 
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
             partyIdentifier,
@@ -371,6 +305,16 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return result;
     }
 
+    private static UnreachableException CreateMissingEndUserPartyIdentifierException(ClaimsPrincipal principal)
+    {
+        var (userType, _) = principal.GetUserType();
+
+        return new(
+            "GetEndUserPartyIdentifier returned null. " +
+            $"UserType={userType}, " +
+            principal.GetDiagnosticSummary());
+    }
+
     private async Task PopulateDialogIdsFromInstanceRefs(
         DialogSearchAuthorizationResult result,
         AuthorizedPartiesResult authorizedParties,
@@ -394,7 +338,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             var partyAuthorizedInstances = party.AuthorizedInstances
                 .Where(instance =>
                     constraintResources is null
-                    || constraintResources.Contains($"{Domain.Common.Constants.ServiceResourcePrefix}{instance.ResourceId}"))
+                    || constraintResources.Contains($"{Constants.ServiceResourcePrefix}{instance.ResourceId}"))
                 .ToList();
 
             if (partyAuthorizedInstances.Count == 0)

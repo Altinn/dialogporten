@@ -5,6 +5,7 @@ using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -51,6 +52,7 @@ public interface IDialogDbContext
     DbSet<ResourcePolicyInformation> ResourcePolicyInformation { get; }
 
     DbSet<ActorName> ActorName { get; }
+    DbSet<AttachmentUrl> AttachmentUrls { get; }
     DbSet<DialogAttachment> DialogAttachments { get; }
     DbSet<DialogTransmissionAttachment> DialogTransmissionAttachments { get; }
 

@@ -11,6 +11,7 @@ public sealed class SystemLabel(SystemLabel.Values id) :
 
     public enum Values
     {
+        // Keep PostgresFormattableStringBuilderExtensions.SupportedSystemLabelsMaskBitCount in sync when adding labels used by end-user search filters.
         Default = 1,
         Bin = 2,
         Archive = 3,

@@ -19,7 +19,7 @@ public class GetDialogVisibleFromTests(WebApiE2EFixture fixture) : E2ETestBase<W
             dialog => dialog.VisibleFrom = visibleFrom);
 
         // Act
-        var response = await Fixture.EnduserApi.GetDialog(dialogId);
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);

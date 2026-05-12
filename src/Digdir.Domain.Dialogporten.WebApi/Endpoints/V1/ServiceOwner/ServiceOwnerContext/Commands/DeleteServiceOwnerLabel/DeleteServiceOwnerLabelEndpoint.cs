@@ -87,6 +87,7 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
     }
 }
 
+[OpenApiTypeName(nameof(DeleteServiceOwnerLabelRequest))]
 public sealed class DeleteServiceOwnerLabelRequest
 {
     public Guid DialogId { get; set; }

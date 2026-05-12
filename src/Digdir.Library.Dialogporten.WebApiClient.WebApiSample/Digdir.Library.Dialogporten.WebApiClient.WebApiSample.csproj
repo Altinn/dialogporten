@@ -9,6 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
         <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj"/>
     </ItemGroup>
 

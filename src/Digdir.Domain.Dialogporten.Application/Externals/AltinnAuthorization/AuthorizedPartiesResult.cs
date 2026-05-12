@@ -4,14 +4,6 @@ public sealed class AuthorizedPartiesResult
 {
     public List<AuthorizedParty> AuthorizedParties { get; set; } = [];
 
-    public Dictionary<string, string> GetNameByParty()
-    {
-        return AuthorizedParties
-            .DistinctBy(x => x.Party)
-            .Select(x => (x.Party, x.Name))
-            .ToDictionary();
-    }
-
     /// <summary>
     /// - Moves all depth 1 SubParties to the root AuthorizedParties.
     /// - Sets all the SubParties references to null

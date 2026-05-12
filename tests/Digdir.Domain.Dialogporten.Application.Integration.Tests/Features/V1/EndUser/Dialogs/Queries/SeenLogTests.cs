@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,19 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.E
 public class SeenLogTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     private const string DummyService = "urn:altinn:resource:test-service";
+
+    [Fact]
+    public Task Get_Unseen_Dialog_Should_Produce_DialogUpdatedEvent() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var events = Application.GetPublishedEvents();
+                events.Should().ContainSingle(x => x is DialogCreatedDomainEvent);
+                events.Should().ContainSingle(x => x is DialogUpdatedDomainEvent);
+                events.Should().ContainSingle(x => x is DialogSeenDomainEvent);
+            });
 
     [Fact]
     public Task Search_Dialog_SeenLog_Should_Not_Return_User_Ids_Unhashed() =>

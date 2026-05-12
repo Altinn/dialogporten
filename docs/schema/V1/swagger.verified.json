@@ -10896,7 +10896,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
         "description": "Gets a single transmission belonging to a dialog.",
-        "operationId": "V1ServiceOwnerDialogsQueriesGetTransnission_DialogTransmission",
+        "operationId": "V1ServiceOwnerDialogsQueriesGetTransmission_DialogTransmission",
         "parameters": [
           {
             "in": "path",

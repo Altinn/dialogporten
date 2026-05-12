@@ -34,4 +34,28 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
             JsonSerializer.Serialize(response.Content));
     }
+
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Get_Transmission_With_Renamed_Client_Method()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(
+            TransmissionTestData.AddComplexTransmissions);
+
+        var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+
+        var transmissionId = dialog.Content.Transmissions
+            .Single(t => t.RelatedTransmissionId is not null).Id;
+
+        // Act
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
+            dialogId,
+            transmissionId,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        response.Content.Should().NotBeNull();
+    }
 }

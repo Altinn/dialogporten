@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransnission;
+namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 
 [OpenApiOperationId("GetDialogTransmission")]
 public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionQuery, TransmissionDto>

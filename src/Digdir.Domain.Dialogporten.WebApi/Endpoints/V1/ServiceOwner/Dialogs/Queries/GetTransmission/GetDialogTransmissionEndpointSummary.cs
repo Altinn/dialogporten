@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
-namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransnission;
+namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 
 public sealed class GetDialogTransmissionEndpointSummary : Summary<GetDialogTransmissionEndpoint>
 {

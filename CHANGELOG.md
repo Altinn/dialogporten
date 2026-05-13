@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.114.11](https://github.com/Altinn/dialogporten/compare/v1.114.10...v1.114.11) (2026-05-12)
+
+
+### Bug Fixes
+
+* Cache the name of the user thats authenticated, not all names ([#3939](https://github.com/Altinn/dialogporten/issues/3939)) ([db16d26](https://github.com/Altinn/dialogporten/commit/db16d26b474158b8de919470f680cd9372f891fc))
+* sdk transmission namespace typo ([#3936](https://github.com/Altinn/dialogporten/issues/3936)) ([17129d8](https://github.com/Altinn/dialogporten/commit/17129d80be42b7aa2255d7f7b65eecbf54b75cb0)), closes [#3919](https://github.com/Altinn/dialogporten/issues/3919)
+* shorten Azure Container Apps revision suffix ([#3942](https://github.com/Altinn/dialogporten/issues/3942)) ([e962375](https://github.com/Altinn/dialogporten/commit/e962375228b59c38aee4a7ab3fb5100c3fe032f5))
+
+
+### Miscellaneous Chores
+
+* bump azure-login action AZ CLI version to 2.86.0 ([#3934](https://github.com/Altinn/dialogporten/issues/3934)) ([4596530](https://github.com/Altinn/dialogporten/commit/45965301f1b0cc0f3cf9f0065c0993edeb6ea06e))
+
 ## [1.114.10](https://github.com/Altinn/dialogporten/compare/v1.114.9...v1.114.10) (2026-05-11)
 
 

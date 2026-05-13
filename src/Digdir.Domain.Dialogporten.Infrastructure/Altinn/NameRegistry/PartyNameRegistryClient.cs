@@ -68,14 +68,11 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         };
     }
 
-    public void CacheNames(Dictionary<string, string> nameByActorId)
+    public void CacheName(string actorId, string name)
     {
-        foreach (var (actorId, name) in nameByActorId)
+        if (PartyIdentifier.TryParse(actorId, out var partyIdentifier))
         {
-            if (PartyIdentifier.TryParse(actorId, out var partyIdentifier))
-            {
-                _cache.Set(GetCacheKey(actorId), FlipNameIfPerson(partyIdentifier, name));
-            }
+            _cache.Set(GetCacheKey(actorId), FlipNameIfPerson(partyIdentifier, name));
         }
     }
 
@@ -191,12 +188,9 @@ internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
             : Task.FromResult<string?>("Gunnar Gunnarson");
     }
 
-    public void CacheNames(Dictionary<string, string> nameByActorId)
+    public void CacheName(string actorId, string name)
     {
-        foreach (var keyValuePair in nameByActorId)
-        {
-            _fakeCache.Remove(keyValuePair.Key);
-            _fakeCache.Add(keyValuePair.Key, keyValuePair.Value);
-        }
+        _fakeCache.Remove(actorId);
+        _fakeCache.Add(actorId, name);
     }
 }

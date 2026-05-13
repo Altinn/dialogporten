@@ -81,9 +81,9 @@ internal abstract class ServiceOwnerApiDecoratorBase : IServiceownerApi
         CancellationToken cancellationToken = default) =>
         _serviceownerApi.V1ServiceOwnerDialogsQueriesNotificationConditionNotificationCondition(dialogId, queryParams, cancellationToken);
 
-    public virtual Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(Guid dialogId, Guid transmissionId,
+    public virtual Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(Guid dialogId, Guid transmissionId,
         CancellationToken cancellationToken = default) =>
-        _serviceownerApi.V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(dialogId, transmissionId, cancellationToken);
+        _serviceownerApi.V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(dialogId, transmissionId, cancellationToken);
 
     public virtual Task<IApiResponse> V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(Guid dialogId, Guid transmissionId,
         V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest updateTransmissionRequest, Guid? if_Match,

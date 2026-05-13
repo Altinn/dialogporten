@@ -40,7 +40,16 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
-        await _db.Database.ExecuteSqlAsync($@"SELECT search.""UpsertDialogSearchOne""({dialogId})", cancellationToken);
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var command = new NpgsqlCommand(
+            @"SELECT search.""UpsertDialogSearchOne""(@p_dialog_id)",
+            connection)
+        {
+            CommandTimeout = 5
+        };
+        command.Parameters.AddWithValue("p_dialog_id", dialogId);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task<int> SeedFullAsync(bool resetExisting, CancellationToken ct) =>

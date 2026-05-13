@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using UserType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
 using Policy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
 
@@ -10,6 +11,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 public sealed class UserTypeValidationMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<UserTypeValidationMiddleware> _logger;
     private static readonly Dictionary<string, List<UserType>> ValidUserTypesForPolicy = new()
     {
         { Policy.EndUser, [UserType.Person, UserType.SystemUser, UserType.IdportenEmailIdentifiedUser, UserType.AltinnSelfIdentifiedUser, UserType.FeideUser] },
@@ -18,17 +20,27 @@ public sealed class UserTypeValidationMiddleware
         { Policy.ServiceProviderAdmin, [UserType.ServiceOwner] }
     };
 
-    public UserTypeValidationMiddleware(RequestDelegate next)
+    public UserTypeValidationMiddleware(RequestDelegate next, ILogger<UserTypeValidationMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
         if (context.User.Identity is { IsAuthenticated: true })
         {
-            if (!IsValidUserTypeForEndpoint(context, out var validUserTypes))
+            var (userType, _) = context.User.GetUserType();
+            if (!IsValidUserTypeForEndpoint(context, userType, out var validUserTypes))
             {
+                if (userType is UserType.Unknown)
+                {
+                    _logger.LogError(
+                        "The request was authenticated, but the user type could not be determined. UserType={UserType}, {DiagnosticSummary}",
+                        userType,
+                        context.User.GetDiagnosticSummary());
+                }
+
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 var response = context.GetResponseOrDefault(
                     context.Response.StatusCode,
@@ -48,6 +60,7 @@ public sealed class UserTypeValidationMiddleware
 
     private static bool IsValidUserTypeForEndpoint(
         HttpContext context,
+        UserType userType,
         [NotNullWhen(false)] out List<UserType>? validUserTypes)
     {
         var policy = context.GetEndpoint()?
@@ -61,7 +74,6 @@ public sealed class UserTypeValidationMiddleware
             return true;
         }
 
-        var (userType, _) = context.User.GetUserType();
         return validUserTypes.Contains(userType);
     }
 }

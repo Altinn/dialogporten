@@ -179,8 +179,16 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             default:
                 break;
         }
-        AuthorizedPartiesResult authorizedParties;
 
+        // Currently, access management is unable to properly leverage party filters on system users. Disable
+        // filtering here to ensure better cache hit rate for system users iterating over many parties.
+        if (authorizedPartiesRequest.PartyIdentifier is SystemUserIdentifier
+            && !_applicationSettings.CurrentValue.FeatureToggle.EnablePartyFiltersForSystemUsers)
+        {
+            authorizedPartiesRequest.PartyFilter.Clear();
+        }
+
+        AuthorizedPartiesResult authorizedParties;
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
             authorizedParties = await _partiesCache.GetOrSetAsync(

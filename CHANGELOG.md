@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.115.1](https://github.com/Altinn/dialogporten/compare/v1.115.0...v1.115.1) (2026-05-13)
+
+
+### Miscellaneous Chores
+
+* revert reject UserType.Unknown at the request edge ([#3957](https://github.com/Altinn/dialogporten/issues/3957)) ([f54fe8c](https://github.com/Altinn/dialogporten/commit/f54fe8c805a25b0827c98003ad9b88e7d696fc71)), closes [#3908](https://github.com/Altinn/dialogporten/issues/3908)
+
 ## [1.115.0](https://github.com/Altinn/dialogporten/compare/v1.114.11...v1.115.0) (2026-05-13)
 
 

@@ -14,8 +14,17 @@ public sealed class InfrastructureSettings
     public required AltinnCdnPlatformSettings AltinnCdn { get; init; }
     public required MaskinportenSettings Maskinporten { get; init; }
     public required MassTransitSettings MassTransit { get; set; }
+    public required DialogSearchSettings DialogSearch { get; init; } = new();
     public bool EnableSqlStatementLogging { get; init; }
     public bool EnableSqlParametersLogging { get; init; }
+}
+
+public sealed class DialogSearchSettings
+{
+    /// <summary>
+    /// Set to 0 to use the Npgsql/provider default command timeout.
+    /// </summary>
+    public int? UpsertCommandTimeoutSeconds { get; init; } = 5;
 }
 
 public sealed class MassTransitSettings
@@ -52,6 +61,7 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
         IValidator<AltinnCdnPlatformSettings> altinnCdnPlatformSettingsValidator,
         IValidator<MaskinportenSettings> maskinportenSettingsValidator,
         IValidator<RedisSettings> redisSettingsValidator,
+        IValidator<DialogSearchSettings> dialogSearchSettingsValidator,
         IValidator<MassTransitSettings> massTransitSettingsValidator)
     {
         RuleFor(x => x.DialogDbConnectionString)
@@ -73,6 +83,10 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
             .NotEmpty()
             .SetValidator(redisSettingsValidator);
 
+        RuleFor(x => x.DialogSearch)
+            .NotNull()
+            .SetValidator(dialogSearchSettingsValidator);
+
         RuleFor(x => x.MassTransit)
             .SetValidator(massTransitSettingsValidator);
     }
@@ -83,8 +97,18 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
         new AltinnCdnPlatformSettingsValidator(),
         new MaskinportenSettingsValidator(),
         new RedisSettingsValidator(),
+        new DialogSearchSettingsValidator(),
         new MassTransitSettingsValidator())
     { }
+}
+
+internal sealed class DialogSearchSettingsValidator : AbstractValidator<DialogSearchSettings>
+{
+    public DialogSearchSettingsValidator()
+    {
+        RuleFor(x => x.UpsertCommandTimeoutSeconds)
+            .GreaterThanOrEqualTo(0);
+    }
 }
 
 internal sealed class MassTransitSettingsValidator : AbstractValidator<MassTransitSettings>;

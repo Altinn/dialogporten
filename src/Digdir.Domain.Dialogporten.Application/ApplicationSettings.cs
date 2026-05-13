@@ -17,6 +17,7 @@ public sealed class FeatureToggle
 {
     public bool UsePartyResourcePruning { get; init; }
     public bool UseAltinnAutoAuthorizedPartiesQueryParameters { get; init; }
+    public bool EnablePartyFiltersForSystemUsers { get; init; }
     public bool UseCorrectPersonNameOrdering { get; init; }
     public bool UseAccessManagementForAltinnSelfIdentifiedUsers { get; init; }
     public bool UseAccessManagementForIdportenEmailUsers { get; init; }

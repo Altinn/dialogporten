@@ -1,9 +1,14 @@
+using System.Net;
+using System.Text.Json.Nodes;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.NullObjects;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Authorization;
@@ -77,6 +83,43 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
         result.Should().Be(expected);
     }
 
+    [Theory]
+    [InlineData(false, 0)]
+    [InlineData(true, 1)]
+    public async Task GetAuthorizedPartiesForLookup_Should_Respect_SystemUser_PartyFilter_FeatureToggle(
+        bool enablePartyFiltersForSystemUsers,
+        int expectedPartyFilterCount)
+    {
+        // Arrange
+        var handler = new CapturingHttpMessageHandler();
+        var client = CreateAltinnAuthorizationClient(
+            handler,
+            new FeatureToggle
+            {
+                EnablePartyFiltersForSystemUsers = enablePartyFiltersForSystemUsers
+            });
+
+        const string party = "urn:altinn:organization:identifier-no:991825827";
+
+        // Act
+        await client.GetAuthorizedPartiesForLookup(
+            CreateSystemUserIdentifier(),
+            [party],
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        handler.RequestContent.Should().NotBeNull();
+        var requestJson = JsonNode.Parse(handler.RequestContent!)!;
+        var partyFilter = requestJson["partyFilter"]!.AsArray();
+        partyFilter.Count.Should().Be(expectedPartyFilterCount);
+
+        if (enablePartyFiltersForSystemUsers)
+        {
+            partyFilter[0]!["Type"]!.GetValue<string>().Should().Be(NorwegianOrganizationIdentifier.Prefix);
+            partyFilter[0]!["Value"]!.GetValue<string>().Should().Be("991825827");
+        }
+    }
+
     private static AltinnAuthorizationClient CreateAltinnAuthorizationClient(
         string userAuthLevel, DialogDbContext db)
     {
@@ -102,5 +145,64 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             Substitute.For<IOptionsMonitor<ApplicationSettings>>(),
             Substitute.For<IPartyNameRegistry>()
         );
+    }
+
+    private static AltinnAuthorizationClient CreateAltinnAuthorizationClient(
+        HttpMessageHandler handler,
+        FeatureToggle featureToggle)
+    {
+        var cacheProvider = Substitute.For<IFusionCacheProvider>();
+        cacheProvider.GetCache(Arg.Any<string>()).Returns(_ => new NullFusionCache(Options.Create(new FusionCacheOptions())));
+
+        var user = Substitute.For<IUser>();
+        user.GetPrincipal().Returns(TestUsers.FromDefault().Build());
+
+        var applicationSettings = Substitute.For<IOptionsMonitor<ApplicationSettings>>();
+        applicationSettings.CurrentValue.Returns(TestApplicationSettings.CreateDefault(featureToggle: featureToggle));
+
+        return new AltinnAuthorizationClient(
+            new HttpClient(handler)
+            {
+                BaseAddress = new Uri("https://altinn.test")
+            },
+            cacheProvider,
+            user,
+            Substitute.For<IDialogDbContext>(),
+            Substitute.For<IServiceResourceMinimumAuthenticationLevelResolver>(),
+            Substitute.For<IPartyResourceReferenceRepository>(),
+            Substitute.For<ILogger<AltinnAuthorizationClient>>(),
+            Substitute.For<IServiceScopeFactory>(),
+            applicationSettings,
+            Substitute.For<IPartyNameRegistry>()
+        );
+    }
+
+    private static IPartyIdentifier CreateSystemUserIdentifier()
+    {
+        var parsed = SystemUserIdentifier.TryParse(
+            $"{SystemUserIdentifier.PrefixWithSeparator}{Guid.NewGuid()}",
+            out var systemUserIdentifier);
+        parsed.Should().BeTrue();
+        systemUserIdentifier.Should().NotBeNull();
+
+        return systemUserIdentifier;
+    }
+
+    private sealed class CapturingHttpMessageHandler : HttpMessageHandler
+    {
+        public string? RequestContent { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            request.Content.Should().NotBeNull();
+            RequestContent = await request.Content.ReadAsStringAsync(cancellationToken);
+
+            return new(HttpStatusCode.OK)
+            {
+                Content = new StringContent("[]")
+            };
+        }
     }
 }

@@ -14,6 +14,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -23,33 +24,52 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
     private readonly DialogDbContext _db;
     private readonly NpgsqlDataSource _dataSource;
     private readonly ISearchStrategySelector<EndUserSearchContext> _endUserSearchStrategySelector;
+    private readonly IOptionsSnapshot<InfrastructureSettings> _infrastructureSettings;
 
     public DialogSearchRepository(
         DialogDbContext dbContext,
         NpgsqlDataSource dataSource,
-        ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector)
+        ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector,
+        IOptionsSnapshot<InfrastructureSettings> infrastructureSettings)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(dataSource);
         ArgumentNullException.ThrowIfNull(endUserSearchStrategySelector);
+        ArgumentNullException.ThrowIfNull(infrastructureSettings);
 
         _db = dbContext;
         _dataSource = dataSource;
         _endUserSearchStrategySelector = endUserSearchStrategySelector;
+        _infrastructureSettings = infrastructureSettings;
     }
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
     {
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        await using var command = new NpgsqlCommand(
-            @"SELECT search.""UpsertDialogSearchOne""(@p_dialog_id)",
-            connection)
-        {
-            CommandTimeout = 5
-        };
-        command.Parameters.AddWithValue("p_dialog_id", dialogId);
+        await using var command = CreateUpsertFreeTextSearchIndexCommand(
+            connection,
+            dialogId,
+            _infrastructureSettings.Value.DialogSearch.UpsertCommandTimeoutSeconds);
 
         await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    internal static NpgsqlCommand CreateUpsertFreeTextSearchIndexCommand(
+        NpgsqlConnection connection,
+        Guid dialogId,
+        int? commandTimeoutSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        var command = new NpgsqlCommand(
+            @"SELECT search.""UpsertDialogSearchOne""(@p_dialog_id)",
+            connection);
+        if (commandTimeoutSeconds is > 0)
+        {
+            command.CommandTimeout = commandTimeoutSeconds.Value;
+        }
+        command.Parameters.AddWithValue("p_dialog_id", dialogId);
+        return command;
     }
 
     public async Task<int> SeedFullAsync(bool resetExisting, CancellationToken ct) =>

@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
@@ -15,14 +14,10 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
-        var getDialogResponse = await Fixture.ServiceownerApi.GetDialog(
-            dialogId,
-            E2EConstants.DefaultParty);
+        // Trigger seen log once with EndUser
+        var getDialogResponse = await Fixture.EndUserApi.V1.GetDialog(dialogId, new());
 
         getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
-
-        var seenLogResponse1 = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(dialogId);
-        seenLogResponse1.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         var patchResponse = await Fixture.ServiceownerApi.PatchDialogAsync(dialogId, ops => ops.Add(new()
         {
@@ -33,6 +28,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
 
         patchResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
+        // Trigger new seen log after patch with ServiceOwner representing EndUser
         var getDialogAfterPatchResponse = await Fixture.ServiceownerApi.GetDialog(
             dialogId,
             E2EConstants.DefaultParty);

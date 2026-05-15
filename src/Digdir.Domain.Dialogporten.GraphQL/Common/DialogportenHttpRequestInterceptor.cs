@@ -1,8 +1,8 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using HotChocolate.AspNetCore;
 using HotChocolate.Execution;
-using Microsoft.Extensions.Logging;
 using UserType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common;
@@ -33,6 +33,14 @@ public sealed class DialogportenHttpRequestInterceptor : DefaultHttpRequestInter
             return;
         }
 
+        // Pass through for DialogToken
+        // Validation happens in AddDialogportenAuthentication
+        // and the EndUserSubscription authorization policy
+        if (IsDialogToken(context))
+        {
+            return;
+        }
+
         var (userType, _) = context.User.GetUserType();
         if (userType is not UserType.Unknown)
         {
@@ -49,6 +57,9 @@ public sealed class DialogportenHttpRequestInterceptor : DefaultHttpRequestInter
             .SetCode("AUTH_USER_TYPE_UNKNOWN")
             .Build());
     }
+
+    private static bool IsDialogToken(HttpContext context) =>
+        context.User.TryGetClaimValue(DialogTokenClaimTypes.DialogId, out _);
 
     private static void SetAcceptLanguageGlobalState(HttpContext context, OperationRequestBuilder requestBuilder)
     {

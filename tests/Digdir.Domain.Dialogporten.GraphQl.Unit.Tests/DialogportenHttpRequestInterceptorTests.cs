@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using HotChocolate;
 using HotChocolate.Execution;
@@ -46,6 +47,29 @@ public class DialogportenHttpRequestInterceptorTests
         {
             User = new ClaimsPrincipal(new ClaimsIdentity(
                 claims: [new Claim("pid", "22834498646")],
+                AuthenticationType))
+        };
+
+        var act = async () =>
+            await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),
+                TestContext.Current.CancellationToken);
+
+        await act.Should().NotThrowAsync();
+        logger.Entries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Authenticated_dialog_token_passes_through()
+    {
+        var logger = new TestLogger<DialogportenHttpRequestInterceptor>();
+        var interceptor = new DialogportenHttpRequestInterceptor(logger);
+        var context = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                claims:
+                [
+                    new Claim(DialogTokenClaimTypes.DialogId, Guid.NewGuid().ToString())
+                ],
                 AuthenticationType))
         };
 

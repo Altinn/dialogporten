@@ -22,6 +22,9 @@ public sealed class UserTypeValidationMiddleware
 
     public UserTypeValidationMiddleware(RequestDelegate next, ILogger<UserTypeValidationMiddleware> logger)
     {
+        ArgumentNullException.ThrowIfNull(next);
+        ArgumentNullException.ThrowIfNull(logger);
+
         _next = next;
         _logger = logger;
     }

@@ -2,6 +2,12 @@
   "version": 1,
   "dependencies": {
     "net10.0": {
+      "AwesomeAssertions": {
+        "type": "Direct",
+        "requested": "[9.4.0, )",
+        "resolved": "9.4.0",
+        "contentHash": "dJxkWiQ8D+xT6Gr2sSL83+Mar+Vpy2JTcUPxFcckpPJ8VYBfSgnk+zqpS6t7kcGnjz8NLyF14qfuoL4bKzzoew=="
+      },
       "coverlet.collector": {
         "type": "Direct",
         "requested": "[8.0.1, )",

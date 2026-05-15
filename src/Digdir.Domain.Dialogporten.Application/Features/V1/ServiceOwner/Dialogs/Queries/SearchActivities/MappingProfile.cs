@@ -8,7 +8,6 @@ public sealed class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<DialogActivity, ActivityDto>()
-            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId))
-            .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.Dialog.DeletedAt));
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.TypeId));
     }
 }

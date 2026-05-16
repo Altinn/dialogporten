@@ -182,13 +182,13 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(nameof(Altinn.Authorization), new()
         {
-            // This cache has high cardinality, and will create several keys per user:
-            // - One entry per user per dialog search and combination of party and service resource parameters
-            // - One entry per dialog details
-            // EU systems iterating over several parties in search view and fetching details for each dialog will
-            // potentially create hundreds over even thousands of cache entries within the cache TTL. To avoid
-            // memory exhaustion, we therefore disable the memory cache for authorization results, and rely solely on
-            // the distributed cache.
+            // This cache stores PDP authorization results for dialog details.
+            // This will have high cardinality, as each dialog details request is cached separately
+            // per user, dialog instance, party, service resource and Altinn action set.
+            // EU systems fetching details for many dialogs can therefore create hundreds or even
+            // thousands of cache entries within the cache TTL. To avoid memory exhaustion, we
+            // disable the memory cache for PDP authorization results and rely solely on the
+            // distributed cache.
             SkipMemoryCache = true,
             // In normal operations, 15 minutes delay is deemed acceptable for authorization data
             Duration = TimeSpan.FromMinutes(15),
@@ -196,29 +196,31 @@ public static class InfrastructureExtensions
             // for an additional 15 minutes. Using default FailSafeThrottleDuration.
             FailSafeMaxDuration = TimeSpan.FromMinutes(30),
             // If the request to Altinn Authorization takes too long, we allow the cache to return stale data
-            // temporarily whilst updating the cache in the background. Note that we are also using eager refresh
-            // and a backplane.
-            FactorySoftTimeout = TimeSpan.FromSeconds(2),
+            // temporarily whilst updating the cache in the background. Eager refresh is enabled, and a registered
+            // backplane is used when available.
+            FactorySoftTimeout = TimeSpan.FromSeconds(4),
             // Timeout for the cache to wait for the factory to complete, which when reached without fail-safe data
             // will cause an exception to be thrown
-            FactoryHardTimeout = TimeSpan.FromSeconds(10)
+            FactoryHardTimeout = TimeSpan.FromSeconds(20)
         })
         .ConfigureFusionCache(nameof(AuthorizedPartiesResult), new()
         {
-            // We keep authorized parties in a separate cache key, as this originates from a different API
-            // and has lees cardinality than the dialog authorization cache (only one per user). We therefore
-            // allow a memory cache for this.
+            // This cache stores authorized parties from Altinn Access Management. Dialog search
+            // authorization is based on this data, so search does not use the Altinn.Authorization
+            // PDP cache directly. Cardinality is lower than the dialog details authorization cache,
+            // as entries are keyed by authorized-parties request parameters rather than by each
+            // dialog details authorization check. We therefore allow a memory cache for this.
             Duration = TimeSpan.FromMinutes(15),
             // In case Altinn Access Management is down/overloaded, we allow the re-usage of stale authorization data
             // for an additional 15 minutes. Using default FailSafeThrottleDuration.
             FailSafeMaxDuration = TimeSpan.FromMinutes(30),
-            // If the request to Altinn AccessManagement takes too long, we allow the cache to return stale data
-            // temporarily whilst updating the cache in the background. Note that we are also using eager refresh
-            // and a backplane.
-            FactorySoftTimeout = TimeSpan.FromSeconds(2),
+            // If the request to Altinn Access Management takes too long, we allow the cache to return stale data
+            // temporarily whilst updating the cache in the background. Eager refresh is enabled, and a registered
+            // backplane is used when available.
+            FactorySoftTimeout = TimeSpan.FromSeconds(6),
             // Timeout for the cache to wait for the factory to complete, which when reached without fail-safe data
             // will cause an exception to be thrown
-            FactoryHardTimeout = TimeSpan.FromSeconds(15)
+            FactoryHardTimeout = TimeSpan.FromSeconds(20)
         })
         .ConfigureFusionCache(nameof(SubjectResource), new()
         {

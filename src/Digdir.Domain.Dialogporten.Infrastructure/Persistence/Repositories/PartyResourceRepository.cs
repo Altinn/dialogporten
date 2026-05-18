@@ -58,6 +58,16 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
         }
 
         var shouldPopulateCache = ShouldPopulateCache(request.Parties.Count);
+        if (!shouldPopulateCache)
+        {
+            // Large party sets intentionally bypass per-party cache lookups to avoid Redis/cache fanout.
+            var fetchedResourcesByParty = await FetchResourcesByParty(request.Parties, cancellationToken);
+            return BuildResult(
+                request.Parties,
+                request.Resources,
+                fetchedResourcesByParty);
+        }
+
         var cacheLookup = await LoadCachedResourcesByParty(request.Parties, cancellationToken);
         await PopulateCacheMisses(cacheLookup, shouldPopulateCache, cancellationToken);
 

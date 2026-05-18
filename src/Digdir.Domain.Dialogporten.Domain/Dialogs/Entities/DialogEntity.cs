@@ -141,9 +141,30 @@ public sealed class DialogEntity :
         return ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
     }
 
-    public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
+    public void AddUpdateEvent()
     {
         _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+    }
+
+    public void AddSeenEvent(string userId, DialogUserType.Values userTypeId, Guid seenLogId)
+    {
+        _domainEvents.Add(
+            new DialogSeenDomainEvent(
+                Id,
+                ServiceResource,
+                Party,
+                Process,
+                PrecedingProcess,
+                userId,
+                userTypeId,
+                seenLogId
+            )
+        );
+    }
+
+    public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
+    {
+        AddUpdateEvent();
 
         if (VisibleFrom is { } visibleFrom && visibleFrom > utcNow)
         {

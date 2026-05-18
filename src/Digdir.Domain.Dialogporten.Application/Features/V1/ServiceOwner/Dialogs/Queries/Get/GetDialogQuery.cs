@@ -87,7 +87,15 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             seenResult = await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);
 
+            if (seenResult != null)
+            {
+                var newSeenLog = seenResult.NewSeenLog;
+                if (seenResult.CausedChangesOutsideEf) dialog.AddUpdateEvent();
+                if (newSeenLog != null) dialog.AddSeenEvent(userId.ExternalIdWithPrefix, userId.Type, newSeenLog.Id);
+            }
+
             var saveResult = await _unitOfWork
+                .DisableAggregateFilter()
                 .DisableUpdatableFilter()
                 .DisableVersionableFilter()
                 .SaveChangesAsync(cancellationToken);

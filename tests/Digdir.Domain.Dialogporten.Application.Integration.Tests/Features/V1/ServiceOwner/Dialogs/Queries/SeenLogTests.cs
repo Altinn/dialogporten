@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -226,30 +227,55 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 .AssertSingleActorIdUnHashed());
 
     [Fact]
-    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs() => FlowBuilder.For(Application)
+    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs_And_One_Pair_Of_Events() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
-        .ConsumeEvents()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ((DialogCreatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .GetServiceOwnerDialogAsEndUser()
         .GetServiceOwnerDialogAsEndUser()
         .GetServiceOwnerSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
             x.Count.Should().Be(1);
-            ctx.Application.GetPublishedEvents().Count.Should().Be(0);
+            var events = ctx.Application.GetPublishedEvents();
+            events.Count.Should().Be(2);
+            ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
+            ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
         });
 
     [Fact]
-    public Task Multiple_Gets_Around_Update_Should_Create_Multiple_SeenLogs() => FlowBuilder.For(Application)
+    public Task Multiple_Gets_Around_Update_Should_Create_Multiple_SeenLogs_And_Events() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ((DialogCreatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .GetServiceOwnerDialogAsEndUser()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(2);
+            ((DialogUpdatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+            ((DialogSeenDomainEvent)x[1]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-        .ConsumeEvents()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ((DialogUpdatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .GetServiceOwnerDialogAsEndUser()
         .GetServiceOwnerSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
             x.Count.Should().Be(2);
-            ctx.Application.GetPublishedEvents().Count.Should().Be(0);
+            var events = ctx.Application.GetPublishedEvents();
+            events.Count.Should().Be(2);
+            ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
+            ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
         });
 
     [Fact]

@@ -221,8 +221,9 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
-    public async Task PublishEvents()
+    public async Task<List<object>> PublishEvents()
     {
+        var publishedEvents = new List<object>();
         while (GetPublishedEvents().Count != 0)
         {
             foreach (var value in PopPublishedEvents())
@@ -230,8 +231,11 @@ public class DialogApplication : IAsyncLifetime
                 using var scope = _rootProvider.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
                 await mediator.Publish(value);
+                publishedEvents.Add(value);
             }
         }
+
+        return publishedEvents;
     }
 
     public async ValueTask ResetState()

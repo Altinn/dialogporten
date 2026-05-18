@@ -94,6 +94,8 @@ jobs:
 
       - name: Scan base (${{ github.event.pull_request.base.ref }})
         working-directory: base
+        env:
+          DOTNET_ROLL_FORWARD: latestMajor
         run: |
           dotnet restore
           dotnet list package --vulnerable --include-transitive --format json > "$GITHUB_WORKSPACE/base-vulns.json"

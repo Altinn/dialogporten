@@ -17,7 +17,7 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var instanceRef = $"urn:altinn:instance-id:1337/{Guid.NewGuid()}";
 
         // Act
-        var response = await Fixture.EnduserApi.V1.GetDialogLookup(
+        var response = await Fixture.EndUserApi.V1.GetDialogLookup(
             instanceRef,
             new(),
             TestContext.Current.CancellationToken);
@@ -49,7 +49,7 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         });
 
         // Act
-        var response = await Fixture.EnduserApi.V1.GetDialogLookup(
+        var response = await Fixture.EndUserApi.V1.GetDialogLookup(
             instanceRef,
             new(),
             TestContext.Current.CancellationToken);

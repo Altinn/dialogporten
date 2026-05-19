@@ -5656,11 +5656,6 @@
             "nullable": true,
             "type": "string"
           },
-          "deletedAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
           "description": {
             "items": {
               "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
@@ -5867,12 +5862,6 @@
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
-            "type": "string"
-          },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
             "type": "string"
           },
           "extendedType": {
@@ -6350,11 +6339,6 @@
             "format": "date-time",
             "type": "string"
           },
-          "deletedAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
           "extendedType": {
             "format": "uri",
             "nullable": true,
@@ -6572,12 +6556,6 @@
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
-            "type": "string"
-          },
-          "deletedAt": {
-            "description": "The date and time when the transmission was deleted, if applicable.",
-            "format": "date-time",
-            "nullable": true,
             "type": "string"
           },
           "extendedType": {
@@ -10913,7 +10891,7 @@
     "/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}": {
       "get": {
         "description": "Gets a single transmission belonging to a dialog.",
-        "operationId": "V1ServiceOwnerDialogsQueriesGetTransnission_DialogTransmission",
+        "operationId": "V1ServiceOwnerDialogsQueriesGetTransmission_DialogTransmission",
         "parameters": [
           {
             "in": "path",

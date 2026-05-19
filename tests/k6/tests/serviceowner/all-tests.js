@@ -15,7 +15,6 @@ import { default as dialogCreateUpdatePatchDeleteCorrespondenceResource } from '
 import { default as dialogDetails } from './dialogDetails.js';
 import { default as dialogFreeze } from './dialogFreeze.js';
 import { default as dialogRestore } from './dialogRestore.js';
-import { default as dialogSearch } from './dialogSearch.js';
 import { default as dialogSearchServiceOwnerLabel } from './dialogSearchServiceOwnerLabel.js';
 import { default as dialogServiceOwnerLabels } from './dialogServiceOwnerLabels.js';
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
@@ -37,7 +36,6 @@ export default function() {
   dialogDetails();
   dialogFreeze();
   dialogRestore();
-  dialogSearch();
   dialogSearchServiceOwnerLabel();
   dialogServiceOwnerLabels();
   dialogUpdateActivity();

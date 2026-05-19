@@ -1,16 +1,18 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get.GetDialogLookupQuery;
 using EndUserIdentifierLookupDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup.EndUserIdentifierLookupDto;
 using IdentifierLookupGrantType = Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup.IdentifierLookupGrantType;
@@ -29,7 +31,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             {
                 InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
-            .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.EntityNotFound>(_ => { });
+            .ExecuteAndAssert<EntityNotFound>(_ => { });
 
     [Fact]
     public Task Get_By_Label_Should_Pick_Newest_NonDeleted_Dialog_For_EndUser()
@@ -155,7 +157,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             {
                 InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
             })
-            .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
+            .ExecuteAndAssert<Forbidden>(_ => { });
 
     [Fact]
     public Task Get_Should_Return_NonSensitiveTitle_As_Title_When_EndUser_Auth_Level_Is_Too_Low()
@@ -168,7 +170,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
             .AsIntegrationTestUser(x => x.WithClaim(
                 ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
-                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaSubstantial))
+                Constants.IdportenLoaSubstantial))
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = party;
@@ -209,7 +211,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
             .AsIntegrationTestUser(x => x.WithClaim(
                 ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
-                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaSubstantial))
+                Constants.IdportenLoaSubstantial))
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = party;
@@ -243,7 +245,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
             .AsIntegrationTestUser(x => x.WithClaim(
                 ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
-                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaHigh))
+                Constants.IdportenLoaHigh))
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = party;
@@ -284,7 +286,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                 ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
             .AsIntegrationTestUser(x => x.WithClaim(
                 ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
-                Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants.IdportenLoaSubstantial))
+                Constants.IdportenLoaSubstantial))
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = party;
@@ -343,7 +345,18 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                             {
                                 Party = party,
                                 PartyUuid = Guid.NewGuid(),
+                                PartyId = 0,
                                 Name = "Party",
+                                DateOfBirth = null,
+                                PartyType = AuthorizedPartyType.Person,
+                                IsDeleted = false,
+                                HasKeyRole = false,
+                                IsCurrentEndUser = false,
+                                IsMainAdministrator = false,
+                                IsAccessManager = false,
+                                HasOnlyAccessToSubParties = false,
+                                AuthorizedResources = [],
+                                AuthorizedRolesAndAccessPackages = [],
                                 AuthorizedInstances =
                                 [
                                     new AuthorizedResource
@@ -358,7 +371,9 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                                         InstanceId = instanceId.ToString(),
                                         InstanceRef = instanceRef
                                     }
-                                ]
+                                ],
+                                SubParties = null,
+                                ParentParty = null
                             }
                         ]
                     });
@@ -415,7 +430,18 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                             {
                                 Party = party,
                                 PartyUuid = Guid.NewGuid(),
+                                PartyId = 0,
                                 Name = "Party",
+                                DateOfBirth = null,
+                                PartyType = AuthorizedPartyType.Person,
+                                IsDeleted = false,
+                                HasKeyRole = false,
+                                IsCurrentEndUser = false,
+                                IsMainAdministrator = false,
+                                IsAccessManager = false,
+                                HasOnlyAccessToSubParties = false,
+                                AuthorizedResources = [],
+                                AuthorizedRolesAndAccessPackages = [],
                                 AuthorizedInstances =
                                 [
                                     new AuthorizedResource
@@ -424,7 +450,9 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                                         InstanceId = dialogId.ToString(),
                                         InstanceRef = requestDialogRef
                                     }
-                                ]
+                                ],
+                                SubParties = null,
+                                ParentParty = null
                             }
                         ]
                     });
@@ -445,7 +473,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             {
                 InstanceRef = requestDialogRef
             })
-            .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Forbidden>(_ => { });
+            .ExecuteAndAssert<Forbidden>(_ => { });
     }
 
     [Fact]
@@ -471,10 +499,21 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                             {
                                 Party = party,
                                 PartyUuid = Guid.NewGuid(),
+                                PartyId = 0,
                                 Name = "Party",
-                                AuthorizedRolesAndAccessPackages = [roleSubject],
+                                DateOfBirth = null,
+                                PartyType = AuthorizedPartyType.Person,
+                                IsDeleted = false,
+                                HasKeyRole = false,
+                                IsCurrentEndUser = false,
+                                IsMainAdministrator = false,
+                                IsAccessManager = false,
+                                HasOnlyAccessToSubParties = false,
                                 AuthorizedResources = [],
-                                AuthorizedInstances = []
+                                AuthorizedRolesAndAccessPackages = [roleSubject],
+                                AuthorizedInstances = [],
+                                SubParties = null,
+                                ParentParty = null
                             }
                         ]
                     });
@@ -529,10 +568,21 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                             {
                                 Party = party,
                                 PartyUuid = Guid.NewGuid(),
+                                PartyId = 0,
                                 Name = "Party",
-                                AuthorizedRolesAndAccessPackages = [accessPackageSubject],
+                                DateOfBirth = null,
+                                PartyType = AuthorizedPartyType.Person,
+                                IsDeleted = false,
+                                HasKeyRole = false,
+                                IsCurrentEndUser = false,
+                                IsMainAdministrator = false,
+                                IsAccessManager = false,
+                                HasOnlyAccessToSubParties = false,
                                 AuthorizedResources = [],
-                                AuthorizedInstances = []
+                                AuthorizedRolesAndAccessPackages = [accessPackageSubject],
+                                AuthorizedInstances = [],
+                                SubParties = null,
+                                ParentParty = null
                             }
                         ]
                     });
@@ -584,10 +634,21 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                             {
                                 Party = party,
                                 PartyUuid = Guid.NewGuid(),
+                                PartyId = 0,
                                 Name = "Party",
-                                AuthorizedRolesAndAccessPackages = [],
+                                DateOfBirth = null,
+                                PartyType = AuthorizedPartyType.Person,
+                                IsDeleted = false,
+                                HasKeyRole = false,
+                                IsCurrentEndUser = false,
+                                IsMainAdministrator = false,
+                                IsAccessManager = false,
+                                HasOnlyAccessToSubParties = false,
                                 AuthorizedResources = [serviceResource],
-                                AuthorizedInstances = []
+                                AuthorizedRolesAndAccessPackages = [],
+                                AuthorizedInstances = [],
+                                SubParties = null,
+                                ParentParty = null
                             }
                         ]
                     });
@@ -623,7 +684,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             {
                 InstanceRef = $"urn:altinn:unsupported:{Guid.NewGuid()}"
             })
-            .ExecuteAndAssert<Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ValidationError>(result =>
+            .ExecuteAndAssert<ValidationError>(result =>
                 result.Errors.Should().ContainSingle());
 
     private static async Task SeedMinimumAuthenticationLevel(
@@ -660,10 +721,21 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                     {
                         Party = party,
                         PartyUuid = Guid.NewGuid(),
+                        PartyId = 0,
                         Name = "Party",
-                        AuthorizedRolesAndAccessPackages = [],
+                        DateOfBirth = null,
+                        PartyType = AuthorizedPartyType.Person,
+                        IsDeleted = false,
+                        HasKeyRole = false,
+                        IsCurrentEndUser = false,
+                        IsMainAdministrator = false,
+                        IsAccessManager = false,
+                        HasOnlyAccessToSubParties = false,
                         AuthorizedResources = [serviceResource],
-                        AuthorizedInstances = []
+                        AuthorizedRolesAndAccessPackages = [],
+                        AuthorizedInstances = [],
+                        SubParties = null,
+                        ParentParty = null
                     }
                 ]
             });

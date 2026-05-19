@@ -4,3 +4,6 @@ dotnet_diagnostic.CA1707.severity = none
 
 # IDE0010: Add missing cases to switch statements
 dotnet_diagnostic.IDE0010.severity = none
+
+# IDE0390: Make method synchronous
+dotnet_diagnostic.IDE0390.severity = none

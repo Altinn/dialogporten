@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Digdir.Domain.Dialogporten.Application.Common;
+﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -22,19 +21,16 @@ public sealed partial class SearchSeenLogResult : OneOfBase<List<SeenLogDto>, En
 internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQuery, SearchSeenLogResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
     public SearchSeenLogQueryHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IUserResourceRegistry userResourceRegistry)
     {
         ArgumentNullException.ThrowIfNull(db);
-        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(userResourceRegistry);
 
         _db = db;
-        _mapper = mapper;
         _userResourceRegistry = userResourceRegistry;
     }
 
@@ -66,11 +62,7 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
         }
 
         return dialog.SeenLog
-            .Select(x =>
-            {
-                var dto = _mapper.Map<SeenLogDto>(x);
-                return dto;
-            })
+            .Select(x => x.ToDto())
             .ToList();
     }
 }

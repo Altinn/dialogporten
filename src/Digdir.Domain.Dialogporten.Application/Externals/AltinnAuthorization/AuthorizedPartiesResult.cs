@@ -3,25 +3,74 @@ namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 public sealed class AuthorizedPartiesResult
 {
     public List<AuthorizedParty> AuthorizedParties { get; set; } = [];
+
+    /// <summary>
+    /// - Moves all depth 1 SubParties to the root AuthorizedParties.
+    /// - Sets all the SubParties references to null
+    /// - Sets the ParentParty of all flattened SubParties to a reference of its parent AuthorizedParty.
+    ///
+    /// Limitation: Only considers the first level of SubParties
+    /// </summary>
+    /// <returns>A new instance with all depth 1 SubParties flattened to AuthorizedParties</returns>
+    public AuthorizedPartiesResult Flatten()
+    {
+        var topLevelCount = AuthorizedParties.Count;
+
+        var totalCapacity = topLevelCount;
+        for (var i = 0; i < topLevelCount; i++)
+        {
+            var party = AuthorizedParties[i];
+            if (party.SubParties != null)
+            {
+                totalCapacity += party.SubParties.Count;
+            }
+        }
+
+        // Preallocate the exact size needed
+        var flattenedList = new List<AuthorizedParty>(totalCapacity);
+
+        for (var i = 0; i < topLevelCount; i++)
+        {
+            var party = AuthorizedParties[i].Clone(maxDepth: 1);
+
+            flattenedList.Add(party);
+
+            if (!(party.SubParties?.Count > 0)) continue;
+            var subCount = party.SubParties.Count;
+            for (var j = 0; j < subCount; j++)
+            {
+                var subParty = party.SubParties[j];
+                subParty.SubParties?.Clear();
+                subParty.ParentParty = party.Party;
+                flattenedList.Add(subParty);
+            }
+            party.SubParties = [];
+        }
+
+        return new AuthorizedPartiesResult
+        {
+            AuthorizedParties = flattenedList
+        };
+    }
 }
 
 public sealed class AuthorizedParty
 {
-    public string Party { get; init; } = null!;
-    public Guid PartyUuid { get; init; }
-    public int PartyId { get; init; }
-    public string Name { get; init; } = null!;
-    public string? DateOfBirth { get; init; }
-    public AuthorizedPartyType PartyType { get; init; }
-    public bool IsDeleted { get; init; }
-    public bool HasKeyRole { get; init; }
-    public bool IsCurrentEndUser { get; set; }
-    public bool IsMainAdministrator { get; init; }
-    public bool IsAccessManager { get; init; }
-    public bool HasOnlyAccessToSubParties { get; init; }
-    public List<string> AuthorizedResources { get; init; } = [];
-    public List<string> AuthorizedRolesAndAccessPackages { get; init; } = [];
-    public List<AuthorizedResource> AuthorizedInstances { get; init; } = [];
+    public required string Party { get; init; } = null!;
+    public required Guid PartyUuid { get; init; }
+    public required int PartyId { get; init; }
+    public required string Name { get; init; } = null!;
+    public required string? DateOfBirth { get; init; }
+    public required AuthorizedPartyType PartyType { get; init; }
+    public required bool IsDeleted { get; init; }
+    public required bool HasKeyRole { get; init; }
+    public required bool IsCurrentEndUser { get; set; }
+    public required bool IsMainAdministrator { get; init; }
+    public required bool IsAccessManager { get; init; }
+    public required bool HasOnlyAccessToSubParties { get; init; }
+    public required List<string> AuthorizedResources { get; init; } = [];
+    public required List<string> AuthorizedRolesAndAccessPackages { get; init; } = [];
+    public required List<AuthorizedResource> AuthorizedInstances { get; init; } = [];
 
     // Only populated in case of flatten = false
     public List<AuthorizedParty>? SubParties { get; set; }
@@ -29,13 +78,64 @@ public sealed class AuthorizedParty
     // Only populated in case of flatten = true
     public string? ParentParty { get; set; }
 
+    /// <summary>
+    /// Deep clone this instance
+    /// </summary>
+    /// <param name="maxDepth">
+    /// The maximum recursion level for SubParties.
+    /// If we reach maxDepth, SubParties will be set to an empty list.
+    /// If maxDepth is 0, children will be removed
+    /// </param>
+    /// <returns>A deep copy of this instance.</returns>
+    public AuthorizedParty Clone(int maxDepth = 100)
+    {
+        var nextMaxDepth = maxDepth - 1;
+        return new AuthorizedParty
+        {
+            Party = Party,
+            PartyUuid = PartyUuid,
+            PartyId = PartyId,
+            Name = Name,
+            DateOfBirth = DateOfBirth,
+            PartyType = PartyType,
+            IsDeleted = IsDeleted,
+            HasKeyRole = HasKeyRole,
+            IsCurrentEndUser = IsCurrentEndUser,
+            IsMainAdministrator = IsMainAdministrator,
+            IsAccessManager = IsAccessManager,
+            HasOnlyAccessToSubParties = HasOnlyAccessToSubParties,
+            AuthorizedResources = AuthorizedResources.Count > 0
+                ? [.. AuthorizedResources]
+                : [],
+            AuthorizedRolesAndAccessPackages = AuthorizedRolesAndAccessPackages.Count > 0
+                ? [.. AuthorizedRolesAndAccessPackages]
+                : [],
+            AuthorizedInstances = AuthorizedInstances.Count > 0
+                ? AuthorizedInstances.Select(x => x.Clone()).ToList()
+                : [],
+            SubParties = SubParties?.Count > 0
+                    ? maxDepth <= 0 ? [] : SubParties.Select(x => x.Clone(nextMaxDepth)).ToList()
+                    : SubParties,
+            ParentParty = ParentParty
+        };
+    }
 }
 
 public sealed class AuthorizedResource
 {
-    public string ResourceId { get; set; } = null!;
-    public string InstanceId { get; set; } = null!;
-    public string? InstanceRef { get; set; }
+    public required string ResourceId { get; set; } = null!;
+    public required string InstanceId { get; set; } = null!;
+    public required string? InstanceRef { get; set; }
+
+    public AuthorizedResource Clone()
+    {
+        return new AuthorizedResource
+        {
+            ResourceId = ResourceId,
+            InstanceId = InstanceId,
+            InstanceRef = InstanceRef
+        };
+    }
 }
 
 public enum AuthorizedPartyType

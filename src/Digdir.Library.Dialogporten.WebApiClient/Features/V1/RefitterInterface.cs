@@ -947,7 +947,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransnissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<V1ServiceOwnerDialogsQueriesGetTransmission_Transmission>> V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(System.Guid dialogId, System.Guid transmissionId, CancellationToken cancellationToken = default);
 
         /// <summary>Replaces a transmission</summary>
         /// <remarks>
@@ -1816,12 +1816,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? RelatedTransmissionId { get; set; }
 
         /// <summary>
-        /// The date and time when the transmission was deleted, if applicable.
-        /// </summary>
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        /// <summary>
         /// The type of the transmission.
         /// </summary>
         [JsonPropertyName("type")]
@@ -2136,9 +2130,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
 
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }
@@ -2717,12 +2708,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public System.Guid? RelatedTransmissionId { get; set; }
 
         /// <summary>
-        /// The date and time when the transmission was deleted, if applicable.
-        /// </summary>
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
-
-        /// <summary>
         /// The type of the transmission.
         /// </summary>
         [JsonPropertyName("type")]
@@ -2917,9 +2902,6 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesActivities_DialogActivityType>))]
         public DialogsEntitiesActivities_DialogActivityType Type { get; set; }
-
-        [JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
 
         [JsonPropertyName("transmissionId")]
         public System.Guid? TransmissionId { get; set; }

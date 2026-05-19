@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Parquet;
-using Parquet.Data;
 using Parquet.Schema;
 
 namespace Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
@@ -49,43 +48,42 @@ public sealed partial class ParquetFileService
             relativeResourceUsage[i] = records[i].RelativeResourceUsage;
         }
 
-        // Ordering here must match the column data below
+        var environmentField = new DataField<string>("Miljø");
+        var serviceField = new DataField<string>("Tjeneste");
+        var adminField = new DataField<string>("Admin");
+        var consumerOrgNumberField = new DataField<string>("Konsumentorgnr");
+        var ownerOrgNumberField = new DataField<string>("Tjenesteeierorgnr");
+        var transactionTypeField = new DataField<string>("Transaksjonstype");
+        var failedField = new DataField<string>("Feilet");
+        var countField = new DataField<long>("Antall");
+        var relativeResourceUsageField = new DataField<decimal>("RelativRessursbruk");
+
         var schema = new ParquetSchema(
-            new DataField<string>("Miljø"),
-            new DataField<string>("Tjeneste"),
-            new DataField<string>("Admin"),
-            new DataField<string>("Konsumentorgnr"),
-            new DataField<string>("Tjenesteeierorgnr"),
-            new DataField<string>("Transaksjonstype"),
-            new DataField<string>("Feilet"),
-            new DataField<long>("Antall"),
-            new DataField<decimal>("RelativRessursbruk")
-        );
+            environmentField,
+            serviceField,
+            adminField,
+            consumerOrgNumberField,
+            ownerOrgNumberField,
+            transactionTypeField,
+            failedField,
+            countField,
+            relativeResourceUsageField);
 
-        // Ordering here must match the above ParquetSchema
-        var columnData = new Array[]
-        {
-            environment,
-            service,
-            admin,
-            consumerOrgNumber,
-            ownerOrgNumber,
-            transactionType,
-            failed,
-            count,
-            relativeResourceUsage
-        };
+        var options = new ParquetOptions { CompressionMethod = CompressionMethod.Snappy };
 
-        using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream, cancellationToken: cancellationToken))
+        await using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream, options, cancellationToken: cancellationToken))
         {
-            parquetWriter.CompressionMethod = CompressionMethod.Snappy;
             using var rowGroup = parquetWriter.CreateRowGroup();
 
-            for (var i = 0; i < columnData.Length; i++)
-            {
-                await rowGroup.WriteColumnAsync(
-                    new DataColumn(schema.DataFields[i], columnData[i]), cancellationToken);
-            }
+            await rowGroup.WriteAsync(environmentField, environment);
+            await rowGroup.WriteAsync(serviceField, service);
+            await rowGroup.WriteAsync(adminField, admin);
+            await rowGroup.WriteAsync(consumerOrgNumberField, consumerOrgNumber);
+            await rowGroup.WriteAsync(ownerOrgNumberField, ownerOrgNumber);
+            await rowGroup.WriteAsync(transactionTypeField, transactionType);
+            await rowGroup.WriteAsync(failedField, failed);
+            await rowGroup.WriteAsync<long>(countField, count, cancellationToken: cancellationToken);
+            await rowGroup.WriteAsync<decimal>(relativeResourceUsageField, relativeResourceUsage, cancellationToken: cancellationToken);
         }
 
         LogGeneratedParquetFile(memoryStream.Length);

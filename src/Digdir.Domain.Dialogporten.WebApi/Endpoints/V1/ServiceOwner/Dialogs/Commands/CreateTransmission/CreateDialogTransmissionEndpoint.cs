@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransnission;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 using FastEndpoints;
 using MediatR;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
@@ -70,6 +70,7 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
     }
 }
 
+[OpenApiTypeName(nameof(CreateTransmissionRequest))]
 public sealed class CreateTransmissionRequest : CreateTransmissionDto
 {
     public Guid DialogId { get; set; }

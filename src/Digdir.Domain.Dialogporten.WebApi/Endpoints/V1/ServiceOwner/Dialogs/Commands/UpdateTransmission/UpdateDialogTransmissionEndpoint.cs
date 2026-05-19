@@ -63,6 +63,7 @@ public sealed class UpdateDialogTransmissionEndpoint : Endpoint<UpdateTransmissi
     }
 }
 
+[OpenApiTypeName(nameof(UpdateTransmissionRequest))]
 public sealed class UpdateTransmissionRequest : UpdateTransmissionDto
 {
     public Guid DialogId { get; set; }

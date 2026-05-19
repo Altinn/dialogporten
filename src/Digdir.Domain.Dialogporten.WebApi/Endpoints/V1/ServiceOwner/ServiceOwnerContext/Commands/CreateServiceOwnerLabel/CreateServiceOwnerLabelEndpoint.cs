@@ -89,6 +89,7 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
     }
 }
 
+[OpenApiTypeName(nameof(CreateServiceOwnerLabelRequest))]
 public sealed class CreateServiceOwnerLabelRequest
 {
     public Guid DialogId { get; set; }
@@ -100,6 +101,7 @@ public sealed class CreateServiceOwnerLabelRequest
     public Guid? IfMatchServiceOwnerContextRevision { get; set; }
 }
 
+[OpenApiTypeName("CreateServiceOwnerLabel")]
 public sealed class LabelDto
 {
     public string Value { get; set; } = null!;

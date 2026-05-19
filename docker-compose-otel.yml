@@ -1,7 +1,7 @@
 services:
   # OpenTelemetry Collector
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.148.0
+    image: otel/opentelemetry-collector-contrib:0.151.0
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./local-otel-configuration/otel-collector-config.yaml:/etc/otel-collector-config.yaml
@@ -31,7 +31,7 @@ services:
 
   # Prometheus for metrics
   prometheus:
-    image: prom/prometheus:v3.10.0
+    image: prom/prometheus:v3.11.3
     volumes:
       - ./local-otel-configuration/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:

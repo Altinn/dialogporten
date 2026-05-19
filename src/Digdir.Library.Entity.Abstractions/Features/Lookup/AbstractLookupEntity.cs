@@ -57,7 +57,7 @@ public abstract class AbstractLookupEntity<TSelf, TEnum> : ILookupEntity<TSelf, 
     /// </summary>
     /// <param name="id">The entity identification.</param>
     /// <returns>A new instance of <typeparamref name="TSelf"/>.</returns>
-    public static TSelf GetValue(TEnum id) => (TSelf)id;
+    public static TSelf GetValue(TEnum id) => (TSelf)(AbstractLookupEntity<TSelf, TEnum>)id;
 
     /// <summary>
     /// Tries to parse the string representation of an enum value to a <typeparamref name="TSelf"/> instance.

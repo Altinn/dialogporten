@@ -36,6 +36,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogTokenGenerator _dialogTokenGenerator;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDialogSeenLogWriter _dialogSeenLogWriter;
 
     public GetDialogQueryHandler(
         IDialogDbContext db,
@@ -44,7 +45,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
-        IDialogTokenGenerator dialogTokenGenerator)
+        IDialogTokenGenerator dialogTokenGenerator,
+        IDialogSeenLogWriter dialogSeenLogWriter)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(mapper);
@@ -53,6 +55,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ArgumentNullException.ThrowIfNull(userRegistry);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
         ArgumentNullException.ThrowIfNull(dialogTokenGenerator);
+        ArgumentNullException.ThrowIfNull(dialogSeenLogWriter);
 
         _db = db;
         _mapper = mapper;
@@ -61,6 +64,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         _userRegistry = userRegistry;
         _altinnAuthorization = altinnAuthorization;
         _dialogTokenGenerator = dialogTokenGenerator;
+        _dialogSeenLogWriter = dialogSeenLogWriter;
     }
 
     public async Task<GetDialogResult> Handle(GetDialogQuery request, CancellationToken cancellationToken)
@@ -220,7 +224,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         var userId = _userRegistry.GetCurrentUserId();
 
-        dialog.OnSeen(userId.ExternalIdWithPrefix, userId.Type);
+        var seenResult = await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);
 
         var saveResult = await _unitOfWork
             .DisableUpdatableFilter()
@@ -242,12 +246,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.UpdatedAt,
-            userId.ExternalIdWithPrefix);
+            userId.ExternalIdWithPrefix,
+            seenResult?.NewSeenLog
+        );
 
         dialogDto.SeenSinceLastContentUpdate = GetSeenLogs(
             dialog.SeenLog,
             dialog.ContentUpdatedAt,
-            userId.ExternalIdWithPrefix);
+            userId.ExternalIdWithPrefix,
+            seenResult?.NewSeenLog
+        );
 
         dialogDto.DialogToken = _dialogTokenGenerator.GetDialogToken(
             dialog,
@@ -259,6 +267,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
 
+        dialogDto.IsContentSeen = seenResult?.IsContentSeen ?? dialogDto.IsContentSeen;
         dialogDto.EndUserContext.SystemLabels.Remove(SystemLabel.Values.MarkedAsUnopened);
 
         return dialogDto;
@@ -267,13 +276,16 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
-        string externalId) =>
+        string externalId,
+        DialogSeenLog? newSeenLog) =>
         seenLogs
             .Where(log => log.CreatedAt >= filterDate)
+            .Concat(newSeenLog is null ? [] : [newSeenLog])
             .GroupBy(log => log.SeenBy.ActorNameEntity!.ActorId)
             .Select(group => group
                 .OrderByDescending(log => log.CreatedAt)
-                .First())
+                .First()
+            )
             .Select(log => ToSeenLogDto(externalId, log))
             .ToList();
 

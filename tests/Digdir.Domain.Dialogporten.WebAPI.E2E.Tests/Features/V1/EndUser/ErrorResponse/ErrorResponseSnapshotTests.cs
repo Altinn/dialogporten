@@ -17,7 +17,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         var nonExistentDialogId = Guid.CreateVersion7();
 
         // Act
-        var response = await Fixture.EnduserApi.GetDialog(nonExistentDialogId);
+        var response = await Fixture.EndUserApi.GetDialog(nonExistentDialogId);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -31,8 +31,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         var nonExistentDialogId = Guid.CreateVersion7();
 
         // Act
-        var response = await Fixture.EnduserApi
-            .V1.SearchDialogActivities(nonExistentDialogId, new V1EndUserCommon_AcceptedLanguages());
+        var response = await Fixture.EndUserApi
+            .V1.SearchDialogActivities(nonExistentDialogId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -47,8 +47,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         var nonExistentActivityId = Guid.CreateVersion7();
 
         // Act
-        var response = await Fixture.EnduserApi
-            .V1.GetDialogActivity(dialogId, nonExistentActivityId, new V1EndUserCommon_AcceptedLanguages());
+        var response = await Fixture.EndUserApi
+            .V1.GetDialogActivity(dialogId, nonExistentActivityId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -63,8 +63,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
 
         // Act
-        var response = await Fixture.EnduserApi
-            .V1.GetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
+        var response = await Fixture.EndUserApi
+            .V1.GetDialog(dialogId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Gone);
@@ -80,8 +80,8 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
             x.ServiceResource = "urn:altinn:resource:ttd-dialogporten-transmissions-test");
 
         // Act
-        var response = await Fixture.EnduserApi
-            .V1.GetDialog(dialogId, new V1EndUserCommon_AcceptedLanguages());
+        var response = await Fixture.EndUserApi
+            .V1.GetDialog(dialogId, new AcceptedLanguages());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);

@@ -54,6 +54,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSy
     }
 }
 
+[OpenApiTypeName(nameof(BulkSetDialogSystemLabelsRequest))]
 public sealed class BulkSetDialogSystemLabelsRequest
 {
     [QueryParam]

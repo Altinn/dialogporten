@@ -74,9 +74,10 @@ internal static class DialogContentDtoMapExtensions
             }
 
             destinations ??= [];
-            foreach (var contentType in DialogContentType.GetValues())
+            var contentTypeIds = DialogContentType.GetValues().Select(contentType => contentType.Id);
+            foreach (var typeId in contentTypeIds)
             {
-                var sourceValue = contentType.Id switch
+                var sourceValue = typeId switch
                 {
                     DialogContentType.Values.Title => source.Title,
                     DialogContentType.Values.NonSensitiveTitle => source.NonSensitiveTitle,
@@ -87,10 +88,10 @@ internal static class DialogContentDtoMapExtensions
                     DialogContentType.Values.ExtendedStatus => source.ExtendedStatus,
                     DialogContentType.Values.MainContentReference => source.MainContentReference,
                     _ => throw new InvalidOperationException(
-                        $"Unknown {nameof(DialogContentType)} '{contentType.Id}'")
+                        $"Unknown {nameof(DialogContentType)} '{typeId}'")
                 };
 
-                SyncContent(destinations, contentType.Id, sourceValue);
+                SyncContent(destinations, typeId, sourceValue);
             }
 
             return destinations;
@@ -149,18 +150,19 @@ internal static class TransmissionContentDtoMapExtensions
             }
 
             destinations ??= [];
-            foreach (var contentType in DialogTransmissionContentType.GetValues())
+            var contentTypeIds = DialogTransmissionContentType.GetValues().Select(contentType => contentType.Id);
+            foreach (var typeId in contentTypeIds)
             {
-                var sourceValue = contentType.Id switch
+                var sourceValue = typeId switch
                 {
                     DialogTransmissionContentType.Values.Title => source.Title,
                     DialogTransmissionContentType.Values.Summary => source.Summary,
                     DialogTransmissionContentType.Values.ContentReference => source.ContentReference,
                     _ => throw new InvalidOperationException(
-                        $"Unknown {nameof(DialogTransmissionContentType)} '{contentType.Id}'")
+                        $"Unknown {nameof(DialogTransmissionContentType)} '{typeId}'")
                 };
 
-                SyncContent(destinations, contentType.Id, sourceValue);
+                SyncContent(destinations, typeId, sourceValue);
             }
 
             return destinations;

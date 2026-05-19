@@ -16,7 +16,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
-            dialog.ServiceOwnerContext = new V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
+            dialog.ServiceOwnerContext = new()
             {
                 ServiceOwnerLabels =
                 [
@@ -49,7 +49,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(dialog =>
         {
-            dialog.ServiceOwnerContext = new V1ServiceOwnerDialogsCommandsCreate_DialogServiceOwnerContext
+            dialog.ServiceOwnerContext = new()
             {
                 ServiceOwnerLabels =
                 [
@@ -106,7 +106,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             ExpiresAt = DateTimeOffset.UtcNow.Date.AddYears(20),
             IsApiOnly = false,
             Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.Awaiting,
-            Content = new V1ServiceOwnerDialogsCommandsUpdate_Content
+            Content = new()
             {
                 Title = DialogTestData.CreateContentValue(
                     value: "PUT updated dialog title",
@@ -142,7 +142,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             ],
             Attachments =
             [
-                new V1ServiceOwnerDialogsCommandsUpdate_Attachment
+                new()
                 {
                     Id = DialogTestData.NewUuidV7(),
                     Name = "put-dialog-attachment",
@@ -152,17 +152,17 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                     ],
                     Urls =
                     [
-                        new V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl
+                        new()
                         {
                             Id = DialogTestData.NewUuidV7(),
-                            Url = new Uri("https://example.com/put-dialog-attachment.pdf"),
+                            Url = new("https://example.com/put-dialog-attachment.pdf"),
                             MediaType = "application/pdf",
                             ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                         },
-                        new V1ServiceOwnerDialogsCommandsUpdate_AttachmentUrl
+                        new()
                         {
                             Id = DialogTestData.NewUuidV7(),
-                            Url = new Uri("https://example.com/put-dialog-attachment-api.json"),
+                            Url = new("https://example.com/put-dialog-attachment-api.json"),
                             MediaType = "application/json",
                             ConsumerType = Attachments_AttachmentUrlConsumerType.Api
                         }
@@ -172,20 +172,20 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             ],
             Transmissions =
             [
-                new V1ServiceOwnerDialogsCommandsUpdate_Transmission
+                new()
                 {
                     Id = DialogTestData.NewUuidV7(),
                     IdempotentKey = "put-transmission-key",
-                    CreatedAt = new DateTimeOffset(2026, 1, 2, 3, 4, 5, TimeSpan.Zero),
+                    CreatedAt = new(2026, 1, 2, 3, 4, 5, TimeSpan.Zero),
                     AuthorizationAttribute = E2EConstants.AvailableExternalResource,
-                    ExtendedType = new Uri("urn:test:update:transmission-type"),
+                    ExtendedType = new("urn:test:update:transmission-type"),
                     ExternalReference = "put-transmission-external-reference",
                     Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
-                    Sender = new V1ServiceOwnerCommonActors_Actor
+                    Sender = new()
                     {
                         ActorType = Actors_ActorType.ServiceOwner
                     },
-                    Content = new V1ServiceOwnerDialogsCommandsUpdate_TransmissionContent
+                    Content = new()
                     {
                         Title = DialogTestData.CreateContentValue(
                             value: "PUT transmission title",
@@ -200,7 +200,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                     },
                     Attachments =
                     [
-                        new V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachment
+                        new()
                         {
                             Id = DialogTestData.NewUuidV7(),
                             Name = "put-transmission-attachment",
@@ -210,9 +210,9 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                             ],
                             Urls =
                             [
-                                new V1ServiceOwnerDialogsCommandsUpdate_TransmissionAttachmentUrl
+                                new()
                                 {
-                                    Url = new Uri("https://example.com/put-transmission-attachment.pdf"),
+                                    Url = new("https://example.com/put-transmission-attachment.pdf"),
                                     MediaType = "application/pdf",
                                     ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                                 }
@@ -222,13 +222,13 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                     ],
                     NavigationalActions =
                     [
-                        new V1ServiceOwnerDialogsCommandsUpdate_TransmissionNavigationalAction
+                        new()
                         {
                             Title =
                             [
                                 DialogTestData.CreateLocalization("PUT transmission navigation")
                             ],
-                            Url = new Uri("https://example.com/put-transmission-navigation"),
+                            Url = new("https://example.com/put-transmission-navigation"),
                             ExpiresAt = DateTimeOffset.UtcNow.Date.AddYears(10)
                         }
                     ]
@@ -236,11 +236,11 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             ],
             GuiActions =
             [
-                new V1ServiceOwnerDialogsCommandsUpdate_GuiAction
+                new()
                 {
                     Id = DialogTestData.NewUuidV7(),
                     Action = "read",
-                    Url = new Uri("https://example.com/put-gui-action"),
+                    Url = new("https://example.com/put-gui-action"),
                     AuthorizationAttribute = E2EConstants.AvailableExternalResource,
                     IsDeleteDialogAction = false,
                     HttpMethod = Http_HttpVerb.POST,
@@ -257,7 +257,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             ],
             ApiActions =
             [
-                new V1ServiceOwnerDialogsCommandsUpdate_ApiAction
+                new()
                 {
                     Id = DialogTestData.NewUuidV7(),
                     Action = "read",
@@ -265,15 +265,15 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                     Name = "put-api-action",
                     Endpoints =
                     [
-                        new V1ServiceOwnerDialogsCommandsUpdate_ApiActionEndpoint
+                        new()
                         {
                             Id = DialogTestData.NewUuidV7(),
                             Version = "v1",
-                            Url = new Uri("https://example.com/put-api-action"),
+                            Url = new("https://example.com/put-api-action"),
                             HttpMethod = Http_HttpVerb.POST,
-                            DocumentationUrl = new Uri("https://example.com/put-api-action/docs"),
-                            RequestSchema = new Uri("https://example.com/put-api-action/request-schema.json"),
-                            ResponseSchema = new Uri("https://example.com/put-api-action/response-schema.json"),
+                            DocumentationUrl = new("https://example.com/put-api-action/docs"),
+                            RequestSchema = new("https://example.com/put-api-action/request-schema.json"),
+                            ResponseSchema = new("https://example.com/put-api-action/response-schema.json"),
                             Deprecated = true,
                             SunsetAt = DateTimeOffset.UtcNow.Date.AddYears(10)
                         }
@@ -282,13 +282,13 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             ],
             Activities =
             [
-                new V1ServiceOwnerDialogsCommandsUpdate_Activity
+                new()
                 {
                     Id = DialogTestData.NewUuidV7(),
-                    CreatedAt = new DateTimeOffset(2026, 1, 2, 3, 4, 5, TimeSpan.Zero),
-                    ExtendedType = new Uri("urn:test:update:activity-type"),
+                    CreatedAt = new(2026, 1, 2, 3, 4, 5, TimeSpan.Zero),
+                    ExtendedType = new("urn:test:update:activity-type"),
                     Type = DialogsEntitiesActivities_DialogActivityType.Information,
-                    PerformedBy = new V1ServiceOwnerCommonActors_Actor
+                    PerformedBy = new()
                     {
                         ActorType = Actors_ActorType.PartyRepresentative,
                         ActorName = "PUT activity performer"

@@ -222,6 +222,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotVisible<DialogEntity>(dialog.VisibleFrom.Value);
         }
 
+        // if (dialog.ExpiresAt.HasValue && dialog.ExpiresAt < _clock.UtcNowOffset)
+        // {
+        //     return new EntityExpired<DialogEntity>(dialog.ExpiresAt.Value);
+        // }
+
         var userId = _userRegistry.GetCurrentUserId();
 
         var seenResult = await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);

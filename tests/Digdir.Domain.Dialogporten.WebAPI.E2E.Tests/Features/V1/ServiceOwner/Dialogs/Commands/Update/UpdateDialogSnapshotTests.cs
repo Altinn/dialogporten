@@ -100,10 +100,10 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             Progress = 42,
             ExtendedStatus = "urn:test:update:extended-status",
             ExternalReference = "put-updated-external-reference",
-            DueAt = DateTimeOffset.UtcNow.Date.AddYears(2).AddHours(3).AddMinutes(4).AddSeconds(5),
+            DueAt = DateTimeOffset.UtcNow.Date.AddYears(2),
             Process = "urn:test:update:process",
             PrecedingProcess = "urn:test:update:preceding-process",
-            ExpiresAt = DateTimeOffset.UtcNow.Date.AddYears(20).AddHours(3).AddMinutes(4).AddSeconds(5),
+            ExpiresAt = DateTimeOffset.UtcNow.Date.AddYears(20),
             IsApiOnly = false,
             Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.Awaiting,
             Content = new V1ServiceOwnerDialogsCommandsUpdate_Content
@@ -167,7 +167,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                             ConsumerType = Attachments_AttachmentUrlConsumerType.Api
                         }
                     ],
-                    ExpiresAt = new DateTimeOffset(2044, 1, 2, 3, 4, 5, TimeSpan.Zero)
+                    ExpiresAt = DateTimeOffset.UtcNow.Date.AddYears(10)
                 }
             ],
             Transmissions =
@@ -217,7 +217,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                                     ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                                 }
                             ],
-                            ExpiresAt = new DateTimeOffset(2044, 1, 2, 3, 4, 5, TimeSpan.Zero)
+                            ExpiresAt = DateTimeOffset.UtcNow.Date.AddYears(10)
                         }
                     ],
                     NavigationalActions =
@@ -229,7 +229,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                                 DialogTestData.CreateLocalization("PUT transmission navigation")
                             ],
                             Url = new Uri("https://example.com/put-transmission-navigation"),
-                            ExpiresAt = new DateTimeOffset(2044, 1, 2, 3, 4, 5, TimeSpan.Zero)
+                            ExpiresAt = DateTimeOffset.UtcNow.Date.AddYears(10)
                         }
                     ]
                 }
@@ -275,7 +275,7 @@ public class UpdateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
                             RequestSchema = new Uri("https://example.com/put-api-action/request-schema.json"),
                             ResponseSchema = new Uri("https://example.com/put-api-action/response-schema.json"),
                             Deprecated = true,
-                            SunsetAt = new DateTimeOffset(2044, 1, 2, 3, 4, 5, TimeSpan.Zero)
+                            SunsetAt = DateTimeOffset.UtcNow.Date.AddYears(10)
                         }
                     ]
                 }

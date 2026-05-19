@@ -13,6 +13,7 @@ const queryType = "getAllDialogsForParties";
 const environment = __ENV.API_ENVIRONMENT || "yt01";
 
 // The label format is: label_pid_totaldialogs, e.g. a_06917699338_73k means that the end user with pid 06917699338 has 73k dialogs.
+// TODO: Find real cases for staging and test environments, or remove those environments from the test. Currently using the same test data for all environments.
 const endUsersByEnvironment = {
   yt01: [
     { pid: "06917699338", label: "a_06917699338_73k" },

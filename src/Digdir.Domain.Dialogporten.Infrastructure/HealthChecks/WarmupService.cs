@@ -20,23 +20,28 @@ internal sealed partial class WarmupService : IHostedService
     private readonly ILogger<WarmupService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly WarmupState _warmupState;
+    private readonly IHostApplicationLifetime _hostApplicationLifetime;
     private readonly WarmupSettings _settings;
     private CancellationTokenSource? _internalCts;
+    private Task? _warmupTask;
 
     public WarmupService(
         ILogger<WarmupService> logger,
         IServiceScopeFactory scopeFactory,
         WarmupState warmupState,
+        IHostApplicationLifetime hostApplicationLifetime,
         IOptions<InfrastructureSettings> options)
     {
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(scopeFactory);
         ArgumentNullException.ThrowIfNull(warmupState);
+        ArgumentNullException.ThrowIfNull(hostApplicationLifetime);
         ArgumentNullException.ThrowIfNull(options);
 
         _logger = logger;
         _scopeFactory = scopeFactory;
         _warmupState = warmupState;
+        _hostApplicationLifetime = hostApplicationLifetime;
         _settings = options.Value.Warmup;
     }
 
@@ -50,19 +55,39 @@ internal sealed partial class WarmupService : IHostedService
         }
 
         _logger.LogInformation("Queuing readiness warmup.");
-        _internalCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _internalCts = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken,
+            _hostApplicationLifetime.ApplicationStopping);
         var warmupToken = _internalCts.Token;
 
-        _ = Task.Run(() => PerformWarmupAsync(warmupToken), CancellationToken.None);
+        _warmupTask = Task.Run(() => PerformWarmupAsync(warmupToken), CancellationToken.None);
 
         return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _internalCts?.Cancel();
-        _internalCts?.Dispose();
-        return Task.CompletedTask;
+        if (_warmupTask is null)
+        {
+            return;
+        }
+
+        var internalCts = _internalCts
+            ?? throw new InvalidOperationException("Warmup task was started without a cancellation source.");
+
+        await internalCts.CancelAsync();
+
+        try
+        {
+            await _warmupTask.WaitAsync(cancellationToken);
+        }
+        finally
+        {
+            if (_warmupTask.IsCompleted)
+            {
+                internalCts.Dispose();
+            }
+        }
     }
 
     private async Task PerformWarmupAsync(CancellationToken cancellationToken)
@@ -96,6 +121,11 @@ internal sealed partial class WarmupService : IHostedService
             _logger.LogWarning(ex, "Readiness warmup was cancelled.");
             _warmupState.MarkWarmupFailed("cancelled", ex);
         }
+        catch (ObjectDisposedException ex) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning(ex, "Readiness warmup was cancelled because application services are stopping.");
+            _warmupState.MarkWarmupFailed("cancelled", ex);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Readiness warmup failed.");
@@ -105,6 +135,7 @@ internal sealed partial class WarmupService : IHostedService
 
     private async Task RunPhaseAsync(string phase, Func<Task> action)
     {
+        _internalCts?.Token.ThrowIfCancellationRequested();
         _warmupState.MarkPhaseStarted(phase);
         WarmupPhaseStarting(_logger, phase);
         await action();

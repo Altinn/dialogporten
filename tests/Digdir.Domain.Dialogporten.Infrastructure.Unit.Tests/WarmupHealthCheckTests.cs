@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -54,10 +55,12 @@ public sealed class WarmupHealthCheckTests
     {
         var state = new WarmupState();
         var serviceProvider = new ServiceCollection().BuildServiceProvider();
+        using var hostApplicationLifetime = new TestHostApplicationLifetime();
         var service = new WarmupService(
             NullLogger<WarmupService>.Instance,
             serviceProvider.GetRequiredService<IServiceScopeFactory>(),
             state,
+            hostApplicationLifetime,
             Options.Create(CreateInfrastructureSettings(new WarmupSettings { Enabled = false })));
 
         await service.StartAsync(TestContext.Current.CancellationToken);
@@ -102,4 +105,17 @@ public sealed class WarmupHealthCheckTests
             DialogSearch = new DialogSearchSettings(),
             Warmup = warmupSettings
         };
+
+    private sealed class TestHostApplicationLifetime : IHostApplicationLifetime, IDisposable
+    {
+        private readonly CancellationTokenSource _applicationStoppingCts = new();
+
+        public CancellationToken ApplicationStarted => CancellationToken.None;
+        public CancellationToken ApplicationStopping => _applicationStoppingCts.Token;
+        public CancellationToken ApplicationStopped => CancellationToken.None;
+
+        public void StopApplication() => _applicationStoppingCts.Cancel();
+
+        public void Dispose() => _applicationStoppingCts.Dispose();
+    }
 }

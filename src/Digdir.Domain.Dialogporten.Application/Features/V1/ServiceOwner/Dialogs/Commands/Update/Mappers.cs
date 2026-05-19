@@ -2,14 +2,11 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
-using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using GetDialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
@@ -71,7 +68,7 @@ public static class Mappers
         destination.PrecedingProcess = source.PrecedingProcess;
         destination.ExpiresAt = source.ExpiresAt;
         destination.IsApiOnly = source.IsApiOnly;
-        destination.Content = SyncDialogContent(source.Content, destination.Content) ?? [];
+        destination.Content = source.Content.ToDialogContentList(destination.Content) ?? [];
     }
 
     internal static List<DialogSearchTag> ToDialogSearchTags(this IEnumerable<SearchTagDto> source) =>
@@ -82,7 +79,7 @@ public static class Mappers
     internal static DialogActivity ToDialogActivity(this ActivityDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             CreatedAt = source.CreatedAt ?? default,
             ExtendedType = source.ExtendedType,
             TypeId = source.Type,
@@ -94,7 +91,7 @@ public static class Mappers
     internal static DialogTransmission ToDialogTransmission(this TransmissionDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             IdempotentKey = source.IdempotentKey,
             CreatedAt = source.CreatedAt,
             AuthorizationAttribute = source.AuthorizationAttribute,
@@ -103,7 +100,7 @@ public static class Mappers
             RelatedTransmissionId = source.RelatedTransmissionId,
             TypeId = source.Type,
             Sender = source.Sender.ToActor<DialogTransmissionSenderActor>(),
-            Content = SyncTransmissionContent(source.Content, []) ?? [],
+            Content = source.Content.ToDialogTransmissionContentList([]) ?? [],
             Attachments = source.Attachments.Select(x => x.ToDialogTransmissionAttachment()).ToList(),
             NavigationalActions = source.NavigationalActions.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList()
         };
@@ -111,7 +108,7 @@ public static class Mappers
     internal static DialogAttachment ToDialogAttachment(this AttachmentDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             Name = source.Name,
             ExpiresAt = source.ExpiresAt,
             DisplayName = source.DisplayName.ToLocalizationSet<AttachmentDisplayName>(),
@@ -129,7 +126,7 @@ public static class Mappers
     internal static AttachmentUrl ToAttachmentUrl(this AttachmentUrlDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             Url = source.Url,
             MediaType = source.MediaType,
             ConsumerTypeId = source.ConsumerType
@@ -146,7 +143,7 @@ public static class Mappers
     internal static DialogGuiAction ToDialogGuiAction(this GuiActionDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             Action = source.Action,
             Url = source.Url,
             AuthorizationAttribute = source.AuthorizationAttribute,
@@ -173,7 +170,7 @@ public static class Mappers
     internal static DialogApiAction ToDialogApiAction(this ApiActionDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             Action = source.Action,
             AuthorizationAttribute = source.AuthorizationAttribute,
             Name = source.Name,
@@ -191,7 +188,7 @@ public static class Mappers
     internal static DialogApiActionEndpoint ToDialogApiActionEndpoint(this ApiActionEndpointDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             Version = source.Version,
             Url = source.Url,
             HttpMethodId = source.HttpMethod,
@@ -218,7 +215,7 @@ public static class Mappers
     private static DialogTransmissionAttachment ToDialogTransmissionAttachment(this TransmissionAttachmentDto source) =>
         new()
         {
-            Id = source.Id ?? default,
+            Id = source.Id ?? Guid.Empty,
             Name = source.Name,
             ExpiresAt = source.ExpiresAt,
             DisplayName = source.DisplayName.ToLocalizationSet<AttachmentDisplayName>(),
@@ -242,11 +239,11 @@ public static class Mappers
             Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!
         };
 
-    private static Update.ContentDto? ToUpdateContentDto(
+    private static ContentDto? ToUpdateContentDto(
         this Queries.Get.ContentDto? source) =>
         source is null
             ? null
-            : new Update.ContentDto
+            : new ContentDto
             {
                 Title = source.Title.Copy()!,
                 NonSensitiveTitle = source.NonSensitiveTitle.Copy(),
@@ -258,11 +255,11 @@ public static class Mappers
                 MainContentReference = source.MainContentReference.Copy()
             };
 
-    private static Update.ContentDto? ToUpdateContentDto(
+    private static ContentDto? ToUpdateContentDto(
         this Features.V1.EndUser.Dialogs.Queries.Get.ContentDto? source) =>
         source is null
             ? null
-            : new Update.ContentDto
+            : new ContentDto
             {
                 Title = source.Title.Copy()!,
                 NonSensitiveTitle = null,
@@ -383,150 +380,6 @@ public static class Mappers
             Deprecated = source.Deprecated,
             SunsetAt = source.SunsetAt
         };
-
-    private static List<DialogContent>? SyncDialogContent(ContentDto? source, List<DialogContent>? destinations)
-    {
-        if (source is null)
-        {
-            return null;
-        }
-
-        destinations ??= [];
-        foreach (var contentType in DialogContentType.GetValues())
-        {
-            var sourceValue = contentType.Id switch
-            {
-                DialogContentType.Values.Title => source.Title,
-                DialogContentType.Values.NonSensitiveTitle => source.NonSensitiveTitle,
-                DialogContentType.Values.Summary => source.Summary,
-                DialogContentType.Values.NonSensitiveSummary => source.NonSensitiveSummary,
-                DialogContentType.Values.SenderName => source.SenderName,
-                DialogContentType.Values.AdditionalInfo => source.AdditionalInfo,
-                DialogContentType.Values.ExtendedStatus => source.ExtendedStatus,
-                DialogContentType.Values.MainContentReference => source.MainContentReference,
-                _ => throw new InvalidOperationException($"Unknown {nameof(DialogContentType)} '{contentType.Id}'")
-            };
-
-            SyncContent(
-                destinations,
-                contentType.Id,
-                sourceValue,
-                static (typeId, mediaType, localizations) => new DialogContent
-                {
-                    TypeId = typeId,
-                    MediaType = mediaType,
-                    Value = new DialogContentValue { Localizations = localizations }
-                });
-        }
-
-        return destinations;
-    }
-
-    private static List<DialogTransmissionContent>? SyncTransmissionContent(
-        TransmissionContentDto? source,
-        List<DialogTransmissionContent>? destinations)
-    {
-        if (source is null)
-        {
-            return null;
-        }
-
-        destinations ??= [];
-        foreach (var contentType in DialogTransmissionContentType.GetValues())
-        {
-            var sourceValue = contentType.Id switch
-            {
-                DialogTransmissionContentType.Values.Title => source.Title,
-                DialogTransmissionContentType.Values.Summary => source.Summary,
-                DialogTransmissionContentType.Values.ContentReference => source.ContentReference,
-                _ => throw new InvalidOperationException(
-                    $"Unknown {nameof(DialogTransmissionContentType)} '{contentType.Id}'")
-            };
-
-            SyncContent(
-                destinations,
-                contentType.Id,
-                sourceValue,
-                static (typeId, mediaType, localizations) => new DialogTransmissionContent
-                {
-                    TypeId = typeId,
-                    MediaType = mediaType,
-                    Value = new DialogTransmissionContentValue { Localizations = localizations }
-                });
-        }
-
-        return destinations;
-    }
-
-    private static void SyncContent<TContent, TType>(
-        List<TContent> destinations,
-        TType typeId,
-        ContentValueDto? sourceValue,
-        Func<TType, string, List<Localization>, TContent> create)
-        where TContent : class
-    {
-        var existing = destinations.FirstOrDefault(x => GetTypeId(x)!.Equals(typeId));
-
-        if (sourceValue is null)
-        {
-            if (existing is not null)
-            {
-                destinations.Remove(existing);
-            }
-
-            return;
-        }
-
-        var mediaType = sourceValue.MediaType.MapDeprecatedMediaType();
-        if (existing is not null)
-        {
-            SetContent(existing, mediaType, sourceValue.Value);
-            return;
-        }
-
-        destinations.Add(create(typeId, mediaType, sourceValue.Value.Select(x => x.ToLocalization()).ToList()));
-    }
-
-    private static object? GetTypeId(object content) =>
-        content switch
-        {
-            DialogContent dialogContent => dialogContent.TypeId,
-            DialogTransmissionContent transmissionContent => transmissionContent.TypeId,
-            _ => throw new ArgumentOutOfRangeException(nameof(content), content, null)
-        };
-
-    private static void SetContent(object content, string mediaType, ICollection<LocalizationDto> localizations)
-    {
-        _ = content switch
-        {
-            DialogContent dialogContent => UpdateDialogContent(dialogContent, mediaType, localizations),
-            DialogTransmissionContent transmissionContent => UpdateTransmissionContent(
-                transmissionContent,
-                mediaType,
-                localizations),
-            _ => throw new ArgumentOutOfRangeException(nameof(content), content, null)
-        };
-    }
-
-    private static bool UpdateDialogContent(
-        DialogContent content,
-        string mediaType,
-        ICollection<LocalizationDto> localizations)
-    {
-        content.MediaType = mediaType;
-        content.Value.Localizations.MergeFrom(localizations);
-        return true;
-    }
-
-    private static bool UpdateTransmissionContent(
-        DialogTransmissionContent content,
-        string mediaType,
-        ICollection<LocalizationDto> localizations)
-    {
-        content.MediaType = mediaType;
-        content.Value.Localizations.MergeFrom(localizations);
-        return true;
-    }
 
     private static DialogStatusInput ToDialogStatusInput(this DialogStatus.Values source) =>
         (DialogStatusInput)source;

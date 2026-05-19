@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Threading;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -72,10 +73,12 @@ internal sealed partial class WarmupService : IHostedService
             return;
         }
 
-        var internalCts = _internalCts
-            ?? throw new InvalidOperationException("Warmup task was started without a cancellation source.");
+        var internalCts = Interlocked.Exchange(ref _internalCts, null);
 
-        await internalCts.CancelAsync();
+        if (internalCts is not null)
+        {
+            await internalCts.CancelAsync();
+        }
 
         try
         {
@@ -83,10 +86,7 @@ internal sealed partial class WarmupService : IHostedService
         }
         finally
         {
-            if (_warmupTask.IsCompleted)
-            {
-                internalCts.Dispose();
-            }
+            internalCts?.Dispose();
         }
     }
 
@@ -130,6 +130,10 @@ internal sealed partial class WarmupService : IHostedService
         {
             _logger.LogError(ex, "Readiness warmup failed.");
             _warmupState.MarkWarmupFailed(_warmupState.CurrentPhase ?? "unknown", ex);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _internalCts, null)?.Dispose();
         }
     }
 

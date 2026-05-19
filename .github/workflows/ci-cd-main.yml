@@ -109,15 +109,49 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       runMigration: true
 
+  get-previous-deployed-sha:
+    name: Get previous deployed SHA for test
+    runs-on: ubuntu-latest
+    environment: test
+    if: ${{ github.event_name == 'push' }}
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - name: Resolve watermark
+        id: resolve
+        env:
+          STORED_SHA: ${{ vars.LATEST_DEPLOYED_SHA }}
+          FALLBACK_SHA: ${{ github.event.before }}
+        run: |
+          if [[ -n "$STORED_SHA" ]]; then
+            echo "Using stored watermark: $STORED_SHA"
+            echo "sha=$STORED_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "No stored watermark; falling back to github.event.before: $FALLBACK_SHA"
+            echo "sha=$FALLBACK_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for test
-    needs: [ deploy-apps, deploy-infra ]
+    needs: [ deploy-apps, deploy-infra, get-previous-deployed-sha ]
     if: ${{ always() && !failure() && !cancelled() && github.event_name == 'push' && (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
     with:
       environment-label: at23
-      from-sha: ${{ github.event.before }}
+      from-sha: ${{ needs.get-previous-deployed-sha.outputs.sha }}
       to-sha: ${{ github.sha }}
+
+  store-latest-deployed-sha:
+    name: Store latest deployed SHA for test
+    needs: [ tag-issues-with-environment ]
+    if: ${{ always() && !failure() && !cancelled() && needs.tag-issues-with-environment.result == 'success' }}
+    uses: ./.github/workflows/workflow-store-github-env-variable.yml
+    with:
+      variable_name: LATEST_DEPLOYED_SHA
+      variable_value: ${{ github.sha }}
+      environment: test
+    secrets:
+      GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
 
   generate-timestamp:
     name: Generate timestamp
@@ -216,7 +250,9 @@ jobs:
     needs: [
       deploy-infra,
       deploy-apps,
+      get-previous-deployed-sha,
       tag-issues-with-environment,
+      store-latest-deployed-sha,
       run-e2e-tests,
       run-graphql-e2e-tests,
       run-webapi-e2e-tests,

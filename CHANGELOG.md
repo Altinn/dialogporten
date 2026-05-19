@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.115.1](https://github.com/Altinn/dialogporten/compare/v1.115.0...v1.115.1) (2026-05-13)
+
+
+### Miscellaneous Chores
+
+* revert reject UserType.Unknown at the request edge ([#3957](https://github.com/Altinn/dialogporten/issues/3957)) ([f54fe8c](https://github.com/Altinn/dialogporten/commit/f54fe8c805a25b0827c98003ad9b88e7d696fc71)), closes [#3908](https://github.com/Altinn/dialogporten/issues/3908)
+
+## [1.115.0](https://github.com/Altinn/dialogporten/compare/v1.114.11...v1.115.0) (2026-05-13)
+
+
+### Features
+
+* remove automapper from transmission search ([#3943](https://github.com/Altinn/dialogporten/issues/3943)) ([0eac9bf](https://github.com/Altinn/dialogporten/commit/0eac9bfb358d98a70842bff04e652d882ae7cbf7))
+
+
+### Bug Fixes
+
+* **graphql:** reject UserType.Unknown at the request edge ([#3908](https://github.com/Altinn/dialogporten/issues/3908)) ([6791bd3](https://github.com/Altinn/dialogporten/commit/6791bd3a851df4c3220bd96d692bc7860567fb08))
+* limit dialog search upsert lock waits ([#3941](https://github.com/Altinn/dialogporten/issues/3941)) ([670e429](https://github.com/Altinn/dialogporten/commit/670e42922b9526d1f0404660d8e28c72227c0f1d))
+* make dialog search upsert timeout configurable ([#3949](https://github.com/Altinn/dialogporten/issues/3949)) ([a0768c8](https://github.com/Altinn/dialogporten/commit/a0768c8b9d1bc1e05ccd01f9e7fe1c8170d1c594))
+* **perf:** disable party filter in authorized parties call for system users ([#3954](https://github.com/Altinn/dialogporten/issues/3954)) ([f08b469](https://github.com/Altinn/dialogporten/commit/f08b4696c26927a485b37baec3da003ff0525227))
+* remove ef entity mutation on get dialog ([#3955](https://github.com/Altinn/dialogporten/issues/3955)) ([a28e2b5](https://github.com/Altinn/dialogporten/commit/a28e2b55c2340be90946fda207458105aae826a3))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/github-script action to v9 ([#3948](https://github.com/Altinn/dialogporten/issues/3948)) ([2bb9287](https://github.com/Altinn/dialogporten/commit/2bb92878aca5ebad41a3b630c8b0c5761e1e6754))
+* **deps:** update dependency azure.monitor.opentelemetry.aspnetcore to 1.5.0 ([#3945](https://github.com/Altinn/dialogporten/issues/3945)) ([0bac554](https://github.com/Altinn/dialogporten/commit/0bac554e94e151d65a2b1c0f91165a513430ad44))
+* **deps:** update prom/prometheus docker tag to v3.11.3 ([#3946](https://github.com/Altinn/dialogporten/issues/3946)) ([083c119](https://github.com/Altinn/dialogporten/commit/083c119625fe0c552554533b16e948e3bc04e049))
+* **deps:** update step-security/harden-runner action to v2.19.1 ([#3947](https://github.com/Altinn/dialogporten/issues/3947)) ([7fb5eca](https://github.com/Altinn/dialogporten/commit/7fb5eca4c4b3f198235c1aaef0e758f799622f7e))
+* **deps:** update test dependencies ([#3886](https://github.com/Altinn/dialogporten/issues/3886)) ([efe4108](https://github.com/Altinn/dialogporten/commit/efe410846642c497ddcc084c57668d63ca827dcf))
+
+## [1.114.11](https://github.com/Altinn/dialogporten/compare/v1.114.10...v1.114.11) (2026-05-12)
+
+
+### Bug Fixes
+
+* Cache the name of the user thats authenticated, not all names ([#3939](https://github.com/Altinn/dialogporten/issues/3939)) ([db16d26](https://github.com/Altinn/dialogporten/commit/db16d26b474158b8de919470f680cd9372f891fc))
+* sdk transmission namespace typo ([#3936](https://github.com/Altinn/dialogporten/issues/3936)) ([17129d8](https://github.com/Altinn/dialogporten/commit/17129d80be42b7aa2255d7f7b65eecbf54b75cb0)), closes [#3919](https://github.com/Altinn/dialogporten/issues/3919)
+* shorten Azure Container Apps revision suffix ([#3942](https://github.com/Altinn/dialogporten/issues/3942)) ([e962375](https://github.com/Altinn/dialogporten/commit/e962375228b59c38aee4a7ab3fb5100c3fe032f5))
+
+
+### Miscellaneous Chores
+
+* bump azure-login action AZ CLI version to 2.86.0 ([#3934](https://github.com/Altinn/dialogporten/issues/3934)) ([4596530](https://github.com/Altinn/dialogporten/commit/45965301f1b0cc0f3cf9f0065c0993edeb6ea06e))
+
 ## [1.114.10](https://github.com/Altinn/dialogporten/compare/v1.114.9...v1.114.10) (2026-05-11)
 
 

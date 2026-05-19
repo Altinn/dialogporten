@@ -14,8 +14,29 @@ public sealed class InfrastructureSettings
     public required AltinnCdnPlatformSettings AltinnCdn { get; init; }
     public required MaskinportenSettings Maskinporten { get; init; }
     public required MassTransitSettings MassTransit { get; set; }
+    public required DialogSearchSettings DialogSearch { get; init; } = new();
+    public WarmupSettings Warmup { get; init; } = new();
     public bool EnableSqlStatementLogging { get; init; }
     public bool EnableSqlParametersLogging { get; init; }
+}
+
+public sealed class WarmupSettings
+{
+    public bool Enabled { get; init; } = true;
+    public int TimeoutSeconds { get; init; } = 60;
+    public int DbConnectionsToOpen { get; init; } = 4;
+    public int DbConnectionParallelism { get; init; } = 2;
+    public bool RunEndUserSearch { get; init; } = true;
+    // Synthetic warmup user expected to exist in all non-prod environments. Override in prod and local dev.
+    public string? EndUserPid { get; init; } = "14886498226";
+}
+
+public sealed class DialogSearchSettings
+{
+    /// <summary>
+    /// Set to 0 to use the Npgsql/provider default command timeout.
+    /// </summary>
+    public int? UpsertCommandTimeoutSeconds { get; init; } = 5;
 }
 
 public sealed class MassTransitSettings
@@ -52,6 +73,8 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
         IValidator<AltinnCdnPlatformSettings> altinnCdnPlatformSettingsValidator,
         IValidator<MaskinportenSettings> maskinportenSettingsValidator,
         IValidator<RedisSettings> redisSettingsValidator,
+        IValidator<DialogSearchSettings> dialogSearchSettingsValidator,
+        IValidator<WarmupSettings> warmupSettingsValidator,
         IValidator<MassTransitSettings> massTransitSettingsValidator)
     {
         RuleFor(x => x.DialogDbConnectionString)
@@ -73,6 +96,14 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
             .NotEmpty()
             .SetValidator(redisSettingsValidator);
 
+        RuleFor(x => x.DialogSearch)
+            .NotNull()
+            .SetValidator(dialogSearchSettingsValidator);
+
+        RuleFor(x => x.Warmup)
+            .NotNull()
+            .SetValidator(warmupSettingsValidator);
+
         RuleFor(x => x.MassTransit)
             .SetValidator(massTransitSettingsValidator);
     }
@@ -83,8 +114,34 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
         new AltinnCdnPlatformSettingsValidator(),
         new MaskinportenSettingsValidator(),
         new RedisSettingsValidator(),
+        new DialogSearchSettingsValidator(),
+        new WarmupSettingsValidator(),
         new MassTransitSettingsValidator())
     { }
+}
+
+internal sealed class WarmupSettingsValidator : AbstractValidator<WarmupSettings>
+{
+    public WarmupSettingsValidator()
+    {
+        RuleFor(x => x.TimeoutSeconds)
+            .GreaterThan(0);
+
+        RuleFor(x => x.DbConnectionsToOpen)
+            .GreaterThanOrEqualTo(0);
+
+        RuleFor(x => x.DbConnectionParallelism)
+            .GreaterThan(0);
+    }
+}
+
+internal sealed class DialogSearchSettingsValidator : AbstractValidator<DialogSearchSettings>
+{
+    public DialogSearchSettingsValidator()
+    {
+        RuleFor(x => x.UpsertCommandTimeoutSeconds)
+            .GreaterThanOrEqualTo(0);
+    }
 }
 
 internal sealed class MassTransitSettingsValidator : AbstractValidator<MassTransitSettings>;

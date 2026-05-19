@@ -66,9 +66,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        dialog.SeenLog = dialog.SeenLog
-            .Where(x => x.CreatedAt >= dialog.ContentUpdatedAt).ToList();
-
         var dialogDto = _mapper.Map<DialogDto>(dialog);
         DialogSeenResult? seenResult = null;
 

@@ -6339,11 +6339,6 @@
             "format": "date-time",
             "type": "string"
           },
-          "deletedAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string"
-          },
           "extendedType": {
             "format": "uri",
             "nullable": true,

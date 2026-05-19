@@ -98,10 +98,10 @@ param probes Probes = {
     timeoutSeconds: 2
   }
   readiness: {
-    periodSeconds: 5
-    initialDelaySeconds: 15
+    periodSeconds: 2
+    initialDelaySeconds: 5
     successThreshold: 1
-    failureThreshold: 3
+    failureThreshold: 45
     timeoutSeconds: 2
   }
   liveness: {

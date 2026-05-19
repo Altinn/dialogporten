@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -22,17 +21,14 @@ public sealed partial class SearchActivityResult : OneOfBase<List<ActivityDto>, 
 internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivityQuery, SearchActivityResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IUserResourceRegistry _userResourceRegistry;
 
-    public SearchActivityQueryHandler(IDialogDbContext db, IMapper mapper, IUserResourceRegistry userResourceRegistry)
+    public SearchActivityQueryHandler(IDialogDbContext db, IUserResourceRegistry userResourceRegistry)
     {
         ArgumentNullException.ThrowIfNull(db);
-        ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
 
         _db = db;
-        _mapper = mapper;
         _userResourceRegistry = userResourceRegistry;
     }
 
@@ -61,6 +57,8 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        return _mapper.Map<List<ActivityDto>>(dialog.Activities);
+        return dialog.Activities
+            .Select(x => x.ToDto())
+            .ToList();
     }
 }

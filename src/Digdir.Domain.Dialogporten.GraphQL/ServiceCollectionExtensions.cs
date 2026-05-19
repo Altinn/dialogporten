@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDialogportenGraphQl(this IServiceCollection services) => services
         .AddTransient<ActivityEnricher, DialogportenGqlActivityEnricher>()
         .AddGraphQLServer()
-        .AddHttpRequestInterceptor<AcceptLanguageHeaderInterceptor>()
+        .AddHttpRequestInterceptor<DialogportenHttpRequestInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
         // This assumes that subscriptions have been set up by the infrastructure
         .AddSubscriptionType<Subscriptions>()

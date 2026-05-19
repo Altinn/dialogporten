@@ -105,6 +105,10 @@ param postgresConfiguration = {
       value: '64'
     }
     {
+      name: 'shared_preload_libraries'
+      value: 'pg_cron,pg_stat_statements,pg_hint_plan,auto_explain,pgaudit,pg_squeeze'
+    }
+    {
       name: 'subtransaction_buffers'
       value: '1024'
     }

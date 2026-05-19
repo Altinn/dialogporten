@@ -25,9 +25,11 @@ If integration tests fail because test containers are blocked by sandboxing, use
 
 All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyzers.
 
-Changes that affect Swagger/GraphQL spec must be reflected in the `docs/schema/v1/*verified*.json` files. Use the corresponding `*received*.json` files, which are generated upon build, for synchronization.
-Do not edit `schema.verified.graphql` or `swagger.verified.json` directly; they are automatically generated and validated via snapshot tests.
-The SwaggerSnapshot test will fail if these files are not identical. It will also fail when run in Debug configuration (must use Release).
+## Snapshot Tests
+- Never manually edit, create, or hand-write `*.verified.*` snapshot files.
+- When adding or updating snapshot tests, run the relevant test and let Verify generate the corresponding `*.received.*` file.
+- Review the generated `*.received.*` output, then accept/promote it to `*.verified.*` using the repository’s normal Verify workflow.
+- If the snapshot test cannot run because of local environment issues, leave the snapshot uncommitted/uncreated and document the blocker instead of fabricating the expected snapshot.
 
 ## Code Style Guidelines
 - Use file-scoped namespaces with `using` directives outside the namespace.

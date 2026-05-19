@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetSeenLog;
@@ -276,6 +277,18 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             events.Count.Should().Be(2);
             ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
             ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
+        });
+
+    [Fact]
+    public Task Multiple_Gets_Around_Content_Update_Should_Create_Multiple_SeenLogs() => FlowBuilder.For(Application)
+        .CreateSimpleDialog()
+        .GetServiceOwnerDialogAsEndUser()
+        .UpdateDialog(x => x.Dto.Status = DialogStatusInput.Awaiting)
+        .GetServiceOwnerDialogAsEndUser()
+        .GetServiceOwnerSeenLogs()
+        .ExecuteAndAssert<List<SearchSeenLogDto>>((x, _) =>
+        {
+            x.Count.Should().Be(2);
         });
 
     [Fact]

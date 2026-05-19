@@ -82,38 +82,6 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     }
 
     [Fact]
-    public Task Get_By_DialogRef_Should_Fall_Back_To_CorrespondenceId_From_MainContentReference_When_Label_Is_Missing()
-    {
-        var correspondenceId = Guid.NewGuid();
-
-        return FlowBuilder.For(Application, services =>
-            {
-                services.RemoveAll<IResourceRegistry>();
-                services.AddScoped<IResourceRegistry, CorrespondenceLookupResourceRegistry>();
-            })
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.AddMainContentReference(content =>
-                {
-                    content.Value =
-                    [
-                        new LocalizationDto
-                        {
-                            LanguageCode = "nb",
-                            Value = $"https://altinn.no/correspondence/api/v1/correspondence/{correspondenceId}/content"
-                        }
-                    ];
-                });
-            })
-            .SendCommand((_, ctx) => new GetDialogLookupQuery
-            {
-                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
-            })
-            .ExecuteAndAssert<ServiceOwnerIdentifierLookupDto>(result =>
-                result.InstanceRef.Should().Be($"urn:altinn:correspondence-id:{correspondenceId}".ToLowerInvariant()));
-    }
-
-    [Fact]
     public Task Get_Should_Prune_Title_And_NonSensitiveTitle_When_AcceptLanguage_Is_Set() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>

@@ -65,7 +65,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             return new EntityNotFound(nameof(request.InstanceRef), [request.InstanceRef]);
         }
 
-        var responseInstanceRef = await _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData, cancellationToken);
+        var responseInstanceRef = _dialogResolver.ResolveOutputInstanceRef(instanceRef, dialogData);
         if (!InstanceRef.TryParse(responseInstanceRef, out var parsedResponseInstanceRef))
         {
             _logger.LogError(

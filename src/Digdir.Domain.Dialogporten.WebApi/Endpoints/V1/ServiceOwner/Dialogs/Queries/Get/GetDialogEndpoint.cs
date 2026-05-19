@@ -38,7 +38,7 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
             dto =>
             {
                 HttpContext.Response.Headers.ETag = dto.Revision.ToString();
-                return SendOkAsync(dto, ct);
+                return Send.OkAsync(dto, ct);
             },
             notFound => this.NotFoundAsync(notFound, ct),
             validationError => this.BadRequestAsync(validationError, ct));

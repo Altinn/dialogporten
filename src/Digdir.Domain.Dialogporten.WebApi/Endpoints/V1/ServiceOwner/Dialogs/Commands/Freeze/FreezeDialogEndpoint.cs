@@ -51,7 +51,7 @@ public sealed class FreezeDialogEndpoint : Endpoint<FreezeDialogRequest>
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                return SendNoContentAsync(ct);
+                return Send.NoContentAsync(ct);
             },
             entityNotFound => this.NotFoundAsync(entityNotFound, ct),
             deleted => this.GoneAsync(deleted, ct),

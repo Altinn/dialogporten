@@ -33,7 +33,7 @@ public sealed class SearchDialogEndUserContextEndpoint : Endpoint<SearchDialogEn
     {
         var result = await _sender.Send(req, ct);
         await result.Match(
-            paginatedDto => SendOkAsync(paginatedDto, ct),
+            paginatedDto => Send.OkAsync(paginatedDto, ct),
             validationError => this.BadRequestAsync(validationError, ct));
     }
 }

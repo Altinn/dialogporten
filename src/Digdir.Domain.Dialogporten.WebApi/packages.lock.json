@@ -13,12 +13,12 @@
       },
       "FastEndpoints.Swagger": {
         "type": "Direct",
-        "requested": "[5.35.0, )",
-        "resolved": "5.35.0",
-        "contentHash": "qasL4AwV7y50qTr/lskWN5zqNE2hWn10pVymegNt7W7ByGrciPB7OYa6XqwM+mZkI3NMvEBOpl2KUwOsSB1XKg==",
+        "requested": "[8.1.0, )",
+        "resolved": "8.1.0",
+        "contentHash": "J0PLiqtzJzRArxfT9juncvtYbW/bOHfVuAf0Cqz9FhMxJsNyKuVtG9NLxW9lpChEY1yDSaiM5qwzCvxa6Y0Oow==",
         "dependencies": {
-          "FastEndpoints": "5.35.0",
-          "NSwag.AspNetCore": "14.2.0"
+          "FastEndpoints": "8.1.0",
+          "NSwag.AspNetCore": "14.6.3"
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
@@ -272,23 +272,46 @@
       },
       "FastEndpoints": {
         "type": "Transitive",
-        "resolved": "5.35.0",
-        "contentHash": "6pMv0i2AsPlwZES65qfVrwpjQDVIBDOFZ2/E7UqWbHNjpB8T5PpsbaFa8cLrcvkLzxijqzORDmDJ+wB6hck2rA==",
+        "resolved": "8.1.0",
+        "contentHash": "LGppBQ5tUTdZNXA9/zTI5zIrd9Nup5O5ASVU7YxKDD56aU8pK5+sxAcd5ud8bmjlw4t97vCzfNU0wW7/7XFodw==",
         "dependencies": {
-          "FastEndpoints.Attributes": "5.35.0",
-          "FastEndpoints.Messaging.Core": "5.35.0",
-          "FluentValidation": "11.11.0"
+          "FastEndpoints.Attributes": "8.1.0",
+          "FastEndpoints.JobQueues": "8.1.0",
+          "FastEndpoints.Messaging": "8.1.0",
+          "FluentValidation": "12.1.1"
         }
       },
       "FastEndpoints.Attributes": {
         "type": "Transitive",
-        "resolved": "5.35.0",
-        "contentHash": "Fxxc1Bh6ItLQ1lJg4bEIg57AoRCibu69GCmCOe35vzAqq4nQVb9bGl5snoxJA3CNkC4XzIJLXzsKj/fJNtiHxQ=="
+        "resolved": "8.1.0",
+        "contentHash": "jo2pRdwv/Bs0JE7S3bCUBZWuyX7u3fJylOf985/epr/tSQfuaBCIwx9XouuXcU00H1XdukcDKUzVmPQFeRZuRg=="
+      },
+      "FastEndpoints.Core": {
+        "type": "Transitive",
+        "resolved": "8.1.0",
+        "contentHash": "z5Ym1UNtHZ87u5ZsTgajeM+anU1Ab3TsKvFTK5taPTqb89seB2raxFcykhOHoQ9o1hN7gVj3epS8R7ZYx47nhg=="
+      },
+      "FastEndpoints.JobQueues": {
+        "type": "Transitive",
+        "resolved": "8.1.0",
+        "contentHash": "vP+D3+4J35miQ2E5mWjay5PDWSPwmlgjvvWFaptNzq0Csde/ONh8PJ8EDnuJ9uhAkKd6QLgujbRaympBQXBhXg==",
+        "dependencies": {
+          "FastEndpoints.Messaging": "8.1.0"
+        }
+      },
+      "FastEndpoints.Messaging": {
+        "type": "Transitive",
+        "resolved": "8.1.0",
+        "contentHash": "soymzIpNTRjUbrbHZ+418EhB+KC39xj98EWQo8Q0V793EYrl/qVqTlAlahXhInA75CP9pip0/Hgb79U05hflZA==",
+        "dependencies": {
+          "FastEndpoints.Core": "8.1.0",
+          "FastEndpoints.Messaging.Core": "8.1.0"
+        }
       },
       "FastEndpoints.Messaging.Core": {
         "type": "Transitive",
-        "resolved": "5.35.0",
-        "contentHash": "gLvzZ0h7+/jWCfp9U9y04E1miy5WwMjnd1stxCh+nMTvxRfo4qtd93qIsTHScQr+r6pCS0LYjdyqGfLxzncHyg=="
+        "resolved": "8.1.0",
+        "contentHash": "i3VqYn4b9UjpvXFkcCRXZq5lMzQ13dlLab7BWh/19aVY8pvQT9v643ViCdga47zir7y2twnYOIjRIy9Fln2dWw=="
       },
       "FluentValidation": {
         "type": "Transitive",

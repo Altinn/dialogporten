@@ -38,7 +38,7 @@ public sealed class GetServiceOwnerLabelEndpoint : Endpoint<GetServiceOwnerLabel
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                return SendOkAsync(success.Labels, ct);
+                return Send.OkAsync(success.Labels, ct);
             },
             notFound => this.NotFoundAsync(notFound, ct));
     }

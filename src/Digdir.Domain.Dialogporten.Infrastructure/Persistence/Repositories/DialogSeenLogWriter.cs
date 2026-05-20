@@ -76,15 +76,24 @@ internal sealed class DialogSeenLogWriter(
         );
 
         var newSeenLog = seenLogWriteResult.NewDialogSeenLog;
-        var isSeenSinceLastContentUpdateSetToTrue = await db.Dialogs
-            .Where(x => x.Id == dialog.Id && x.ContentUpdatedAt == dialog.ContentUpdatedAt)
-            .ExecuteUpdateAsync(s => s.SetProperty(d => d.IsSeenSinceLastContentUpdate, true), cancellationToken) > 0;
+        var isSeenSinceLastContentUpdateSetToTrue = (await MarkThisRevisionAsSeen(dialog, cancellationToken)) > 0;
 
         return new DialogSeenResult(
             NewSeenLog: newSeenLog,
             CausedChangesOutsideEf: isSeenSinceLastContentUpdateSetToTrue || newSeenLog is not null,
             IsContentSeen: isSeenSinceLastContentUpdateSetToTrue || dialog.IsSeenSinceLastContentUpdate
         );
+    }
+
+    private Task<int> MarkThisRevisionAsSeen(DialogEntity dialog, CancellationToken cancellationToken)
+    {
+        return db.Database
+            .ExecuteSqlInterpolatedAsync($"""
+                                          UPDATE "Dialog" 
+                                          SET "IsSeenSinceLastContentUpdate"=true
+                                          WHERE "Id"={dialog.Id}
+                                            AND "ContentUpdatedAt"={dialog.ContentUpdatedAt}
+                                          """, cancellationToken);
     }
 
     private sealed record EnsureSeenLogResult(

@@ -58,7 +58,7 @@ public static class Mappers
             Transmissions = []
         };
 
-    internal static void MapTo(this UpdateDialogDto source, DialogEntity destination)
+    internal static void MapPrimitivesTo(this UpdateDialogDto source, DialogEntity destination)
     {
         destination.Progress = source.Progress;
         destination.ExtendedStatus = source.ExtendedStatus;

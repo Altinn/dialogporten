@@ -126,7 +126,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
 
         // Update primitive properties
-        request.Dto.MapTo(dialog);
+        request.Dto.MapPrimitivesTo(dialog);
         dialog.StatusId = request.Dto.Status.ToDialogStatusValue();
 
         if (!request.IsSilentUpdate && !isCurrentUserServiceOwnerAdmin)

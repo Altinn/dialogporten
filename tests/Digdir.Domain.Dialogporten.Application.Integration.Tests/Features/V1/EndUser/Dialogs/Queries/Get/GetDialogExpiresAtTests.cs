@@ -17,6 +17,6 @@ public class GetDialogExpiresAtTests(DialogApplication application) : Applicatio
             .CreateSimpleDialog((x, _) => x.Dto.ExpiresAt = expiresAt)
             .OverrideUtc(expiresAt.AddSeconds(1))
             .GetEndUserDialog()
-            .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
+            .ExecuteAndAssert<EntityExpired<DialogEntity>>();
     }
 }

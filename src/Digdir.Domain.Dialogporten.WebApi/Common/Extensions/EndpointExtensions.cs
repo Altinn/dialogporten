@@ -35,6 +35,15 @@ public static class EndpointExtensions
             cancellation: cancellationToken);
     }
 
+    public static Task ExpiredAsync(this IEndpoint ep, EntityExpired expired, CancellationToken cancellationToken = default)
+    {
+        ep.HttpContext.Response.Headers.Expires = expired.ExpiredAt.ToString("r");
+        return ep.HttpContext.Response.SendErrorsAsync(
+            expired.ToValidationResults(),
+            StatusCodes.Status404NotFound,
+            cancellation: cancellationToken);
+    }
+
     public static Task GoneAsync(this IEndpoint ep, EntityDeleted deleted, CancellationToken cancellationToken = default)
         => ep.HttpContext.Response.SendErrorsAsync(
             deleted.ToValidationResults(),

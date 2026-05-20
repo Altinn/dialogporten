@@ -25,7 +25,7 @@ public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricSe
 }
 
 [GenerateOneOf]
-public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityNotVisible, EntityDeleted, Forbidden>;
+public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityNotVisible, EntityExpired, EntityDeleted, Forbidden>;
 
 internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, GetDialogResult>
 {
@@ -222,10 +222,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotVisible<DialogEntity>(dialog.VisibleFrom.Value);
         }
 
-        // if (dialog.ExpiresAt.HasValue && dialog.ExpiresAt < _clock.UtcNowOffset)
-        // {
-        //     return new EntityExpired<DialogEntity>(dialog.ExpiresAt.Value);
-        // }
+        if (dialog.ExpiresAt.HasValue && dialog.ExpiresAt < _clock.UtcNowOffset)
+        {
+            return new EntityExpired<DialogEntity>(dialog.ExpiresAt.Value);
+        }
 
         var userId = _userRegistry.GetCurrentUserId();
 

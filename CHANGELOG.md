@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.115.3](https://github.com/Altinn/dialogporten/compare/v1.115.2...v1.115.3) (2026-05-19)
+
+
+### Bug Fixes
+
+* warmup shutdown lifetime race ([#3979](https://github.com/Altinn/dialogporten/issues/3979)) ([c3f3cce](https://github.com/Altinn/dialogporten/commit/c3f3ccec47a0aba69ca223cef39339ba945c7ae1))
+
+
+### Miscellaneous Chores
+
+* removed workaround to find CorrespondenceId without SO labels ([#3872](https://github.com/Altinn/dialogporten/issues/3872)) ([2a78839](https://github.com/Altinn/dialogporten/commit/2a7883920de71ed42c3acd6e1a2f1d8820ebe536))
+
 ## [1.115.2](https://github.com/Altinn/dialogporten/compare/v1.115.1...v1.115.2) (2026-05-18)
 
 

@@ -61,7 +61,7 @@ var additionalTags = {}
 
 var tags = baseTags(additionalTags, environment)
 
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
   name: appConfigurationName
 }
 

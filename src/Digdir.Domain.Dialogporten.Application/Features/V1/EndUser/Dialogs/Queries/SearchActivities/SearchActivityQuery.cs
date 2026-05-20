@@ -78,6 +78,10 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
 
         dialog.FilterLocalizations(request.AcceptedLanguages);
 
-        return dialog.Activities.Select(x => x.ToDto()).ToList();
+        return dialog.Activities
+            .OrderBy(x => x.CreatedAt)
+            .ThenBy(x => x.Id)
+            .Select(x => x.ToDto())
+            .ToList();
     }
 }

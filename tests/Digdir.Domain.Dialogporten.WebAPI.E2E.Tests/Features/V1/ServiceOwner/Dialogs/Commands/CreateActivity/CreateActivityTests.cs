@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Net;
+using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -36,6 +38,38 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         activityId.Should().NotBe(Guid.Empty);
+    }
+
+    [E2EFact]
+    public async Task Should_Handle_Concurrent_Activity_Creation()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var responses = await Task.WhenAll(
+            Enumerable.Range(0, 10)
+                .Select(index => Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateActivityDialogActivity(
+                    dialogId,
+                    DialogTestData.CreateSimpleActivity(activity =>
+                    {
+                        activity.Type = DialogsEntitiesActivities_DialogActivityType.Information;
+                        activity.PerformedBy = new()
+                        {
+                            ActorType = Actors_ActorType.ServiceOwner
+                        };
+                        activity.Description = [DialogTestData.CreateLocalization(index.ToString(CultureInfo.InvariantCulture))];
+                    }),
+                    if_Match: null,
+                    TestContext.Current.CancellationToken)));
+
+        // Assert
+        var statusCodes = responses.Select(response => response.StatusCode).ToArray();
+        statusCodes.Should().Contain(HttpStatusCode.Created);
+        statusCodes.Should().AllSatisfy(status => status.Should()
+            .BeOneOf(
+                HttpStatusCode.Created,
+                HttpStatusCode.Conflict));
     }
 
     [E2EFact]

@@ -45,7 +45,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSy
 
         var result = await _sender.Send(command, ct);
         await result.Match(
-            _ => SendNoContentAsync(ct),
+            _ => Send.NoContentAsync(ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),

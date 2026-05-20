@@ -56,7 +56,7 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
                 var transmissionId = success.TransmissionIds.First();
-                return SendCreatedAtAsync<GetDialogTransmissionEndpoint>(
+                return Send.CreatedAtAsync<GetDialogTransmissionEndpoint>(
                     new GetTransmissionQuery { DialogId = req.DialogId, TransmissionId = transmissionId }, transmissionId,
                     cancellation: ct);
             },

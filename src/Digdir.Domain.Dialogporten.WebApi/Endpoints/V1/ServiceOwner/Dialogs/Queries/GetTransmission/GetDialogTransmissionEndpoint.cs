@@ -36,7 +36,7 @@ public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionQuer
     {
         var result = await _sender.Send(req, ct);
         await result.Match(
-            dto => SendOkAsync(dto, ct),
+            dto => Send.OkAsync(dto, ct),
             notFound => this.NotFoundAsync(notFound, ct),
             deleted => this.GoneAsync(deleted, ct));
     }

@@ -40,7 +40,7 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
         var result = await _sender.Send(query, ct);
 
         await result.Match(
-            paginatedDto => SendOkAsync(paginatedDto, ct),
+            paginatedDto => Send.OkAsync(paginatedDto, ct),
             validationError => this.BadRequestAsync(validationError, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));
     }

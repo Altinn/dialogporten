@@ -8810,9 +8810,6 @@
               }
             }
           },
-          "204": {
-            "description": "No Content"
-          },
           "400": {
             "content": {
               "application/problem\u002Bjson": {
@@ -9884,9 +9881,6 @@
               }
             }
           },
-          "204": {
-            "description": "No Content"
-          },
           "400": {
             "content": {
               "application/problem\u002Bjson": {
@@ -10799,9 +10793,6 @@
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           },
           "400": {
             "content": {

@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.115.4](https://github.com/Altinn/dialogporten/compare/v1.115.3...v1.115.4) (2026-05-20)
+
+
+### Bug Fixes
+
+* stabilize activity search ordering ([#3988](https://github.com/Altinn/dialogporten/issues/3988)) ([06d337a](https://github.com/Altinn/dialogporten/commit/06d337a0b5049db0e5ba87d677d04fc30cf5c0f9))
+
+
+### Miscellaneous Chores
+
+* bump App Configuration API version ([#3983](https://github.com/Altinn/dialogporten/issues/3983)) ([67d2ccb](https://github.com/Altinn/dialogporten/commit/67d2ccb66523b01c7e39bbe32a0001208a1ae423))
+* **deps:** update dependency azure.storage.blobs to 12.28.0 ([#3990](https://github.com/Altinn/dialogporten/issues/3990)) ([54feba8](https://github.com/Altinn/dialogporten/commit/54feba83aad5c1ad561a31349fc4b4b2c25095e4))
+* **deps:** update microsoft dependencies to 10.0.8 ([#3989](https://github.com/Altinn/dialogporten/issues/3989)) ([381f994](https://github.com/Altinn/dialogporten/commit/381f99491775aee81fba7befba269bfd152fabda))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.152.0 ([#3991](https://github.com/Altinn/dialogporten/issues/3991)) ([87b0dae](https://github.com/Altinn/dialogporten/commit/87b0dae6e7631edf2dc2c8ea7aa1cfa5a32ec7df))
+* **deps:** update postgres docker tag to v18.3 ([#3992](https://github.com/Altinn/dialogporten/issues/3992)) ([82a9df5](https://github.com/Altinn/dialogporten/commit/82a9df52f270e30b197ecff54fec7ade718774d4))
+
 ## [1.115.3](https://github.com/Altinn/dialogporten/compare/v1.115.2...v1.115.3) (2026-05-19)
 
 

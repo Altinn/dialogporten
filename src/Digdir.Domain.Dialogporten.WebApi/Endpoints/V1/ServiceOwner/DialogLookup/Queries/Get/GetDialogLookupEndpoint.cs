@@ -46,7 +46,7 @@ public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, S
         var result = await _sender.Send(query, ct);
 
         await result.Match(
-            dto => SendOkAsync(dto, ct),
+            dto => Send.OkAsync(dto, ct),
             notFound => this.NotFoundAsync(notFound, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             validationError => this.BadRequestAsync(validationError, ct));

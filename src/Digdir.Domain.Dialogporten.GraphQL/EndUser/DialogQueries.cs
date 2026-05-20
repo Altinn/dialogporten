@@ -51,10 +51,7 @@ public partial class Queries
                 };
             },
             expired =>
-            {
-                httpContextAccessor.HttpContext?.Response.Headers.Expires = expired.ExpiredAt.ToString("R");
-
-                return new DialogByIdPayload
+                new DialogByIdPayload
                 {
                     Errors =
                     [
@@ -64,8 +61,7 @@ public partial class Queries
                             ExpiredAt = expired.ExpiredAt
                         }
                     ]
-                };
-            },
+                },
             deleted => new DialogByIdPayload { Errors = [new DialogByIdDeleted { Message = deleted.Message }] },
             forbidden =>
             {

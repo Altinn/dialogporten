@@ -1,5 +1,4 @@
 // This file is generated, see "scripts" directory
-import { default as concurrency } from './concurrency.js';
 import { default as contextCreateSOLabels } from './contextCreateSOLabels.js';
 import { default as contextDeleteSOLabels } from './contextDeleteSOLabels.js';
 import { default as dialogApiOnly } from './dialogApiOnly.js';
@@ -20,7 +19,6 @@ import { default as dialogServiceOwnerLabels } from './dialogServiceOwnerLabels.
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
 
 export default function() {
-  concurrency();
   contextCreateSOLabels();
   contextDeleteSOLabels();
   dialogApiOnly();

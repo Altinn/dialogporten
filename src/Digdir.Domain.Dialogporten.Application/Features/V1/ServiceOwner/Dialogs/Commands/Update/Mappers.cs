@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -9,14 +10,12 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
-using GetDialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
-using GetDialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
 public static class Mappers
 {
-    public static UpdateDialogDto ToUpdateDialogDto(this GetDialogDtoSO source) =>
+    public static UpdateDialogDto ToUpdateDialogDto(this DialogDto source) =>
         new()
         {
             Progress = source.Progress,
@@ -34,26 +33,6 @@ public static class Mappers
             GuiActions = source.GuiActions.Select(x => x.ToUpdateGuiActionDto()).ToList(),
             ApiActions = source.ApiActions.Select(x => x.ToUpdateApiActionDto()).ToList(),
             // Activities and transmissions are append-only, and PATCH must not replay existing records.
-            Activities = [],
-            Transmissions = []
-        };
-
-    public static UpdateDialogDto ToUpdateDialogDto(this GetDialogDtoEU source) =>
-        new()
-        {
-            Progress = source.Progress,
-            ExtendedStatus = source.ExtendedStatus,
-            ExternalReference = source.ExternalReference,
-            DueAt = source.DueAt,
-            Process = source.Process,
-            PrecedingProcess = source.PrecedingProcess,
-            ExpiresAt = source.ExpiresAt,
-            IsApiOnly = source.IsApiOnly,
-            Status = source.Status.ToDialogStatusInput(),
-            Content = source.Content.ToUpdateContentDto(),
-            Attachments = source.Attachments.Select(x => x.ToUpdateAttachmentDto()).ToList(),
-            GuiActions = source.GuiActions.Select(x => x.ToUpdateGuiActionDto()).ToList(),
-            ApiActions = source.ApiActions.Select(x => x.ToUpdateApiActionDto()).ToList(),
             Activities = [],
             Transmissions = []
         };
@@ -271,7 +250,7 @@ public static class Mappers
                 MainContentReference = source.MainContentReference.Copy()
             };
 
-    private static AttachmentDto ToUpdateAttachmentDto(this Queries.Get.DialogAttachmentDto source) =>
+    private static AttachmentDto ToUpdateAttachmentDto(this DialogAttachmentDto source) =>
         new()
         {
             Id = source.Id,
@@ -303,7 +282,7 @@ public static class Mappers
             ExpiresAt = source.ExpiresAt
         };
 
-    private static GuiActionDto ToUpdateGuiActionDto(this Queries.Get.DialogGuiActionDto source) =>
+    private static GuiActionDto ToUpdateGuiActionDto(this DialogGuiActionDto source) =>
         new()
         {
             Id = source.Id,
@@ -331,7 +310,7 @@ public static class Mappers
             Prompt = source.Prompt.CopyOptional()
         };
 
-    private static ApiActionDto ToUpdateApiActionDto(this Queries.Get.DialogApiActionDto source) =>
+    private static ApiActionDto ToUpdateApiActionDto(this DialogApiActionDto source) =>
         new()
         {
             Id = source.Id,
@@ -352,7 +331,7 @@ public static class Mappers
         };
 
     private static ApiActionEndpointDto ToUpdateApiActionEndpointDto(
-        this Queries.Get.DialogApiActionEndpointDto source) =>
+        this DialogApiActionEndpointDto source) =>
         new()
         {
             Id = source.Id,

@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.115.3](https://github.com/Altinn/dialogporten/compare/v1.115.2...v1.115.3) (2026-05-19)
+
+
+### Bug Fixes
+
+* warmup shutdown lifetime race ([#3979](https://github.com/Altinn/dialogporten/issues/3979)) ([c3f3cce](https://github.com/Altinn/dialogporten/commit/c3f3ccec47a0aba69ca223cef39339ba945c7ae1))
+
+
+### Miscellaneous Chores
+
+* removed workaround to find CorrespondenceId without SO labels ([#3872](https://github.com/Altinn/dialogporten/issues/3872)) ([2a78839](https://github.com/Altinn/dialogporten/commit/2a7883920de71ed42c3acd6e1a2f1d8820ebe536))
+
+## [1.115.2](https://github.com/Altinn/dialogporten/compare/v1.115.1...v1.115.2) (2026-05-18)
+
+
+### Bug Fixes
+
+* **perf:** when skipping cache population, also skip cache lookup fanout ([#3972](https://github.com/Altinn/dialogporten/issues/3972)) ([cffb2fc](https://github.com/Altinn/dialogporten/commit/cffb2fcbd89a86305b58533ec4b0f4cbcd3266e1))
+
+
+### Miscellaneous Chores
+
+* add preload libraries to postgresql ([#3930](https://github.com/Altinn/dialogporten/issues/3930)) ([ab4e156](https://github.com/Altinn/dialogporten/commit/ab4e15612c3b996885f73604cab99937990c262e))
+* **azure:** bump resource groups api version ([#3950](https://github.com/Altinn/dialogporten/issues/3950)) ([f8e6477](https://github.com/Altinn/dialogporten/commit/f8e6477310df37b94d1bd99e2a30c7be2906b316))
+* **deps:** update .net sdk to 10.0.300 ([#3973](https://github.com/Altinn/dialogporten/issues/3973)) ([a29ddc2](https://github.com/Altinn/dialogporten/commit/a29ddc2f7650d67ddc15cfdc6dcc70317650e00c))
+* **deps:** update dependency coverlet.collector to v10 ([#3970](https://github.com/Altinn/dialogporten/issues/3970)) ([eb47eb7](https://github.com/Altinn/dialogporten/commit/eb47eb74a5da774706f51ddd3223c4f80f65ad95))
+* **deps:** update dependency microsoft.applicationinsights.aspnetcore to 3.1.1 ([#3967](https://github.com/Altinn/dialogporten/issues/3967)) ([1f8a0e6](https://github.com/Altinn/dialogporten/commit/1f8a0e61490e4f857023b9996aef47c8e20030eb))
+* **deps:** update dependency parquet.net to 6.0.2 ([#3968](https://github.com/Altinn/dialogporten/issues/3968)) ([8a4a79f](https://github.com/Altinn/dialogporten/commit/8a4a79ffd7be3800ce5a4fd3d4b5f726fc7eb65a))
+* **deps:** update dependency verify.xunitv3 to 31.16.3 ([#3969](https://github.com/Altinn/dialogporten/issues/3969)) ([641a31e](https://github.com/Altinn/dialogporten/commit/641a31ede3ae5364542aa9cd611755735f75f480))
+* log unknown user on presentation layer ([#3959](https://github.com/Altinn/dialogporten/issues/3959)) ([d680fab](https://github.com/Altinn/dialogporten/commit/d680fab1b8025283402ddaecfe56d1cc45b26c6b))
+
 ## [1.115.1](https://github.com/Altinn/dialogporten/compare/v1.115.0...v1.115.1) (2026-05-13)
 
 

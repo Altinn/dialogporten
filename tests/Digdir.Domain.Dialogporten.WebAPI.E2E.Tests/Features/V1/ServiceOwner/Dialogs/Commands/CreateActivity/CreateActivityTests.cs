@@ -64,13 +64,12 @@ public class CreateActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                     TestContext.Current.CancellationToken)));
 
         // Assert
-        responses
-            .Select(response => response.StatusCode)
-            .Should()
-            .AllSatisfy(status => status.Should()
-                .BeOneOf(
-                    HttpStatusCode.Created,
-                    HttpStatusCode.Conflict));
+        var statusCodes = responses.Select(response => response.StatusCode).ToArray();
+        statusCodes.Should().Contain(HttpStatusCode.Created);
+        statusCodes.Should().AllSatisfy(status => status.Should()
+            .BeOneOf(
+                HttpStatusCode.Created,
+                HttpStatusCode.Conflict));
     }
 
     [E2EFact]

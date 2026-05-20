@@ -41,6 +41,6 @@ public sealed class GetJwksEndpoint : EndpointWithoutRequest<GetJwksDto>
         HttpContext.Response.Headers[HeaderNames.Vary] = new[] { "Accept-Encoding" };
 
 
-        await SendOkAsync(result, ct);
+        await Send.OkAsync(result, ct);
     }
 }

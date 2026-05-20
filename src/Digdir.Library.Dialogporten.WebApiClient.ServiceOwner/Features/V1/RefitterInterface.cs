@@ -559,10 +559,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <description>The UUID of the created dialog transmission. A relative URL to the newly created activity is set in the \"Location\" header.</description>
         /// </item>
         /// <item>
-        /// <term>204</term>
-        /// <description>No Content</description>
-        /// </item>
-        /// <item>
         /// <term>400</term>
         /// <description>Validation error occurred. See problem details for a list of errors.</description>
         /// </item>
@@ -740,10 +736,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <description>The UUID of the created dialog activity. A relative URL to the newly created activity is set in the \"Location\" header.</description>
         /// </item>
         /// <item>
-        /// <term>204</term>
-        /// <description>No Content</description>
-        /// </item>
-        /// <item>
         /// <term>400</term>
         /// <description>Validation error occurred. See problem details for a list of errors.</description>
         /// </item>
@@ -838,10 +830,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <item>
         /// <term>201</term>
         /// <description>The UUID of the created dialog aggregate. A relative URL to the newly created activity is set in the \"Location\" header.</description>
-        /// </item>
-        /// <item>
-        /// <term>204</term>
-        /// <description>No Content</description>
         /// </item>
         /// <item>
         /// <term>400</term>

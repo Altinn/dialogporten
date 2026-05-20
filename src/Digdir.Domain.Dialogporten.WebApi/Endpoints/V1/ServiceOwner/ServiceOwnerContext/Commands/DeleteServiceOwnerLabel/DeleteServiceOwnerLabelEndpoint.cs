@@ -77,7 +77,7 @@ public sealed class DeleteServiceOwnerLabelEndpoint : Endpoint<DeleteServiceOwne
         await result.Match(success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                return SendNoContentAsync(ct);
+                return Send.NoContentAsync(ct);
             },
             validationError => this.BadRequestAsync(validationError, ct),
             notFound => this.NotFoundAsync(notFound, ct),

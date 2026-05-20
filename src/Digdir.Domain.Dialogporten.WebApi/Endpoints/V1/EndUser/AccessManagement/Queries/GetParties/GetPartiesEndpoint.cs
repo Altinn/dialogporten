@@ -32,6 +32,6 @@ public sealed class GetPartiesEndpoint : EndpointWithoutRequest<PartiesDto>
     public override async Task HandleAsync(CancellationToken ct)
     {
         var result = await _sender.Send(new GetPartiesQuery(), ct);
-        await SendOkAsync(result, ct);
+        await Send.OkAsync(result, ct);
     }
 }

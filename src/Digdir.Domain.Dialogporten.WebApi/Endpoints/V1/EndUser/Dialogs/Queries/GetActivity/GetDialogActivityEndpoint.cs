@@ -42,7 +42,7 @@ public sealed class GetDialogActivityEndpoint : Endpoint<GetActivityRequest, Act
         };
         var result = await _sender.Send(query, ct);
         await result.Match(
-            dto => SendOkAsync(dto, ct),
+            dto => Send.OkAsync(dto, ct),
             notFound => this.NotFoundAsync(notFound, ct),
             deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));

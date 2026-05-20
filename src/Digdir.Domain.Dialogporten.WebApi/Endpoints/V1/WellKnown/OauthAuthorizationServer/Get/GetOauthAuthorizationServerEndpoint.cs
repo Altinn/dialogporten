@@ -40,6 +40,6 @@ public sealed class GetOauthAuthorizationServerEndpoint : EndpointWithoutRequest
         };
         HttpContext.Response.Headers[HeaderNames.Vary] = new[] { "Accept-Encoding" };
 
-        await SendOkAsync(result, ct);
+        await Send.OkAsync(result, ct);
     }
 }

@@ -41,7 +41,7 @@ public sealed class UpdateFormSavedActivityTimeEndpoint : Endpoint<UpdateFormSav
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                return SendNoContentAsync(ct);
+                return Send.NoContentAsync(ct);
             },
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),

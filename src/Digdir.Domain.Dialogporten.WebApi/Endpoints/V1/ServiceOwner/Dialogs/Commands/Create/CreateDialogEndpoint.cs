@@ -43,7 +43,7 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                return SendCreatedAtAsync<GetDialogEndpoint>(new GetDialogQuery { DialogId = success.DialogId },
+                return Send.CreatedAtAsync<GetDialogEndpoint>(new GetDialogQuery { DialogId = success.DialogId },
                     success.DialogId, cancellation: ct);
             },
             domainError => this.UnprocessableEntityAsync(domainError, ct),

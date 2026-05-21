@@ -49,6 +49,7 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogRequest, DialogDto>
             },
             notFound => this.NotFoundAsync(notFound, ct),
             notVisible => this.NotVisibleAsync(notVisible, ct),
+            expired => this.ExpiredAsync(expired, ct),
             deleted => this.GoneAsync(deleted, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct));
     }

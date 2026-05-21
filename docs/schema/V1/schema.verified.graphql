@@ -247,6 +247,11 @@ type DialogByIdDeleted implements DialogByIdError {
   message: String!
 }
 
+type DialogByIdExpired implements DialogByIdError {
+  message: String!
+  expiredAt: DateTime!
+}
+
 type DialogByIdForbidden implements DialogByIdError {
   message: String!
 }

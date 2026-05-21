@@ -50,6 +50,18 @@ public partial class Queries
                     ]
                 };
             },
+            expired =>
+                new DialogByIdPayload
+                {
+                    Errors =
+                    [
+                        new DialogByIdExpired
+                        {
+                            Message = expired.Message,
+                            ExpiredAt = expired.ExpiredAt
+                        }
+                    ]
+                },
             deleted => new DialogByIdPayload { Errors = [new DialogByIdDeleted { Message = deleted.Message }] },
             forbidden =>
             {

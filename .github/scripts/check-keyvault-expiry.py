@@ -36,6 +36,7 @@ import yaml
 MONITORED_FILE = pathlib.Path(os.environ["MONITORED_SECRETS_FILE"])
 SECRETS_DIR = pathlib.Path(os.environ["SECRETS_DIR"])
 RUN_URL = os.environ.get("GITHUB_RUN_URL", "")
+RUNBOOK_URL = os.environ.get("RUNBOOK_URL", "")
 STEP_SUMMARY = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
 STEP_OUTPUT = pathlib.Path(os.environ["GITHUB_OUTPUT"])
 
@@ -158,6 +159,17 @@ def build_blocks(alerted: list[dict], missing: list[dict], header_suffix: str = 
             },
         })
 
+    if RUNBOOK_URL:
+        blocks.append({
+            "type": "actions",
+            "elements": [{
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Open rotation runbook"},
+                "url": RUNBOOK_URL,
+                "style": "primary",
+            }],
+        })
+
     if RUN_URL:
         blocks.append({
             "type": "context",
@@ -199,6 +211,8 @@ def render_step_summary(expiry_findings: list[dict], missing: list[dict], envs: 
     lines: list[str] = []
     lines.append("# Key Vault secret expiry — daily check\n")
     lines.append(f"Checked envs: {', '.join(envs) if envs else '(none)'}\n")
+    if RUNBOOK_URL:
+        lines.append(f"Rotation runbook: {RUNBOOK_URL}\n")
 
     with_expires = [f for f in expiry_findings if f["expires"]]
     lines.append("## Secrets with `attributes.expires` set\n")

@@ -48,7 +48,7 @@ param postgresConfiguration = {
     tier: 'MemoryOptimized'
   }
   storage: {
-    storageSizeGB: 10000
+    storageSizeGB: 16000
     type: 'PremiumV2_LRS'
     iops: 24000
     throughput: 1200

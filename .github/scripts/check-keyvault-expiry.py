@@ -291,6 +291,13 @@ def render_step_summary(
 
 
 def main() -> int:
+    if not EXPECTED_ENVS:
+        raise RuntimeError(
+            "EXPECTED_ENVS_JSON is empty. The workflow's prepare job is supposed to "
+            "populate it with the envs to check; an empty list would silently "
+            "succeed with zero findings."
+        )
+
     expiry_findings, missing, present_envs = collect_findings()
     missing_envs = sorted(set(EXPECTED_ENVS) - set(present_envs))
 

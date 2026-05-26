@@ -37,6 +37,7 @@ MONITORED_FILE = pathlib.Path(os.environ["MONITORED_SECRETS_FILE"])
 SECRETS_DIR = pathlib.Path(os.environ["SECRETS_DIR"])
 RUN_URL = os.environ.get("GITHUB_RUN_URL", "")
 RUNBOOK_URL = os.environ.get("RUNBOOK_URL", "")
+EXPECTED_ENVS = json.loads(os.environ.get("EXPECTED_ENVS_JSON", "[]"))
 STEP_SUMMARY = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
 STEP_OUTPUT = pathlib.Path(os.environ["GITHUB_OUTPUT"])
 
@@ -73,14 +74,18 @@ def tier_icon(tier: int) -> str:
 
 
 def load_monitored() -> set[str]:
-    if not MONITORED_FILE.exists():
-        return set()
     data = yaml.safe_load(MONITORED_FILE.read_text()) or {}
     return set(data.get("required_expires", []) or [])
 
 
 def collect_findings() -> tuple[list[dict], list[dict], list[str]]:
-    """Returns (expiry_findings, missing_findings, env_list)."""
+    """Returns (expiry_findings, missing_findings, present_envs).
+
+    `present_envs` is the list of envs whose `secrets-<env>.json` was actually
+    present in $SECRETS_DIR — distinct from $EXPECTED_ENVS_JSON, which is what
+    the prepare job said we should check. The difference is the set of envs
+    whose matrix leg failed to upload its artifact.
+    """
     monitored = load_monitored()
     today = datetime.now(timezone.utc).date()
 
@@ -124,11 +129,29 @@ def collect_findings() -> tuple[list[dict], list[dict], list[str]]:
     return expiry_findings, missing_findings, envs
 
 
-def build_blocks(alerted: list[dict], missing: list[dict], header_suffix: str = "") -> list[dict]:
+def build_blocks(
+    alerted: list[dict],
+    missing: list[dict],
+    missing_envs: list[str],
+    header_suffix: str = "",
+) -> list[dict]:
     blocks: list[dict] = [{
         "type": "header",
         "text": {"type": "plain_text", "text": f"Key Vault secret expiry{header_suffix}"},
     }]
+
+    if missing_envs:
+        blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (
+                    ":rotating_light: *Data unavailable for: "
+                    f"{', '.join(missing_envs)}* — the matrix leg(s) for these envs failed. "
+                    "Findings below reflect only the envs that were checked successfully."
+                ),
+            },
+        })
 
     if alerted:
         rows = []
@@ -179,18 +202,23 @@ def build_blocks(alerted: list[dict], missing: list[dict], header_suffix: str = 
     return blocks
 
 
-def mention_for(alerted: list[dict], missing: list[dict]) -> str:
+def mention_for(alerted: list[dict], missing: list[dict], missing_envs: list[str]) -> str:
     tiers = {f["tier"] for f in alerted}
     if 3 in tiers:
         return "<!channel>"
-    if 2 in tiers or missing:
+    if 2 in tiers or missing or missing_envs:
         return "<!here>"
     return ""
 
 
-def build_payload(alerted: list[dict], missing: list[dict], header_suffix: str = "") -> dict:
-    blocks = build_blocks(alerted, missing, header_suffix=header_suffix)
-    mention = mention_for(alerted, missing)
+def build_payload(
+    alerted: list[dict],
+    missing: list[dict],
+    missing_envs: list[str],
+    header_suffix: str = "",
+) -> dict:
+    blocks = build_blocks(alerted, missing, missing_envs, header_suffix=header_suffix)
+    mention = mention_for(alerted, missing, missing_envs)
     if mention:
         blocks.insert(1, {
             "type": "section",
@@ -207,10 +235,20 @@ def write_payload(path: str, payload: dict) -> None:
     pathlib.Path(path).write_text(json.dumps(payload, indent=2))
 
 
-def render_step_summary(expiry_findings: list[dict], missing: list[dict], envs: list[str]) -> str:
+def render_step_summary(
+    expiry_findings: list[dict],
+    missing: list[dict],
+    present_envs: list[str],
+    missing_envs: list[str],
+) -> str:
     lines: list[str] = []
     lines.append("# Key Vault secret expiry — daily check\n")
-    lines.append(f"Checked envs: {', '.join(envs) if envs else '(none)'}\n")
+    lines.append(f"Checked envs: {', '.join(present_envs) if present_envs else '(none)'}\n")
+    if missing_envs:
+        lines.append(
+            f":rotating_light: **Data unavailable for: {', '.join(missing_envs)}** "
+            "— matrix leg(s) for these envs failed; rerun or check workflow logs.\n"
+        )
     if RUNBOOK_URL:
         lines.append(f"Rotation runbook: {RUNBOOK_URL}\n")
 
@@ -253,7 +291,8 @@ def render_step_summary(expiry_findings: list[dict], missing: list[dict], envs: 
 
 
 def main() -> int:
-    expiry_findings, missing, envs = collect_findings()
+    expiry_findings, missing, present_envs = collect_findings()
+    missing_envs = sorted(set(EXPECTED_ENVS) - set(present_envs))
 
     alerted = [f for f in expiry_findings if f["tier"] is not None]
 
@@ -266,23 +305,40 @@ def main() -> int:
     nonprod_missing = [m for m in missing if not is_prod(m["env"])]
     prod_missing = [m for m in missing if is_prod(m["env"])]
 
-    if nonprod_alerted or nonprod_missing:
-        write_payload("slack-nonprod.json", build_payload(nonprod_alerted, nonprod_missing, header_suffix=" alert (non-prod)"))
-    if prod_alerted or prod_missing:
-        write_payload("slack-prod.json", build_payload(prod_alerted, prod_missing, header_suffix=" alert (prod)"))
+    nonprod_missing_envs = [e for e in missing_envs if not is_prod(e)]
+    prod_missing_envs = [e for e in missing_envs if is_prod(e)]
+
+    if nonprod_alerted or nonprod_missing or nonprod_missing_envs:
+        write_payload(
+            "slack-nonprod.json",
+            build_payload(nonprod_alerted, nonprod_missing, nonprod_missing_envs,
+                          header_suffix=" alert (non-prod)"),
+        )
+    if prod_alerted or prod_missing or prod_missing_envs:
+        write_payload(
+            "slack-prod.json",
+            build_payload(prod_alerted, prod_missing, prod_missing_envs,
+                          header_suffix=" alert (prod)"),
+        )
     if prod_tier3:
-        write_payload("slack-prod-critical.json", build_payload(prod_tier3, [], header_suffix=" — PROD CRITICAL"))
+        write_payload(
+            "slack-prod-critical.json",
+            build_payload(prod_tier3, [], [], header_suffix=" — PROD CRITICAL"),
+        )
 
-    STEP_SUMMARY.write_text(render_step_summary(expiry_findings, missing, envs))
+    STEP_SUMMARY.write_text(render_step_summary(expiry_findings, missing, present_envs, missing_envs))
 
-    any_rule_tripped = bool(alerted or missing)
+    any_rule_tripped = bool(alerted or missing or missing_envs)
     with STEP_OUTPUT.open("a") as out:
         out.write(f"any_rule_tripped={'true' if any_rule_tripped else 'false'}\n")
-        out.write(f"have_nonprod_payload={'true' if (nonprod_alerted or nonprod_missing) else 'false'}\n")
-        out.write(f"have_prod_payload={'true' if (prod_alerted or prod_missing) else 'false'}\n")
+        out.write(f"have_nonprod_payload={'true' if (nonprod_alerted or nonprod_missing or nonprod_missing_envs) else 'false'}\n")
+        out.write(f"have_prod_payload={'true' if (prod_alerted or prod_missing or prod_missing_envs) else 'false'}\n")
         out.write(f"have_prod_critical_payload={'true' if prod_tier3 else 'false'}\n")
 
-    print(f"Findings: {len(alerted)} expiring, {len(missing)} configuration issues across envs {envs}")
+    print(
+        f"Findings: {len(alerted)} expiring, {len(missing)} configuration issues "
+        f"across present envs {present_envs}; missing envs: {missing_envs}"
+    )
     return 0
 
 

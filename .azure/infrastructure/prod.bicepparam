@@ -127,7 +127,7 @@ param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
 param redisSku = {
   name: 'Standard'
   family: 'C'
-  capacity: 1
+  capacity: 2
 }
 
 param serviceBusSku = {

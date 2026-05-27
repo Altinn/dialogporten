@@ -156,6 +156,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         {
             NorwegianPersonIdentifier personIdentifier => new() { Data = [personIdentifier.FullId] },
             NorwegianOrganizationIdentifier organizationIdentifier => new() { Data = [organizationIdentifier.FullId] },
+            SystemUserIdentifier systemUserIdentifier => new() { Data = [systemUserIdentifier.FullId] },
             _ => null
         };
 

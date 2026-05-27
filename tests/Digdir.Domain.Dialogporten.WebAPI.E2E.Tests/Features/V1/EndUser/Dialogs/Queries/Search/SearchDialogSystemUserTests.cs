@@ -11,20 +11,6 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialog
 public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2EFact]
-    public async Task Should_Return_404_When_SystemUser_Gets_Dialog_Directly()
-    {
-        // Arrange
-        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
-
-        // Act
-        using var _ = Fixture.UseSystemUserTokenOverrides();
-        var response = await Fixture.EndUserApi.GetDialog(dialogId);
-
-        // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-    }
-
-    [E2EFact]
     public async Task Should_Return_Empty_Items_When_SystemUser_Searches_With_Party()
     {
         // Arrange
@@ -47,5 +33,20 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         var content = response.Content;
         content.Should().NotBeNull();
         content.Items.Should().BeNull();
+    }
+
+    [E2EFact]
+    public async Task Should_Return_Empty_It2ems_When_SystemUser_Searches_With_Party()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(x => x.Party = "urn:altinn:organization:identifier-no:991825827");
+        using var _ = Fixture.UseSystemUserTokenOverrides();
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        var content = response.Content;
+        response.Content!.SeenSinceLastUpdate.ToList()[0].SeenBy.ActorName.Should().Be("LITTERATUR UROMANTISK");
+        content.Should().NotBeNull();
     }
 }

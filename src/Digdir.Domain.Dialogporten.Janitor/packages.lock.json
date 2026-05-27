@@ -118,9 +118,9 @@
       },
       "Parquet.Net": {
         "type": "Direct",
-        "requested": "[6.0.2, )",
-        "resolved": "6.0.2",
-        "contentHash": "d16gYIequd6B+oltL1lIIf7l/l1gwLmMoaWxx2IV/RN1fykwD9nlPIYFDD/eZbV5aMn8w/ICMMqU0Yn189YHMQ==",
+        "requested": "[6.0.3, )",
+        "resolved": "6.0.3",
+        "contentHash": "2PvsvAVkLsiWH+Y+XIK1Rl3pZSmC8PAH+Q6PwVOahujG89IbpxGS5YdZJ9dqOaXAEPJLlDX+TxjNzcDdSeMvBw==",
         "dependencies": {
           "CommunityToolkit.HighPerformance": "8.4.2",
           "K4os.Compression.LZ4": "1.3.8",

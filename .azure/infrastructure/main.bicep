@@ -137,6 +137,17 @@ module environmentKeyVault '../modules/keyvault/create.bicep' = {
   }
 }
 
+// Grant the GitHub OIDC deployer principal Key Vault Reader so the
+// check-keyvault-secret-expiry workflow can list secret metadata.
+module keyVaultReaderForDeployer '../modules/keyvault/addKvReaderRoles.bicep' = {
+  scope: resourceGroup
+  name: 'keyVaultReaderForDeployer'
+  params: {
+    keyvaultName: environmentKeyVault.outputs.name
+    principalId: deployer().objectId
+  }
+}
+
 module appConfiguration '../modules/appConfiguration/create.bicep' = {
   scope: resourceGroup
   name: 'appConfiguration'

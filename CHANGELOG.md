@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.115.5](https://github.com/Altinn/dialogporten/compare/v1.115.4...v1.115.5) (2026-05-27)
+
+
+### Bug Fixes
+
+* **app:** check for expires at on enduser get dialog ([#3984](https://github.com/Altinn/dialogporten/issues/3984)) ([ee0919c](https://github.com/Altinn/dialogporten/commit/ee0919cdcddb4d718ef3c2ed939e96d06c0f1e75))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency coverlet.collector to 10.0.1 ([#4015](https://github.com/Altinn/dialogporten/issues/4015)) ([19e09ec](https://github.com/Altinn/dialogporten/commit/19e09ece2d99d2a150f2d5a603a3671765a82a18))
+* **deps:** update dependency dapper to 2.1.79 ([#4005](https://github.com/Altinn/dialogporten/issues/4005)) ([5b28ed0](https://github.com/Altinn/dialogporten/commit/5b28ed03b57c8fd4d445cf7e55a303d6c5130984))
+* **deps:** update dependency parquet.net to 6.0.3 ([#4006](https://github.com/Altinn/dialogporten/issues/4006)) ([4eda2a5](https://github.com/Altinn/dialogporten/commit/4eda2a5fc175d131cfefb7d425a9ac916966056f))
+* **deps:** update dotnet monorepo ([#4004](https://github.com/Altinn/dialogporten/issues/4004)) ([9367fa7](https://github.com/Altinn/dialogporten/commit/9367fa77e0b23cbc754e7d101427a2bb6a427e9a))
+* **deps:** update grafana/loki docker tag to v3.7.2 ([#4007](https://github.com/Altinn/dialogporten/issues/4007)) ([c6fe5ce](https://github.com/Altinn/dialogporten/commit/c6fe5ce470d6a159b6636063eae1ba4ad85d04a6))
+* **deps:** update nginx docker tag to v1.30.1 ([#4018](https://github.com/Altinn/dialogporten/issues/4018)) ([cb6fd3a](https://github.com/Altinn/dialogporten/commit/cb6fd3ad93339f7733d312202089efa6598d10d7))
+* **deps:** update step-security/harden-runner action to v2.19.3 ([#4016](https://github.com/Altinn/dialogporten/issues/4016)) ([5796248](https://github.com/Altinn/dialogporten/commit/579624818a2ea4d94d1b226058c699c996e49ea5))
+* **webapi:** upgrade fastendpoints to 8.1.0 ([#3986](https://github.com/Altinn/dialogporten/issues/3986)) ([7092df0](https://github.com/Altinn/dialogporten/commit/7092df03f62300a7a24ce2faf722fc777dbc58b9))
+
 ## [1.115.4](https://github.com/Altinn/dialogporten/compare/v1.115.3...v1.115.4) (2026-05-20)
 
 

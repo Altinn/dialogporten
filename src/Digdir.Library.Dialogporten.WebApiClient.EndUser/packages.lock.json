@@ -4,9 +4,9 @@
     "net10.0": {
       "Altinn.ApiClients.Maskinporten": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "8rBC3rvIPuTat66JmvlEk2Yfl/vQysJNYwyuq0Gzn2IXucRGM9qitQFS82qwbtpco86zFAWTYG2tvtckuCHXiA==",
+        "requested": "[9.2.1-next.20260528.47, )",
+        "resolved": "9.2.1-next.20260528.47",
+        "contentHash": "U96WHKLUFoY3lYxIsBjGe/pr6vsHcQxUEIL2jqk+UckM7tjGVmqmh2kgU3A6xAf+Mvk0MRyph9YVYSN5BZtdxw==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.2",
           "Microsoft.Extensions.Caching.Memory": "10.0.2",
@@ -295,9 +295,9 @@
     "net8.0": {
       "Altinn.ApiClients.Maskinporten": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "8rBC3rvIPuTat66JmvlEk2Yfl/vQysJNYwyuq0Gzn2IXucRGM9qitQFS82qwbtpco86zFAWTYG2tvtckuCHXiA==",
+        "requested": "[9.2.1-next.20260528.47, )",
+        "resolved": "9.2.1-next.20260528.47",
+        "contentHash": "U96WHKLUFoY3lYxIsBjGe/pr6vsHcQxUEIL2jqk+UckM7tjGVmqmh2kgU3A6xAf+Mvk0MRyph9YVYSN5BZtdxw==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.2",
           "Microsoft.Extensions.Caching.Memory": "10.0.2",
@@ -593,9 +593,9 @@
     "net9.0": {
       "Altinn.ApiClients.Maskinporten": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "8rBC3rvIPuTat66JmvlEk2Yfl/vQysJNYwyuq0Gzn2IXucRGM9qitQFS82qwbtpco86zFAWTYG2tvtckuCHXiA==",
+        "requested": "[9.2.1-next.20260528.47, )",
+        "resolved": "9.2.1-next.20260528.47",
+        "contentHash": "U96WHKLUFoY3lYxIsBjGe/pr6vsHcQxUEIL2jqk+UckM7tjGVmqmh2kgU3A6xAf+Mvk0MRyph9YVYSN5BZtdxw==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.2",
           "Microsoft.Extensions.Caching.Memory": "10.0.2",

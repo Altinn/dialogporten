@@ -15,77 +15,77 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 {
     public class SearchDialogsQueryParams
     {
-        
+
                 /// <summary>
                 /// Filter by one or more service owner codes
                 /// </summary>
-        [Query(CollectionFormat.Multi)] 
+        [Query(CollectionFormat.Multi)]
         public IEnumerable<string> Org { get; set; }
 
                 /// <summary>
                 /// Filter by one or more service resources
                 /// </summary>
-        [Query(CollectionFormat.Multi)] 
+        [Query(CollectionFormat.Multi)]
         public IEnumerable<string> ServiceResource { get; set; }
 
                 /// <summary>
                 /// Filter by one or more owning parties
                 /// </summary>
-        [Query(CollectionFormat.Multi)] 
+        [Query(CollectionFormat.Multi)]
         public IEnumerable<string> Party { get; set; }
 
                 /// <summary>
                 /// Filter by one or more extended statuses
                 /// </summary>
-        [Query(CollectionFormat.Multi)] 
+        [Query(CollectionFormat.Multi)]
         public IEnumerable<string> ExtendedStatus { get; set; }
 
                 /// <summary>
                 /// Filter by external reference
                 /// </summary>
-        [Query] 
+        [Query]
         public string ExternalReference { get; set; }
 
                 /// <summary>
                 /// Filter by status
                 /// </summary>
-        [Query(CollectionFormat.Multi)] 
+        [Query(CollectionFormat.Multi)]
         public IEnumerable<DialogStatus> Status { get; set; }
 
                 /// <summary>
                 /// Only return dialogs created after this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? CreatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs created before this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? CreatedBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs updated after this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? UpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs updated before this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? UpdatedBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with content updated after this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with content updated before this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
 
                 /// <summary>
@@ -93,69 +93,69 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
                 /// If null, no filtering is applied
                 /// If true, returns dialogs that have been seen
                 /// If false, returns dialogs that have not been seen
-                /// 
+                ///
                 /// A dialog's content is considered seen if:
                 /// - It has been visited by the GET .../dialogs/{dialogId} endpoint since the last content update, and
                 /// - It does not have a system label MarkedAsUnopened.
                 /// </summary>
-        [Query] 
+        [Query]
         public bool? IsContentSeen { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with due date after this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? DueAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with due date before this date
                 /// </summary>
-        [Query] 
+        [Query]
         public System.DateTimeOffset? DueBefore { get; set; }
 
                 /// <summary>
                 /// Filter by process
                 /// </summary>
-        [Query] 
+        [Query]
         public string Process { get; set; }
 
                 /// <summary>
                 /// Filter by Display state
                 /// </summary>
-        [Query(CollectionFormat.Multi)] 
+        [Query(CollectionFormat.Multi)]
         public IEnumerable<SystemLabel> SystemLabel { get; set; }
 
                 /// <summary>
                 /// Whether to exclude API-only dialogs from the results. Defaults to false.
                 /// </summary>
-        [Query] 
+        [Query]
         public bool? ExcludeApiOnly { get; set; }
 
                 /// <summary>
                 /// Search string for free text search. Will attempt to fuzzily match in all free text fields in the aggregate
                 /// </summary>
-        [Query] 
+        [Query]
         public string Search { get; set; }
 
                 /// <summary>
                 /// Limit free text search to texts with this language code, e.g. 'nb', 'en'. Culture codes will be normalized to neutral language codes (ISO 639). Default: search all culture codes
                 /// </summary>
-        [Query] 
+        [Query]
         public string SearchLanguageCode { get; set; }
 
-        [Query] 
+        [Query]
         public string OrderBy { get; set; }
 
                 /// <summary>
                 /// Supply "continuationToken" for the response to get the next page of results, if hasNextPage is true
                 /// </summary>
-        [Query] 
+        [Query]
         public string ContinuationToken { get; set; }
 
                 /// <summary>
                 /// Limit the number of results per page (1-1000, default: 100)
                 /// </summary>
-        [Query] 
+        [Query]
         public int? Limit { get; set; }
 
     }
@@ -257,12 +257,12 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/context/labellog")]
-        Task<IApiResponse<ICollection<LabelAssignmentLog>>> SearchDialogLabelAssignmentLogs(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<LabelAssignmentLog>>> SearchDialogLabelAssignmentLogs(System.Guid dialogId, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Sets the system labels of a dialog</summary>
         /// <remarks>
         /// Sets the system labels of the dialog.
-        /// 
+        ///
         /// Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.
         /// </remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -320,7 +320,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/enduser/dialogs/{dialogId}/context/systemlabels")]
-        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
@@ -369,7 +369,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset")]
-        Task<IApiResponse> BulkSetDialogSystemLabels([Body] BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
+        Task<IApiResponse> BulkSetDialogSystemLabels([Body] BulkSetSystemLabel dto, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
@@ -411,7 +411,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -448,7 +448,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(System.Guid dialogId, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -486,12 +486,12 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<ICollection<DialogActivitySearchItem>>> SearchDialogActivities(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogActivitySearchItem>>> SearchDialogActivities(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
         /// Performs a search for dialogs, returning a paginated list of dialogs.
-        /// 
+        ///
         /// * All date parameters must contain explicit time zone. Example: 2023-10-27T10:00:00Z or 2023-10-27T10:00:00+01:00
         /// * See "continuationToken" in the response for how to get the next page of results.
         /// * hasNextPage will be set to true if there are more items to get.
@@ -522,7 +522,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/dialogs")]
-        Task<IApiResponse<PaginatedListOfDialogListItem>> SearchDialogs([Query] SearchDialogsQueryParams queryParams, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PaginatedListOfDialogListItem>> SearchDialogs([Query] SearchDialogsQueryParams queryParams, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets a single dialog transmission</summary>
         /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
@@ -565,7 +565,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<DialogTransmissionDetails>> GetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogTransmissionDetails>> GetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
@@ -603,7 +603,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<DialogSeenLogDetails>> GetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogSeenLogDetails>> GetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
@@ -642,7 +642,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(System.Guid dialogId, System.Guid activityId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(System.Guid dialogId, System.Guid activityId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>Gets a single dialog aggregate.</remarks>
@@ -680,7 +680,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}")]
-        Task<IApiResponse<Dialog>> GetDialog(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<Dialog>> GetDialog(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Looks up a dialog by instance reference</summary>
         /// <remarks>Resolves dialog metadata and authorization evidence for a supported instance reference.</remarks>
@@ -722,7 +722,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialoglookup")]
-        Task<IApiResponse<EndUserIdentifierLookup>> GetDialogLookup([Query] string instanceRef, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<EndUserIdentifierLookup>> GetDialogLookup([Query] string instanceRef, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
 
         /// <summary>Gets the list of authorized parties for the end user</summary>
         /// <remarks>Gets the list of authorized parties for the end user.</remarks>
@@ -754,7 +754,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/parties")]
-        Task<IApiResponse<Parties>> GetParties(CancellationToken cancellationToken = default);
+        Task<IApiResponse<Parties>> GetParties(CancellationToken cancellationToken = default, [Property] object? requestProperties = null);
     }
 
 }
@@ -785,7 +785,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 {
     using System = global::System;
 
-    
+
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ServiceResourceMetadataList
@@ -1333,7 +1333,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <summary>
         /// True if the authenticated user is authorized for this content. If not, the endpoints will
         /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
-        /// <br/>            
+        /// <br/>
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool? IsAuthorized { get; set; }
@@ -1641,7 +1641,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
@@ -1650,7 +1650,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("externalReference")]
@@ -1805,7 +1805,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// An arbitrary string with a service-specific activity type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -1862,7 +1862,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
-        /// <br/>            
+        /// <br/>
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
         [JsonPropertyName("isViaServiceOwner")]
@@ -2240,7 +2240,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
@@ -2249,7 +2249,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("externalReference")]
@@ -2263,7 +2263,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>            
+        /// <br/>
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed by the service
         /// <br/>owner after the dialog has been created.
@@ -2531,7 +2531,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -2546,7 +2546,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -2746,7 +2746,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -2863,7 +2863,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -2902,7 +2902,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Arbitrary string indicating the version of the endpoint.
-        /// <br/>            
+        /// <br/>
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("version")]
@@ -2976,7 +2976,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// An arbitrary URI/URN with a service-specific activity type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -3033,7 +3033,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
-        /// <br/>            
+        /// <br/>
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
         [JsonPropertyName("isViaServiceOwner")]
@@ -3244,7 +3244,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Whether the authenticated user has a key role in the party.
-        /// <br/>            
+        /// <br/>
         /// <br/>Read more about key roles (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_er/#nøkkelroller
         /// </summary>
         [JsonPropertyName("hasKeyRole")]
@@ -3258,7 +3258,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Whether the authenticated user is the main administrator of the party
-        /// <br/>            
+        /// <br/>
         /// <br/>Read more about main administrator (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#hovedadministrator
         /// </summary>
         [JsonPropertyName("isMainAdministrator")]
@@ -3266,7 +3266,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// Whether the authenticated user is an access manager of the party.
-        /// <br/>            
+        /// <br/>
         /// <br/>Read more about access managers (norwegian) at https://docs.altinn.studio/nb/altinn-studio/reference/configuration/authorization/guidelines_authorization/roles_and_rights/roles_altinn/altinn_roles_administration/#tilgangsstrying
         /// </summary>
         [JsonPropertyName("isAccessManager")]

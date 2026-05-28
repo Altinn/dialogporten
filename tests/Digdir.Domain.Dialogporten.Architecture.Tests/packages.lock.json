@@ -2322,7 +2322,7 @@
       "Altinn.ApiClients.Dialogporten.EndUser": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
+          "Altinn.ApiClients.Maskinporten": "[9.2.1-next.20260528.47, )",
           "Microsoft.Extensions.Hosting.Abstractions": "[10.0.8, )",
           "NSec.Cryptography": "[25.4.0, )",
           "Refit": "[10.2.0, )",

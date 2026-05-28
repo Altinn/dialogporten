@@ -31,8 +31,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
 
 permissions:
-  contents: read
-  id-token: write   # OIDC for npm Trusted Publishing + provenance
+  contents: read   # id-token: write is scoped to the publish job only
 
 jobs:
   resolve-context:
@@ -82,6 +81,10 @@ jobs:
                 echo "::error::client_payload.version is required for release_created dispatch"
                 exit 1
               fi
+              if [ -z "$PREVIOUS_RELEASE_SHA" ]; then
+                echo "::error::client_payload.previous_release_sha is required for release_created dispatch"
+                exit 1
+              fi
               echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
               echo "ref=refs/tags/v${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
               echo "base_sha=$PREVIOUS_RELEASE_SHA" >> "$GITHUB_OUTPUT"
@@ -89,6 +92,14 @@ jobs:
               echo "force_publish=false" >> "$GITHUB_OUTPUT"
               ;;
             workflow_dispatch)
+              # Deriving the default version reads version.txt and GITHUB_SHA, which reflect
+              # the dispatched ref — not INPUT_REF. To avoid publishing one ref's content
+              # under another ref's auto-derived version (and npm versions are immutable),
+              # require an explicit version whenever ref is overridden.
+              if [ -n "$INPUT_REF" ] && [ -z "$INPUT_VERSION" ]; then
+                echo "::error::workflow_dispatch with 'ref' set requires an explicit 'version' input"
+                exit 1
+              fi
               if [ -n "$INPUT_VERSION" ]; then
                 echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
               else

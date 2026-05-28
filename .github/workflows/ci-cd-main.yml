@@ -196,16 +196,6 @@ jobs:
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
-  publish-schema-npm:
-    name: Deploy schema npm package
-    needs: [ check-for-changes, get-current-version, generate-git-short-sha, deploy-apps ]
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasOpenApiEndUserSchemaChanges == 'true' || needs.check-for-changes.outputs.hasOpenApiServiceOwnerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasGqlSchemaChanges == 'true') }}
-    uses: ./.github/workflows/workflow-publish-schema.yml
-    with:
-      version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
   run-e2e-tests:
     name: "Run K6 functional end-to-end tests"
     # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
@@ -256,7 +246,6 @@ jobs:
       run-e2e-tests,
       run-graphql-e2e-tests,
       run-webapi-e2e-tests,
-      publish-schema-npm,
       publish-docker-images,
       build-and-test,
     ]
@@ -269,7 +258,6 @@ jobs:
       e2e_tests_status: ${{ needs.run-e2e-tests.result }}
       graphql_e2e_tests_status: ${{ needs.run-graphql-e2e-tests.result }}
       webapi_e2e_tests_status: ${{ needs.run-webapi-e2e-tests.result }}
-      schema_npm_status: ${{ needs.publish-schema-npm.result }}
       publish_status: ${{ needs.publish-docker-images.result }}
       build_and_test_status: ${{ needs.build-and-test.result }}
     secrets:

@@ -1,0 +1,215 @@
+# Sole publisher of the @digdir/dialogporten-schema npm package.
+# Configured as the Trusted Publisher for the package on npmjs.com.
+# Triggers:
+#   push: main                      → version: ${version.txt}-${shortSha} (test/at23 flow)
+#   repository_dispatch: release_created → version: ${client_payload.version}  (staging/tt02 flow)
+#   workflow_dispatch               → manual force-publish with optional inputs
+name: CI/CD Publish Schema NPM
+run-name: >-
+  CI/CD Publish Schema NPM
+  ${{ github.event.client_payload.version && format('(v{0})', github.event.client_payload.version)
+   || github.event.inputs.version && format('(v{0})', github.event.inputs.version)
+   || '' }}
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [release_created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override version to publish. Leave empty to use version.txt + short SHA."
+        required: false
+        type: string
+      ref:
+        description: "Git ref to publish from. Leave empty for current default."
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+
+permissions:
+  contents: read
+  id-token: write   # OIDC for npm Trusted Publishing + provenance
+
+jobs:
+  resolve-context:
+    name: Resolve trigger context
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.context.outputs.version }}
+      ref: ${{ steps.context.outputs.ref }}
+      base_sha: ${{ steps.context.outputs.base_sha }}
+      environment: ${{ steps.context.outputs.environment }}
+      force_publish: ${{ steps.context.outputs.force_publish }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Resolve context
+        id: context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          RELEASE_VERSION: ${{ github.event.client_payload.version }}
+          PREVIOUS_RELEASE_SHA: ${{ github.event.client_payload.previous_release_sha }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          INPUT_REF: ${{ github.event.inputs.ref }}
+        run: |
+          set -euo pipefail
+
+          short_sha() { git rev-parse --short=8 "$GITHUB_SHA"; }
+          version_from_file() { echo "$(cat version.txt)-$(short_sha)"; }
+
+          case "$EVENT_NAME" in
+            push)
+              echo "version=$(version_from_file)" >> "$GITHUB_OUTPUT"
+              echo "ref=$GITHUB_REF" >> "$GITHUB_OUTPUT"
+              echo "base_sha=$EVENT_BEFORE" >> "$GITHUB_OUTPUT"
+              echo "environment=test" >> "$GITHUB_OUTPUT"
+              echo "force_publish=false" >> "$GITHUB_OUTPUT"
+              ;;
+            repository_dispatch)
+              if [ -z "$RELEASE_VERSION" ]; then
+                echo "::error::client_payload.version is required for release_created dispatch"
+                exit 1
+              fi
+              echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+              echo "ref=refs/tags/v${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
+              echo "base_sha=$PREVIOUS_RELEASE_SHA" >> "$GITHUB_OUTPUT"
+              echo "environment=staging" >> "$GITHUB_OUTPUT"
+              echo "force_publish=false" >> "$GITHUB_OUTPUT"
+              ;;
+            workflow_dispatch)
+              if [ -n "$INPUT_VERSION" ]; then
+                echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+              else
+                echo "version=$(version_from_file)" >> "$GITHUB_OUTPUT"
+              fi
+              echo "ref=${INPUT_REF:-$GITHUB_REF}" >> "$GITHUB_OUTPUT"
+              echo "base_sha=" >> "$GITHUB_OUTPUT"
+              echo "environment=manual" >> "$GITHUB_OUTPUT"
+              echo "force_publish=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "::error::Unsupported event: $EVENT_NAME"
+              exit 1
+              ;;
+          esac
+
+  check-for-changes:
+    name: Check for schema changes
+    needs: [resolve-context]
+    if: ${{ needs.resolve-context.outputs.force_publish == 'false' }}
+    uses: ./.github/workflows/workflow-check-for-changes.yml
+    with:
+      apps_base_sha: ${{ needs.resolve-context.outputs.base_sha }}
+
+  publish:
+    name: Publish schema to npm
+    needs: [resolve-context, check-for-changes]
+    if: >-
+      ${{ always() && !cancelled() && needs.resolve-context.result == 'success' &&
+        (needs.resolve-context.outputs.force_publish == 'true' ||
+         (needs.check-for-changes.result == 'success' &&
+          (needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' ||
+           needs.check-for-changes.outputs.hasOpenApiEndUserSchemaChanges == 'true' ||
+           needs.check-for-changes.outputs.hasOpenApiServiceOwnerSchemaChanges == 'true' ||
+           needs.check-for-changes.outputs.hasGqlSchemaChanges == 'true'))) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      WORKING_DIRECTORY: docs/schema/V1
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.resolve-context.outputs.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Fetch package name
+        id: fetch-package-name
+        run: echo "PACKAGE_NAME=$(jq -r '.name' package.json)" >> $GITHUB_ENV
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Check if version exists on NPM
+        id: check-version
+        env:
+          PACKAGE_NAME: ${{ env.PACKAGE_NAME }}
+          VERSION: ${{ needs.resolve-context.outputs.version }}
+        run: |
+          if npm view "${PACKAGE_NAME}@${VERSION}" > /dev/null 2>&1; then
+            echo "version-exists=true" >> $GITHUB_OUTPUT
+            echo "Version ${VERSION} already exists; skipping publish."
+          else
+            echo "version-exists=false" >> $GITHUB_OUTPUT
+            echo "Version ${VERSION} not yet published."
+          fi
+
+      - name: Build and test schema
+        if: steps.check-version.outputs.version-exists == 'false'
+        uses: ./.github/actions/build-schema
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Update package version
+        if: steps.check-version.outputs.version-exists == 'false'
+        env:
+          VERSION: ${{ needs.resolve-context.outputs.version }}
+        run: |
+          jq --arg version "$VERSION" '.version = $version' package.json > temp.json
+          mv temp.json package.json
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Publish package (Trusted Publishing via OIDC)
+        if: steps.check-version.outputs.version-exists == 'false'
+        run: npm publish --provenance --access public
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+  notify-failure:
+    name: Send Slack message on failure
+    needs: [resolve-context, check-for-changes, publish]
+    if: ${{ always() && failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        env:
+          CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
+          ENVIRONMENT: ${{ needs.resolve-context.outputs.environment }}
+          VERSION: ${{ needs.resolve-context.outputs.version }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          errors: true
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload-templated: true
+          payload-file-path: "./.github/slack-templates/schema-publish-failed.json"

@@ -10,15 +10,12 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 using MediatR;
-using HotChocolate.Authorization;
 using static Digdir.Domain.Dialogporten.GraphQL.Common.Constants;
-using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;
 
 public partial class Queries
 {
-    [Authorize(Policy = AuthorizationPolicy.EndUser)]
     public async Task<DialogByIdPayload> GetDialogById(
         [Service] ISender mediator,
         [Service] IMapper mapper,
@@ -83,7 +80,6 @@ public partial class Queries
             });
     }
 
-    [Authorize(Policy = AuthorizationPolicy.EndUser)]
     public async Task<SearchDialogsPayload> SearchDialogs(
         [Service] ISender mediator,
         [Service] IMapper mapper,

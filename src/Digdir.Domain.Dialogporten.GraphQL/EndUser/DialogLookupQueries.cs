@@ -2,9 +2,7 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup;
 using MediatR;
-using HotChocolate.Authorization;
 using static Digdir.Domain.Dialogporten.GraphQL.Common.Constants;
-using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 using DialogLookupModel = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup.DialogLookup;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get.GetDialogLookupQuery;
 
@@ -12,7 +10,6 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;
 
 public sealed partial class Queries
 {
-    [Authorize(Policy = AuthorizationPolicy.EndUser)]
     public async Task<DialogLookupPayload> GetDialogLookup(
         [Service] ISender mediator,
         [Service] IMapper mapper,

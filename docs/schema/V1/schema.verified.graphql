@@ -399,17 +399,17 @@ type LocalizationDto {
   languageCode: String!
 }
 
-type Mutations {
+type Mutations @authorize(policy: "enduser") {
   setSystemLabel(input: SetSystemLabelInput!): SetSystemLabelPayload!
   bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
 }
 
-type Queries {
-  dialogLookup(instanceRef: String!): DialogLookupPayload! @authorize(policy: "enduser")
-  dialogById(dialogId: UUID!): DialogByIdPayload! @authorize(policy: "enduser")
-  searchDialogs(input: SearchDialogInput!): SearchDialogsPayload! @authorize(policy: "enduser")
-  limits: Limits! @authorize(policy: "enduser")
-  parties: [AuthorizedParty!]! @authorize(policy: "enduser")
+type Queries @authorize(policy: "enduser") {
+  dialogLookup(instanceRef: String!): DialogLookupPayload!
+  dialogById(dialogId: UUID!): DialogByIdPayload!
+  searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
+  limits: Limits!
+  parties: [AuthorizedParty!]!
   serviceResources: GetServiceResourceMetadataDto!
 }
 

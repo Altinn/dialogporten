@@ -196,25 +196,49 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Fact]
-    public Task Past_VisibleFrom_Should_Not_Backdate_Timestamps_On_Create()
+    public Task Past_VisibleFrom_Should_Not_Control_Default_Timestamps_On_Create()
     {
-        var fixedUtcNow = new DateTimeOffset(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
-        var visibleFrom = fixedUtcNow.AddDays(-3);
+        var utcNow = new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero);
+        var visibleFrom = utcNow.AddDays(-7);
 
         return FlowBuilder.For(Application)
-            .OverrideUtc(fixedUtcNow)
+            .OverrideUtc(utcNow)
             .AsAdminUser()
             .CreateSimpleDialog((x, _) => x.Dto.VisibleFrom = visibleFrom)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(dialog =>
             {
-                dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
-                dialog.CreatedAt.Should().BeCloseTo(fixedUtcNow, TimeSpan.FromSeconds(1));
-                dialog.UpdatedAt.Should().BeCloseTo(fixedUtcNow, TimeSpan.FromSeconds(1));
-                dialog.ContentUpdatedAt.Should().BeCloseTo(fixedUtcNow, TimeSpan.FromSeconds(1));
-                dialog.CreatedAt.Should().NotBe(dialog.VisibleFrom);
-                dialog.UpdatedAt.Should().NotBe(dialog.VisibleFrom);
-                dialog.ContentUpdatedAt.Should().NotBe(dialog.VisibleFrom);
+                dialog.VisibleFrom.Should().Be(visibleFrom);
+                dialog.CreatedAt.Should().Be(utcNow);
+                dialog.UpdatedAt.Should().Be(utcNow);
+                dialog.ContentUpdatedAt.Should().Be(utcNow);
+            });
+    }
+
+    [Fact]
+    public Task Past_VisibleFrom_Should_Not_Control_Supplied_Timestamps_On_Create()
+    {
+        var utcNow = new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero);
+        var visibleFrom = utcNow.AddDays(-7);
+        var createdAt = utcNow.AddDays(-3);
+        var updatedAt = utcNow.AddDays(-1);
+
+        return FlowBuilder.For(Application)
+            .OverrideUtc(utcNow)
+            .AsAdminUser()
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.CreatedAt = createdAt;
+                x.Dto.UpdatedAt = updatedAt;
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+            {
+                dialog.VisibleFrom.Should().Be(visibleFrom);
+                dialog.CreatedAt.Should().Be(createdAt);
+                dialog.UpdatedAt.Should().Be(updatedAt);
+                dialog.ContentUpdatedAt.Should().Be(updatedAt);
             });
     }
 

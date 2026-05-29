@@ -22,7 +22,7 @@ public sealed record AccessManagementAccessPackageMetadata(
     IReadOnlyList<LocalizationDto> Name,
     LinkDto Links);
 
-public sealed class LinkDto
+public sealed record LinkDto
 {
-    public string Metadata { get; set; } = null!;
+    public required string Metadata { get; init; }
 }

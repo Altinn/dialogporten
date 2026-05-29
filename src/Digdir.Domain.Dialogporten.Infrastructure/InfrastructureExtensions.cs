@@ -250,7 +250,8 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
         {
-            Duration = TimeSpan.FromHours(6)
+            Duration = TimeSpan.FromHours(6),
+            FailSafeMaxDuration = TimeSpan.FromHours(6)
         })
         .ConfigureFusionCache(AccessManagementMetadataClient.CacheName, new()
         {

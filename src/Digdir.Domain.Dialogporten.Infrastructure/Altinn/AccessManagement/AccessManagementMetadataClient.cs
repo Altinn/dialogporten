@@ -11,6 +11,7 @@ internal sealed class AccessManagementMetadataClient : IAccessManagementMetadata
     private const string AccessPackagesEndpoint = "accessmanagement/api/v1/meta/info/accesspackages/export";
     public const string CacheName = "AccessManagementMetadata";
     private const string CacheKeyPrefix = "access-management-metadata:";
+    private const string MetadataCacheKey = CacheKeyPrefix + "assembled";
 
     private static readonly string[] SupportedLanguages = ["nb", "en", "nn"];
 
@@ -35,54 +36,58 @@ internal sealed class AccessManagementMetadataClient : IAccessManagementMetadata
         _metadataLinkProvider = metadataLinkProvider;
     }
 
-    public async Task<AccessManagementMetadata> GetMetadata(CancellationToken cancellationToken)
-    {
-        var localizedMetadata = await Task.WhenAll(SupportedLanguages
-            .Select(language => GetLocalizedMetadata(language, cancellationToken)));
+    public async Task<AccessManagementMetadata> GetMetadata(CancellationToken cancellationToken) =>
+        await _cache.GetOrSetAsync(
+            MetadataCacheKey,
+            async token =>
+            {
+                var localizedMetadata = await Task.WhenAll(SupportedLanguages
+                    .Select(language => GetLocalizedMetadata(language, token)));
 
-        var roles = localizedMetadata
-            .SelectMany(x => x.Roles)
-            .GroupBy(x => x.Subject, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                x => x.Key,
-                x =>
-                {
-                    var first = x.First();
-                    var names = x
-                        .Select(y => y.Name)
-                        .Where(y => !string.IsNullOrWhiteSpace(y.Value))
-                        .DistinctBy(y => y.LanguageCode, StringComparer.Ordinal)
-                        .ToList();
-                    return new AccessManagementRoleMetadata(
-                        first.Id,
-                        first.Urn,
-                        names,
-                        new LinkDto { Metadata = _metadataLinkProvider.GetRoleMetadataLink(first.Id) });
-                },
-                StringComparer.OrdinalIgnoreCase);
+                var roles = localizedMetadata
+                    .SelectMany(x => x.Roles)
+                    .GroupBy(x => x.Subject, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(
+                        x => x.Key,
+                        x =>
+                        {
+                            var first = x.First();
+                            var names = x
+                                .Select(y => y.Name)
+                                .Where(y => !string.IsNullOrWhiteSpace(y.Value))
+                                .DistinctBy(y => y.LanguageCode, StringComparer.Ordinal)
+                                .ToList();
+                            return new AccessManagementRoleMetadata(
+                                first.Id,
+                                first.Urn,
+                                names,
+                                new LinkDto { Metadata = _metadataLinkProvider.GetRoleMetadataLink(first.Id) });
+                        },
+                        StringComparer.OrdinalIgnoreCase);
 
-        var accessPackages = localizedMetadata
-            .SelectMany(x => x.AccessPackages)
-            .GroupBy(x => x.Urn, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                x => x.Key,
-                x =>
-                {
-                    var first = x.First();
-                    var names = x
-                        .Select(y => y.Name)
-                        .Where(y => !string.IsNullOrWhiteSpace(y.Value))
-                        .DistinctBy(y => y.LanguageCode, StringComparer.Ordinal)
-                        .ToList();
-                    return new AccessManagementAccessPackageMetadata(
-                        first.Urn,
-                        names,
-                        new LinkDto { Metadata = _metadataLinkProvider.GetAccessPackageMetadataLink(first.Urn) });
-                },
-                StringComparer.OrdinalIgnoreCase);
+                var accessPackages = localizedMetadata
+                    .SelectMany(x => x.AccessPackages)
+                    .GroupBy(x => x.Urn, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(
+                        x => x.Key,
+                        x =>
+                        {
+                            var first = x.First();
+                            var names = x
+                                .Select(y => y.Name)
+                                .Where(y => !string.IsNullOrWhiteSpace(y.Value))
+                                .DistinctBy(y => y.LanguageCode, StringComparer.Ordinal)
+                                .ToList();
+                            return new AccessManagementAccessPackageMetadata(
+                                first.Urn,
+                                names,
+                                new LinkDto { Metadata = _metadataLinkProvider.GetAccessPackageMetadataLink(first.Urn) });
+                        },
+                        StringComparer.OrdinalIgnoreCase);
 
-        return new AccessManagementMetadata(roles, accessPackages);
-    }
+                return new AccessManagementMetadata(roles, accessPackages);
+            },
+            token: cancellationToken);
 
     private async Task<LocalizedAccessManagementMetadata> GetLocalizedMetadata(
         string language,

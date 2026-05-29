@@ -2173,6 +2173,21 @@
           "grantType": {
             "$ref": "#/components/schemas/IdentifierLookupGrantType"
           },
+          "links": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Links"
+              }
+            ]
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "subject": {
             "type": "string"
           }
@@ -2252,6 +2267,15 @@
           },
           "performedBy": {
             "$ref": "#/components/schemas/Actor"
+          }
+        },
+        "type": "object"
+      },
+      "Links": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "type": "string"
           }
         },
         "type": "object"

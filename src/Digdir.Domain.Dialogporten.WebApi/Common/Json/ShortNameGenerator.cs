@@ -19,11 +19,11 @@ internal sealed class ShortNameGenerator(string documentName) : ISchemaNameGener
             {
                 return attributeTypeName;
             }
+        }
 
-            if (OpenApiTypeNameOverrides.TryGetOverride(documentName, currentName, out var overrideName))
-            {
-                return overrideName;
-            }
+        if (OpenApiTypeNameOverrides.TryGetOverride(documentName, currentName, out var overrideName))
+        {
+            return overrideName;
         }
 
         OpenApiTypeNameOverrides.ThrowIfMissingOverride(documentName, type, currentName);

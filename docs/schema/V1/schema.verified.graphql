@@ -301,10 +301,16 @@ type DialogLookupAuthorizationEvidence {
 type DialogLookupAuthorizationEvidenceItem {
   grantType: DialogLookupGrantType!
   subject: String!
+  name: [Localization!]!
+  links: DialogLookupLinks
 }
 
 type DialogLookupForbidden implements DialogLookupError {
   message: String!
+}
+
+type DialogLookupLinks {
+  metadata: String!
 }
 
 type DialogLookupNotFound implements DialogLookupError {
@@ -345,6 +351,10 @@ type EndUserSearchLimits {
   maxExtendedStatusFilterValues: Int!
 }
 
+type GetServiceResourceMetadataDto {
+  items: [ServiceResourceMetadataItemDto!]!
+}
+
 type GuiAction {
   "The unique identifier for the action in UUIDv7 format."
   id: UUID!
@@ -373,8 +383,19 @@ type Limits {
   serviceOwnerSearch: ServiceOwnerSearchLimits!
 }
 
+type LinkDto {
+  metadata: String!
+}
+
 type Localization {
   value: String!
+  languageCode: String!
+}
+
+type LocalizationDto {
+  "The localized text (or URL if a front-channel embed)."
+  value: String!
+  "The language code of the localization in ISO 639-1 format."
   languageCode: String!
 }
 
@@ -383,12 +404,13 @@ type Mutations {
   bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
 }
 
-type Queries @authorize(policy: "enduser") {
-  dialogLookup(instanceRef: String!): DialogLookupPayload!
-  dialogById(dialogId: UUID!): DialogByIdPayload!
-  searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
-  limits: Limits!
-  parties: [AuthorizedParty!]!
+type Queries {
+  dialogLookup(instanceRef: String!): DialogLookupPayload! @authorize(policy: "enduser")
+  dialogById(dialogId: UUID!): DialogByIdPayload! @authorize(policy: "enduser")
+  searchDialogs(input: SearchDialogInput!): SearchDialogsPayload! @authorize(policy: "enduser")
+  limits: Limits! @authorize(policy: "enduser")
+  parties: [AuthorizedParty!]! @authorize(policy: "enduser")
+  serviceResources: GetServiceResourceMetadataDto!
 }
 
 type SearchContent {
@@ -502,6 +524,39 @@ type ServiceOwnerSearchLimits {
   maxPartyFilterValues: Int!
   maxServiceResourceFilterValues: Int!
   maxExtendedStatusFilterValues: Int!
+}
+
+type ServiceResourceMetadataAccessPackageDto {
+  urn: String!
+  name: [LocalizationDto!]!
+  links: LinkDto!
+}
+
+type ServiceResourceMetadataItemDto {
+  serviceResource: ServiceResourceMetadataServiceResourceDto!
+  roles: [ServiceResourceMetadataRoleDto!]!
+  accessPackages: [ServiceResourceMetadataAccessPackageDto!]!
+  serviceOwner: ServiceResourceMetadataServiceOwnerDto!
+}
+
+type ServiceResourceMetadataRoleDto {
+  urn: String!
+  name: [LocalizationDto!]!
+  links: LinkDto!
+}
+
+type ServiceResourceMetadataServiceOwnerDto {
+  orgNumber: String!
+  code: String!
+  name: [LocalizationDto!]!
+}
+
+type ServiceResourceMetadataServiceResourceDto {
+  id: String!
+  isDelegable: Boolean!
+  minimumAuthenticationLevel: Int!
+  name: [LocalizationDto!]!
+  links: LinkDto!
 }
 
 type SetSystemLabelConcurrencyError implements SetSystemLabelError {

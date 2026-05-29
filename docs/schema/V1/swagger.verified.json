@@ -215,6 +215,15 @@
           "Invalid"
         ]
       },
+      "Links": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,
         "properties": {
@@ -357,6 +366,128 @@
           },
           "severity": {
             "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceAccessPackage": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "accessPackages": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceAccessPackage"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceRole"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/ServiceResourceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/ServiceResource"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceMetadataList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceMetadata"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceRole": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
             "type": "string"
           }
         },
@@ -548,6 +679,21 @@
         "properties": {
           "grantType": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupGrantType"
+          },
+          "links": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Links"
+              }
+            ]
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "subject": {
             "type": "string"
@@ -8334,6 +8480,47 @@
           }
         },
         "summary": "Gets currently enforced application-level query limits",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
+    "/api/v1/metadata/serviceresources": {
+      "get": {
+        "description": "Returns public service resource metadata with related service owner, role, and access package metadata.",
+        "operationId": "V1MetadataServiceResourcesGet_ServiceResourceMetadata",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResourceMetadataList"
+                }
+              }
+            },
+            "description": "Service resource metadata."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets service resources currently in use in Dialogporten.",
         "tags": [
           "Metadata"
         ]

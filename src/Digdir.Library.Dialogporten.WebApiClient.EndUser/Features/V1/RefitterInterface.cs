@@ -2960,6 +2960,12 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("subject")]
         public string Subject { get; set; }
 
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -2977,6 +2983,15 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"InstanceDelegation")]
         InstanceDelegation = 3,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Links
+    {
+
+        [JsonPropertyName("metadata")]
+        public string Metadata { get; set; }
 
     }
 

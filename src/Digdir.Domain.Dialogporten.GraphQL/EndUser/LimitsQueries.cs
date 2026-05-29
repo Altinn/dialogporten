@@ -1,5 +1,7 @@
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.Limits.Queries.Get;
+using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
+using HotChocolate.Authorization;
 using MediatR;
 using LimitsType = Digdir.Domain.Dialogporten.GraphQL.EndUser.Limits.Limits;
 
@@ -7,6 +9,7 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;
 
 public partial class Queries
 {
+    [Authorize(Policy = AuthorizationPolicy.EndUser)]
     public async Task<LimitsType> GetLimits(
         [Service] ISender mediator,
         [Service] IMapper mapper,

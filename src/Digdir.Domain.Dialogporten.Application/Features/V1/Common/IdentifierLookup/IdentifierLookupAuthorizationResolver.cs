@@ -2,6 +2,9 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
@@ -14,19 +17,23 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     private readonly IUser _user;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogDbContext _db;
+    private readonly IAccessManagementMetadata _accessManagementMetadata;
 
     public IdentifierLookupAuthorizationResolver(
         IUser user,
         IAltinnAuthorization altinnAuthorization,
-        IDialogDbContext db)
+        IDialogDbContext db,
+        IAccessManagementMetadata accessManagementMetadata)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
         ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(accessManagementMetadata);
 
         _user = user;
         _altinnAuthorization = altinnAuthorization;
         _db = db;
+        _accessManagementMetadata = accessManagementMetadata;
     }
 
     /// <summary>
@@ -34,6 +41,7 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
     /// </summary>
     public async Task<IdentifierLookupAuthorizationResolution> Resolve(IdentifierLookupDialogData dialogData,
         InstanceRef responseInstanceRef,
+        List<AcceptedLanguage>? acceptedLanguages,
         CancellationToken cancellationToken)
     {
         var currentAuthenticationLevel = _user.GetPrincipal().GetAuthenticationLevel();
@@ -67,6 +75,8 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             authorizedSubjects,
             cancellationToken);
 
+        var metadata = await _accessManagementMetadata.GetMetadata(cancellationToken);
+
         foreach (var subject in roleAndAccessPackageSubjects)
         {
             var grantType = ResolveGrantType(subject);
@@ -76,11 +86,14 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
                 continue;
             }
 
-            evidenceItems.Add(new IdentifierLookupAuthorizationEvidenceItemDto
+            var evidenceItem = new IdentifierLookupAuthorizationEvidenceItemDto
             {
                 GrantType = grantType.Value,
                 Subject = subject
-            });
+            };
+
+            EnrichEvidenceItem(evidenceItem, metadata, acceptedLanguages);
+            evidenceItems.Add(evidenceItem);
         }
 
         var viaRole = evidenceItems.Any(x => x.GrantType == IdentifierLookupGrantType.Role);
@@ -148,6 +161,44 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
         }
 
         return null;
+    }
+
+    private static void EnrichEvidenceItem(
+        IdentifierLookupAuthorizationEvidenceItemDto evidenceItem,
+        AccessManagementMetadata metadata,
+        List<AcceptedLanguage>? acceptedLanguages)
+    {
+        switch (evidenceItem.GrantType)
+        {
+            case IdentifierLookupGrantType.Role:
+                if (metadata.RolesBySubject.TryGetValue(evidenceItem.Subject, out var role))
+                {
+                    evidenceItem.Name = PruneLocalizations(role.Name, acceptedLanguages);
+                    evidenceItem.Links = role.Links;
+                }
+                break;
+            case IdentifierLookupGrantType.AccessPackage:
+                if (metadata.AccessPackagesBySubject.TryGetValue(evidenceItem.Subject, out var accessPackage))
+                {
+                    evidenceItem.Name = PruneLocalizations(accessPackage.Name, acceptedLanguages);
+                    evidenceItem.Links = accessPackage.Links;
+                }
+                break;
+            case IdentifierLookupGrantType.ResourceDelegation:
+            case IdentifierLookupGrantType.InstanceDelegation:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(evidenceItem), evidenceItem.GrantType, "Unknown grant type.");
+        }
+    }
+
+    private static List<LocalizationDto> PruneLocalizations(
+        IReadOnlyList<LocalizationDto> localizations,
+        List<AcceptedLanguage>? acceptedLanguages)
+    {
+        var prunedLocalizations = localizations.ToList();
+        prunedLocalizations.PruneLocalizations(acceptedLanguages);
+        return prunedLocalizations;
     }
 
     private async Task<List<string>> ResolveRoleAndAccessPackageSubjects(

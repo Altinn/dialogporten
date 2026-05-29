@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -102,6 +103,7 @@ internal sealed partial class WarmupService : IHostedService
 
             await RunPhaseAsync("db-pool", () => WarmupDbPoolAsync(services, timeoutCts.Token));
             await RunPhaseAsync("ef-model", () => WarmupEfModelAsync(services, timeoutCts.Token));
+            await RunPhaseAsync("service-resource-metadata", () => WarmupServiceResourceMetadataAsync(services, timeoutCts.Token));
 
             if (_settings.RunEndUserSearch)
             {
@@ -180,6 +182,12 @@ internal sealed partial class WarmupService : IHostedService
             .Where(x => x.Id == DialogStatus.Values.Completed)
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private static async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
+    {
+        var sender = services.GetRequiredService<ISender>();
+        await sender.Send(new GetServiceResourceMetadataQuery(), cancellationToken);
     }
 
     private async Task WarmupEndUserSearchAsync(IServiceProvider services, CancellationToken cancellationToken)

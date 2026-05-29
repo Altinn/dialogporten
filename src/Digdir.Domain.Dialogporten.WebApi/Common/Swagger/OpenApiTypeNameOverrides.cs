@@ -19,12 +19,24 @@ internal static class OpenApiTypeNameOverrides
         ["DialogsEntitiesActions_DialogGuiActionPriority"] = "DialogGuiActionPriority",
         ["DialogsEntitiesActivities_DialogActivityType"] = "DialogActivityType",
         ["DialogsEntitiesTransmissions_DialogTransmissionType"] = "DialogTransmissionType",
+        ["DigdirDomainDialogportenApplicationExternals_Link"] = "Links",
         ["Http_HttpVerb"] = "HttpVerb",
         ["ProblemDetails_Error"] = "ProblemDetailsError",
         ["V1CommonContent_ContentValue"] = "ContentValue",
         ["V1CommonLocalizations_Localization"] = "Localization",
         ["V1EndUserCommon_AcceptedLanguage"] = "AcceptedLanguage",
         ["V1EndUserCommon_AcceptedLanguages"] = "AcceptedLanguages"
+    }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    private static readonly FrozenDictionary<string, string> PublicOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["DigdirDomainDialogportenApplicationExternals_Link"] = "Links",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata"] = "ServiceResourceMetadataList",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage"] = "ServiceResourceAccessPackage",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem"] = "ServiceResourceMetadata",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole"] = "ServiceResourceRole",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner"] = "ServiceResourceOwner",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource"] = "ServiceResource"
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static readonly FrozenDictionary<string, string> EndUserOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -191,6 +203,11 @@ internal static class OpenApiTypeNameOverrides
 
     public static bool TryGetOverride(string documentName, string currentName, [NotNullWhen(true)] out string? overrideName)
     {
+        if (documentName is "v1")
+        {
+            return PublicOverrides.TryGetValue(currentName, out overrideName);
+        }
+
         if (documentName is not ("v1.enduser" or "v1.serviceowner"))
         {
             overrideName = null;

@@ -3,12 +3,15 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Queries.GetParties;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Parties;
+using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
+using HotChocolate.Authorization;
 using MediatR;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;
 
 public partial class Queries
 {
+    [Authorize(Policy = AuthorizationPolicy.EndUser)]
     public async Task<List<AuthorizedParty>> GetParties(
         [Service] ISender mediator,
         [Service] IMapper mapper,

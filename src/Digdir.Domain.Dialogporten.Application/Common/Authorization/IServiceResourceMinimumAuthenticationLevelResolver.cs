@@ -1,12 +1,14 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Common.Authorization;
 
 public interface IServiceResourceMinimumAuthenticationLevelResolver
 {
     Task<int> GetMinimumAuthenticationLevel(string serviceResource, CancellationToken cancellationToken);
+
+    Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(
+        IReadOnlyCollection<string> serviceResources,
+        CancellationToken cancellationToken);
 }
 
 internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServiceResourceMinimumAuthenticationLevelResolver
@@ -20,39 +22,55 @@ internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServi
     /// </summary>
     private const int DefaultMinimumAuthenticationLevel = 3;
 
-    private readonly IDialogDbContext _db;
-    private readonly ILogger<ServiceResourceMinimumAuthenticationLevelResolver> _logger;
+    private readonly IResourcePolicyInformationRepository _resourcePolicyInformationRepository;
 
     public ServiceResourceMinimumAuthenticationLevelResolver(
-        IDialogDbContext db,
-        ILogger<ServiceResourceMinimumAuthenticationLevelResolver> logger)
+        IResourcePolicyInformationRepository resourcePolicyInformationRepository)
     {
-        ArgumentNullException.ThrowIfNull(db);
-        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(resourcePolicyInformationRepository);
 
-        _db = db;
-        _logger = logger;
+        _resourcePolicyInformationRepository = resourcePolicyInformationRepository;
     }
 
     public async Task<int> GetMinimumAuthenticationLevel(string serviceResource, CancellationToken cancellationToken)
     {
-        var minimumAuthenticationLevel = await _db.ResourcePolicyInformation
-            .AsNoTracking()
-            .Where(x => x.Resource == serviceResource)
-            .Select(x => (int?)x.MinimumAuthenticationLevel)
-            .FirstOrDefaultAsync(cancellationToken);
+        var minimumAuthenticationLevels = await GetMinimumAuthenticationLevels([serviceResource], cancellationToken);
+        return minimumAuthenticationLevels[serviceResource];
+    }
 
-        if (minimumAuthenticationLevel is not null)
+    public async Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(
+        IReadOnlyCollection<string> serviceResources,
+        CancellationToken cancellationToken)
+    {
+        var requestedResources = serviceResources
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (requestedResources.Count == 0)
         {
-            return minimumAuthenticationLevel.Value;
+            return new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
-        _logger.LogWarning(
-            "Could not find resource policy information for resource {ServiceResource}, " +
-            "falling back to default minimum authentication level {DefaultMinimumAuthenticationLevel}",
-            serviceResource,
-            DefaultMinimumAuthenticationLevel);
+        var fetchedMinimumAuthenticationLevels = await _resourcePolicyInformationRepository
+            .GetMinimumAuthenticationLevels(cancellationToken);
 
-        return DefaultMinimumAuthenticationLevel;
+        var minimumAuthenticationLevels = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var serviceResource in requestedResources)
+        {
+            if (fetchedMinimumAuthenticationLevels.TryGetValue(serviceResource, out var minimumAuthenticationLevel))
+            {
+                minimumAuthenticationLevels[serviceResource] = minimumAuthenticationLevel;
+                continue;
+            }
+
+            // We used to log this as a warning, but as this is hit by the service resource metadata endpoint, the
+            // logs might get spammed with lots of warnings if the cache is stale. Currently, the policy information
+            // is only updated once every 24 hours so we drop logging here for now.
+
+            minimumAuthenticationLevels[serviceResource] = DefaultMinimumAuthenticationLevel;
+        }
+
+        return minimumAuthenticationLevels;
     }
 }

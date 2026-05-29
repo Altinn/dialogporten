@@ -68,6 +68,7 @@ public class GetServiceResourceMetadataTests(DialogApplication application) : Ap
 
         var item = result.Items.Should().ContainSingle(x => x.ServiceResource.Id == unprefixedServiceResource).Subject;
         item.ServiceResource.MinimumAuthenticationLevel.Should().Be(4);
+        item.ServiceResource.Links.Should().NotBeNull();
         item.ServiceResource.Links.Metadata.Should().Be("https://platform.example/resourceregistry/api/v1/resource/test-service-metadata");
         item.Roles.Should().ContainSingle(x => x.Urn == roleSubject);
         item.AccessPackages.Should().ContainSingle(x => x.Urn == accessPackageSubject);

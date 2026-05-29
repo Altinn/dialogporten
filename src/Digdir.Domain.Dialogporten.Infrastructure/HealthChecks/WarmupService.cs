@@ -184,10 +184,17 @@ internal sealed partial class WarmupService : IHostedService
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    private static async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
+    private async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
-        var sender = services.GetRequiredService<ISender>();
-        await sender.Send(new GetServiceResourceMetadataQuery(), cancellationToken);
+        try
+        {
+            var sender = services.GetRequiredService<ISender>();
+            await sender.Send(new GetServiceResourceMetadataQuery(), cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        {
+            ServiceResourceMetadataWarmupFailed(_logger, ex);
+        }
     }
 
     private async Task WarmupEndUserSearchAsync(IServiceProvider services, CancellationToken cancellationToken)
@@ -240,6 +247,9 @@ internal sealed partial class WarmupService : IHostedService
 
     [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "End-user search warmup failed for PID {EndUserPid}; readiness will not be failed by this optional phase.")]
     private static partial void EndUserSearchFailed(ILogger logger, string endUserPid, Exception exception);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Warning, Message = "Service resource metadata warmup failed; readiness will not be failed by this optional phase.")]
+    private static partial void ServiceResourceMetadataWarmupFailed(ILogger logger, Exception exception);
 }
 
 internal enum WarmupStatus

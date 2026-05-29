@@ -35,7 +35,7 @@ internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServi
     public async Task<int> GetMinimumAuthenticationLevel(string serviceResource, CancellationToken cancellationToken)
     {
         var minimumAuthenticationLevels = await GetMinimumAuthenticationLevels([serviceResource], cancellationToken);
-        return minimumAuthenticationLevels[serviceResource];
+        return minimumAuthenticationLevels.GetValueOrDefault(serviceResource, DefaultMinimumAuthenticationLevel);
     }
 
     public async Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(

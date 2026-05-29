@@ -196,6 +196,29 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public Task Past_VisibleFrom_Should_Not_Backdate_Timestamps_On_Create()
+    {
+        var fixedUtcNow = new DateTimeOffset(2024, 6, 1, 12, 0, 0, TimeSpan.Zero);
+        var visibleFrom = fixedUtcNow.AddDays(-3);
+
+        return FlowBuilder.For(Application)
+            .OverrideUtc(fixedUtcNow)
+            .AsAdminUser()
+            .CreateSimpleDialog((x, _) => x.Dto.VisibleFrom = visibleFrom)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+            {
+                dialog.VisibleFrom.Should().BeCloseTo(visibleFrom, TimeSpan.FromSeconds(1));
+                dialog.CreatedAt.Should().BeCloseTo(fixedUtcNow, TimeSpan.FromSeconds(1));
+                dialog.UpdatedAt.Should().BeCloseTo(fixedUtcNow, TimeSpan.FromSeconds(1));
+                dialog.ContentUpdatedAt.Should().BeCloseTo(fixedUtcNow, TimeSpan.FromSeconds(1));
+                dialog.CreatedAt.Should().NotBe(dialog.VisibleFrom);
+                dialog.UpdatedAt.Should().NotBe(dialog.VisibleFrom);
+                dialog.ContentUpdatedAt.Should().NotBe(dialog.VisibleFrom);
+            });
+    }
+
+    [Fact]
     public Task Cannot_Create_DueAt_Before_VisibleFrom_Without_Admin_Scope()
     {
         var visibleFrom = DateTimeOffset.UtcNow.AddDays(10);

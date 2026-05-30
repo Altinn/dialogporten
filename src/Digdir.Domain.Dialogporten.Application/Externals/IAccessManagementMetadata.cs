@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals;
@@ -21,8 +22,3 @@ public sealed record AccessManagementAccessPackageMetadata(
     string Urn,
     IReadOnlyList<LocalizationDto> Name,
     LinkDto Links);
-
-public sealed record LinkDto
-{
-    public required string Metadata { get; init; }
-}

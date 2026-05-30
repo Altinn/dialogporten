@@ -143,7 +143,7 @@
           "Correction"
         ]
       },
-      "DigdirDomainDialogportenApplicationExternals_Link": {
+      "DigdirDomainDialogportenApplicationCommon_Link": {
         "additionalProperties": false,
         "properties": {
           "metadata": {
@@ -562,7 +562,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
+                "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
               }
             ]
           },
@@ -2721,7 +2721,7 @@
         "additionalProperties": false,
         "properties": {
           "links": {
-            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
           },
           "name": {
             "items": {
@@ -2766,7 +2766,7 @@
         "additionalProperties": false,
         "properties": {
           "links": {
-            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
           },
           "name": {
             "items": {
@@ -2810,7 +2810,7 @@
             "type": "boolean"
           },
           "links": {
-            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
           },
           "minimumAuthenticationLevel": {
             "format": "int32",

@@ -12,7 +12,7 @@ public sealed class MappingProfile : Profile
         CreateMap<IdentifierLookupServiceOwnerDto, DialogLookupServiceOwner>();
         CreateMap<IdentifierLookupAuthorizationEvidenceDto, DialogLookupAuthorizationEvidence>();
         CreateMap<IdentifierLookupAuthorizationEvidenceItemDto, DialogLookupAuthorizationEvidenceItem>();
-        CreateMap<Digdir.Domain.Dialogporten.Application.Externals.LinkDto, DialogLookupLinks>();
+        CreateMap<Digdir.Domain.Dialogporten.Application.Common.LinkDto, DialogLookupLinks>();
         CreateMap<IdentifierLookupGrantType, DialogLookupGrantType>();
     }
 }

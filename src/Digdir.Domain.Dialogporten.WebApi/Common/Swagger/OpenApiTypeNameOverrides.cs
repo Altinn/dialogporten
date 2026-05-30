@@ -19,7 +19,7 @@ internal static class OpenApiTypeNameOverrides
         ["DialogsEntitiesActions_DialogGuiActionPriority"] = "DialogGuiActionPriority",
         ["DialogsEntitiesActivities_DialogActivityType"] = "DialogActivityType",
         ["DialogsEntitiesTransmissions_DialogTransmissionType"] = "DialogTransmissionType",
-        ["DigdirDomainDialogportenApplicationExternals_Link"] = "Links",
+        ["DigdirDomainDialogportenApplicationCommon_Link"] = "Links",
         ["Http_HttpVerb"] = "HttpVerb",
         ["ProblemDetails_Error"] = "ProblemDetailsError",
         ["V1CommonContent_ContentValue"] = "ContentValue",

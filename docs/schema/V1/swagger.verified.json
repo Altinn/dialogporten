@@ -143,6 +143,15 @@
           "Correction"
         ]
       },
+      "DigdirDomainDialogportenApplicationExternals_Link": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Http_HttpVerb": {
         "description": "",
         "enum": [
@@ -214,15 +223,6 @@
           "Test",
           "Invalid"
         ]
-      },
-      "Links": {
-        "additionalProperties": false,
-        "properties": {
-          "metadata": {
-            "type": "string"
-          }
-        },
-        "type": "object"
       },
       "PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,
@@ -366,128 +366,6 @@
           },
           "severity": {
             "nullable": true,
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "ServiceResource": {
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "isDelegable": {
-            "type": "boolean"
-          },
-          "links": {
-            "$ref": "#/components/schemas/Links"
-          },
-          "minimumAuthenticationLevel": {
-            "format": "int32",
-            "type": "integer"
-          },
-          "name": {
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "ServiceResourceAccessPackage": {
-        "additionalProperties": false,
-        "properties": {
-          "links": {
-            "$ref": "#/components/schemas/Links"
-          },
-          "name": {
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "urn": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "ServiceResourceMetadata": {
-        "additionalProperties": false,
-        "properties": {
-          "accessPackages": {
-            "items": {
-              "$ref": "#/components/schemas/ServiceResourceAccessPackage"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "roles": {
-            "items": {
-              "$ref": "#/components/schemas/ServiceResourceRole"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceOwner": {
-            "$ref": "#/components/schemas/ServiceResourceOwner"
-          },
-          "serviceResource": {
-            "$ref": "#/components/schemas/ServiceResource"
-          }
-        },
-        "type": "object"
-      },
-      "ServiceResourceMetadataList": {
-        "additionalProperties": false,
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/ServiceResourceMetadata"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "ServiceResourceOwner": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "orgNumber": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "ServiceResourceRole": {
-        "additionalProperties": false,
-        "properties": {
-          "links": {
-            "$ref": "#/components/schemas/Links"
-          },
-          "name": {
-            "items": {
-              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "urn": {
             "type": "string"
           }
         },
@@ -684,7 +562,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/Links"
+                "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
               }
             ]
           },
@@ -2822,6 +2700,128 @@
           "maxServiceResourceFilterValues": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem": {
+        "additionalProperties": false,
+        "properties": {
+          "accessPackages": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationExternals_Link"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -8494,7 +8494,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServiceResourceMetadataList"
+                  "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata"
                 }
               }
             },

@@ -1,0 +1,13 @@
+# Locked dependencies for .github/scripts/check-keyvault-expiry.py.
+# Used with `pip install --require-hashes -r requirements.txt` so a compromised
+# PyPI cannot substitute a different wheel for the same version.
+#
+# Hashes cover linux x86_64 manylinux wheels for CPython 3.10 - 3.13 (the
+# runtimes likely to be present on github-hosted ubuntu-latest). Sdist is
+# intentionally excluded because the workflow uses --only-binary :all:.
+# To regenerate: curl -s https://pypi.org/pypi/pyyaml/<ver>/json | jq '.urls'
+pyyaml==6.0.2 \
+    --hash=sha256:ec031d5d2feb36d1d1a24380e4db6d43695f3748343d99434e6f5f9156aaa2ed \
+    --hash=sha256:3ad2a3decf9aaba3d29c8f537ac4b243e36bef957511b4766cb0057d32b0be85 \
+    --hash=sha256:80bab7bfc629882493af4aa31a4cfa43a4c57c83813253626916b8c7ada83476 \
+    --hash=sha256:70b189594dbe54f75ab3a1acec5f1e3faa7e8cf2f1e08d9b561cb41b845f69d5

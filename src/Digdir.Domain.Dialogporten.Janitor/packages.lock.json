@@ -118,9 +118,9 @@
       },
       "Parquet.Net": {
         "type": "Direct",
-        "requested": "[6.0.2, )",
-        "resolved": "6.0.2",
-        "contentHash": "d16gYIequd6B+oltL1lIIf7l/l1gwLmMoaWxx2IV/RN1fykwD9nlPIYFDD/eZbV5aMn8w/ICMMqU0Yn189YHMQ==",
+        "requested": "[6.0.3, )",
+        "resolved": "6.0.3",
+        "contentHash": "2PvsvAVkLsiWH+Y+XIK1Rl3pZSmC8PAH+Q6PwVOahujG89IbpxGS5YdZJ9dqOaXAEPJLlDX+TxjNzcDdSeMvBw==",
         "dependencies": {
           "CommunityToolkit.HighPerformance": "8.4.2",
           "K4os.Compression.LZ4": "1.3.8",
@@ -337,8 +337,8 @@
       },
       "Dapper": {
         "type": "Transitive",
-        "resolved": "2.1.72",
-        "contentHash": "ns4mGqQd9a/MhP8m6w556vVlZIa0/MfUu03zrxjZC/jlr1uVCsUac8bkdB+Fs98Llbd56rRSo1eZH5VVmeGZyw=="
+        "resolved": "2.1.79",
+        "contentHash": "8YijbzgTfmqmQOnVNorYM6K++pxqnW3nJ4aC1sRHzxUA2CcuoJ9gsTem3kgBnPRMc38zZHl4Esb6hAezXIEEuw=="
       },
       "DeterministicGuids": {
         "type": "Transitive",
@@ -1678,7 +1678,7 @@
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
-          "Dapper": "[2.1.72, )",
+          "Dapper": "[2.1.79, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
           "EntityFrameworkCore.Exceptions.PostgreSQL": "[8.1.3, )",

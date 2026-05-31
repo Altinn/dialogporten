@@ -79,7 +79,7 @@ public static class Mappers
             RelatedTransmissionId = source.RelatedTransmissionId,
             TypeId = source.Type,
             Sender = source.Sender.ToActor<DialogTransmissionSenderActor>(),
-            Content = source.Content.ToDialogTransmissionContentList([]) ?? [],
+            Content = source.Content.ToDialogTransmissionContentList() ?? [],
             Attachments = source.Attachments.Select(x => x.ToDialogTransmissionAttachment()).ToList(),
             NavigationalActions = source.NavigationalActions.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList()
         };

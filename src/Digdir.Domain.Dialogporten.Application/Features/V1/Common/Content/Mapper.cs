@@ -66,7 +66,7 @@ internal static class DialogContentDtoMapExtensions
     extension<TContentDto>(TContentDto? source)
         where TContentDto : class, IDialogContentDto
     {
-        internal List<DialogContent>? ToDialogContentList(List<DialogContent>? destinations)
+        internal List<DialogContent>? ToDialogContentList(List<DialogContent>? destinations = null)
         {
             if (source is null)
             {
@@ -142,7 +142,7 @@ internal static class TransmissionContentDtoMapExtensions
         where TContentDto : class, ITransmissionContentDto
     {
         internal List<DialogTransmissionContent>? ToDialogTransmissionContentList(
-            List<DialogTransmissionContent>? destinations)
+            List<DialogTransmissionContent>? destinations = null)
         {
             if (source is null)
             {

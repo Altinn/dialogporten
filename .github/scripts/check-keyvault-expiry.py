@@ -15,8 +15,11 @@ Reads:
 Writes:
   - slack-{nonprod,prod,prod-critical}.json: chat.postMessage payloads, one per channel
     that has something to report.
+  - slack-{nonprod,prod}-digest.json: a full overview of every tracked secret expiry (no
+    @mention), written when $SEND_DIGEST is true or it's the 1st of the month. Informational
+    only — does not affect the run's pass/fail.
   - $GITHUB_STEP_SUMMARY: markdown table (tier, secret, expires, days left).
-  - $GITHUB_OUTPUT: `any_rule_tripped` + per-channel `have_*_payload` flags.
+  - $GITHUB_OUTPUT: `any_rule_tripped` + per-channel `have_*_payload` / `have_*_digest` flags.
 
 Per-finding routing by days until expiry: 8-30 -> no mention; 2-7 -> @here;
 <=1 or expired -> @channel (prod also cross-posts to the prod-critical channel).
@@ -38,6 +41,7 @@ MONITORED_FILE = pathlib.Path(os.environ["MONITORED_SECRETS_FILE"])
 SECRETS_DIR = pathlib.Path(os.environ["SECRETS_DIR"])
 RUN_URL = os.environ.get("GITHUB_RUN_URL", "")
 RUNBOOK_URL = os.environ.get("RUNBOOK_URL", "")
+SEND_DIGEST = os.environ.get("SEND_DIGEST", "").lower() == "true"
 EXPECTED_TIERS = json.loads(os.environ.get("EXPECTED_TIERS_JSON", "[]"))
 STEP_SUMMARY = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
 STEP_OUTPUT = pathlib.Path(os.environ["GITHUB_OUTPUT"])
@@ -72,6 +76,32 @@ def days_phrase(days: int) -> str:
 
 def tier_icon(tier: int) -> str:
     return {1: ":large_yellow_circle:", 2: ":large_orange_diamond:", 3: ":red_circle:"}[tier]
+
+
+def status_icon(days_left: int) -> str:
+    tier = classify_tier(days_left)
+    return tier_icon(tier) if tier is not None else ":large_green_circle:"
+
+
+def footer_blocks() -> list[dict]:
+    """Runbook button + workflow-run link, shared by alert and digest payloads."""
+    blocks: list[dict] = []
+    if RUNBOOK_URL:
+        blocks.append({
+            "type": "actions",
+            "elements": [{
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Open rotation runbook"},
+                "url": RUNBOOK_URL,
+                "style": "primary",
+            }],
+        })
+    if RUN_URL:
+        blocks.append({
+            "type": "context",
+            "elements": [{"type": "mrkdwn", "text": f"<{RUN_URL}|View workflow run>"}],
+        })
+    return blocks
 
 
 def load_monitored() -> set[str]:
@@ -202,24 +232,31 @@ def build_blocks(
             },
         })
 
-    if RUNBOOK_URL:
-        blocks.append({
-            "type": "actions",
-            "elements": [{
-                "type": "button",
-                "text": {"type": "plain_text", "text": "Open rotation runbook"},
-                "url": RUNBOOK_URL,
-                "style": "primary",
-            }],
-        })
-
-    if RUN_URL:
-        blocks.append({
-            "type": "context",
-            "elements": [{"type": "mrkdwn", "text": f"<{RUN_URL}|View workflow run>"}],
-        })
-
+    blocks.extend(footer_blocks())
     return blocks
+
+
+def build_digest_payload(findings: list[dict], header_suffix: str = "") -> dict:
+    """Informational monthly overview: every tracked secret with an expiry, soonest first,
+    colour-coded by runway. No @mention; does not affect the run's pass/fail."""
+    rows = [
+        f"{status_icon(f['days'])} *{f['tier']}* `{f['name']}` "
+        f"— {days_phrase(f['days'])} (expires {f['expires'][:10]})"
+        for f in sorted(findings, key=lambda x: (x["days"], x["tier"], x["name"]))
+    ]
+    body = "\n".join(rows) if rows else "_No secrets with an expiry set._"
+    blocks = [
+        {"type": "header",
+         "text": {"type": "plain_text", "text": f"Key Vault secret expiry digest{header_suffix}"}},
+        {"type": "section",
+         "text": {"type": "mrkdwn", "text": f"Monthly overview of tracked secret expiries:\n{body}"}},
+    ]
+    blocks.extend(footer_blocks())
+    return {
+        "channel": CHANNEL_PLACEHOLDER,
+        "text": f"Key Vault secret expiry digest{header_suffix}",
+        "blocks": blocks,
+    }
 
 
 def mention_for(alerted: list[dict], missing: list[dict], missing_tiers: list[str]) -> str:
@@ -354,6 +391,18 @@ def main() -> int:
             build_payload(prod_tier3, [], [], header_suffix=" — PROD CRITICAL"),
         )
 
+    # Monthly digest: a full overview of every tracked expiry, sent on the 1st (or on demand
+    # via SEND_DIGEST). Independent of the alert rules — never flips the run to failed.
+    digest_mode = SEND_DIGEST or datetime.now(timezone.utc).day == 1
+    nonprod_findings = [f for f in expiry_findings if not is_prod(f["tier"])]
+    prod_findings = [f for f in expiry_findings if is_prod(f["tier"])]
+    have_nonprod_digest = digest_mode and bool(nonprod_findings)
+    have_prod_digest = digest_mode and bool(prod_findings)
+    if have_nonprod_digest:
+        write_payload("slack-nonprod-digest.json", build_digest_payload(nonprod_findings, " (non-prod)"))
+    if have_prod_digest:
+        write_payload("slack-prod-digest.json", build_digest_payload(prod_findings, " (prod)"))
+
     STEP_SUMMARY.write_text(render_step_summary(expiry_findings, missing, present_tiers, missing_tiers))
 
     any_rule_tripped = bool(alerted or missing or missing_tiers)
@@ -362,6 +411,8 @@ def main() -> int:
         out.write(f"have_nonprod_payload={'true' if (nonprod_alerted or nonprod_missing or nonprod_missing_tiers) else 'false'}\n")
         out.write(f"have_prod_payload={'true' if (prod_alerted or prod_missing or prod_missing_tiers) else 'false'}\n")
         out.write(f"have_prod_critical_payload={'true' if prod_tier3 else 'false'}\n")
+        out.write(f"have_nonprod_digest={'true' if have_nonprod_digest else 'false'}\n")
+        out.write(f"have_prod_digest={'true' if have_prod_digest else 'false'}\n")
 
     print(
         f"Findings: {len(alerted)} expiring, {len(missing)} configuration issues "

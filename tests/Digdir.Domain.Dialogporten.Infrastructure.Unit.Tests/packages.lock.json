@@ -41,8 +41,8 @@
       },
       "Altinn.ApiClients.Maskinporten": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "8rBC3rvIPuTat66JmvlEk2Yfl/vQysJNYwyuq0Gzn2IXucRGM9qitQFS82qwbtpco86zFAWTYG2tvtckuCHXiA==",
+        "resolved": "10.0.2-alpha",
+        "contentHash": "GUQAR5Cb/TqXacrmbFJvdOWsGR4IiR2CZ5phYvAtNartvpZYTENVRE37Qm9Nz9DSzfxjDUlmvo8c5x8H4ToR2w==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.2",
           "Microsoft.Extensions.Caching.Memory": "10.0.2",
@@ -1113,7 +1113,7 @@
       "digdir.domain.dialogporten.infrastructure": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
+          "Altinn.ApiClients.Maskinporten": "[10.0.2-alpha, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
           "Dapper": "[2.1.79, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",

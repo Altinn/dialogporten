@@ -52,7 +52,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="9.2.1-next.20260528.47" />
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.0.2-alpha" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="Refit" Version="10.2.0" />
@@ -84,13 +84,21 @@
                     return true;
                 }
 
-                const string requestPropertyParameter = "[Property] object? requestProperties = null";
+                const string usingLine = "using Altinn.ApiClients.Maskinporten.Models;";
+                const string requestPropertyParameter = "[Property(\"Altinn.ApiClients.Maskinporten.TokenRequestContext\")] MaskinportenTokenRequestContext? requestContext = null";
                 var original = File.ReadAllText(GeneratedFile);
+                var updated = original;
 
-                var updated = Regex.Replace(
-                    original,
-                    @"^(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);$",
-                    "${method}CancellationToken cancellationToken = default, " + requestPropertyParameter + ");",
+                if (updated.IndexOf(usingLine, StringComparison.Ordinal) < 0)
+                {
+                    updated = updated.Replace("using Refit;\n", "using Refit;\n" + usingLine + "\n");
+                }
+
+                updated = updated.Replace(", [Property] object? requestProperties = null", string.Empty);
+                updated = Regex.Replace(
+                    updated,
+                    @"^(?!.*MaskinportenTokenRequestContext\? requestContext)(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);$",
+                    "${method}" + requestPropertyParameter + ", CancellationToken cancellationToken = default);",
                     RegexOptions.Multiline);
 
                 if (!string.Equals(original, updated, StringComparison.Ordinal))

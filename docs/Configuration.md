@@ -138,3 +138,24 @@ There are two conventions, one that targets a specific environment, and one "any
 
 ## 4.2. How to
 Instruct your friendly secrets manager to modify the desired key value pair in the source key vault before merging your pull request to the main branch.
+
+## 4.3. Secret expiry and rotation
+Expiring external secrets (Maskinporten JWKs, certificates, vendor keys) are monitored by the daily `Check Key Vault secret expiry` workflow (`.github/workflows/check-keyvault-secret-expiry.yml`). It reads `attributes.expires` on the **source** key vault secrets and alerts to Slack as expiry approaches (30 / 7 / 1 days out), plus a full overview digest on the 1st of each month.
+
+Conventions:
+
+- **Set `attributes.expires` on the source secret to the credential's actual expiry date** (a Maskinporten key's `valid_until` from Samarbeidsportalen, or a certificate's `notAfter`). The workflow warns ahead of expiry on its own, so enter the real date rather than an earlier reminder date.
+- **Set the date only on the source secret.** `copySecrets.bicep` copies a secret's value into each environment key vault but not its attributes, so the environment-vault copies have no expiry date by design. Only the source secrets are monitored; leave the environment-vault copies as they are.
+- **Watch-listed secrets must have an expiry.** Any secret named in `.github/keyvault-expiry-monitored-secrets.yml` is required to have `attributes.expires` set; if one is missing it, the workflow flags it in Slack.
+
+### Maskinporten clients
+There are two Maskinporten clients: one shared by `test`, `yt01` and `staging` (via the non-prod source key vault), and one for `prod`. A client can hold several registered JWKs at once; the JWT `kid` header in the signed assertion tells Maskinporten which registered key to validate against. This is what makes a no-downtime rotation possible: register the new key alongside the old one, switch over, then remove the old one (see below).
+
+### Rotating a Maskinporten JWK
+1. Obtain the new key and register its JWK on the Maskinporten client. Keep the old key registered until the new one is verified (overlap window).
+2. Update the source secret value and set `attributes.expires` to the new key's `valid_until`.
+3. Deploy the affected environment(s) so `copySecrets` propagates the new value, then restart the apps so they reload the key (it is read at startup via an app-config Key Vault reference).
+4. Verify the apps authenticate with the new key: no `invalid_grant`, and a successful Maskinporten token call visible in Application Insights.
+5. Deregister the old key from the client once nothing uses it.
+
+See the rotation runbook for step-by-step detail: <https://digdir.atlassian.net/wiki/x/QIDDAgE>

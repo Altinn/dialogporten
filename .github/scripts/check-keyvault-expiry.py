@@ -80,10 +80,22 @@ def load_monitored() -> set[str]:
 
 
 def matches_monitored(secret_name: str, canonical_key: str) -> bool:
-    """True if a source secret name is the canonical key, with or without the
-    `dialogporten--(any|<env>)--` source prefix. The `--` separator stops `Jwk`
-    from matching `EncodedJwk`."""
-    return secret_name == canonical_key or secret_name.endswith(f"--{canonical_key}")
+    """True if a source secret is the monitored canonical key, optionally carrying a
+    single documented source prefix: `dialogporten--<env>--` or `dialogporten--any--`
+    (Configuration.md). Names with extra leading segments, or without the dialogporten
+    prefix, are rejected so an unrelated secret that merely ends with the key cannot
+    satisfy the rule."""
+    if secret_name == canonical_key:
+        return True
+    suffix = f"--{canonical_key}"
+    if not secret_name.endswith(suffix):
+        return False
+    prefix = secret_name[: -len(suffix)]
+    if not prefix.startswith("dialogporten--"):
+        return False
+    env = prefix[len("dialogporten--"):]
+    # the env segment must be exactly one `--`-delimited token (e.g. any, test, yt01)
+    return env != "" and "--" not in env
 
 
 def collect_findings() -> tuple[list[dict], list[dict], list[str]]:

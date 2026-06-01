@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.115.6](https://github.com/Altinn/dialogporten/compare/v1.115.5...v1.115.6) (2026-06-01)
+
+
+### Bug Fixes
+
+* don't match dates to visibleFrom unless in future ([#4025](https://github.com/Altinn/dialogporten/issues/4025)) ([20d5ba4](https://github.com/Altinn/dialogporten/commit/20d5ba49b3e7d2c91dcbff94b27aa9a90d2b24e7))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency pyyaml to v6.0.3 ([#4017](https://github.com/Altinn/dialogporten/issues/4017)) ([fdc58b2](https://github.com/Altinn/dialogporten/commit/fdc58b2dfce2255fdbd1bdbd031aa0ba288892a4))
+* **deps:** update dependency testcontainers.postgresql to 4.12.0 ([#4031](https://github.com/Altinn/dialogporten/issues/4031)) ([846c388](https://github.com/Altinn/dialogporten/commit/846c3882b7f7b7f1982195430403ea1cc05603f1))
+* **deps:** update dependency verify.xunitv3 to 31.17.0 ([#4032](https://github.com/Altinn/dialogporten/issues/4032)) ([64febb0](https://github.com/Altinn/dialogporten/commit/64febb096352f7f5d145d2d1cd549805279ce73d))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.152.1 ([#4029](https://github.com/Altinn/dialogporten/issues/4029)) ([c8886b0](https://github.com/Altinn/dialogporten/commit/c8886b062f339994cd360a74af687b421e986ad2))
+* **deps:** update step-security/harden-runner action to v2.19.4 ([#4030](https://github.com/Altinn/dialogporten/issues/4030)) ([e451bcb](https://github.com/Altinn/dialogporten/commit/e451bcbcd88008f43a947f512cd668bab3da3db9))
+
 ## [1.115.5](https://github.com/Altinn/dialogporten/compare/v1.115.4...v1.115.5) (2026-05-27)
 
 

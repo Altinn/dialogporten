@@ -251,7 +251,9 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
         {
             Duration = TimeSpan.FromHours(6),
-            FailSafeMaxDuration = TimeSpan.FromHours(6)
+            // Min auth level is on the authorization hot path; keep stale-but-known data usable well past
+            // Duration so the cache can still serve if ResourcePolicyInformation queries start failing.
+            FailSafeMaxDuration = TimeSpan.FromHours(24)
         })
         .ConfigureFusionCache(AccessManagementMetadataClient.CacheName, new()
         {

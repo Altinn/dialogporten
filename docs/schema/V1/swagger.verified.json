@@ -2704,6 +2704,20 @@
         },
         "type": "object"
       },
+      "V1MetadataServiceResourcesGet_ServiceResourceMetadataRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata": {
         "additionalProperties": false,
         "properties": {
@@ -8489,6 +8503,20 @@
       "get": {
         "description": "Returns public service resource metadata with related service owner, role, and access package metadata.",
         "operationId": "V1MetadataServiceResourcesGet_ServiceResourceMetadata",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {

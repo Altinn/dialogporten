@@ -2134,6 +2134,20 @@
         },
         "type": "object"
       },
+      "GetServiceResourceMetadataRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "HttpVerb": {
         "description": "",
         "enum": [
@@ -4119,6 +4133,20 @@
       "get": {
         "description": "Returns public service resource metadata with related service owner, role, and access package metadata.",
         "operationId": "GetServiceResourceMetadata",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {

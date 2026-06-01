@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
 using MediatR;
 
@@ -10,7 +9,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Metadata.ServiceResourc
 
 [OpenApiOperationId("GetServiceResourceMetadata")]
 public sealed class GetServiceResourceMetadataEndpoint
-    : EndpointWithoutRequest<GetServiceResourceMetadataDto>
+    : Endpoint<GetServiceResourceMetadataRequest, GetServiceResourceMetadataDto>
 {
     private readonly ISender _sender;
 
@@ -24,25 +23,25 @@ public sealed class GetServiceResourceMetadataEndpoint
     public override void Configure()
     {
         Get("metadata/serviceresources");
-        PreProcessor<RequireJsonAcceptPreProcessor>();
         Group<MetadataGroup>();
 
         Description(b => b.ProducesOneOf<GetServiceResourceMetadataDto>(StatusCodes.Status200OK));
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(GetServiceResourceMetadataRequest req, CancellationToken ct)
     {
-        var acceptedLanguages = AcceptedLanguages.TryParse(
-            HttpContext.Request.Headers[Constants.AcceptLanguage],
-            out var parsedAcceptedLanguages)
-            ? parsedAcceptedLanguages
-            : new AcceptedLanguages([]);
-
         var result = await _sender.Send(new GetServiceResourceMetadataQuery
         {
-            AcceptedLanguages = acceptedLanguages.AcceptedLanguage
+            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
         }, ct);
 
         await Send.OkAsync(result, ct);
     }
+}
+
+[OpenApiTypeName(nameof(GetServiceResourceMetadataRequest))]
+public sealed class GetServiceResourceMetadataRequest
+{
+    [FromHeader(Constants.AcceptLanguage, isRequired: false)]
+    public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
 }

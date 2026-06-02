@@ -1,8 +1,8 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Repositories;
 
@@ -14,23 +14,15 @@ public class SubjectResourceRepositoryTests(DialogApplication application) : App
     {
         var suffix = Guid.NewGuid().ToString("N");
         var referencedResource = $"urn:altinn:resource:referenced-{suffix}";
-        var unprefixedReferencedResource = $"referenced-{suffix}";
         var unreferencedResource = $"urn:altinn:resource:unreferenced-{suffix}";
         const string subject = "urn:altinn:rolecode:DIALOG_READ";
 
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = referencedResource)
+            .ExecuteAsync();
+
         using (var scope = Application.GetServiceProvider().CreateScope())
         {
-            var dataSource = scope.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-            await using var connection = await dataSource.OpenConnectionAsync(TestContext.Current.CancellationToken);
-            await using var command = connection.CreateCommand();
-            command.CommandText =
-                """
-                INSERT INTO partyresource."Resource" ("UnprefixedResourceIdentifier")
-                VALUES (@resource);
-                """;
-            command.Parameters.AddWithValue("resource", unprefixedReferencedResource);
-            await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
-
             var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
             db.SubjectResources.AddRange(
                 new()

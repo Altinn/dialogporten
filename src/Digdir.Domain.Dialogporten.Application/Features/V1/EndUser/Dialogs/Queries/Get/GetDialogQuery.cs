@@ -244,7 +244,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
 
-        dialog.FilterLocalizations(request.AcceptedLanguages);
+        dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 

@@ -244,6 +244,108 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
     }
 
+    /// <summary>Gets the OAuth 2.0 Metadata for automatic configuration of clients verifying dialog tokens</summary>
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
+    public partial interface IMetadataApi
+    {
+        /// <summary>Gets the OAuth 2.0 Metadata for automatic configuration of clients verifying dialog tokens</summary>
+        /// <remarks>This endpoint can be used by client integrations supporting automatic discovery of "OAuth 2.0 Authorization Server" metadata, enabling verification of dialog tokens issued by Dialogporten.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>The OAuth 2.0 Authorization Server Metadata</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/.well-known/oauth-authorization-server")]
+        Task<IApiResponse<V1WellKnownOauthAuthorizationServerQueriesGet_OauthAuthorizationServer>> V1WellKnownOauthAuthorizationServerGetOauthAuthorizationServer(CancellationToken cancellationToken = default);
+
+        /// <summary>Gets the JSON Web Key Set (JWKS) containing the public keys used to verify dialog token signatures</summary>
+        /// <remarks>This endpoint can be used by client integrations supporting automatic discovery of "OAuth 2.0 Authorization Server" metadata, enabling verification of dialog tokens issued by Dialogporten.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>The OAuth 2.0 Authorization Server Metadata</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/.well-known/jwks.json")]
+        Task<IApiResponse<V1WellKnownJwksQueriesGet_Jwks>> V1WellKnownJwksGetJwks(CancellationToken cancellationToken = default);
+
+        /// <summary>Gets service resources currently in use in Dialogporten.</summary>
+        /// <remarks>Returns public service resource metadata with related service owner, role, and access package metadata.</remarks>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Service resource metadata.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/serviceresources")]
+        Task<IApiResponse<V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata>> V1MetadataServiceResourcesGetServiceResourceMetadata([Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets currently enforced application-level query limits</summary>
+        /// <remarks>Returns the active limits for EndUser and ServiceOwner search filters.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>The currently enforced application-level query limits.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/limits")]
+        Task<IApiResponse<V1MetadataLimitsQueriesGet_Limits>> V1MetadataLimitsGetLimits(CancellationToken cancellationToken = default);
+    }
+
     /// <summary>Retrieve service owner labels for a dialog.</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IServiceownerApi
@@ -1540,6 +1642,51 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     using System = global::System;
 
     
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1WellKnownOauthAuthorizationServerQueriesGet_OauthAuthorizationServer
+    {
+
+        [JsonPropertyName("issuer")]
+        public string Issuer { get; set; }
+
+        [JsonPropertyName("jwks_uri")]
+        public string JwksUri { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1WellKnownJwksQueriesGet_Jwks
+    {
+
+        [JsonPropertyName("keys")]
+        public ICollection<V1WellKnownJwksQueriesGet_Jwk> Keys { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1WellKnownJwksQueriesGet_Jwk
+    {
+
+        [JsonPropertyName("kty")]
+        public string Kty { get; set; }
+
+        [JsonPropertyName("use")]
+        public string Use { get; set; }
+
+        [JsonPropertyName("kid")]
+        public string Kid { get; set; }
+
+        [JsonPropertyName("crv")]
+        public string Crv { get; set; }
+
+        [JsonPropertyName("x")]
+        public string X { get; set; }
+
+        [JsonPropertyName("alg")]
+        public string Alg { get; set; }
+
+    }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel
@@ -5837,6 +5984,153 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("weight")]
         public int Weight { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata
+    {
+
+        [JsonPropertyName("items")]
+        public ICollection<V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem> Items { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem
+    {
+
+        [JsonPropertyName("serviceResource")]
+        public V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource ServiceResource { get; set; }
+
+        [JsonPropertyName("roles")]
+        public ICollection<V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole> Roles { get; set; }
+
+        [JsonPropertyName("accessPackages")]
+        public ICollection<V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage> AccessPackages { get; set; }
+
+        [JsonPropertyName("serviceOwner")]
+        public V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner ServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource
+    {
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public DigdirDomainDialogportenApplicationCommon_Link Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class DigdirDomainDialogportenApplicationCommon_Link
+    {
+
+        [JsonPropertyName("metadata")]
+        public string Metadata { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole
+    {
+
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public DigdirDomainDialogportenApplicationCommon_Link Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage
+    {
+
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public DigdirDomainDialogportenApplicationCommon_Link Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner
+    {
+
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<V1CommonLocalizations_Localization> Name { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataLimitsQueriesGet_Limits
+    {
+
+        [JsonPropertyName("endUserSearch")]
+        public V1MetadataLimitsQueriesGet_EndUserSearchLimits EndUserSearch { get; set; }
+
+        [JsonPropertyName("serviceOwnerSearch")]
+        public V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataLimitsQueriesGet_EndUserSearchLimits
+    {
+
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; }
+
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; }
+
+        [JsonPropertyName("maxOrgFilterValues")]
+        public int MaxOrgFilterValues { get; set; }
+
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits
+    {
+
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; }
+
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; }
+
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; }
 
     }
 

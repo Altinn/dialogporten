@@ -1,10 +1,10 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Metadata.ServiceResources.Queries.Get;
 
@@ -19,19 +19,12 @@ public class GetServiceResourceMetadataTests(DialogApplication application) : Ap
         const string roleSubject = "urn:altinn:rolecode:DIALOG_READ";
         const string accessPackageSubject = "urn:altinn:accesspackage:dialog_lookup_package";
 
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.ServiceResource = serviceResource)
+            .ExecuteAsync();
+
         using (var scope = Application.GetServiceProvider().CreateScope())
         {
-            var dataSource = scope.ServiceProvider.GetRequiredService<NpgsqlDataSource>();
-            await using var connection = await dataSource.OpenConnectionAsync(TestContext.Current.CancellationToken);
-            await using var command = connection.CreateCommand();
-            command.CommandText =
-                """
-                INSERT INTO partyresource."Resource" ("UnprefixedResourceIdentifier")
-                VALUES (@resource);
-                """;
-            command.Parameters.AddWithValue("resource", unprefixedServiceResource);
-            await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
-
             var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
             db.SubjectResources.AddRange(
                 new()

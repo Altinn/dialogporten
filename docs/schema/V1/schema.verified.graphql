@@ -351,10 +351,6 @@ type EndUserSearchLimits {
   maxExtendedStatusFilterValues: Int!
 }
 
-type GetServiceResourceMetadataDto {
-  items: [ServiceResourceMetadataItemDto!]!
-}
-
 type GuiAction {
   "The unique identifier for the action in UUIDv7 format."
   id: UUID!
@@ -383,19 +379,8 @@ type Limits {
   serviceOwnerSearch: ServiceOwnerSearchLimits!
 }
 
-type LinkDto {
-  metadata: String!
-}
-
 type Localization {
   value: String!
-  languageCode: String!
-}
-
-type LocalizationDto {
-  "The localized text (or URL if a front-channel embed)."
-  value: String!
-  "The language code of the localization in ISO 639-1 format."
   languageCode: String!
 }
 
@@ -410,7 +395,7 @@ type Queries @authorize(policy: "enduser") {
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
-  serviceResources: GetServiceResourceMetadataDto!
+  serviceResources: ServiceResourceMetadata!
 }
 
 type SearchContent {
@@ -526,37 +511,45 @@ type ServiceOwnerSearchLimits {
   maxExtendedStatusFilterValues: Int!
 }
 
-type ServiceResourceMetadataAccessPackageDto {
+type ServiceResourceMetadata {
+  items: [ServiceResourceMetadataItem!]!
+}
+
+type ServiceResourceMetadataAccessPackage {
   urn: String!
-  name: [LocalizationDto!]!
-  links: LinkDto!
+  name: [Localization!]!
+  links: ServiceResourceMetadataLinks!
 }
 
-type ServiceResourceMetadataItemDto {
-  serviceResource: ServiceResourceMetadataServiceResourceDto!
-  roles: [ServiceResourceMetadataRoleDto!]!
-  accessPackages: [ServiceResourceMetadataAccessPackageDto!]!
-  serviceOwner: ServiceResourceMetadataServiceOwnerDto!
+type ServiceResourceMetadataItem {
+  serviceResource: ServiceResourceMetadataServiceResource!
+  roles: [ServiceResourceMetadataRole!]!
+  accessPackages: [ServiceResourceMetadataAccessPackage!]!
+  serviceOwner: ServiceResourceMetadataServiceOwner!
 }
 
-type ServiceResourceMetadataRoleDto {
+type ServiceResourceMetadataLinks {
+  metadata: String!
+}
+
+type ServiceResourceMetadataRole {
   urn: String!
-  name: [LocalizationDto!]!
-  links: LinkDto!
+  name: [Localization!]!
+  links: ServiceResourceMetadataLinks!
 }
 
-type ServiceResourceMetadataServiceOwnerDto {
+type ServiceResourceMetadataServiceOwner {
   orgNumber: String!
   code: String!
-  name: [LocalizationDto!]!
+  name: [Localization!]!
 }
 
-type ServiceResourceMetadataServiceResourceDto {
+type ServiceResourceMetadataServiceResource {
   id: String!
   isDelegable: Boolean!
   minimumAuthenticationLevel: Int!
-  name: [LocalizationDto!]!
-  links: LinkDto!
+  name: [Localization!]!
+  links: ServiceResourceMetadataLinks!
 }
 
 type SetSystemLabelConcurrencyError implements SetSystemLabelError {

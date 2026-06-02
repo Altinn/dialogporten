@@ -2,18 +2,88 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 internal sealed class SubjectResourceRepository : ISubjectResourceRepository
 {
-    private readonly DialogDbContext _dbContext;
+    internal const string ReferencedPartyResourcesCacheName = "SubjectResourceReferencedPartyResources";
 
-    public SubjectResourceRepository(DialogDbContext dbContext)
+    private const string ReferencedPartyResourcesCacheKey = ReferencedPartyResourcesCacheName;
+
+    private readonly DialogDbContext _dbContext;
+    private readonly IFusionCache _referencedPartyResourcesCache;
+
+    public SubjectResourceRepository(
+        DialogDbContext dbContext,
+        IFusionCacheProvider cacheProvider)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(cacheProvider);
+
+        var referencedPartyResourcesCache = cacheProvider.GetCache(ReferencedPartyResourcesCacheName);
+        ArgumentNullException.ThrowIfNull(referencedPartyResourcesCache);
 
         _dbContext = dbContext;
+        _referencedPartyResourcesCache = referencedPartyResourcesCache;
+    }
+
+    public async Task<Dictionary<string, List<string>>> GetSubjectsByResource(
+        IReadOnlyCollection<string> resources,
+        CancellationToken cancellationToken)
+    {
+        if (resources.Count == 0)
+        {
+            return [];
+        }
+
+        return (await _dbContext.SubjectResources
+                .AsNoTracking()
+                .Where(x => resources.Contains(x.Resource))
+                .Select(x => new { x.Resource, x.Subject })
+                .Distinct()
+                .ToListAsync(cancellationToken))
+            .GroupBy(x => x.Resource)
+            .ToDictionary(
+                x => x.Key,
+                x => x.Select(y => y.Subject).ToList(),
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    public async Task<Dictionary<string, List<string>>> GetSubjectsForReferencedPartyResources(
+        CancellationToken cancellationToken)
+    {
+        var subjectsByResource = await _referencedPartyResourcesCache.GetOrSetAsync<Dictionary<string, List<string>>>(
+            ReferencedPartyResourcesCacheKey,
+            FetchSubjectsForReferencedPartyResources,
+            token: cancellationToken);
+
+        return subjectsByResource.ToDictionary(
+            x => x.Key,
+            x => x.Value.ToList(),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    private async Task<Dictionary<string, List<string>>> FetchSubjectsForReferencedPartyResources(
+        CancellationToken cancellationToken)
+    {
+        const string sql =
+            """
+            SELECT sr."Resource", sr."Subject"
+            FROM "SubjectResource" sr
+            INNER JOIN partyresource."Resource" r
+              ON sr."Resource" = 'urn:altinn:resource:' || r."UnprefixedResourceIdentifier"
+            """;
+
+        return (await _dbContext.Database
+                .SqlQueryRaw<SubjectResourceRow>(sql)
+                .ToListAsync(cancellationToken))
+            .GroupBy(x => x.Resource, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                x => x.Key,
+                x => x.Select(y => y.Subject).ToList(),
+                StringComparer.OrdinalIgnoreCase);
     }
 
     public async Task<DateTimeOffset> GetLastUpdatedAt(
@@ -58,8 +128,12 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
               	values (s.id, s.subject, s.resource, s.createdAt, s.updatedAt);
             """;
 
-        return subjectResource.Count == 0 ? 0
-            : await _dbContext.Database.ExecuteSqlRawAsync(sql,
+        if (subjectResource.Count == 0)
+        {
+            return 0;
+        }
+
+        var mergeCount = await _dbContext.Database.ExecuteSqlRawAsync(sql,
             [
                 new NpgsqlParameter("ids", subjectResource.Select(x => x.Id).ToArray()),
                 new NpgsqlParameter("subjects", subjectResource.Select(x => x.Subject).ToArray()),
@@ -68,5 +142,17 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
                 new NpgsqlParameter("updatedAts", subjectResource.Select(x => x.UpdatedAt).ToArray()),
                 new NpgsqlParameter("isDeletes", subjectResource.Select(x => x.IsDeleted).ToArray())
             ], cancellationToken);
+
+        await _referencedPartyResourcesCache.ExpireAsync(
+            ReferencedPartyResourcesCacheKey,
+            token: cancellationToken);
+
+        return mergeCount;
+    }
+
+    private sealed class SubjectResourceRow
+    {
+        public required string Resource { get; init; }
+        public required string Subject { get; init; }
     }
 }

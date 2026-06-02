@@ -7,6 +7,7 @@ public interface IResourcePolicyInformationRepository
 {
     Task<int> Merge(IReadOnlyCollection<ResourcePolicyInformation> resourceMetadata, CancellationToken cancellationToken = default);
     Task<DateTimeOffset> GetLastUpdatedAt(TimeSpan? timeSkew = null, CancellationToken cancellationToken = default);
+    Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(CancellationToken cancellationToken);
 }
 
 public static class ResourcePolicyInformationExtensions

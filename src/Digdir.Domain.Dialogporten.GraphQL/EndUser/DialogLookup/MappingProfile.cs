@@ -1,4 +1,5 @@
 using AutoMapper;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup;
@@ -12,7 +13,7 @@ public sealed class MappingProfile : Profile
         CreateMap<IdentifierLookupServiceOwnerDto, DialogLookupServiceOwner>();
         CreateMap<IdentifierLookupAuthorizationEvidenceDto, DialogLookupAuthorizationEvidence>();
         CreateMap<IdentifierLookupAuthorizationEvidenceItemDto, DialogLookupAuthorizationEvidenceItem>();
-        CreateMap<Digdir.Domain.Dialogporten.Application.Common.LinkDto, DialogLookupLinks>();
+        CreateMap<LinkDto, DialogLookupLinks>();
         CreateMap<IdentifierLookupGrantType, DialogLookupGrantType>();
     }
 }

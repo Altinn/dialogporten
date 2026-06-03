@@ -203,7 +203,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             if (!listAuthorizationResult)
             {
-                return new EntityNotFound<DialogEntity>(request.DialogId);
+                return new Forbidden("Forbidden");
             }
         }
 

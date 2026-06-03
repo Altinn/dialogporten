@@ -83,8 +83,7 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
         unauthorizedResult.Data.Should().NotBeNull();
         var error = unauthorizedResult.Data.DialogById.Errors.Single();
 
-        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
-        error.Message.Should().Contain(dialogId.ToString());
+        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdForbidden>();
     }
 
     private Task<IOperationResult<IGetDialogByIdResult>> GetDialog(Guid dialogId) =>

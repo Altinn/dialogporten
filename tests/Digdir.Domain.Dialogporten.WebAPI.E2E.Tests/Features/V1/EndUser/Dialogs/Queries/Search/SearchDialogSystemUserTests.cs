@@ -11,7 +11,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialog
 public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2EFact]
-    public async Task Should_Return_404_When_SystemUser_Gets_Dialog_Directly()
+    public async Task Should_Return_Forbidden_When_SystemUser_Gets_Dialog_Directly()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
@@ -21,7 +21,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }
 
     [E2EFact]

@@ -17,6 +17,7 @@
 
 ### Miscellaneous Chores
 
+* **deps:** update refit to 10.2.0 ([#4059](https://github.com/Altinn/dialogporten/pull/4059)) ([eaff593](https://github.com/Altinn/dialogporten/commit/eaff59338d451ef18eb065eb0bbec41f2778240c))
 * **deps:** update docker/build-push-action action to v7.2.0 ([#4047](https://github.com/Altinn/dialogporten/issues/4047)) ([2766920](https://github.com/Altinn/dialogporten/commit/2766920da6d62b57d5090b8ccef293c6ad09977d))
 
 ## [1.115.6](https://github.com/Altinn/dialogporten/compare/v1.115.5...v1.115.6) (2026-06-01)

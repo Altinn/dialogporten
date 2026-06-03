@@ -115,6 +115,7 @@ static void BuildAndRun(string[] args)
             ServiceLifetime.Transient, includeInternalTypes: true)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
+        .AddDialogportenResponseCompression()
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
@@ -166,8 +167,11 @@ static void BuildAndRun(string[] args)
     app.MapAspNetHealthChecks()
         .MapControllers();
 
-    app.UseHttpsRedirection()
-        .UseDefaultExceptionHandler()
+    app.UseHttpsRedirection();
+    // Wraps the response body before any downstream middleware writes. Must precede
+    // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
+    app.UseResponseCompression();
+    app.UseDefaultExceptionHandler()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
@@ -183,8 +187,9 @@ static void BuildAndRun(string[] args)
             x.Versioning.DefaultVersion = 1;
             x.Endpoints.Configurator = endpointDefinition =>
             {
-                endpointDefinition.Description(routeHandlerBuilder
-                    => routeHandlerBuilder.Add(endpointBuilder =>
+                endpointDefinition.Description(routeHandlerBuilder =>
+                {
+                    routeHandlerBuilder.Add(endpointBuilder =>
                     {
                         endpointBuilder.Metadata.Add(
                             new EndpointNameMetadata(
@@ -196,7 +201,10 @@ static void BuildAndRun(string[] args)
                         {
                             endpointBuilder.Metadata.Add(operationIdAttr);
                         }
-                    }));
+                    });
+
+                    routeHandlerBuilder.AddResponseCompressionHintIfMarked(endpointDefinition.EndpointType);
+                });
             };
             x.Serializer.Options.RespectNullableAnnotations = true;
             x.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

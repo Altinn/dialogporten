@@ -64,7 +64,7 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
     }
 
     [E2EFact]
-    public async Task Should_Return_Typed_NotFound_Result_When_Using_Unauthorized_Party()
+    public async Task Should_Return_Typed_Forbidden_Result_When_Using_Unauthorized_Party()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
@@ -83,8 +83,7 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
         unauthorizedResult.Data.Should().NotBeNull();
         var error = unauthorizedResult.Data.DialogById.Errors.Single();
 
-        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdNotFound>();
-        error.Message.Should().Contain(dialogId.ToString());
+        error.Should().BeOfType<GetDialogById_DialogById_Errors_DialogByIdForbidden>();
     }
 
     private Task<IOperationResult<IGetDialogByIdResult>> GetDialog(Guid dialogId) =>

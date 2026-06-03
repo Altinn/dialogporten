@@ -64,7 +64,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="Build/PatchEndUserRefitterInterface.cs" />
         <InternalsVisibleTo Include="Digdir.Library.Dialogporten.WebApiClient.EndUser.Unit.Tests"/>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
@@ -81,7 +80,7 @@
             <Using Namespace="System.Text.RegularExpressions" />
             <Code Type="Fragment"
                   Language="cs"
-                  Source="$(MSBuildProjectDirectory)/Build/PatchEndUserRefitterInterface.cs" />
+                  Source="$(MSBuildProjectDirectory)/Build/PatchEndUserRefitterInterface.csfragment" />
         </Task>
     </UsingTask>
 

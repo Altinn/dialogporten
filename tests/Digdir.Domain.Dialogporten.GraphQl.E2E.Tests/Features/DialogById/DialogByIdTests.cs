@@ -64,7 +64,7 @@ public class DialogByIdTests : E2ETestBase<GraphQlE2EFixture>
     }
 
     [E2EFact]
-    public async Task Should_Return_Typed_NotFound_Result_When_Using_Unauthorized_Party()
+    public async Task Should_Return_Typed_Forbidden_Result_When_Using_Unauthorized_Party()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();

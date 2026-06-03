@@ -1,5 +1,6 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
@@ -12,12 +13,14 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
@@ -95,6 +98,24 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.Content.MainContentReference!.Value.Should().AllSatisfy(x =>
                     x.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
             });
+
+    [Fact]
+    public Task Get_Dialog_Should_Return_Forbidden_When_No_Access_To_Main_Resource_And_No_List_Authorization() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                // No authorized actions => no access to the main resource
+                altinnAuthorization
+                    .GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(new DialogDetailsAuthorizationResult { AuthorizedAltinnActions = [] });
+                // And no access via the list authorization either
+                altinnAuthorization
+                    .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(false);
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<Forbidden>();
 
     [Fact]
     public Task Get_Dialog_Should_Include_GuiAction_Url_When_Read_Access_To_Main_Resource() =>

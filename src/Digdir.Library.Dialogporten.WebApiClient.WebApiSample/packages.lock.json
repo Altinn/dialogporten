@@ -69,15 +69,15 @@
       },
       "Refit": {
         "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "j82mHFcXJpiJiaLqQgiikmLAu+oYKcIM8ZafipX2s2b2soOS0OGN+Oc+BXkhsG8x6j2M1J23Eac3068yOKLPFA=="
+        "resolved": "10.2.0",
+        "contentHash": "zwPmA4p0ZDCeg0/z0hRUXj4aS0y0mlJ8TSri4pz4e0MWmRXAtjSVeQdnkyRah2f6+I0JlP14UqMQW4N8u/hVeg=="
       },
       "Refit.HttpClientFactory": {
         "type": "Transitive",
-        "resolved": "10.1.6",
-        "contentHash": "brVgMXHX2pp6pMji7tJijygbMwxccIy2vSsPurPmOZ7jSChBjYpiT9bBbJkBDc0hhnNyzvLkkbx0uiHhJuTTEQ==",
+        "resolved": "10.2.0",
+        "contentHash": "pDd73YQWLFxqwP01H4vpXqu6BJAPKJrci7+Nmlhx+Xg5asklGhmoAUVAeGeEKAqyOMQeN7wl5tCKcihus+Gzmw==",
         "dependencies": {
-          "Refit": "10.1.6"
+          "Refit": "10.2.0"
         }
       },
       "System.IdentityModel.Tokens.Jwt": {
@@ -94,8 +94,8 @@
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
           "NSec.Cryptography": "[25.4.0, )",
-          "Refit": "[10.1.6, )",
-          "Refit.HttpClientFactory": "[10.1.6, )"
+          "Refit": "[10.2.0, )",
+          "Refit.HttpClientFactory": "[10.2.0, )"
         }
       },
       "Altinn.ApiClients.Dialogporten.Common": {
@@ -103,8 +103,8 @@
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.0.1, )",
           "NSec.Cryptography": "[25.4.0, )",
-          "Refit": "[10.1.6, )",
-          "Refit.HttpClientFactory": "[10.1.6, )"
+          "Refit": "[10.2.0, )",
+          "Refit.HttpClientFactory": "[10.2.0, )"
         }
       }
     }

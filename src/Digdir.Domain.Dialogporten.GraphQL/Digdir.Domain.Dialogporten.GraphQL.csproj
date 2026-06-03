@@ -21,4 +21,8 @@
         <ProjectReference Include="..\Digdir.Library.Utils.AspNet\Digdir.Library.Utils.AspNet.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Digdir.Domain.Dialogporten.GraphQl.Unit.Tests" />
+    </ItemGroup>
+
 </Project>

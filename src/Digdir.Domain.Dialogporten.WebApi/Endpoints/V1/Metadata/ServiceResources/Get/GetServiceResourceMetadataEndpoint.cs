@@ -2,8 +2,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
+using Digdir.Library.Utils.AspNet;
 using FastEndpoints;
 using MediatR;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Metadata.ServiceResources.Get;
 
@@ -28,6 +30,7 @@ public sealed class GetServiceResourceMetadataEndpoint
         Description(b => b.ProducesOneOf<GetServiceResourceMetadataDto>(StatusCodes.Status200OK));
     }
 
+    [EnableResponseCompression]
     public override async Task HandleAsync(GetServiceResourceMetadataRequest req, CancellationToken ct)
     {
         var result = await _sender.Send(new GetServiceResourceMetadataQuery

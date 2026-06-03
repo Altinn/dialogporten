@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.116.0](https://github.com/Altinn/dialogporten/compare/v1.115.6...v1.116.0) (2026-06-03)
+
+
+### Features
+
+* add opt-in endpoint/resolver output compression ([#4052](https://github.com/Altinn/dialogporten/issues/4052)) ([12d755d](https://github.com/Altinn/dialogporten/commit/12d755da2a950172fc51368e1c5e3606681b83d8))
+* Add public services resources API and augment dialog lookup ([#4022](https://github.com/Altinn/dialogporten/issues/4022)) ([61fcf9a](https://github.com/Altinn/dialogporten/commit/61fcf9a3902b074c5ad99855996c4a9f6c322c3d))
+* **infra:** pin the monthly Key Vault expiry digest in Slack ([#4057](https://github.com/Altinn/dialogporten/issues/4057)) ([269b4e8](https://github.com/Altinn/dialogporten/commit/269b4e857cd5507f973791bdd71c7ac359b43585))
+
+
+### Bug Fixes
+
+* return 403 instead of 404 for unauthorized enduser get dialog ([#4053](https://github.com/Altinn/dialogporten/issues/4053)) ([2e244e5](https://github.com/Altinn/dialogporten/commit/2e244e592476932df64294de82f8c4dddf5886ac))
+
+
+### Miscellaneous Chores
+
+* **deps:** update refit to 10.2.0 ([#4059](https://github.com/Altinn/dialogporten/pull/4059)) ([eaff593](https://github.com/Altinn/dialogporten/commit/eaff59338d451ef18eb065eb0bbec41f2778240c))
+* **deps:** update docker/build-push-action action to v7.2.0 ([#4047](https://github.com/Altinn/dialogporten/issues/4047)) ([2766920](https://github.com/Altinn/dialogporten/commit/2766920da6d62b57d5090b8ccef293c6ad09977d))
+
 ## [1.115.6](https://github.com/Altinn/dialogporten/compare/v1.115.5...v1.115.6) (2026-06-01)
 
 

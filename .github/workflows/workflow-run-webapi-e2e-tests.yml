@@ -22,6 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # TEMP workaround for reactiveui/refit#2114: Refit 10.1.6's signing cert (CN=Glenn Watson)
+    # was revoked upstream 2026-06-02, making Linux `dotnet restore` fail with NU3012. Offline
+    # revocation mode keeps signature/chain verification but skips the live CRL check. Remove
+    # once Refit republishes 10.1.x with a valid signature. Revert tracked in #4049.
+    env:
+      NUGET_CERT_REVOCATION_MODE: offline
     steps:
       - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:

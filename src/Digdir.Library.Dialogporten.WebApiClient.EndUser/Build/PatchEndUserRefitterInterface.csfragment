@@ -10,27 +10,51 @@ var updated = original;
 
 if (updated.IndexOf(usingLine, StringComparison.Ordinal) < 0)
 {
-    updated = updated.Replace("using Refit;\n", "using Refit;\n" + usingLine + "\n");
+    var insertedUsing = false;
+    updated = Regex.Replace(
+        updated,
+        @"^using Refit;(?<eol>\r?\n)",
+        match =>
+        {
+            insertedUsing = true;
+            return match.Value + usingLine + match.Groups["eol"].Value;
+        },
+        RegexOptions.Multiline);
+
+    if (!insertedUsing)
+    {
+        throw new InvalidOperationException("Could not add Maskinporten using because 'using Refit;' was not found.");
+    }
 }
 
 updated = updated.Replace(", [Property] object? requestProperties = null", string.Empty);
 updated = updated.Replace(", " + requestPropertyParameter, string.Empty);
 updated = updated.Replace("(" + requestPropertyParameter + ", ", "(");
 
+var patchedMethodCount = 0;
 updated = Regex.Replace(
     updated,
-    @"(?<interface>^\s*public partial interface IEnduserApi\s*\{\n)(?<body>.*?)(?<closing>^\s*\}\n)",
+    @"(?<interface>^[ \t]*public partial interface IEnduserApi[ \t]*(?:\{|\r?\n[ \t]*\{)(?:\r?\n))(?<body>.*?)(?<closing>^[ \t]*\}(?:\r?\n|$))",
     match =>
     {
         var body = Regex.Replace(
             match.Groups["body"].Value,
-            @"^(?!.*MaskinportenTokenRequestContext\? requestContext)(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);$",
-            "${method}" + requestPropertyParameter + ", CancellationToken cancellationToken = default);",
+            @"^(?!.*MaskinportenTokenRequestContext\? requestContext)(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);(?<eol>\r?)$",
+            methodMatch =>
+            {
+                patchedMethodCount++;
+                return methodMatch.Groups["method"].Value + requestPropertyParameter + ", CancellationToken cancellationToken = default);" + methodMatch.Groups["eol"].Value;
+            },
             RegexOptions.Multiline);
 
         return match.Groups["interface"].Value + body + match.Groups["closing"].Value;
     },
     RegexOptions.Multiline | RegexOptions.Singleline);
+
+if (patchedMethodCount == 0)
+{
+    throw new InvalidOperationException("Could not add Maskinporten request context parameter to any IEnduserApi methods.");
+}
 
 if (!string.Equals(original, updated, StringComparison.Ordinal))
 {

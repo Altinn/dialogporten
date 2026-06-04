@@ -92,4 +92,8 @@
         <PatchEndUserRefitterInterface GeneratedFile="$(MSBuildProjectDirectory)/Features/V1/RefitterInterface.cs" />
     </Target>
 
+    <Target Name="PatchEndUserRefitterInterfaceAfterBuild" AfterTargets="Build">
+        <PatchEndUserRefitterInterface GeneratedFile="$(MSBuildProjectDirectory)/Features/V1/RefitterInterface.cs" />
+    </Target>
+
 </Project>

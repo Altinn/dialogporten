@@ -1,3 +1,10 @@
+// MSBuild loads this RoslynCodeTaskFactory fragment from the EndUser SDK project
+// to patch RefitterInterface.cs after Refitter generates it. Refitter/NSwag do
+// not currently give us a narrow hook for adding the Maskinporten Refit property
+// parameter only to IEnduserApi, so the build patches the generated interface.
+// Keep this as .csfragment instead of .cs so IDE analyzers do not treat it as a
+// standalone source file; the fragment only compiles inside the MSBuild task.
+
 if (!File.Exists(GeneratedFile))
 {
     return true;

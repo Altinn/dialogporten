@@ -15,6 +15,7 @@ if (updated.IndexOf(usingLine, StringComparison.Ordinal) < 0)
 
 updated = updated.Replace(", [Property] object? requestProperties = null", string.Empty);
 updated = updated.Replace(", " + requestPropertyParameter, string.Empty);
+updated = updated.Replace("(" + requestPropertyParameter + ", ", "(");
 
 updated = Regex.Replace(
     updated,
@@ -23,7 +24,7 @@ updated = Regex.Replace(
     {
         var body = Regex.Replace(
             match.Groups["body"].Value,
-            @"^(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);$",
+            @"^(?!.*MaskinportenTokenRequestContext\? requestContext)(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);$",
             "${method}" + requestPropertyParameter + ", CancellationToken cancellationToken = default);",
             RegexOptions.Multiline);
 

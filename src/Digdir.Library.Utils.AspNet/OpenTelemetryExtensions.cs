@@ -26,7 +26,8 @@ public static class OpenTelemetryExtensions
         IConfiguration configuration,
         IHostEnvironment environment,
         Action<TracerProviderBuilder>? additionalTracing = null,
-        Action<MeterProviderBuilder>? additionalMetrics = null)
+        Action<MeterProviderBuilder>? additionalMetrics = null,
+        IReadOnlyList<HttpDependencyUrlTemplate>? httpUrlTemplates = null)
     {
         if (!Uri.IsWellFormedUriString(configuration[OtelExporterOtlpEndpoint], UriKind.Absolute))
             return services;
@@ -78,6 +79,22 @@ public static class OpenTelemetryExtensions
 
                             return true;
                         };
+
+                        if (httpUrlTemplates is { Count: > 0 })
+                        {
+                            o.EnrichWithHttpRequestMessage = (activity, request) =>
+                            {
+                                var path = request.RequestUri?.AbsolutePath;
+                                if (path is null) return;
+                                foreach (var t in httpUrlTemplates)
+                                {
+                                    if (!t.PathPattern.IsMatch(path)) continue;
+                                    activity.DisplayName = $"{request.Method.Method} /{t.Template}";
+                                    activity.SetTag("url.template", "/" + t.Template);
+                                    return;
+                                }
+                            };
+                        }
                     })
                     .AddNpgsql()
                     .AddOtlpExporter(options =>

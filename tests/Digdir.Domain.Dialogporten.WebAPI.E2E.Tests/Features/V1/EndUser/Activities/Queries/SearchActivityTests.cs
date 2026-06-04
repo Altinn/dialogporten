@@ -24,7 +24,7 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var response = await Fixture.EndUserApi.V1.SearchDialogActivities(
             dialogId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -81,7 +81,7 @@ public class SearchActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var response = await Fixture.EndUserApi.V1.SearchDialogActivities(
             dialogId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

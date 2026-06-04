@@ -30,7 +30,7 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         var response = await Fixture.EndUserApi.V1.GetDialogSeenLog(
             dialogId,
             seenLog.Id,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

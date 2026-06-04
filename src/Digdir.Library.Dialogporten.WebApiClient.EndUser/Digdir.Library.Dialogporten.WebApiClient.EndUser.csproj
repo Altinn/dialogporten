@@ -68,6 +68,12 @@
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 
+    <!--
+        Refitter generates the Refit interface methods directly and cannot add this custom
+        Maskinporten request context property parameter from templates. Patch the generated
+        EndUser interface so callers can pass per-request token context through Refit.
+        See PatchEndUserRefitterInterface.csfragment
+    -->
     <UsingTask TaskName="PatchEndUserRefitterInterface"
                TaskFactory="RoslynCodeTaskFactory"
                AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">

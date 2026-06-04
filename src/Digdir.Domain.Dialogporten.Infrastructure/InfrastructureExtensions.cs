@@ -109,8 +109,8 @@ public static class InfrastructureExtensions
             })
             .AddDapperTypeHandlers()
             .AddHostedService<FusionCacheWarmupHostedService>()
-            .AddHostedService<DevelopmentMigratorHostedService>()
-            .AddHostedService<DevelopmentCleanupOutboxHostedService>()
+            //.AddHostedService<DevelopmentMigratorHostedService>()
+            //.AddHostedService<DevelopmentCleanupOutboxHostedService>()
             .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()
             .AddHostedService<DevelopmentResourcePolicyInformationSyncHostedService>()
             .AddValidatorsFromAssembly(InfrastructureAssemblyMarker.Assembly, ServiceLifetime.Transient,
@@ -141,6 +141,7 @@ public static class InfrastructureExtensions
             .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<IWordlistSamplingRepository, WordlistSamplingRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()

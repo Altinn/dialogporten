@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.ReindexDialogSearch;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Commands.GenerateWordlist;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 using MediatR;
@@ -122,6 +123,32 @@ internal static partial class Commands
                 return result.Match(
                     success => 0,
                     failure => -1);
+            });
+
+        app.AddCommand("generate-wordlist", async (
+                [FromService] CoconaAppContext ctx,
+                [FromService] ISender application,
+                [Option('n', Description = "Samples per service resource (3-100, default 3)")] int? sampleSize,
+                [Option("pool-rows", Description = "Stage A TABLESAMPLE pool target rows (default 150000)")] int? poolRows,
+                [Option('m', Description = "Minimum word length (default 5)")] int? minLength,
+                [Option('o', Description = "Output JSONL path (default ./wordlist.jsonl)")] string? output,
+                [Option('l', Description = "Comma-separated language codes (default nb,nn,en)")] string? languages)
+            =>
+            {
+                var langs = string.IsNullOrWhiteSpace(languages)
+                    ? null
+                    : languages.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var result = await application.Send(
+                    new GenerateWordlistCommand
+                    {
+                        SampleSize = sampleSize,
+                        PoolRows = poolRows,
+                        MinLength = minLength,
+                        OutputPath = output,
+                        Languages = langs
+                    },
+                    ctx.CancellationToken);
+                return result.Match(success => 0, validationError => -1);
             });
 
         app.AddCommand("collect-custom-metrics", async (

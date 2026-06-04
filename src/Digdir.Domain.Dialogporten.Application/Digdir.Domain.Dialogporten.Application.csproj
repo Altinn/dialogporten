@@ -33,4 +33,8 @@
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="Features/V1/Wordlist/Filtering/Stopwords/*.txt"/>
+    </ItemGroup>
+
 </Project>

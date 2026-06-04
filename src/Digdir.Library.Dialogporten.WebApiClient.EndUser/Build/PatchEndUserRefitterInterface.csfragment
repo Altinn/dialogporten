@@ -14,11 +14,22 @@ if (updated.IndexOf(usingLine, StringComparison.Ordinal) < 0)
 }
 
 updated = updated.Replace(", [Property] object? requestProperties = null", string.Empty);
+updated = updated.Replace(", " + requestPropertyParameter, string.Empty);
+
 updated = Regex.Replace(
     updated,
-    @"^(?!.*MaskinportenTokenRequestContext\? requestContext)(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);$",
-    "${method}" + requestPropertyParameter + ", CancellationToken cancellationToken = default);",
-    RegexOptions.Multiline);
+    @"(?<interface>^\s*public partial interface IEnduserApi\s*\{\n)(?<body>.*?)(?<closing>^\s*\}\n)",
+    match =>
+    {
+        var body = Regex.Replace(
+            match.Groups["body"].Value,
+            @"^(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);$",
+            "${method}" + requestPropertyParameter + ", CancellationToken cancellationToken = default);",
+            RegexOptions.Multiline);
+
+        return match.Groups["interface"].Value + body + match.Groups["closing"].Value;
+    },
+    RegexOptions.Multiline | RegexOptions.Singleline);
 
 if (!string.Equals(original, updated, StringComparison.Ordinal))
 {

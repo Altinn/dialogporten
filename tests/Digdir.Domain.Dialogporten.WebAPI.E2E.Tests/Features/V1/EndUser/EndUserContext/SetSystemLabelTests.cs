@@ -26,6 +26,28 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     }
 
     [E2EFact]
+    public async Task Should_Be_Able_To_Set_System_Label_When_SystemUser()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>
+            {
+                d.Party = E2EConstants.DefaultSystemUserOrgUrn;
+            }
+        );
+        using var _ = Fixture.UseSystemUserTokenOverrides();
+        var response1 = await Fixture.EndUserApi.SetSystemLabels(dialogId, r =>
+        {
+            r.AddLabels = [Bin];
+        });
+        response1.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+    }
+
+    [E2EFact]
     public async Task Should_Add_One_LabelLog_Entry_After_Setting_Label()
     {
         // Arrange

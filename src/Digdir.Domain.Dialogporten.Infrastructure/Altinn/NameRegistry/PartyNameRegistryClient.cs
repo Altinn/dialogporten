@@ -97,11 +97,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                 return partyIdentifier.Id;
             case FeideUserIdentifier:
                 return $"Feide User ({partyIdentifier.Id[..6]})";
-            case SystemUserIdentifier:
-                // TODO! When called within enduser context (ie. we have a ClaimsPrincipal), we use the systemuser_org to look up name
-                // In other contexts, eg. PopulateActorNameInterceptor, this information is not available. At some point, we should have
-                // some sort of lookup mechanism here
-                return "System User";
             default:
                 // Handle below
                 break;

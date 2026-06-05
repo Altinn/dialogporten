@@ -175,6 +175,10 @@ public class DialogApplication : IAsyncLifetime
             .GetName(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Brando Sando");
 
+        nameRegistrySubstitute
+            .GetName(Arg.Is(TestUsers.DefaultSystemUserUrn), Arg.Any<CancellationToken>())
+            .Returns("Mock system user name");
+
         return nameRegistrySubstitute;
     }
 

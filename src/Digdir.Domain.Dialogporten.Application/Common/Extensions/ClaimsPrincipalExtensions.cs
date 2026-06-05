@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using System.Security.Claims;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -23,7 +23,7 @@ public static class ClaimsPrincipalExtensions
     public const string IdportenAmrClaim = "amr";
     public const string AmrSelfRegisteredEmail = "Selfregistered-email";
     public const string AmrSelfIdentified = "SelfIdentified";
-    private const string AuthorizationDetailsClaim = "authorization_details";
+    public const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
     public const string IdportenEmailClaim = "email";
@@ -459,7 +459,7 @@ public static class ClaimsPrincipalExtensions
     }
 
     // https://docs.altinn.studio/authentication/systemauthentication/
-    private sealed class SystemUserAuthorizationDetails
+    public sealed class SystemUserAuthorizationDetails
     {
         [JsonPropertyName("type")]
         public string? Type { get; set; }
@@ -471,7 +471,7 @@ public static class ClaimsPrincipalExtensions
         public ConsumerOrganization SystemUserOrg { get; set; } = new();
     }
 
-    private sealed class ConsumerOrganization
+    public sealed class ConsumerOrganization
     {
         [JsonPropertyName("authority")]
         public string Authority { get; set; } = null!;

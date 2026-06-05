@@ -1,5 +1,4 @@
 using System.Net;
-using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
@@ -16,16 +15,17 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     public async Task Should_BulkSet_Labels_For_Accessible_Dialogs()
     {
         // Arrange
-        var dialogId1 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
-        var dialogId2 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        await Task.WhenAll(createDialog1, createDialog2);
 
         // Act
         var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
         {
             request.Dialogs =
             [
-                new() { DialogId = dialogId1 },
-                new() { DialogId = dialogId2 }
+                new() { DialogId = createDialog1.Result },
+                new() { DialogId = createDialog2.Result }
             ];
 
             request.AddLabels = [Bin];
@@ -34,8 +34,8 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var dialog1Response = await Fixture.EndUserApi.GetDialog(dialogId1);
-        var dialog2Response = await Fixture.EndUserApi.GetDialog(dialogId2);
+        var dialog1Response = await Fixture.EndUserApi.GetDialog(createDialog1.Result);
+        var dialog2Response = await Fixture.EndUserApi.GetDialog(createDialog2.Result);
 
         dialog1Response.ShouldHaveStatusCode(HttpStatusCode.OK);
         dialog2Response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -50,24 +50,96 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     }
 
     [E2EFact]
+    public async Task Should_Be_Able_To_Set_System_Labels_When_SystemUser()
+    {
+        // Arrange
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>
+            {
+                d.Party = E2EConstants.DefaultSystemUserOrgUrn;
+            }
+        );
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>
+            {
+                d.Party = E2EConstants.DefaultSystemUserOrgUrn;
+            }
+        );
+        await Task.WhenAll(createDialog1, createDialog2);
+
+        // Act
+        using var _ = Fixture.UseSystemUserTokenOverrides();
+        var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
+        {
+            request.Dialogs =
+            [
+                new() { DialogId = createDialog1.Result },
+                new() { DialogId = createDialog2.Result },
+            ];
+            request.AddLabels = [Archive];
+        });
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+    }
+
+    [E2EFact]
     public async Task Should_Return_404_When_BulkSet_Contains_Unauthorized_Dialog()
     {
         // Arrange
-        var dialogId1 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
-        var dialogId2 = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        await Task.WhenAll(createDialog1, createDialog2);
 
         var forbiddenDialogId = await Fixture.ServiceownerApi
-            .CreateSimpleDialogAsync(dialog =>
-                dialog.Party = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}" +
-                               $"{E2EConstants.GetDefaultServiceOwnerOrgNr()}");
+            .CreateSimpleDialogAsync(dialog => dialog.Party = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}" +
+                                                              $"{E2EConstants.GetDefaultServiceOwnerOrgNr()}");
 
         // Act
         var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
         {
             request.Dialogs =
             [
-                new() { DialogId = dialogId1 },
-                new() { DialogId = dialogId2 },
+                new() { DialogId = createDialog1.Result },
+                new() { DialogId = createDialog2.Result },
+                new() { DialogId = forbiddenDialogId }
+            ];
+            request.AddLabels = [Archive];
+        });
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        response.Error.Should().NotBeNull();
+        response.Error.Content.Should().Contain(forbiddenDialogId.ToString());
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_As_SystemUser_When_BulkSet_Contains_Unauthorized_Dialog()
+    {
+        // Arrange
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>
+            {
+                d.Party = E2EConstants.DefaultSystemUserOrgUrn;
+            }
+        );
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>
+            {
+                d.Party = E2EConstants.DefaultSystemUserOrgUrn;
+            }
+        );
+        await Task.WhenAll(createDialog1, createDialog2);
+
+        var forbiddenDialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(d =>
+        {
+            d.Party = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}" +
+                      $"{E2EConstants.GetDefaultServiceOwnerOrgNr()}";
+        });
+
+        // Act
+        var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
+        {
+            request.Dialogs =
+            [
+                new() { DialogId = createDialog1.Result },
+                new() { DialogId = createDialog2.Result },
                 new() { DialogId = forbiddenDialogId }
             ];
             request.AddLabels = [Archive];

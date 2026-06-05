@@ -48,7 +48,6 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         var __ = await Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>
         {
             d.ExtendedStatus = uniqueExtendedStatus;
-            d.ServiceResource = "urn:altinn:resource:dialogporten-e2e-test-resource";
             d.Party = "urn:altinn:organization:identifier-no:437454302";
         });
 

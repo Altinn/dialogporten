@@ -205,7 +205,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
 
         log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
         log.PerformedBy.ActorNameEntity.Should().NotBeNull();
-        log.PerformedBy.ActorNameEntity.ActorId.Should().Be(TestUsers.DefaultSystemUserOrgUrn);
+        log.PerformedBy.ActorNameEntity.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
         log.PerformedBy.ActorNameEntity.Name.Should().Be("Mock system user name");
     }
 

@@ -29,7 +29,7 @@ internal static class TestUsers
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
     public static string DefaultSystemUserId => "2e39badb-fc4e-4d25-ba77-5a9fe8afcae4";
     public static string DefaultSystemUserOrg => "999888777";
-    public static string DefaultSystemUserOrgUrn => "urn:altinn:systemuser:uuid:" + DefaultSystemUserId;
+    public static string DefaultSystemUserUrn => "urn:altinn:systemuser:uuid:" + DefaultSystemUserId;
 
     private const string DefaultConsumerClaim =
         """

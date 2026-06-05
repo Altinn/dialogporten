@@ -134,6 +134,7 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         });
 
         // Act
+        using var _ = Fixture.UseSystemUserTokenOverrides();
         var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
         {
             request.Dialogs =

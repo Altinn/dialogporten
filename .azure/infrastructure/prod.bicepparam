@@ -48,7 +48,7 @@ param postgresConfiguration = {
     tier: 'MemoryOptimized'
   }
   storage: {
-    storageSizeGB: 10000
+    storageSizeGB: 16000
     type: 'PremiumV2_LRS'
     iops: 24000
     throughput: 1200
@@ -127,7 +127,7 @@ param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
 param redisSku = {
   name: 'Standard'
   family: 'C'
-  capacity: 1
+  capacity: 2
 }
 
 param serviceBusSku = {

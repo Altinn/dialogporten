@@ -25,7 +25,7 @@ public sealed class GetDialogQuery : IRequest<GetDialogResult>, IFeatureMetricSe
 }
 
 [GenerateOneOf]
-public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityNotVisible, EntityDeleted, Forbidden>;
+public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFound, EntityNotVisible, EntityExpired, EntityDeleted, Forbidden>;
 
 internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, GetDialogResult>
 {
@@ -203,7 +203,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             if (!listAuthorizationResult)
             {
-                return new EntityNotFound<DialogEntity>(request.DialogId);
+                return new Forbidden("Forbidden");
             }
         }
 
@@ -220,6 +220,11 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         if (dialog.VisibleFrom.HasValue && dialog.VisibleFrom > _clock.UtcNowOffset)
         {
             return new EntityNotVisible<DialogEntity>(dialog.VisibleFrom.Value);
+        }
+
+        if (dialog.ExpiresAt.HasValue && dialog.ExpiresAt < _clock.UtcNowOffset)
+        {
+            return new EntityExpired<DialogEntity>(dialog.ExpiresAt.Value);
         }
 
         var userId = _userRegistry.GetCurrentUserId();
@@ -247,7 +252,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
 
-        dialog.FilterLocalizations(request.AcceptedLanguages);
+        dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 

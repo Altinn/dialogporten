@@ -3232,7 +3232,43 @@
           "Correction"
         ]
       },
+      "EndUserSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxOrgFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "GetDialogLookupRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "GetServiceResourceMetadataRequest": {
         "additionalProperties": false,
         "properties": {
           "acceptedLanguages": {
@@ -3359,6 +3395,27 @@
           "Test",
           "Invalid"
         ]
+      },
+      "Limits": {
+        "additionalProperties": false,
+        "properties": {
+          "endUserSearch": {
+            "$ref": "#/components/schemas/EndUserSearchLimits"
+          },
+          "serviceOwnerSearch": {
+            "$ref": "#/components/schemas/ServiceOwnerSearchLimits"
+          }
+        },
+        "type": "object"
+      },
+      "Links": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "Localization": {
         "additionalProperties": false,
@@ -3555,6 +3612,146 @@
         "properties": {
           "value": {
             "description": "A label value.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceOwnerSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceAccessPackage": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "accessPackages": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceAccessPackage"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceRole"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/ServiceResourceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/ServiceResource"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceMetadataList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceMetadata"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceRole": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
             "type": "string"
           }
         },
@@ -4546,6 +4743,102 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/metadata/limits": {
+      "get": {
+        "description": "Returns the active limits for EndUser and ServiceOwner search filters.",
+        "operationId": "GetLimits",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Limits"
+                }
+              }
+            },
+            "description": "The currently enforced application-level query limits."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets currently enforced application-level query limits",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
+    "/api/v1/metadata/serviceresources": {
+      "get": {
+        "description": "Returns public service resource metadata with related service owner, role, and access package metadata.",
+        "operationId": "GetServiceResourceMetadata",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResourceMetadataList"
+                }
+              }
+            },
+            "description": "Service resource metadata."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets service resources currently in use in Dialogporten.",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialoglookup": {
       "get": {
         "description": "Resolves dialog metadata for a supported instance reference in service owner context.",
@@ -5016,9 +5309,6 @@
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           },
           "400": {
             "content": {
@@ -6091,9 +6381,6 @@
               }
             }
           },
-          "204": {
-            "description": "No Content"
-          },
           "400": {
             "content": {
               "application/problem\u002Bjson": {
@@ -7006,9 +7293,6 @@
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           },
           "400": {
             "content": {

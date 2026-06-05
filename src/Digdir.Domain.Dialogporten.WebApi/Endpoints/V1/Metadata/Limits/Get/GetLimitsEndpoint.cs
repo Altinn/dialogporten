@@ -32,6 +32,6 @@ public sealed class GetLimitsEndpoint : EndpointWithoutRequest<GetLimitsDto>
     {
         var result = await _sender.Send(new GetLimitsQuery(), ct);
 
-        await SendOkAsync(result, ct);
+        await Send.OkAsync(result, ct);
     }
 }

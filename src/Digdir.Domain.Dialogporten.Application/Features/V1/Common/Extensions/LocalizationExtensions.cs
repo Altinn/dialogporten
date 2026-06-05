@@ -7,9 +7,9 @@ using Digdir.Domain.Dialogporten.Domain.Localizations;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 
-internal static class DialogExtensions
+internal static class LocalizationExtensions
 {
-    public static void FilterLocalizations(this DialogEntity dialog, List<AcceptedLanguage>? acceptedLanguages)
+    public static void FilterDialogLocalizations(this DialogEntity dialog, List<AcceptedLanguage>? acceptedLanguages)
     {
         if (acceptedLanguages is null or [])
         {
@@ -34,16 +34,16 @@ internal static class DialogExtensions
 
         foreach (var transmission in dialog.Transmissions)
         {
-            transmission.FilterLocalizations(acceptedLanguages);
+            transmission.FilterTransmissionLocalizations(acceptedLanguages);
         }
 
         foreach (var activity in dialog.Activities)
         {
-            activity.FilterLocalizations(acceptedLanguages);
+            activity.FilterActivityLocalizations(acceptedLanguages);
         }
     }
 
-    public static void FilterLocalizations(this DialogTransmission transmission, List<AcceptedLanguage>? acceptedLanguages)
+    public static void FilterTransmissionLocalizations(this DialogTransmission transmission, List<AcceptedLanguage>? acceptedLanguages)
     {
         if (acceptedLanguages is null or [])
         {
@@ -66,7 +66,7 @@ internal static class DialogExtensions
         }
     }
 
-    public static void FilterLocalizations(this DialogActivity activity, List<AcceptedLanguage>? acceptedLanguages) =>
+    public static void FilterActivityLocalizations(this DialogActivity activity, List<AcceptedLanguage>? acceptedLanguages) =>
             activity.Description?.Localizations.PruneLocalizations(acceptedLanguages);
 
     public static void PruneLocalizations(this List<Localization>? localizations, List<AcceptedLanguage>? acceptedLanguages)

@@ -76,6 +76,23 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
                 false));
     }
 
+    public virtual async Task<IReadOnlyDictionary<string, ServiceResourceInformation>> GetResourceInformation(
+        IReadOnlyCollection<string> serviceResourceIds,
+        CancellationToken cancellationToken)
+    {
+        var resources = await Task.WhenAll(serviceResourceIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(x => GetResourceInformation(x, cancellationToken)));
+
+        return resources
+            .OfType<ServiceResourceInformation>()
+            .ToDictionary(
+                x => x.ResourceId,
+                x => x,
+                StringComparer.OrdinalIgnoreCase);
+    }
+
     /// <summary>
     /// Returns an empty subject-resource change stream in local development.
     /// </summary>

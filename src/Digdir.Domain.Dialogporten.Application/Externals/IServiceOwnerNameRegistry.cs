@@ -3,6 +3,10 @@ namespace Digdir.Domain.Dialogporten.Application.Externals;
 public interface IServiceOwnerNameRegistry
 {
     Task<ServiceOwnerInfo?> GetServiceOwnerInfo(string orgNumber, CancellationToken cancellationToken);
+
+    Task<IReadOnlyDictionary<string, ServiceOwnerInfo>> GetServiceOwnerInfo(
+        IReadOnlyCollection<string> orgNumbers,
+        CancellationToken cancellationToken);
 }
 
 public sealed class ServiceOwnerInfo

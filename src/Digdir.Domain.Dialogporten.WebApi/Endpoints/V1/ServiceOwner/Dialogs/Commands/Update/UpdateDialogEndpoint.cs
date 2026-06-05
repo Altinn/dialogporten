@@ -51,7 +51,7 @@ public sealed class UpdateDialogEndpoint : Endpoint<UpdateDialogRequest>
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                return SendNoContentAsync(ct);
+                return Send.NoContentAsync(ct);
             },
             notFound => this.NotFoundAsync(notFound, ct),
             gone => this.GoneAsync(gone, ct),

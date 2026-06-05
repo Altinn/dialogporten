@@ -6,10 +6,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Microsoft.AspNetCore.ResponseCompression (used by ResponseCompressionExtensions) ships
+             only through the ASP.NET Core shared framework; there is no standalone NuGet for it. -->
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
         <PackageReference Include="HotChocolate.Diagnostics" Version="15.1.16" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.1.1" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0"/>
         <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.5.0" />
         <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.5.0" />

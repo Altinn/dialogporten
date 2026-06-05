@@ -25,6 +25,12 @@ public sealed class DialogByIdNotVisible : IDialogByIdError
     public DateTimeOffset VisibleFrom { get; set; }
 }
 
+public sealed class DialogByIdExpired : IDialogByIdError
+{
+    public string Message { get; set; } = null!;
+    public DateTimeOffset ExpiredAt { get; set; }
+}
+
 public sealed class DialogByIdForbidden : IDialogByIdError
 {
     public string Message { get; set; } = "Forbidden";

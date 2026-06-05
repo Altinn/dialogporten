@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
         .AddTransient<ActivityEnricher, DialogportenGqlActivityEnricher>()
         .AddGraphQLServer()
         .AddHttpRequestInterceptor<DialogportenHttpRequestInterceptor>()
+        .TryAddTypeInterceptor<EnableResponseCompressionTypeInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
         // This assumes that subscriptions have been set up by the infrastructure
         .AddSubscriptionType<Subscriptions>()

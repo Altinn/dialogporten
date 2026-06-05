@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -124,7 +125,9 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
         string userAuthLevel, DialogDbContext db)
     {
         var cacheProvider = Substitute.For<IFusionCacheProvider>();
-        cacheProvider.GetCache(Arg.Any<string>()).Returns(Substitute.For<IFusionCache>());
+        cacheProvider
+            .GetCache(Arg.Any<string>())
+            .Returns(_ => new NullFusionCache(Options.Create(new FusionCacheOptions())));
 
         var user = Substitute.For<IUser>();
         user.GetPrincipal().Returns(TestUsers.FromDefault()
@@ -137,8 +140,7 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             user,
             db,
             new ServiceResourceMinimumAuthenticationLevelResolver(
-                db,
-                Substitute.For<ILogger<ServiceResourceMinimumAuthenticationLevelResolver>>()),
+                new ResourcePolicyInformationRepository(db, cacheProvider)),
             Substitute.For<IPartyResourceReferenceRepository>(),
             Substitute.For<ILogger<AltinnAuthorizationClient>>(),
             Substitute.For<IServiceScopeFactory>(),

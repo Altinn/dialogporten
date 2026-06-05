@@ -52,7 +52,7 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
             success =>
             {
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
-                return SendCreatedAtAsync<GetDialogActivityEndpoint>(
+                return Send.CreatedAtAsync<GetDialogActivityEndpoint>(
                     new GetActivityQuery { DialogId = req.DialogId, ActivityId = success.ActivityId },
                     success.ActivityId,
                     cancellation: ct

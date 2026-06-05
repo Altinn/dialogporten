@@ -25,7 +25,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             dialogId,
             transmissionId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -51,7 +51,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             dialogId,
             transmissionId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

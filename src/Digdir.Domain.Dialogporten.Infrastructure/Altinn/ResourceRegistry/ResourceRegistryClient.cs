@@ -58,8 +58,30 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         string serviceResourceId,
         CancellationToken cancellationToken)
     {
+        var resources = await GetResourceInformation([serviceResourceId], cancellationToken);
+        return resources.GetValueOrDefault(serviceResourceId);
+    }
+
+    public async Task<IReadOnlyDictionary<string, ServiceResourceInformation>> GetResourceInformation(
+        IReadOnlyCollection<string> serviceResourceIds,
+        CancellationToken cancellationToken)
+    {
+        var requestedServiceResourceIds = serviceResourceIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (requestedServiceResourceIds.Count == 0)
+        {
+            return new Dictionary<string, ServiceResourceInformation>(StringComparer.OrdinalIgnoreCase);
+        }
+
         var resources = await FetchServiceResources(cancellationToken);
-        return resources.FirstOrDefault(x => string.Equals(x.ResourceId, serviceResourceId, StringComparison.OrdinalIgnoreCase));
+        return resources
+            .Where(x => requestedServiceResourceIds.Contains(x.ResourceId))
+            .ToDictionary(
+                x => x.ResourceId,
+                x => x,
+                StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>

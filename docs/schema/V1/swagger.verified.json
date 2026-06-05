@@ -143,6 +143,15 @@
           "Correction"
         ]
       },
+      "DigdirDomainDialogportenApplicationCommon_Link": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Http_HttpVerb": {
         "description": "",
         "enum": [
@@ -548,6 +557,21 @@
         "properties": {
           "grantType": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupGrantType"
+          },
+          "links": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+              }
+            ]
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "subject": {
             "type": "string"
@@ -2676,6 +2700,142 @@
           "maxServiceResourceFilterValues": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesGet_ServiceResourceMetadataRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem": {
+        "additionalProperties": false,
+        "properties": {
+          "accessPackages": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -8339,6 +8499,61 @@
         ]
       }
     },
+    "/api/v1/metadata/serviceresources": {
+      "get": {
+        "description": "Returns public service resource metadata with related service owner, role, and access package metadata.",
+        "operationId": "V1MetadataServiceResourcesGet_ServiceResourceMetadata",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata"
+                }
+              }
+            },
+            "description": "Service resource metadata."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets service resources currently in use in Dialogporten.",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialoglookup": {
       "get": {
         "description": "Resolves dialog metadata for a supported instance reference in service owner context.",
@@ -8809,9 +9024,6 @@
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           },
           "400": {
             "content": {
@@ -9884,9 +10096,6 @@
               }
             }
           },
-          "204": {
-            "description": "No Content"
-          },
           "400": {
             "content": {
               "application/problem\u002Bjson": {
@@ -10799,9 +11008,6 @@
                 }
               }
             }
-          },
-          "204": {
-            "description": "No Content"
           },
           "400": {
             "content": {

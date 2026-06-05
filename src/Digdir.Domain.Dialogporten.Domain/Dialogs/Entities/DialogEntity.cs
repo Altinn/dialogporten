@@ -118,10 +118,9 @@ public sealed class DialogEntity :
     {
         _domainEvents.Add(new DialogCreatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
-        // We need to set UpdatedAt and CreatedAt to VisibleFrom to simulate it coming into existence at that time.
-        // This makes sure that sorting on UpdatedAt/ContentUpdatedAt works as expected, including
-        // polling on UpdatedSince in the API.
-        if (VisibleFrom is { } visibleFrom)
+        // We only backdate the aggregate when the dialog becomes visible in the future.
+        // Historic dialogs may have VisibleFrom in the past and should keep their actual creation timestamps.
+        if (VisibleFrom is { } visibleFrom && visibleFrom > utcNow)
         {
             UpdatedAt = visibleFrom;
             CreatedAt = visibleFrom;

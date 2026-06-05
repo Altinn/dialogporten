@@ -117,6 +117,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             {
                 x.SeenSinceLastContentUpdate.Count.Should().Be(1);
                 x.SeenSinceLastUpdate.Count.Should().Be(1);
+                x.SeenSinceLastUpdate.First().SeenBy.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
                 x.SeenSinceLastContentUpdate.First().SeenBy.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
             });
 

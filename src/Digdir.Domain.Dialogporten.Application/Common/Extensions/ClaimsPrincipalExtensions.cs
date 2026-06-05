@@ -459,7 +459,7 @@ public static class ClaimsPrincipalExtensions
     }
 
     // https://docs.altinn.studio/authentication/systemauthentication/
-    public sealed class SystemUserAuthorizationDetails
+    internal sealed class SystemUserAuthorizationDetails
     {
         [JsonPropertyName("type")]
         public string? Type { get; set; }
@@ -471,7 +471,7 @@ public static class ClaimsPrincipalExtensions
         public ConsumerOrganization SystemUserOrg { get; set; } = new();
     }
 
-    public sealed class ConsumerOrganization
+    internal sealed class ConsumerOrganization
     {
         [JsonPropertyName("authority")]
         public string Authority { get; set; } = null!;

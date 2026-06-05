@@ -11,7 +11,7 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
 {
 
     [E2EFact]
-    public async Task Should_Return_200_When_SystemUser_Gets_Dialog_And_Make_Seen_Log()
+    public async Task Should_Return_200_And_Make_Seen_Log_When_SystemUser_Gets_Dialog()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>

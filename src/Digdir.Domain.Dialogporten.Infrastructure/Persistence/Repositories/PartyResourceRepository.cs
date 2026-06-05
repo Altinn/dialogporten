@@ -21,14 +21,18 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 /// </summary>
 internal sealed class PartyResourceRepository : IPartyResourceReferenceRepository
 {
+    internal const string ReferencedResourcesCacheName = "PartyResourceReferencedResources";
+
     private const string ResourcePrefix = "urn:altinn:resource:";
     private const string CacheKeyPrefix = "ps:";
+    private const string ReferencedResourcesCacheKey = "all";
 
     private static readonly StringComparer Comparer = StringComparer.InvariantCultureIgnoreCase;
 
     private readonly NpgsqlDataSource _dataSource;
     private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
     private readonly IFusionCache _cache;
+    private readonly IFusionCache _referencedResourcesCache;
 
     public PartyResourceRepository(
         NpgsqlDataSource dataSource,
@@ -41,10 +45,37 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
 
         var cache = cacheProvider.GetCache(nameof(IPartyResourceReferenceRepository));
         ArgumentNullException.ThrowIfNull(cache);
+        var referencedResourcesCache = cacheProvider.GetCache(ReferencedResourcesCacheName);
+        ArgumentNullException.ThrowIfNull(referencedResourcesCache);
 
         _dataSource = dataSource;
         _applicationSettings = applicationSettings;
         _cache = cache;
+        _referencedResourcesCache = referencedResourcesCache;
+    }
+
+    public async Task<IReadOnlyCollection<string>> GetReferencedResources(CancellationToken cancellationToken) =>
+        await _referencedResourcesCache.GetOrSetAsync<List<string>>(
+            ReferencedResourcesCacheKey,
+            FetchReferencedResources,
+            token: cancellationToken);
+
+    private async Task<List<string>> FetchReferencedResources(CancellationToken cancellationToken)
+    {
+        const string sql =
+            """
+            SELECT r."UnprefixedResourceIdentifier"
+            FROM partyresource."Resource" r
+            ORDER BY r."UnprefixedResourceIdentifier"
+            """;
+
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        var command = new CommandDefinition(sql, cancellationToken: cancellationToken);
+        var rows = await connection.QueryAsync<string>(command);
+
+        return rows
+            .Select(x => $"{ResourcePrefix}{x}")
+            .ToList();
     }
 
     public async Task<Dictionary<string, HashSet<string>>> GetReferencedResourcesByParty(

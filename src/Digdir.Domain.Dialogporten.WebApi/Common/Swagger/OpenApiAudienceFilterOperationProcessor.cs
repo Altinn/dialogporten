@@ -6,11 +6,13 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 
 public sealed class OpenApiAudienceFilterOperationProcessor(string audience) : IOperationProcessor
 {
+    private const string MetadataSegment = "/metadata/";
     private readonly string _audienceSegment = $"/{audience.Trim('/')}/";
 
     public bool Process(OperationProcessorContext context)
     {
         var path = $"/{((AspNetCoreOperationProcessorContext)context).ApiDescription.RelativePath?.TrimStart('~').TrimEnd('/')}";
-        return path.Contains(_audienceSegment, StringComparison.OrdinalIgnoreCase);
+        return path.Contains(_audienceSegment, StringComparison.OrdinalIgnoreCase)
+            || path.Contains(MetadataSegment, StringComparison.OrdinalIgnoreCase);
     }
 }

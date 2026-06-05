@@ -19,12 +19,22 @@ internal static class OpenApiTypeNameOverrides
         ["DialogsEntitiesActions_DialogGuiActionPriority"] = "DialogGuiActionPriority",
         ["DialogsEntitiesActivities_DialogActivityType"] = "DialogActivityType",
         ["DialogsEntitiesTransmissions_DialogTransmissionType"] = "DialogTransmissionType",
+        ["DigdirDomainDialogportenApplicationCommon_Link"] = "Links",
         ["Http_HttpVerb"] = "HttpVerb",
         ["ProblemDetails_Error"] = "ProblemDetailsError",
         ["V1CommonContent_ContentValue"] = "ContentValue",
         ["V1CommonLocalizations_Localization"] = "Localization",
         ["V1EndUserCommon_AcceptedLanguage"] = "AcceptedLanguage",
-        ["V1EndUserCommon_AcceptedLanguages"] = "AcceptedLanguages"
+        ["V1EndUserCommon_AcceptedLanguages"] = "AcceptedLanguages",
+        ["V1MetadataLimitsQueriesGet_EndUserSearchLimits"] = "EndUserSearchLimits",
+        ["V1MetadataLimitsQueriesGet_Limits"] = "Limits",
+        ["V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits"] = "ServiceOwnerSearchLimits",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata"] = "ServiceResourceMetadataList",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage"] = "ServiceResourceAccessPackage",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem"] = "ServiceResourceMetadata",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole"] = "ServiceResourceRole",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner"] = "ServiceResourceOwner",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource"] = "ServiceResource"
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static readonly FrozenDictionary<string, string> EndUserOverrides = new Dictionary<string, string>(StringComparer.Ordinal)

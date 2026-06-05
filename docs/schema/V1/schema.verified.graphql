@@ -301,10 +301,16 @@ type DialogLookupAuthorizationEvidence {
 type DialogLookupAuthorizationEvidenceItem {
   grantType: DialogLookupGrantType!
   subject: String!
+  name: [Localization!]!
+  links: DialogLookupLinks
 }
 
 type DialogLookupForbidden implements DialogLookupError {
   message: String!
+}
+
+type DialogLookupLinks {
+  metadata: String!
 }
 
 type DialogLookupNotFound implements DialogLookupError {
@@ -378,7 +384,7 @@ type Localization {
   languageCode: String!
 }
 
-type Mutations {
+type Mutations @authorize(policy: "enduser") {
   setSystemLabel(input: SetSystemLabelInput!): SetSystemLabelPayload!
   bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
 }
@@ -389,6 +395,7 @@ type Queries @authorize(policy: "enduser") {
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
+  serviceResources: ServiceResourceMetadata!
 }
 
 type SearchContent {
@@ -502,6 +509,47 @@ type ServiceOwnerSearchLimits {
   maxPartyFilterValues: Int!
   maxServiceResourceFilterValues: Int!
   maxExtendedStatusFilterValues: Int!
+}
+
+type ServiceResourceMetadata {
+  items: [ServiceResourceMetadataItem!]!
+}
+
+type ServiceResourceMetadataAccessPackage {
+  urn: String!
+  name: [Localization!]!
+  links: ServiceResourceMetadataLinks!
+}
+
+type ServiceResourceMetadataItem {
+  serviceResource: ServiceResourceMetadataServiceResource!
+  roles: [ServiceResourceMetadataRole!]!
+  accessPackages: [ServiceResourceMetadataAccessPackage!]!
+  serviceOwner: ServiceResourceMetadataServiceOwner!
+}
+
+type ServiceResourceMetadataLinks {
+  metadata: String!
+}
+
+type ServiceResourceMetadataRole {
+  urn: String!
+  name: [Localization!]!
+  links: ServiceResourceMetadataLinks!
+}
+
+type ServiceResourceMetadataServiceOwner {
+  orgNumber: String!
+  code: String!
+  name: [Localization!]!
+}
+
+type ServiceResourceMetadataServiceResource {
+  id: String!
+  isDelegable: Boolean!
+  minimumAuthenticationLevel: Int!
+  name: [Localization!]!
+  links: ServiceResourceMetadataLinks!
 }
 
 type SetSystemLabelConcurrencyError implements SetSystemLabelError {

@@ -97,7 +97,7 @@ resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-0
   name: appConfigurationName
 }
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
 

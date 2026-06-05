@@ -20,7 +20,7 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var response = await Fixture.EndUserApi.V1.GetDialogLookup(
             instanceRef,
             new(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
@@ -52,7 +52,7 @@ public class GetDialogLookupTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var response = await Fixture.EndUserApi.V1.GetDialogLookup(
             instanceRef,
             new(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

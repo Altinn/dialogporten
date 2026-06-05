@@ -203,7 +203,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             if (!listAuthorizationResult)
             {
-                return new EntityNotFound<DialogEntity>(request.DialogId);
+                return new Forbidden("Forbidden");
             }
         }
 
@@ -244,7 +244,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
 
-        dialog.FilterLocalizations(request.AcceptedLanguages);
+        dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
         var dialogDto = _mapper.Map<DialogDto>(dialog);
 

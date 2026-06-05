@@ -144,6 +144,22 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         response.Error!.Content.Should().Contain(Constants.AltinnAuthLevelTooLow);
     }
 
+    [E2EFact]
+    public async Task Should_Return_Forbidden_When_EndUser_Has_No_Access_To_Dialog()
+    {
+        // Arrange
+        // Create a dialog for a party the default end user does not represent, so the end user
+        // has neither read access to the main resource nor list authorization for the dialog.
+        var unauthorizedParty = $"{NorwegianPersonIdentifier.PrefixWithSeparator}08895699684";
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x => x.Party = unauthorizedParty);
+
+        // Act
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+    }
+
     [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Get_Dialog_Verify_Snapshot()
     {

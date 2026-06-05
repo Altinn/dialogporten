@@ -27,6 +27,21 @@ public class PartyResourceRepositoryTests(DialogApplication application) : Appli
     private const string Resource3 = $"urn:altinn:resource:{Resource3UnprefixedIdentifier}";
 
     [Fact]
+    public async Task GetReferencedResources_ShouldReturnDistinctFullResourceUrns()
+    {
+        await SeedPartyResourceData(CancellationToken.None);
+
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var sut = scope.ServiceProvider.GetRequiredService<IPartyResourceReferenceRepository>();
+
+        var result = await sut.GetReferencedResources(CancellationToken.None);
+
+        Assert.Equal(
+            [Resource1, Resource2, Resource3],
+            result.Order(StringComparer.Ordinal).ToList());
+    }
+
+    [Fact]
     public async Task GetReferencedResourcesByParty_ShouldReturnOnlyRequestedResources()
     {
         await SeedPartyResourceData(CancellationToken.None);

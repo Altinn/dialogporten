@@ -28,7 +28,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             ct => Fixture.EndUserApi.V1.SearchDialogs(new()
             {
                 Party = [E2EConstants.DefaultParty]
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items
                 .FirstOrDefault(x => x.Id == dialogId)
                 ?.SeenSinceLastUpdate.Count > 0,
@@ -66,7 +66,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelTag
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
@@ -98,7 +98,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelTag,
                 Limit = 4
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count == 4,
             degradationMessage: "Search indexing speed is degraded.");
 
@@ -159,7 +159,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         var token = await TestTokenGenerator.GenerateTokenAsync(
             TokenKind.EndUser,
             Fixture.Settings,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         var uriBuilder = new UriBuilder(Fixture.Settings.DialogportenBaseUri)
         {
@@ -213,7 +213,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = uniqueTitle
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
@@ -263,7 +263,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = uniqueAdditionalInfo
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
@@ -304,7 +304,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = uniqueSenderName
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
@@ -346,7 +346,7 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             {
                 Party = [E2EConstants.DefaultParty],
                 Search = sentinelLabel
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: searchResult => searchResult.Content?.Items.Any(x => x.Id == dialogId) is true,
             degradationMessage: "Search indexing speed is degraded.");
 

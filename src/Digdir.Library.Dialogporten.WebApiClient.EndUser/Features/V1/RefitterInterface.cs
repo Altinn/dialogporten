@@ -4,6 +4,7 @@
 
 
 using Refit;
+using Altinn.ApiClients.Maskinporten.Models;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -160,6 +161,60 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
     }
 
+    /// <summary>Gets service resources currently in use in Dialogporten.</summary>
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
+    public partial interface IMetadataApi
+    {
+        /// <summary>Gets service resources currently in use in Dialogporten.</summary>
+        /// <remarks>Returns public service resource metadata with related service owner, role, and access package metadata.</remarks>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Service resource metadata.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/serviceresources")]
+        Task<IApiResponse<ServiceResourceMetadataList>> GetServiceResourceMetadata([Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets currently enforced application-level query limits</summary>
+        /// <remarks>Returns the active limits for EndUser and ServiceOwner search filters.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>The currently enforced application-level query limits.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/limits")]
+        Task<IApiResponse<Limits>> GetLimits(CancellationToken cancellationToken = default);
+    }
+
     /// <summary>Gets a list of dialog label assignment logs</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IEnduserApi
@@ -203,7 +258,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/context/labellog")]
-        Task<IApiResponse<ICollection<LabelAssignmentLog>>> SearchDialogLabelAssignmentLogs(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<LabelAssignmentLog>>> SearchDialogLabelAssignmentLogs(System.Guid dialogId, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Sets the system labels of a dialog</summary>
         /// <remarks>
@@ -266,7 +321,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/enduser/dialogs/{dialogId}/context/systemlabels")]
-        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, CancellationToken cancellationToken = default);
+        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
@@ -315,7 +370,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/enduser/dialogs/context/systemlabels/actions/bulkset")]
-        Task<IApiResponse> BulkSetDialogSystemLabels([Body] BulkSetSystemLabel dto, CancellationToken cancellationToken = default);
+        Task<IApiResponse> BulkSetDialogSystemLabels([Body] BulkSetSystemLabel dto, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>
@@ -357,7 +412,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -394,7 +449,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(System.Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(System.Guid dialogId, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -432,7 +487,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<ICollection<DialogActivitySearchItem>>> SearchDialogActivities(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogActivitySearchItem>>> SearchDialogActivities(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
@@ -468,7 +523,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/dialogs")]
-        Task<IApiResponse<PaginatedListOfDialogListItem>> SearchDialogs([Query] SearchDialogsQueryParams queryParams, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<PaginatedListOfDialogListItem>> SearchDialogs([Query] SearchDialogsQueryParams queryParams, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog transmission</summary>
         /// <remarks>Gets a single transmission belonging to a dialog.</remarks>
@@ -511,7 +566,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<DialogTransmissionDetails>> GetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogTransmissionDetails>> GetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
@@ -549,7 +604,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<DialogSeenLogDetails>> GetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogSeenLogDetails>> GetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
@@ -588,7 +643,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(System.Guid dialogId, System.Guid activityId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(System.Guid dialogId, System.Guid activityId, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>Gets a single dialog aggregate.</remarks>
@@ -626,7 +681,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}")]
-        Task<IApiResponse<Dialog>> GetDialog(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<Dialog>> GetDialog(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Looks up a dialog by instance reference</summary>
         /// <remarks>Resolves dialog metadata and authorization evidence for a supported instance reference.</remarks>
@@ -668,7 +723,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialoglookup")]
-        Task<IApiResponse<EndUserIdentifierLookup>> GetDialogLookup([Query] string instanceRef, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+        Task<IApiResponse<EndUserIdentifierLookup>> GetDialogLookup([Query] string instanceRef, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets the list of authorized parties for the end user</summary>
         /// <remarks>Gets the list of authorized parties for the end user.</remarks>
@@ -700,7 +755,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/parties")]
-        Task<IApiResponse<Parties>> GetParties(CancellationToken cancellationToken = default);
+        Task<IApiResponse<Parties>> GetParties([Property("Altinn.ApiClients.Maskinporten.TokenRequestContext")] MaskinportenTokenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
     }
 
 }
@@ -732,6 +787,192 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
     using System = global::System;
 
     
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceMetadataList
+    {
+
+        [JsonPropertyName("items")]
+        public ICollection<ServiceResourceMetadata> Items { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceMetadata
+    {
+
+        [JsonPropertyName("serviceResource")]
+        public ServiceResource ServiceResource { get; set; }
+
+        [JsonPropertyName("roles")]
+        public ICollection<ServiceResourceRole> Roles { get; set; }
+
+        [JsonPropertyName("accessPackages")]
+        public ICollection<ServiceResourceAccessPackage> AccessPackages { get; set; }
+
+        [JsonPropertyName("serviceOwner")]
+        public ServiceResourceOwner ServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResource
+    {
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Localization
+    {
+
+        /// <summary>
+        /// The localized text (or URL if a front-channel embed).
+        /// </summary>
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
+
+        /// <summary>
+        /// The language code of the localization in ISO 639-1 format.
+        /// </summary>
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Links
+    {
+
+        [JsonPropertyName("metadata")]
+        public string Metadata { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceRole
+    {
+
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceAccessPackage
+    {
+
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceOwner
+    {
+
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class AcceptedLanguages
+    {
+
+        [JsonPropertyName("acceptedLanguage")]
+        public ICollection<AcceptedLanguage> AcceptedLanguage { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class AcceptedLanguage
+    {
+
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; }
+
+        [JsonPropertyName("weight")]
+        public int Weight { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Limits
+    {
+
+        [JsonPropertyName("endUserSearch")]
+        public EndUserSearchLimits EndUserSearch { get; set; }
+
+        [JsonPropertyName("serviceOwnerSearch")]
+        public ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class EndUserSearchLimits
+    {
+
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; }
+
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; }
+
+        [JsonPropertyName("maxOrgFilterValues")]
+        public int MaxOrgFilterValues { get; set; }
+
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceOwnerSearchLimits
+    {
+
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; }
+
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; }
+
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; }
+
+    }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class LabelAssignmentLog
@@ -1101,24 +1342,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class Localization
-    {
-
-        /// <summary>
-        /// The localized text (or URL if a front-channel embed).
-        /// </summary>
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
-
-        /// <summary>
-        /// The language code of the localization in ISO 639-1 format.
-        /// </summary>
-        [JsonPropertyName("languageCode")]
-        public string LanguageCode { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class DialogTransmissionSearchAttachment
     {
 
@@ -1220,27 +1443,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class AcceptedLanguages
-    {
-
-        [JsonPropertyName("acceptedLanguage")]
-        public ICollection<AcceptedLanguage> AcceptedLanguage { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class AcceptedLanguage
-    {
-
-        [JsonPropertyName("languageCode")]
-        public string LanguageCode { get; set; }
-
-        [JsonPropertyName("weight")]
-        public int Weight { get; set; }
 
     }
 
@@ -2959,6 +3161,12 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         [JsonPropertyName("subject")]
         public string Subject { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
 
     }
 

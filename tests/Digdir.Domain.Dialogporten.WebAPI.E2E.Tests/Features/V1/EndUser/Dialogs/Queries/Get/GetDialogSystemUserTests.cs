@@ -31,16 +31,17 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
     }
 
     [E2EFact]
-    public async Task Should_Return_404_When_SystemUser_Gets_Another_Partys_Dialog()
+    public async Task Should_Return_Forbidden_When_SystemUser_Gets_Another_Partys_Dialog()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
+
 
         // Act
         using var _ = Fixture.UseSystemUserTokenOverrides();
         var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }
 }

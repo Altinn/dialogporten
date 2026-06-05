@@ -34,19 +34,16 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var dialog1Response = await Fixture.EndUserApi.GetDialog(createDialog1.Result);
-        var dialog2Response = await Fixture.EndUserApi.GetDialog(createDialog2.Result);
+        var getDialog1 = Fixture.EndUserApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.EndUserApi.GetDialog(createDialog2.Result);
+        await Task.WhenAll(getDialog1, getDialog2);
 
-        dialog1Response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        dialog2Response.ShouldHaveStatusCode(HttpStatusCode.OK);
-
-        dialog1Response.Content!.EndUserContext.SystemLabels
-            .Should().ContainSingle()
-            .Which.Should().Be(Bin);
-
-        dialog2Response.Content!.EndUserContext.SystemLabels
-            .Should().ContainSingle()
-            .Which.Should().Be(Bin);
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
     }
 
     [E2EFact]
@@ -79,6 +76,16 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+        var getDialog1 = Fixture.EndUserApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.EndUserApi.GetDialog(createDialog2.Result);
+        await Task.WhenAll(getDialog1, getDialog2);
+
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Archive);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Archive);
     }
 
     [E2EFact]
@@ -87,11 +94,11 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Arrange
         var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
         var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
-        await Task.WhenAll(createDialog1, createDialog2);
+        var createForbiddenDialog = Fixture.ServiceownerApi
+            .CreateSimpleDialogAsync(dialog => dialog.Party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}" +
+                                                              $"{E2EConstants.AlternateEndUserSsn}");
 
-        var forbiddenDialogId = await Fixture.ServiceownerApi
-            .CreateSimpleDialogAsync(dialog => dialog.Party = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}" +
-                                                              $"{E2EConstants.GetDefaultServiceOwnerOrgNr()}");
+        await Task.WhenAll(createDialog1, createDialog2, createForbiddenDialog);
 
         // Act
         var response = await Fixture.EndUserApi.BulkSetSystemLabels(request =>
@@ -100,7 +107,7 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             [
                 new() { DialogId = createDialog1.Result },
                 new() { DialogId = createDialog2.Result },
-                new() { DialogId = forbiddenDialogId }
+                new() { DialogId = createForbiddenDialog.Result }
             ];
             request.AddLabels = [Archive];
         });
@@ -108,7 +115,23 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         response.Error.Should().NotBeNull();
-        response.Error.Content.Should().Contain(forbiddenDialogId.ToString());
+        response.Error.Content.Should().Contain(createForbiddenDialog.Result.ToString());
+
+        var getDialog1 = Fixture.EndUserApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.EndUserApi.GetDialog(createDialog2.Result);
+        Fixture.UseEndUserTokenOverrides(ssn: E2EConstants.AlternateEndUserSsn);
+        var getDialog3 = Fixture.EndUserApi.GetDialog(createForbiddenDialog.Result);
+        await Task.WhenAll(getDialog1, getDialog2, getDialog3);
+
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        var dialog3 = getDialog3.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog3.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+        dialog3.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]
@@ -125,13 +148,12 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 d.Party = E2EConstants.DefaultSystemUserOrgUrn;
             }
         );
-        await Task.WhenAll(createDialog1, createDialog2);
-
-        var forbiddenDialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(d =>
+        var createForbiddenDialog = Fixture.ServiceownerApi.CreateSimpleDialogAsync(d =>
         {
-            d.Party = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}" +
-                      $"{E2EConstants.GetDefaultServiceOwnerOrgNr()}";
+            d.Party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}" +
+                      $"{E2EConstants.AlternateEndUserSsn}";
         });
+        await Task.WhenAll(createDialog1, createDialog2);
 
         // Act
         using var _ = Fixture.UseSystemUserTokenOverrides();
@@ -141,7 +163,7 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             [
                 new() { DialogId = createDialog1.Result },
                 new() { DialogId = createDialog2.Result },
-                new() { DialogId = forbiddenDialogId }
+                new() { DialogId = createForbiddenDialog.Result }
             ];
             request.AddLabels = [Archive];
         });
@@ -149,6 +171,22 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         response.Error.Should().NotBeNull();
-        response.Error.Content.Should().Contain(forbiddenDialogId.ToString());
+        response.Error.Content.Should().Contain(createForbiddenDialog.Result.ToString());
+
+        var getDialog1 = Fixture.EndUserApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.EndUserApi.GetDialog(createDialog2.Result);
+        Fixture.UseEndUserTokenOverrides(ssn: E2EConstants.AlternateEndUserSsn);
+        var getDialog3 = Fixture.EndUserApi.GetDialog(createForbiddenDialog.Result);
+        await Task.WhenAll(getDialog1, getDialog2, getDialog3);
+
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        var dialog3 = getDialog3.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog3.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+        dialog3.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 }

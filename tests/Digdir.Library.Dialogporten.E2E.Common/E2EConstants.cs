@@ -9,6 +9,7 @@ public static class E2EConstants
     public const string TestTokenBaseUrl = "https://altinn-testtools-token-generator.azurewebsites.net/api";
     public const string DefaultServiceOwnerOrgName = "ttd";
     public const string DefaultEndUserSsn = "08844397713";
+    public const string AlternateEndUserSsn = "13838599936";
     public const string DefaultSystemUserId = "51551dd0-b9c5-4f4b-a4a2-9b7e3669b364";
     public const string DefaultSystemUserOrgNo = "310057223";
     public const string DefaultSystemUserOrgUrn = "urn:altinn:organization:identifier-no:" + DefaultSystemUserOrgNo;

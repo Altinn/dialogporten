@@ -34,6 +34,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 using HotChocolate.Subscriptions;
+using MessagePack.Resolvers;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using StackExchange.Redis;
@@ -161,7 +162,7 @@ public static class InfrastructureExtensions
             // Feature Metrics
             .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 
-        services.AddFusionCacheNeueccMessagePackSerializer();
+        services.AddFusionCacheNeueccMessagePackSerializer(ContractlessStandardResolverAllowPrivate.Options);
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
         services.AddFusionCacheStackExchangeRedisBackplane(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
 

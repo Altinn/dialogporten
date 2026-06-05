@@ -1,6 +1,37 @@
 ﻿[
   {
     "id": "00000000-0000-0000-0000-000000000000",
+    "idempotentKey": null,
+    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+    "authorizationAttribute": null,
+    "extendedType": null,
+    "externalReference": "first-transmission",
+    "relatedTransmissionId": null,
+    "type": "Information",
+    "sender": {
+      "actorType": "ServiceOwner",
+      "actorName": null,
+      "actorId": null
+    },
+    "content": {
+      "title": {
+        "value": [
+          {
+            "value": "Melding med vedlegg",
+            "languageCode": "nb"
+          }
+        ],
+        "mediaType": "text/plain",
+        "isAuthorized": null
+      },
+      "summary": null,
+      "contentReference": null
+    },
+    "attachments": null,
+    "navigationalActions": null
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
     "idempotentKey": "idempotent-key",
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
     "authorizationAttribute": null,
@@ -78,36 +109,5 @@
         "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
       }
     ]
-  },
-  {
-    "id": "00000000-0000-0000-0000-000000000000",
-    "idempotentKey": null,
-    "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-    "authorizationAttribute": null,
-    "extendedType": null,
-    "externalReference": "first-transmission",
-    "relatedTransmissionId": null,
-    "type": "Information",
-    "sender": {
-      "actorType": "ServiceOwner",
-      "actorName": null,
-      "actorId": null
-    },
-    "content": {
-      "title": {
-        "value": [
-          {
-            "value": "Melding med vedlegg",
-            "languageCode": "nb"
-          }
-        ],
-        "mediaType": "text/plain",
-        "isAuthorized": null
-      },
-      "summary": null,
-      "contentReference": null
-    },
-    "attachments": null,
-    "navigationalActions": null
   }
 ]

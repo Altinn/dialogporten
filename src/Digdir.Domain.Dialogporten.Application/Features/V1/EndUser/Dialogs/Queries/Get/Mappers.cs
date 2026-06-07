@@ -74,29 +74,49 @@ internal static class DialogContentListMapExtensions
 {
     extension(List<DialogContent>? sources)
     {
-        internal ContentDto? ToContentDto() =>
-            sources is null || sources.Count == 0
-                ? null
-                : sources.Aggregate(new ContentDto(), (dto, content) =>
-                    content.TypeId switch
-                    {
-                        DialogContentType.Values.Title => Apply(dto, x => x.Title = content.ToContentValueDto()),
-                        DialogContentType.Values.NonSensitiveTitle => dto,
-                        DialogContentType.Values.SenderName => Apply(dto, x => x.SenderName = content.ToContentValueDto()),
-                        DialogContentType.Values.Summary => Apply(dto, x => x.Summary = content.ToContentValueDto()),
-                        DialogContentType.Values.NonSensitiveSummary => dto,
-                        DialogContentType.Values.AdditionalInfo => Apply(dto, x => x.AdditionalInfo = content.ToContentValueDto()),
-                        DialogContentType.Values.ExtendedStatus => Apply(dto, x => x.ExtendedStatus = content.ToContentValueDto()),
-                        DialogContentType.Values.MainContentReference => Apply(dto, x => x.MainContentReference = content.ToContentValueDto()),
-                        _ => throw new InvalidOperationException(
-                            $"Unknown TypeId {content.TypeId} found in DialogContent {content.Id}")
-                    });
-    }
+        internal ContentDto? ToContentDto()
+        {
+            if (sources is null || sources.Count == 0)
+            {
+                return null;
+            }
 
-    private static ContentDto Apply(ContentDto dto, Action<ContentDto> action)
-    {
-        action(dto);
-        return dto;
+            var dto = new ContentDto();
+
+            foreach (var content in sources)
+            {
+                switch (content.TypeId)
+                {
+                    case DialogContentType.Values.Title:
+                        dto.Title = content.ToContentValueDto();
+                        break;
+                    case DialogContentType.Values.NonSensitiveTitle:
+                        break;
+                    case DialogContentType.Values.SenderName:
+                        dto.SenderName = content.ToContentValueDto();
+                        break;
+                    case DialogContentType.Values.Summary:
+                        dto.Summary = content.ToContentValueDto();
+                        break;
+                    case DialogContentType.Values.NonSensitiveSummary:
+                        break;
+                    case DialogContentType.Values.AdditionalInfo:
+                        dto.AdditionalInfo = content.ToContentValueDto();
+                        break;
+                    case DialogContentType.Values.ExtendedStatus:
+                        dto.ExtendedStatus = content.ToContentValueDto();
+                        break;
+                    case DialogContentType.Values.MainContentReference:
+                        dto.MainContentReference = content.ToContentValueDto();
+                        break;
+                    default:
+                        throw new InvalidOperationException(
+                            $"Unknown TypeId {content.TypeId} found in DialogContent {content.Id}");
+                }
+            }
+
+            return dto;
+        }
     }
 }
 

@@ -16,7 +16,7 @@
   "updatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "contentUpdatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "status": "NotApplicable",
-  "systemLabel": "Default",
+  "systemLabel": "Bin",
   "isApiOnly": false,
   "hasUnopenedContent": true,
   "content": {
@@ -70,7 +70,20 @@
       "mediaType": "text/plain",
       "isAuthorized": null
     },
-    "mainContentReference": null
+    "mainContentReference": {
+      "value": [
+        {
+          "value": "https://digdir.no/dialog/en",
+          "languageCode": "en"
+        },
+        {
+          "value": "https://digdir.no/dialog/nb",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+      "isAuthorized": true
+    }
   },
   "dialogToken": "***",
   "fromServiceOwnerTransmissionsCount": 3,
@@ -84,7 +97,7 @@
           "languageCode": "nb"
         }
       ],
-      "name": null,
+      "name": "expired-dialog-attachment",
       "urls": [
         {
           "id": "00000000-0000-0000-0000-000000000000",
@@ -93,7 +106,7 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -140,8 +153,8 @@
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
       "isAuthorized": true,
-      "extendedType": null,
-      "externalReference": null,
+      "extendedType": "https://digdir.no/transmission-type/authorized",
+      "externalReference": "authorized-transmission",
       "relatedTransmissionId": null,
       "type": "Information",
       "sender": {
@@ -207,7 +220,7 @@
               "languageCode": "nb"
             }
           ],
-          "name": null,
+          "name": "authorized-transmission-attachment",
           "urls": [
             {
               "id": "00000000-0000-0000-0000-000000000000",
@@ -216,10 +229,35 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
         }
       ],
-      "navigationalActions": null
+      "navigationalActions": [
+        {
+          "title": [
+            {
+              "value": "Expired navigation",
+              "languageCode": "en"
+            },
+            {
+              "value": "Utg\u00E5tt navigasjon",
+              "languageCode": "nb"
+            }
+          ],
+          "url": "https://digdir.no/transmission/expired-navigation",
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        },
+        {
+          "title": [
+            {
+              "value": "Aktiv navigasjon",
+              "languageCode": "nb"
+            }
+          ],
+          "url": "https://digdir.no/transmission/active-navigation",
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        }
+      ]
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -292,7 +330,18 @@
           "expiresAt": null
         }
       ],
-      "navigationalActions": null
+      "navigationalActions": [
+        {
+          "title": [
+            {
+              "value": "Uautorisert navigasjon",
+              "languageCode": "nb"
+            }
+          ],
+          "url": "urn:dialogporten:unauthorized",
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        }
+      ]
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -522,7 +571,7 @@
   "endUserContext": {
     "revision": "00000000-0000-0000-0000-000000000000",
     "systemLabels": [
-      0
+      1
     ]
   }
 }

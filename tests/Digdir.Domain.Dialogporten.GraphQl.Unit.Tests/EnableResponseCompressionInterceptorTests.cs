@@ -63,8 +63,8 @@ public class EnableResponseCompressionInterceptorTests
         }
 
         var provider = services.BuildServiceProvider();
-        var executor = await provider.GetRequiredService<IRequestExecutorResolver>()
-            .GetRequestExecutorAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var executor = await provider.GetRequiredService<IRequestExecutorProvider>()
+            .GetExecutorAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         return (executor, feature);
     }

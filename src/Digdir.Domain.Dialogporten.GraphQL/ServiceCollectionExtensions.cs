@@ -1,4 +1,3 @@
-using AppAny.HotChocolate.FluentValidation;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
@@ -20,12 +19,10 @@ public static class ServiceCollectionExtensions
         .AddSubscriptionType<Subscriptions>()
         .AddAuthorization()
         .RegisterDbContextFactory<DialogDbContext>()
-        .AddFluentValidation()
         .AddQueryType<Queries>()
         .AddMutationType<Mutations>()
         .AddErrorTypes()
         .AddMaxExecutionDepthRule(12)
         .AddInstrumentation()
-        .InitializeOnStartup()
         .Services;
 }

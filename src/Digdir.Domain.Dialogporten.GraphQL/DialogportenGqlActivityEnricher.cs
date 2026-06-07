@@ -1,14 +1,11 @@
 using System.Diagnostics;
-using System.Text;
 using HotChocolate.Diagnostics;
 using HotChocolate.Execution;
-using Microsoft.Extensions.ObjectPool;
 
 namespace Digdir.Domain.Dialogporten.GraphQL;
 
 public sealed class DialogportenGqlActivityEnricher(
-    ObjectPool<StringBuilder> stringBuilderPool,
-    InstrumentationOptions options) : ActivityEnricher(stringBuilderPool, options)
+    InstrumentationOptions options) : ActivityEnricher(options)
 {
     private const string ActivityName = "gql.activity";
     private const string HttpRoute = "http.route";
@@ -16,7 +13,7 @@ public sealed class DialogportenGqlActivityEnricher(
     private const int PrefixLength = 5;
     private const int MaxLength = 100;
 
-    public override void EnrichExecuteRequest(IRequestContext context, Activity activity)
+    public override void EnrichExecuteRequest(RequestContext context, Activity activity)
     {
         base.EnrichExecuteRequest(context, activity);
         var rootActivity = GetRootActivity(activity);

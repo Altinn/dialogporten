@@ -1918,6 +1918,11 @@
           "Refit": "10.2.0"
         }
       },
+      "Scalar.AspNetCore": {
+        "type": "Transitive",
+        "resolved": "2.14.14",
+        "contentHash": "xNa3MadDudKk7y+0gQPBQihVL+JxGP3KNZHB4Zl2W42ATFIffHHHBjsuyKJ4YPUnnA7NUiHR/diqV/FTZC9dkg=="
+      },
       "ScottBrady.IdentityModel": {
         "type": "Transitive",
         "resolved": "4.1.0",
@@ -2460,6 +2465,7 @@
           "Microsoft.Azure.AppConfiguration.AspNetCore": "[8.5.0, )",
           "NSwag.AspNetCore": "[14.7.1, )",
           "NSwag.MSBuild": "[14.7.1, )",
+          "Scalar.AspNetCore": "[2.14.14, )",
           "Serilog.AspNetCore": "[10.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.OpenTelemetry": "[4.2.0, )"

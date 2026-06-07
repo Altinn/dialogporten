@@ -1,8 +1,10 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc4918#section-11.2",
+  "type": "urn:altinn:error:DP.UNP-00000",
   "title": "Unprocessable request.",
   "status": 422,
   "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000/activities",
+  "code": "DP.UNP-00000",
+  "statusDescription": "Unprocessable Entity",
   "errors": {
     "DialogActivity": [
       "Key (\u0027Id\u0027)=(00000000-0000-0000-0000-000000000000) already exists."

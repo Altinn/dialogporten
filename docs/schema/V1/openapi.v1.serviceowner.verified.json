@@ -3514,59 +3514,61 @@
       "ProblemDetails": {
         "additionalProperties": false,
         "properties": {
+          "code": {
+            "type": "string"
+          },
           "detail": {
             "nullable": true,
             "type": "string"
           },
           "errors": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "instance": {
+            "nullable": true,
+            "type": "string"
+          },
+          "problems": {
             "items": {
-              "$ref": "#/components/schemas/ProblemDetails_Error"
+              "$ref": "#/components/schemas/ProblemDetails"
             },
             "nullable": true,
             "type": "array"
           },
-          "instance": {
-            "default": "/api/route",
-            "type": "string"
-          },
           "status": {
-            "default": 400,
             "format": "int32",
+            "nullable": true,
             "type": "integer"
           },
+          "statusDescription": {
+            "nullable": true,
+            "type": "string"
+          },
           "title": {
-            "default": "One or more validation errors occurred.",
+            "nullable": true,
             "type": "string"
           },
           "traceId": {
-            "default": "0HMPNHL0JHL76:00000001",
+            "nullable": true,
             "type": "string"
           },
           "type": {
-            "default": "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "ProblemDetails_Error": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
             "nullable": true,
             "type": "string"
           },
-          "name": {
-            "default": "Error or field name",
-            "type": "string"
-          },
-          "reason": {
-            "default": "Error reason",
-            "type": "string"
-          },
-          "severity": {
+          "validationErrors": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
             "nullable": true,
-            "type": "string"
+            "type": "array"
           }
         },
         "type": "object"
@@ -4722,6 +4724,25 @@
                 "$ref": "#/components/schemas/DialogTransmissionType"
               }
             ]
+          }
+        },
+        "type": "object"
+      },
+      "ValidationError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "paths": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"

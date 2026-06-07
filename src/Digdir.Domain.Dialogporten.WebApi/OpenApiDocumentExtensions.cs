@@ -87,39 +87,84 @@ public static class OpenApiDocumentExtensions
     }
 
     /// <summary>
-    /// When generating ProblemDetails and ProblemDetails_Error, there is a bug/weird behavior in NSwag or FastEndpoints
-    /// which results in certain 'Description' properties being generated when running on f.ex. MacOS,
-    /// but not when running on the Ubuntu GitHub Actions runner. This leads to the OpenAPI swagger snapshot test
-    /// behaving differently on different platforms/CPU architectures, which is not desirable.
-    ///
-    /// This method removes these descriptions.
+    /// Replaces the auto-generated ProblemDetails schema (originating from FastEndpoints' OOTB
+    /// type) with one that matches what the runtime actually returns from
+    /// <see cref="Common.Extensions.ErrorResponseBuilderExtensions"/>; i.e.
+    /// <see cref="Common.Errors.DialogportenProblemDetails"/>. Also drops the now-orphaned
+    /// ProblemDetails_Error schema and registers a new ValidationError schema.
     /// </summary>
-    /// <param name="openApiDocument"></param>
-    public static void ReplaceProblemDetailsDescriptions(this OpenApiDocument openApiDocument)
+    public static void ReplaceProblemDetailsSchema(this OpenApiDocument openApiDocument)
     {
         var schemas = openApiDocument.Components.Schemas;
-        List<JsonSchema> schemaList = [schemas["ProblemDetails"], schemas["ProblemDetails_Error"]];
+        var problemDetailsSchema = schemas["ProblemDetails"];
 
-        foreach (var schema in schemaList)
+        schemas.Remove("ProblemDetails_Error");
+
+        var validationErrorSchema = BuildValidationErrorSchema();
+        schemas["ValidationError"] = validationErrorSchema;
+        ConfigureProblemDetailsSchema(problemDetailsSchema, validationErrorSchema);
+    }
+
+    private static JsonSchema BuildValidationErrorSchema()
+    {
+        var schema = new JsonSchema
         {
-            if (schema.Description != null)
-            {
-                schema.Description = null;
-            }
+            Type = JsonObjectType.Object,
+            AllowAdditionalProperties = false
+        };
+        schema.Properties["code"] = new JsonSchemaProperty { Type = JsonObjectType.String };
+        schema.Properties["detail"] = new JsonSchemaProperty { Type = JsonObjectType.String };
+        schema.Properties["paths"] = new JsonSchemaProperty
+        {
+            Type = JsonObjectType.Array,
+            Item = new JsonSchema { Type = JsonObjectType.String }
+        };
+        return schema;
+    }
 
-            if (schema.Properties == null)
-            {
-                continue;
-            }
+    private static void ConfigureProblemDetailsSchema(JsonSchema schema, JsonSchema validationErrorSchema)
+    {
+        schema.Type = JsonObjectType.Object;
+        schema.AllowAdditionalProperties = false;
+        schema.Description = null;
+        schema.Properties.Clear();
+        schema.RequiredProperties.Clear();
 
-            foreach (var property in schema.Properties)
+        schema.Properties["type"] = new JsonSchemaProperty { Type = JsonObjectType.String, IsNullableRaw = true };
+        schema.Properties["title"] = new JsonSchemaProperty { Type = JsonObjectType.String, IsNullableRaw = true };
+        schema.Properties["status"] = new JsonSchemaProperty
+        {
+            Type = JsonObjectType.Integer,
+            Format = JsonFormatStrings.Integer,
+            IsNullableRaw = true
+        };
+        schema.Properties["detail"] = new JsonSchemaProperty { Type = JsonObjectType.String, IsNullableRaw = true };
+        schema.Properties["instance"] = new JsonSchemaProperty { Type = JsonObjectType.String, IsNullableRaw = true };
+        schema.Properties["code"] = new JsonSchemaProperty { Type = JsonObjectType.String };
+        schema.Properties["statusDescription"] = new JsonSchemaProperty { Type = JsonObjectType.String, IsNullableRaw = true };
+        schema.Properties["errors"] = new JsonSchemaProperty
+        {
+            Type = JsonObjectType.Object,
+            IsNullableRaw = true,
+            AdditionalPropertiesSchema = new JsonSchema
             {
-                if (property.Value.Description != null)
-                {
-                    property.Value.Description = null;
-                }
+                Type = JsonObjectType.Array,
+                Item = new JsonSchema { Type = JsonObjectType.String }
             }
-        }
+        };
+        schema.Properties["validationErrors"] = new JsonSchemaProperty
+        {
+            Type = JsonObjectType.Array,
+            IsNullableRaw = true,
+            Item = new JsonSchema { Reference = validationErrorSchema }
+        };
+        schema.Properties["problems"] = new JsonSchemaProperty
+        {
+            Type = JsonObjectType.Array,
+            IsNullableRaw = true,
+            Item = new JsonSchema { Reference = schema }
+        };
+        schema.Properties["traceId"] = new JsonSchemaProperty { Type = JsonObjectType.String, IsNullableRaw = true };
     }
 
     public static void MakeCollectionsNullable(this OpenApiDocument openApiDocument)

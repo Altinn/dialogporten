@@ -1,8 +1,10 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
+  "type": "urn:altinn:error:STD-00000",
   "title": "One or more validation errors occurred.",
   "status": 400,
   "instance": "/api/v1/serviceowner/dialogs",
+  "code": "STD-00000",
+  "statusDescription": "Bad Request",
   "errors": {
     "dto.serviceResource": [
       "\u0027ServiceResource\u0027 must start with \u0027urn:altinn:resource:\u0027."
@@ -32,5 +34,70 @@
       "The length of \u0027Process\u0027 must be 1023 characters or fewer. You entered 1024 characters."
     ]
   },
+  "validationErrors": [
+    {
+      "code": "DP.VLD-00000",
+      "detail": "\u0027ServiceResource\u0027 must start with \u0027urn:altinn:resource:\u0027.",
+      "paths": [
+        "/serviceResource"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "\u0027Party\u0027 must be on format \u0027urn:altinn:organization:identifier-no:{norwegian org-nr}\u0027, \u0027urn:altinn:person:identifier-no:{norwegian f-nr/d-nr}\u0027, \u0027urn:altinn:person:legacy-selfidentified:{username}\u0027 or \u0027urn:altinn:person:idporten-email:{e-mail}\u0027 with valid values, respectively.",
+      "paths": [
+        "/party"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "\u0027Progress\u0027 must be between 0 and 100. You entered 101.",
+      "paths": [
+        "/progress"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "\u0027LanguageCode\u0027 \u0027no\u0027 is not a valid language code. Use \u0027nb\u0027 or \u0027nn\u0027 for Norwegian. Culture specific codes like \u0027en_GB\u0027 and \u0027en-US\u0027 are normalized to \u0027en\u0027 (ISO 639).",
+      "paths": [
+        "/attachments/0/displayName/0/languageCode"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "\u0027Value\u0027 must not be empty.",
+      "paths": [
+        "/attachments/0/displayName/1/value"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "The length of \u0027Name\u0027 must be 255 characters or fewer. You entered 256 characters.",
+      "paths": [
+        "/attachments/0/name"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "\u0027Urls\u0027 must not be empty.",
+      "paths": [
+        "/attachments/0/urls"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "Title must not be empty.",
+      "paths": [
+        "/content"
+      ]
+    },
+    {
+      "code": "DP.VLD-00000",
+      "detail": "The length of \u0027Process\u0027 must be 1023 characters or fewer. You entered 1024 characters.",
+      "paths": [
+        "/process"
+      ]
+    }
+  ],
   "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
 }

@@ -1,8 +1,10 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4",
+  "type": "urn:altinn:error:DP.NF-00000",
   "title": "Resource not found.",
   "status": 404,
   "instance": "/api/v1/enduser/dialogs/00000000-0000-0000-0000-000000000000",
+  "code": "DP.NF-00000",
+  "statusDescription": "Not Found",
   "errors": {
     "DialogEntity": [
       "Entity \u0027DialogEntity\u0027 with the following key(s) was not found: (00000000-0000-0000-0000-000000000000)."

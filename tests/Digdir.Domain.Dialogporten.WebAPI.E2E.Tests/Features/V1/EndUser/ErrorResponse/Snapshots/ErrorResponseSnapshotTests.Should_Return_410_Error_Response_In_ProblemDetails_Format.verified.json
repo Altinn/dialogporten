@@ -1,8 +1,10 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.9",
+  "type": "urn:altinn:error:DP.GONE-00000",
   "title": "Resource no longer available.",
   "status": 410,
   "instance": "/api/v1/enduser/dialogs/00000000-0000-0000-0000-000000000000",
+  "code": "DP.GONE-00000",
+  "statusDescription": "Gone",
   "errors": {
     "DialogEntity": [
       "Entity \u0027DialogEntity\u0027 with the following key(s) is removed: (00000000-0000-0000-0000-000000000000)."

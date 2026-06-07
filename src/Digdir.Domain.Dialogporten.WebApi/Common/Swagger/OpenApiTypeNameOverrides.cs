@@ -21,7 +21,6 @@ internal static class OpenApiTypeNameOverrides
         ["DialogsEntitiesTransmissions_DialogTransmissionType"] = "DialogTransmissionType",
         ["DigdirDomainDialogportenApplicationCommon_Link"] = "Links",
         ["Http_HttpVerb"] = "HttpVerb",
-        ["ProblemDetails_Error"] = "ProblemDetailsError",
         ["V1CommonContent_ContentValue"] = "ContentValue",
         ["V1CommonLocalizations_Localization"] = "Localization",
         ["V1EndUserCommon_AcceptedLanguage"] = "AcceptedLanguage",

@@ -1,8 +1,10 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8",
+  "type": "urn:altinn:error:DP.CFL-00000",
   "title": "Conflict.",
   "status": 409,
   "instance": "/api/v1/serviceowner/dialogs",
+  "code": "DP.CFL-00000",
+  "statusDescription": "Conflict",
   "errors": {
     "IdempotentKey": [
       "\u0027duplicate-idempotent-key\u0027 already exists with DialogId \u002700000000-0000-0000-0000-000000000000\u0027"

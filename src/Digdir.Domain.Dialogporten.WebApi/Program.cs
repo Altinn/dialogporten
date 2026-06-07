@@ -272,7 +272,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.PostProcess = document =>
         {
             document.Generator = null;
-            document.ReplaceProblemDetailsDescriptions();
+            document.ReplaceProblemDetailsSchema();
             document.MakeCollectionsNullable();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();

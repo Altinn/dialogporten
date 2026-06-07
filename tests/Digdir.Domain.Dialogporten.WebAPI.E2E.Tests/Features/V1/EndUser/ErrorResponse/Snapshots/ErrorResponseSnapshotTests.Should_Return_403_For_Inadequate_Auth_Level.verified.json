@@ -1,8 +1,10 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3",
+  "type": "urn:altinn:error:DP.AUT-00000",
   "title": "Forbidden.",
   "status": 403,
   "instance": "/api/v1/enduser/dialogs/00000000-0000-0000-0000-000000000000",
+  "code": "DP.AUT-00000",
+  "statusDescription": "Forbidden",
   "errors": {
     "Forbidden": [
       "Altinn authentication level too low."

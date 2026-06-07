@@ -1,121 +1,130 @@
-﻿using FluentValidation.Results;
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Digdir.Domain.Dialogporten.WebApi.Common.Errors;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 
 internal static class ErrorResponseBuilderExtensions
 {
-    public static ProblemDetails DefaultResponse(this HttpContext ctx, int? statusCode = null) => new()
-    {
-        Title = "An error occurred while processing the request.",
-        Detail = "Something went wrong during the request.",
-        Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
-        Status = statusCode ?? ctx.Response.StatusCode,
-        Instance = ctx.Request.Path,
-        Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-    };
+    public static DialogportenProblemDetails DefaultResponse(this HttpContext ctx, int? statusCode = null) =>
+        Build(ctx,
+            statusCode ?? ctx.Response.StatusCode,
+            ErrorCodes.InternalServerError,
+            "An error occurred while processing the request.",
+            detail: "Something went wrong during the request.");
 
-    public static ProblemDetails GetResponseOrDefault(this HttpContext ctx, int statusCode,
+    public static DialogportenProblemDetails GetResponseOrDefault(this HttpContext ctx, int statusCode,
         List<ValidationFailure>? failures = null) =>
         ctx.ResponseBuilder(failures, statusCode) ?? ctx.DefaultResponse(statusCode);
 
     public static object ResponseBuilder(List<ValidationFailure> failures, HttpContext ctx, int statusCode)
         => ctx.ResponseBuilder(failures, statusCode) ?? ctx.DefaultResponse(statusCode);
 
-    public static ProblemDetails? ResponseBuilder(this HttpContext ctx, List<ValidationFailure>? failures = null, int? statusCode = null)
+    public static DialogportenProblemDetails? ResponseBuilder(this HttpContext ctx,
+        List<ValidationFailure>? failures = null, int? statusCode = null)
     {
-        var errors = failures?
-            .GroupBy(f => f.PropertyName)
-            .ToDictionary(x => x.Key, x => x.Select(m => m.ErrorMessage).ToArray())
-            ?? [];
-
         statusCode ??= ctx.Response.StatusCode;
+        var errors = ToErrorDictionary(failures);
+
         return statusCode switch
         {
-            StatusCodes.Status413PayloadTooLarge => new ProblemDetails
-            {
-                Title = $"Payload too large. The maximum allowed size is {Constants.MaxRequestBodySizeInBytes} bytes.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.11",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status400BadRequest => new ValidationProblemDetails(errors)
-            {
-                Title = "One or more validation errors occurred.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status403Forbidden => new ValidationProblemDetails(errors)
-            {
-                Title = "Forbidden.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status404NotFound => new ValidationProblemDetails(errors)
-            {
-                Title = "Resource not found.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status406NotAcceptable => new ValidationProblemDetails(errors)
-            {
-                Title = "Requested content type is not acceptable.",
-                Detail = "The Accept header must allow JSON responses.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.6",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status409Conflict => new ValidationProblemDetails(errors)
-            {
-                Title = "Conflict.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status410Gone => new ValidationProblemDetails(errors)
-            {
-                Title = "Resource no longer available.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.9",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status412PreconditionFailed => new ProblemDetails
-            {
-                Title = "Precondition failed.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7232#section-4.2",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status422UnprocessableEntity => new ValidationProblemDetails(errors)
-            {
-                Title = "Unprocessable request.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc4918#section-11.2",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
-            StatusCodes.Status502BadGateway => new ProblemDetails
-            {
-                Title = "Bad gateway.",
-                Detail = "An upstream server is down or returned an invalid response. Please try again later.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.3",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
+            StatusCodes.Status400BadRequest => Build(ctx, statusCode.Value, ErrorCodes.Validation,
+                "One or more validation errors occurred.",
+                errors: errors ?? [],
+                validationErrors: ToValidationErrors(failures)),
+            StatusCodes.Status403Forbidden => Build(ctx, statusCode.Value, ErrorCodes.Forbidden,
+                "Forbidden.", errors: errors ?? []),
+            StatusCodes.Status404NotFound => Build(ctx, statusCode.Value, ErrorCodes.NotFound,
+                "Resource not found.", errors: errors ?? []),
+            StatusCodes.Status406NotAcceptable => Build(ctx, statusCode.Value, ErrorCodes.NotAcceptable,
+                "Requested content type is not acceptable.",
+                detail: "The Accept header must allow JSON responses.",
+                errors: errors ?? []),
+            StatusCodes.Status409Conflict => Build(ctx, statusCode.Value, ErrorCodes.Conflict,
+                "Conflict.", errors: errors ?? []),
+            StatusCodes.Status410Gone => Build(ctx, statusCode.Value, ErrorCodes.Gone,
+                "Resource no longer available.", errors: errors ?? []),
+            StatusCodes.Status412PreconditionFailed => Build(ctx, statusCode.Value, ErrorCodes.PreconditionFailed,
+                "Precondition failed."),
+            StatusCodes.Status413PayloadTooLarge => Build(ctx, statusCode.Value, ErrorCodes.PayloadTooLarge,
+                $"Payload too large. The maximum allowed size is {Constants.MaxRequestBodySizeInBytes} bytes."),
+            StatusCodes.Status422UnprocessableEntity => Build(ctx, statusCode.Value, ErrorCodes.UnprocessableEntity,
+                "Unprocessable request.", errors: errors ?? []),
+            StatusCodes.Status502BadGateway => Build(ctx, statusCode.Value, ErrorCodes.BadGateway,
+                "Bad gateway.",
+                detail: "An upstream server is down or returned an invalid response. Please try again later."),
             _ => null
         };
+    }
+
+    private static DialogportenProblemDetails Build(
+        HttpContext ctx,
+        int statusCode,
+        string code,
+        string title,
+        string? detail = null,
+        Dictionary<string, string[]>? errors = null,
+        IReadOnlyList<ValidationErrorItem>? validationErrors = null,
+        IReadOnlyList<DialogportenProblemDetails>? problems = null)
+    {
+        var result = new DialogportenProblemDetails
+        {
+            Type = ErrorCodes.ToUrn(code),
+            Title = title,
+            Status = statusCode,
+            Instance = ctx.Request.Path,
+            Code = code,
+            StatusDescription = ReasonPhrases.GetReasonPhrase(statusCode),
+            Errors = errors,
+            ValidationErrors = validationErrors,
+            Problems = problems
+        };
+
+        if (detail is not null)
+        {
+            result.Detail = detail;
+        }
+
+        result.TraceId = Activity.Current?.Id ?? ctx.TraceIdentifier;
+        return result;
+    }
+
+    private static Dictionary<string, string[]>? ToErrorDictionary(List<ValidationFailure>? failures)
+    {
+        if (failures is null || failures.Count == 0)
+        {
+            return null;
+        }
+
+        return failures
+            .GroupBy(f => f.PropertyName)
+            .ToDictionary(x => x.Key, x => x.Select(m => m.ErrorMessage).ToArray());
+    }
+
+    private static List<ValidationErrorItem>? ToValidationErrors(List<ValidationFailure>? failures)
+    {
+        if (failures is null || failures.Count == 0)
+        {
+            return null;
+        }
+
+        return failures
+            .Select(f => new ValidationErrorItem(ErrorCodes.ValidationError, f.ErrorMessage, [ToJsonPointer(f.PropertyName)]))
+            .ToList();
+    }
+
+    private static string ToJsonPointer(string propertyName)
+    {
+        var path = propertyName.StartsWith("dto.", StringComparison.OrdinalIgnoreCase)
+            ? propertyName[4..]
+            : propertyName;
+
+        var pointer = string.Join('/', path
+            .Replace("]", "", StringComparison.Ordinal)
+            .Split(['.', '['], StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal)));
+
+        return pointer.Length == 0 ? "" : $"/{pointer}";
     }
 }

@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
@@ -18,7 +19,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using ActivityDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;
 
-namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands;
+namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
 [Collection(nameof(DialogCqrsCollectionFixture))]
 public class CreateDialogActivityTests(DialogApplication application) : ApplicationCollectionFixture(application)
@@ -226,6 +227,65 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     }
 
     [Fact]
+    public Task Can_Create_Activity_With_Barely_Long_Enough_Description()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .CreateActivity((c, _) =>
+                {
+                    c.Activity = new CreateActivityDto
+                    {
+                        Type = DialogActivityType.Values.Information,
+                        PerformedBy = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                        },
+                        Description =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = new string('a', Constants.DefaultMaxStringLength)
+                            }
+                        ]
+                    };
+                }
+            )
+            .ExecuteAndAssert<CreateActivitySuccess>();
+    }
+
+    [Fact]
+    public Task Can_Create_Activity_With_Barely_Long_Enough_Description_As_Correspondence()
+    {
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AsCorrespondenceUser()
+            .CreateActivity((c, _) =>
+                {
+                    c.Activity = new CreateActivityDto
+                    {
+                        Type = DialogActivityType.Values.Information,
+                        PerformedBy = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                        },
+                        Description =
+                        [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = new string('a', Constants.CorrespondenceActivityDescriptionMaxLength)
+                            }
+                        ]
+                    };
+                }
+            )
+            .ExecuteAndAssert<CreateActivitySuccess>();
+    }
+
+    [Fact]
     public Task Can_Not_Create_Activity_On_Unknown_TransmissionId()
     {
         var transmissionId = Guid.Parse("019c27dc-76d0-7269-a8e1-b30fc5a53aec");
@@ -419,9 +479,13 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     [Theory, ClassData(typeof(CreateInvalidActivityTestData))]
     public Task Validation_error(CreateInvalidActivityScenario scenario)
     {
-        return FlowBuilder.For(Application)
+        var flowExecutor = FlowBuilder.For(Application)
             .OverrideUtc(CreateInvalidActivityTestData.Time)
-            .CreateSimpleDialog()
+            .CreateSimpleDialog();
+
+        flowExecutor = scenario.ModifyFlow?.Invoke(flowExecutor) ?? flowExecutor;
+
+        return flowExecutor
             .SendCommand(scenario.CreateCommand)
             .ExecuteAndAssert<ValidationError>(validationError =>
             {
@@ -432,7 +496,9 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     public sealed record CreateInvalidActivityScenario(
         string DisplayName,
         Func<FlowContext, CreateActivityCommand> CreateCommand,
-        List<string> ExpectedErrorTexts) : IClassDataBase
+        List<string> ExpectedErrorTexts,
+        Func<IFlowExecutor<CreateDialogResult>, IFlowExecutor<CreateDialogResult>>? ModifyFlow = null
+        ) : IClassDataBase
     {
         public override string ToString() => DisplayName;
     }
@@ -636,6 +702,65 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 ExpectedErrorTexts:
                 [
                     "The length of 'ExtendedType' must be 1023 characters or fewer. You entered 1025 characters.",
+                ]));
+
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.Description cant be 256 or longer",
+                CreateCommand: _ => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity = new CreateActivityDto
+                    {
+                        Type = DialogActivityType.Values.Information,
+                        PerformedBy = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                        },
+                        Description = [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = new string('a',  Constants.DefaultMaxStringLength + 1)
+                            },
+                        ]
+                    },
+                    IsSilentUpdate = false
+                },
+                ExpectedErrorTexts:
+                [
+                    "The length of 'Value' must be 255 characters or fewer. You entered 256 characters.",
+                ]));
+
+            Add(new CreateInvalidActivityScenario(
+                DisplayName: "Activity.Description cant be 256 or longer",
+                ModifyFlow: builder => builder.AsCorrespondenceUser(),
+                CreateCommand: _ => new CreateActivityCommand
+                {
+                    DialogId = Guid.Parse("00bfa652-d580-7384-96c4-8d1a97e7118d"),
+                    IfMatchDialogRevision = null,
+                    Activity = new CreateActivityDto
+                    {
+                        Type = DialogActivityType.Values.Information,
+                        PerformedBy = new ActorDto
+                        {
+                            ActorType = ActorType.Values.PartyRepresentative,
+                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+                        },
+                        Description = [
+                            new LocalizationDto
+                            {
+                                LanguageCode = "nb",
+                                Value = new string('a',  Constants.CorrespondenceActivityDescriptionMaxLength + 1)
+                            },
+                        ]
+                    },
+                    IsSilentUpdate = false
+                },
+                ExpectedErrorTexts:
+                [
+                    "The length of 'Value' must be 4095 characters or fewer. You entered 4096 characters.",
                 ]));
 
             Add(new CreateInvalidActivityScenario(

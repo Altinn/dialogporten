@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using FluentValidation;
 using MediatR;
@@ -76,6 +77,7 @@ public static class ApplicationExtensions
             .AddTransient<IDialogTransmissionAppender, DialogTransmissionAppender>()
             .AddTransient<ITransmissionHierarchyValidator, TransmissionHierarchyValidator>()
             .AddTransient<ISystemLabelAdder, SystemLabelAdder>()
+            .AddTransient<LocalizationDtosValidatorFactory>()
             .AddDataLoaders()
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationFeatureToggleBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))

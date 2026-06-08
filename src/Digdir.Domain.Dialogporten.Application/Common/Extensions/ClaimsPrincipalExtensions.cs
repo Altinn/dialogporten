@@ -78,6 +78,9 @@ public static class ClaimsPrincipalExtensions
         claimsPrincipal.TryGetClaimValue(ScopeClaim, out var scopes) &&
         scopes.Split(ScopeClaimSeparator).Contains(scope);
 
+    public static bool IsCorrespondence(this ClaimsPrincipal claimsPrincipal) =>
+        claimsPrincipal.HasScope(AuthorizationScope.CorrespondenceScope);
+
     public static bool TryGetSupplierOrgNumber(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? orgNumber)
         => claimsPrincipal.FindFirst(SupplierClaim).TryGetConsumerOrgNumber(out orgNumber);
 

@@ -734,7 +734,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 ]));
 
             Add(new CreateInvalidActivityScenario(
-                DisplayName: "Activity.Description cant be 256 or longer",
+                DisplayName: "Activity.Description cant be 4096 or longer (correspondence)",
                 ModifyFlow: builder => builder.AsCorrespondenceUser(),
                 CreateCommand: _ => new CreateActivityCommand
                 {

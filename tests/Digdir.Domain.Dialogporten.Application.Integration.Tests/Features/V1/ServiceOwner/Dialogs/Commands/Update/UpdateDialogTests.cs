@@ -858,44 +858,44 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         {
             AddLengthTests(
                 caseName: "Content title",
-                (x, value) => x.Dto.Content!.Title = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.Title)
+                applyValue: (x, value) => x.Dto.Content!.Title = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.Title)
             );
 
             AddLengthTests(
                 caseName: "Content Sender Name",
-                (x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.SenderName)
+                applyValue: (x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.SenderName)
             );
 
             AddLengthTests(
                 caseName: "Content Summary",
-                (x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.Summary)
+                applyValue: (x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.Summary)
             );
 
             AddLengthTests(
                 caseName: "Content AdditionalInfo",
-                (x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.AdditionalInfo)
+                applyValue: (x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.AdditionalInfo)
             );
 
             AddLengthTests(
                 caseName: "Content ExtendedStatus",
-                (x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.ExtendedStatus)
+                applyValue: (x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.ExtendedStatus)
             );
 
             AddLengthTests(
                 caseName: "Content NonSensitiveTitle",
-                (x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.NonSensitiveTitle)
+                applyValue: (x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.NonSensitiveTitle)
             );
 
             AddLengthTests(
                 caseName: "Content NonSensitiveSummary",
-                (x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.NonSensitiveSummary)
+                applyValue: (x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.NonSensitiveSummary)
             );
 
             AddLengthTests(

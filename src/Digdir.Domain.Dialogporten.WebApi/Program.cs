@@ -168,9 +168,12 @@ static void BuildAndRun(string[] args)
     app.MapAspNetHealthChecks()
         .MapControllers();
 
+    var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
+    var openApiDocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
+
     app.MapScalarApiReference("/scalar", options => options
         .WithTitle("Dialogporten API")
-        .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+        .WithOpenApiRoutePattern(openApiDocumentPath)
         .AddDocument("v1", "Dialogporten")
         .AddDocument("v1.enduser", "Dialogporten EndUser")
         .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner")
@@ -253,8 +256,7 @@ static void BuildAndRun(string[] args)
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
-            var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
-            uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
+            uiConfig.DocumentPath = openApiDocumentPath;
         })
         .UseFeatureMetrics();
 

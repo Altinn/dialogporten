@@ -20,7 +20,7 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
                 d.Party = E2EConstants.DefaultSystemUserOrgUrn;
             }
         );
-        using var _ = Fixture.UseSystemUserTokenOverrides();
+        using var _ = Fixture.UseSystemUserTokenOverrides(E2EConstants.DefaultSystemUserId);
         var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
@@ -59,7 +59,7 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
 
         // Act
-        using var _ = Fixture.UseSystemUserTokenOverrides();
+        using var _ = Fixture.UseSystemUserTokenOverrides(E2EConstants.DefaultSystemUserId);
         var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert
@@ -77,7 +77,7 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
         });
 
         // Act
-        using var _ = Fixture.UseSystemUserTokenOverrides(systemUserId: E2EConstants.AlternateSystemUserId);
+        using var _ = Fixture.UseSystemUserTokenOverrides(E2EConstants.AlternateSystemUserId);
         var response = await Fixture.EndUserApi.GetDialog(dialogId);
 
         // Assert

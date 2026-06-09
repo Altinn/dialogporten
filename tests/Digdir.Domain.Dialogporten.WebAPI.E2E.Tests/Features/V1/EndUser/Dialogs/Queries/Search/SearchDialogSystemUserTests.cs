@@ -117,7 +117,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         });
 
         // Act
-        using var _ = Fixture.UseSystemUserTokenOverrides(systemUserId: E2EConstants.AlternateSystemUserId);
+        using var _ = Fixture.UseSystemUserTokenOverrides(E2EConstants.AlternateSystemUserId);
         var queryParams = new SearchDialogsQueryParams
         {
             ExtendedStatus = [uniqueExtendedStatus],

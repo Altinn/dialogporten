@@ -22,7 +22,6 @@ public static class ClaimsPrincipalExtensions
     public const string IdportenAuthLevelClaim = "acr";
     public const string IdportenAmrClaim = "amr";
     public const string AmrSelfRegisteredEmail = "Selfregistered-email";
-    public const string AmrSelfIdentified = "SelfIdentified";
     private const string AuthorizationDetailsClaim = "authorization_details";
     private const string AuthorizationDetailsType = "urn:altinn:systemuser";
     private const string AltinnAuthLevelClaim = "urn:altinn:authlevel";
@@ -184,18 +183,6 @@ public static class ClaimsPrincipalExtensions
         }
     }
 
-    private static bool TryGetSelfIdentifiedUsername(this ClaimsPrincipal claimsPrincipal,
-        [NotNullWhen(true)] out string? username)
-    {
-        username = claimsPrincipal.TryGetClaimValue(AltinnUsernameClaim, out username)
-            && claimsPrincipal.TryGetAmrClaimValues(out var amr) && amr is [AmrSelfIdentified]
-            ? username.ToLowerInvariant()
-            : null;
-
-        return username is not null;
-    }
-
-
     private static bool TryGetSelfIdentifiedUserEmail(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
     {
         email = claimsPrincipal.TryGetClaimValue(IdportenEmailClaim, out email)
@@ -205,9 +192,6 @@ public static class ClaimsPrincipalExtensions
 
         return email is not null;
     }
-
-    public static bool TryGetFeideSubject(this ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? subject)
-        => claimsPrincipal.TryGetClaimValue(FeideSubjectClaim, out subject);
 
     public static bool TryGetPartyUuid(this ClaimsPrincipal claimsPrincipal, out Guid partyUuid)
     {
@@ -303,10 +287,8 @@ public static class ClaimsPrincipalExtensions
     /// 1. Person (has pid claim)
     /// 2. System user (has authorization_details claim with type urn:altinn:systemuser)
     /// 3. Service owner (has consumer claim and service_owner scope)
-    /// 4. Feide user (has orgsub claim)
-    /// 5. Altinn self-identified user (has urn:altinn:username claim with SelfIdentified amr claim)
-    /// 6. Idporten self-registered user (has email claim with Selfregistered-email amr claim)
-    /// 7. Unknown (none of the above)
+    /// 4. Idporten self-registered user (has email claim with Selfregistered-email amr claim)
+    /// 5. Unknown (none of the above)
     /// </summary>
     /// <param name="claimsPrincipal"></param>
     /// <returns></returns>
@@ -329,16 +311,6 @@ public static class ClaimsPrincipalExtensions
             claimsPrincipal.TryGetConsumerOrgNumber(out externalId))
         {
             return (UserIdType.ServiceOwner, externalId);
-        }
-
-        if (claimsPrincipal.TryGetFeideSubject(out externalId))
-        {
-            return (UserIdType.FeideUser, externalId);
-        }
-
-        if (claimsPrincipal.TryGetSelfIdentifiedUsername(out externalId))
-        {
-            return (UserIdType.AltinnSelfIdentifiedUser, externalId);
         }
 
         if (claimsPrincipal.TryGetSelfIdentifiedUserEmail(out externalId))
@@ -366,12 +338,8 @@ public static class ClaimsPrincipalExtensions
             UserIdType.IdportenEmailIdentifiedUser
                 => IdportenEmailUserIdentifier.TryParse(externalId, out var email)
                     ? email : null,
-            UserIdType.AltinnSelfIdentifiedUser
-                => AltinnSelfIdentifiedUserIdentifier.TryParse(externalId, out var username)
-                    ? username : null,
-            UserIdType.FeideUser
-                => FeideUserIdentifier.TryParse(externalId, out var feideSubject)
-                    ? feideSubject : null,
+            UserIdType.AltinnSelfIdentifiedUser => null,
+            UserIdType.FeideUser => null,
             UserIdType.Unknown => null,
             UserIdType.ServiceOwner => null,
             _ => null

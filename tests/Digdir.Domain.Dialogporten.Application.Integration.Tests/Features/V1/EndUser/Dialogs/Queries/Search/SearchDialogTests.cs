@@ -359,22 +359,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle());
 
-    [Fact]
-    public Task Search_Dialogs_As_Legacy_SI_User() =>
-        // IntegrationLegacySIUser have this username: UserName
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Party = AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "USERNAME";
-            })
-            .AsIntegrationLegacySIUser()
-            .SearchEndUserDialogs(x =>
-            {
-                x.Party = [AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "uSeRnAmE"];
-            })
-            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Should().ContainSingle());
-
     private static void ConfDialog(CreateDialogCommand command, Guid dialogId, DateTimeOffset createdAt)
     {
         command.Dto.Id = dialogId;

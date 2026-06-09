@@ -4,9 +4,9 @@
     "net10.0": {
       "Altinn.ApiClients.Maskinporten": {
         "type": "Direct",
-        "requested": "[10.0.2-alpha, )",
-        "resolved": "10.0.2-alpha",
-        "contentHash": "GUQAR5Cb/TqXacrmbFJvdOWsGR4IiR2CZ5phYvAtNartvpZYTENVRE37Qm9Nz9DSzfxjDUlmvo8c5x8H4ToR2w==",
+        "requested": "[10.0.3-alpha, )",
+        "resolved": "10.0.3-alpha",
+        "contentHash": "Pq93odGJsxdPT8uSBxlMI6suVH0iknvv5aYuM2X63xeKLk5QOjxVIuAc3PZbWx6R+Wh4j3eckBTDzy+HmQjVFQ==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.2",
           "Microsoft.Extensions.Caching.Memory": "10.0.2",

@@ -2421,10 +2421,19 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public int FromPartyTransmissionsCount { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+        /// <br/>A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction
+        /// <br/>The value of this field is:
+        /// <br/>- true when there are any new unopened Transmissions sent from the service owner.
+        /// <br/>- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+        /// <br/>            
+        /// <br/>Note that the value is
+        /// <br/>- determined by the service owner and not to be confused with IsContentSeen
+        /// <br/>- not affected by SystemLabels
+        /// <br/>            
+        /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -2446,9 +2455,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public ICollection<DialogSeenLogListItem> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
-        /// A dialog is considered seen if
-        /// <br/>- it has been retrieved by a user, since its last content update, and
-        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// Indicates whether a dialog has been seen since its last content update.
+        /// <br/>            
+        /// <br/>The value of this field is
+        /// <br/>- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened
+        /// <br/>- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update
+        /// <br/>- false after the dialog receives a content update.
+        /// <br/>            
+        /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
         [JsonPropertyName("isContentSeen")]
         public bool IsContentSeen { get; set; }
@@ -3111,10 +3125,19 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+        /// <br/>A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction
+        /// <br/>The value of this field is:
+        /// <br/>- true when there are any new unopened Transmissions sent from the service owner.
+        /// <br/>- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+        /// <br/>            
+        /// <br/>Note that the value is
+        /// <br/>- determined by the service owner and not to be confused with IsContentSeen
+        /// <br/>- not affected by SystemLabels
+        /// <br/>            
+        /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3184,9 +3207,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public ICollection<DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
-        /// A dialog is considered seen if
-        /// <br/>- it has been retrieved by a user, since its last content update, and
-        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// Indicates whether a dialog has been seen since its last content update.
+        /// <br/>            
+        /// <br/>The value of this field is
+        /// <br/>- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened
+        /// <br/>- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update
+        /// <br/>- false after the dialog receives a content update.
+        /// <br/>            
+        /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
         [JsonPropertyName("isContentSeen")]
         public bool IsContentSeen { get; set; }

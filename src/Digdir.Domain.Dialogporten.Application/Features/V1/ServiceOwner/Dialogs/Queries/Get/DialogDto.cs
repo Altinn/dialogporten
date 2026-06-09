@@ -154,9 +154,18 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
-    /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+    /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+    /// A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of <see cref="DialogTransmissionType.Values.Submission"/> or <see cref="DialogTransmissionType.Values.Correction"/>
+    /// The value of this field is:
+    /// - true when there are any new unopened Transmissions sent from the service owner.
+    /// - false when the service owner has created an Activity of type <see cref="DialogActivityType.Values.TransmissionOpened"/> for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+    ///
+    /// Note that the value is
+    /// - determined by the service owner and not to be confused with <see cref="IsContentSeen"/>
+    /// - not affected by <see cref="DialogEndUserContextDto.SystemLabels"/>
+    ///
+    /// For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type <see cref="DialogActivityType.Values.CorrespondenceOpened"/>
     /// </summary>
-    [Obsolete($"Use {nameof(IsContentSeen)} instead. See the new field's description for an explanation of the new behavior.")]
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
@@ -215,9 +224,14 @@ public sealed class DialogDto
     public List<DialogSeenLogDto> SeenSinceLastContentUpdate { get; set; } = [];
 
     /// <summary>
-    /// A dialog is considered seen if
-    /// - it has been retrieved by a user, since its last content update, and
-    /// - there is no <see cref="DialogEndUserContextDto.SystemLabels"/> <see cref="SystemLabel.Values.MarkedAsUnopened"/>
+    /// Indicates whether a dialog has been seen since its last content update.
+    ///
+    /// The value of this field is
+    /// - true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no <see cref="DialogEndUserContextDto.SystemLabels"/> <see cref="SystemLabel.Values.MarkedAsUnopened"/>
+    /// - false if there is a <see cref="DialogEndUserContextDto.SystemLabels"/> <see cref="SystemLabel.Values.MarkedAsUnopened"/>, even if the dialog has been seen since its last content update
+    /// - false after the dialog receives a content update.
+    ///
+    /// Note that the value is determined by Dialogporten and not to be confused with <see cref="HasUnopenedContent"/>
     /// </summary>
     public bool IsContentSeen { get; set; }
 

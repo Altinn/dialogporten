@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.117.0](https://github.com/Altinn/dialogporten/compare/v1.116.0...v1.117.0) (2026-06-05)
+
+
+### Features
+
+* add support for changing org in enduser sdk ([#4039](https://github.com/Altinn/dialogporten/issues/4039)) ([8e275a8](https://github.com/Altinn/dialogporten/commit/8e275a8e12d8facecf43068f89b96173d0fd4375))
+
+
+### Bug Fixes
+
+* serialize non-public FusionCache value types to L2/Redis ([79e6c4b](https://github.com/Altinn/dialogporten/commit/79e6c4be7770da1488e0dc07132bbb846a6dbcf0))
+
+
+### Miscellaneous Chores
+
+* **azure:** bump Microsoft.App API versions to 2026-01-01 ([#4037](https://github.com/Altinn/dialogporten/issues/4037)) ([0c0a954](https://github.com/Altinn/dialogporten/commit/0c0a9542b058c38de33574f8ad35654f3a5be2d6))
+* **ci:** update azure cli to 2.87.0 ([#4051](https://github.com/Altinn/dialogporten/issues/4051)) ([56c50de](https://github.com/Altinn/dialogporten/commit/56c50dec96dedff57e8fb1c6a7c9b4aa200d9418))
+* disable warmup in janitor ([#4064](https://github.com/Altinn/dialogporten/issues/4064)) ([f4b119b](https://github.com/Altinn/dialogporten/commit/f4b119bcbb4a927efb3e6312a7acadd3617690a7))
+
 ## [1.116.0](https://github.com/Altinn/dialogporten/compare/v1.115.6...v1.116.0) (2026-06-03)
 
 

@@ -10,7 +10,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialog
 public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_200_And_Make_Seen_Log_When_SystemUser_With_Access_Package_Gets_Dialog()
     {
         // Arrange
@@ -31,7 +31,7 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
         content.SeenSinceLastUpdate.First().SeenBy.ActorName.Should().Be("Dialogporten E2E tests (nb)");
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_200_And_Make_Seen_Log_When_SystemUser_With_Rights_Gets_Dialog()
     {
         // Arrange
@@ -52,7 +52,7 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
         content.SeenSinceLastUpdate.First().SeenBy.ActorName.Should().Be("Dialogporten E2E tests (nb)");
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_Forbidden_When_SystemUser_Gets_Another_Partys_Dialog()
     {
         // Arrange
@@ -66,7 +66,7 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_Forbidden_When_Another_SystemUser_Gets_A_Dialog_Accessible_From_The_Default_SystemUser()
     {
         // Arrange

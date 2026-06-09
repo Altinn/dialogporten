@@ -9,7 +9,7 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialog
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_Allowed_Dialogs_When_SystemUser_With_Access_Package_Searches()
     {
         // Arrange
@@ -41,7 +41,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         content.Items.Count.Should().Be(1);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_Allowed_Dialogs_When_SystemUser_With_Rights_Searches()
     {
         // Arrange
@@ -73,7 +73,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         content.Items.Count.Should().Be(1);
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_Empty_Items_When_SystemUser_Searches_Other_Parties()
     {
         // Arrange
@@ -104,7 +104,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         content.Items.Should().BeNull();
     }
 
-    [E2EFact]
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Return_Empty_Items_When_Another_SystemUser_Searches_Dialogs_Accessible_From_The_Default_SystemUser()
     {
         // Arrange

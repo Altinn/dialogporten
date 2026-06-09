@@ -24,7 +24,6 @@ public sealed class TestUser : IUser
 internal static class TestUsers
 {
     public static string DefaultPid => "22834498646";
-    private static string DefaultUserName => "UserName";
     private static string DefaultEmail => "TEST@TEST.NO";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
     public static string DefaultSystemUserId => "2e39badb-fc4e-4d25-ba77-5a9fe8afcae4";
@@ -68,13 +67,6 @@ internal static class TestUsers
             flowStep.AsUser(() => FromSelfIdentifiedUser()
                 .WithAmr(ClaimsPrincipalExtensions.AmrSelfRegisteredEmail)
                 .WithClaim(ClaimsPrincipalExtensions.IdportenEmailClaim, DefaultEmail)
-                .Configure(configure)
-                .Build());
-
-        public TFlowStep AsIntegrationLegacySIUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
-            flowStep.AsUser(() => FromSelfIdentifiedUser()
-                .WithAmr(ClaimsPrincipalExtensions.AmrSelfIdentified)
-                .WithClaim(ClaimsPrincipalExtensions.AltinnUsernameClaim, DefaultUserName)
                 .Configure(configure)
                 .Build());
 

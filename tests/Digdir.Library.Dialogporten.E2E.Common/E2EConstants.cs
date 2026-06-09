@@ -10,9 +10,22 @@ public static class E2EConstants
     public const string DefaultServiceOwnerOrgName = "ttd";
     public const string DefaultEndUserSsn = "08844397713";
     public const string AlternateEndUserSsn = "13838599936";
+
+    /// <summary>
+    /// Default System user has the following properties:
+    /// - Access to AccessPackage "ordinaer-post-til-virksomheten" on <see cref="DefaultServiceResource"/>
+    /// </summary>
     public const string DefaultSystemUserId = "51551dd0-b9c5-4f4b-a4a2-9b7e3669b364";
     public const string DefaultSystemUserOrgNo = "310057223";
     public const string DefaultSystemUserOrgUrn = "urn:altinn:organization:identifier-no:" + DefaultSystemUserOrgNo;
+
+    /// <summary>
+    /// Alternate System user has the following properties:
+    /// - Direct access to resource <see cref="AlternateServiceResource"/>
+    /// </summary>
+    public const string AlternateSystemUserId = "54cb69df-3d8a-4432-804e-742e40de6211";
+    public const string AlternateSystemUserOrgNo = "313006425";
+    public const string AlternateSystemUserOrgUrn = "urn:altinn:organization:identifier-no:" + AlternateSystemUserOrgNo;
 
     private const string DefaultServiceOwnerOrgNr = "991825827";
     private const string Yt01ServiceOwnerOrgNr = "713431400";

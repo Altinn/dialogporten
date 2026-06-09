@@ -14,7 +14,7 @@ public sealed class UserTypeValidationMiddleware
     private readonly ILogger<UserTypeValidationMiddleware> _logger;
     private static readonly Dictionary<string, List<UserType>> ValidUserTypesForPolicy = new()
     {
-        { Policy.EndUser, [UserType.Person, UserType.SystemUser, UserType.IdportenEmailIdentifiedUser, UserType.AltinnSelfIdentifiedUser, UserType.FeideUser] },
+        { Policy.EndUser, [UserType.Person, UserType.SystemUser, UserType.IdportenEmailIdentifiedUser] },
         { Policy.ServiceProvider, [UserType.ServiceOwner, UserType.ServiceOwnerOnBehalfOfPerson] },
         { Policy.ServiceProviderSearch, [UserType.ServiceOwner, UserType.ServiceOwnerOnBehalfOfPerson] },
         { Policy.ServiceProviderAdmin, [UserType.ServiceOwner] }

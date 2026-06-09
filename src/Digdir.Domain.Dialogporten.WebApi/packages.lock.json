@@ -115,8 +115,8 @@
       },
       "Altinn.ApiClients.Maskinporten": {
         "type": "Transitive",
-        "resolved": "10.0.2-alpha",
-        "contentHash": "GUQAR5Cb/TqXacrmbFJvdOWsGR4IiR2CZ5phYvAtNartvpZYTENVRE37Qm9Nz9DSzfxjDUlmvo8c5x8H4ToR2w==",
+        "resolved": "10.0.3-alpha",
+        "contentHash": "Pq93odGJsxdPT8uSBxlMI6suVH0iknvv5aYuM2X63xeKLk5QOjxVIuAc3PZbWx6R+Wh4j3eckBTDzy+HmQjVFQ==",
         "dependencies": {
           "Microsoft.IdentityModel.Tokens": "8.15.0",
           "System.IdentityModel.Tokens.Jwt": "8.15.0"
@@ -1391,7 +1391,7 @@
       "digdir.domain.dialogporten.infrastructure": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Maskinporten": "[10.0.2-alpha, )",
+          "Altinn.ApiClients.Maskinporten": "[10.0.3-alpha, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
           "Dapper": "[2.1.79, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",

@@ -158,28 +158,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         bool flatten,
         CancellationToken cancellationToken)
     {
-        // Self-identified/Feide users are not currently supported in the access management API, so we need to emulate it.
-        // Assume they can only represent themselves, and have no delegated rights.
-
-        // We currently do not have any support in the Register API to resolve the name of self-identified users,
-        // so we need to get this from the request context, which means this will ONLY work in end-user contexts
-        // where there is a end-user token available, ie. not in service owner contexts (using ?EndUserId=...) or
-        // service contexts.
-        switch (authorizedPartiesRequest.PartyIdentifier)
-        {
-            case IdportenEmailUserIdentifier
-                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForIdportenEmailUsers:
-            case AltinnSelfIdentifiedUserIdentifier
-                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForAltinnSelfIdentifiedUsers:
-            case FeideUserIdentifier
-                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForFeideUsers:
-                return GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(authorizedPartiesRequest);
-
-            // ReSharper disable once RedundantEmptySwitchSection
-            default:
-                break;
-        }
-
         // Currently, access management is unable to properly leverage party filters on system users. Disable
         // filtering here to ensure better cache hit rate for system users iterating over many parties.
         if (authorizedPartiesRequest.PartyIdentifier is SystemUserIdentifier
@@ -199,28 +177,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         }
 
         return flatten ? authorizedParties.Flatten() : authorizedParties;
-    }
-
-    private AuthorizedPartiesResult GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(
-        AuthorizedPartiesRequest authorizedPartiesRequest)
-    {
-        var authorizedPartiesResultDto = new AuthorizedPartiesResultDto
-        {
-            PartyUuid = _user.GetPrincipal().TryGetPartyUuid(out var uuid) ? uuid : throw new UnreachableException("Expected party UUID to be present in current principal"),
-            PartyId = _user.GetPrincipal().TryGetPartyId(out var partyId) ? partyId : throw new UnreachableException("Expected party ID to be present in current principal"),
-            Name = authorizedPartiesRequest.PartyIdentifier.Id,
-            OrganizationNumber = "",
-            Type = AuthorizedPartiesHelper.PartyTypeSelfIdentified,
-            IsDeleted = false,
-            AuthorizedRoles = [AuthorizedPartiesHelper.SelfIdentifiedUserRoleCode],
-            OnlyHierarchyElementWithNoAccess = false,
-            AuthorizedResources = [],
-            AuthorizedAccessPackages = [],
-            AuthorizedInstances = [],
-            Subunits = []
-        };
-
-        return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult([authorizedPartiesResultDto], authorizedPartiesRequest);
     }
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)

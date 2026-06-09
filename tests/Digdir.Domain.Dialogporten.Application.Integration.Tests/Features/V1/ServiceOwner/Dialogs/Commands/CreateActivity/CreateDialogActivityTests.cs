@@ -280,9 +280,8 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .ExecuteAndAssert<CreateActivitySuccess>();
 
     [Fact]
-    public Task Can_Create_Activity_With_Barely_Long_Enough_Description_As_Correspondence()
-    {
-        return FlowBuilder.For(Application)
+    public Task Can_Create_Activity_With_Barely_Long_Enough_Description_As_Correspondence() =>
+        FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .AsCorrespondenceUser()
             .CreateActivity((c, _) =>
@@ -307,7 +306,6 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 }
             )
             .ExecuteAndAssert<CreateActivitySuccess>();
-    }
 
     [Fact]
     public Task Can_Not_Create_Activity_On_Unknown_TransmissionId()

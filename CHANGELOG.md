@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.117.1](https://github.com/Altinn/dialogporten/compare/v1.117.0...v1.117.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* email party mapping, remove legacy/feide authentication ([#4085](https://github.com/Altinn/dialogporten/issues/4085)) ([5e9d80e](https://github.com/Altinn/dialogporten/commit/5e9d80e0236d77a1d394e476c9b2ae54a9e5805a))
+
+
+### Miscellaneous Chores
+
+* bump Microsoft.Compute API version to 2025-11-01 ([#4080](https://github.com/Altinn/dialogporten/issues/4080)) ([c2d4507](https://github.com/Altinn/dialogporten/commit/c2d4507a7ff210f2b0ffdcc7688241d61944e35d))
+* **deps:** update actions/setup-dotnet action to v5.3.0 ([#4073](https://github.com/Altinn/dialogporten/issues/4073)) ([16fd252](https://github.com/Altinn/dialogporten/commit/16fd2527fbc918194d86006bdd67c6baaa227db6))
+* **deps:** update docker/login-action action to v4.2.0 ([#4074](https://github.com/Altinn/dialogporten/issues/4074)) ([bb89d6a](https://github.com/Altinn/dialogporten/commit/bb89d6a2f7c8937a405e478ed6b939a94b2119ba))
+* **deps:** update docker/metadata-action action to v6.1.0 ([#4075](https://github.com/Altinn/dialogporten/issues/4075)) ([f59a56e](https://github.com/Altinn/dialogporten/commit/f59a56ee3ff877e90e2120c69fe7aa1da119853e))
+* **deps:** update docker/setup-buildx-action action to v4.1.0 ([#4076](https://github.com/Altinn/dialogporten/issues/4076)) ([05bdf90](https://github.com/Altinn/dialogporten/commit/05bdf90e99ee4ca88959546ff829a0c4abbf943f))
+
 ## [1.117.0](https://github.com/Altinn/dialogporten/compare/v1.116.0...v1.117.0) (2026-06-05)
 
 

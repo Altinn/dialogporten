@@ -13,10 +13,8 @@ internal sealed class LocalizationDtosValidatorFactory
         _user = user;
     }
 
-    public LocalizationDtosValidator CreateActivityDescriptionLocalizationDtosValidator()
-    {
-        return _user.GetPrincipal().IsCorrespondence()
+    public LocalizationDtosValidator CreateActivityDescriptionLocalizationDtosValidator() =>
+        _user.GetPrincipal().IsCorrespondence()
             ? new LocalizationDtosValidator(Constants.CorrespondenceActivityDescriptionMaxLength)
             : new LocalizationDtosValidator();
-    }
 }

@@ -11,7 +11,7 @@ if (!File.Exists(GeneratedFile))
 }
 
 const string usingLine = "using Altinn.ApiClients.Maskinporten.Models;";
-const string requestPropertyParameter = "[Property(\"Altinn.ApiClients.Maskinporten.TokenRequestContext\")] MaskinportenTokenRequestContext? requestContext = null";
+const string requestPropertyParameter = "[Property(\"Altinn.ApiClients.Maskinporten.RequestContext\")] MaskinportenRequestContext? requestContext = null";
 var original = File.ReadAllText(GeneratedFile);
 var updated = original;
 
@@ -46,7 +46,7 @@ updated = Regex.Replace(
     {
         var body = Regex.Replace(
             match.Groups["body"].Value,
-            @"^(?!.*MaskinportenTokenRequestContext\? requestContext)(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);(?<eol>\r?)$",
+            @"^(?!.*MaskinportenRequestContext\? requestContext)(?<method>\s*Task<.+\(.*)CancellationToken cancellationToken = default\);(?<eol>\r?)$",
             methodMatch =>
             {
                 patchedMethodCount++;

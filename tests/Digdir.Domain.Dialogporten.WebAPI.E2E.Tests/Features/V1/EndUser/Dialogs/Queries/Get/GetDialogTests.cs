@@ -195,19 +195,19 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
                 DialogTestData.CreateLocalization("https://digdir.no/dialog/en", "en")
             ]);
 
-        var expiredAt = DateTimeOffset.UtcNow.AddDays(1);
+        var expiresAt = DateTimeOffset.UtcNow.AddDays(1);
         var futureExpiresAt = DateTimeOffset.UtcNow.AddYears(100);
 
         var expiredDialogAttachment = dialog.Attachments.First();
         expiredDialogAttachment.Name = "expired-dialog-attachment";
-        expiredDialogAttachment.ExpiresAt = expiredAt;
+        expiredDialogAttachment.ExpiresAt = expiresAt;
 
         var authorizedTransmission = dialog.Transmissions.First(x =>
             x.AuthorizationAttribute == E2EConstants.AvailableExternalResource);
         authorizedTransmission.ExternalReference = "authorized-transmission";
         authorizedTransmission.ExtendedType = new Uri("https://digdir.no/transmission-type/authorized");
         authorizedTransmission.Attachments.First().Name = "authorized-transmission-attachment";
-        authorizedTransmission.Attachments.First().ExpiresAt = expiredAt;
+        authorizedTransmission.Attachments.First().ExpiresAt = expiresAt;
         authorizedTransmission.NavigationalActions =
         [
             new V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction
@@ -218,7 +218,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
                     DialogTestData.CreateLocalization("Expired navigation", "en")
                 ],
                 Url = new Uri("https://digdir.no/transmission/expired-navigation"),
-                ExpiresAt = expiredAt
+                ExpiresAt = expiresAt
             },
             new V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction
             {

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -25,6 +26,9 @@ internal static class TestUsers
     public static string DefaultPid => "22834498646";
     private static string DefaultEmail => "TEST@TEST.NO";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
+    public static string DefaultSystemUserId => "2e39badb-fc4e-4d25-ba77-5a9fe8afcae4";
+    public static string DefaultSystemUserOrg => "999888777";
+    public static string DefaultSystemUserUrn => "urn:altinn:systemuser:uuid:" + DefaultSystemUserId;
 
     private const string DefaultConsumerClaim =
         """
@@ -78,6 +82,31 @@ internal static class TestUsers
                 .Configure(configure)
                 .Build());
 
+        public TFlowStep AsSystemUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() =>
+            {
+                var defaultClaims = new Dictionary<string, string>
+                {
+                    [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim
+                };
+                return ClaimsPrincipalBuilder.From(defaultClaims)
+                    .WithScope("digdir:dialogporten")
+                    .WithAuthorizationDetails([
+                        new()
+                        {
+                            Type = "urn:altinn:systemuser",
+                            SystemUserIds = [DefaultSystemUserId],
+                            SystemUserOrg = new ClaimsPrincipalExtensions.ConsumerOrganization
+                            {
+                                Authority = "iso6523-actorid-upis",
+                                Id = "0192:" + DefaultSystemUserOrg
+                            }
+                        }
+                    ])
+                    .Configure(configure)
+                    .Build();
+            });
+
         public TFlowStep AsChangeTransmissionUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
             flowStep.AsUser(() => FromDefault()
                 .WithScope(AuthorizationScope.ServiceProviderChangeTransmissions)
@@ -129,6 +158,12 @@ internal sealed class ClaimsPrincipalBuilder
     public ClaimsPrincipalBuilder WithAmr(string value)
     {
         _claims[ClaimsPrincipalExtensions.IdportenAmrClaim] = value;
+        return this;
+    }
+
+    public ClaimsPrincipalBuilder WithAuthorizationDetails(ClaimsPrincipalExtensions.SystemUserAuthorizationDetails[] value)
+    {
+        _claims[ClaimsPrincipalExtensions.AuthorizationDetailsClaim] = JsonSerializer.Serialize(value);
         return this;
     }
 

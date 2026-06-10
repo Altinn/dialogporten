@@ -1,1 +1,12 @@
-﻿
+﻿{
+  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3",
+  "title": "Forbidden.",
+  "status": 403,
+  "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000",
+  "errors": {
+    "Forbidden": [
+      "Use of CorrespondenceConfirmed or CorrespondenceOpened activity types requires the scope digdir:dialogporten.correspondence."
+    ]
+  },
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+}

@@ -123,7 +123,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             ServiceOwner: new ServiceOwnerTokenOverrides(orgNumber, orgName, scopes, tokenOverride)));
 
     public IDisposable UseSystemUserTokenOverrides(
-        string? systemUserId = null,
+        Func<TokenGeneratorEnvironment, string>? systemUserId = null,
         string? systemUserOrg = null,
         string? scopes = null,
         string? tokenOverride = null) =>

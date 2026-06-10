@@ -106,6 +106,21 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.SeenSinceLastUpdate.Select(l => l.SeenBy.ActorId).Distinct().Count().Should().Be(2);
             });
 
+
+    [Fact]
+    public Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_SystemUser() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AsSystemUser()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.SeenSinceLastContentUpdate.Count.Should().Be(1);
+                x.SeenSinceLastUpdate.Count.Should().Be(1);
+                x.SeenSinceLastUpdate.First().SeenBy.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
+                x.SeenSinceLastContentUpdate.First().SeenBy.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
+            });
+
     [Fact]
     public Task Multiple_Non_content_Updates_Should_Result_In_New_Entry_In_Both_Seen_Logs() =>
         FlowBuilder.For(Application)

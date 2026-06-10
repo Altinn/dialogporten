@@ -227,32 +227,6 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     }
 
     [Fact]
-    public Task Can_Create_Activity_With_Barely_Long_Enough_Description()
-    {
-        return FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .CreateActivity((c, _) =>
-                {
-                    c.Activity = new CreateActivityDto
-                    {
-                        Type = DialogActivityType.Values.Information,
-                        PerformedBy = new ActorDto
-                        {
-                            ActorType = ActorType.Values.PartyRepresentative,
-                            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
-                        },
-                        Description =
-                        [
-                            new LocalizationDto
-                            {
-                                LanguageCode = "nb",
-                                Value = new string('a', Constants.DefaultMaxStringLength)
-                            }
-                        ]
-                    };
-                }
-            )
-            .ExecuteAndAssert<CreateActivitySuccess>();
     public Task Can_Create_Activity_With_Barely_Long_Enough_Description() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

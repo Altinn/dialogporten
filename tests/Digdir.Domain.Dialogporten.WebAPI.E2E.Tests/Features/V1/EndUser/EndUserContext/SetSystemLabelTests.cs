@@ -23,6 +23,31 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
+    }
+
+    [E2EFact]
+    public async Task Should_Be_Able_To_Set_System_Label_When_SystemUser()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync(d =>
+            {
+                d.Party = E2EConstants.DefaultSystemUserOrgUrn;
+            }
+        );
+        using var _ = Fixture.UseSystemUserTokenOverrides();
+        var response = await Fixture.EndUserApi.SetSystemLabels(dialogId, r =>
+        {
+            r.AddLabels = [Bin];
+        });
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
     }
 
     [E2EFact]
@@ -38,8 +63,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
-        var labelLogResponse = await Fixture.EndUserApi
-            .GetSystemLabelAssignmentLog(dialogId);
+        var labelLogResponse = await Fixture.EndUserApi.GetSystemLabelAssignmentLog(dialogId);
 
         labelLogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         var labelLog = labelLogResponse.Content ?? throw new InvalidOperationException("Label log content was null.");

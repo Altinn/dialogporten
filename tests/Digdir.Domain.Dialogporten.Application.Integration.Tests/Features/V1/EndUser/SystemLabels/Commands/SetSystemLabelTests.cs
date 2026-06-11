@@ -1,16 +1,19 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -177,6 +180,34 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     }).And.HaveCount(3);
             });
 
+    [Fact]
+    public async Task Set_As_SystemUser_Records_The_Correct_Assignment_Log()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AsSystemUser()
+            .SetSystemLabelsEndUser(command =>
+            {
+                command.AddLabels = [SystemLabel.Values.Archive];
+            })
+            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
+
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IDialogDbContext>();
+        var expectedLabelName = SystemLabel.Values.Archive.ToNamespacedName();
+
+        var log = await dbContext.LabelAssignmentLogs
+            .Include(x => x.PerformedBy)
+            .ThenInclude(x => x.ActorNameEntity)
+            .SingleAsync(x => x.Name == expectedLabelName, TestContext.Current.CancellationToken);
+
+        log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
+        log.PerformedBy.ActorNameEntity.Should().NotBeNull();
+        log.PerformedBy.ActorNameEntity.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
+        log.PerformedBy.ActorNameEntity.Name.Should().Be("Mock system user name");
+    }
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

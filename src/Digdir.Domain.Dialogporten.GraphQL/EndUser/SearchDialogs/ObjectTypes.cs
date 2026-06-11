@@ -101,8 +101,17 @@ public sealed class SearchDialog
     [GraphQLDescription("The aggregated status of the dialog.")]
     public DialogStatus Status { get; set; }
 
-    [GraphQLDeprecated($"Use {nameof(IsContentSeen)} instead. See the new field's description for an explanation of the new behavior.")]
-    [GraphQLDescription("Indicates whether the dialog contains content that has not been viewed or opened by the user yet.")]
+    [GraphQLDescription("""
+                         Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+                         A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction
+                         The value of this field is:
+                         - true when there are any new unopened Transmissions sent from the service owner.
+                         - false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+                         Note that the value is
+                         - determined by the service owner and not to be confused with IsContentSeen
+                         - not affected by SystemLabels
+                         For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
+                        """)]
     public bool HasUnopenedContent { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.")]
@@ -126,7 +135,14 @@ public sealed class SearchDialog
     [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.")]
     public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 
-    [GraphQLDescription("A dialog is considered seen if it has been retrieved by a user since its last content update, and there is no SystemLabel MarkedAsUnopened")]
+    [GraphQLDescription("""
+                        Indicates whether a dialog has been seen since its last content update.
+                        The value of this field is
+                         - true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabel MarkedAsUnopened
+                         - false if there is a SystemLabel MarkedAsUnopened, even if the dialog has been seen since its last content update
+                         - false after the dialog receives a content update.
+                        Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
+                        """)]
     public bool IsContentSeen { get; set; }
 
     [GraphQLDescription("Metadata about the dialog owned by end-users.")]

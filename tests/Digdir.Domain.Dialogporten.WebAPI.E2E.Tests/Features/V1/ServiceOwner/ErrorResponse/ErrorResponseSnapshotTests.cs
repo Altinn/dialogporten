@@ -31,7 +31,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         {
             ServiceResource = "InvalidServiceResource",
             Party = "InvalidParty",
-            Content = new V1ServiceOwnerDialogsCommandsCreate_Content(),
+            Content = new(),
             Progress = 101,
             Process = new string('a', 1024),
             Attachments =
@@ -168,5 +168,206 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_400_For_Invalid_Dialog_Update()
+    {
+        // Arrange - update a dialog with multiple validation errors
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var invalidUpdateDialog = new V1ServiceOwnerDialogsCommandsUpdate_Dialog
+        {
+            Content = new(),
+            Progress = 101,
+            Process = new string('a', 1024),
+            Attachments =
+            [
+                new()
+                {
+                    Name = new string('a', 256),
+                    DisplayName =
+                    [
+                        new()
+                        {
+                            Value = new string('a', 4),
+                            LanguageCode = "no"
+                        },
+                        new()
+                        {
+                            Value = string.Empty,
+                            LanguageCode = "en"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(dialogId, invalidUpdateDialog, null);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
+        await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_For_Update_On_Non_Existent_Dialog()
+    {
+        // Arrange
+        var nonExistentDialogId = Guid.CreateVersion7();
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(nonExistentDialogId, CreateSimpleUpdateDialog(), null);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_410_For_Update_On_Deleted_Dialog()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsDeleteDialog(dialogId, null);
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(dialogId, CreateSimpleUpdateDialog(), null);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.Gone);
+        await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_412_For_Update_With_Invalid_Revision()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act - update with an if-match revision that does not match the dialog's revision
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(dialogId, CreateSimpleUpdateDialog(), Guid.CreateVersion7());
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
+        await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_403_For_Update_With_Correspondence_Activity_Without_Scope()
+    {
+        // Arrange - correspondence activity types require a scope the default test token lacks
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var updateDialog = CreateSimpleUpdateDialog(dialog => dialog.Activities =
+        [
+            new()
+            {
+                Type = DialogsEntitiesActivities_DialogActivityType.CorrespondenceConfirmed,
+                PerformedBy = new()
+                {
+                    ActorType = Actors_ActorType.ServiceOwner
+                }
+            }
+        ]);
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(dialogId, updateDialog, null);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_422_For_Update_With_Duplicate_Activity_Id()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+        var activityId = Guid.CreateVersion7();
+        await Fixture.ServiceownerApi.CreateSimpleActivityAsync(dialogId, modify: activity => activity.Id = activityId);
+
+        var updateDialog = CreateSimpleUpdateDialog(dialog => dialog.Activities =
+        [
+            new()
+            {
+                Id = activityId,
+                Type = DialogsEntitiesActivities_DialogActivityType.Information,
+                PerformedBy = new V1ServiceOwnerCommonActors_Actor
+                {
+                    ActorType = Actors_ActorType.ServiceOwner
+                },
+                Description = [DialogTestData.CreateLocalization("En beskrivelse")]
+            }
+        ]);
+
+        // Act - append an activity with an ID that already exists on the dialog
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(dialogId, updateDialog, null);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
+        await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_409_For_Update_With_Duplicate_Transmission_Idempotent_Key()
+    {
+        // Arrange
+        const string idempotentKey = "duplicate-transmission-key";
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+            dialog.AddTransmission(transmission => transmission.IdempotentKey = idempotentKey));
+
+        var updateDialog = CreateSimpleUpdateDialog(dialog => dialog.Transmissions =
+        [
+            new()
+            {
+                IdempotentKey = idempotentKey,
+                Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+                Sender = new()
+                {
+                    ActorType = Actors_ActorType.ServiceOwner
+                },
+                Content = new()
+                {
+                    Title = DialogTestData.CreateContentValue(
+                        value: "Ny forsendelse",
+                        languageCode: "nb")
+                }
+            }
+        ]);
+
+        // Act - append a transmission with an idempotent key that already exists on the dialog
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateDialog(dialogId, updateDialog, null);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
+        await VerifyJsonSnapshot(response.Error!.Content!);
+    }
+
+    private static V1ServiceOwnerDialogsCommandsUpdate_Dialog CreateSimpleUpdateDialog(
+        Action<V1ServiceOwnerDialogsCommandsUpdate_Dialog>? modify = null)
+    {
+        var updateDialog = new V1ServiceOwnerDialogsCommandsUpdate_Dialog
+        {
+            Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.InProgress,
+            Content = new()
+            {
+                Title = DialogTestData.CreateContentValue(
+                    value: "Oppdatert skjema for rapportering av et eller annet",
+                    languageCode: "nb"),
+                Summary = DialogTestData.CreateContentValue(
+                    value: "Et oppdatert sammendrag her.",
+                    languageCode: "nb")
+            }
+        };
+
+        modify?.Invoke(updateDialog);
+        return updateDialog;
     }
 }

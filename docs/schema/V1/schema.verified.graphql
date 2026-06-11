@@ -4,24 +4,24 @@
   subscription: Subscriptions
 }
 
-type Queries @authorize(policy: "enduser") {
-  dialogLookup(instanceRef: String!): DialogLookupPayload!
-  dialogById(dialogId: UUID!): DialogByIdPayload!
-  searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
-  limits: Limits!
-  parties: [AuthorizedParty!]!
-  serviceResources: ServiceResourceMetadata!
+interface BulkSetSystemLabelError {
+  message: String!
 }
 
-type Mutations @authorize(policy: "enduser") {
-  setSystemLabel(input: SetSystemLabelInput!): SetSystemLabelPayload!
-  bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
+interface DialogByIdError {
+  message: String!
 }
 
-type Subscriptions {
-  "Requires a dialog token in the 'Authorization' header."
-  dialogEvents(dialogId: UUID!): DialogEventPayload!
-    @authorize(policy: "enduserSubscription", apply: VALIDATION)
+interface DialogLookupError {
+  message: String!
+}
+
+interface SearchDialogError {
+  message: String!
+}
+
+interface SetSystemLabelError {
+  message: String!
 }
 
 type Activity {
@@ -213,11 +213,18 @@ type Dialog {
   dialogToken: String
   "The aggregated status of the dialog."
   status: DialogStatus!
-  "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
+  """
+  Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+   A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction.
+   The value of this field is:
+   - true when there are any new unopened Transmissions sent from the service owner.
+   - false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+   Note that the value is
+   - determined by the service owner and not to be confused with IsContentSeen
+   - not affected by SystemLabels
+   For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
+  """
   hasUnopenedContent: Boolean!
-    @deprecated(
-      reason: "Use IsContentSeen instead. See the new field's description for an explanation of the new behavior."
-    )
   "The number of transmissions sent by the service owner"
   fromServiceOwnerTransmissionsCount: Int!
   "The number of transmissions sent by a party representative"
@@ -238,7 +245,14 @@ type Dialog {
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
   seenSinceLastContentUpdate: [SeenLog!]!
-  "A dialog is considered seen if it has been retrieved by a user since its last content update, and there is no SystemLabel MarkedAsUnopened"
+  """
+  Indicates whether a dialog has been seen since its last content update.
+  The value of this field is
+   - true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabel MarkedAsUnopened
+   - false if there is a SystemLabel MarkedAsUnopened, even if the dialog has been seen since its last content update
+   - false after the dialog receives a content update.
+  Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
+  """
   isContentSeen: Boolean!
   "The immutable list of transmissions associated with the dialog."
   transmissions: [Transmission!]!
@@ -387,6 +401,20 @@ type Localization {
   languageCode: String!
 }
 
+type Mutations @authorize(policy: "enduser") {
+  setSystemLabel(input: SetSystemLabelInput!): SetSystemLabelPayload!
+  bulkSetSystemLabels(input: BulkSetSystemLabelInput!): BulkSetSystemLabelPayload!
+}
+
+type Queries @authorize(policy: "enduser") {
+  dialogLookup(instanceRef: String!): DialogLookupPayload!
+  dialogById(dialogId: UUID!): DialogByIdPayload!
+  searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
+  limits: Limits!
+  parties: [AuthorizedParty!]!
+  serviceResources: ServiceResourceMetadata!
+}
+
 type SearchContent {
   "The title of the dialog."
   title: ContentValue!
@@ -431,11 +459,18 @@ type SearchDialog {
   dueAt: DateTime
   "The aggregated status of the dialog."
   status: DialogStatus!
-  "Indicates whether the dialog contains content that has not been viewed or opened by the user yet."
+  """
+  Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+   A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction.
+   The value of this field is:
+   - true when there are any new unopened Transmissions sent from the service owner.
+   - false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+   Note that the value is
+   - determined by the service owner and not to be confused with IsContentSeen
+   - not affected by SystemLabels
+   For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
+  """
   hasUnopenedContent: Boolean!
-    @deprecated(
-      reason: "Use IsContentSeen instead. See the new field's description for an explanation of the new behavior."
-    )
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans."
   isApiOnly: Boolean!
   "The number of transmissions sent by the service owner"
@@ -450,7 +485,14 @@ type SearchDialog {
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."
   seenSinceLastContentUpdate: [SeenLog!]!
-  "A dialog is considered seen if it has been retrieved by a user since its last content update, and there is no SystemLabel MarkedAsUnopened"
+  """
+  Indicates whether a dialog has been seen since its last content update.
+  The value of this field is
+   - true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabel MarkedAsUnopened
+   - false if there is a SystemLabel MarkedAsUnopened, even if the dialog has been seen since its last content update
+   - false after the dialog receives a content update.
+  Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
+  """
   isContentSeen: Boolean!
   "Metadata about the dialog owned by end-users."
   endUserContext: EndUserContext!
@@ -476,6 +518,10 @@ type SearchDialogSortType {
   contentUpdatedAt: OrderDirection
 }
 
+type SearchDialogValidationError implements SearchDialogError {
+  message: String!
+}
+
 type SearchDialogsPayload {
   items: [SearchDialog!]
   hasNextPage: Boolean!
@@ -483,10 +529,6 @@ type SearchDialogsPayload {
   continuationToken: String
   orderBy: [SearchDialogSortType!]!
   errors: [SearchDialogError!]!
-}
-
-type SearchDialogValidationError implements SearchDialogError {
-  message: String!
 }
 
 type SeenLog {
@@ -577,6 +619,11 @@ type SetSystemLabelValidationError implements SetSystemLabelError {
   message: String!
 }
 
+type Subscriptions {
+  "Requires a dialog token in the 'Authorization' header."
+  dialogEvents(dialogId: UUID!): DialogEventPayload! @authorize(policy: "enduserSubscription", apply: VALIDATION)
+}
+
 type Transmission {
   "The unique identifier for the transmission in UUIDv7 format."
   id: UUID!
@@ -586,7 +633,7 @@ type Transmission {
   authorizationAttribute: String
   "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and the attachments will not be available."
   isAuthorized: Boolean!
-  "Arbitrary URI/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use)."
+  "Arbitrary URI\/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   extendedType: URL
   "Arbitrary string with a service-specific reference to an external system or service."
   externalReference: String
@@ -622,26 +669,6 @@ type TransmissionNavigationalAction {
   url: URL!
   "The UTC timestamp when the navigational action expires and is no longer available."
   expiresAt: DateTime
-}
-
-interface BulkSetSystemLabelError {
-  message: String!
-}
-
-interface DialogByIdError {
-  message: String!
-}
-
-interface DialogLookupError {
-  message: String!
-}
-
-interface SearchDialogError {
-  message: String!
-}
-
-interface SetSystemLabelError {
-  message: String!
 }
 
 input BulkSetSystemLabelInput {
@@ -684,7 +711,7 @@ input SearchDialogInput {
   contentUpdatedAfter: DateTime
   "Only return dialogs with content updated before this date"
   contentUpdatedBefore: DateTime
-  "Only return dialogs that have content that has/hasn't been seen by the user. A dialog is considered seen if it has been retrieved by a user, since it's last content update, and there is no SystemLabel MarkedAsUnopened."
+  "Only return dialogs that have content that has\/hasn't been seen by the user. A dialog is considered seen if it has been retrieved by a user, since it's last content update, and there is no SystemLabel MarkedAsUnopened."
   isContentSeen: Boolean
   "Only return dialogs updated after this date"
   updatedAfter: DateTime
@@ -798,7 +825,7 @@ enum DialogStatus {
   DRAFT
   "Awaiting action by the service owner. Indicates that the dialog is in a state where the party representative has no further tasks, and the responsibility lies with the service owner."
   AWAITING
-  "Used to indicate that the dialogue is in progress/under work, but is in a state where the user must do something - for example, correct an error, or other conditions that hinder further processing."
+  "Used to indicate that the dialogue is in progress\/under work, but is in a state where the user must do something - for example, correct an error, or other conditions that hinder further processing."
   REQUIRES_ATTENTION
   "The dialogue was completed. This typically means that the dialogue is moved to a GUI archive or similar."
   COMPLETED
@@ -840,39 +867,31 @@ enum SystemLabel {
 enum TransmissionType {
   "For general information, not related to any submissions"
   INFORMATION
-  "Feedback/receipt accepting a previous submission"
+  "Feedback\/receipt accepting a previous submission"
   ACCEPTANCE
-  "Feedback/error message rejecting a previous submission"
+  "Feedback\/error message rejecting a previous submission"
   REJECTION
-  "Question/request for more information"
+  "Question\/request for more information"
   REQUEST
   "Critical information about the process"
   ALERT
   "Information about a formal decision ('resolution')"
   DECISION
-  "A normal submission of some information/form"
+  "A normal submission of some information\/form"
   SUBMISSION
-  "A submission correcting/overriding some previously submitted information"
+  "A submission correcting\/overriding some previously submitted information"
   CORRECTION
 }
 
-"The `DateTime` scalar type represents a date and time with time zone offset information."
-scalar DateTime
-  @specifiedBy(url: "https://scalars.graphql.org/chillicream/date-time.html")
-
-"The `URL` scalar type represents a Uniform Resource Locator (URL) as defined by RFC 3986."
-scalar URL @specifiedBy(url: "https://scalars.graphql.org/chillicream/url.html")
-
-"The `UUID` scalar type represents a Universally Unique Identifier (UUID) as defined by RFC 9562."
-scalar UUID
-  @specifiedBy(url: "https://scalars.graphql.org/chillicream/uuid.html")
-
 "The authorize directive."
-directive @authorize(
-  "The name of the authorization policy that determines access to the annotated resource."
-  policy: String
-  "Roles that are allowed to access the annotated resource."
-  roles: [String!]
-  "Defines when the authorize directive shall be applied. By default the authorize directive is applied before the resolver is executed."
-  apply: ApplyPolicy! = BEFORE_RESOLVER
-) repeatable on OBJECT | FIELD_DEFINITION
+directive @authorize("The name of the authorization policy that determines access to the annotated resource." policy: String "Roles that are allowed to access the annotated resource." roles: [String!] "Defines when when the authorize directive shall be applied.By default the authorize directives are applied during the validation phase." apply: ApplyPolicy! = BEFORE_RESOLVER) repeatable on OBJECT | FIELD_DEFINITION
+
+"The `@specifiedBy` directive is used within the type system definition language to provide a URL for specifying the behavior of custom scalar definitions."
+directive @specifiedBy("The specifiedBy URL points to a human-readable specification. This field will only read a result for scalar types." url: String!) on SCALAR
+
+"The `DateTime` scalar represents an ISO-8601 compliant date time type."
+scalar DateTime @specifiedBy(url: "https:\/\/www.graphql-scalars.com\/date-time")
+
+scalar URL @specifiedBy(url: "https:\/\/tools.ietf.org\/html\/rfc3986")
+
+scalar UUID @specifiedBy(url: "https:\/\/tools.ietf.org\/html\/rfc4122")

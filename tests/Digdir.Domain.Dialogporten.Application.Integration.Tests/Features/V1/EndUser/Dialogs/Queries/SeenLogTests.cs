@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +107,21 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 x.SeenSinceLastUpdate.Select(l => l.SeenBy.ActorId).Distinct().Count().Should().Be(2);
             });
 
+
+    [Fact]
+    public Task SeenLogs_Should_Track_UpdatedAt_And_ContentUpdatedAt_For_SystemUser() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AsSystemUser()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.SeenSinceLastContentUpdate.Count.Should().Be(1);
+                x.SeenSinceLastUpdate.Count.Should().Be(1);
+                x.SeenSinceLastUpdate.First().SeenBy.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
+                x.SeenSinceLastContentUpdate.First().SeenBy.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
+            });
+
     [Fact]
     public Task Multiple_Non_content_Updates_Should_Result_In_New_Entry_In_Both_Seen_Logs() =>
         FlowBuilder.For(Application)
@@ -173,31 +189,55 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     }
 
     [Fact]
-    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs() => FlowBuilder.For(Application)
+    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs_And_One_Pair_Of_Events() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
-        .ConsumeEvents()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ((DialogCreatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .GetEndUserDialog()
         .GetEndUserDialog()
         .GetEndUserSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
             x.Count.Should().Be(1);
-            ctx.Application.GetPublishedEvents().Count.Should().Be(0);
+            var events = ctx.Application.GetPublishedEvents();
+            events.Count.Should().Be(2);
+            ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
+            ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
         });
 
-
     [Fact]
-    public Task Multiple_Gets_Around_Update_Should_Create_Multiple_SeenLogs() => FlowBuilder.For(Application)
+    public Task Multiple_Gets_Around_Update_Should_Create_Multiple_SeenLogs_And_Events() => FlowBuilder.For(Application)
         .CreateSimpleDialog()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ((DialogCreatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .GetEndUserDialog()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(2);
+            ((DialogUpdatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+            ((DialogSeenDomainEvent)x[1]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .UpdateDialog(x => x.Dto.ExternalReference = "foo:bar")
-        .ConsumeEvents()
+        .ConsumeEvents((x, ctx) =>
+        {
+            x.Count.Should().Be(1);
+            ((DialogUpdatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+        })
         .GetEndUserDialog()
         .GetEndUserSeenLogs()
         .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
         {
             x.Count.Should().Be(2);
-            ctx.Application.GetPublishedEvents().Count.Should().Be(0);
+            var events = ctx.Application.GetPublishedEvents();
+            events.Count.Should().Be(2);
+            ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
+            ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
         });
 
     [Fact]

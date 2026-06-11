@@ -589,9 +589,12 @@ public static class IFlowStepExtensions
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
         => step.AssertResult(assert).ExecuteAsync();
 
-    public static TFlowStep ConsumeEvents<TFlowStep>(this TFlowStep flowStep) where TFlowStep : IFlowStep =>
+    public static TFlowStep ConsumeEvents<TFlowStep>(this TFlowStep flowStep, Action<List<object>, FlowContext>? assert = null) where TFlowStep : IFlowStep =>
         flowStep.Do(async ctx =>
-            await ctx.Application.PublishEvents());
+        {
+            var events = await ctx.Application.PublishEvents();
+            assert?.Invoke(events, ctx);
+        });
 
     public static TFlowStep VerifySnapshot<TFlowStep>(
         this TFlowStep flowStep,

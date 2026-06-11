@@ -1407,10 +1407,8 @@
             "type": "array"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -1428,7 +1426,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "org": {
@@ -2180,10 +2178,8 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -2196,7 +2192,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "latestActivity": {

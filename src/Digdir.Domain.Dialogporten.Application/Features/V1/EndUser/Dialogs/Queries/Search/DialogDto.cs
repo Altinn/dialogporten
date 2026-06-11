@@ -111,7 +111,8 @@ public sealed class DialogDto
 
     /// <summary>
     /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
-    /// A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of <see cref="DialogTransmissionType.Values.Submission"/> or <see cref="DialogTransmissionType.Values.Correction"/>
+    /// A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of <see cref="DialogTransmissionType.Values.Submission"/> or <see cref="DialogTransmissionType.Values.Correction"/>.
+    ///
     /// The value of this field is:
     /// - true when there are any new unopened Transmissions sent from the service owner.
     /// - false when the service owner has created an Activity of type <see cref="DialogActivityType.Values.TransmissionOpened"/> for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.

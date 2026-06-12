@@ -107,11 +107,6 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         if (dialog is null)
         {
             return new EntityNotFound<DialogEntity>(request.Id);
-            // {
-            //     ProblemInstance = MyAppErrors.NotFound.Create([
-            //         new(nameof(DialogEntity), request.Id.ToString())
-            //     ])
-            // };
         }
 
         if (dialog.Deleted)

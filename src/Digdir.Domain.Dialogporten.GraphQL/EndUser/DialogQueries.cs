@@ -1,4 +1,3 @@
-using AppAny.HotChocolate.FluentValidation;
 using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
@@ -9,6 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
+using FluentValidation;
 using MediatR;
 using static Digdir.Domain.Dialogporten.GraphQL.Common.Constants;
 
@@ -83,10 +83,26 @@ public partial class Queries
     public async Task<SearchDialogsPayload> SearchDialogs(
         [Service] ISender mediator,
         [Service] IMapper mapper,
+        [Service] IValidator<SearchDialogInput> inputValidator,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
-        [UseFluentValidation, UseValidator<SearchDialogInputValidator>] SearchDialogInput input,
+        SearchDialogInput input,
         CancellationToken cancellationToken)
     {
+        var validationResult = await inputValidator.ValidateAsync(input, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return new SearchDialogsPayload
+            {
+                Errors =
+                [
+                    .. validationResult.Errors.Select(x => new SearchDialogValidationError
+                    {
+                        Message = x.ErrorMessage
+                    })
+                ]
+            };
+        }
+
         var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
         searchDialogQuery.AcceptedLanguages = acceptLanguage?.AcceptedLanguage;
 

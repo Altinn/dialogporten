@@ -1,0 +1,12 @@
+﻿{
+  "type": "https://datatracker.ietf.org/doc/html/rfc4918#section-11.2",
+  "title": "Unprocessable request.",
+  "status": 422,
+  "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000",
+  "errors": {
+    "DialogActivity": [
+      "Entity \u0027DialogActivity\u0027 with the following key(s) already exists: (00000000-0000-0000-0000-000000000000)."
+    ]
+  },
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+}

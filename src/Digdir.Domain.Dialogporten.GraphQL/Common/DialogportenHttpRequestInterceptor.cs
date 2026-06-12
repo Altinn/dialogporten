@@ -3,19 +3,13 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using HotChocolate.AspNetCore;
 using HotChocolate.Execution;
+using Microsoft.Extensions.DependencyInjection;
 using UserType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common;
 
 public sealed class DialogportenHttpRequestInterceptor : DefaultHttpRequestInterceptor
 {
-    private readonly ILogger<DialogportenHttpRequestInterceptor> _logger;
-
-    public DialogportenHttpRequestInterceptor(ILogger<DialogportenHttpRequestInterceptor> logger)
-    {
-        _logger = logger;
-    }
-
     public override ValueTask OnCreateAsync(HttpContext context, IRequestExecutor requestExecutor,
         OperationRequestBuilder requestBuilder,
         CancellationToken cancellationToken)
@@ -26,7 +20,7 @@ public sealed class DialogportenHttpRequestInterceptor : DefaultHttpRequestInter
         return base.OnCreateAsync(context, requestExecutor, requestBuilder, cancellationToken);
     }
 
-    private void RejectUnknownAuthenticatedUserType(HttpContext context)
+    private static void RejectUnknownAuthenticatedUserType(HttpContext context)
     {
         if (context.User.Identity is not { IsAuthenticated: true })
         {
@@ -47,7 +41,9 @@ public sealed class DialogportenHttpRequestInterceptor : DefaultHttpRequestInter
             return;
         }
 
-        _logger.LogError(
+        var logger = context.RequestServices
+            .GetRequiredService<ILogger<DialogportenHttpRequestInterceptor>>();
+        logger.LogError(
             "The request was authenticated, but the user type could not be determined. UserType={UserType}, {DiagnosticSummary}",
             userType,
             context.User.GetDiagnosticSummary());

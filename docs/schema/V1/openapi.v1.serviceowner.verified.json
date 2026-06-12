@@ -3511,7 +3511,6 @@
         "additionalProperties": {
           "nullable": true
         },
-        "description": "sup",
         "properties": {
           "code": {
             "nullable": true,
@@ -3528,7 +3527,6 @@
               },
               "type": "array"
             },
-            "description": "how bout this",
             "type": "object"
           },
           "instance": {
@@ -3541,7 +3539,6 @@
             "type": "integer"
           },
           "statusDescription": {
-            "description": "fam",
             "nullable": true,
             "type": "string"
           },
@@ -3571,7 +3568,6 @@
         "additionalProperties": {
           "nullable": true
         },
-        "description": "one more",
         "properties": {
           "code": {
             "nullable": true,
@@ -3582,7 +3578,6 @@
             "type": "string"
           },
           "paths": {
-            "description": "yaw",
             "items": {
               "type": "string"
             },

@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.GraphQL.Common;
 using HotChocolate;
 using HotChocolate.Execution;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests;
@@ -13,17 +14,27 @@ public class DialogportenHttpRequestInterceptorTests
 {
     private const string AuthenticationType = "Bearer";
 
+    private static DefaultHttpContext CreateHttpContext(
+        ClaimsPrincipal user,
+        ILogger<DialogportenHttpRequestInterceptor> logger) =>
+        new()
+        {
+            User = user,
+            RequestServices = new ServiceCollection()
+                .AddSingleton(logger)
+                .BuildServiceProvider()
+        };
+
     [Fact]
     public async Task Authenticated_user_with_unknown_user_type_throws_graphql_exception()
     {
         var logger = new TestLogger<DialogportenHttpRequestInterceptor>();
-        var interceptor = new DialogportenHttpRequestInterceptor(logger);
-        var context = new DefaultHttpContext
-        {
-            User = new ClaimsPrincipal(new ClaimsIdentity(
+        var interceptor = new DialogportenHttpRequestInterceptor();
+        var context = CreateHttpContext(
+            new ClaimsPrincipal(new ClaimsIdentity(
                 claims: [new Claim("custom-claim", "custom-value")],
-                AuthenticationType))
-        };
+                AuthenticationType)),
+            logger);
 
         var act = async () =>
             await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),
@@ -42,13 +53,12 @@ public class DialogportenHttpRequestInterceptorTests
     public async Task Authenticated_user_with_known_user_type_passes_through()
     {
         var logger = new TestLogger<DialogportenHttpRequestInterceptor>();
-        var interceptor = new DialogportenHttpRequestInterceptor(logger);
-        var context = new DefaultHttpContext
-        {
-            User = new ClaimsPrincipal(new ClaimsIdentity(
+        var interceptor = new DialogportenHttpRequestInterceptor();
+        var context = CreateHttpContext(
+            new ClaimsPrincipal(new ClaimsIdentity(
                 claims: [new Claim("pid", "22834498646")],
-                AuthenticationType))
-        };
+                AuthenticationType)),
+            logger);
 
         var act = async () =>
             await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),
@@ -62,16 +72,15 @@ public class DialogportenHttpRequestInterceptorTests
     public async Task Authenticated_dialog_token_passes_through()
     {
         var logger = new TestLogger<DialogportenHttpRequestInterceptor>();
-        var interceptor = new DialogportenHttpRequestInterceptor(logger);
-        var context = new DefaultHttpContext
-        {
-            User = new ClaimsPrincipal(new ClaimsIdentity(
+        var interceptor = new DialogportenHttpRequestInterceptor();
+        var context = CreateHttpContext(
+            new ClaimsPrincipal(new ClaimsIdentity(
                 claims:
                 [
                     new Claim(DialogTokenClaimTypes.DialogId, Guid.NewGuid().ToString())
                 ],
-                AuthenticationType))
-        };
+                AuthenticationType)),
+            logger);
 
         var act = async () =>
             await interceptor.OnCreateAsync(context, null!, OperationRequestBuilder.New(),

@@ -89,7 +89,7 @@ public static class TestTokenGenerator
     private static string BuildEndUserRequestPath(
         EndUserTokenOverrides? overrides) =>
         "/GetPersonalToken" +
-        $"?env={Environment.GetTokenGeneratorEnvironment()}" +
+        $"?env={Environment.GetTokenGeneratorEnvironment().ToTokenGeneratorUrlParameter()}" +
         $"&scopes={Uri.EscapeDataString(overrides?.Scopes ?? EndUserScopes)}" +
         $"&pid={Uri.EscapeDataString(overrides?.Ssn ?? DefaultEndUserSsn)}" +
         $"&ttl={DefaultTokenTtl}";
@@ -97,18 +97,20 @@ public static class TestTokenGenerator
     private static string BuildServiceOwnerRequestPath(
         ServiceOwnerTokenOverrides? overrides) =>
         "/GetEnterpriseToken" +
-        $"?env={Environment.GetTokenGeneratorEnvironment()}" +
+        $"?env={Environment.GetTokenGeneratorEnvironment().ToTokenGeneratorUrlParameter()}" +
         $"&scopes={Uri.EscapeDataString(overrides?.Scopes ?? ServiceOwnerScopes)}" +
         $"&org={Uri.EscapeDataString(overrides?.OrgName ?? DefaultServiceOwnerOrgName)}" +
         $"&orgNo={Uri.EscapeDataString(overrides?.OrgNumber ?? GetDefaultServiceOwnerOrgNr())}" +
         $"&ttl={DefaultTokenTtl}";
 
-    private static string BuildSystemUserRequestPath(
-        SystemUserTokenOverrides? overrides) =>
-        "/GetSystemUserToken" +
-        $"?env={Environment.GetTokenGeneratorEnvironment()}" +
-        $"&scopes={Uri.EscapeDataString(overrides?.Scopes ?? SystemUserScopes)}" +
-        $"&systemUserId={Uri.EscapeDataString(overrides?.SystemUserId ?? DefaultSystemUserId)}" +
-        $"&systemUserOrg={Uri.EscapeDataString(overrides?.SystemUserOrg ?? DefaultSystemUserOrgNo)}" +
-        $"&ttl={DefaultTokenTtl}";
+    private static string BuildSystemUserRequestPath(SystemUserTokenOverrides? o)
+    {
+        var env = Environment.GetTokenGeneratorEnvironment();
+        return "/GetSystemUserToken" +
+               $"?env={env.ToTokenGeneratorUrlParameter()}" +
+               $"&scopes={Uri.EscapeDataString(o?.Scopes ?? SystemUserScopes)}" +
+               $"&systemUserId={Uri.EscapeDataString(o?.SystemUserId?.Invoke(env) ?? DefaultSystemUserId(env))}" +
+               $"&systemUserOrg={Uri.EscapeDataString(o?.SystemUserOrg ?? DefaultSystemUserOrgNo)}" +
+               $"&ttl={DefaultTokenTtl}";
+    }
 }

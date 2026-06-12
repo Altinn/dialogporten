@@ -3,7 +3,7 @@ using Digdir.Library.Utils.AspNet;
 using HotChocolate.Configuration;
 using HotChocolate.Language;
 using HotChocolate.Resolvers;
-using HotChocolate.Types.Descriptors.Definitions;
+using HotChocolate.Types.Descriptors.Configurations;
 using Microsoft.AspNetCore.Http.Features;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common;
@@ -19,14 +19,14 @@ internal sealed class EnableResponseCompressionTypeInterceptor : TypeInterceptor
 {
     public override void OnBeforeRegisterDependencies(
         ITypeDiscoveryContext discoveryContext,
-        DefinitionBase definition)
+        TypeSystemConfiguration configuration)
     {
-        if (definition is not ObjectTypeDefinition objectTypeDefinition)
+        if (configuration is not ObjectTypeConfiguration objectTypeConfiguration)
         {
             return;
         }
 
-        foreach (var field in objectTypeDefinition.Fields)
+        foreach (var field in objectTypeConfiguration.Fields)
         {
             var member = field.ResolverMember ?? field.Member;
             if (member?.GetCustomAttribute<EnableResponseCompressionAttribute>() is null)
@@ -34,7 +34,7 @@ internal sealed class EnableResponseCompressionTypeInterceptor : TypeInterceptor
                 continue;
             }
 
-            field.MiddlewareDefinitions.Add(new FieldMiddlewareDefinition(
+            field.MiddlewareConfigurations.Add(new FieldMiddlewareConfiguration(
                 next => async context =>
                 {
                     // Belt-and-braces: response compression only applies to read responses.

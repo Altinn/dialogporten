@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using AutoMapper;
@@ -50,7 +51,7 @@ public class DialogApplication : IAsyncLifetime
     private Respawner _respawner = null!;
     private ServiceProvider _rootProvider = null!;
     private ServiceProvider _fixtureRootProvider = null!;
-    private readonly List<object> _publishedEvents = [];
+    private readonly ConcurrentQueue<object> _publishedEvents = [];
 
     internal static TestClock Clock { get; } = new();
     internal static TestUser User { get; } = new();
@@ -110,7 +111,7 @@ public class DialogApplication : IAsyncLifetime
         var publishEndpointSubstitute = Substitute.For<IPublishEndpoint>();
         publishEndpointSubstitute
             .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
-            .Do(x => _publishedEvents.Add(x[0]));
+            .Do(x => _publishedEvents.Enqueue(x[0]));
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
@@ -179,6 +180,10 @@ public class DialogApplication : IAsyncLifetime
         nameRegistrySubstitute
             .GetName(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Brando Sando");
+
+        nameRegistrySubstitute
+            .GetName(Arg.Is(TestUsers.DefaultSystemUserUrn), Arg.Any<CancellationToken>())
+            .Returns("Mock system user name");
 
         return nameRegistrySubstitute;
     }
@@ -286,8 +291,9 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
-    public async Task PublishEvents()
+    public async Task<List<object>> PublishEvents()
     {
+        var publishedEvents = new List<object>();
         while (GetPublishedEvents().Count != 0)
         {
             foreach (var value in PopPublishedEvents())
@@ -295,8 +301,11 @@ public class DialogApplication : IAsyncLifetime
                 using var scope = _rootProvider.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
                 await mediator.Publish(value);
+                publishedEvents.Add(value);
             }
         }
+
+        return publishedEvents;
     }
 
     public async ValueTask ResetState()
@@ -339,7 +348,7 @@ public class DialogApplication : IAsyncLifetime
         });
     }
 
-    public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
+    public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.ToList().AsReadOnly();
 
     public List<object> PopPublishedEvents()
     {

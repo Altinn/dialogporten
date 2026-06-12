@@ -178,13 +178,10 @@ static void BuildAndRun(string[] args)
     app.MapGraphQL()
         .RequireCors(GraphQlCorsOptions.PolicyName)
         .RequireAuthorization()
-        .WithOptions(new GraphQLServerOptions
+        .WithOptions(options =>
         {
-            EnableSchemaRequests = true,
-            Tool =
-            {
-                Enable = true
-            }
+            options.EnableSchemaRequests = true;
+            options.Tool.Enable = true;
         });
 
     app.Run();

@@ -26,6 +26,7 @@ using Microsoft.Extensions.Options;
 using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Scalar.AspNetCore;
 using Serilog;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
@@ -168,6 +169,17 @@ static void BuildAndRun(string[] args)
     app.MapAspNetHealthChecks()
         .MapControllers();
 
+    var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
+    var openApiDocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
+
+    app.MapScalarApiReference("/scalar", options => options
+        .WithTitle("Dialogporten API")
+        .WithOpenApiRoutePattern(openApiDocumentPath)
+        .AddDocument("v1", "Dialogporten")
+        .AddDocument("v1.enduser", "Dialogporten EndUser")
+        .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner")
+        .DisableAgent());
+
     app.UseHttpsRedirection();
     // Wraps the response body before any downstream middleware writes. Must precede
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
@@ -222,6 +234,7 @@ static void BuildAndRun(string[] args)
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
         {
+            config.Path = "/swagger/{documentName}/swagger.json";
             config.PostProcess = (document, _) =>
             {
                 var dialogportenBaseUri = builder.Configuration
@@ -244,8 +257,7 @@ static void BuildAndRun(string[] args)
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
-            var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
-            uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
+            uiConfig.DocumentPath = openApiDocumentPath;
         })
         .UseFeatureMetrics();
 

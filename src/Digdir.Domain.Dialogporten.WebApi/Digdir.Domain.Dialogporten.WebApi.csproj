@@ -17,6 +17,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.8" />
         <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
         <PackageReference Include="NSwag.MSBuild" Version="14.7.1" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />
     </ItemGroup>
 
     <ItemGroup>

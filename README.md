@@ -116,6 +116,7 @@ If you are on Windows, set `USER_SECRETS_DIR` to `%APPDATA%/Microsoft/UserSecret
 
 The following GUI services should now be available:
 * WebAPI/SwaggerUI: [localhost:7214/swagger](https://localhost:7214/swagger/index.html)
+* WebAPI/Scalar: [localhost:7214/scalar](https://localhost:7214/scalar)
 * GraphQl/Nitro: [localhost:7215/graphql](https://localhost:7215/graphql)
 * Redis/Insight: [localhost:7216](https://localhost:7216)
 

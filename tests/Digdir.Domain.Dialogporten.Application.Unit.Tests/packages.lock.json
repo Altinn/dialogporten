@@ -62,6 +62,23 @@
           "xunit.v3.mtp-v1": "[3.2.2]"
         }
       },
+      "Altinn.Authorization.ProblemDetails": {
+        "type": "Transitive",
+        "resolved": "5.4.0",
+        "contentHash": "CTWsmEmXcSLfQEnimMgtC7tMaTCP9bEovoV0VNT44IWSckNbcQGXLPJ4ZRWjL4E15QwzWUGNQq603jQL9zKyBw==",
+        "dependencies": {
+          "Altinn.Authorization.ProblemDetails.Abstractions": "5.4.0",
+          "CommunityToolkit.Diagnostics": "8.4.2"
+        }
+      },
+      "Altinn.Authorization.ProblemDetails.Abstractions": {
+        "type": "Transitive",
+        "resolved": "5.4.0",
+        "contentHash": "NLA5asow4kKcvm7jGKze/DgtU8Sx5/nC5izJAOnrZNL5TF41LEbFjqRmw6nav/LTHeYe1CvVdim9BLpDamgc8w==",
+        "dependencies": {
+          "CommunityToolkit.Diagnostics": "8.4.2"
+        }
+      },
       "Argon": {
         "type": "Transitive",
         "resolved": "0.34.0",
@@ -97,6 +114,11 @@
         "type": "Transitive",
         "resolved": "2.9.1",
         "contentHash": "OE0sl1/sQ37bjVsPKKtwQlWDgqaxWgtme3xZz7JssWUzg5JpMIyHgCTY9MVMxOg48fJ1AgGT3tgdH5m/kQ5xhA=="
+      },
+      "CommunityToolkit.Diagnostics": {
+        "type": "Transitive",
+        "resolved": "8.4.2",
+        "contentHash": "WC0fk3A49gk6kWjhSZ8CDgPkv+wPHGhMFxUrKRlLtzUYXRFOdTDQ4RsEkZnI9ApO7eJh6nqT2MFmwFptpMs7aw=="
       },
       "DeterministicGuids": {
         "type": "Transitive",
@@ -699,6 +721,7 @@
       "digdir.domain.dialogporten.application": {
         "type": "Project",
         "dependencies": {
+          "Altinn.Authorization.ProblemDetails": "[5.4.0, )",
           "AsyncKeyedLock": "[8.0.2, )",
           "AutoMapper": "[14.0.0, )",
           "Digdir.Domain.Dialogporten.Domain": "[1.0.0, )",
@@ -719,6 +742,7 @@
       "digdir.domain.dialogporten.domain": {
         "type": "Project",
         "dependencies": {
+          "Altinn.Authorization.ProblemDetails.Abstractions": "[5.4.0, )",
           "DeterministicGuids": "[1.0.11, )",
           "Digdir.Library.Entity.Abstractions": "[1.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.8, )"

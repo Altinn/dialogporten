@@ -2,6 +2,15 @@
   "version": 1,
   "dependencies": {
     "net10.0": {
+      "Altinn.Authorization.ProblemDetails.Abstractions": {
+        "type": "Direct",
+        "requested": "[5.4.0, )",
+        "resolved": "5.4.0",
+        "contentHash": "NLA5asow4kKcvm7jGKze/DgtU8Sx5/nC5izJAOnrZNL5TF41LEbFjqRmw6nav/LTHeYe1CvVdim9BLpDamgc8w==",
+        "dependencies": {
+          "CommunityToolkit.Diagnostics": "8.4.2"
+        }
+      },
       "DeterministicGuids": {
         "type": "Direct",
         "requested": "[1.0.11, )",
@@ -13,6 +22,11 @@
         "requested": "[10.0.8, )",
         "resolved": "10.0.8",
         "contentHash": "21nbDV60SRPWGIivsyl6lqBeEJNG1sginhhfWgRrr3Ais7aQ12To25OAHQxgoiJkjqy1aQ6RxpZBGYuTi7Ge6A=="
+      },
+      "CommunityToolkit.Diagnostics": {
+        "type": "Transitive",
+        "resolved": "8.4.2",
+        "contentHash": "WC0fk3A49gk6kWjhSZ8CDgPkv+wPHGhMFxUrKRlLtzUYXRFOdTDQ4RsEkZnI9ApO7eJh6nqT2MFmwFptpMs7aw=="
       },
       "MediatR.Contracts": {
         "type": "Transitive",

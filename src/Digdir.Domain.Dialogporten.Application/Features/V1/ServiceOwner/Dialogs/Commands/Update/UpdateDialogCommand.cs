@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common;
+﻿using Altinn.Authorization.ProblemDetails;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
@@ -6,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Errors;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
@@ -105,6 +107,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         if (dialog is null)
         {
             return new EntityNotFound<DialogEntity>(request.Id);
+            // {
+            //     ProblemInstance = MyAppErrors.NotFound.Create([
+            //         new(nameof(DialogEntity), request.Id.ToString())
+            //     ])
+            // };
         }
 
         if (dialog.Deleted)

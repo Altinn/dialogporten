@@ -229,6 +229,8 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
+            // x.Errors.ProducesMetadataType = typeof(ApplicationSettings);
+            x.Errors.UseProblemDetails();
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>

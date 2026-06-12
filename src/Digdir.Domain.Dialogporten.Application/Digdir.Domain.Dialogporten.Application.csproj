@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Altinn.Authorization.ProblemDetails" Version="5.4.0" />
         <PackageReference Include="AsyncKeyedLock" Version="8.0.2" />
         <PackageReference Include="AutoMapper" Version="14.0.0"/>
         <PackageReference Include="HtmlAgilityPack" Version="1.12.4"/>

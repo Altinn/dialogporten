@@ -24,7 +24,7 @@ internal static class RouteHandlerBuilderExtensions
                 case StatusCodes.Status412PreconditionFailed:
                 case StatusCodes.Status404NotFound:
                 case StatusCodes.Status422UnprocessableEntity:
-                    builder.ProducesProblemDetails(statusCode);
+                    builder.ProducesProblemFE<ProblemDetails>(statusCode);
                     break;
                 default:
                     builder.Produces(statusCode);

@@ -1607,6 +1607,93 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
     }
 
+    /// <summary>
+    /// sup
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ProblemDetails
+    {
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+
+        [JsonPropertyName("status")]
+        public int? Status { get; set; }
+
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+
+        [JsonPropertyName("instance")]
+        public string Instance { get; set; }
+
+        /// <summary>
+        /// fam
+        /// </summary>
+        [JsonPropertyName("statusDescription")]
+        public string StatusDescription { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("traceId")]
+        public string TraceId { get; set; }
+
+        [JsonPropertyName("validationErrors")]
+        public ICollection<ProblemDetails_Error> ValidationErrors { get; set; }
+
+        /// <summary>
+        /// how bout this
+        /// </summary>
+        [JsonPropertyName("errors")]
+        public IDictionary<string, ICollection<string>> Errors { get; set; }
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    /// <summary>
+    /// one more
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ProblemDetails_Error
+    {
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+
+        /// <summary>
+        /// yaw
+        /// </summary>
+        [JsonPropertyName("paths")]
+        public ICollection<string> Paths { get; set; }
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class SetDialogSystemLabelRequest
     {
@@ -1638,51 +1725,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </summary>
         [JsonPropertyName("performedBy")]
         public Actor PerformedBy { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProblemDetails
-    {
-
-        [JsonPropertyName("type")]
-        public string Type { get; set; } = "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1";
-
-        [JsonPropertyName("title")]
-        public string Title { get; set; } = "One or more validation errors occurred.";
-
-        [JsonPropertyName("status")]
-        public int Status { get; set; } = 400;
-
-        [JsonPropertyName("instance")]
-        public string Instance { get; set; } = "/api/route";
-
-        [JsonPropertyName("traceId")]
-        public string TraceId { get; set; } = "0HMPNHL0JHL76:00000001";
-
-        [JsonPropertyName("detail")]
-        public string Detail { get; set; }
-
-        [JsonPropertyName("errors")]
-        public ICollection<ProblemDetails_Error> Errors { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class ProblemDetails_Error
-    {
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = "Error or field name";
-
-        [JsonPropertyName("reason")]
-        public string Reason { get; set; } = "Error reason";
-
-        [JsonPropertyName("code")]
-        public string Code { get; set; }
-
-        [JsonPropertyName("severity")]
-        public string Severity { get; set; }
 
     }
 

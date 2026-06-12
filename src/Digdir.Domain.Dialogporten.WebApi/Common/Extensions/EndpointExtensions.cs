@@ -21,7 +21,7 @@ public static class EndpointExtensions
         => ep.HttpContext.Response.SendErrorsAsync([], StatusCodes.Status412PreconditionFailed, cancellation: cancellationToken);
 
     public static Task NotFoundAsync(this IEndpoint ep, EntityNotFound notFound, CancellationToken cancellationToken = default)
-        => ep.HttpContext.Response.SendAsync(
+        => ep.HttpContext.Response.SendErrorsAsync(
             notFound.ToValidationResults(),
             StatusCodes.Status404NotFound,
             cancellation: cancellationToken);

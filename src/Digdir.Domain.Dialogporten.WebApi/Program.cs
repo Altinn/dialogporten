@@ -229,8 +229,6 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
             x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
-            // x.Errors.ProducesMetadataType = typeof(ApplicationSettings);
-            x.Errors.UseProblemDetails();
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
@@ -286,7 +284,6 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.PostProcess = document =>
         {
             document.Generator = null;
-            document.ReplaceProblemDetailsDescriptions();
             document.MakeCollectionsNullable();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();

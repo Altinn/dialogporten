@@ -67,9 +67,6 @@ public class ConfigurationExtensionsTests
             Environment.SetEnvironmentVariable(variableName, value);
         }
 
-        public void Dispose()
-        {
-            Environment.SetEnvironmentVariable(_variableName, _originalValue);
-        }
+        public void Dispose() => Environment.SetEnvironmentVariable(_variableName, _originalValue);
     }
 }

@@ -43,7 +43,5 @@ public sealed class WebApiE2EFixture : E2EFixtureBase
     }
 
     protected override void AfterServiceProviderBuilt(ServiceProvider serviceProvider)
-    {
-        EndUserApi = serviceProvider.GetRequiredService<IEndUserApi>();
-    }
+        => EndUserApi = serviceProvider.GetRequiredService<IEndUserApi>();
 }

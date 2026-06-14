@@ -6,9 +6,6 @@ public static class TokenGeneratorEnvironmentExtensions
 {
     extension(TokenGeneratorEnvironment env)
     {
-        public string ToTokenGeneratorUrlParameter()
-        {
-            return env.ToString().ToLower(CultureInfo.InvariantCulture);
-        }
+        public string ToTokenGeneratorUrlParameter() => env.ToString().ToLower(CultureInfo.InvariantCulture);
     }
 }

@@ -130,20 +130,11 @@ public sealed class DialogEntity :
         IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration() || IsFromAltinn2Instance();
     }
 
-    private bool WasCreatedBeforeFirstMigration()
-    {
-        return CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
-    }
+    private bool WasCreatedBeforeFirstMigration() => CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-    private bool IsFromAltinn2Instance()
-    {
-        return ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
-    }
+    private bool IsFromAltinn2Instance() => ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
 
-    public void AddUpdateEvent()
-    {
-        _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
-    }
+    public void AddUpdateEvent() => _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
 
     public void AddSeenEvent(string userId, DialogUserType.Values userTypeId, Guid seenLogId)
     {

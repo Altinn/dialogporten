@@ -166,14 +166,28 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             authorizedPartiesRequest.PartyFilter.Clear();
         }
 
+        // Party filtering for SI users is mostly useless, as it very often is just one or two
+        // parties. Disable by default to reduce cache cardinality.
+        if (authorizedPartiesRequest.PartyIdentifier is IdportenEmailUserIdentifier
+            && !_applicationSettings.CurrentValue.FeatureToggle.EnablePartyFiltersForEmailUsers)
+        {
+            authorizedPartiesRequest.PartyFilter.Clear();
+        }
+
         AuthorizedPartiesResult authorizedParties;
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
-            authorizedParties = await _partiesCache.GetOrSetAsync(
-                authorizedPartiesRequest.GenerateCacheKey(),
-                async token => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token),
-                token: cancellationToken
-            );
+            // Party cache for SI users is problematic due to merging of legacy SI users and e-mail users,
+            // since this flow assumes that the user is immediately able to load the updated party list. The
+            // list is cheap to generate in AM, so we pay the cost of doing this lookup for all SI user requests
+            authorizedParties = authorizedPartiesRequest.PartyIdentifier is IdportenEmailUserIdentifier
+                && !_applicationSettings.CurrentValue.FeatureToggle.EnablePartyCacheForEmailUsers
+                ? await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken)
+                : await _partiesCache.GetOrSetAsync(
+                    authorizedPartiesRequest.GenerateCacheKey(),
+                    async token => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token),
+                    token: cancellationToken
+                );
         }
 
         return flatten ? authorizedParties.Flatten() : authorizedParties;

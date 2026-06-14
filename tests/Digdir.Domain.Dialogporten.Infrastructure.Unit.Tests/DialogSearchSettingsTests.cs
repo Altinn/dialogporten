@@ -1,5 +1,4 @@
 using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Infrastructure;
 using Xunit;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;

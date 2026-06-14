@@ -2,7 +2,6 @@ using System.Reflection;
 using Digdir.Library.Utils.AspNet;
 using HotChocolate.Configuration;
 using HotChocolate.Language;
-using HotChocolate.Resolvers;
 using HotChocolate.Types.Descriptors.Configurations;
 using Microsoft.AspNetCore.Http.Features;
 

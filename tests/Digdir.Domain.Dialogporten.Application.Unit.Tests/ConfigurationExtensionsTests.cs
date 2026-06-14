@@ -1,4 +1,3 @@
-using System.Linq;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Microsoft.Extensions.Configuration;

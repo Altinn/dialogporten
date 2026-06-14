@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Library.Dialogporten.E2E.Common.Extensions;

@@ -117,7 +117,7 @@ public class ServiceOwnerLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebA
     public async Task Should_Return_404_When_Deleting_Missing_Label()
     {
         // Arrange
-        const string missingLabel = "nonExistentLabel";
+        const string missingLabel = "non-existent-label";
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
         // Act

@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common;
 
 [OpenApiTypeName("ProblemDetails")]
-public class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails
+public sealed class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails
 {
     public string? StatusDescription { get; set; }
     public string? Code { get; set; }
@@ -16,7 +16,7 @@ public class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails
 
 [OpenApiTypeName("ProblemDetails_Error")]
 #pragma warning disable CA1707
-public class ProblemDetails_Error
+public sealed class ProblemDetails_Error
 #pragma warning restore CA1707
 {
     public string? Title { get; set; }

@@ -1029,9 +1029,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
     }
 
-    /// <summary>
-    /// sup
-    /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails
     {
@@ -1051,9 +1048,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("instance")]
         public string Instance { get; set; }
 
-        /// <summary>
-        /// fam
-        /// </summary>
         [JsonPropertyName("statusDescription")]
         public string StatusDescription { get; set; }
 
@@ -1066,9 +1060,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("validationErrors")]
         public ICollection<ProblemDetails_Error> ValidationErrors { get; set; }
 
-        /// <summary>
-        /// how bout this
-        /// </summary>
         [JsonPropertyName("errors")]
         public IDictionary<string, ICollection<string>> Errors { get; set; }
 
@@ -1083,9 +1074,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
     }
 
-    /// <summary>
-    /// one more
-    /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ProblemDetails_Error
     {
@@ -1099,9 +1087,6 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("detail")]
         public string Detail { get; set; }
 
-        /// <summary>
-        /// yaw
-        /// </summary>
         [JsonPropertyName("paths")]
         public ICollection<string> Paths { get; set; }
 

@@ -1,6 +1,4 @@
 // This file is generated, see "scripts" directory
-import { default as contextCreateSOLabels } from './contextCreateSOLabels.js';
-import { default as contextDeleteSOLabels } from './contextDeleteSOLabels.js';
 import { default as dialogAttachmentOrder } from './dialogAttachmentOrder.js';
 import { default as dialogBulkSystemLabels } from './dialogBulkSystemLabels.js';
 import { default as dialogCreateActivity } from './dialogCreateActivity.js';
@@ -16,8 +14,6 @@ import { default as dialogServiceOwnerLabels } from './dialogServiceOwnerLabels.
 import { default as dialogUpdateActivity } from './dialogUpdateActivity.js';
 
 export default function() {
-  contextCreateSOLabels();
-  contextDeleteSOLabels();
   dialogAttachmentOrder();
   dialogBulkSystemLabels();
   dialogCreateActivity();

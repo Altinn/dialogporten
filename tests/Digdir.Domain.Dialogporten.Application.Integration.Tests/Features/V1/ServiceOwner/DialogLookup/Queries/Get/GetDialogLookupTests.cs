@@ -179,5 +179,5 @@ internal sealed class CorrespondenceLookupResourceRegistry(DialogDbContext db) :
         string serviceResourceId,
         CancellationToken cancellationToken) =>
         Task.FromResult<ServiceResourceInformation?>(
-            new ServiceResourceInformation(serviceResourceId, CorrespondenceService, "991825827", "ttd", [], [], false));
+            new ServiceResourceInformation(serviceResourceId, CorrespondenceService, "991825827", "ttd", [], [], false, "active"));
 }

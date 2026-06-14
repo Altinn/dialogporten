@@ -10,7 +10,7 @@ type Queries @authorize(policy: "enduser") {
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
-  serviceResources: ServiceResourceMetadata!
+  serviceResources(parties: [String!], includeUnauthorized: Boolean! = false): ServiceResourceMetadata!
 }
 
 type Mutations @authorize(policy: "enduser") {
@@ -566,6 +566,8 @@ type ServiceResourceMetadataServiceOwner {
 
 type ServiceResourceMetadataServiceResource {
   id: String!
+  resourceType: String!
+  status: String!
   isDelegable: Boolean!
   minimumAuthenticationLevel: Int!
   name: [Localization!]!

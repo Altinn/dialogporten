@@ -68,7 +68,8 @@ public sealed class UserResourceRegistryTests
                 name,
                 [],
                 [],
-                false))
+                false,
+                "active"))
             .ToArray();
 
         var resourceRegistry = Substitute.For<IResourceRegistry>();

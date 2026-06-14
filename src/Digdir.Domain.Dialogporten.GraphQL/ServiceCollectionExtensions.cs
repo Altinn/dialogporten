@@ -15,7 +15,6 @@ public static class ServiceCollectionExtensions
         .AddGraphQLServer()
         .BindRuntimeType<Uri, UrlType>()
         .AddHttpRequestInterceptor<DialogportenHttpRequestInterceptor>()
-        .TryAddTypeInterceptor<EnableResponseCompressionTypeInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
         // This assumes that subscriptions have been set up by the infrastructure
         .AddSubscriptionType<Subscriptions>()

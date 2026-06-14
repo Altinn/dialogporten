@@ -109,9 +109,6 @@ static void BuildAndRun(string[] args)
         // Graph QL
         .AddDialogportenGraphQl()
 
-        // Response compression (opt-in per resolver via [EnableResponseCompression])
-        .AddDialogportenResponseCompression()
-
         // Add controllers
         .AddControllers()
             .Services
@@ -165,8 +162,6 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
 
     app.UseCors();
-    // Must precede MapGraphQL so HotChocolate's response body stream is wrapped before write.
-    app.UseResponseCompression();
     app.MapAspNetHealthChecks()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()

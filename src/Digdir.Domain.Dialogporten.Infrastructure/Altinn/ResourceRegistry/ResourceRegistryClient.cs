@@ -16,7 +16,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 /// </summary>
 internal sealed class ResourceRegistryClient : IResourceRegistry
 {
-    private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey_V3";
+    private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey_V4";
     private const string ResourceRegistryResourceEndpoint = "resourceregistry/api/v1/resource/";
     private const string AuthenticationLevelCategory = "urn:altinn:minimum-authenticationlevel";
 
@@ -229,7 +229,8 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
                         x.HasCompetentAuthority.OrgCode!,
                         x.Title.ToLocalizations(),
                         x.Description.ToLocalizations(),
-                        x.Delegable))
+                        x.Delegable,
+                        x.Status ?? string.Empty))
                     .ToArray();
             },
             token: cancellationToken);
@@ -259,6 +260,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         public required CompetentAuthority HasCompetentAuthority { get; init; }
         public required string ResourceType { get; init; }
         public required bool Delegable { get; init; }
+        public string? Status { get; init; }
         public IDictionary<string, string> Title { get; init; } = new Dictionary<string, string>();
         public IDictionary<string, string> Description { get; init; } = new Dictionary<string, string>();
     }

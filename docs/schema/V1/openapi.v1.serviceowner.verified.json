@@ -3653,6 +3653,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
           }
         },
         "type": "object"

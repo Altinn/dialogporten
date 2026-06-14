@@ -147,6 +147,7 @@ public static class InfrastructureExtensions
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient<IMetadataLinkProvider, MetadataLinkProvider>()
+            .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddTransient(x => new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 

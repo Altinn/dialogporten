@@ -91,6 +91,15 @@ internal static class LocalizationExtensions
         localizations.Add(preferredLanguage);
     }
 
+    public static List<LocalizationDto> Pruned(
+        this IReadOnlyList<LocalizationDto> localizations,
+        List<AcceptedLanguage>? acceptedLanguages)
+    {
+        var copy = localizations.ToList();
+        copy.PruneLocalizations(acceptedLanguages);
+        return copy;
+    }
+
     public static void PruneLocalizations(this List<LocalizationDto>? localizations, List<AcceptedLanguage>? acceptedLanguages)
     {
         if (localizations is null or [] || acceptedLanguages is null or []) return;

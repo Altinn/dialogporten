@@ -192,6 +192,26 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public Task Search_Should_Return_ApiOnly_Dialog_Without_Content() =>
+        // API-only dialogs are not required to have content, and are not excluded
+        // from end user search by default. The handler must not throw when content
+        // is missing for such a dialog. Regression test for KeyNotFoundException.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.IsApiOnly = true;
+                x.Dto.Content = null;
+            })
+            .SearchEndUserDialogs((x, ctx) =>
+                x.Party = [ctx.GetParty()])
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+            {
+                var dialog = x.Items.Single();
+                dialog.IsApiOnly.Should().BeTrue();
+                dialog.Content.Should().BeNull();
+            });
+
+    [Fact]
     public Task Search_Should_Return_HasUnopenedContent_False_For_New_Simple_Dialogs() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

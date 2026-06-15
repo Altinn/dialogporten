@@ -182,9 +182,9 @@ public sealed class DialogDto
     public DialogEndUserContextDto EndUserContext { get; set; } = null!;
 
     /// <summary>
-    /// The content of the dialog in search results.
+    /// The content of the dialog in search results. May be null for API-only dialogs, which are not required to have content.
     /// </summary>
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; }
 }
 
 public sealed class ContentDto

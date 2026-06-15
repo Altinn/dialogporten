@@ -265,7 +265,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                     .Result[dialog.Id]
                     .SystemLabels.All(x => x != SystemLabel.Values.MarkedAsUnopened),
                 EndUserContext = endUserContextByDialogIdTask.Result[dialog.Id],
-                Content = contentByDialogIdTask.Result[dialog.Id],
+                Content = contentByDialogIdTask.Result.GetValueOrDefault(dialog.Id),
             };
         });
 

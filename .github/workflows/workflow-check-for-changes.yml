@@ -56,7 +56,7 @@ jobs:
     name: Filter
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       hasInfraChanges: ${{ steps.filter.outputs.azure_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}
       hasBackendChanges: ${{ steps.filter-backend.outputs.backend_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}

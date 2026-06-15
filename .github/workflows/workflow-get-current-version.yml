@@ -13,7 +13,7 @@ jobs:
     name: Filter
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       version: ${{ steps.set-current-version.outputs.version }}
     steps:

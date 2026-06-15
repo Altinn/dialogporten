@@ -3,7 +3,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using HotChocolate.AspNetCore;
 using HotChocolate.Execution;
-using Microsoft.Extensions.DependencyInjection;
 using UserType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.Common;

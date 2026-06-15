@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.Application;
 using Microsoft.Extensions.Options;
 using NSec.Cryptography;
 

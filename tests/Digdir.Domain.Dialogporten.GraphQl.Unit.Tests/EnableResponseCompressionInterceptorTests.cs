@@ -1,7 +1,6 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using Digdir.Library.Utils.AspNet;
-using HotChocolate;
 using HotChocolate.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;

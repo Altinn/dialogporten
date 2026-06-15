@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
 using UserType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
 using Policy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
 

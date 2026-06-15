@@ -25,7 +25,7 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
         _partyResourceReferenceRepository = partyResourceReferenceRepository;
     }
 
-    public async Task<Dictionary<string, HashSet<string>>> GetAuthorizedServiceResourcesByParty(
+    public async Task<IReadOnlyDictionary<string, HashSet<string>>> GetAuthorizedServiceResourcesByParty(
         CancellationToken cancellationToken)
     {
         // Validate the principal resolves to an end user; mirrors the dialog-search path, which treats a missing

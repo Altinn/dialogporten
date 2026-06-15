@@ -8560,7 +8560,7 @@
             ]
           }
         ],
-        "summary": "Gets the service resources the authenticated end user is authorized to.",
+        "summary": "Gets the service resources the authenticated end user is authorized to use.",
         "tags": [
           "Enduser"
         ]

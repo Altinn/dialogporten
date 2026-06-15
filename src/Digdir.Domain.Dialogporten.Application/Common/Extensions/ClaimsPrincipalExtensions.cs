@@ -353,8 +353,12 @@ public static class ClaimsPrincipalExtensions
     /// types that resolve to a party identifier.
     /// </summary>
     public static IPartyIdentifier GetEndUserPartyIdentifierOrThrow(this ClaimsPrincipal claimsPrincipal)
-        => claimsPrincipal.GetEndUserPartyIdentifier()
-           ?? throw CreateMissingEndUserPartyIdentifierException(claimsPrincipal);
+    {
+        ArgumentNullException.ThrowIfNull(claimsPrincipal);
+
+        return claimsPrincipal.GetEndUserPartyIdentifier()
+               ?? throw CreateMissingEndUserPartyIdentifierException(claimsPrincipal);
+    }
 
     private static UnreachableException CreateMissingEndUserPartyIdentifierException(ClaimsPrincipal principal)
     {

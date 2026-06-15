@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -23,23 +22,19 @@ public sealed partial class GetSeenLogResult : OneOfBase<SeenLogDto, EntityNotFo
 
 internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, GetSeenLogResult>
 {
-    private readonly IMapper _mapper;
     private readonly IDialogDbContext _dbContext;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IUserRegistry _userRegistry;
 
     public GetSeenLogQueryHandler(
-        IMapper mapper,
         IDialogDbContext dbContext,
         IAltinnAuthorization altinnAuthorization,
         IUserRegistry userRegistry)
     {
-        ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
         ArgumentNullException.ThrowIfNull(userRegistry);
 
-        _mapper = mapper;
         _dbContext = dbContext;
         _altinnAuthorization = altinnAuthorization;
         _userRegistry = userRegistry;
@@ -94,7 +89,7 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        var dto = _mapper.Map<SeenLogDto>(seenLog);
+        var dto = seenLog.ToDto();
         dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == seenLog.SeenBy.ActorNameEntity?.ActorId;
 
         return dto;

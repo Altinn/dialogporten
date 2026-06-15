@@ -15,8 +15,8 @@
         <PackageReference Include="Altinn.Authorization.ABAC" Version="0.1.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.8" />
         <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.8" />
-        <PackageReference Include="Npgsql" Version="10.0.2" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+        <PackageReference Include="Npgsql" Version="10.0.3" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -29,6 +29,8 @@
         <PackageReference Include="ZiggyCreatures.FusionCache.Locking.AsyncKeyed" Version="2.6.0" />
         <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.6.0" />
         <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack" Version="2.6.0" />
+        <!-- Pin transitive MessagePack above 3.1.4 (GHSA-hv8m-jj95-wg3x). Remove once NeueccMessagePack references >= 3.1.7. -->
+        <PackageReference Include="MessagePack" Version="3.1.7" />
     </ItemGroup>
 
     <ItemGroup>

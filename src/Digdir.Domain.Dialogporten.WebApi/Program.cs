@@ -169,11 +169,14 @@ static void BuildAndRun(string[] args)
         .MapControllers();
 
     var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
-    var openApiDocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
 
     app.MapScalarApiReference("/scalar", options => options
         .WithTitle("Dialogporten API")
-        .WithOpenApiRoutePattern(openApiDocumentPath)
+        // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
+        // the base path it auto-detects (window.location.pathname minus the server request path).
+        // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
+        // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
+        .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
         .AddDocument("v1", "Dialogporten")
         .AddDocument("v1.enduser", "Dialogporten EndUser")
         .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner")
@@ -256,7 +259,7 @@ static void BuildAndRun(string[] args)
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
-            uiConfig.DocumentPath = openApiDocumentPath;
+            uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
         })
         .UseFeatureMetrics();
 

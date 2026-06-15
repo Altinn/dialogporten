@@ -177,7 +177,7 @@ static void BuildAndRun(string[] args)
         // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
         // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
         .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
-        .AddDocument("v1", "Dialogporten")
+        .AddDocument("v1", "Dialogporten - EndUser/ServiceOwner combined (legacy)")
         .AddDocument("v1.enduser", "Dialogporten EndUser")
         .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
         .DisableAgent());

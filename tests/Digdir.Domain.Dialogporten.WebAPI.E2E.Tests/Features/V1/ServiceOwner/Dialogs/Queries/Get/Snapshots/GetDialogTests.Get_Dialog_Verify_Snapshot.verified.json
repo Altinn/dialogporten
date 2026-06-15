@@ -19,7 +19,7 @@
   "updatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "contentUpdatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "status": "NotApplicable",
-  "systemLabel": "Default",
+  "systemLabel": "Archive",
   "isApiOnly": false,
   "hasUnopenedContent": true,
   "content": {
@@ -93,16 +93,25 @@
       "mediaType": "text/plain",
       "isAuthorized": null
     },
-    "mainContentReference": null
+    "mainContentReference": {
+      "value": [
+        {
+          "value": "https://altinn.no/get-dialog-main-content",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+      "isAuthorized": true
+    }
   },
-  "fromServiceOwnerTransmissionsCount": 3,
-  "fromPartyTransmissionsCount": 0,
+  "fromServiceOwnerTransmissionsCount": 1,
+  "fromPartyTransmissionsCount": 1,
   "searchTags": [
     {
-      "value": "something searchable"
+      "value": "get-dialog-search-primary"
     },
     {
-      "value": "something else searchable"
+      "value": "get-dialog-search-secondary"
     }
   ],
   "attachments": [
@@ -110,58 +119,30 @@
       "id": "00000000-0000-0000-0000-000000000000",
       "displayName": [
         {
-          "value": "Et vedlegg",
+          "value": "Get dialog attachment",
+          "languageCode": "en"
+        },
+        {
+          "value": "Get dialog vedlegg",
           "languageCode": "nb"
         }
       ],
-      "name": null,
+      "name": "get-dialog-attachment",
       "urls": [
         {
           "id": "00000000-0000-0000-0000-000000000000",
-          "url": "https://foo.com/foo.pdf",
+          "url": "https://altinn.no/get-dialog-attachment.pdf",
           "mediaType": "application/pdf",
           "consumerType": "Gui"
-        }
-      ],
-      "expiresAt": null
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000000",
-      "displayName": [
-        {
-          "value": "Et annet vedlegg",
-          "languageCode": "nb"
-        }
-      ],
-      "name": null,
-      "urls": [
+        },
         {
           "id": "00000000-0000-0000-0000-000000000000",
-          "url": "https://foo.com/foo.pdf",
-          "mediaType": "application/pdf",
-          "consumerType": "Gui"
+          "url": "https://altinn.no/get-dialog-attachment-api.json",
+          "mediaType": "application/json",
+          "consumerType": "Api"
         }
       ],
-      "expiresAt": null
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000000",
-      "displayName": [
-        {
-          "value": "Nok et vedlegg",
-          "languageCode": "nb"
-        }
-      ],
-      "name": null,
-      "urls": [
-        {
-          "id": "00000000-0000-0000-0000-000000000000",
-          "url": "https://foo.com/foo.pdf",
-          "mediaType": "application/pdf",
-          "consumerType": "Gui"
-        }
-      ],
-      "expiresAt": null
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
     }
   ],
   "transmissions": [
@@ -170,9 +151,9 @@
       "idempotentKey": null,
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
-      "isAuthorized": null,
+      "isAuthorized": true,
       "extendedType": null,
-      "externalReference": null,
+      "externalReference": "first-transmission",
       "relatedTransmissionId": null,
       "type": "Information",
       "sender": {
@@ -184,11 +165,49 @@
         "title": {
           "value": [
             {
-              "value": "Transmission title",
-              "languageCode": "en"
-            },
+              "value": "Melding med vedlegg",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "text/plain",
+          "isAuthorized": null
+        },
+        "summary": null,
+        "contentReference": {
+          "value": [
             {
-              "value": "Forsendelsestittel",
+              "value": "https://altinn.no/get-dialog-transmission-content",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+          "isAuthorized": null
+        }
+      },
+      "isOpened": false,
+      "attachments": null,
+      "navigationalActions": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "idempotentKey": "idempotent-key",
+      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "authorizationAttribute": "someunavailablesubresource",
+      "isAuthorized": false,
+      "extendedType": "https://digdir.com/transmission-type",
+      "externalReference": "second-transmission",
+      "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
+      "type": "Submission",
+      "sender": {
+        "actorType": "PartyRepresentative",
+        "actorName": "DIGITALISERINGSDIREKTORATET",
+        "actorId": "urn:altinn:organization:identifier-no:991825827"
+      },
+      "content": {
+        "title": {
+          "value": [
+            {
+              "value": "Melding med vedlegg",
               "languageCode": "nb"
             }
           ],
@@ -198,11 +217,7 @@
         "summary": {
           "value": [
             {
-              "value": "Transmission summary",
-              "languageCode": "en"
-            },
-            {
-              "value": "Forsendelse oppsummering",
+              "value": "Summary",
               "languageCode": "nb"
             }
           ],
@@ -212,11 +227,7 @@
         "contentReference": {
           "value": [
             {
-              "value": "https://digdir.no/en",
-              "languageCode": "en"
-            },
-            {
-              "value": "https://digdir.no/nb",
+              "value": "https://digdir.com/content-reference",
               "languageCode": "nb"
             }
           ],
@@ -230,175 +241,40 @@
           "id": "00000000-0000-0000-0000-000000000000",
           "displayName": [
             {
-              "value": "Transmission attachment display name",
-              "languageCode": "en"
-            },
-            {
-              "value": "Forsendelse visningsnavn",
+              "value": "Attachment display name",
               "languageCode": "nb"
             }
           ],
-          "name": null,
+          "name": "attachment-name",
           "urls": [
             {
               "id": "00000000-0000-0000-0000-000000000000",
-              "url": "https://digdir.apps.tt02.altinn.no/some-other-url",
-              "mediaType": null,
+              "url": "https://altinn.no/get-dialog-transmission-attachment.pdf",
+              "mediaType": "application/pdf",
               "consumerType": "Gui"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000000",
+              "url": "https://altinn.no/get-dialog-transmission-attachment-api.json",
+              "mediaType": "application/json",
+              "consumerType": "Api"
             }
           ],
-          "expiresAt": null
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
         }
       ],
-      "navigationalActions": []
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000000",
-      "idempotentKey": null,
-      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-      "authorizationAttribute": "urn:altinn:resource:ttd-altinn-events-automated-tests",
-      "isAuthorized": null,
-      "extendedType": null,
-      "externalReference": null,
-      "relatedTransmissionId": null,
-      "type": "Information",
-      "sender": {
-        "actorType": "ServiceOwner",
-        "actorName": null,
-        "actorId": null
-      },
-      "content": {
-        "title": {
-          "value": [
-            {
-              "value": "Transmission title",
-              "languageCode": "en"
-            },
-            {
-              "value": "Forsendelsesstittel",
-              "languageCode": "nb"
-            }
-          ],
-          "mediaType": "text/plain",
-          "isAuthorized": null
-        },
-        "summary": {
-          "value": [
-            {
-              "value": "Transmission summary",
-              "languageCode": "en"
-            },
-            {
-              "value": "Transmisjon oppsummering",
-              "languageCode": "nb"
-            }
-          ],
-          "mediaType": "text/plain",
-          "isAuthorized": null
-        },
-        "contentReference": null
-      },
-      "isOpened": false,
-      "attachments": [
+      "navigationalActions": [
         {
-          "id": "00000000-0000-0000-0000-000000000000",
-          "displayName": [
+          "title": [
             {
-              "value": "Transmission attachment display name",
-              "languageCode": "en"
-            },
-            {
-              "value": "Visningsnavn for forsendelsesvedlegg ",
+              "value": "Get dialog transmission navigation",
               "languageCode": "nb"
             }
           ],
-          "name": null,
-          "urls": [
-            {
-              "id": "00000000-0000-0000-0000-000000000000",
-              "url": "https://digdir.apps.tt02.altinn.no/some-other-url",
-              "mediaType": null,
-              "consumerType": "Gui"
-            }
-          ],
-          "expiresAt": null
+          "url": "https://altinn.no/get-dialog-transmission-navigation",
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
         }
-      ],
-      "navigationalActions": []
-    },
-    {
-      "id": "00000000-0000-0000-0000-000000000000",
-      "idempotentKey": null,
-      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
-      "authorizationAttribute": "someunavailablesubresource",
-      "isAuthorized": null,
-      "extendedType": null,
-      "externalReference": null,
-      "relatedTransmissionId": null,
-      "type": "Information",
-      "sender": {
-        "actorType": "ServiceOwner",
-        "actorName": null,
-        "actorId": null
-      },
-      "content": {
-        "title": {
-          "value": [
-            {
-              "value": "Transmission title",
-              "languageCode": "en"
-            },
-            {
-              "value": "Forsendelsetittel",
-              "languageCode": "nb"
-            }
-          ],
-          "mediaType": "text/plain",
-          "isAuthorized": null
-        },
-        "summary": {
-          "value": [
-            {
-              "value": "Transmission summary",
-              "languageCode": "en"
-            },
-            {
-              "value": "Forsendelsesoppsummering",
-              "languageCode": "nb"
-            }
-          ],
-          "mediaType": "text/plain",
-          "isAuthorized": null
-        },
-        "contentReference": null
-      },
-      "isOpened": false,
-      "attachments": [
-        {
-          "id": "00000000-0000-0000-0000-000000000000",
-          "displayName": [
-            {
-              "value": "Transmission attachment display name",
-              "languageCode": "en"
-            },
-            {
-              "value": "Visningsnavn for forsendelsesvedlegg",
-              "languageCode": "nb"
-            }
-          ],
-          "name": null,
-          "urls": [
-            {
-              "id": "00000000-0000-0000-0000-000000000000",
-              "url": "https://digdir.apps.tt02.altinn.no/some-other-url",
-              "mediaType": null,
-              "consumerType": "Gui"
-            }
-          ],
-          "expiresAt": null
-        }
-      ],
-      "navigationalActions": []
+      ]
     }
   ],
   "guiActions": [
@@ -406,8 +282,8 @@
       "id": "00000000-0000-0000-0000-000000000000",
       "action": "read",
       "url": "https://digdir.no/",
-      "authorizationAttribute": null,
-      "isAuthorized": null,
+      "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
+      "isAuthorized": true,
       "isDeleteDialogAction": false,
       "priority": "Primary",
       "httpMethod": "GET",
@@ -424,7 +300,7 @@
       "action": "read",
       "url": "https://digdir.no/",
       "authorizationAttribute": null,
-      "isAuthorized": null,
+      "isAuthorized": true,
       "isDeleteDialogAction": false,
       "priority": "Secondary",
       "httpMethod": "POST",
@@ -446,8 +322,8 @@
     {
       "id": "00000000-0000-0000-0000-000000000000",
       "action": "some_unauthorized_action",
-      "authorizationAttribute": null,
-      "isAuthorized": null,
+      "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
+      "isAuthorized": false,
       "name": "confirm",
       "endpoints": [
         {
@@ -525,16 +401,43 @@
       ]
     }
   ],
-  "seenSinceLastUpdate": [],
-  "seenSinceLastContentUpdate": [],
-  "isContentSeen": false,
+  "seenSinceLastUpdate": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "seenBy": {
+        "actorType": "PartyRepresentative",
+        "actorName": "LITTERATUR UROMANTISK",
+        "actorId": "urn:altinn:person:identifier-no:08844397713"
+      },
+      "isViaServiceOwner": false,
+      "isCurrentEndUser": true
+    }
+  ],
+  "seenSinceLastContentUpdate": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "seenBy": {
+        "actorType": "PartyRepresentative",
+        "actorName": "LITTERATUR UROMANTISK",
+        "actorId": "urn:altinn:person:identifier-no:08844397713"
+      },
+      "isViaServiceOwner": false,
+      "isCurrentEndUser": true
+    }
+  ],
+  "isContentSeen": true,
   "serviceOwnerContext": {
     "serviceOwnerLabels": [
       {
         "value": "digdir:dialogporten:ephemeral-dialog"
       },
       {
-        "value": "some-label"
+        "value": "get-dialog-primary-label"
+      },
+      {
+        "value": "get-dialog-secondary-label"
       }
     ],
     "revision": "00000000-0000-0000-0000-000000000000"
@@ -542,7 +445,8 @@
   "endUserContext": {
     "revision": "00000000-0000-0000-0000-000000000000",
     "systemLabels": [
-      0
+      2,
+      4
     ]
   }
 }

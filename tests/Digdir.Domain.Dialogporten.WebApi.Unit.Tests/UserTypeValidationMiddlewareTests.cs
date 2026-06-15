@@ -75,10 +75,7 @@ public class UserTypeValidationMiddlewareTests
             EventId eventId,
             TState state,
             Exception? exception,
-            Func<TState, Exception?, string> formatter)
-        {
-            Entries.Add(new(logLevel, formatter(state, exception)));
-        }
+            Func<TState, Exception?, string> formatter) => Entries.Add(new(logLevel, formatter(state, exception)));
 
         internal sealed record LogEntry(LogLevel Level, string Message);
 

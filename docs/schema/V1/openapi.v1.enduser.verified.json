@@ -1048,7 +1048,8 @@
         "additionalProperties": false,
         "properties": {
           "content": {
-            "description": "The content of the dialog in search results.",
+            "description": "The content of the dialog in search results. May be null for API-only dialogs, which are not required to have content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/DialogContentSummary"

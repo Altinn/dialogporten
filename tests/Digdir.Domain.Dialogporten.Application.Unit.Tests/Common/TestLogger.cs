@@ -16,10 +16,7 @@ internal sealed class TestLogger<T> : ILogger<T>
         EventId eventId,
         TState state,
         Exception? exception,
-        Func<TState, Exception?, string> formatter)
-    {
-        Entries.Add(new LogEntry(logLevel, formatter(state, exception), exception));
-    }
+        Func<TState, Exception?, string> formatter) => Entries.Add(new LogEntry(logLevel, formatter(state, exception), exception));
 
     internal sealed record LogEntry(LogLevel Level, string Message, Exception? Exception);
 

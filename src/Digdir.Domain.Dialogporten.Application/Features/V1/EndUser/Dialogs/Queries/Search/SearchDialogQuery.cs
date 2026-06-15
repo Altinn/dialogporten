@@ -265,7 +265,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                     .Result[dialog.Id]
                     .SystemLabels.All(x => x != SystemLabel.Values.MarkedAsUnopened),
                 EndUserContext = endUserContextByDialogIdTask.Result[dialog.Id],
-                Content = contentByDialogIdTask.Result[dialog.Id],
+                Content = contentByDialogIdTask.Result.GetValueOrDefault(dialog.Id),
             };
         });
 
@@ -376,10 +376,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     }
 
     private Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
-        CancellationToken cancellationToken)
-    {
-        return _searchRepository.FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
-    }
+        CancellationToken cancellationToken) => _searchRepository.FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
 }
 
 internal static class SearchDialogQueryExtensions

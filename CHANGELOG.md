@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.117.2](https://github.com/Altinn/dialogporten/compare/v1.117.1...v1.117.2) (2026-06-14)
+
+
+### Bug Fixes
+
+* Add back domain events for seen/updated on get dialog ([#3975](https://github.com/Altinn/dialogporten/issues/3975)) ([c7e0e51](https://github.com/Altinn/dialogporten/commit/c7e0e515cdc4822bcd9357e3ed3cb8ae090c5e50))
+* Allow 4095 characters for activity description if correspondence ([#4083](https://github.com/Altinn/dialogporten/issues/4083)) ([aa8baa5](https://github.com/Altinn/dialogporten/commit/aa8baa56a3e79818f05ef5b6e06842704a695cd5))
+* disable cache/partyfilter for SI users ([#4096](https://github.com/Altinn/dialogporten/issues/4096)) ([10e0299](https://github.com/Altinn/dialogporten/commit/10e0299ce05803e00d159103fbc17d0b7d306a0f))
+* Lookup system user names ([#4069](https://github.com/Altinn/dialogporten/issues/4069)) ([b7c301e](https://github.com/Altinn/dialogporten/commit/b7c301e5d7699240e60c0a3f66dcd786ee11b281))
+
+
+### Miscellaneous Chores
+
+* add explicit reference to non-vulnerable MessagePack ([#4102](https://github.com/Altinn/dialogporten/issues/4102)) ([8464d78](https://github.com/Altinn/dialogporten/commit/8464d789f53ffded984f83fa3df52941e4719580))
+* **deps:** update actions/checkout action to v6.0.3 ([#4089](https://github.com/Altinn/dialogporten/issues/4089)) ([ba39a19](https://github.com/Altinn/dialogporten/commit/ba39a1916333c5081999ba40ad2b475d2dbf6aa4))
+* **deps:** update grafana monorepo to v11.6.15 ([#4098](https://github.com/Altinn/dialogporten/issues/4098)) ([20c438c](https://github.com/Altinn/dialogporten/commit/20c438cfedafcad4a35767d031eb48bfb618773b))
+* **deps:** update hotchocolate dependencies to v16 ([#4066](https://github.com/Altinn/dialogporten/issues/4066)) ([f7bdf3f](https://github.com/Altinn/dialogporten/commit/f7bdf3fe7bf42b427dafb6efeb5c88ffdfbcd3e3))
+* **deps:** update microsoft dependencies to 3.1.2 ([#4099](https://github.com/Altinn/dialogporten/issues/4099)) ([0e931bb](https://github.com/Altinn/dialogporten/commit/0e931bbc6bffc85d26d210ea4b0bbac42cd12d6e))
+* **deps:** update nginx docker tag to v1.31.1 ([#4090](https://github.com/Altinn/dialogporten/issues/4090)) ([9b411db](https://github.com/Altinn/dialogporten/commit/9b411db4f78d0ad5ce3cecb44292f880edab0e1f))
+* **deps:** update npgsql dependencies ([#4100](https://github.com/Altinn/dialogporten/issues/4100)) ([c1dc2b4](https://github.com/Altinn/dialogporten/commit/c1dc2b4e13344f1eecd974e86d06b058d6953080))
+* **deps:** update opentelemetry dependencies to 10.0.3 ([#4101](https://github.com/Altinn/dialogporten/issues/4101)) ([4970871](https://github.com/Altinn/dialogporten/commit/49708711fda6646aa4e1261ad3a024ba241f98db))
+* **enduser:** remove AutoMapper from GetDialog ([#4081](https://github.com/Altinn/dialogporten/issues/4081)) ([9e809cf](https://github.com/Altinn/dialogporten/commit/9e809cf531799da35163afe20bb4b41f67af524b))
+
 ## [1.117.1](https://github.com/Altinn/dialogporten/compare/v1.117.0...v1.117.1) (2026-06-09)
 
 

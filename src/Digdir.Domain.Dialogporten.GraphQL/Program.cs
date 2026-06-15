@@ -10,7 +10,6 @@ using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Library.Utils.AspNet;
 using FluentValidation;
-using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Metrics;

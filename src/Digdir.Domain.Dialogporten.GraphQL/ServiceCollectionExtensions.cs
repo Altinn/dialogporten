@@ -4,7 +4,6 @@ using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using HotChocolate.Diagnostics;
-using HotChocolate.Types;
 
 namespace Digdir.Domain.Dialogporten.GraphQL;
 

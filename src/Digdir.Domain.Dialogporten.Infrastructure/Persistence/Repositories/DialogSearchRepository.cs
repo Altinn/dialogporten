@@ -102,10 +102,8 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
                  """)
             .SingleAsync(ct);
 
-    public async Task OptimizeIndexAsync(CancellationToken ct)
-    {
+    public async Task OptimizeIndexAsync(CancellationToken ct) =>
         await _db.Database.ExecuteSqlAsync($@"VACUUM ANALYZE search.""DialogSearch""", ct);
-    }
 
     public async Task<PaginatedList<DialogEntity>> GetDialogsAsServiceOwner(
         GetDialogsQuery query,

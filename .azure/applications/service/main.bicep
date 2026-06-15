@@ -139,7 +139,7 @@ var containerAppEnvVars = [
   }
 ]
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: environmentKeyVaultName
 }
 

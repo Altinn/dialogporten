@@ -202,6 +202,11 @@ static void BuildAndRun(string[] args)
             x.Versioning.DefaultVersion = 1;
             x.Endpoints.Configurator = endpointDefinition =>
             {
+                if (NonBodyRequestBinder.ShouldUseFor(endpointDefinition))
+                {
+                    endpointDefinition.RequestBinder(typeof(NonBodyRequestBinder<>));
+                }
+
                 endpointDefinition.Description(routeHandlerBuilder =>
                 {
                     routeHandlerBuilder.Add(endpointBuilder =>

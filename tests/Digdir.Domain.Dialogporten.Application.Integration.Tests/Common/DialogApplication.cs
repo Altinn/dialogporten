@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using AutoMapper;
@@ -9,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
@@ -48,7 +50,7 @@ public class DialogApplication : IAsyncLifetime
     private Respawner _respawner = null!;
     private ServiceProvider _rootProvider = null!;
     private ServiceProvider _fixtureRootProvider = null!;
-    private readonly List<object> _publishedEvents = [];
+    private readonly ConcurrentQueue<object> _publishedEvents = [];
 
     internal static TestClock Clock { get; } = new();
     internal static TestUser User { get; } = new();
@@ -108,7 +110,7 @@ public class DialogApplication : IAsyncLifetime
         var publishEndpointSubstitute = Substitute.For<IPublishEndpoint>();
         publishEndpointSubstitute
             .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
-            .Do(x => _publishedEvents.Add(x[0]));
+            .Do(x => _publishedEvents.Enqueue(x[0]));
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
@@ -137,8 +139,11 @@ public class DialogApplication : IAsyncLifetime
             .AddDapperTypeHandlers()
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
+            .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddScoped<IResourceRegistry, LocalDevelopmentResourceRegistry>()
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
+            .AddScoped<IAccessManagementMetadata>(_ => CreateAccessManagementMetadataSubstitute())
+            .AddScoped<IMetadataLinkProvider>(_ => CreateMetadataLinkProviderSubstitute())
             .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
             .AddSingleton(Settings)
             .AddScoped<IOptionsSnapshot<ApplicationSettings>>(x => x.GetRequiredService<TestApplicationSettings>())
@@ -175,6 +180,10 @@ public class DialogApplication : IAsyncLifetime
             .GetName(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Brando Sando");
 
+        nameRegistrySubstitute
+            .GetName(Arg.Is(TestUsers.DefaultSystemUserUrn), Arg.Any<CancellationToken>())
+            .Returns("Mock system user name");
+
         return nameRegistrySubstitute;
     }
 
@@ -190,7 +199,67 @@ public class DialogApplication : IAsyncLifetime
                 ShortName = "digdir"
             });
 
+        organizationRegistrySubstitute
+            .GetServiceOwnerInfo(Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var orgNumbers = callInfo.ArgAt<IReadOnlyCollection<string>>(0);
+                return orgNumbers
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(
+                        x => x,
+                        x => new ServiceOwnerInfo
+                        {
+                            OrgNumber = x,
+                            ShortName = "digdir"
+                        },
+                        StringComparer.OrdinalIgnoreCase);
+            });
+
         return organizationRegistrySubstitute;
+    }
+
+    private static IAccessManagementMetadata CreateAccessManagementMetadataSubstitute()
+    {
+        var metadataSubstitute = Substitute.For<IAccessManagementMetadata>();
+
+        metadataSubstitute
+            .GetMetadata(Arg.Any<CancellationToken>())
+            .Returns(new AccessManagementMetadata(
+                new Dictionary<string, AccessManagementRoleMetadata>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["urn:altinn:rolecode:DIALOG_READ"] = new(
+                        Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                        "urn:altinn:rolecode:DIALOG_READ",
+                        [new LocalizationDto { LanguageCode = "nb", Value = "Dialogleser" }],
+                        new LinkDto { Metadata = "https://platform.example/accessmanagement/api/v1/meta/info/roles/11111111-1111-1111-1111-111111111111" })
+                },
+                new Dictionary<string, AccessManagementAccessPackageMetadata>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["urn:altinn:accesspackage:dialog_lookup_package"] = new(
+                        "urn:altinn:accesspackage:dialog_lookup_package",
+                        [new LocalizationDto { LanguageCode = "nb", Value = "Dialogoppslagspakke" }],
+                        new LinkDto { Metadata = "https://platform.example/accessmanagement/api/v1/meta/info/accesspackages/package/urn/urn:altinn:accesspackage:dialog_lookup_package" })
+                }));
+
+        return metadataSubstitute;
+    }
+
+    private static IMetadataLinkProvider CreateMetadataLinkProviderSubstitute()
+    {
+        var metadataLinkProvider = Substitute.For<IMetadataLinkProvider>();
+
+        metadataLinkProvider
+            .GetServiceResourceMetadataLink(Arg.Any<string>())
+            .Returns(x => $"https://platform.example/resourceregistry/api/v1/resource/{x.Arg<string>()}");
+        metadataLinkProvider
+            .GetRoleMetadataLink(Arg.Any<Guid>())
+            .Returns(x => $"https://platform.example/accessmanagement/api/v1/meta/info/roles/{x.Arg<Guid>()}");
+        metadataLinkProvider
+            .GetAccessPackageMetadataLink(Arg.Any<string>())
+            .Returns(x => $"https://platform.example/accessmanagement/api/v1/meta/info/accesspackages/package/urn/{x.Arg<string>()}");
+
+        return metadataLinkProvider;
     }
 
     private static IFusionCacheProvider CreateNullFusionCacheProvider()
@@ -221,8 +290,9 @@ public class DialogApplication : IAsyncLifetime
         return await mediator.Send(request, cancellationToken);
     }
 
-    public async Task PublishEvents()
+    public async Task<List<object>> PublishEvents()
     {
+        var publishedEvents = new List<object>();
         while (GetPublishedEvents().Count != 0)
         {
             foreach (var value in PopPublishedEvents())
@@ -230,8 +300,11 @@ public class DialogApplication : IAsyncLifetime
                 using var scope = _rootProvider.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IPublisher>();
                 await mediator.Publish(value);
+                publishedEvents.Add(value);
             }
         }
+
+        return publishedEvents;
     }
 
     public async ValueTask ResetState()
@@ -274,7 +347,7 @@ public class DialogApplication : IAsyncLifetime
         });
     }
 
-    public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.AsReadOnly();
+    public ReadOnlyCollection<object> GetPublishedEvents() => _publishedEvents.ToList().AsReadOnly();
 
     public List<object> PopPublishedEvents()
     {

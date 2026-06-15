@@ -6,6 +6,12 @@ namespace Digdir.Domain.Dialogporten.Application.Externals;
 
 public interface ISubjectResourceRepository
 {
+    Task<Dictionary<string, List<string>>> GetSubjectsByResource(
+        IReadOnlyCollection<string> resources,
+        CancellationToken cancellationToken);
+
+    Task<Dictionary<string, List<string>>> GetSubjectsForReferencedPartyResources(CancellationToken cancellationToken);
+
     Task<int> Merge(List<MergableSubjectResource> subjectResource, CancellationToken cancellationToken = default);
     Task<DateTimeOffset> GetLastUpdatedAt(TimeSpan? timeSkew = null, CancellationToken cancellationToken = default);
 }

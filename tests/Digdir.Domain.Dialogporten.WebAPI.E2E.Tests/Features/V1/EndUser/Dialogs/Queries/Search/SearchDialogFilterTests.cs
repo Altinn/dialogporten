@@ -38,7 +38,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             {
                 Party = [E2EConstants.DefaultParty],
                 ExtendedStatus = [extendedStatus1, extendedStatus2]
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items
                 .Count(x => x.Id == dialogId1 ||
                             x.Id == dialogId2) == 2 &&
@@ -71,7 +71,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             {
                 Party = [E2EConstants.DefaultParty],
                 ServiceResource = [auxResource]
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
@@ -107,7 +107,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             {
                 Party = [E2EConstants.DefaultParty],
                 Process = process
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
@@ -146,7 +146,7 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             {
                 Party = [E2EConstants.DefaultParty],
                 SystemLabel = [SystemLabel.Bin]
-            }, new(), ct),
+            }, new(), cancellationToken: ct),
             isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
                                r.Content.Items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");

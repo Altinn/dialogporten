@@ -1407,10 +1407,8 @@
             "type": "array"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -1428,7 +1426,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "org": {
@@ -2180,10 +2178,8 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -2196,7 +2192,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "latestActivity": {
@@ -3232,7 +3228,43 @@
           "Correction"
         ]
       },
+      "EndUserSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxOrgFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "GetDialogLookupRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "GetServiceResourceMetadataRequest": {
         "additionalProperties": false,
         "properties": {
           "acceptedLanguages": {
@@ -3359,6 +3391,27 @@
           "Test",
           "Invalid"
         ]
+      },
+      "Limits": {
+        "additionalProperties": false,
+        "properties": {
+          "endUserSearch": {
+            "$ref": "#/components/schemas/EndUserSearchLimits"
+          },
+          "serviceOwnerSearch": {
+            "$ref": "#/components/schemas/ServiceOwnerSearchLimits"
+          }
+        },
+        "type": "object"
+      },
+      "Links": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "Localization": {
         "additionalProperties": false,
@@ -3555,6 +3608,146 @@
         "properties": {
           "value": {
             "description": "A label value.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceOwnerSearchLimits": {
+        "additionalProperties": false,
+        "properties": {
+          "maxExtendedStatusFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxPartyFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxServiceResourceFilterValues": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceAccessPackage": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "accessPackages": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceAccessPackage"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceRole"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/ServiceResourceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/ServiceResource"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceMetadataList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceMetadata"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceResourceRole": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
             "type": "string"
           }
         },
@@ -4546,6 +4739,102 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/api/v1/metadata/limits": {
+      "get": {
+        "description": "Returns the active limits for EndUser and ServiceOwner search filters.",
+        "operationId": "GetLimits",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Limits"
+                }
+              }
+            },
+            "description": "The currently enforced application-level query limits."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets currently enforced application-level query limits",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
+    "/api/v1/metadata/serviceresources": {
+      "get": {
+        "description": "Returns public service resource metadata with related service owner, role, and access package metadata.",
+        "operationId": "GetServiceResourceMetadata",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResourceMetadataList"
+                }
+              }
+            },
+            "description": "Service resource metadata."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets service resources currently in use in Dialogporten.",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
     "/api/v1/serviceowner/dialoglookup": {
       "get": {
         "description": "Resolves dialog metadata for a supported instance reference in service owner context.",

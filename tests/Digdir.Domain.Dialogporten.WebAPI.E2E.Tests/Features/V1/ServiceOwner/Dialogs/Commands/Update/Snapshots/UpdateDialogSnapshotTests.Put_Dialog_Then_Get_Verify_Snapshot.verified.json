@@ -1,0 +1,314 @@
+﻿{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "idempotentKey": null,
+  "revision": "00000000-0000-0000-0000-000000000000",
+  "org": "ttd",
+  "serviceResource": "urn:altinn:resource:ttd-dialogporten-automated-tests",
+  "serviceResourceType": "genericaccessresource",
+  "party": "urn:altinn:person:identifier-no:08844397713",
+  "progress": 42,
+  "process": "urn:test:update:process",
+  "precedingProcess": "urn:test:update:preceding-process",
+  "extendedStatus": "urn:test:update:extended-status",
+  "externalReference": "put-updated-external-reference",
+  "deletedAt": null,
+  "visibleFrom": null,
+  "dueAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "updatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "contentUpdatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "status": "Awaiting",
+  "systemLabel": "Default",
+  "isApiOnly": false,
+  "hasUnopenedContent": true,
+  "content": {
+    "title": {
+      "value": [
+        {
+          "value": "PUT updated dialog title",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "nonSensitiveTitle": {
+      "value": [
+        {
+          "value": "PUT updated non-sensitive title",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "summary": {
+      "value": [
+        {
+          "value": "PUT updated dialog summary",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "nonSensitiveSummary": {
+      "value": [
+        {
+          "value": "PUT updated non-sensitive summary",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "senderName": {
+      "value": [
+        {
+          "value": "PUT updated sender",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "additionalInfo": {
+      "value": [
+        {
+          "value": "PUT updated additional information",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/markdown",
+      "isAuthorized": null
+    },
+    "extendedStatus": {
+      "value": [
+        {
+          "value": "PUT updated status text",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "mainContentReference": {
+      "value": [
+        {
+          "value": "https://example.com/put-main-content",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+      "isAuthorized": null
+    }
+  },
+  "fromServiceOwnerTransmissionsCount": 1,
+  "fromPartyTransmissionsCount": 0,
+  "searchTags": [
+    {
+      "value": "put-search-tag"
+    },
+    {
+      "value": "put-secondary-search-tag"
+    }
+  ],
+  "attachments": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "displayName": [
+        {
+          "value": "PUT dialog attachment",
+          "languageCode": "nb"
+        }
+      ],
+      "name": "put-dialog-attachment",
+      "urls": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "url": "https://example.com/put-dialog-attachment.pdf",
+          "mediaType": "application/pdf",
+          "consumerType": "Gui"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "url": "https://example.com/put-dialog-attachment-api.json",
+          "mediaType": "application/json",
+          "consumerType": "Api"
+        }
+      ],
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+    }
+  ],
+  "transmissions": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "idempotentKey": "put-transmission-key",
+      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
+      "isAuthorized": null,
+      "extendedType": "urn:test:update:transmission-type",
+      "externalReference": "put-transmission-external-reference",
+      "relatedTransmissionId": null,
+      "type": "Information",
+      "sender": {
+        "actorType": "ServiceOwner",
+        "actorName": null,
+        "actorId": null
+      },
+      "content": {
+        "title": {
+          "value": [
+            {
+              "value": "PUT transmission title",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "text/plain",
+          "isAuthorized": null
+        },
+        "summary": {
+          "value": [
+            {
+              "value": "PUT transmission summary",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "text/plain",
+          "isAuthorized": null
+        },
+        "contentReference": {
+          "value": [
+            {
+              "value": "https://example.com/put-transmission-content",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+          "isAuthorized": null
+        }
+      },
+      "isOpened": false,
+      "attachments": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "displayName": [
+            {
+              "value": "PUT transmission attachment",
+              "languageCode": "nb"
+            }
+          ],
+          "name": "put-transmission-attachment",
+          "urls": [
+            {
+              "id": "00000000-0000-0000-0000-000000000000",
+              "url": "https://example.com/put-transmission-attachment.pdf",
+              "mediaType": "application/pdf",
+              "consumerType": "Gui"
+            }
+          ],
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        }
+      ],
+      "navigationalActions": [
+        {
+          "title": [
+            {
+              "value": "PUT transmission navigation",
+              "languageCode": "nb"
+            }
+          ],
+          "url": "https://example.com/put-transmission-navigation",
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        }
+      ]
+    }
+  ],
+  "guiActions": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "action": "read",
+      "url": "https://example.com/put-gui-action",
+      "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
+      "isAuthorized": null,
+      "isDeleteDialogAction": false,
+      "priority": "Primary",
+      "httpMethod": "POST",
+      "title": [
+        {
+          "value": "PUT GUI action",
+          "languageCode": "nb"
+        }
+      ],
+      "prompt": [
+        {
+          "value": "PUT GUI action prompt",
+          "languageCode": "nb"
+        }
+      ]
+    }
+  ],
+  "apiActions": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "action": "read",
+      "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
+      "isAuthorized": null,
+      "name": "put-api-action",
+      "endpoints": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "version": "v1",
+          "url": "https://example.com/put-api-action",
+          "httpMethod": "POST",
+          "documentationUrl": "https://example.com/put-api-action/docs",
+          "requestSchema": "https://example.com/put-api-action/request-schema.json",
+          "responseSchema": "https://example.com/put-api-action/response-schema.json",
+          "deprecated": true,
+          "sunsetAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        }
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "extendedType": "urn:test:update:activity-type",
+      "type": "Information",
+      "transmissionId": null,
+      "performedBy": {
+        "actorType": "PartyRepresentative",
+        "actorName": "PUT activity performer",
+        "actorId": null
+      },
+      "description": [
+        {
+          "value": "PUT activity description",
+          "languageCode": "nb"
+        }
+      ]
+    }
+  ],
+  "seenSinceLastUpdate": null,
+  "seenSinceLastContentUpdate": null,
+  "isContentSeen": false,
+  "serviceOwnerContext": {
+    "serviceOwnerLabels": [
+      {
+        "value": "digdir:dialogporten:ephemeral-dialog"
+      },
+      {
+        "value": "put-initial-label"
+      }
+    ],
+    "revision": "00000000-0000-0000-0000-000000000000"
+  },
+  "endUserContext": {
+    "revision": "00000000-0000-0000-0000-000000000000",
+    "systemLabels": [
+      0
+    ]
+  }
+}

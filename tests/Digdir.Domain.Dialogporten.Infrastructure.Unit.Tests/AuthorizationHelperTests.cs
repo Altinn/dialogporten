@@ -452,6 +452,9 @@ public class AuthorizationHelperTests
 
         internal Dictionary<string, HashSet<string>> ReferencedResourcesByParty { get; init; } = [];
 
+        public Task<IReadOnlyCollection<string>> GetReferencedResources(CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyCollection<string>>([]);
+
         public Task<Dictionary<string, HashSet<string>>> GetReferencedResourcesByParty(
             IReadOnlyCollection<string> parties,
             IReadOnlyCollection<string> resources,

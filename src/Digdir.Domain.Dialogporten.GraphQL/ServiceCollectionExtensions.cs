@@ -1,4 +1,3 @@
-using AppAny.HotChocolate.FluentValidation;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
@@ -13,18 +12,18 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDialogportenGraphQl(this IServiceCollection services) => services
         .AddTransient<ActivityEnricher, DialogportenGqlActivityEnricher>()
         .AddGraphQLServer()
+        .BindRuntimeType<Uri, UrlType>()
         .AddHttpRequestInterceptor<DialogportenHttpRequestInterceptor>()
+        .TryAddTypeInterceptor<EnableResponseCompressionTypeInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
         // This assumes that subscriptions have been set up by the infrastructure
         .AddSubscriptionType<Subscriptions>()
         .AddAuthorization()
         .RegisterDbContextFactory<DialogDbContext>()
-        .AddFluentValidation()
         .AddQueryType<Queries>()
         .AddMutationType<Mutations>()
         .AddErrorTypes()
         .AddMaxExecutionDepthRule(12)
         .AddInstrumentation()
-        .InitializeOnStartup()
         .Services;
 }

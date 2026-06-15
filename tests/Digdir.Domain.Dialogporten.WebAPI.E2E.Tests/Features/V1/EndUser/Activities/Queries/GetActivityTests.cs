@@ -34,7 +34,7 @@ public class GetActivityTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
             dialogId,
             activityId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

@@ -192,6 +192,26 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public Task Search_Should_Return_ApiOnly_Dialog_Without_Content() =>
+        // API-only dialogs are not required to have content, and are not excluded
+        // from end user search by default. The handler must not throw when content
+        // is missing for such a dialog. Regression test for KeyNotFoundException.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.IsApiOnly = true;
+                x.Dto.Content = null;
+            })
+            .SearchEndUserDialogs((x, ctx) =>
+                x.Party = [ctx.GetParty()])
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+            {
+                var dialog = x.Items.Single();
+                dialog.IsApiOnly.Should().BeTrue();
+                dialog.Content.Should().BeNull();
+            });
+
+    [Fact]
     public Task Search_Should_Return_HasUnopenedContent_False_For_New_Simple_Dialogs() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -355,22 +375,6 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
             .SearchEndUserDialogs(x =>
             {
                 x.Party = [IdportenEmailUserIdentifier.PrefixWithSeparator + "test@test.NO"];
-            })
-            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
-                x.Items.Should().ContainSingle());
-
-    [Fact]
-    public Task Search_Dialogs_As_Legacy_SI_User() =>
-        // IntegrationLegacySIUser have this username: UserName
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog((x, _) =>
-            {
-                x.Dto.Party = AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "USERNAME";
-            })
-            .AsIntegrationLegacySIUser()
-            .SearchEndUserDialogs(x =>
-            {
-                x.Party = [AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + "uSeRnAmE"];
             })
             .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
                 x.Items.Should().ContainSingle());

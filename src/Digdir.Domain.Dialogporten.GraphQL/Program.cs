@@ -10,7 +10,6 @@ using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Library.Utils.AspNet;
 using FluentValidation;
-using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Metrics;
@@ -109,6 +108,9 @@ static void BuildAndRun(string[] args)
         // Graph QL
         .AddDialogportenGraphQl()
 
+        // Response compression (opt-in per resolver via [EnableResponseCompression])
+        .AddDialogportenResponseCompression()
+
         // Add controllers
         .AddControllers()
             .Services
@@ -162,6 +164,8 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
 
     app.UseCors();
+    // Must precede MapGraphQL so HotChocolate's response body stream is wrapped before write.
+    app.UseResponseCompression();
     app.MapAspNetHealthChecks()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
@@ -172,13 +176,10 @@ static void BuildAndRun(string[] args)
     app.MapGraphQL()
         .RequireCors(GraphQlCorsOptions.PolicyName)
         .RequireAuthorization()
-        .WithOptions(new GraphQLServerOptions
+        .WithOptions(options =>
         {
-            EnableSchemaRequests = true,
-            Tool =
-            {
-                Enable = true
-            }
+            options.EnableSchemaRequests = true;
+            options.Tool.Enable = true;
         });
 
     app.Run();

@@ -143,6 +143,15 @@
           "Correction"
         ]
       },
+      "DigdirDomainDialogportenApplicationCommon_Link": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Http_HttpVerb": {
         "description": "",
         "enum": [
@@ -549,6 +558,21 @@
           "grantType": {
             "$ref": "#/components/schemas/V1CommonIdentifierLookup_IdentifierLookupGrantType"
           },
+          "links": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+              }
+            ]
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "subject": {
             "type": "string"
           }
@@ -892,10 +916,8 @@
             "type": "array"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -908,7 +930,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "org": {
@@ -1923,7 +1945,8 @@
         "additionalProperties": false,
         "properties": {
           "content": {
-            "description": "The content of the dialog in search results.",
+            "description": "The content of the dialog in search results. May be null for API-only dialogs, which are not required to have content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearch_Content"
@@ -1984,10 +2007,8 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -2000,7 +2021,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "latestActivity": {
@@ -2676,6 +2697,142 @@
           "maxServiceResourceFilterValues": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesGet_ServiceResourceMetadataRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem": {
+        "additionalProperties": false,
+        "properties": {
+          "accessPackages": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceOwner": {
+            "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner"
+          },
+          "serviceResource": {
+            "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole": {
+        "additionalProperties": false,
+        "properties": {
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "urn": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orgNumber": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "isDelegable": {
+            "type": "boolean"
+          },
+          "links": {
+            "$ref": "#/components/schemas/DigdirDomainDialogportenApplicationCommon_Link"
+          },
+          "minimumAuthenticationLevel": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "items": {
+              "$ref": "#/components/schemas/V1CommonLocalizations_Localization"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -4907,10 +5064,8 @@
             "type": "array"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -4928,7 +5083,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "org": {
@@ -6070,10 +6225,8 @@
             "type": "integer"
           },
           "hasUnopenedContent": {
-            "deprecated": true,
-            "description": "Indicates whether the dialog contains content that has not been viewed or opened by the user yet.",
-            "type": "boolean",
-            "x-deprecatedMessage": "Use IsContentSeen instead. See the new field\u0027s description for an explanation of the new behavior."
+            "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
+            "type": "boolean"
           },
           "id": {
             "description": "The unique identifier for the dialog in UUIDv7 format.",
@@ -6086,7 +6239,7 @@
             "type": "boolean"
           },
           "isContentSeen": {
-            "description": "A dialog is considered seen if\n- it has been retrieved by a user, since its last content update, and\n- there is no SystemLabels MarkedAsUnopened",
+            "description": "Indicates whether a dialog has been seen since its last content update.\n            \nThe value of this field is\n- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened\n- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update\n- false after the dialog receives a content update.\n            \nNote that the value is determined by Dialogporten and not to be confused with HasUnopenedContent",
             "type": "boolean"
           },
           "latestActivity": {
@@ -8334,6 +8487,61 @@
           }
         },
         "summary": "Gets currently enforced application-level query limits",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
+    "/api/v1/metadata/serviceresources": {
+      "get": {
+        "description": "Returns public service resource metadata with related service owner, role, and access package metadata.",
+        "operationId": "V1MetadataServiceResourcesGet_ServiceResourceMetadata",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata"
+                }
+              }
+            },
+            "description": "Service resource metadata."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets service resources currently in use in Dialogporten.",
         "tags": [
           "Metadata"
         ]

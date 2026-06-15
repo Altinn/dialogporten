@@ -177,6 +177,49 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     }
 
     [E2EFact]
+    public async Task Should_Filter_By_ExcludeApiOnly()
+    {
+        // Arrange
+        var sentinelLabel = Guid.NewGuid().ToString();
+
+        var apiOnlyDialogId = await Fixture.ServiceownerApi
+            .CreateSearchDialogAsync(sentinelLabel, dialog => dialog.IsApiOnly = true);
+        var regularDialogId = await Fixture.ServiceownerApi.CreateSearchDialogAsync(sentinelLabel);
+
+        // Act: by default, search includes API-only dialogs. Wait until both are indexed.
+        var includeResult = await E2ERetryPolicies.RetryUntilAsync(
+            ct => Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(new()
+            {
+                ServiceOwnerLabels = [sentinelLabel]
+            }, ct),
+            isSuccessful: response =>
+                response.Content is { Items.Count: 2 } content &&
+                content.Items.Any(x => x.Id == apiOnlyDialogId) &&
+                content.Items.Any(x => x.Id == regularDialogId),
+            degradationMessage: "Search indexing speed is degraded.");
+
+        // Assert
+        includeResult.ShouldHaveStatusCode(HttpStatusCode.OK);
+        includeResult.Content.Should().NotBeNull();
+        includeResult.Content.Items.Should().Contain(x => x.Id == apiOnlyDialogId && x.IsApiOnly);
+        includeResult.Content.Items.Should().Contain(x => x.Id == regularDialogId && !x.IsApiOnly);
+
+        // Act: excluding API-only dialogs returns only the regular dialog.
+        var excludeResult = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsQueriesSearchDialog(new()
+        {
+            ServiceOwnerLabels = [sentinelLabel],
+            ExcludeApiOnly = true
+        });
+
+        // Assert
+        excludeResult.ShouldHaveStatusCode(HttpStatusCode.OK);
+        excludeResult.Content.Should().NotBeNull();
+        excludeResult.Content.Items.Should().ContainSingle();
+        excludeResult.Content.Items.Single().Id.Should().Be(regularDialogId);
+        excludeResult.Content.Items.Should().OnlyContain(x => !x.IsApiOnly);
+    }
+
+    [E2EFact]
     public async Task Should_Return_400_When_Process_Is_Invalid()
     {
         // Act

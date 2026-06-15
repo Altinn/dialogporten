@@ -130,19 +130,31 @@ public sealed class DialogEntity :
         IsSeenSinceLastContentUpdate = WasCreatedBeforeFirstMigration() || IsFromAltinn2Instance();
     }
 
-    private bool WasCreatedBeforeFirstMigration()
-    {
-        return CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
-    }
+    private bool WasCreatedBeforeFirstMigration() => CreatedAt < new DateTimeOffset(2025, 12, 1, 0, 0, 0, TimeSpan.Zero);
 
-    private bool IsFromAltinn2Instance()
+    private bool IsFromAltinn2Instance() => ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
+
+    public void AddUpdateEvent() => _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+
+    public void AddSeenEvent(string userId, DialogUserType.Values userTypeId, Guid seenLogId)
     {
-        return ServiceResource.StartsWith($"urn:altinn:resource:app_{Org}_a2", StringComparison.OrdinalIgnoreCase);
+        _domainEvents.Add(
+            new DialogSeenDomainEvent(
+                Id,
+                ServiceResource,
+                Party,
+                Process,
+                PrecedingProcess,
+                userId,
+                userTypeId,
+                seenLogId
+            )
+        );
     }
 
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
     {
-        _domainEvents.Add(new DialogUpdatedDomainEvent(Id, ServiceResource, Party, Process, PrecedingProcess));
+        AddUpdateEvent();
 
         if (VisibleFrom is { } visibleFrom && visibleFrom > utcNow)
         {

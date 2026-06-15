@@ -97,7 +97,7 @@ resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-0
   name: appConfigurationName
 }
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' existing = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
   name: containerAppEnvironmentName
 }
 
@@ -107,7 +107,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: environmentKeyVaultName
 }
 

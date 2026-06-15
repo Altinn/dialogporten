@@ -11,11 +11,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.0.1" />
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.0.3-alpha" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
-        <PackageReference Include="Refit.HttpClientFactory" Version="10.1.6" />
-        <PackageReference Include="Refit" Version="10.1.6" />
+        <PackageReference Include="Refit.HttpClientFactory" Version="10.2.0" />
+        <PackageReference Include="Refit" Version="10.2.0" />
     </ItemGroup>
 
     <ItemGroup>

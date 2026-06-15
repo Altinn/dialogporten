@@ -6,6 +6,10 @@ public interface IResourceRegistry
 
     Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken);
 
+    Task<IReadOnlyDictionary<string, ServiceResourceInformation>> GetResourceInformation(
+        IReadOnlyCollection<string> serviceResourceIds,
+        CancellationToken cancellationToken);
+
     IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset since, int batchSize,
         CancellationToken cancellationToken);
 

@@ -20,6 +20,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn.AccessManagement;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.OrganizationRegistry;
@@ -33,6 +34,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 using HotChocolate.Subscriptions;
+using MessagePack.Resolvers;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using StackExchange.Redis;
@@ -46,7 +48,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using MassTransit;
 using MediatR;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 
@@ -146,6 +147,7 @@ public static class InfrastructureExtensions
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
+            .AddTransient<IMetadataLinkProvider, MetadataLinkProvider>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddTransient(x => new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
@@ -161,7 +163,7 @@ public static class InfrastructureExtensions
             // Feature Metrics
             .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 
-        services.AddFusionCacheNeueccMessagePackSerializer();
+        services.AddFusionCacheNeueccMessagePackSerializer(ContractlessStandardResolverAllowPrivate.Options);
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
         services.AddFusionCacheStackExchangeRedisBackplane(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
 
@@ -237,6 +239,28 @@ public static class InfrastructureExtensions
         {
             Duration = TimeSpan.FromMinutes(30),
             FailSafeMaxDuration = TimeSpan.FromMinutes(60)
+        })
+        .ConfigureFusionCache(PartyResourceRepository.ReferencedResourcesCacheName, new()
+        {
+            Duration = TimeSpan.FromMinutes(30),
+            FailSafeMaxDuration = TimeSpan.FromMinutes(60),
+            SkipDistributedCache = true
+        })
+        .ConfigureFusionCache(SubjectResourceRepository.ReferencedPartyResourcesCacheName, new()
+        {
+            Duration = TimeSpan.FromMinutes(20)
+        })
+        .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
+        {
+            Duration = TimeSpan.FromHours(6),
+            // Min auth level is on the authorization hot path; keep stale-but-known data usable well past
+            // Duration so the cache can still serve if ResourcePolicyInformation queries start failing.
+            FailSafeMaxDuration = TimeSpan.FromHours(24)
+        })
+        .ConfigureFusionCache(AccessManagementMetadataClient.CacheName, new()
+        {
+            Duration = TimeSpan.FromHours(1),
+            FailSafeMaxDuration = TimeSpan.FromHours(2)
         });
 
         if (environment.IsEnvironment("yt01"))
@@ -419,6 +443,10 @@ public static class InfrastructureExtensions
                 client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.AltinnCdn.BaseUri)
             .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
 
+        services.AddHttpClient<IAccessManagementMetadata, AccessManagementMetadataClient>((services, client) =>
+                client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri)
+            .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
+
         services.AddMaskinportenHttpClient<IPartyNameRegistry, PartyNameRegistryClient, SettingsJwkClientDefinition>(
                 infrastructureSettings,
                 x => x.ClientSettings.ExhangeToAltinnToken = true)
@@ -507,6 +535,8 @@ public static class InfrastructureExtensions
 
                 SkipMemoryCacheWrite = settings.SkipMemoryCache,
                 SkipMemoryCacheRead = settings.SkipMemoryCache,
+                SkipDistributedCacheRead = settings.SkipDistributedCache,
+                SkipDistributedCacheWrite = settings.SkipDistributedCache,
 
                 // This will stop deserialization exceptions to be re-thrown, which will cause the factory to run as if
                 // the cache entry was not found. This avoids crashes which otherwise would happen if entities that
@@ -552,5 +582,6 @@ public static class InfrastructureExtensions
         public TimeSpan JitterMaxDuration { get; set; } = TimeSpan.FromSeconds(2);
         public float EagerRefreshThreshold { get; set; } = 0.8f;
         public bool SkipMemoryCache { get; set; }
+        public bool SkipDistributedCache { get; set; }
     }
 }

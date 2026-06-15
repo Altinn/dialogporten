@@ -34,7 +34,7 @@ resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-
   name: appInsightWorkspaceName
 }
 
-resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-10-02-preview' = {
+resource containerAppEnv 'Microsoft.App/managedEnvironments@2025-10-02-preview' = {
   name: '${namePrefix}-cae'
   location: location
   identity: {

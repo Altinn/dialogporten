@@ -10,14 +10,13 @@ public static class EnvironmentExtensions
             Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
             ?? Environments.Development;
 
-        public static string GetTokenGeneratorEnvironment() =>
+        public static TokenGeneratorEnvironment GetTokenGeneratorEnvironment() =>
             Environment.GetDotnetEnvironment() switch
             {
-                "Development" or "test" => "at23",
-                "staging" => "tt02",
-                "yt01" => "yt01",
+                "Development" or "test" => TokenGeneratorEnvironment.At23,
+                "staging" => TokenGeneratorEnvironment.Tt02,
+                "yt01" => TokenGeneratorEnvironment.Yt01,
                 _ => throw new InvalidOperationException($"Unknown environment: {Environment.GetDotnetEnvironment()}")
             };
     }
-
 }

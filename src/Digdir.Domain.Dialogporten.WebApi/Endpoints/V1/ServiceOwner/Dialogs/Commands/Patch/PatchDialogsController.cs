@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
 using DialogportenAuthorizationPolicy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
-using IMapper = AutoMapper.IMapper;
 using ProblemDetails = FastEndpoints.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
@@ -26,15 +25,12 @@ namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Co
 public sealed class PatchDialogsController : ControllerBase
 {
     private readonly ISender _sender;
-    private readonly IMapper _mapper;
 
-    public PatchDialogsController(ISender sender, IMapper mapper)
+    public PatchDialogsController(ISender sender)
     {
         ArgumentNullException.ThrowIfNull(sender);
-        ArgumentNullException.ThrowIfNull(mapper);
 
         _sender = sender;
-        _mapper = mapper;
     }
 
     /// <summary>
@@ -86,7 +82,7 @@ public sealed class PatchDialogsController : ControllerBase
                         validationFailed.Errors.ToList())));
         }
 
-        var updateDialogDto = _mapper.Map<UpdateDialogDto>(dialog);
+        var updateDialogDto = dialog.ToUpdateDialogDto();
         patchDocument.ApplyTo(updateDialogDto, ModelState);
         if (!ModelState.IsValid)
         {

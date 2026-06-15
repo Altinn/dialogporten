@@ -137,17 +137,6 @@ module environmentKeyVault '../modules/keyvault/create.bicep' = {
   }
 }
 
-// Grant the GitHub OIDC deployer principal Key Vault Reader so the
-// check-keyvault-secret-expiry workflow can list secret metadata.
-module keyVaultReaderForDeployer '../modules/keyvault/addKvReaderRoles.bicep' = {
-  scope: resourceGroup
-  name: 'keyVaultReaderForDeployer'
-  params: {
-    keyvaultName: environmentKeyVault.outputs.name
-    principalId: deployer().objectId
-  }
-}
-
 module appConfiguration '../modules/appConfiguration/create.bicep' = {
   scope: resourceGroup
   name: 'appConfiguration'
@@ -211,7 +200,7 @@ module vnet '../modules/vnet/main.bicep' = {
 // Create references to existing resources
 // #######################################
 
-resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2024-11-01' existing = {
+resource srcKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: secrets.sourceKeyVaultName
   scope: az.resourceGroup(secrets.sourceKeyVaultSubscriptionId, secrets.sourceKeyVaultResourceGroup)
 }

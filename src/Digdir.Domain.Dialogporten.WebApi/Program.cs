@@ -26,6 +26,7 @@ using Microsoft.Extensions.Options;
 using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Scalar.AspNetCore;
 using Serilog;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
@@ -115,6 +116,7 @@ static void BuildAndRun(string[] args)
             ServiceLifetime.Transient, includeInternalTypes: true)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
+        .AddDialogportenResponseCompression()
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
@@ -166,8 +168,25 @@ static void BuildAndRun(string[] args)
     app.MapAspNetHealthChecks()
         .MapControllers();
 
-    app.UseHttpsRedirection()
-        .UseDefaultExceptionHandler()
+    var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
+
+    app.MapScalarApiReference("/scalar", options => options
+        .WithTitle("Dialogporten API")
+        // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
+        // the base path it auto-detects (window.location.pathname minus the server request path).
+        // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
+        // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
+        .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+        .AddDocument("v1", "Dialogporten - EndUser/ServiceOwner combined (legacy)")
+        .AddDocument("v1.enduser", "Dialogporten EndUser")
+        .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
+        .DisableAgent());
+
+    app.UseHttpsRedirection();
+    // Wraps the response body before any downstream middleware writes. Must precede
+    // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
+    app.UseResponseCompression();
+    app.UseDefaultExceptionHandler()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
@@ -183,8 +202,14 @@ static void BuildAndRun(string[] args)
             x.Versioning.DefaultVersion = 1;
             x.Endpoints.Configurator = endpointDefinition =>
             {
-                endpointDefinition.Description(routeHandlerBuilder
-                    => routeHandlerBuilder.Add(endpointBuilder =>
+                if (NonBodyRequestBinder.ShouldUseFor(endpointDefinition))
+                {
+                    endpointDefinition.RequestBinder(typeof(NonBodyRequestBinder<>));
+                }
+
+                endpointDefinition.Description(routeHandlerBuilder =>
+                {
+                    routeHandlerBuilder.Add(endpointBuilder =>
                     {
                         endpointBuilder.Metadata.Add(
                             new EndpointNameMetadata(
@@ -196,7 +221,10 @@ static void BuildAndRun(string[] args)
                         {
                             endpointBuilder.Metadata.Add(operationIdAttr);
                         }
-                    }));
+                    });
+
+                    routeHandlerBuilder.AddResponseCompressionHintIfMarked(endpointDefinition.EndpointType);
+                });
             };
             x.Serializer.Options.RespectNullableAnnotations = true;
             x.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -213,6 +241,7 @@ static void BuildAndRun(string[] args)
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
         {
+            config.Path = "/swagger/{documentName}/swagger.json";
             config.PostProcess = (document, _) =>
             {
                 var dialogportenBaseUri = builder.Configuration
@@ -235,7 +264,6 @@ static void BuildAndRun(string[] args)
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
-            var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
         })
         .UseFeatureMetrics();

@@ -1511,6 +1511,60 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         Task<IApiResponse<ServiceOwnerIdentifierLookup>> GetDialogLookup([Query] string instanceRef, [Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
     }
 
+    /// <summary>Gets service resources currently in use in Dialogporten.</summary>
+    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
+    public partial interface IMetadataApi
+    {
+        /// <summary>Gets service resources currently in use in Dialogporten.</summary>
+        /// <remarks>Returns public service resource metadata with related service owner, role, and access package metadata.</remarks>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Service resource metadata.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/serviceresources")]
+        Task<IApiResponse<ServiceResourceMetadataList>> GetServiceResourceMetadata([Header("accept-Language")] AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
+
+        /// <summary>Gets currently enforced application-level query limits</summary>
+        /// <remarks>Returns the active limits for EndUser and ServiceOwner search filters.</remarks>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>The currently enforced application-level query limits.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/limits")]
+        Task<IApiResponse<Limits>> GetLimits(CancellationToken cancellationToken = default);
+    }
+
 }
 
 //----------------------
@@ -2367,10 +2421,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public int FromPartyTransmissionsCount { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+        /// <br/>A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction.
+        /// <br/>            
+        /// <br/>The value of this field is:
+        /// <br/>- true when there are any new unopened Transmissions sent from the service owner.
+        /// <br/>- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+        /// <br/>            
+        /// <br/>Note that the value is
+        /// <br/>- determined by the service owner and not to be confused with IsContentSeen
+        /// <br/>- not affected by SystemLabels
+        /// <br/>            
+        /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -2392,9 +2456,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public ICollection<DialogSeenLogListItem> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
-        /// A dialog is considered seen if
-        /// <br/>- it has been retrieved by a user, since its last content update, and
-        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// Indicates whether a dialog has been seen since its last content update.
+        /// <br/>            
+        /// <br/>The value of this field is
+        /// <br/>- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened
+        /// <br/>- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update
+        /// <br/>- false after the dialog receives a content update.
+        /// <br/>            
+        /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
         [JsonPropertyName("isContentSeen")]
         public bool IsContentSeen { get; set; }
@@ -3057,10 +3126,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public bool IsApiOnly { get; set; }
 
         /// <summary>
-        /// Indicates whether the dialog contains content that has not been viewed or opened by the user yet.
+        /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+        /// <br/>A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction.
+        /// <br/>            
+        /// <br/>The value of this field is:
+        /// <br/>- true when there are any new unopened Transmissions sent from the service owner.
+        /// <br/>- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+        /// <br/>            
+        /// <br/>Note that the value is
+        /// <br/>- determined by the service owner and not to be confused with IsContentSeen
+        /// <br/>- not affected by SystemLabels
+        /// <br/>            
+        /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        [System.Obsolete("Use IsContentSeen instead. See the new field\'s description for an explanation of the new behavior.")]
         public bool HasUnopenedContent { get; set; }
 
         /// <summary>
@@ -3130,9 +3209,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public ICollection<DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
 
         /// <summary>
-        /// A dialog is considered seen if
-        /// <br/>- it has been retrieved by a user, since its last content update, and
-        /// <br/>- there is no SystemLabels MarkedAsUnopened
+        /// Indicates whether a dialog has been seen since its last content update.
+        /// <br/>            
+        /// <br/>The value of this field is
+        /// <br/>- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened
+        /// <br/>- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update
+        /// <br/>- false after the dialog receives a content update.
+        /// <br/>            
+        /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
         [JsonPropertyName("isContentSeen")]
         public bool IsContentSeen { get; set; }
@@ -5837,6 +5921,153 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         [JsonPropertyName("weight")]
         public int Weight { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceMetadataList
+    {
+
+        [JsonPropertyName("items")]
+        public ICollection<ServiceResourceMetadata> Items { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceMetadata
+    {
+
+        [JsonPropertyName("serviceResource")]
+        public ServiceResource ServiceResource { get; set; }
+
+        [JsonPropertyName("roles")]
+        public ICollection<ServiceResourceRole> Roles { get; set; }
+
+        [JsonPropertyName("accessPackages")]
+        public ICollection<ServiceResourceAccessPackage> AccessPackages { get; set; }
+
+        [JsonPropertyName("serviceOwner")]
+        public ServiceResourceOwner ServiceOwner { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResource
+    {
+
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; }
+
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Links
+    {
+
+        [JsonPropertyName("metadata")]
+        public string Metadata { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceRole
+    {
+
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceAccessPackage
+    {
+
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+        [JsonPropertyName("links")]
+        public Links Links { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceResourceOwner
+    {
+
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("name")]
+        public ICollection<Localization> Name { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Limits
+    {
+
+        [JsonPropertyName("endUserSearch")]
+        public EndUserSearchLimits EndUserSearch { get; set; }
+
+        [JsonPropertyName("serviceOwnerSearch")]
+        public ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class EndUserSearchLimits
+    {
+
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; }
+
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; }
+
+        [JsonPropertyName("maxOrgFilterValues")]
+        public int MaxOrgFilterValues { get; set; }
+
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ServiceOwnerSearchLimits
+    {
+
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; }
+
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; }
+
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; }
 
     }
 

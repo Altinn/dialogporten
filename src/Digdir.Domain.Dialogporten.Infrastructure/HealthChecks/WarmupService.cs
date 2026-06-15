@@ -1,9 +1,9 @@
 using System.Security.Claims;
-using System.Threading;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -102,6 +102,7 @@ internal sealed partial class WarmupService : IHostedService
 
             await RunPhaseAsync("db-pool", () => WarmupDbPoolAsync(services, timeoutCts.Token));
             await RunPhaseAsync("ef-model", () => WarmupEfModelAsync(services, timeoutCts.Token));
+            await RunPhaseAsync("service-resource-metadata", () => WarmupServiceResourceMetadataAsync(services, timeoutCts.Token));
 
             if (_settings.RunEndUserSearch)
             {
@@ -182,6 +183,19 @@ internal sealed partial class WarmupService : IHostedService
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    private async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var sender = services.GetRequiredService<ISender>();
+            await sender.Send(new GetServiceResourceMetadataQuery(), cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        {
+            ServiceResourceMetadataWarmupFailed(_logger, ex);
+        }
+    }
+
     private async Task WarmupEndUserSearchAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(_settings.EndUserPid))
@@ -232,6 +246,9 @@ internal sealed partial class WarmupService : IHostedService
 
     [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "End-user search warmup failed for PID {EndUserPid}; readiness will not be failed by this optional phase.")]
     private static partial void EndUserSearchFailed(ILogger logger, string endUserPid, Exception exception);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Warning, Message = "Service resource metadata warmup failed; readiness will not be failed by this optional phase.")]
+    private static partial void ServiceResourceMetadataWarmupFailed(ILogger logger, Exception exception);
 }
 
 internal enum WarmupStatus

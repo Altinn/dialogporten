@@ -179,7 +179,7 @@ static void BuildAndRun(string[] args)
         .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
         .AddDocument("v1", "Dialogporten")
         .AddDocument("v1.enduser", "Dialogporten EndUser")
-        .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner")
+        .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
         .DisableAgent());
 
     app.UseHttpsRedirection();

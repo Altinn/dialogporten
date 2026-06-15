@@ -24,6 +24,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public CreateTransmissionTests(DialogApplication application) : base(application) { }
 
     private const string ParentTransmissionIdKey = nameof(ParentTransmissionIdKey);
+    private const string DeepChainTailTransmissionIdKey = nameof(DeepChainTailTransmissionIdKey);
 
     [Fact]
     public Task Can_Create_Transmission_Related_To_Existing_Transmission() =>
@@ -76,6 +77,28 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 DialogId = ctx.GetDialogId(),
                 Transmissions = CreateLinkedTransmissions(101)
             })
+            .ExecuteAndAssert<DomainError>(result =>
+                result.ShouldHaveErrorWithText("depth violation"));
+
+    [Fact]
+    public Task Cannot_Create_Transmission_That_Extends_Existing_100_Linked_Chain() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) =>
+            {
+                var transmissions = CreateLinkedTransmissions(100);
+                ctx.Bag[DeepChainTailTransmissionIdKey] = transmissions.Last().Id!.Value;
+
+                return new CreateTransmissionCommand
+                {
+                    DialogId = ctx.GetDialogId(),
+                    Transmissions = transmissions
+                };
+            })
+            .AssertResult<CreateTransmissionSuccess>()
+            .CreateTransmission((transmission, ctx) =>
+                transmission.RelatedTransmissionId = ctx.GetGuidByKey(DeepChainTailTransmissionIdKey))
             .ExecuteAndAssert<DomainError>(result =>
                 result.ShouldHaveErrorWithText("depth violation"));
 

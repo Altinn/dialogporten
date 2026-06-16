@@ -12,7 +12,7 @@ jobs:
     name: Generate git short sha
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       gitShortSha: ${{ steps.set-git-short-sha.outputs.gitShortSha }}
     steps:

@@ -291,8 +291,8 @@
       ]
     }
   ],
-  "seenSinceLastUpdate": null,
-  "seenSinceLastContentUpdate": null,
+  "seenSinceLastUpdate": [],
+  "seenSinceLastContentUpdate": [],
   "isContentSeen": false,
   "serviceOwnerContext": {
     "serviceOwnerLabels": [

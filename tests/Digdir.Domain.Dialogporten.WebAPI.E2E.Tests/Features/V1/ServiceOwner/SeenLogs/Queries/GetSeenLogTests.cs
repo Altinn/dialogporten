@@ -16,13 +16,12 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
-        // Trigger seen log by fetching the dialog as the end user, retrying
-        // until the seen log entry has propagated.
-        var getDialogResponse = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EndUserApi.GetDialog(dialogId, cancellationToken: ct),
-            isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
-            degradationMessage: "Seen log creation delayed");
+        // Trigger seen log by fetching the dialog as the end user.
+        var getDialogResponse = await Fixture.EndUserApi.GetDialog(
+            dialogId,
+            cancellationToken: TestContext.Current.CancellationToken);
 
+        getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         getDialogResponse.Content.Should().NotBeNull();
         var seenLog = getDialogResponse.Content.SeenSinceLastUpdate.FirstOrDefault();
         seenLog.Should().NotBeNull();

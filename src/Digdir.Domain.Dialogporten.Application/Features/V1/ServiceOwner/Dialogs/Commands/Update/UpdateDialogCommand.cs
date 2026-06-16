@@ -162,12 +162,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
                 $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
         }
 
-        _domainContext.AddErrors(dialog.Transmissions.ValidateReferenceHierarchy(
-            keySelector: x => x.Id,
-            parentKeySelector: x => x.RelatedTransmissionId,
-            propertyName: nameof(UpdateDialogDto.Transmissions),
-            maxDepth: 20,
-            maxWidth: 20));
+        _transmissionHierarchyValidator.ValidateWholeAggregate(dialog);
 
         VerifyActivityTransmissionRelations(dialog);
 

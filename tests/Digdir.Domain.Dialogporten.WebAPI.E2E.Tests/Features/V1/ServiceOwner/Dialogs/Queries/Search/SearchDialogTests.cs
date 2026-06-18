@@ -340,6 +340,6 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         response.Content.Should().NotBeNull();
-        response.Content.Items.Should().BeNull();
+        response.Content.Items.Should().BeEmpty();
     }
 }

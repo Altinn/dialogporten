@@ -1772,7 +1772,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public DialogEndUserContextListItem EndUserContext { get; set; }
 
         /// <summary>
-        /// The content of the dialog in search results.
+        /// The content of the dialog in search results. May be null for API-only dialogs, which are not required to have content.
         /// </summary>
         [JsonPropertyName("content")]
         public DialogContentSummary Content { get; set; }

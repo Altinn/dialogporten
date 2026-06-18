@@ -1,5 +1,9 @@
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -10,6 +14,11 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.ErrorR
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
+    private static readonly JsonSerializerOptions ProblemDetailsSerializerOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     [E2EFact]
     public async Task Should_Return_404_Error_Response_In_ProblemDetails_Format()
     {
@@ -21,7 +30,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await VerifyProblemDetailsSnapshot(response);
     }
 
     [E2EFact]
@@ -36,7 +45,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await VerifyProblemDetailsSnapshot(response);
     }
 
     [E2EFact]
@@ -52,7 +61,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await VerifyProblemDetailsSnapshot(response);
     }
 
     [E2EFact]
@@ -68,7 +77,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Gone);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await VerifyProblemDetailsSnapshot(response);
     }
 
     [E2EFact]
@@ -85,6 +94,26 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await VerifyProblemDetailsSnapshot(response);
+    }
+
+    private static async Task VerifyProblemDetailsSnapshot(
+        Refit.IApiResponse response,
+        [CallerMemberName] string callerMemberName = "",
+        [CallerFilePath] string sourceFile = "")
+    {
+        var problemDetails = await response.Error!
+            .GetContentAsAsync<ProblemDetails>();
+
+        problemDetails.Should().NotBeNull();
+
+        var jsonProblemDetails = JsonSerializer
+            .Serialize(problemDetails,
+                ProblemDetailsSerializerOptions);
+
+        await VerifyJsonSnapshot(
+            jsonProblemDetails,
+            callerMemberName: callerMemberName,
+            sourceFile: sourceFile);
     }
 }

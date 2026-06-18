@@ -61,7 +61,7 @@ jobs:
     name: Send Slack message
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:

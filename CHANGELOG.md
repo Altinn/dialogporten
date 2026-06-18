@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.117.3](https://github.com/Altinn/dialogporten/compare/v1.117.2...v1.117.3) (2026-06-17)
+
+
+### Bug Fixes
+
+* correct Scalar OpenAPI document path behind APIM ([#4108](https://github.com/Altinn/dialogporten/issues/4108)) ([a63ea27](https://github.com/Altinn/dialogporten/commit/a63ea27bf8e1b55915216389d10afbb097514d41))
+* handle content-less apionly dialogs ([#4111](https://github.com/Altinn/dialogporten/issues/4111)) ([e4c0e81](https://github.com/Altinn/dialogporten/commit/e4c0e8140cab2d7d1336527908fc063624e1377d))
+* **infra:** align test postgres2 storage with live server to unblock deploy ([#4127](https://github.com/Altinn/dialogporten/issues/4127)) ([6e4bfe4](https://github.com/Altinn/dialogporten/commit/6e4bfe4a27a6e476eefee31eddf27dbb3fde83e2))
+* re-introduce GQL server spans ([#4126](https://github.com/Altinn/dialogporten/issues/4126)) ([54c502c](https://github.com/Altinn/dialogporten/commit/54c502cc2feed503f09847076388afaa76a25124))
+
+
+### Miscellaneous Chores
+
+* **app:** increase transmission hierarchy depth limit to 100 ([#4120](https://github.com/Altinn/dialogporten/issues/4120)) ([bf3e56c](https://github.com/Altinn/dialogporten/commit/bf3e56c70eebdcc5cd05c177b5b45ac2ac93cd75))
+* **app:** remove automapper from enduser GetSeenLog ([#4106](https://github.com/Altinn/dialogporten/issues/4106))q ([537b6e1](https://github.com/Altinn/dialogporten/commit/537b6e1e4740d1fe1f8d65364069dd6efbb36c0a))
+* bump Key Vault API versions ([#4107](https://github.com/Altinn/dialogporten/issues/4107)) ([666c82d](https://github.com/Altinn/dialogporten/commit/666c82d394f30a04d706c2654cf98c174cd54104))
+* **webapi:** remove skip empty lists when serializing responses ([#4117](https://github.com/Altinn/dialogporten/issues/4117)) ([5c3e8e2](https://github.com/Altinn/dialogporten/commit/5c3e8e2c59f80714d0b19915dcaa141b927bd51a))
+
 ## [1.117.2](https://github.com/Altinn/dialogporten/compare/v1.117.1...v1.117.2) (2026-06-14)
 
 

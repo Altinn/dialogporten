@@ -126,7 +126,7 @@ static void BuildAndRun(string[] args)
                 {
                     o.EnrichWithHttpResponse = (activity, _) =>
                     {
-                        DialogportenGqlActivityEnricher.RenameOperationName(activity);
+                        RenameRootActivityListener.EnrichRootActivity(activity);
                     };
                 }))
 

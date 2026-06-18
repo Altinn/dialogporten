@@ -101,7 +101,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content;
         content.Should().NotBeNull();
-        content.Items.Should().BeNull();
+        content.Items.Should().BeEmpty();
     }
 
     [E2EFact(SkipOnEnvironments = ["yt01"])]
@@ -132,6 +132,6 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content;
         content.Should().NotBeNull();
-        content.Items.Should().BeNull();
+        content.Items.Should().BeEmpty();
     }
 }

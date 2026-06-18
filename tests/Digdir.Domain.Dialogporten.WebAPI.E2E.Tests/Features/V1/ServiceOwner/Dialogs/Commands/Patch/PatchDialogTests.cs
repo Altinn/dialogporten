@@ -3,6 +3,7 @@ using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using static Altinn.ApiClients.Dialogporten.Features.V1.V1ServiceOwnerCommonDialogStatuses_DialogStatusInput;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Patch;
 
@@ -25,28 +26,28 @@ public class PatchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
         {
             Add(new PatchDialogTestsScenario(
                 "replace status: New -> InProgress",
-                modifyDialog => { modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New; },
+                modifyDialog => { modifyDialog.Status = New; },
                 [new() { Op = "replace", Path = "/status", Value = "InProgress" }],
                 updated => { updated.Status.Should().Be(DialogsEntities_DialogStatus.InProgress); })
             );
 
             Add(new PatchDialogTestsScenario(
                 "replace status: New -> Draft",
-                modifyDialog => { modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New; },
+                modifyDialog => { modifyDialog.Status = New; },
                 [new() { Op = "replace", Path = "/status", Value = "Draft" }],
                 updated => { updated.Status.Should().Be(DialogsEntities_DialogStatus.Draft); })
             );
 
             Add(new PatchDialogTestsScenario(
                 "replace status: New -> Sent (maps to Awaiting)",
-                modifyDialog => { modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New; },
+                modifyDialog => { modifyDialog.Status = New; },
                 [new() { Op = "replace", Path = "/status", Value = "Sent" }],
                 updated => { updated.Status.Should().Be(DialogsEntities_DialogStatus.Awaiting); })
             );
 
             Add(new PatchDialogTestsScenario(
                 "replace status: New -> RequiresAttention",
-                modifyDialog => { modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New; },
+                modifyDialog => { modifyDialog.Status = New; },
                 [
                     new() { Op = "replace", Path = "/status", Value = "RequiresAttention" }
                 ],
@@ -55,21 +56,21 @@ public class PatchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
 
             Add(new PatchDialogTestsScenario(
                 "replace status: New -> Completed",
-                modifyDialog => { modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New; },
+                modifyDialog => { modifyDialog.Status = New; },
                 [new() { Op = "replace", Path = "/status", Value = "Completed" }],
                 updated => { updated.Status.Should().Be(DialogsEntities_DialogStatus.Completed); })
             );
 
             Add(new PatchDialogTestsScenario(
                 "replace status: New -> NotApplicable",
-                modifyDialog => { modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New; },
+                modifyDialog => { modifyDialog.Status = New; },
                 [new() { Op = "replace", Path = "/status", Value = "NotApplicable" }],
                 updated => { updated.Status.Should().Be(DialogsEntities_DialogStatus.NotApplicable); })
             );
 
             Add(new PatchDialogTestsScenario(
                 "replace status: New -> Awaiting",
-                modifyDialog => { modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New; },
+                modifyDialog => { modifyDialog.Status = New; },
                 [new() { Op = "replace", Path = "/status", Value = "Awaiting" }],
                 updated => { updated.Status.Should().Be(DialogsEntities_DialogStatus.Awaiting); })
             );
@@ -227,7 +228,7 @@ public class PatchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EF
                 "Multiple replace patches",
                 modifyDialog =>
                 {
-                    modifyDialog.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New;
+                    modifyDialog.Status = New;
                     modifyDialog.Progress = 10;
                 },
                 [

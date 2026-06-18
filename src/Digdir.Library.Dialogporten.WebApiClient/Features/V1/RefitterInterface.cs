@@ -1705,25 +1705,43 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         [JsonPropertyName("type")]
-        public string Type { get; set; } = "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1";
+        public string Type { get; set; }
 
         [JsonPropertyName("title")]
-        public string Title { get; set; } = "One or more validation errors occurred.";
+        public string Title { get; set; }
 
         [JsonPropertyName("status")]
-        public int Status { get; set; } = 400;
-
-        [JsonPropertyName("instance")]
-        public string Instance { get; set; } = "/api/route";
-
-        [JsonPropertyName("traceId")]
-        public string TraceId { get; set; } = "0HMPNHL0JHL76:00000001";
+        public int? Status { get; set; }
 
         [JsonPropertyName("detail")]
         public string Detail { get; set; }
 
+        [JsonPropertyName("instance")]
+        public string Instance { get; set; }
+
+        [JsonPropertyName("statusDescription")]
+        public string StatusDescription { get; set; }
+
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+
+        [JsonPropertyName("traceId")]
+        public string TraceId { get; set; }
+
+        [JsonPropertyName("validationErrors")]
+        public ICollection<ProblemDetails_Error> ValidationErrors { get; set; }
+
         [JsonPropertyName("errors")]
-        public ICollection<ProblemDetails_Error> Errors { get; set; }
+        public IDictionary<string, ICollection<string>> Errors { get; set; }
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
 
     }
 
@@ -1731,17 +1749,26 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public partial class ProblemDetails_Error
     {
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = "Error or field name";
-
-        [JsonPropertyName("reason")]
-        public string Reason { get; set; } = "Error reason";
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
 
         [JsonPropertyName("code")]
         public string Code { get; set; }
 
-        [JsonPropertyName("severity")]
-        public string Severity { get; set; }
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+
+        [JsonPropertyName("paths")]
+        public ICollection<string> Paths { get; set; }
+
+        private IDictionary<string, object> _additionalProperties;
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
 
     }
 

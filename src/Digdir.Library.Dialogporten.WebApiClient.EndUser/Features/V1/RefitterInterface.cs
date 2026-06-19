@@ -215,10 +215,44 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         Task<IApiResponse<Limits>> GetLimits(CancellationToken cancellationToken = default);
     }
 
-    /// <summary>Gets a list of dialog label assignment logs</summary>
+    /// <summary>Gets the service resources the authenticated end user is authorized to.</summary>
     [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IEnduserApi
     {
+        /// <summary>Gets the service resources the authenticated end user is authorized to.</summary>
+        /// <remarks>Returns the same service resource metadata as the public metadata endpoint, filtered to the resources the calling end user is authorized to use. Optionally narrowed by one or more party URNs.</remarks>
+        /// <param name="party">Filter by one or more party URNs. Parties the caller is not authorized for are silently ignored.</param>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Authorized service resource metadata.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/enduser/serviceresources")]
+        Task<IApiResponse<AuthorizedServiceResourceList>> SearchAuthorizedServiceResources([Query(CollectionFormat.Multi)] IEnumerable<string> party, [Header("accept-Language")] AcceptedLanguages accept_Language, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+
         /// <summary>Gets a list of dialog label assignment logs</summary>
         /// <remarks>Gets the list of label assignment logs belonging to a dialog</remarks>
         /// <param name="dialogId">dialogId parameter</param>
@@ -822,6 +856,12 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
+        [JsonPropertyName("resourceType")]
+        public string ResourceType { get; set; }
+
+        [JsonPropertyName("status")]
+        public string Status { get; set; }
+
         [JsonPropertyName("isDelegable")]
         public bool IsDelegable { get; set; }
 
@@ -971,6 +1011,15 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         [JsonPropertyName("maxExtendedStatusFilterValues")]
         public int MaxExtendedStatusFilterValues { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class AuthorizedServiceResourceList
+    {
+
+        [JsonPropertyName("items")]
+        public ICollection<ServiceResourceMetadata> Items { get; set; }
 
     }
 

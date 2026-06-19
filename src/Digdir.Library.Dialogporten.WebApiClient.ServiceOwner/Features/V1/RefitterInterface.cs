@@ -5985,6 +5985,12 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
+        [JsonPropertyName("resourceType")]
+        public string ResourceType { get; set; }
+
+        [JsonPropertyName("status")]
+        public string Status { get; set; }
+
         [JsonPropertyName("isDelegable")]
         public bool IsDelegable { get; set; }
 

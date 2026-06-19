@@ -51,21 +51,18 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
                 StringComparer.OrdinalIgnoreCase);
     }
 
-    public async Task<Dictionary<string, List<string>>> GetSubjectsForReferencedPartyResources(
+    public async Task<IReadOnlyDictionary<string, IReadOnlyList<string>>> GetSubjectsForReferencedPartyResources(
         CancellationToken cancellationToken)
     {
-        var subjectsByResource = await _referencedPartyResourcesCache.GetOrSetAsync<Dictionary<string, List<string>>>(
+        // The cached dictionary is treated as immutable and returned directly (no per-request copy).
+        // Callers receive a read-only view, so the cached instance is protected from mutation.
+        return await _referencedPartyResourcesCache.GetOrSetAsync<Dictionary<string, IReadOnlyList<string>>>(
             ReferencedPartyResourcesCacheKey,
             FetchSubjectsForReferencedPartyResources,
             token: cancellationToken);
-
-        return subjectsByResource.ToDictionary(
-            x => x.Key,
-            x => x.Value.ToList(),
-            StringComparer.OrdinalIgnoreCase);
     }
 
-    private async Task<Dictionary<string, List<string>>> FetchSubjectsForReferencedPartyResources(
+    private async Task<Dictionary<string, IReadOnlyList<string>>> FetchSubjectsForReferencedPartyResources(
         CancellationToken cancellationToken)
     {
         const string sql =
@@ -82,7 +79,7 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
             .GroupBy(x => x.Resource, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(
                 x => x.Key,
-                x => x.Select(y => y.Subject).ToList(),
+                x => (IReadOnlyList<string>)x.Select(y => y.Subject).ToList(),
                 StringComparer.OrdinalIgnoreCase);
     }
 

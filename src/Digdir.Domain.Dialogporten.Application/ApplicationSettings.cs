@@ -15,7 +15,6 @@ public sealed class ApplicationSettings
 
 public sealed class FeatureToggle
 {
-    public bool UsePartyResourcePruning { get; init; }
     public bool UseAltinnAutoAuthorizedPartiesQueryParameters { get; init; }
     public bool EnablePartyFiltersForSystemUsers { get; init; }
     public bool EnablePartyFiltersForEmailUsers { get; init; }

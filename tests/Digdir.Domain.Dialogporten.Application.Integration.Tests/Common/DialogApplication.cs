@@ -159,6 +159,7 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton(AltinnAuthorization)
             .AddScoped<LocalDevelopmentAltinnAuthorization>()
             .AddScoped<IAltinnAuthorization, RoutedAltinnAuthorization>()
+            .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()

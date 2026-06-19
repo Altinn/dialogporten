@@ -6049,34 +6049,40 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         [JsonPropertyName("items")]
-        public ICollection<V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem> Items { get; set; }
+        public ICollection<V1CommonServiceResourceMetadata_ServiceResourceMetadataItem> Items { get; set; }
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataItem
+    public partial class V1CommonServiceResourceMetadata_ServiceResourceMetadataItem
     {
 
         [JsonPropertyName("serviceResource")]
-        public V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource ServiceResource { get; set; }
+        public V1CommonServiceResourceMetadata_ServiceResourceMetadataServiceResource ServiceResource { get; set; }
 
         [JsonPropertyName("roles")]
-        public ICollection<V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole> Roles { get; set; }
+        public ICollection<V1CommonServiceResourceMetadata_ServiceResourceMetadataRole> Roles { get; set; }
 
         [JsonPropertyName("accessPackages")]
-        public ICollection<V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage> AccessPackages { get; set; }
+        public ICollection<V1CommonServiceResourceMetadata_ServiceResourceMetadataAccessPackage> AccessPackages { get; set; }
 
         [JsonPropertyName("serviceOwner")]
-        public V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner ServiceOwner { get; set; }
+        public V1CommonServiceResourceMetadata_ServiceResourceMetadataServiceOwner ServiceOwner { get; set; }
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceResource
+    public partial class V1CommonServiceResourceMetadata_ServiceResourceMetadataServiceResource
     {
 
         [JsonPropertyName("id")]
         public string Id { get; set; }
+
+        [JsonPropertyName("resourceType")]
+        public string ResourceType { get; set; }
+
+        [JsonPropertyName("status")]
+        public string Status { get; set; }
 
         [JsonPropertyName("isDelegable")]
         public bool IsDelegable { get; set; }
@@ -6102,7 +6108,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataRole
+    public partial class V1CommonServiceResourceMetadata_ServiceResourceMetadataRole
     {
 
         [JsonPropertyName("urn")]
@@ -6117,7 +6123,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataAccessPackage
+    public partial class V1CommonServiceResourceMetadata_ServiceResourceMetadataAccessPackage
     {
 
         [JsonPropertyName("urn")]
@@ -6132,7 +6138,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadataServiceOwner
+    public partial class V1CommonServiceResourceMetadata_ServiceResourceMetadataServiceOwner
     {
 
         [JsonPropertyName("orgNumber")]

@@ -67,7 +67,9 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                     "Got null when getting system username. Retrying once after 100ms. ExternalId: {ExternalId}",
                     externalIdWithPrefix
                 );
-                await Task.Delay(TimeSpan.FromMilliseconds(100), ct);
+                // We inline a simple retry here to account for propagation delays in register
+                // This will block gets performed by system users, but might save them a 500
+                await Task.Delay(TimeSpan.FromMilliseconds(500), ct);
                 name = await GetNameFromRegister(externalIdWithPrefix, ct);
             }
 

@@ -6,6 +6,9 @@
 // </auto-generated>
 //----------------------
 
+#nullable enable
+
+using System.Text.Json.Serialization;
 #pragma warning disable 108 // Disable "CS0108 '{derivedDto}.ToJson()' hides inherited member '{dtoBase}.ToJson()'. Use the new keyword if hiding was intended."
 #pragma warning disable 114 // Disable "CS0114 '{derivedDto}.RaisePropertyChanged(String)' hides inherited member 'dtoBase.RaisePropertyChanged(String)'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword."
 #pragma warning disable 472 // Disable "CS0472 The result of the expression is always 'false' since a value of type 'Int32' is never equal to 'null' of type 'Int32?'
@@ -35,8 +38,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A label value.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -44,42 +47,42 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ProblemDetails
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        public string Type { get; set; }
+        [JsonPropertyName("type")]
+        public string? Type { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public string Title { get; set; }
+        [JsonPropertyName("title")]
+        public string? Title { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public int? Status { get; set; }
+        [JsonPropertyName("status")]
+        public int? Status { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("detail")]
-        public string Detail { get; set; }
+        [JsonPropertyName("detail")]
+        public string? Detail { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("instance")]
-        public string Instance { get; set; }
+        [JsonPropertyName("instance")]
+        public string? Instance { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("statusDescription")]
-        public string StatusDescription { get; set; }
+        [JsonPropertyName("statusDescription")]
+        public string? StatusDescription { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("code")]
-        public string Code { get; set; }
+        [JsonPropertyName("code")]
+        public string? Code { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("traceId")]
-        public string TraceId { get; set; }
+        [JsonPropertyName("traceId")]
+        public string? TraceId { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("validationErrors")]
-        public System.Collections.Generic.ICollection<ProblemDetails_Error> ValidationErrors { get; set; }
+        [JsonPropertyName("validationErrors")]
+        public ICollection<ProblemDetails_Error>? ValidationErrors { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("errors")]
-        public System.Collections.Generic.IDictionary<string, System.Collections.Generic.ICollection<string>> Errors { get; set; }
+        [JsonPropertyName("errors")]
+        public IDictionary<string, ICollection<string>> Errors { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private IDictionary<string, object>? _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
         {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
             set { _additionalProperties = value; }
         }
 
@@ -89,24 +92,24 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ProblemDetails_Error
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public string Title { get; set; }
+        [JsonPropertyName("title")]
+        public string? Title { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("code")]
-        public string Code { get; set; }
+        [JsonPropertyName("code")]
+        public string? Code { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("detail")]
-        public string Detail { get; set; }
+        [JsonPropertyName("detail")]
+        public string? Detail { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("paths")]
-        public System.Collections.Generic.ICollection<string> Paths { get; set; }
+        [JsonPropertyName("paths")]
+        public ICollection<string>? Paths { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private IDictionary<string, object>? _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
-        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalProperties
         {
-            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            get { return _additionalProperties ?? (_additionalProperties = new Dictionary<string, object>()); }
             set { _additionalProperties = value; }
         }
 
@@ -119,30 +122,30 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// List of system labels to set on target dialogs
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabels")]
+        [JsonPropertyName("systemLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-        public System.Collections.Generic.ICollection<SystemLabel> SystemLabels { get; set; }
+        public ICollection<SystemLabel>? SystemLabels { get; set; } = default!;
 
         /// <summary>
         /// List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("addLabels")]
+        [JsonPropertyName("addLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public System.Collections.Generic.ICollection<SystemLabel> AddLabels { get; set; }
+        public ICollection<SystemLabel>? AddLabels { get; set; } = default!;
 
         /// <summary>
         /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("removeLabels")]
+        [JsonPropertyName("removeLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public System.Collections.Generic.ICollection<SystemLabel> RemoveLabels { get; set; }
+        public ICollection<SystemLabel>? RemoveLabels { get; set; } = default!;
 
         /// <summary>
         /// Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor? PerformedBy { get; set; } = default!;
 
     }
 
@@ -150,8 +153,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class CreateServiceOwnerLabel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -183,21 +186,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The type of actor; either the service owner, or someone representing the party.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("actorType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ActorType>))]
-        public ActorType ActorType { get; set; }
+        [JsonPropertyName("actorType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<ActorType>))]
+        public ActorType ActorType { get; set; } = default!;
 
         /// <summary>
         /// The name of the actor.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("actorName")]
-        public string ActorName { get; set; }
+        [JsonPropertyName("actorName")]
+        public string? ActorName { get; set; } = default!;
 
         /// <summary>
         /// The identifier (national identity number or organization number) of the actor.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("actorId")]
-        public string ActorId { get; set; }
+        [JsonPropertyName("actorId")]
+        public string? ActorId { get; set; } = default!;
 
     }
 
@@ -220,75 +223,75 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the transmission in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// The authorization attribute associated with the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// The extended type URI for the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// The unique identifier for the related transmission, if any.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The type of the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogTransmissionType>))]
-        public DialogTransmissionType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
+        public DialogTransmissionType Type { get; set; } = default!;
 
         /// <summary>
         /// The sender actor information for the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sender")]
-        public Actor Sender { get; set; }
+        [JsonPropertyName("sender")]
+        public Actor Sender { get; set; } = default!;
 
         /// <summary>
         /// The content of the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public DialogTransmissionSearchContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public DialogTransmissionSearchContent Content { get; set; } = default!;
 
         /// <summary>
         /// The attachments associated with the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<DialogTransmissionSearchAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<DialogTransmissionSearchAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The navigational actions associated with the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("navigationalActions")]
-        public System.Collections.Generic.ICollection<DialogTransmissionSearchNavigationalAction> NavigationalActions { get; set; }
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<DialogTransmissionSearchNavigationalAction>? NavigationalActions { get; set; } = default!;
 
     }
 
@@ -299,36 +302,36 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// List of target dialog ids with optional revision ids
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("dialogs")]
-        public System.Collections.Generic.ICollection<DialogRevision> Dialogs { get; set; }
+        [JsonPropertyName("dialogs")]
+        public ICollection<DialogRevision>? Dialogs { get; set; } = default!;
 
         /// <summary>
         /// List of system labels to set on target dialogs
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabels")]
+        [JsonPropertyName("systemLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
         [System.Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-        public System.Collections.Generic.ICollection<SystemLabel> SystemLabels { get; set; }
+        public ICollection<SystemLabel>? SystemLabels { get; set; } = default!;
 
         /// <summary>
         /// List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("addLabels")]
+        [JsonPropertyName("addLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public System.Collections.Generic.ICollection<SystemLabel> AddLabels { get; set; }
+        public ICollection<SystemLabel>? AddLabels { get; set; } = default!;
 
         /// <summary>
         /// List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("removeLabels")]
+        [JsonPropertyName("removeLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public System.Collections.Generic.ICollection<SystemLabel> RemoveLabels { get; set; }
+        public ICollection<SystemLabel>? RemoveLabels { get; set; } = default!;
 
         /// <summary>
         /// Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor? PerformedBy { get; set; } = default!;
 
     }
 
@@ -339,14 +342,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Target dialog id for system labels
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("dialogId")]
-        public System.Guid DialogId { get; set; }
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; } = default!;
 
         /// <summary>
         /// Optional end user context revision to match against. If supplied and not matching current revision, the entire operation will fail.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endUserContextRevision")]
-        public System.Guid? EndUserContextRevision { get; set; }
+        [JsonPropertyName("endUserContextRevision")]
+        public System.Guid? EndUserContextRevision { get; set; } = default!;
 
     }
 
@@ -387,20 +390,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// The summary of the content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentReference")]
-        public ContentValue ContentReference { get; set; }
+        [JsonPropertyName("contentReference")]
+        public ContentValue? ContentReference { get; set; } = default!;
 
     }
 
@@ -411,22 +414,22 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A list of localizations for the content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public System.Collections.Generic.ICollection<Localization> Value { get; set; }
+        [JsonPropertyName("value")]
+        public ICollection<Localization>? Value { get; set; } = default!;
 
         /// <summary>
         /// Media type of the content, this can also indicate that the content is embeddable.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string MediaType { get; set; } = default!;
 
         /// <summary>
         /// True if the authenticated user is authorized for this content. If not, the endpoints will
         /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
         /// <br/>            
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isAuthorized")]
-        public bool? IsAuthorized { get; set; }
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; } = default!;
 
     }
 
@@ -437,14 +440,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The localized text (or URL if a front-channel embed).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
         /// <summary>
         /// The language code of the localization in ISO 639-1 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("languageCode")]
-        public string LanguageCode { get; set; }
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; } = default!;
 
     }
 
@@ -455,32 +458,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<DialogTransmissionSearchAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<DialogTransmissionSearchAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -491,28 +494,28 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment URL in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
         /// <br/>not authorized to access the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -535,20 +538,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the navigational action expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -556,17 +559,17 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class DialogSeenLogSearchItem
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("seenBy")]
-        public Actor SeenBy { get; set; }
+        [JsonPropertyName("seenBy")]
+        public Actor SeenBy { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; } = default!;
 
     }
 
@@ -577,26 +580,26 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The paginated list of items
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("items")]
-        public System.Collections.Generic.ICollection<DialogEndUserContextItem> Items { get; set; }
+        [JsonPropertyName("items")]
+        public ICollection<DialogEndUserContextItem>? Items { get; set; } = default!;
 
         /// <summary>
         /// Whether there are more items available that can be fetched by supplying the continuation token
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hasNextPage")]
-        public bool HasNextPage { get; set; }
+        [JsonPropertyName("hasNextPage")]
+        public bool HasNextPage { get; set; } = default!;
 
         /// <summary>
         /// The continuation token to be used to fetch the next page of items
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("continuationToken")]
-        public string ContinuationToken { get; set; }
+        [JsonPropertyName("continuationToken")]
+        public string? ContinuationToken { get; set; } = default!;
 
         /// <summary>
         /// The current sorting order of the items
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("orderBy")]
-        public string OrderBy { get; set; }
+        [JsonPropertyName("orderBy")]
+        public string OrderBy { get; set; } = default!;
 
     }
 
@@ -604,15 +607,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class DialogEndUserContextItem
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("dialogId")]
-        public System.Guid DialogId { get; set; }
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("endUserContextRevision")]
-        public System.Guid EndUserContextRevision { get; set; }
+        [JsonPropertyName("endUserContextRevision")]
+        public System.Guid EndUserContextRevision { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabels")]
+        [JsonPropertyName("systemLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public System.Collections.Generic.ICollection<SystemLabel> SystemLabels { get; set; }
+        public ICollection<SystemLabel>? SystemLabels { get; set; } = default!;
 
     }
 
@@ -620,21 +623,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class DialogActivitySearchItem
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogActivityType>))]
-        public DialogActivityType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
+        public DialogActivityType Type { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; } = default!;
 
     }
 
@@ -702,26 +705,26 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The paginated list of items
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("items")]
-        public System.Collections.Generic.ICollection<DialogListItem> Items { get; set; }
+        [JsonPropertyName("items")]
+        public ICollection<DialogListItem>? Items { get; set; } = default!;
 
         /// <summary>
         /// Whether there are more items available that can be fetched by supplying the continuation token
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hasNextPage")]
-        public bool HasNextPage { get; set; }
+        [JsonPropertyName("hasNextPage")]
+        public bool HasNextPage { get; set; } = default!;
 
         /// <summary>
         /// The continuation token to be used to fetch the next page of items
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("continuationToken")]
-        public string ContinuationToken { get; set; }
+        [JsonPropertyName("continuationToken")]
+        public string? ContinuationToken { get; set; } = default!;
 
         /// <summary>
         /// The current sorting order of the items
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("orderBy")]
-        public string OrderBy { get; set; }
+        [JsonPropertyName("orderBy")]
+        public string OrderBy { get; set; } = default!;
 
     }
 
@@ -732,64 +735,64 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the dialog in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The service owner code representing the organization (service owner) related to this dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("org")]
-        public string Org { get; set; }
+        [JsonPropertyName("org")]
+        public string Org { get; set; } = default!;
 
         /// <summary>
         /// The unique identifier for the revision in UUIDv4 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("revision")]
-        public System.Guid Revision { get; set; }
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; } = default!;
 
         /// <summary>
         /// The service identifier for the service that the dialog is related to in URN-format.
         /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceResource")]
-        public string ServiceResource { get; set; }
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; } = default!;
 
         /// <summary>
         /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceResourceType")]
-        public string ServiceResourceType { get; set; }
+        [JsonPropertyName("serviceResourceType")]
+        public string ServiceResourceType { get; set; } = default!;
 
         /// <summary>
         /// The party code representing the organization or person that the dialog belongs to in URN format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("party")]
-        public string Party { get; set; }
+        [JsonPropertyName("party")]
+        public string Party { get; set; } = default!;
 
         /// <summary>
         /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
         /// <br/>to a natural completion (successful or not).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progress")]
-        public int? Progress { get; set; }
+        [JsonPropertyName("progress")]
+        public int? Progress { get; set; } = default!;
 
         /// <summary>
         /// Optional process identifier used to indicate a business process this dialog belongs to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("process")]
-        public string Process { get; set; }
+        [JsonPropertyName("process")]
+        public string? Process { get; set; } = default!;
 
         /// <summary>
         /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("precedingProcess")]
-        public string PrecedingProcess { get; set; }
+        [JsonPropertyName("precedingProcess")]
+        public string? PrecedingProcess { get; set; } = default!;
 
         /// <summary>
         /// The number of attachments in the dialog made available for browser-based frontends.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("guiAttachmentCount")]
-        public int? GuiAttachmentCount { get; set; }
+        [JsonPropertyName("guiAttachmentCount")]
+        public int? GuiAttachmentCount { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
@@ -798,87 +801,87 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public string ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public string? ExtendedStatus { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the dialog was created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the dialog was last updated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
-        public System.DateTimeOffset UpdatedAt { get; set; }
+        [JsonPropertyName("updatedAt")]
+        public System.DateTimeOffset UpdatedAt { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the dialog content was last updated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentUpdatedAt")]
-        public System.DateTimeOffset ContentUpdatedAt { get; set; }
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; } = default!;
 
         /// <summary>
         /// The due date for the dialog. This is the last date when the dialog is expected to be completed.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("dueAt")]
-        public System.DateTimeOffset? DueAt { get; set; }
+        [JsonPropertyName("dueAt")]
+        public System.DateTimeOffset? DueAt { get; set; } = default!;
 
         /// <summary>
         /// If deleted, the date and time when the deletion was performed.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; } = default!;
 
         /// <summary>
         /// The timestamp when the dialog will be made visible for authorized end users.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("visibleFrom")]
-        public System.DateTimeOffset? VisibleFrom { get; set; }
+        [JsonPropertyName("visibleFrom")]
+        public System.DateTimeOffset? VisibleFrom { get; set; } = default!;
 
         /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogStatus>))]
-        public DialogStatus Status { get; set; }
+        [JsonPropertyName("status")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogStatus>))]
+        public DialogStatus Status { get; set; } = default!;
 
         /// <summary>
         /// System defined label used to categorize dialogs.
         /// <br/>This is obsolete and will only show; Default, Bin or Archive.
         /// <br/>Use SystemLabels on EndUserContext instead.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabel")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SystemLabel>))]
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter<SystemLabel>))]
         [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
-        public SystemLabel SystemLabel { get; set; }
+        public SystemLabel SystemLabel { get; set; } = default!;
 
         /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; } = default!;
 
         /// <summary>
         /// The number of transmissions sent by a service owner
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("fromServiceOwnerTransmissionsCount")]
-        public int FromServiceOwnerTransmissionsCount { get; set; }
+        [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
+        public int FromServiceOwnerTransmissionsCount { get; set; } = default!;
 
         /// <summary>
         /// The number of transmissions sent by a party representative
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("fromPartyTransmissionsCount")]
-        public int FromPartyTransmissionsCount { get; set; }
+        [JsonPropertyName("fromPartyTransmissionsCount")]
+        public int FromPartyTransmissionsCount { get; set; } = default!;
 
         /// <summary>
         /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
@@ -894,26 +897,26 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hasUnopenedContent")]
-        public bool HasUnopenedContent { get; set; }
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; } = default!;
 
         /// <summary>
         /// The latest entry in the dialog's activity log.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("latestActivity")]
-        public DialogActivityListItem LatestActivity { get; set; }
+        [JsonPropertyName("latestActivity")]
+        public DialogActivityListItem? LatestActivity { get; set; } = default!;
 
         /// <summary>
         /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenSinceLastUpdate")]
-        public System.Collections.Generic.ICollection<DialogSeenLogListItem> SeenSinceLastUpdate { get; set; }
+        [JsonPropertyName("seenSinceLastUpdate")]
+        public ICollection<DialogSeenLogListItem>? SeenSinceLastUpdate { get; set; } = default!;
 
         /// <summary>
         /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenSinceLastContentUpdate")]
-        public System.Collections.Generic.ICollection<DialogSeenLogListItem> SeenSinceLastContentUpdate { get; set; }
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<DialogSeenLogListItem>? SeenSinceLastContentUpdate { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether a dialog has been seen since its last content update.
@@ -925,26 +928,26 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isContentSeen")]
-        public bool IsContentSeen { get; set; }
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; } = default!;
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwnerContext")]
-        public DialogServiceOwnerContextListItem ServiceOwnerContext { get; set; }
+        [JsonPropertyName("serviceOwnerContext")]
+        public DialogServiceOwnerContextListItem ServiceOwnerContext { get; set; } = default!;
 
         /// <summary>
         /// Metadata about the dialog owned by end-users.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endUserContext")]
-        public DialogListItemEndUserContext EndUserContext { get; set; }
+        [JsonPropertyName("endUserContext")]
+        public DialogListItemEndUserContext EndUserContext { get; set; } = default!;
 
         /// <summary>
         /// The content of the dialog in search results.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public DialogContentSummary Content { get; set; }
+        [JsonPropertyName("content")]
+        public DialogContentSummary? Content { get; set; } = default!;
 
     }
 
@@ -979,47 +982,47 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the activity in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the activity was created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// An arbitrary string with a service-specific activity type.
         /// <br/>            
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// The type of activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogActivityType>))]
-        public DialogActivityType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
+        public DialogActivityType Type { get; set; } = default!;
 
         /// <summary>
         /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The actor that performed the activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor PerformedBy { get; set; } = default!;
 
         /// <summary>
         /// Unstructured text describing the activity. Only set if the activity type is "Information".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
-        public System.Collections.Generic.ICollection<Localization> Description { get; set; }
+        [JsonPropertyName("description")]
+        public ICollection<Localization>? Description { get; set; } = default!;
 
     }
 
@@ -1030,34 +1033,34 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the seen log entry in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The timestamp when the dialog revision was seen.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; } = default!;
 
         /// <summary>
         /// The actor that saw the dialog revision.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenBy")]
-        public Actor SeenBy { get; set; }
+        [JsonPropertyName("seenBy")]
+        public Actor SeenBy { get; set; } = default!;
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
         /// <br/>            
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; } = default!;
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created by the end user supplied in the query.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isCurrentEndUser")]
-        public bool IsCurrentEndUser { get; set; }
+        [JsonPropertyName("isCurrentEndUser")]
+        public bool IsCurrentEndUser { get; set; } = default!;
 
     }
 
@@ -1068,14 +1071,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the service owner context revision in UUIDv4 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("revision")]
-        public System.Guid Revision { get; set; }
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; } = default!;
 
         /// <summary>
         /// A list of labels, not visible in end-user APIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwnerLabels")]
-        public System.Collections.Generic.ICollection<DialogServiceOwnerLabelListItem> ServiceOwnerLabels { get; set; }
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<DialogServiceOwnerLabelListItem>? ServiceOwnerLabels { get; set; } = default!;
 
     }
 
@@ -1086,8 +1089,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A label value.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -1098,15 +1101,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the end user context revision in UUIDv4 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("revision")]
-        public System.Guid Revision { get; set; }
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; } = default!;
 
         /// <summary>
         /// System defined labels used to categorize dialogs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabels")]
+        [JsonPropertyName("systemLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public System.Collections.Generic.ICollection<SystemLabel> SystemLabels { get; set; }
+        public ICollection<SystemLabel>? SystemLabels { get; set; } = default!;
 
     }
 
@@ -1117,40 +1120,40 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive title of the dialog.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveTitle")]
-        public ContentValue NonSensitiveTitle { get; set; }
+        [JsonPropertyName("nonSensitiveTitle")]
+        public ContentValue? NonSensitiveTitle { get; set; } = default!;
 
         /// <summary>
         /// A short summary of the dialog and its current state.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive summary of the dialog and its current state.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveSummary")]
-        public ContentValue NonSensitiveSummary { get; set; }
+        [JsonPropertyName("nonSensitiveSummary")]
+        public ContentValue? NonSensitiveSummary { get; set; } = default!;
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("senderName")]
-        public ContentValue SenderName { get; set; }
+        [JsonPropertyName("senderName")]
+        public ContentValue? SenderName { get; set; } = default!;
 
         /// <summary>
         /// Used as the human-readable label used to describe the "ExtendedStatus" field.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public ContentValue ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public ContentValue? ExtendedStatus { get; set; } = default!;
 
     }
 
@@ -1158,8 +1161,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class NotificationCondition
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("sendNotification")]
-        public bool SendNotification { get; set; }
+        [JsonPropertyName("sendNotification")]
+        public bool SendNotification { get; set; } = default!;
 
     }
 
@@ -1185,75 +1188,75 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the transmission in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// The authorization attribute associated with the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// The extended type URI for the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// The unique identifier for the related transmission, if any.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The type of the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogTransmissionType>))]
-        public DialogTransmissionType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
+        public DialogTransmissionType Type { get; set; } = default!;
 
         /// <summary>
         /// The sender actor information for the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sender")]
-        public Actor Sender { get; set; }
+        [JsonPropertyName("sender")]
+        public Actor Sender { get; set; } = default!;
 
         /// <summary>
         /// The content of the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public DialogTransmissionContentDetails Content { get; set; }
+        [JsonPropertyName("content")]
+        public DialogTransmissionContentDetails Content { get; set; } = default!;
 
         /// <summary>
         /// The attachments associated with the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<DialogTransmissionAttachmentDetails> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<DialogTransmissionAttachmentDetails>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The navigational actions associated with the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("navigationalActions")]
-        public System.Collections.Generic.ICollection<DialogTransmissionNavigationalActionDetails> NavigationalActions { get; set; }
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<DialogTransmissionNavigationalActionDetails>? NavigationalActions { get; set; } = default!;
 
     }
 
@@ -1276,20 +1279,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// The summary of the content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentReference")]
-        public ContentValue ContentReference { get; set; }
+        [JsonPropertyName("contentReference")]
+        public ContentValue? ContentReference { get; set; } = default!;
 
     }
 
@@ -1300,32 +1303,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<DialogTransmissionAttachmentUrlDetails> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<DialogTransmissionAttachmentUrlDetails>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -1336,28 +1339,28 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment URL in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
         /// <br/>not authorized to access the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -1368,20 +1371,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the navigational action expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -1389,17 +1392,17 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class DialogSeenLogDetails
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("seenBy")]
-        public Actor SeenBy { get; set; }
+        [JsonPropertyName("seenBy")]
+        public Actor SeenBy { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; } = default!;
 
     }
 
@@ -1407,27 +1410,27 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class DialogActivityDetails
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogActivityType>))]
-        public DialogActivityType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
+        public DialogActivityType Type { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor PerformedBy { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
-        public System.Collections.Generic.ICollection<Localization> Description { get; set; }
+        [JsonPropertyName("description")]
+        public ICollection<Localization>? Description { get; set; } = default!;
 
     }
 
@@ -1438,65 +1441,65 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the dialog in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.
         /// <br/>            
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// The unique identifier for the revision in UUIDv4 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("revision")]
-        public System.Guid Revision { get; set; }
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; } = default!;
 
         /// <summary>
         /// The service owner code representing the organization (service owner) related to this dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("org")]
-        public string Org { get; set; }
+        [JsonPropertyName("org")]
+        public string Org { get; set; } = default!;
 
         /// <summary>
         /// The service identifier for the service that the dialog is related to in URN-format.
         /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceResource")]
-        public string ServiceResource { get; set; }
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; } = default!;
 
         /// <summary>
         /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceResourceType")]
-        public string ServiceResourceType { get; set; }
+        [JsonPropertyName("serviceResourceType")]
+        public string ServiceResourceType { get; set; } = default!;
 
         /// <summary>
         /// The party code representing the organization or person that the dialog belongs to in URN format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("party")]
-        public string Party { get; set; }
+        [JsonPropertyName("party")]
+        public string Party { get; set; } = default!;
 
         /// <summary>
         /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
         /// <br/>to a natural completion (successful or not).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progress")]
-        public int? Progress { get; set; }
+        [JsonPropertyName("progress")]
+        public int? Progress { get; set; } = default!;
 
         /// <summary>
         /// Optional process identifier used to indicate a business process this dialog belongs to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("process")]
-        public string Process { get; set; }
+        [JsonPropertyName("process")]
+        public string? Process { get; set; } = default!;
 
         /// <summary>
         /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("precedingProcess")]
-        public string PrecedingProcess { get; set; }
+        [JsonPropertyName("precedingProcess")]
+        public string? PrecedingProcess { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
@@ -1505,34 +1508,34 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public string ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public string? ExtendedStatus { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// If deleted, the date and time when the deletion was performed.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("deletedAt")]
-        public System.DateTimeOffset? DeletedAt { get; set; }
+        [JsonPropertyName("deletedAt")]
+        public System.DateTimeOffset? DeletedAt { get; set; } = default!;
 
         /// <summary>
         /// The timestamp when the dialog will be made visible for authorized end users.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("visibleFrom")]
-        public System.DateTimeOffset? VisibleFrom { get; set; }
+        [JsonPropertyName("visibleFrom")]
+        public System.DateTimeOffset? VisibleFrom { get; set; } = default!;
 
         /// <summary>
         /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("dueAt")]
-        public System.DateTimeOffset? DueAt { get; set; }
+        [JsonPropertyName("dueAt")]
+        public System.DateTimeOffset? DueAt { get; set; } = default!;
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
@@ -1541,49 +1544,49 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed by the service
         /// <br/>owner after the dialog has been created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the dialog was created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the dialog was last updated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
-        public System.DateTimeOffset UpdatedAt { get; set; }
+        [JsonPropertyName("updatedAt")]
+        public System.DateTimeOffset UpdatedAt { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the dialog content was last updated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentUpdatedAt")]
-        public System.DateTimeOffset ContentUpdatedAt { get; set; }
+        [JsonPropertyName("contentUpdatedAt")]
+        public System.DateTimeOffset ContentUpdatedAt { get; set; } = default!;
 
         /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogStatus>))]
-        public DialogStatus Status { get; set; }
+        [JsonPropertyName("status")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogStatus>))]
+        public DialogStatus Status { get; set; } = default!;
 
         /// <summary>
         /// System defined label used to categorize dialogs.
         /// <br/>This is obsolete and will only show; Default, Bin or Archive.
         /// <br/>Use SystemLabels on EndUserContext instead.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabel")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SystemLabel>))]
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter<SystemLabel>))]
         [System.Obsolete("Use EndUserContext.SystemLabels instead.")]
-        public SystemLabel SystemLabel { get; set; }
+        public SystemLabel SystemLabel { get; set; } = default!;
 
         /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; } = default!;
 
         /// <summary>
         /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
@@ -1599,74 +1602,74 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hasUnopenedContent")]
-        public bool HasUnopenedContent { get; set; }
+        [JsonPropertyName("hasUnopenedContent")]
+        public bool HasUnopenedContent { get; set; } = default!;
 
         /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public Content Content { get; set; }
+        [JsonPropertyName("content")]
+        public Content? Content { get; set; } = default!;
 
         /// <summary>
         /// The number of transmissions sent by the service owner.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("fromServiceOwnerTransmissionsCount")]
-        public int FromServiceOwnerTransmissionsCount { get; set; }
+        [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
+        public int FromServiceOwnerTransmissionsCount { get; set; } = default!;
 
         /// <summary>
         /// The number of transmissions sent by a party representative.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("fromPartyTransmissionsCount")]
-        public int FromPartyTransmissionsCount { get; set; }
+        [JsonPropertyName("fromPartyTransmissionsCount")]
+        public int FromPartyTransmissionsCount { get; set; } = default!;
 
         /// <summary>
         /// The list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("searchTags")]
-        public System.Collections.Generic.ICollection<DialogTag> SearchTags { get; set; }
+        [JsonPropertyName("searchTags")]
+        public ICollection<DialogTag>? SearchTags { get; set; } = default!;
 
         /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<DialogAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<DialogAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The immutable list of transmissions associated with the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissions")]
-        public System.Collections.Generic.ICollection<DialogTransmission> Transmissions { get; set; }
+        [JsonPropertyName("transmissions")]
+        public ICollection<DialogTransmission>? Transmissions { get; set; } = default!;
 
         /// <summary>
         /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("guiActions")]
-        public System.Collections.Generic.ICollection<DialogGuiAction> GuiActions { get; set; }
+        [JsonPropertyName("guiActions")]
+        public ICollection<DialogGuiAction>? GuiActions { get; set; } = default!;
 
         /// <summary>
         /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("apiActions")]
-        public System.Collections.Generic.ICollection<DialogApiAction> ApiActions { get; set; }
+        [JsonPropertyName("apiActions")]
+        public ICollection<DialogApiAction>? ApiActions { get; set; } = default!;
 
         /// <summary>
         /// An immutable list of activities associated with the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("activities")]
-        public System.Collections.Generic.ICollection<DialogActivity> Activities { get; set; }
+        [JsonPropertyName("activities")]
+        public ICollection<DialogActivity>? Activities { get; set; } = default!;
 
         /// <summary>
         /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenSinceLastUpdate")]
-        public System.Collections.Generic.ICollection<DialogSeenLog> SeenSinceLastUpdate { get; set; }
+        [JsonPropertyName("seenSinceLastUpdate")]
+        public ICollection<DialogSeenLog>? SeenSinceLastUpdate { get; set; } = default!;
 
         /// <summary>
         /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenSinceLastContentUpdate")]
-        public System.Collections.Generic.ICollection<DialogSeenLog> SeenSinceLastContentUpdate { get; set; }
+        [JsonPropertyName("seenSinceLastContentUpdate")]
+        public ICollection<DialogSeenLog>? SeenSinceLastContentUpdate { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether a dialog has been seen since its last content update.
@@ -1678,20 +1681,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isContentSeen")]
-        public bool IsContentSeen { get; set; }
+        [JsonPropertyName("isContentSeen")]
+        public bool IsContentSeen { get; set; } = default!;
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwnerContext")]
-        public DialogServiceOwnerContext ServiceOwnerContext { get; set; }
+        [JsonPropertyName("serviceOwnerContext")]
+        public DialogServiceOwnerContext ServiceOwnerContext { get; set; } = default!;
 
         /// <summary>
         /// Metadata about the dialog owned by end-users.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endUserContext")]
-        public DialogEndUserContext EndUserContext { get; set; }
+        [JsonPropertyName("endUserContext")]
+        public DialogEndUserContext EndUserContext { get; set; } = default!;
 
     }
 
@@ -1702,53 +1705,53 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive title of the dialog.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveTitle")]
-        public ContentValue NonSensitiveTitle { get; set; }
+        [JsonPropertyName("nonSensitiveTitle")]
+        public ContentValue? NonSensitiveTitle { get; set; } = default!;
 
         /// <summary>
         /// A short summary of the dialog and its current state.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive summary of the dialog and its current state.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveSummary")]
-        public ContentValue NonSensitiveSummary { get; set; }
+        [JsonPropertyName("nonSensitiveSummary")]
+        public ContentValue? NonSensitiveSummary { get; set; } = default!;
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("senderName")]
-        public ContentValue SenderName { get; set; }
+        [JsonPropertyName("senderName")]
+        public ContentValue? SenderName { get; set; } = default!;
 
         /// <summary>
         /// Additional information about the dialog, this may contain Markdown.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("additionalInfo")]
-        public ContentValue AdditionalInfo { get; set; }
+        [JsonPropertyName("additionalInfo")]
+        public ContentValue? AdditionalInfo { get; set; } = default!;
 
         /// <summary>
         /// Used as the human-readable label used to describe the "ExtendedStatus" field.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public ContentValue ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public ContentValue? ExtendedStatus { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// <br/>IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mainContentReference")]
-        public ContentValue MainContentReference { get; set; }
+        [JsonPropertyName("mainContentReference")]
+        public ContentValue? MainContentReference { get; set; } = default!;
 
     }
 
@@ -1759,8 +1762,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A search tag value.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -1771,32 +1774,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<DialogAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<DialogAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -1807,27 +1810,27 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment URL in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// What type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -1838,20 +1841,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the transmission in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the transmission was created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -1859,71 +1862,71 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Flag indicating if the authenticated user supplied in the query is authorized for this transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isAuthorized")]
-        public bool? IsAuthorized { get; set; }
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
         /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The type of transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogTransmissionType>))]
-        public DialogTransmissionType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
+        public DialogTransmissionType Type { get; set; } = default!;
 
         /// <summary>
         /// The actor that sent the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sender")]
-        public Actor Sender { get; set; }
+        [JsonPropertyName("sender")]
+        public Actor Sender { get; set; } = default!;
 
         /// <summary>
         /// The transmission unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public DialogTransmissionContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public DialogTransmissionContent Content { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether the dialog transmission has been opened.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isOpened")]
-        public bool IsOpened { get; set; }
+        [JsonPropertyName("isOpened")]
+        public bool IsOpened { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<DialogTransmissionAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<DialogTransmissionAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level navigational actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("navigationalActions")]
-        public System.Collections.Generic.ICollection<DialogTransmissionNavigationalAction> NavigationalActions { get; set; }
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<DialogTransmissionNavigationalAction>? NavigationalActions { get; set; } = default!;
 
     }
 
@@ -1934,20 +1937,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The transmission title.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// The transmission summary.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentReference")]
-        public ContentValue ContentReference { get; set; }
+        [JsonPropertyName("contentReference")]
+        public ContentValue? ContentReference { get; set; } = default!;
 
     }
 
@@ -1958,32 +1961,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<DialogTransmissionAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<DialogTransmissionAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -1994,28 +1997,28 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the attachment URL in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the attachment. Will be set to "urn:dialogporten:unauthorized" if the user is
         /// <br/>not authorized to access the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -2026,20 +2029,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the navigational action expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -2050,20 +2053,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the action in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("action")]
-        public string Action { get; set; }
+        [JsonPropertyName("action")]
+        public string Action { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -2071,49 +2074,49 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Whether the user, if supplied in the query, is authorized to perform the action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isAuthorized")]
-        public bool? IsAuthorized { get; set; }
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
         /// <br/>for delete actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isDeleteDialogAction")]
-        public bool IsDeleteDialogAction { get; set; }
+        [JsonPropertyName("isDeleteDialogAction")]
+        public bool IsDeleteDialogAction { get; set; } = default!;
 
         /// <summary>
         /// Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action
         /// <br/>priority.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("priority")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogGuiActionPriority>))]
-        public DialogGuiActionPriority Priority { get; set; }
+        [JsonPropertyName("priority")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogGuiActionPriority>))]
+        public DialogGuiActionPriority Priority { get; set; } = default!;
 
         /// <summary>
         /// The HTTP method that the frontend should use when redirecting the user.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("httpMethod")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<HttpVerb>))]
-        public HttpVerb HttpMethod { get; set; }
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter<HttpVerb>))]
+        public HttpVerb HttpMethod { get; set; } = default!;
 
         /// <summary>
         /// The title of the action, this should be short and in verb form.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// If there should be a prompt asking the user for confirmation before the action is executed,
         /// <br/>this field should contain the prompt text.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("prompt")]
-        public System.Collections.Generic.ICollection<Localization> Prompt { get; set; }
+        [JsonPropertyName("prompt")]
+        public ICollection<Localization>? Prompt { get; set; } = default!;
 
     }
 
@@ -2172,15 +2175,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the action in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
         /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("action")]
-        public string Action { get; set; }
+        [JsonPropertyName("action")]
+        public string Action { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -2188,26 +2191,26 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// True if the authenticated user (set in the query) is authorized for this action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isAuthorized")]
-        public bool? IsAuthorized { get; set; }
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the operation the API action refers to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endpoints")]
-        public System.Collections.Generic.ICollection<DialogApiActionEndpoint> Endpoints { get; set; }
+        [JsonPropertyName("endpoints")]
+        public ICollection<DialogApiActionEndpoint>? Endpoints { get; set; } = default!;
 
     }
 
@@ -2218,63 +2221,63 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the endpoint in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string indicating the version of the endpoint.
         /// <br/>            
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("version")]
-        public string Version { get; set; }
+        [JsonPropertyName("version")]
+        public string? Version { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the API endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The HTTP method that the endpoint expects for this action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("httpMethod")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<HttpVerb>))]
-        public HttpVerb HttpMethod { get; set; }
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter<HttpVerb>))]
+        public HttpVerb HttpMethod { get; set; } = default!;
 
         /// <summary>
         /// Link to service provider documentation for the endpoint. Used for service owners to provide documentation for
         /// <br/>integrators. Should be a URL to a human-readable page.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("documentationUrl")]
-        public System.Uri DocumentationUrl { get; set; }
+        [JsonPropertyName("documentationUrl")]
+        public System.Uri? DocumentationUrl { get; set; } = default!;
 
         /// <summary>
         /// Link to the request schema for the endpoint. Used by service owners to provide documentation for integrators.
         /// <br/>Dialogporten will not validate information on this endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("requestSchema")]
-        public System.Uri RequestSchema { get; set; }
+        [JsonPropertyName("requestSchema")]
+        public System.Uri? RequestSchema { get; set; } = default!;
 
         /// <summary>
         /// Link to the response schema for the endpoint. Used for service owners to provide documentation for integrators.
         /// <br/>Dialogporten will not validate information on this endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("responseSchema")]
-        public System.Uri ResponseSchema { get; set; }
+        [JsonPropertyName("responseSchema")]
+        public System.Uri? ResponseSchema { get; set; } = default!;
 
         /// <summary>
         /// Boolean indicating if the endpoint is deprecated. Integrators should migrate to endpoints with a higher version.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("deprecated")]
-        public bool Deprecated { get; set; }
+        [JsonPropertyName("deprecated")]
+        public bool Deprecated { get; set; } = default!;
 
         /// <summary>
         /// Date and time when the service owner has indicated that endpoint will no longer function. Only set if the endpoint
         /// <br/>is deprecated. Dialogporten will not enforce this date.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sunsetAt")]
-        public System.DateTimeOffset? SunsetAt { get; set; }
+        [JsonPropertyName("sunsetAt")]
+        public System.DateTimeOffset? SunsetAt { get; set; } = default!;
 
     }
 
@@ -2285,47 +2288,47 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the activity in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The date and time when the activity was created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// An arbitrary URI/URN with a service-specific activity type.
         /// <br/>            
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// The type of activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogActivityType>))]
-        public DialogActivityType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
+        public DialogActivityType Type { get; set; } = default!;
 
         /// <summary>
         /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The actor that performed the activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor PerformedBy { get; set; } = default!;
 
         /// <summary>
         /// Unstructured text describing the activity. Only set if the activity type is "Information".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
-        public System.Collections.Generic.ICollection<Localization> Description { get; set; }
+        [JsonPropertyName("description")]
+        public ICollection<Localization>? Description { get; set; } = default!;
 
     }
 
@@ -2336,34 +2339,34 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the seen log entry in UUIDv7 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; } = default!;
 
         /// <summary>
         /// The timestamp when the dialog revision was seen.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenAt")]
-        public System.DateTimeOffset SeenAt { get; set; }
+        [JsonPropertyName("seenAt")]
+        public System.DateTimeOffset SeenAt { get; set; } = default!;
 
         /// <summary>
         /// The actor that saw the dialog revision.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("seenBy")]
-        public Actor SeenBy { get; set; }
+        [JsonPropertyName("seenBy")]
+        public Actor SeenBy { get; set; } = default!;
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
         /// <br/>            
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isViaServiceOwner")]
-        public bool? IsViaServiceOwner { get; set; }
+        [JsonPropertyName("isViaServiceOwner")]
+        public bool? IsViaServiceOwner { get; set; } = default!;
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created by the current end user, if provided in the query.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isCurrentEndUser")]
-        public bool IsCurrentEndUser { get; set; }
+        [JsonPropertyName("isCurrentEndUser")]
+        public bool IsCurrentEndUser { get; set; } = default!;
 
     }
 
@@ -2374,14 +2377,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A list of labels, not visible in end-user APIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwnerLabels")]
-        public System.Collections.Generic.ICollection<DialogServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<DialogServiceOwnerLabel>? ServiceOwnerLabels { get; set; } = default!;
 
         /// <summary>
         /// The unique identifier for the service owner context revision in UUIDv4 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("revision")]
-        public System.Guid Revision { get; set; }
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; } = default!;
 
     }
 
@@ -2392,8 +2395,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A label value.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -2404,15 +2407,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The unique identifier for the end user context revision in UUIDv4 format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("revision")]
-        public System.Guid Revision { get; set; }
+        [JsonPropertyName("revision")]
+        public System.Guid Revision { get; set; } = default!;
 
         /// <summary>
         /// System defined labels used to categorize dialogs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabels")]
+        [JsonPropertyName("systemLabels")]
         // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-        public System.Collections.Generic.ICollection<SystemLabel> SystemLabels { get; set; }
+        public ICollection<SystemLabel>? SystemLabels { get; set; } = default!;
 
     }
 
@@ -2423,14 +2426,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and the transmission is not updated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// Overrides the creating date and time for the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -2438,62 +2441,62 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
         /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The type of transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogTransmissionType>))]
-        public DialogTransmissionType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
+        public DialogTransmissionType Type { get; set; } = default!;
 
         /// <summary>
         /// The actor that sent the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sender")]
-        public Actor Sender { get; set; }
+        [JsonPropertyName("sender")]
+        public Actor Sender { get; set; } = default!;
 
         /// <summary>
         /// The transmission unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public UpdateTransmissionContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public UpdateTransmissionContent? Content { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<UpdateTransmissionAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<UpdateTransmissionAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level navigational actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("navigationalActions")]
-        public System.Collections.Generic.ICollection<UpdateTransmissionNavigationalAction> NavigationalActions { get; set; }
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<UpdateTransmissionNavigationalAction>? NavigationalActions { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("isSilentUpdate")]
-        public bool IsSilentUpdate { get; set; }
+        [JsonPropertyName("isSilentUpdate")]
+        public bool IsSilentUpdate { get; set; } = default!;
 
     }
 
@@ -2504,20 +2507,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The transmission title. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// The transmission summary.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentReference")]
-        public ContentValue ContentReference { get; set; }
+        [JsonPropertyName("contentReference")]
+        public ContentValue? ContentReference { get; set; } = default!;
 
     }
 
@@ -2528,32 +2531,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<UpdateTransmissionAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<UpdateTransmissionAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -2564,21 +2567,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -2589,20 +2592,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the navigational action expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -2614,21 +2617,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// A UUIDv7 may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -2636,59 +2639,59 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
         /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The type of transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogTransmissionType>))]
-        public DialogTransmissionType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
+        public DialogTransmissionType Type { get; set; } = default!;
 
         /// <summary>
         /// The actor that sent the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sender")]
-        public Actor Sender { get; set; }
+        [JsonPropertyName("sender")]
+        public Actor Sender { get; set; } = default!;
 
         /// <summary>
         /// The transmission unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public CreateTransmissionContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public CreateTransmissionContent? Content { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<CreateTransmissionAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<CreateTransmissionAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level navigational actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("navigationalActions")]
-        public System.Collections.Generic.ICollection<CreateTransmissionNavigationalAction> NavigationalActions { get; set; }
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<CreateTransmissionNavigationalAction>? NavigationalActions { get; set; } = default!;
 
     }
 
@@ -2700,39 +2703,39 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
         /// <br/>to a natural completion (successful or not).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progress")]
-        public int? Progress { get; set; }
+        [JsonPropertyName("progress")]
+        public int? Progress { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public string ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public string? ExtendedStatus { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("dueAt")]
-        public System.DateTimeOffset? DueAt { get; set; }
+        [JsonPropertyName("dueAt")]
+        public System.DateTimeOffset? DueAt { get; set; } = default!;
 
         /// <summary>
         /// Optional process identifier used to indicate a business process this dialog belongs to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("process")]
-        public string Process { get; set; }
+        [JsonPropertyName("process")]
+        public string? Process { get; set; } = default!;
 
         /// <summary>
         /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("precedingProcess")]
-        public string PrecedingProcess { get; set; }
+        [JsonPropertyName("precedingProcess")]
+        public string? PrecedingProcess { get; set; } = default!;
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
@@ -2740,67 +2743,67 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
         /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
         /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
         /// <br/>If any Transmissions were created without Content while this property was true, the flag cannot be reverted to false.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; } = default!;
 
         /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogStatusInput>))]
-        public DialogStatusInput Status { get; set; }
+        [JsonPropertyName("status")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogStatusInput>))]
+        public DialogStatusInput Status { get; set; } = default!;
 
         /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public UpdateDialogContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public UpdateDialogContent? Content { get; set; } = default!;
 
         /// <summary>
         /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("searchTags")]
-        public System.Collections.Generic.ICollection<UpdateDialogTag> SearchTags { get; set; }
+        [JsonPropertyName("searchTags")]
+        public ICollection<UpdateDialogTag>? SearchTags { get; set; } = default!;
 
         /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<UpdateDialogAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<UpdateDialogAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The immutable list of transmissions associated with the dialog. When updating via PUT, any transmissions
         /// <br/>added here will be appended to the existing list of transmissions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissions")]
-        public System.Collections.Generic.ICollection<UpdateDialogTransmission> Transmissions { get; set; }
+        [JsonPropertyName("transmissions")]
+        public ICollection<UpdateDialogTransmission>? Transmissions { get; set; } = default!;
 
         /// <summary>
         /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("guiActions")]
-        public System.Collections.Generic.ICollection<UpdateDialogGuiAction> GuiActions { get; set; }
+        [JsonPropertyName("guiActions")]
+        public ICollection<UpdateDialogGuiAction>? GuiActions { get; set; } = default!;
 
         /// <summary>
         /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("apiActions")]
-        public System.Collections.Generic.ICollection<UpdateDialogApiAction> ApiActions { get; set; }
+        [JsonPropertyName("apiActions")]
+        public ICollection<UpdateDialogApiAction>? ApiActions { get; set; } = default!;
 
         /// <summary>
         /// An immutable list of activities associated with the dialog. When updating via PUT, any activities added here
         /// <br/>will be appended to the existing list of activities.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("activities")]
-        public System.Collections.Generic.ICollection<UpdateDialogActivity> Activities { get; set; }
+        [JsonPropertyName("activities")]
+        public ICollection<UpdateDialogActivity>? Activities { get; set; } = default!;
 
     }
 
@@ -2841,52 +2844,52 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the dialog. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive title of the dialog.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveTitle")]
-        public ContentValue NonSensitiveTitle { get; set; }
+        [JsonPropertyName("nonSensitiveTitle")]
+        public ContentValue? NonSensitiveTitle { get; set; } = default!;
 
         /// <summary>
         /// A short summary of the dialog and its current state. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive summary of the dialog and its current state.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveSummary")]
-        public ContentValue NonSensitiveSummary { get; set; }
+        [JsonPropertyName("nonSensitiveSummary")]
+        public ContentValue? NonSensitiveSummary { get; set; } = default!;
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("senderName")]
-        public ContentValue SenderName { get; set; }
+        [JsonPropertyName("senderName")]
+        public ContentValue? SenderName { get; set; } = default!;
 
         /// <summary>
         /// Additional information about the dialog, this may contain Markdown.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("additionalInfo")]
-        public ContentValue AdditionalInfo { get; set; }
+        [JsonPropertyName("additionalInfo")]
+        public ContentValue? AdditionalInfo { get; set; } = default!;
 
         /// <summary>
         /// Used as the human-readable label used to describe the "ExtendedStatus" field. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public ContentValue ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public ContentValue? ExtendedStatus { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mainContentReference")]
-        public ContentValue MainContentReference { get; set; }
+        [JsonPropertyName("mainContentReference")]
+        public ContentValue? MainContentReference { get; set; } = default!;
 
     }
 
@@ -2897,8 +2900,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A search tag value.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -2909,32 +2912,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent additions of attachments. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<UpdateDialogAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<UpdateDialogAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -2945,27 +2948,27 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent additions and updates of attachment URLs. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -2977,21 +2980,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// A UUIDv7 may be provided to support idempotent additions to the list of transmissions.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -2999,59 +3002,59 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
         /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The type of transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogTransmissionType>))]
-        public DialogTransmissionType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
+        public DialogTransmissionType Type { get; set; } = default!;
 
         /// <summary>
         /// The actor that sent the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sender")]
-        public Actor Sender { get; set; }
+        [JsonPropertyName("sender")]
+        public Actor Sender { get; set; } = default!;
 
         /// <summary>
         /// The transmission unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public UpdateDialogTransmissionContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public UpdateDialogTransmissionContent? Content { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<UpdateDialogTransmissionAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<UpdateDialogTransmissionAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level navigational actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("navigationalActions")]
-        public System.Collections.Generic.ICollection<UpdateDialogTransmissionNavigationalAction> NavigationalActions { get; set; }
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<UpdateDialogTransmissionNavigationalAction>? NavigationalActions { get; set; } = default!;
 
     }
 
@@ -3062,20 +3065,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The transmission title. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// The transmission summary.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentReference")]
-        public ContentValue ContentReference { get; set; }
+        [JsonPropertyName("contentReference")]
+        public ContentValue? ContentReference { get; set; } = default!;
 
     }
 
@@ -3086,32 +3089,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<UpdateDialogTransmissionAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<UpdateDialogTransmissionAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -3122,21 +3125,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -3147,20 +3150,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the navigational action expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -3171,21 +3174,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent additions of Gui Actions. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("action")]
-        public string Action { get; set; }
+        [JsonPropertyName("action")]
+        public string Action { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
         /// <br/>"urn:dialogporten:unauthorized" if the user is not authorized to perform the action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -3193,43 +3196,43 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
         /// <br/>for delete actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isDeleteDialogAction")]
-        public bool IsDeleteDialogAction { get; set; }
+        [JsonPropertyName("isDeleteDialogAction")]
+        public bool IsDeleteDialogAction { get; set; } = default!;
 
         /// <summary>
         /// The HTTP method that the frontend should use when redirecting the user.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("httpMethod")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<HttpVerb>))]
-        public HttpVerb? HttpMethod { get; set; }
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter<HttpVerb>))]
+        public HttpVerb? HttpMethod { get; set; } = default!;
 
         /// <summary>
         /// Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action
         /// <br/>priority.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("priority")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogGuiActionPriority>))]
-        public DialogGuiActionPriority Priority { get; set; }
+        [JsonPropertyName("priority")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogGuiActionPriority>))]
+        public DialogGuiActionPriority Priority { get; set; } = default!;
 
         /// <summary>
         /// The title of the action, this should be short and in verb form. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// If there should be a prompt asking the user for confirmation before the action is executed,
         /// <br/>this field should contain the prompt text.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("prompt")]
-        public System.Collections.Generic.ICollection<Localization> Prompt { get; set; }
+        [JsonPropertyName("prompt")]
+        public ICollection<Localization>? Prompt { get; set; } = default!;
 
     }
 
@@ -3240,15 +3243,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent additions of Api Actions. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
         /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("action")]
-        public string Action { get; set; }
+        [JsonPropertyName("action")]
+        public string Action { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -3256,20 +3259,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the operation the API action refers to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endpoints")]
-        public System.Collections.Generic.ICollection<UpdateDialogApiActionEndpoint> Endpoints { get; set; }
+        [JsonPropertyName("endpoints")]
+        public ICollection<UpdateDialogApiActionEndpoint>? Endpoints { get; set; } = default!;
 
     }
 
@@ -3280,61 +3283,61 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of Api Action Endpoints. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string indicating the version of the endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("version")]
-        public string Version { get; set; }
+        [JsonPropertyName("version")]
+        public string? Version { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the API endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The HTTP method that the endpoint expects for this action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("httpMethod")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<HttpVerb>))]
-        public HttpVerb HttpMethod { get; set; }
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter<HttpVerb>))]
+        public HttpVerb HttpMethod { get; set; } = default!;
 
         /// <summary>
         /// Link to documentation for the endpoint, providing documentation for integrators. Should be a URL to a
         /// <br/>human-readable page.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("documentationUrl")]
-        public System.Uri DocumentationUrl { get; set; }
+        [JsonPropertyName("documentationUrl")]
+        public System.Uri? DocumentationUrl { get; set; } = default!;
 
         /// <summary>
         /// Link to the request schema for the endpoint. Used to provide documentation for integrators.
         /// <br/>Dialogporten will not validate information on this endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("requestSchema")]
-        public System.Uri RequestSchema { get; set; }
+        [JsonPropertyName("requestSchema")]
+        public System.Uri? RequestSchema { get; set; } = default!;
 
         /// <summary>
         /// Link to the response schema for the endpoint. Used to provide documentation for integrators.
         /// <br/>Dialogporten will not validate information on this endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("responseSchema")]
-        public System.Uri ResponseSchema { get; set; }
+        [JsonPropertyName("responseSchema")]
+        public System.Uri? ResponseSchema { get; set; } = default!;
 
         /// <summary>
         /// Boolean indicating if the endpoint is deprecated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("deprecated")]
-        public bool Deprecated { get; set; }
+        [JsonPropertyName("deprecated")]
+        public bool Deprecated { get; set; } = default!;
 
         /// <summary>
         /// Date and time when the endpoint will no longer function. Only set if the endpoint is deprecated. Dialogporten
         /// <br/>will not enforce this date.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sunsetAt")]
-        public System.DateTimeOffset? SunsetAt { get; set; }
+        [JsonPropertyName("sunsetAt")]
+        public System.DateTimeOffset? SunsetAt { get; set; } = default!;
 
     }
 
@@ -3346,47 +3349,47 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// The type of activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogActivityType>))]
-        public DialogActivityType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
+        public DialogActivityType Type { get; set; } = default!;
 
         /// <summary>
         /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
         /// <br/>Must be present in the request body.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The actor that performed the activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor PerformedBy { get; set; } = default!;
 
         /// <summary>
         /// Unstructured text describing the activity. Only set if the activity type is "Information".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
-        public System.Collections.Generic.ICollection<Localization> Description { get; set; }
+        [JsonPropertyName("description")]
+        public ICollection<Localization>? Description { get; set; } = default!;
 
     }
 
@@ -3397,20 +3400,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The transmission title. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// The transmission summary.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentReference")]
-        public ContentValue ContentReference { get; set; }
+        [JsonPropertyName("contentReference")]
+        public ContentValue? ContentReference { get; set; } = default!;
 
     }
 
@@ -3421,32 +3424,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent additions of transmission attachments. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<CreateTransmissionAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<CreateTransmissionAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -3457,21 +3460,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -3482,20 +3485,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the navigational action expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -3507,47 +3510,47 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
         /// <br/>If not supplied, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// The type of activity
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogActivityType>))]
-        public DialogActivityType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
+        public DialogActivityType Type { get; set; } = default!;
 
         /// <summary>
         /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
         /// <br/>Must be present in the request body.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The actor that performed the activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor PerformedBy { get; set; } = default!;
 
         /// <summary>
         /// Unstructured text describing the activity. Only set if the activity type is "Information".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
-        public System.Collections.Generic.ICollection<Localization> Description { get; set; }
+        [JsonPropertyName("description")]
+        public ICollection<Localization>? Description { get; set; } = default!;
 
     }
 
@@ -3555,26 +3558,26 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceOwnerIdentifierLookup
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("dialogId")]
-        public System.Guid DialogId { get; set; }
+        [JsonPropertyName("dialogId")]
+        public System.Guid DialogId { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("instanceRef")]
-        public string InstanceRef { get; set; }
+        [JsonPropertyName("instanceRef")]
+        public string InstanceRef { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("party")]
-        public string Party { get; set; }
+        [JsonPropertyName("party")]
+        public string Party { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("serviceResource")]
-        public IdentifierLookupServiceResource ServiceResource { get; set; }
+        [JsonPropertyName("serviceResource")]
+        public IdentifierLookupServiceResource ServiceResource { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwner")]
-        public IdentifierLookupServiceOwner ServiceOwner { get; set; }
+        [JsonPropertyName("serviceOwner")]
+        public IdentifierLookupServiceOwner ServiceOwner { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveTitle")]
-        public System.Collections.Generic.ICollection<Localization> NonSensitiveTitle { get; set; }
+        [JsonPropertyName("nonSensitiveTitle")]
+        public ICollection<Localization>? NonSensitiveTitle { get; set; } = default!;
 
     }
 
@@ -3585,73 +3588,73 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of dialogs. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// The service identifier for the service that the dialog is related to in URN-format.
         /// <br/>This corresponds to a resource in the Altinn Resource Registry, which the authenticated organization
         /// <br/>must own, i.e., be listed as the "competent authority" in the Resource Registry entry.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceResource")]
-        public string ServiceResource { get; set; }
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; } = default!;
 
         /// <summary>
         /// The party code representing the organization or person that the dialog belongs to in URN format.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("party")]
-        public string Party { get; set; }
+        [JsonPropertyName("party")]
+        public string Party { get; set; } = default!;
 
         /// <summary>
         /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
         /// <br/>to a natural completion (successful or not).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progress")]
-        public int? Progress { get; set; }
+        [JsonPropertyName("progress")]
+        public int? Progress { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public string ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public string? ExtendedStatus { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// The timestamp when the dialog should be made visible for authorized end users. If not provided, the dialog will be
         /// <br/>immediately available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("visibleFrom")]
-        public System.DateTimeOffset? VisibleFrom { get; set; }
+        [JsonPropertyName("visibleFrom")]
+        public System.DateTimeOffset? VisibleFrom { get; set; } = default!;
 
         /// <summary>
         /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("dueAt")]
-        public System.DateTimeOffset? DueAt { get; set; }
+        [JsonPropertyName("dueAt")]
+        public System.DateTimeOffset? DueAt { get; set; } = default!;
 
         /// <summary>
         /// Optional process identifier used to indicate a business process this dialog belongs to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("process")]
-        public string Process { get; set; }
+        [JsonPropertyName("process")]
+        public string? Process { get; set; } = default!;
 
         /// <summary>
         /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("precedingProcess")]
-        public string PrecedingProcess { get; set; }
+        [JsonPropertyName("precedingProcess")]
+        public string? PrecedingProcess { get; set; } = default!;
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
@@ -3659,91 +3662,91 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
         /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be displayed in user interfaces.
         /// <br/>When true, the dialog will not be visible in portals designed for human users, but will remain accessible via API.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; }
+        [JsonPropertyName("isApiOnly")]
+        public bool IsApiOnly { get; set; } = default!;
 
         /// <summary>
         /// If set, will override the date and time when the dialog is set as created.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// If set, will override the date and time when the dialog is set as last updated.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
-        public System.DateTimeOffset? UpdatedAt { get; set; }
+        [JsonPropertyName("updatedAt")]
+        public System.DateTimeOffset? UpdatedAt { get; set; } = default!;
 
         /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogStatusInput>))]
-        public DialogStatusInput? Status { get; set; }
+        [JsonPropertyName("status")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogStatusInput>))]
+        public DialogStatusInput? Status { get; set; } = default!;
 
         /// <summary>
         /// Set the system label of the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("systemLabel")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SystemLabel>))]
-        public SystemLabel? SystemLabel { get; set; }
+        [JsonPropertyName("systemLabel")]
+        [JsonConverter(typeof(JsonStringEnumConverter<SystemLabel>))]
+        public SystemLabel? SystemLabel { get; set; } = default!;
 
         /// <summary>
         /// Metadata about the dialog owned by the service owner.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwnerContext")]
-        public CreateDialogServiceOwnerContext ServiceOwnerContext { get; set; }
+        [JsonPropertyName("serviceOwnerContext")]
+        public CreateDialogServiceOwnerContext? ServiceOwnerContext { get; set; } = default!;
 
         /// <summary>
         /// The dialog unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public CreateDialogContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public CreateDialogContent? Content { get; set; } = default!;
 
         /// <summary>
         /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("searchTags")]
-        public System.Collections.Generic.ICollection<CreateDialogTag> SearchTags { get; set; }
+        [JsonPropertyName("searchTags")]
+        public ICollection<CreateDialogTag>? SearchTags { get; set; } = default!;
 
         /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<CreateDialogAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<CreateDialogAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The immutable list of transmissions associated with the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissions")]
-        public System.Collections.Generic.ICollection<CreateDialogTransmission> Transmissions { get; set; }
+        [JsonPropertyName("transmissions")]
+        public ICollection<CreateDialogTransmission>? Transmissions { get; set; } = default!;
 
         /// <summary>
         /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("guiActions")]
-        public System.Collections.Generic.ICollection<CreateDialogGuiAction> GuiActions { get; set; }
+        [JsonPropertyName("guiActions")]
+        public ICollection<CreateDialogGuiAction>? GuiActions { get; set; } = default!;
 
         /// <summary>
         /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("apiActions")]
-        public System.Collections.Generic.ICollection<CreateDialogApiAction> ApiActions { get; set; }
+        [JsonPropertyName("apiActions")]
+        public ICollection<CreateDialogApiAction>? ApiActions { get; set; } = default!;
 
         /// <summary>
         /// An immutable list of activities associated with the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("activities")]
-        public System.Collections.Generic.ICollection<CreateDialogActivity> Activities { get; set; }
+        [JsonPropertyName("activities")]
+        public ICollection<CreateDialogActivity>? Activities { get; set; } = default!;
 
     }
 
@@ -3754,8 +3757,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A list of labels, not visible in end-user APIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwnerLabels")]
-        public System.Collections.Generic.ICollection<CreateDialogServiceOwnerLabel> ServiceOwnerLabels { get; set; }
+        [JsonPropertyName("serviceOwnerLabels")]
+        public ICollection<CreateDialogServiceOwnerLabel>? ServiceOwnerLabels { get; set; } = default!;
 
     }
 
@@ -3766,8 +3769,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A label value.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -3779,56 +3782,56 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// The title of the dialog.
         /// <br/>Supported media types: text/plain
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive title of the dialog.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveTitle")]
-        public ContentValue NonSensitiveTitle { get; set; }
+        [JsonPropertyName("nonSensitiveTitle")]
+        public ContentValue? NonSensitiveTitle { get; set; } = default!;
 
         /// <summary>
         /// A short summary of the dialog and its current state.
         /// <br/>Supported media types: text/plain
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// An optional non-sensitive summary of the dialog and its current state.
         /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nonSensitiveSummary")]
-        public ContentValue NonSensitiveSummary { get; set; }
+        [JsonPropertyName("nonSensitiveSummary")]
+        public ContentValue? NonSensitiveSummary { get; set; } = default!;
 
         /// <summary>
         /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.
         /// <br/>Supported media types: text/plain
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("senderName")]
-        public ContentValue SenderName { get; set; }
+        [JsonPropertyName("senderName")]
+        public ContentValue? SenderName { get; set; } = default!;
 
         /// <summary>
         /// Additional information about the dialog.
         /// <br/>Supported media types: text/plain, text/markdown
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("additionalInfo")]
-        public ContentValue AdditionalInfo { get; set; }
+        [JsonPropertyName("additionalInfo")]
+        public ContentValue? AdditionalInfo { get; set; } = default!;
 
         /// <summary>
         /// Used as the human-readable label used to describe the "ExtendedStatus" field.
         /// <br/>Supported media types: text/plain
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedStatus")]
-        public ContentValue ExtendedStatus { get; set; }
+        [JsonPropertyName("extendedStatus")]
+        public ContentValue? ExtendedStatus { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mainContentReference")]
-        public ContentValue MainContentReference { get; set; }
+        [JsonPropertyName("mainContentReference")]
+        public ContentValue? MainContentReference { get; set; } = default!;
 
     }
 
@@ -3839,8 +3842,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A search tag value.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonPropertyName("value")]
+        public string Value { get; set; } = default!;
 
     }
 
@@ -3851,32 +3854,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of attachments. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<CreateDialogAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<CreateDialogAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -3887,27 +3890,27 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of attachment URLs. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -3918,21 +3921,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of transmissions. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// An optional key to ensure idempotency in transmission creation. If provided, it must be unique within the dialog; reusing the same key for the same dialog results in Conflict and no new transmission is created.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("idempotentKey")]
-        public string IdempotentKey { get; set; }
+        [JsonPropertyName("idempotentKey")]
+        public string? IdempotentKey { get; set; } = default!;
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the transmission.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -3940,59 +3943,59 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
         /// <br/>            
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("externalReference")]
-        public string ExternalReference { get; set; }
+        [JsonPropertyName("externalReference")]
+        public string? ExternalReference { get; set; } = default!;
 
         /// <summary>
         /// Reference to any other transmission that this transmission is related to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("relatedTransmissionId")]
-        public System.Guid? RelatedTransmissionId { get; set; }
+        [JsonPropertyName("relatedTransmissionId")]
+        public System.Guid? RelatedTransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The type of transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogTransmissionType>))]
-        public DialogTransmissionType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
+        public DialogTransmissionType Type { get; set; } = default!;
 
         /// <summary>
         /// The actor that sent the transmission.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sender")]
-        public Actor Sender { get; set; }
+        [JsonPropertyName("sender")]
+        public Actor Sender { get; set; } = default!;
 
         /// <summary>
         /// The transmission unstructured text content.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public CreateDialogTransmissionContent Content { get; set; }
+        [JsonPropertyName("content")]
+        public CreateDialogTransmissionContent? Content { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level attachments.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attachments")]
-        public System.Collections.Generic.ICollection<CreateDialogTransmissionAttachment> Attachments { get; set; }
+        [JsonPropertyName("attachments")]
+        public ICollection<CreateDialogTransmissionAttachment>? Attachments { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level navigational actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("navigationalActions")]
-        public System.Collections.Generic.ICollection<CreateDialogTransmissionNavigationalAction> NavigationalActions { get; set; }
+        [JsonPropertyName("navigationalActions")]
+        public ICollection<CreateDialogTransmissionNavigationalAction>? NavigationalActions { get; set; } = default!;
 
     }
 
@@ -4003,20 +4006,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The transmission title. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public ContentValue Title { get; set; }
+        [JsonPropertyName("title")]
+        public ContentValue Title { get; set; } = default!;
 
         /// <summary>
         /// The transmission summary.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("summary")]
-        public ContentValue Summary { get; set; }
+        [JsonPropertyName("summary")]
+        public ContentValue? Summary { get; set; } = default!;
 
         /// <summary>
         /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("contentReference")]
-        public ContentValue ContentReference { get; set; }
+        [JsonPropertyName("contentReference")]
+        public ContentValue? ContentReference { get; set; } = default!;
 
     }
 
@@ -4027,32 +4030,32 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of transmission attachments. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The display name of the attachment that should be used in GUIs.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("displayName")]
-        public System.Collections.Generic.ICollection<Localization> DisplayName { get; set; }
+        [JsonPropertyName("displayName")]
+        public ICollection<Localization>? DisplayName { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The URLs associated with the attachment, each referring to a different representation of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("urls")]
-        public System.Collections.Generic.ICollection<CreateDialogTransmissionAttachmentUrl> Urls { get; set; }
+        [JsonPropertyName("urls")]
+        public ICollection<CreateDialogTransmissionAttachmentUrl>? Urls { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the attachment expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -4063,21 +4066,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The media type of the attachment.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mediaType")]
-        public string MediaType { get; set; }
+        [JsonPropertyName("mediaType")]
+        public string? MediaType { get; set; } = default!;
 
         /// <summary>
         /// The type of consumer the URL is intended for.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consumerType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-        public AttachmentUrlConsumerType ConsumerType { get; set; }
+        [JsonPropertyName("consumerType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
+        public AttachmentUrlConsumerType ConsumerType { get; set; } = default!;
 
     }
 
@@ -4088,20 +4091,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// The title of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The UTC timestamp when the navigational action expires and is no longer available.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expiresAt")]
-        public System.DateTimeOffset? ExpiresAt { get; set; }
+        [JsonPropertyName("expiresAt")]
+        public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
     }
 
@@ -4112,21 +4115,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of Gui Actions. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("action")]
-        public string Action { get; set; }
+        [JsonPropertyName("action")]
+        public string Action { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
         /// <br/>"urn:dialogporten:unauthorized" if the user is not authorized to perform the action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -4134,43 +4137,43 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
         /// <br/>for delete actions.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("isDeleteDialogAction")]
-        public bool IsDeleteDialogAction { get; set; }
+        [JsonPropertyName("isDeleteDialogAction")]
+        public bool IsDeleteDialogAction { get; set; } = default!;
 
         /// <summary>
         /// The HTTP method that the frontend should use when redirecting the user.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("httpMethod")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<HttpVerb>))]
-        public HttpVerb? HttpMethod { get; set; }
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter<HttpVerb>))]
+        public HttpVerb? HttpMethod { get; set; } = default!;
 
         /// <summary>
         /// Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action
         /// <br/>priority.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("priority")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogGuiActionPriority>))]
-        public DialogGuiActionPriority Priority { get; set; }
+        [JsonPropertyName("priority")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogGuiActionPriority>))]
+        public DialogGuiActionPriority Priority { get; set; } = default!;
 
         /// <summary>
         /// The title of the action, this should be short and in verb form. Must be text/plain.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
-        public System.Collections.Generic.ICollection<Localization> Title { get; set; }
+        [JsonPropertyName("title")]
+        public ICollection<Localization>? Title { get; set; } = default!;
 
         /// <summary>
         /// If there should be a prompt asking the user for confirmation before the action is executed,
         /// <br/>this field should contain the prompt text.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("prompt")]
-        public System.Collections.Generic.ICollection<Localization> Prompt { get; set; }
+        [JsonPropertyName("prompt")]
+        public ICollection<Localization>? Prompt { get; set; } = default!;
 
     }
 
@@ -4181,15 +4184,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of Api Actions. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
         /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("action")]
-        public string Action { get; set; }
+        [JsonPropertyName("action")]
+        public string Action { get; set; } = default!;
 
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -4197,20 +4200,20 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <br/>            
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("authorizationAttribute")]
-        public string AuthorizationAttribute { get; set; }
+        [JsonPropertyName("authorizationAttribute")]
+        public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the operation the API action refers to.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; } = default!;
 
         /// <summary>
         /// The endpoints associated with the action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endpoints")]
-        public System.Collections.Generic.ICollection<CreateDialogApiActionEndpoint> Endpoints { get; set; }
+        [JsonPropertyName("endpoints")]
+        public ICollection<CreateDialogApiActionEndpoint>? Endpoints { get; set; } = default!;
 
     }
 
@@ -4221,61 +4224,61 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of Api Action Endpoints. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary string indicating the version of the endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("version")]
-        public string Version { get; set; }
+        [JsonPropertyName("version")]
+        public string? Version { get; set; } = default!;
 
         /// <summary>
         /// The fully qualified URL of the API endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("url")]
-        public System.Uri Url { get; set; }
+        [JsonPropertyName("url")]
+        public System.Uri Url { get; set; } = default!;
 
         /// <summary>
         /// The HTTP method that the endpoint expects for this action.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("httpMethod")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<HttpVerb>))]
-        public HttpVerb HttpMethod { get; set; }
+        [JsonPropertyName("httpMethod")]
+        [JsonConverter(typeof(JsonStringEnumConverter<HttpVerb>))]
+        public HttpVerb HttpMethod { get; set; } = default!;
 
         /// <summary>
         /// Link to documentation for the endpoint, providing documentation for integrators. Should be a URL to a
         /// <br/>human-readable page.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("documentationUrl")]
-        public System.Uri DocumentationUrl { get; set; }
+        [JsonPropertyName("documentationUrl")]
+        public System.Uri? DocumentationUrl { get; set; } = default!;
 
         /// <summary>
         /// Link to the request schema for the endpoint. Used to provide documentation for integrators.
         /// <br/>Dialogporten will not validate information on this endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("requestSchema")]
-        public System.Uri RequestSchema { get; set; }
+        [JsonPropertyName("requestSchema")]
+        public System.Uri? RequestSchema { get; set; } = default!;
 
         /// <summary>
         /// Link to the response schema for the endpoint. Used to provide documentation for integrators.
         /// <br/>Dialogporten will not validate information on this endpoint.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("responseSchema")]
-        public System.Uri ResponseSchema { get; set; }
+        [JsonPropertyName("responseSchema")]
+        public System.Uri? ResponseSchema { get; set; } = default!;
 
         /// <summary>
         /// Boolean indicating if the endpoint is deprecated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("deprecated")]
-        public bool Deprecated { get; set; }
+        [JsonPropertyName("deprecated")]
+        public bool Deprecated { get; set; } = default!;
 
         /// <summary>
         /// Date and time when the endpoint will no longer function. Only set if the endpoint is deprecated. Dialogporten
         /// <br/>will not enforce this date.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sunsetAt")]
-        public System.DateTimeOffset? SunsetAt { get; set; }
+        [JsonPropertyName("sunsetAt")]
+        public System.DateTimeOffset? SunsetAt { get; set; } = default!;
 
     }
 
@@ -4286,47 +4289,47 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// A self-defined UUIDv7 may be provided to support idempotent creation of activities. If not provided, a new UUIDv7 will be generated.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; } = default!;
 
         /// <summary>
         /// If supplied, overrides the creating date and time for the activity.
         /// <br/>If not supplied, the current date /time will be used.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public System.DateTimeOffset? CreatedAt { get; set; }
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset? CreatedAt { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific activity type.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("extendedType")]
-        public System.Uri ExtendedType { get; set; }
+        [JsonPropertyName("extendedType")]
+        public System.Uri? ExtendedType { get; set; } = default!;
 
         /// <summary>
         /// The type of activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DialogActivityType>))]
-        public DialogActivityType Type { get; set; }
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
+        public DialogActivityType Type { get; set; } = default!;
 
         /// <summary>
         /// If the activity is related to a particular transmission, this field will contain the transmission identifier.
         /// <br/>Must be present in the request body.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transmissionId")]
-        public System.Guid? TransmissionId { get; set; }
+        [JsonPropertyName("transmissionId")]
+        public System.Guid? TransmissionId { get; set; } = default!;
 
         /// <summary>
         /// The actor that performed the activity.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("performedBy")]
-        public Actor PerformedBy { get; set; }
+        [JsonPropertyName("performedBy")]
+        public Actor PerformedBy { get; set; } = default!;
 
         /// <summary>
         /// Unstructured text describing the activity. Only set if the activity type is "Information".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
-        public System.Collections.Generic.ICollection<Localization> Description { get; set; }
+        [JsonPropertyName("description")]
+        public ICollection<Localization>? Description { get; set; } = default!;
 
     }
 
@@ -4334,17 +4337,17 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class IdentifierLookupServiceResource
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("isDelegable")]
-        public bool IsDelegable { get; set; }
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("minimumAuthenticationLevel")]
-        public int MinimumAuthenticationLevel { get; set; }
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public System.Collections.Generic.ICollection<Localization> Name { get; set; }
+        [JsonPropertyName("name")]
+        public ICollection<Localization>? Name { get; set; } = default!;
 
     }
 
@@ -4352,14 +4355,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class IdentifierLookupServiceOwner
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("orgNumber")]
-        public string OrgNumber { get; set; }
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("code")]
-        public string Code { get; set; }
+        [JsonPropertyName("code")]
+        public string Code { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public System.Collections.Generic.ICollection<Localization> Name { get; set; }
+        [JsonPropertyName("name")]
+        public ICollection<Localization>? Name { get; set; } = default!;
 
     }
 
@@ -4367,8 +4370,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class AcceptedLanguages
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("acceptedLanguage")]
-        public System.Collections.Generic.ICollection<AcceptedLanguage> AcceptedLanguage { get; set; }
+        [JsonPropertyName("acceptedLanguage")]
+        public ICollection<AcceptedLanguage>? AcceptedLanguage { get; set; } = default!;
 
     }
 
@@ -4376,11 +4379,11 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class AcceptedLanguage
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("languageCode")]
-        public string LanguageCode { get; set; }
+        [JsonPropertyName("languageCode")]
+        public string LanguageCode { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("weight")]
-        public int Weight { get; set; }
+        [JsonPropertyName("weight")]
+        public int Weight { get; set; } = default!;
 
     }
 
@@ -4388,8 +4391,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceResourceMetadataList
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("items")]
-        public System.Collections.Generic.ICollection<ServiceResourceMetadata> Items { get; set; }
+        [JsonPropertyName("items")]
+        public ICollection<ServiceResourceMetadata>? Items { get; set; } = default!;
 
     }
 
@@ -4397,17 +4400,17 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceResourceMetadata
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("serviceResource")]
-        public ServiceResource ServiceResource { get; set; }
+        [JsonPropertyName("serviceResource")]
+        public ServiceResource ServiceResource { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("roles")]
-        public System.Collections.Generic.ICollection<ServiceResourceRole> Roles { get; set; }
+        [JsonPropertyName("roles")]
+        public ICollection<ServiceResourceRole>? Roles { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("accessPackages")]
-        public System.Collections.Generic.ICollection<ServiceResourceAccessPackage> AccessPackages { get; set; }
+        [JsonPropertyName("accessPackages")]
+        public ICollection<ServiceResourceAccessPackage>? AccessPackages { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwner")]
-        public ServiceResourceOwner ServiceOwner { get; set; }
+        [JsonPropertyName("serviceOwner")]
+        public ServiceResourceOwner ServiceOwner { get; set; } = default!;
 
     }
 
@@ -4415,26 +4418,26 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceResource
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("resourceType")]
-        public string ResourceType { get; set; }
+        [JsonPropertyName("resourceType")]
+        public string ResourceType { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+        [JsonPropertyName("status")]
+        public string Status { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("isDelegable")]
-        public bool IsDelegable { get; set; }
+        [JsonPropertyName("isDelegable")]
+        public bool IsDelegable { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("minimumAuthenticationLevel")]
-        public int MinimumAuthenticationLevel { get; set; }
+        [JsonPropertyName("minimumAuthenticationLevel")]
+        public int MinimumAuthenticationLevel { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public System.Collections.Generic.ICollection<Localization> Name { get; set; }
+        [JsonPropertyName("name")]
+        public ICollection<Localization>? Name { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("links")]
-        public Links Links { get; set; }
+        [JsonPropertyName("links")]
+        public Links Links { get; set; } = default!;
 
     }
 
@@ -4442,8 +4445,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class Links
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("metadata")]
-        public string Metadata { get; set; }
+        [JsonPropertyName("metadata")]
+        public string Metadata { get; set; } = default!;
 
     }
 
@@ -4451,14 +4454,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceResourceRole
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("urn")]
-        public string Urn { get; set; }
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public System.Collections.Generic.ICollection<Localization> Name { get; set; }
+        [JsonPropertyName("name")]
+        public ICollection<Localization>? Name { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("links")]
-        public Links Links { get; set; }
+        [JsonPropertyName("links")]
+        public Links Links { get; set; } = default!;
 
     }
 
@@ -4466,14 +4469,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceResourceAccessPackage
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("urn")]
-        public string Urn { get; set; }
+        [JsonPropertyName("urn")]
+        public string Urn { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public System.Collections.Generic.ICollection<Localization> Name { get; set; }
+        [JsonPropertyName("name")]
+        public ICollection<Localization>? Name { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("links")]
-        public Links Links { get; set; }
+        [JsonPropertyName("links")]
+        public Links Links { get; set; } = default!;
 
     }
 
@@ -4481,14 +4484,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceResourceOwner
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("orgNumber")]
-        public string OrgNumber { get; set; }
+        [JsonPropertyName("orgNumber")]
+        public string OrgNumber { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("code")]
-        public string Code { get; set; }
+        [JsonPropertyName("code")]
+        public string Code { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public System.Collections.Generic.ICollection<Localization> Name { get; set; }
+        [JsonPropertyName("name")]
+        public ICollection<Localization>? Name { get; set; } = default!;
 
     }
 
@@ -4496,11 +4499,11 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class Limits
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("endUserSearch")]
-        public EndUserSearchLimits EndUserSearch { get; set; }
+        [JsonPropertyName("endUserSearch")]
+        public EndUserSearchLimits EndUserSearch { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("serviceOwnerSearch")]
-        public ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; }
+        [JsonPropertyName("serviceOwnerSearch")]
+        public ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; } = default!;
 
     }
 
@@ -4508,17 +4511,17 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class EndUserSearchLimits
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("maxPartyFilterValues")]
-        public int MaxPartyFilterValues { get; set; }
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("maxServiceResourceFilterValues")]
-        public int MaxServiceResourceFilterValues { get; set; }
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("maxOrgFilterValues")]
-        public int MaxOrgFilterValues { get; set; }
+        [JsonPropertyName("maxOrgFilterValues")]
+        public int MaxOrgFilterValues { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("maxExtendedStatusFilterValues")]
-        public int MaxExtendedStatusFilterValues { get; set; }
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; } = default!;
 
     }
 
@@ -4526,14 +4529,14 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class ServiceOwnerSearchLimits
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("maxPartyFilterValues")]
-        public int MaxPartyFilterValues { get; set; }
+        [JsonPropertyName("maxPartyFilterValues")]
+        public int MaxPartyFilterValues { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("maxServiceResourceFilterValues")]
-        public int MaxServiceResourceFilterValues { get; set; }
+        [JsonPropertyName("maxServiceResourceFilterValues")]
+        public int MaxServiceResourceFilterValues { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("maxExtendedStatusFilterValues")]
-        public int MaxExtendedStatusFilterValues { get; set; }
+        [JsonPropertyName("maxExtendedStatusFilterValues")]
+        public int MaxExtendedStatusFilterValues { get; set; } = default!;
 
     }
 
@@ -4541,21 +4544,21 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class JsonPatchOperation
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("operationType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<JsonPatchOperationType>))]
-        public JsonPatchOperationType OperationType { get; set; }
+        [JsonPropertyName("operationType")]
+        [JsonConverter(typeof(JsonStringEnumConverter<JsonPatchOperationType>))]
+        public JsonPatchOperationType OperationType { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("path")]
-        public string Path { get; set; }
+        [JsonPropertyName("path")]
+        public string? Path { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("op")]
-        public string Op { get; set; }
+        [JsonPropertyName("op")]
+        public string? Op { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("from")]
-        public string From { get; set; }
+        [JsonPropertyName("from")]
+        public string? From { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
-        public object Value { get; set; }
+        [JsonPropertyName("value")]
+        public object? Value { get; set; } = default!;
 
     }
 

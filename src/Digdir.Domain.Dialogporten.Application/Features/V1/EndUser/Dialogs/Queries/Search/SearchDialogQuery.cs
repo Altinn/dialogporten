@@ -79,10 +79,11 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     /// Only return dialogs with content updated after this date.
     /// </summary>
     /// <remarks>
-    /// For free-text search this is also the only date filter that bounds the search scan window: the
-    /// FTS strategies switch to the recency-range-driven plan when <see cref="ContentUpdatedAfter"/> is
-    /// set, whereas <see cref="CreatedAfter"/> / <see cref="UpdatedAfter"/> still take the unbounded
-    /// term-driven path and a broad term can therefore still hit the server-side statement timeout (422).
+    /// For free-text search (<see cref="Search"/>) this is the only date filter that limits how much the
+    /// search has to scan, so it is the recommended way to narrow a broad search. A broad term without a
+    /// <see cref="ContentUpdatedAfter"/> bound may exceed the server-side time limit and return 422; the
+    /// other date filters (including <see cref="ContentUpdatedBefore"/>, <see cref="CreatedAfter"/> and
+    /// <see cref="UpdatedAfter"/>) do not have this effect.
     /// </remarks>
     public DateTimeOffset? ContentUpdatedAfter { get; set; }
 

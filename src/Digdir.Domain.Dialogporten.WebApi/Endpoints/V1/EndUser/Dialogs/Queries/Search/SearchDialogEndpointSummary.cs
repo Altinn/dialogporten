@@ -25,5 +25,6 @@ public sealed class SearchDialogEndpointSummary : Summary<SearchDialogEndpoint, 
 
         RequestParam(p => p.ContinuationToken, "Supply \"continuationToken\" for the response to get the next page of results, if hasNextPage is true");
         RequestParam(p => p.Limit, $"Limit the number of results per page ({PaginationConstants.MinLimit}-{PaginationConstants.MaxLimit}, default: {PaginationConstants.DefaultLimit})");
+        RequestParam(p => p.OrderBy, "Order the results by one or more fields. Defaults to \"contentUpdatedAt\" descending. For free text search, keeping the default \"contentUpdatedAt\" ordering together with \"contentUpdatedAfter\" gives the fastest results.");
     }
 }

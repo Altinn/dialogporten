@@ -85,32 +85,32 @@ public sealed class SearchDialogRequest : SortablePaginationParameter<SearchDial
     public List<DialogStatus.Values>? Status { get; init; }
 
     /// <summary>
-    /// Only return dialogs created after this date
+    /// Only return dialogs created after this date. For free text search this does not limit how much the search has to scan; use 'contentUpdatedAfter' to narrow a broad search and avoid a 422 timeout.
     /// </summary>
     public DateTimeOffset? CreatedAfter { get; set; }
 
     /// <summary>
-    /// Only return dialogs created before this date
+    /// Only return dialogs created before this date. For free text search this does not limit how much the search has to scan; use 'contentUpdatedAfter' to narrow a broad search and avoid a 422 timeout.
     /// </summary>
     public DateTimeOffset? CreatedBefore { get; set; }
 
     /// <summary>
-    /// Only return dialogs updated after this date
+    /// Only return dialogs updated after this date. For free text search this does not limit how much the search has to scan; use 'contentUpdatedAfter' to narrow a broad search and avoid a 422 timeout.
     /// </summary>
     public DateTimeOffset? UpdatedAfter { get; set; }
 
     /// <summary>
-    /// Only return dialogs updated before this date
+    /// Only return dialogs updated before this date. For free text search this does not limit how much the search has to scan; use 'contentUpdatedAfter' to narrow a broad search and avoid a 422 timeout.
     /// </summary>
     public DateTimeOffset? UpdatedBefore { get; set; }
 
     /// <summary>
-    /// Only return dialogs with content updated after this date
+    /// Only return dialogs with content updated after this date. Recommended for free text search: this is the only date filter that limits how much a broad search has to scan. A broad search term without a 'contentUpdatedAfter' bound may exceed the server-side time limit and return 422 - narrow it with this filter (and/or fewer parties or a service resource).
     /// </summary>
     public DateTimeOffset? ContentUpdatedAfter { get; set; }
 
     /// <summary>
-    /// Only return dialogs with content updated before this date
+    /// Only return dialogs with content updated before this date. Unlike 'contentUpdatedAfter', this upper bound does not by itself limit how much a free text search has to scan.
     /// </summary>
     public DateTimeOffset? ContentUpdatedBefore { get; set; }
 

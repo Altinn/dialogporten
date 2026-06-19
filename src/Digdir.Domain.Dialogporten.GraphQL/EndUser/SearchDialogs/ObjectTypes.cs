@@ -201,25 +201,25 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Whether to exclude API-only dialogs from the results. Defaults to false.")]
     public bool? ExcludeApiOnly { get; init; } = false;
 
-    [GraphQLDescription("Only return dialogs created after this date")]
+    [GraphQLDescription("Only return dialogs created after this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? CreatedAfter { get; init; }
 
-    [GraphQLDescription("Only return dialogs created before this date")]
+    [GraphQLDescription("Only return dialogs created before this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? CreatedBefore { get; init; }
 
-    [GraphQLDescription("Only return dialogs with content updated after this date")]
+    [GraphQLDescription("Only return dialogs with content updated after this date. Recommended for free text search: this is the only date filter that limits how much a broad search has to scan. A broad search term without a contentUpdatedAfter bound may exceed the server-side time limit and return 422 - narrow it with this filter (and/or fewer parties or a service resource).")]
     public DateTimeOffset? ContentUpdatedAfter { get; init; }
 
-    [GraphQLDescription("Only return dialogs with content updated before this date")]
+    [GraphQLDescription("Only return dialogs with content updated before this date. Unlike contentUpdatedAfter, this upper bound does not by itself limit how much a free text search has to scan.")]
     public DateTimeOffset? ContentUpdatedBefore { get; init; }
 
     [GraphQLDescription("Only return dialogs that have content that has/hasn't been seen by the user. A dialog is considered seen if it has been retrieved by a user, since it's last content update, and there is no SystemLabel MarkedAsUnopened.")]
     public bool? IsContentSeen { get; set; }
 
-    [GraphQLDescription("Only return dialogs updated after this date")]
+    [GraphQLDescription("Only return dialogs updated after this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? UpdatedAfter { get; init; }
 
-    [GraphQLDescription("Only return dialogs updated before this date")]
+    [GraphQLDescription("Only return dialogs updated before this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? UpdatedBefore { get; init; }
 
     [GraphQLDescription("Only return dialogs with due date after this date")]
@@ -240,6 +240,6 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Continuation token for pagination")]
     public string? ContinuationToken { get; init; }
 
-    [GraphQLDescription("Sort the results by one or more fields")]
+    [GraphQLDescription("Sort the results by one or more fields. Defaults to contentUpdatedAt descending. For free text search, keeping the default contentUpdatedAt ordering together with contentUpdatedAfter gives the fastest results.")]
     public List<SearchDialogSortType>? OrderBy { get; set; }
 }

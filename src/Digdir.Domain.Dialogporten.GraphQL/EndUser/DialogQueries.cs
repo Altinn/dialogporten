@@ -143,7 +143,7 @@ public partial class Queries
             forbidden => new SearchDialogsPayload { Errors = [new SearchDialogForbidden()] },
             domainError => new SearchDialogsPayload
             {
-                Errors = [.. domainError.Errors.Select(x => new SearchDialogTooBroadError { Message = x.ErrorMessage })]
+                Errors = [.. domainError.Errors.Select(x => new SearchDialogDomainError { Message = x.ErrorMessage })]
             });
     }
 }

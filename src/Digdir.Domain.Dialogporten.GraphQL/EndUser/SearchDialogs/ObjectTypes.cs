@@ -29,9 +29,10 @@ public sealed class SearchDialogValidationError : ISearchDialogError
     public string Message { get; set; } = null!;
 }
 
-// Operational "the search matched too much to complete" condition (REST maps it to 422), distinct from
-// input-validation errors so clients can offer a narrow-your-search retry affordance.
-public sealed class SearchDialogTooBroadError : ISearchDialogError
+// A domain-level failure (mirrors the DomainError member of SearchDialogResult; REST maps it to 422),
+// distinct from input-validation errors. Currently the only case is a search that matched too much to
+// complete in time; the Message carries the specifics and a narrow-your-search hint.
+public sealed class SearchDialogDomainError : ISearchDialogError
 {
     public string Message { get; set; } = null!;
 }

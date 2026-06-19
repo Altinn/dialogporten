@@ -488,6 +488,10 @@ type SearchDialogContinuationTokenParsingError implements SearchDialogError {
   message: String!
 }
 
+type SearchDialogDomainError implements SearchDialogError {
+  message: String!
+}
+
 type SearchDialogForbidden implements SearchDialogError {
   message: String!
 }
@@ -511,10 +515,6 @@ type SearchDialogsPayload {
   continuationToken: String
   orderBy: [SearchDialogSortType!]!
   errors: [SearchDialogError!]!
-}
-
-type SearchDialogTooBroadError implements SearchDialogError {
-  message: String!
 }
 
 type SearchDialogValidationError implements SearchDialogError {

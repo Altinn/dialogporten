@@ -333,7 +333,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/context/labels")]
-        Task<IApiResponse> CreateServiceOwnerLabel(System.Guid dialogId, [Body] CreateServiceOwnerLabel dto, [Header("if-Match")] System.Guid? if_Match = default, CancellationToken cancellationToken = default);
+        Task<IApiResponse> CreateServiceOwnerLabel(System.Guid dialogId, [Body] ServiceOwnerLabel dto, [Header("if-Match")] System.Guid? if_Match = default, CancellationToken cancellationToken = default);
 
         /// <summary>Delete a service owner label for a dialog</summary>
         /// <remarks>Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.</remarks>

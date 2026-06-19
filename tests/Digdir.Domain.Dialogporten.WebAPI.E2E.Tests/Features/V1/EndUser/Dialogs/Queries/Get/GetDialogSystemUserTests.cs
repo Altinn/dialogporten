@@ -27,8 +27,8 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content;
         content.Should().NotBeNull();
-        content.SeenSinceLastUpdate.Count.Should().Be(1);
-        content.SeenSinceLastUpdate.First().SeenBy.ActorName.Should().Be("Dialogporten E2E tests (nb)");
+        content.SeenSinceLastUpdate?.Count.Should().Be(1);
+        content.SeenSinceLastUpdate?.First().SeenBy.ActorName.Should().Be("Dialogporten E2E tests (nb)");
     }
 
     [E2EFact(SkipOnEnvironments = ["yt01"])]
@@ -48,8 +48,8 @@ public class GetDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase<We
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content;
         content.Should().NotBeNull();
-        content.SeenSinceLastUpdate.Count.Should().Be(1);
-        content.SeenSinceLastUpdate.First().SeenBy.ActorName.Should().Be("Dialogporten E2E tests (nb)");
+        content.SeenSinceLastUpdate?.Count.Should().Be(1);
+        content.SeenSinceLastUpdate?.First().SeenBy.ActorName.Should().Be("Dialogporten E2E tests (nb)");
     }
 
     [E2EFact(SkipOnEnvironments = ["yt01"])]

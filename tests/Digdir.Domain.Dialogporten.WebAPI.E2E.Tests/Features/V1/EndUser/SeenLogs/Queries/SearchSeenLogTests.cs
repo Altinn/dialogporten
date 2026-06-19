@@ -23,7 +23,7 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
 
         getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         getDialogResponse.Content.Should().NotBeNull();
-        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Single().Id;
+        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Should().ContainSingle().Which.Id;
 
         // Act
         var response = await Fixture.EndUserApi.V1.SearchDialogSeenLogs(

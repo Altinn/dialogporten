@@ -550,12 +550,16 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
+        /// <term>422</term>
+        /// <description>Domain error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
         /// <term>503</term>
         /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
         /// </item>
         /// </list>
         /// </returns>
-        [Headers("Accept: application/json, text/plain")]
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs")]
         Task<IApiResponse<PaginatedListOfDialogListItem>> SearchDialogs([Query] SearchDialogsQueryParams? queryParams = default, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 

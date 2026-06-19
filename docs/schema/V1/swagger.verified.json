@@ -7487,6 +7487,16 @@
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
           },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
+          },
           "503": {
             "content": {
               "text/plain": {

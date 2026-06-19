@@ -29,6 +29,13 @@ public sealed class SearchDialogValidationError : ISearchDialogError
     public string Message { get; set; } = null!;
 }
 
+// Operational "the search matched too much to complete" condition (REST maps it to 422), distinct from
+// input-validation errors so clients can offer a narrow-your-search retry affordance.
+public sealed class SearchDialogTooBroadError : ISearchDialogError
+{
+    public string Message { get; set; } = null!;
+}
+
 public sealed class SearchDialogsPayload
 {
     public List<SearchDialog>? Items { get; set; }

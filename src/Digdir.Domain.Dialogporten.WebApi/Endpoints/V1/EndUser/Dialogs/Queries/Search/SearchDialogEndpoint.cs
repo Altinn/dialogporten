@@ -31,7 +31,11 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
         Get("dialogs");
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
-        Description(d => d.ClearDefaultProduces(StatusCodes.Status403Forbidden));
+        // 422 (search too broad / timed out) is returned via UnprocessableEntityAsync; declare it on the
+        // operation so it appears in the generated OpenAPI spec (the summary text alone does not add it).
+        Description(d => d
+            .ClearDefaultProduces(StatusCodes.Status403Forbidden)
+            .ProducesProblemDetails(StatusCodes.Status422UnprocessableEntity));
     }
 
     public override async Task HandleAsync(SearchDialogRequest req, CancellationToken ct)
@@ -42,7 +46,8 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
         await result.Match(
             paginatedDto => Send.OkAsync(paginatedDto, ct),
             validationError => this.BadRequestAsync(validationError, ct),
-            forbidden => this.ForbiddenAsync(forbidden, ct));
+            forbidden => this.ForbiddenAsync(forbidden, ct),
+            domainError => this.UnprocessableEntityAsync(domainError, ct));
     }
 }
 

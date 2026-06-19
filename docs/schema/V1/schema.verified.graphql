@@ -513,6 +513,10 @@ type SearchDialogsPayload {
   errors: [SearchDialogError!]!
 }
 
+type SearchDialogTooBroadError implements SearchDialogError {
+  message: String!
+}
+
 type SearchDialogValidationError implements SearchDialogError {
   message: String!
 }

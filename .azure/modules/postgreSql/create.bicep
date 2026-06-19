@@ -444,11 +444,12 @@ var diagnosticLogCategories = [
   'PostgreSQLFlexDatabaseXacts'
 ]
 
-resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (enableQueryStore) {
+resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'PostgreSQLDiagnosticSetting'
   scope: postgres
   properties: {
     workspaceId: appInsightsWorkspace.id
+    logAnalyticsDestinationType: 'Dedicated'
     logs: [for category in diagnosticLogCategories: {
       category: category
       enabled: true
@@ -463,7 +464,6 @@ resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
       }
     ]
   }
-  dependsOn: [pg_qs_query_capture_mode]
 }
 
 module adoConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublishCanonicalConnectionSecrets) {

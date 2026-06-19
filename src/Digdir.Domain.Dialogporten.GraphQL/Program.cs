@@ -125,7 +125,8 @@ static void BuildAndRun(string[] args)
                     {
                         RenameRootActivityListener.EnrichRootActivity(activity);
                     };
-                }))
+                }),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
 
         // Add health checks with configured endpoints and well-known auth metadata endpoints
         .AddAspNetHealthChecks((x, y) =>

@@ -94,7 +94,8 @@ static void BuildAndRun(string[] args)
             additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
-                .AddAspNetCoreInstrumentationExcludingHealthPaths())
+                .AddAspNetCoreInstrumentationExcludingHealthPaths(),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
         // Options setup
         .AddAspNetCommon(builder.Configuration.GetSection(WebApiSettings.SectionName)
             .GetSection(WebHostCommonSettings.SectionName))

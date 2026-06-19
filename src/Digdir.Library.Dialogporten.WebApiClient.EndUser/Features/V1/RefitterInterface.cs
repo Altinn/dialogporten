@@ -550,6 +550,10 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <description>Missing or invalid authentication token. Requires a Maskinporten-token with the scope \"digdir:dialogporten\".</description>
         /// </item>
         /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
         /// <term>422</term>
         /// <description>Domain error occurred. See problem details for a list of errors.</description>
         /// </item>

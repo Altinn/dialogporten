@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
@@ -31,11 +32,10 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
         Get("dialogs");
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
-        // 422 (search too broad / timed out) is returned via UnprocessableEntityAsync; declare it on the
-        // operation so it appears in the generated OpenAPI spec (the summary text alone does not add it).
-        Description(d => d
-            .ClearDefaultProduces(StatusCodes.Status403Forbidden)
-            .ProducesProblemDetails(StatusCodes.Status422UnprocessableEntity));
+
+        Description(b => b.ProducesOneOf<PaginatedList<DialogDto>>(
+            StatusCodes.Status200OK,
+            StatusCodes.Status422UnprocessableEntity));
     }
 
     public override async Task HandleAsync(SearchDialogRequest req, CancellationToken ct)

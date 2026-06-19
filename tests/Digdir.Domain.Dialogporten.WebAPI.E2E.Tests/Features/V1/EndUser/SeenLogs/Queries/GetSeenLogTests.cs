@@ -24,9 +24,7 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         getDialogResponse.Content.Should().NotBeNull();
         var seenLog = getDialogResponse.Content
-            .SeenSinceLastUpdate.FirstOrDefault();
-
-        seenLog.Should().NotBeNull();
+            .SeenSinceLastUpdate.Should().ContainSingle().Which;
 
         // Act
         var response = await Fixture.EndUserApi.V1.GetDialogSeenLog(
@@ -52,7 +50,7 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         getDialogResponse.Content.Should().NotBeNull();
-        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Single().Id;
+        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Should().ContainSingle().Which.Id;
 
         // Act
         var response = await Fixture.EndUserApi.V1.GetDialogSeenLog(
@@ -78,7 +76,7 @@ public class GetSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFi
         getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         getDialogResponse.Content.Should().NotBeNull();
-        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Single().Id;
+        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Should().ContainSingle().Which.Id;
 
         // Act
         var response = await Fixture.EndUserApi.V1.GetDialogSeenLog(

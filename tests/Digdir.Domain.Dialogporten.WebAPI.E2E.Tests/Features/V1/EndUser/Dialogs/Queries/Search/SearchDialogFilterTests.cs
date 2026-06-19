@@ -39,10 +39,10 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 Party = [E2EConstants.DefaultParty],
                 ExtendedStatus = [extendedStatus1, extendedStatus2]
             }, new(), cancellationToken: ct),
-            isSuccessful: r => r.Content?.Items
-                .Count(x => x.Id == dialogId1 ||
-                            x.Id == dialogId2) == 2 &&
-                            r.Content.Items.All(x => x.Id != controlDialogId),
+            isSuccessful: r => r.Content?.Items is { } items
+                               && items.Count(x => x.Id == dialogId1 ||
+                                                   x.Id == dialogId2) == 2
+                               && items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
@@ -72,15 +72,16 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 Party = [E2EConstants.DefaultParty],
                 ServiceResource = [auxResource]
             }, new(), cancellationToken: ct),
-            isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
-                               r.Content.Items.All(x => x.Id != controlDialogId),
+            isSuccessful: r => r.Content?.Items is { } items
+                               && items.Count(x => x.Id == dialogId) == 1
+                               && items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
         searchResult.Content.Should().NotBeNull();
-        searchResult.Content.Items.Single(x => x.Id == dialogId)
-            .ServiceResource.Should().Be(auxResource);
+        searchResult.Content.Items.Should().ContainSingle(x => x.Id == dialogId)
+            .Which.ServiceResource.Should().Be(auxResource);
         searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }
 
@@ -108,15 +109,16 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 Party = [E2EConstants.DefaultParty],
                 Process = process
             }, new(), cancellationToken: ct),
-            isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
-                               r.Content.Items.All(x => x.Id != controlDialogId),
+            isSuccessful: r => r.Content?.Items is { } items
+                               && items.Count(x => x.Id == dialogId) == 1
+                               && items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
         searchResult.Content.Should().NotBeNull();
-        searchResult.Content.Items.Single(x => x.Id == dialogId)
-            .Process.Should().Be(process);
+        searchResult.Content.Items.Should().ContainSingle(x => x.Id == dialogId)
+            .Which.Process.Should().Be(process);
         searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }
 
@@ -147,14 +149,15 @@ public class SearchDialogFilterTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 Party = [E2EConstants.DefaultParty],
                 SystemLabel = [SystemLabel.Bin]
             }, new(), cancellationToken: ct),
-            isSuccessful: r => r.Content?.Items.Count(x => x.Id == dialogId) == 1 &&
-                               r.Content.Items.All(x => x.Id != controlDialogId),
+            isSuccessful: r => r.Content?.Items is { } items
+                               && items.Count(x => x.Id == dialogId) == 1
+                               && items.All(x => x.Id != controlDialogId),
             degradationMessage: "Search indexing speed is degraded.");
 
         // Assert
         searchResult.ShouldHaveStatusCode(HttpStatusCode.OK);
         searchResult.Content.Should().NotBeNull();
-        var dialog = searchResult.Content.Items.Single(x => x.Id == dialogId);
+        var dialog = searchResult.Content.Items.Should().ContainSingle(x => x.Id == dialogId).Which;
         dialog.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Bin);
         searchResult.Content.Items.Should().NotContain(x => x.Id == controlDialogId);
     }

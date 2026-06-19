@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
+using static System.StringComparison;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 
@@ -58,13 +59,24 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return async (ctx, ct) =>
         {
             var name = await GetNameFromRegister(externalIdWithPrefix, ct);
-            if (name is null)
+            if (name is not null) return name;
+
+            if (externalIdWithPrefix.StartsWith(SystemUserIdentifier.Prefix, InvariantCultureIgnoreCase))
             {
-                // Short negative cache
-                ctx.Options.Duration = TimeSpan.FromSeconds(10);
+                _logger.LogWarning(
+                    "Got null when getting system username. Retrying once after 100ms. ExternalId: {ExternalId}",
+                    externalIdWithPrefix
+                );
+                await Task.Delay(TimeSpan.FromMilliseconds(100), ct);
+                name = await GetNameFromRegister(externalIdWithPrefix, ct);
             }
 
-            return name;
+            if (name is not null) return name;
+
+            ctx.Options.SkipMemoryCacheWrite = true;
+            ctx.Options.SkipDistributedCacheWrite = true;
+
+            return null;
         };
     }
 
@@ -117,8 +129,12 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
         if (name is null)
         {
-            // This is PII, but this is an error condition (probably due to missing Altinn profile)
-            _logger.LogError("Failed to get name from party name registry for external id {ExternalId}", externalIdWithPrefix);
+            _logger.LogError(
+                "Failed to get name from party name registry for external id {ExternalId}. Response: {@Response}",
+                externalIdWithPrefix,
+                nameLookupResult
+            );
+
             return null;
         }
 

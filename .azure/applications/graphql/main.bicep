@@ -94,7 +94,7 @@ var containerAppEnvVars = [
   }
   {
     name: 'OTEL_TRACES_SAMPLER'
-    value: 'parentbased_traceidratio'
+    value: 'traceidratio'
   }
   {
     name: 'OTEL_TRACES_SAMPLER_ARG'

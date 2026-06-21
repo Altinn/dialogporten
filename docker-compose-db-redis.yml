@@ -1,6 +1,6 @@
 services:
   dialogporten-postgres:
-    image: postgres:18.3
+    image: postgres:18.4
     restart: always
     command: postgres -c wal_level=logical
     environment:

@@ -141,6 +141,51 @@ public static class OpenApiDocumentExtensions
         openApiDocument.Components.Schemas.Remove("OrderSetOfTOrderDefinitionAndTTarget");
     }
 
+    /// <summary>
+    /// Adds descriptions to the top-level tags (endpoint groups). These are rendered
+    /// underneath the group heading in the OpenAPI reference UI (e.g. Scalar/Swagger).
+    /// Descriptions support Markdown. Only tags actually used by an operation in the
+    /// document get a description, so audience-specific documents don't gain empty sections.
+    /// </summary>
+    public static void AddTagDescriptions(this OpenApiDocument openApiDocument)
+    {
+        var descriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Serviceowner"] =
+                "Endpoints for service owners to create and manage dialogs on behalf of a service. " +
+                "Requires a Maskinporten token with the relevant `digdir:dialogporten.serviceprovider` scope.",
+            ["Enduser"] =
+                "Endpoints for end users (citizens and representatives) to read and act on their own dialogs. " +
+                "Requires a personal token (e.g. via ID-porten) with the relevant end user scope.",
+            ["Metadata"] =
+                "Public, unauthenticated metadata endpoints such as health and configuration information."
+        };
+
+        var usedTagNames = openApiDocument.Paths
+            .SelectMany(path => path.Value.Values)
+            .SelectMany(operation => operation.Tags)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (name, description) in descriptions)
+        {
+            if (!usedTagNames.Contains(name))
+            {
+                continue;
+            }
+
+            var tag = openApiDocument.Tags
+                .FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
+
+            if (tag is null)
+            {
+                tag = new OpenApiTag { Name = name };
+                openApiDocument.Tags.Add(tag);
+            }
+
+            tag.Description = description;
+        }
+    }
+
     private static void MakeCollectionsNullable(JsonSchema schema)
     {
         if (schema.Properties == null)

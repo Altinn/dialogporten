@@ -278,6 +278,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         {
             document.Generator = null;
             document.MakeCollectionsNullable();
+            document.AddTagDescriptions();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();

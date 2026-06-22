@@ -205,7 +205,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return new DomainError(new DomainFailure(
                 nameof(SearchDialogQuery.Search),
                 "The search matched too many dialogs to complete. Narrow it with a date range "
-                + "(contentUpdatedAt), fewer parties, or a service resource."));
+                + "(contentUpdatedAfter), fewer parties, or a service resource."));
         }
 
         var dialogIds = dialogs.Items

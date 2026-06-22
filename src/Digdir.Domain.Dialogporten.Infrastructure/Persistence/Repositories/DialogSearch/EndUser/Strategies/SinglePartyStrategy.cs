@@ -15,9 +15,7 @@ internal sealed class SinglePartyStrategy : IQueryStrategy<EndUserSearchContext>
 
     public int Score(EndUserSearchContext context) =>
         context.Query.Search is null
-        && DialogEndUserSearchSqlHelpers.TryGetSinglePartyAuthorization(
-            context.AuthorizedResources,
-            out _)
+        && context.EffectivePartyCount == 1
             ? QueryStrategyScores.HighlyPreferred
             : QueryStrategyScores.Ineligible;
 

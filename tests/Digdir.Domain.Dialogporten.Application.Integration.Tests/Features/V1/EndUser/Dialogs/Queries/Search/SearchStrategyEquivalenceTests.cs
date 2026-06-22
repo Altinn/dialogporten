@@ -451,6 +451,81 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         result.Select(x => x.Id).Should().Equal(ExpectedIds(dialogs));
     }
 
+    [Fact]
+    public async Task Search_Pagination_WithoutFts_AndMoreDelegatedDialogsThanPageSize_Should_InterleaveByOrder_ForMultiService()
+    {
+        // The delegated dialogs are UNION'd into the multi-service candidate set without a per-branch LIMIT.
+        // This pins that, across page boundaries, they neither drown (when the service branches fill a page)
+        // nor get stranded last - the outer ORDER BY ranks them with everything else - even when there are
+        // more delegated dialogs than fit on a single page. Even indexes are authorized, odd indexes are
+        // delegated, so the delegated dialogs are spread across the whole recency range (not all newest).
+        var allParties = CreateParties(102);
+        var authorizedParties = allParties[..101];
+        var delegatedOwner = allParties[101];
+        var services = CreateServices(2);
+
+        var authorizedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 0)
+            .Select(i => CreateDialog(authorizedParties[i % authorizedParties.Length], services[i % services.Length], index: i, searchText: $"ordinary {i}"))
+            .ToArray();
+        var delegatedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 1)
+            .Where((_, k) => k % 3 == 0) // spread across the full range
+            .Select(i => CreateDialog(delegatedOwner, services[i % services.Length], index: i, searchText: $"ordinary {i}"))
+            .ToArray();
+        var all = authorizedDialogs.Concat(delegatedDialogs).ToArray();
+        delegatedDialogs.Length.Should().BeGreaterThan(10, "the delegated set must span multiple pages for this test to be meaningful");
+
+        await SeedDialogs(all);
+        ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = authorizedParties.ToDictionary(
+                x => x,
+                _ => services.ToHashSet(StringComparer.Ordinal),
+                StringComparer.Ordinal),
+            DialogIds = delegatedDialogs.Select(x => x.Id).ToList()
+        });
+
+        var result = await SearchAllPages(services: services, pageSize: 10);
+
+        var orderedIds = result.Select(x => x.Id).ToList();
+        orderedIds.Should().Equal(ExpectedIds(all));
+    }
+
+    [Fact]
+    public async Task Search_Pagination_WithFts_AndMoreDelegatedDialogsThanPageSize_Should_InterleaveByOrder_ForMultiService()
+    {
+        // FTS counterpart of the above (MultiServiceFtsStrategy shares the same delegated-UNION tail): the
+        // delegated matches must interleave by order across pages even when they outnumber the page size.
+        var allParties = CreateParties(102);
+        var authorizedParties = allParties[..101];
+        var delegatedOwner = allParties[101];
+        var services = CreateServices(2);
+
+        var authorizedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 0)
+            .Select(i => CreateDialog(authorizedParties[i % authorizedParties.Length], services[i % services.Length], index: i, searchText: $"{MatchTerm} {i}"))
+            .ToArray();
+        var delegatedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 1)
+            .Where((_, k) => k % 3 == 0) // spread across the full range
+            .Select(i => CreateDialog(delegatedOwner, services[i % services.Length], index: i, searchText: $"{MatchTerm} {i}"))
+            .ToArray();
+        var all = authorizedDialogs.Concat(delegatedDialogs).ToArray();
+        delegatedDialogs.Length.Should().BeGreaterThan(10, "the delegated set must span multiple pages for this test to be meaningful");
+
+        await SeedDialogs(all, indexDialogs: true);
+        ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = authorizedParties.ToDictionary(
+                x => x,
+                _ => services.ToHashSet(StringComparer.Ordinal),
+                StringComparer.Ordinal),
+            DialogIds = delegatedDialogs.Select(x => x.Id).ToList()
+        });
+
+        var result = await SearchAllPages(services: services, search: MatchTerm, pageSize: 10);
+
+        var orderedIds = result.Select(x => x.Id).ToList();
+        orderedIds.Should().Equal(ExpectedIds(all));
+    }
+
     private async Task SeedDialogs(IEnumerable<SearchDialogSeed> dialogs, bool indexDialogs = false)
     {
         foreach (var dialog in dialogs)
@@ -611,6 +686,9 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
 
     private static void AssertIds(PaginatedList<DialogDto> result, Guid[] expectedIds)
     {
+        // Every test here expects at least one dialog, so an empty expected set means the seed/filter logic is broken, 
+        // not that the search result is correct - fail fast with a clear message in that case.
+        expectedIds.Should().NotBeEmpty();
         result.Items.Select(x => x.Id).Should().Equal(expectedIds);
         result.Items.Select(x => x.Id).Should().OnlyHaveUniqueItems();
         result.HasNextPage.Should().BeFalse();

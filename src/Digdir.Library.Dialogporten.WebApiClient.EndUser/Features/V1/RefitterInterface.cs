@@ -238,7 +238,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/enduser/serviceresources")]
-        Task<IApiResponse<AuthorizedServiceResourceList>> SearchAuthorizedServiceResources(
+        Task<IApiResponse<ServiceResourceMetadataList>> SearchAuthorizedServiceResources(
             [Query(CollectionFormat.Multi)] IEnumerable<string>? party = null, [Header("accept-Language")] AcceptedLanguages? acceptLanguage = null,
             [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
@@ -439,7 +439,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(
+        Task<IApiResponse<ICollection<DialogTransmissionDetails>>> SearchDialogTransmissions(
             Guid dialogId, [Header("accept-Language")] AcceptedLanguages? acceptLanguage = null,
             [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
@@ -478,7 +478,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(
+        Task<IApiResponse<ICollection<DialogSeenLogDetails>>> SearchDialogSeenLogs(
             Guid dialogId, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
@@ -681,7 +681,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(
+        Task<IApiResponse<DialogActivity>> GetDialogActivity(
             Guid dialogId, Guid activityId, [Header("accept-Language")] AcceptedLanguages? acceptLanguage = null,
             [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 

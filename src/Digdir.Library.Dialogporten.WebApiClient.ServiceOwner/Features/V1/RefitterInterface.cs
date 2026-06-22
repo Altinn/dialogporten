@@ -525,7 +525,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogTransmissionDetails>>> SearchDialogTransmissions(Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Adds a transmission to a dialog</summary>
         /// <remarks>
@@ -631,7 +631,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(Guid dialogId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogSeenLogDetails>>> SearchDialogSeenLogs(Guid dialogId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets end user context system labels for dialogs</summary>
         /// <remarks>
@@ -1079,7 +1079,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(Guid dialogId, Guid activityId, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogActivity>> GetDialogActivity(Guid dialogId, Guid activityId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>

@@ -1,0 +1,143 @@
+# Builds and releases an emergency production hotfix from a branch cut off the currently deployed prod
+# release, skipping the normal main -> test -> staging promotion chain.
+#
+# This workflow only does the *build + tag + release* half. The actual production deploy is performed
+# afterwards by the existing "CI/CD Production" workflow (ci-cd-prod.yml), which keeps the prod approval
+# gate, change detection, manifests update, issue tagging and Swarmia/Slack reporting intact.
+#
+# OPERATOR PROCESS (see docs/CI-CD.md -> "Out-of-band deploys"):
+#   1. Branch from the currently deployed prod tag:
+#        git switch -c hotfix/<desc> v<currentProdVersion> && <commit fix> && git push
+#   2. Run THIS workflow from `main` with ref = hotfix/<desc>.
+#   3. Run "CI/CD Production" with the hotfix version printed in this workflow's summary (approval gate fires).
+#   4. Open a PR to back-merge hotfix/<desc> into main (MANDATORY, so the fix survives the next release).
+#
+# NOTE: Run this workflow from `main` (the file only needs to exist on the dispatched ref). The `ref`
+# input below is what gets built, tagged and eventually deployed.
+name: Build Production Hotfix Release
+
+run-name: Build prod hotfix from ${{ inputs.ref }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Hotfix branch or sha (branched from the current prod release tag)"
+        required: true
+        type: string
+
+concurrency:
+  group: hotfix-prod-${{ inputs.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+jobs:
+  resolve:
+    name: Resolve hotfix version
+    runs-on: ubuntu-latest
+    outputs:
+      hotfixVersion: ${{ steps.resolve.outputs.hotfixVersion }}
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - name: "Checkout ref"
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Resolve hotfix version
+        id: resolve
+        run: |
+          set -euo pipefail
+          BASE=$(cat version.txt)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          FULL_SHA=$(git rev-parse HEAD)
+          # Alphanumeric suffix -> satisfies both the prod tag check and the manifests image_tag regex
+          # (^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$).
+          HOTFIX_VERSION="${BASE}-hotfix${SHORT_SHA}"
+          echo "Base (prod) version: ${BASE}"
+          echo "Hotfix version: ${HOTFIX_VERSION}"
+          if ! git rev-parse "v${BASE}" >/dev/null 2>&1; then
+            echo "::warning::No git tag 'v${BASE}' found. A hotfix is normally branched from the currently deployed prod release tag; double-check '${{ inputs.ref }}' was cut from the right place."
+          fi
+          echo "hotfixVersion=${HOTFIX_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
+
+  build-and-push:
+    name: Build and push hotfix images
+    needs: [resolve]
+    uses: ./.github/workflows/workflow-publish-docker-images.yml
+    secrets:
+      GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      dockerImageBaseName: ghcr.io/altinn/dialogporten-
+      version: ${{ needs.resolve.outputs.hotfixVersion }}
+      push: true
+      ref: ${{ inputs.ref }}
+
+  tag-and-release:
+    name: Tag and create hotfix release
+    needs: [resolve, build-and-push]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: "Checkout ref"
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Create and push tag
+        env:
+          HOTFIX_VERSION: ${{ needs.resolve.outputs.hotfixVersion }}
+          SHA: ${{ needs.resolve.outputs.sha }}
+        run: |
+          set -euo pipefail
+          TAG="v${HOTFIX_VERSION}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag ${TAG} already exists. Commit a new change to the hotfix branch and re-run."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" "$SHA" -m "Emergency production hotfix ${HOTFIX_VERSION}"
+          git push origin "$TAG"
+
+      - name: Create GitHub prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOTFIX_VERSION: ${{ needs.resolve.outputs.hotfixVersion }}
+          SOURCE_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          TAG="v${HOTFIX_VERSION}"
+          gh release create "$TAG" \
+            --prerelease \
+            --title "Hotfix ${HOTFIX_VERSION}" \
+            --notes "Emergency production hotfix built from \`${SOURCE_REF}\`. Deploy via the **CI/CD Production** workflow with version \`${HOTFIX_VERSION}\`. Remember to back-merge \`${SOURCE_REF}\` into \`main\`."
+
+  summary:
+    name: Print next steps
+    needs: [resolve, tag-and-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write summary
+        env:
+          HOTFIX_VERSION: ${{ needs.resolve.outputs.hotfixVersion }}
+          SOURCE_REF: ${{ inputs.ref }}
+        run: |
+          {
+            echo "## Hotfix \`${HOTFIX_VERSION}\` built and released :rocket:"
+            echo ""
+            echo "Images pushed: \`ghcr.io/altinn/dialogporten-*:${HOTFIX_VERSION}\`"
+            echo "Tag + prerelease: \`v${HOTFIX_VERSION}\`"
+            echo ""
+            echo "### Next steps"
+            echo "1. Run the **CI/CD Production** workflow with \`version = ${HOTFIX_VERSION}\` (the prod approval gate will fire)."
+            echo "2. Open a PR to back-merge \`${SOURCE_REF}\` into \`main\` so the fix is not lost on the next release. **This is mandatory.**"
+          } >> "$GITHUB_STEP_SUMMARY"

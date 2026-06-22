@@ -1,0 +1,89 @@
+# Deploys an arbitrary (typically unmerged) branch/tag/sha to YT01 for early performance testing.
+#
+# This is an *ephemeral* deploy: it builds and pushes images from the given ref and updates the YT01
+# container apps, but it deliberately does NOT update the dialogporten-manifests GitOps repo. The next
+# normal YT01 deploy will overwrite it.
+#
+# Scope is intentionally just "build + deploy apps". Migrations, infrastructure and performance tests
+# are handled by their own dispatch workflows (dispatch-apps.yml runs migrations, dispatch-infrastructure.yml
+# deploys infra, dispatch-k6-performance.yml runs perf tests) and can be run separately against YT01.
+#
+# NOTE: Run this workflow from `main` (the workflow file only needs to exist on the dispatched ref).
+# The `ref` input below is what actually gets built and deployed.
+#
+# OPERATIONAL NOTE: YT01 is scale-to-zero. Bring the environment up first via the `Scale yt01 (manual)`
+# workflow (dispatch-scale-yt01-manual.yml, action: on).
+name: Dispatch Deploy Branch to YT01
+
+run-name: Deploy ${{ inputs.ref }} to YT01
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag or sha to build and deploy (e.g. my-feature-branch)"
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-branch-yt01-${{ inputs.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+jobs:
+  resolve:
+    name: Resolve image tag from ref
+    runs-on: ubuntu-latest
+    outputs:
+      imageTag: ${{ steps.resolve.outputs.imageTag }}
+    steps:
+      - name: "Checkout ref"
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Resolve image tag
+        id: resolve
+        run: |
+          set -euo pipefail
+          VERSION=$(cat version.txt)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          IMAGE_TAG="${VERSION}-${SHORT_SHA}"
+          echo "Resolved image tag: ${IMAGE_TAG}"
+          echo "imageTag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+  build-and-push:
+    name: Build and push images
+    needs: [resolve]
+    uses: ./.github/workflows/workflow-publish-docker-images.yml
+    secrets:
+      GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      dockerImageBaseName: ghcr.io/altinn/dialogporten-
+      version: ${{ needs.resolve.outputs.imageTag }}
+      push: true
+      ref: ${{ inputs.ref }}
+
+  deploy-apps:
+    name: Deploy apps to YT01
+    needs: [resolve, build-and-push]
+    uses: ./.github/workflows/workflow-deploy-apps.yml
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+      AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+      AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+      AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
+      AZURE_APP_CONFIGURATION_NAME: ${{ secrets.AZURE_APP_CONFIGURATION_NAME }}
+      AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
+    with:
+      environment: yt01
+      version: ${{ needs.resolve.outputs.imageTag }}
+      runMigration: false # DB may be off due to scale-to-zero; run migrations separately if needed
+      ref: ${{ inputs.ref }}

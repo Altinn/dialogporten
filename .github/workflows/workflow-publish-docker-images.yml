@@ -20,6 +20,11 @@ on:
         required: false
         default: true
         type: boolean
+      ref:
+        description: "The branch, tag or sha to build the image from. Uses the default checkout ref if not provided."
+        required: false
+        default: ""
+        type: string
 
 jobs:
   publish-docker-images:
@@ -51,6 +56,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0

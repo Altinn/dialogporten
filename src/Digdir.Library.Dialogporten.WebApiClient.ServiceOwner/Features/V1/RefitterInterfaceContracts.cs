@@ -84,19 +84,19 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </summary>
         [JsonPropertyName("systemLabels")]
         [Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-        public ICollection<SystemLabel>? SystemLabels { get; set; }
+        public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 
         /// <summary>
         /// List of system labels to add to target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
         /// </summary>
         [JsonPropertyName("addLabels")]
-        public ICollection<SystemLabel>? AddLabels { get; set; }
+        public ICollection<SystemLabel> AddLabels { get; set; } = [];
 
         /// <summary>
         /// List of system labels to remove from target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
         /// </summary>
         [JsonPropertyName("removeLabels")]
-        public ICollection<SystemLabel>? RemoveLabels { get; set; }
+        public ICollection<SystemLabel> RemoveLabels { get; set; } = [];
 
         /// <summary>
         /// Optional actor metadata describing who performed the change. Only available for admin-integrations when EnduserId is omitted.
@@ -167,19 +167,19 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </summary>
         [JsonPropertyName("systemLabels")]
         [Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-        public ICollection<SystemLabel>? SystemLabels { get; set; }
+        public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 
         /// <summary>
         /// List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
         /// </summary>
         [JsonPropertyName("addLabels")]
-        public ICollection<SystemLabel>? AddLabels { get; set; }
+        public ICollection<SystemLabel> AddLabels { get; set; } = [];
 
         /// <summary>
         /// List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
         /// </summary>
         [JsonPropertyName("removeLabels")]
-        public ICollection<SystemLabel>? RemoveLabels { get; set; }
+        public ICollection<SystemLabel> RemoveLabels { get; set; } = [];
 
         /// <summary>
         /// Optional actor metadata describing who performed the operation. Only available for admin-integrations when EndUserId is omitted.
@@ -257,7 +257,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// A list of localizations for the content.
         /// </summary>
         [JsonPropertyName("value")]
-        public ICollection<Localization>? Value { get; set; }
+        public ICollection<Localization> Value { get; set; } = [];
 
         /// <summary>
         /// Media type of the content, this can also indicate that the content is embeddable.
@@ -338,7 +338,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         [JsonPropertyName("title")]
         public ICollection<Localization>? Title { get; set; }
 
-        /// <summary>
         /// The fully qualified URL of the navigational action.
         /// </summary>
         [JsonPropertyName("url")]

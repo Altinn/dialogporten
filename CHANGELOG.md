@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.118.0](https://github.com/Altinn/dialogporten/compare/v1.117.3...v1.118.0) (2026-06-21)
+
+
+### Features
+
+* implement authorized service resource api ([#4113](https://github.com/Altinn/dialogporten/issues/4113)) ([c3248af](https://github.com/Altinn/dialogporten/commit/c3248af95e31f8a47439d4d43de3d2cfeaf8efd1))
+* **webapiclient:** enable nullable refs and optional params for SDKs ([#4131](https://github.com/Altinn/dialogporten/issues/4131)) ([569abfe](https://github.com/Altinn/dialogporten/commit/569abfe213e84ed03abe7df27cbee80b40649cbb))
+
+
+### Bug Fixes
+
+* Dont cache null names ([#4139](https://github.com/Altinn/dialogporten/issues/4139)) ([2959f4a](https://github.com/Altinn/dialogporten/commit/2959f4af963954c088de47914a5270a47ec909a0))
+* **webapi:** set correct type for problem details errors ([#4097](https://github.com/Altinn/dialogporten/issues/4097)) ([64f0e23](https://github.com/Altinn/dialogporten/commit/64f0e23c64d752a1f47f19d1d59c6f0f1b1b48bd))
+
+
+### Miscellaneous Chores
+
+* add dependency url templating ([#4065](https://github.com/Altinn/dialogporten/issues/4065)) ([f4029c2](https://github.com/Altinn/dialogporten/commit/f4029c2ee1bdcc246b6f0768cd451f15c2942a27))
+* **deps:** update dotnet monorepo to v10.0.301 ([#4124](https://github.com/Altinn/dialogporten/issues/4124)) ([a85f94e](https://github.com/Altinn/dialogporten/commit/a85f94e44ffd2a12e64180ec936713446af02d11))
+* **deps:** update microsoft dependencies to 10.0.9 ([#4125](https://github.com/Altinn/dialogporten/issues/4125)) ([e490b93](https://github.com/Altinn/dialogporten/commit/e490b9379fe0169e5b3439fde64bf936e3c5b66b))
+* **deps:** update opentelemetry dependencies to 1.16.0 ([#4143](https://github.com/Altinn/dialogporten/issues/4143)) ([706f68c](https://github.com/Altinn/dialogporten/commit/706f68c39f30bcc42470716aea7a642ce1a87932))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.154.0 ([#4144](https://github.com/Altinn/dialogporten/issues/4144)) ([59219f4](https://github.com/Altinn/dialogporten/commit/59219f470b4ae840fc890ee6803e723449d64568))
+* **deps:** update polly monorepo to 8.7.0 ([#4145](https://github.com/Altinn/dialogporten/issues/4145)) ([dd496d0](https://github.com/Altinn/dialogporten/commit/dd496d0d43918ec2dfa114d4279496c9f3981990))
+* **infra:** make PostgreSQL diagnostic setting unconditional and resource-specific ([#4138](https://github.com/Altinn/dialogporten/issues/4138)) ([8b8128c](https://github.com/Altinn/dialogporten/commit/8b8128cb943aeb630d2b9b5f6b3d4d78c0cc97ed))
+
 ## [1.117.3](https://github.com/Altinn/dialogporten/compare/v1.117.2...v1.117.3) (2026-06-17)
 
 

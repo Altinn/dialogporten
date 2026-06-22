@@ -17,10 +17,10 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public ServiceResource ServiceResource { get; set; } = null!;
 
         [JsonPropertyName("roles")]
-        public ICollection<ServiceResourceRole>? Roles { get; set; } = null!;
+        public ICollection<ServiceResourceRole> Roles { get; set; } = [];
 
         [JsonPropertyName("accessPackages")]
-        public ICollection<ServiceResourceAccessPackage>? AccessPackages { get; set; } = null!;
+        public ICollection<ServiceResourceAccessPackage> AccessPackages { get; set; } = [];
 
         [JsonPropertyName("serviceOwner")]
         public ServiceResourceOwner ServiceOwner { get; set; } = null!;
@@ -99,7 +99,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public string Urn { get; set; } = null!;
 
         [JsonPropertyName("name")]
-        public ICollection<Localization>? Name { get; set; } = null!;
+        public ICollection<Localization> Name { get; set; } = [];
 
         [JsonPropertyName("links")]
         public Links Links { get; set; } = null!;
@@ -116,7 +116,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public string Code { get; set; } = null!;
 
         [JsonPropertyName("name")]
-        public ICollection<Localization>? Name { get; set; } = null!;
+        public ICollection<Localization> Name { get; set; } = [];
 
     }
 
@@ -1401,13 +1401,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// The unique identifier for the dialog in UUIDv7 format.
         /// </summary>
         [JsonPropertyName("id")]
-        public Guid Id { get; set; } = Guid.Empty;
+        public Guid Id { get; set; }
 
         /// <summary>
         /// The unique identifier for the revision in UUIDv4 format.
         /// </summary>
         [JsonPropertyName("revision")]
-        public Guid Revision { get; set; } = Guid.Empty;
+        public Guid Revision { get; set; }
 
         /// <summary>
         /// The service owner code representing the organization (service owner) related to this dialog.
@@ -1439,19 +1439,19 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>to a natural completion (successful or not).
         /// </summary>
         [JsonPropertyName("progress")]
-        public int? Progress { get; set; } = null!;
+        public int? Progress { get; set; }
 
         /// <summary>
         /// Optional process identifier used to indicate a business process this dialog belongs to.
         /// </summary>
         [JsonPropertyName("process")]
-        public string? Process { get; set; } = null!;
+        public string? Process { get; set; }
 
         /// <summary>
         /// Optional preceding process identifier to indicate the business process that preceded the process indicated in the "Process" field. Cannot be set without also "Process" being set.
         /// </summary>
         [JsonPropertyName("precedingProcess")]
-        public string? PrecedingProcess { get; set; } = null!;
+        public string? PrecedingProcess { get; set; }
 
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
@@ -1461,7 +1461,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>in use).
         /// </summary>
         [JsonPropertyName("extendedStatus")]
-        public string? ExtendedStatus { get; set; } = null!;
+        public string? ExtendedStatus { get; set; }
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
@@ -1469,13 +1469,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("externalReference")]
-        public string? ExternalReference { get; set; } = null!;
+        public string? ExternalReference { get; set; }
 
         /// <summary>
         /// The due date for the dialog. Dialogs past due date might be marked as such in frontends but will still be available.
         /// </summary>
         [JsonPropertyName("dueAt")]
-        public DateTimeOffset? DueAt { get; set; } = null!;
+        public DateTimeOffset? DueAt { get; set; }
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
@@ -1485,32 +1485,32 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>owner after the dialog has been created.
         /// </summary>
         [JsonPropertyName("expiresAt")]
-        public DateTimeOffset? ExpiresAt { get; set; } = null!;
+        public DateTimeOffset? ExpiresAt { get; set; }
 
         /// <summary>
         /// The date and time when the dialog was created.
         /// </summary>
         [JsonPropertyName("createdAt")]
-        public DateTimeOffset CreatedAt { get; set; } = default!;
+        public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// The date and time when the dialog was last updated.
         /// </summary>
         [JsonPropertyName("updatedAt")]
-        public DateTimeOffset UpdatedAt { get; set; } = default!;
+        public DateTimeOffset UpdatedAt { get; set; }
 
         /// <summary>
         /// The date and time when the dialog content was last updated.
         /// </summary>
         [JsonPropertyName("contentUpdatedAt")]
-        public DateTimeOffset ContentUpdatedAt { get; set; } = default!;
+        public DateTimeOffset ContentUpdatedAt { get; set; }
 
         /// <summary>
         /// The aggregated status of the dialog.
         /// </summary>
         [JsonPropertyName("status")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogStatus>))]
-        public DialogStatus Status { get; set; } = default!;
+        public DialogStatus Status { get; set; }
 
         /// <summary>
         /// System defined label used to categorize dialogs.
@@ -1520,13 +1520,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("systemLabel")]
         [JsonConverter(typeof(JsonStringEnumConverter<SystemLabel>))]
         [Obsolete("Use EndUserContext.SystemLabels instead.")]
-        public SystemLabel SystemLabel { get; set; } = default!;
+        public SystemLabel SystemLabel { get; set; }
 
         /// <summary>
         /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
         /// </summary>
         [JsonPropertyName("isApiOnly")]
-        public bool IsApiOnly { get; set; } = false;
+        public bool IsApiOnly { get; set; }
 
         /// <summary>
         /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
@@ -1543,7 +1543,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
-        public bool HasUnopenedContent { get; set; } = false;
+        public bool HasUnopenedContent { get; set; }
 
         /// <summary>
         /// The dialog unstructured text content.
@@ -1556,61 +1556,61 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>transmissions or attachments. It should also be used for front-channel embeds.
         /// </summary>
         [JsonPropertyName("dialogToken")]
-        public string? DialogToken { get; set; } = null!;
+        public string? DialogToken { get; set; }
 
         /// <summary>
         /// The number of transmissions sent by a service owner.
         /// </summary>
         [JsonPropertyName("fromServiceOwnerTransmissionsCount")]
-        public int FromServiceOwnerTransmissionsCount { get; set; } = 0;
+        public int FromServiceOwnerTransmissionsCount { get; set; }
 
         /// <summary>
         /// The number of transmissions sent by a party representative.
         /// </summary>
         [JsonPropertyName("fromPartyTransmissionsCount")]
-        public int FromPartyTransmissionsCount { get; set; } = 0;
+        public int FromPartyTransmissionsCount { get; set; }
 
         /// <summary>
         /// The attachments associated with the dialog (on an aggregate level).
         /// </summary>
         [JsonPropertyName("attachments")]
-        public ICollection<DialogAttachment>? Attachments { get; set; } = null!;
+        public ICollection<DialogAttachment> Attachments { get; set; } = [];
 
         /// <summary>
         /// The immutable list of transmissions associated with the dialog.
         /// </summary>
         [JsonPropertyName("transmissions")]
-        public ICollection<DialogTransmission>? Transmissions { get; set; } = null!;
+        public ICollection<DialogTransmission> Transmissions { get; set; } = [];
 
         /// <summary>
         /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
         /// </summary>
         [JsonPropertyName("guiActions")]
-        public ICollection<DialogGuiAction>? GuiActions { get; set; } = null!;
+        public ICollection<DialogGuiAction> GuiActions { get; set; } = [];
 
         /// <summary>
         /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
         /// </summary>
         [JsonPropertyName("apiActions")]
-        public ICollection<DialogApiAction>? ApiActions { get; set; } = null!;
+        public ICollection<DialogApiAction> ApiActions { get; set; } = [];
 
         /// <summary>
         /// An immutable list of activities associated with the dialog.
         /// </summary>
         [JsonPropertyName("activities")]
-        public ICollection<DialogActivity>? Activities { get; set; } = null!;
+        public ICollection<DialogActivity> Activities { get; set; } = [];
 
         /// <summary>
         /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
         /// </summary>
         [JsonPropertyName("seenSinceLastUpdate")]
-        public ICollection<DialogSeenLog>? SeenSinceLastUpdate { get; set; } = null!;
+        public ICollection<DialogSeenLog> SeenSinceLastUpdate { get; set; } = [];
 
         /// <summary>
         /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
         /// </summary>
         [JsonPropertyName("seenSinceLastContentUpdate")]
-        public ICollection<DialogSeenLog>? SeenSinceLastContentUpdate { get; set; } = null!;
+        public ICollection<DialogSeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 
         /// <summary>
         /// Indicates whether a dialog has been seen since its last content update.
@@ -1623,7 +1623,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
         [JsonPropertyName("isContentSeen")]
-        public bool IsContentSeen { get; set; } = false;
+        public bool IsContentSeen { get; set; }
 
         /// <summary>
         /// Metadata about the dialog owned by end-users.

@@ -41,12 +41,14 @@ jobs:
       sha: ${{ steps.resolve.outputs.sha }}
     steps:
       - name: Validate dispatched ref
+        env:
+          # Via env (not interpolated into the script) so a crafted ref can't inject shell commands.
+          INPUT_REF: ${{ inputs.ref }}
         run: |
           set -euo pipefail
-          REF='${{ inputs.ref }}'
           # Allow only operator hotfix branches or an explicit full commit SHA.
-          if [[ ! "$REF" =~ ^hotfix\/[A-Za-z0-9._/-]+$ && ! "$REF" =~ ^[0-9a-fA-F]{40}$ ]]; then
-            echo "::error::Invalid ref '$REF'. Allowed formats: hotfix/<name> or 40-char commit SHA."
+          if [[ ! "$INPUT_REF" =~ ^hotfix/[A-Za-z0-9._/-]+$ && ! "$INPUT_REF" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "::error::Invalid ref. Allowed formats: hotfix/<name> or 40-char commit SHA."
             exit 1
           fi
 

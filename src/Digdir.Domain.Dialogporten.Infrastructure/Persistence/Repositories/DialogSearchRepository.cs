@@ -327,17 +327,6 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             .IgnoreQueryFilters()
             .AsNoTracking();
 
-        Task<PaginatedList<DialogEntity>> Execute()
-        {
-            return efQuery.ToPaginatedListAsync(
-                query.OrderBy!,
-                query.ContinuationToken,
-                query.Limit,
-                applyOrder: true,
-                applyContinuationToken: false,
-                cancellationToken);
-        }
-
         // Every end-user search runs inside a transaction so we can pin session settings with SET LOCAL:
         //   * plan_cache_mode = force_custom_plan (ALWAYS): the service-driven strategies pass the
         //     authorized party set as a bound text[] parameter; only a custom plan (which inspects the
@@ -367,7 +356,13 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
         try
         {
             await _db.Database.ExecuteSqlRawAsync(sessionSetupSql, cancellationToken);
-            var dialogs = await Execute();
+            var dialogs = await efQuery.ToPaginatedListAsync(
+                query.OrderBy!,
+                query.ContinuationToken,
+                query.Limit,
+                applyOrder: true,
+                applyContinuationToken: false,
+                cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             return dialogs;
         }

@@ -62,10 +62,7 @@ internal sealed class MultiServiceStrategy : IQueryStrategy<EndUserSearchContext
                 "Multi-service strategy requires at least one authorized service with parties.");
         }
 
-        if (_logger.IsEnabled(LogLevel.Information))
-        {
-            DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesByService, Name);
-        }
+        DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesByService, Name);
 
         var dialogFilters = DialogEndUserSearchSqlHelpers.BuildDialogFilters(query);
         var orderColumnProjection = DialogEndUserSearchSqlHelpers.BuildOrderColumnProjection(query.OrderBy!, alias: "d");

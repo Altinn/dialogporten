@@ -67,10 +67,7 @@ internal sealed class MultiServiceFtsStrategy : IQueryStrategy<EndUserSearchCont
                 "Multi-service FTS strategy requires at least one authorized service with parties.");
         }
 
-        if (_logger.IsEnabled(LogLevel.Information))
-        {
-            DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesByService, Name);
-        }
+        DialogEndUserSearchSqlHelpers.LogPartiesAndServicesCount(_logger, partiesByService, Name);
 
         var ftsQuery = DialogFreeTextSearchSqlHelpers.CreateFreeTextSearchQuery(query);
         var ftsPredicate = DialogFreeTextSearchSqlHelpers.BuildFreeTextSearchPredicate(ftsQuery);

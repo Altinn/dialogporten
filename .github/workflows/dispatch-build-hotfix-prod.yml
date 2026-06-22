@@ -30,10 +30,9 @@ concurrency:
   group: hotfix-prod-${{ inputs.ref }}
   cancel-in-progress: false
 
+# Minimal default; jobs that need more (packages/contents write) opt in below.
 permissions:
-  contents: write
-  id-token: write
-  packages: write
+  contents: read
 
 jobs:
   resolve:
@@ -48,6 +47,7 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Resolve hotfix version
         id: resolve
@@ -62,7 +62,7 @@ jobs:
           echo "Base (prod) version: ${BASE}"
           echo "Hotfix version: ${HOTFIX_VERSION}"
           if ! git rev-parse "v${BASE}" >/dev/null 2>&1; then
-            echo "::warning::No git tag 'v${BASE}' found. A hotfix is normally branched from the currently deployed prod release tag; double-check '${{ inputs.ref }}' was cut from the right place."
+            echo "::warning::No git tag 'v${BASE}' found. A hotfix is normally branched from the currently deployed prod release tag; double-check that the dispatched ref was cut from the right place."
           fi
           echo "hotfixVersion=${HOTFIX_VERSION}" >> "$GITHUB_OUTPUT"
           echo "sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
@@ -70,6 +70,9 @@ jobs:
   build-and-push:
     name: Build and push hotfix images
     needs: [resolve]
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/workflow-publish-docker-images.yml
     secrets:
       GCR_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

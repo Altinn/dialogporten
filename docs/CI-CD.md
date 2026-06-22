@@ -197,7 +197,7 @@ releases.
    the next release.
 
 **Rollback:** redeploy the previous prod version by running **CI/CD Production** with the prior
-`v<x.y.z>`.
+`version = <x.y.z>` (same input format as step 3, without a leading `v`).
 
 ## Version Tracking and Change Detection
 

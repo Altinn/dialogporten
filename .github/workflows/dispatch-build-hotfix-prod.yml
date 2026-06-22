@@ -42,6 +42,16 @@ jobs:
       hotfixVersion: ${{ steps.resolve.outputs.hotfixVersion }}
       sha: ${{ steps.resolve.outputs.sha }}
     steps:
+      - name: Validate dispatched ref
+        run: |
+          set -euo pipefail
+          REF='${{ inputs.ref }}'
+          # Allow only operator hotfix branches or an explicit full commit SHA.
+          if [[ ! "$REF" =~ ^hotfix\/[A-Za-z0-9._/-]+$ && ! "$REF" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "::error::Invalid ref '$REF'. Allowed formats: hotfix/<name> or 40-char commit SHA."
+            exit 1
+          fi
+
       - name: "Checkout ref"
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:

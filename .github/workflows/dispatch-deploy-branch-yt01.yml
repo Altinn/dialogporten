@@ -29,14 +29,12 @@ concurrency:
   group: deploy-branch-yt01-${{ inputs.ref }}
   cancel-in-progress: true
 
-# Minimal default; jobs that need more (packages write, Azure OIDC) opt in below.
-permissions:
-  contents: read
-
 jobs:
   resolve:
     name: Resolve image tag from ref
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       imageTag: ${{ steps.resolve.outputs.imageTag }}
     steps:

@@ -30,14 +30,12 @@ concurrency:
   group: hotfix-prod-${{ inputs.ref }}
   cancel-in-progress: false
 
-# Minimal default; jobs that need more (packages/contents write) opt in below.
-permissions:
-  contents: read
-
 jobs:
   resolve:
     name: Resolve hotfix version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       hotfixVersion: ${{ steps.resolve.outputs.hotfixVersion }}
       sha: ${{ steps.resolve.outputs.sha }}
@@ -138,6 +136,8 @@ jobs:
     name: Print next steps
     needs: [resolve, tag-and-release]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Write summary
         env:

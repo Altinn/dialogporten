@@ -59,7 +59,7 @@ public class ServiceResourceQueriesTests
         sender.LastRequest.Should().BeOfType<GetServiceResourceMetadataQuery>();
     }
 
-    private static OptionsMonitorStub<ApplicationSettings> CreateApplicationSettings(
+    private static OptionsSnapshotStub<ApplicationSettings> CreateApplicationSettings(
         bool enableGraphQlAuthorizedServiceResources) =>
         new(new ApplicationSettings
         {
@@ -118,13 +118,12 @@ public class ServiceResourceQueriesTests
             throw new NotSupportedException();
     }
 
-    private sealed class OptionsMonitorStub<TOptions>(TOptions value) : IOptionsMonitor<TOptions>
+    private sealed class OptionsSnapshotStub<TOptions>(TOptions value) : IOptionsSnapshot<TOptions> where TOptions : class
     {
-        public TOptions CurrentValue => value;
+        public TOptions Value => value;
 
         public TOptions Get(string? name) => value;
 
-        public IDisposable OnChange(Action<TOptions, string?> listener) => NullDisposable.Instance;
     }
 
     private sealed class NullDisposable : IDisposable

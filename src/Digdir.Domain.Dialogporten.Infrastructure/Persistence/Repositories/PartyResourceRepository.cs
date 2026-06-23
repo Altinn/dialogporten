@@ -126,35 +126,14 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
             return [];
         }
 
-        const string sql =
-            """
-            WITH input_parties AS (
-                SELECT x."ShortPrefix"
-                     , x."UnprefixedPartyIdentifier"
-                FROM jsonb_to_recordset(@Parties::jsonb)
-                    AS x("ShortPrefix" char(1), "UnprefixedPartyIdentifier" text)
-            )
-            SELECT p."ShortPrefix" AS "ShortPrefix"
-                 , p."UnprefixedPartyIdentifier" AS "UnprefixedPartyIdentifier"
-                 , r."UnprefixedResourceIdentifier" AS "UnprefixedResourceIdentifier"
-            FROM input_parties ip
-            JOIN partyresource."Party" p
-              ON p."ShortPrefix" = ip."ShortPrefix"
-             AND p."UnprefixedPartyIdentifier" = ip."UnprefixedPartyIdentifier"
-            JOIN partyresource."PartyResource" pr
-              ON pr."PartyId" = p."Id"
-            JOIN partyresource."Resource" r
-              ON r."Id" = pr."ResourceId"
-            """;
-
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(
-            sql,
-            new
-            {
-                Parties = JsonSerializer.Serialize(unprefixedParties)
-            },
-            cancellationToken: cancellationToken);
+        // The single-party case is by far the most common; it uses a non-JSON shape with scalar
+        // parameters so the planner gets an accurate cardinality and we avoid jsonb (de)serialization.
+        // Both shapes join the tiny Resource table through a MATERIALIZED CTE, which forces a hash join
+        // instead of a per-row nested loop on PK_Resource (the dominant buffer cost for multi-party sets).
+        var command = unprefixedParties.Count == 1
+            ? BuildSinglePartyCommand(unprefixedParties[0], cancellationToken)
+            : BuildMultiPartyCommand(unprefixedParties, cancellationToken);
         var rows = await connection.QueryAsync<SummaryRow>(command);
 
         return rows
@@ -167,6 +146,74 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
                     .Select(y => y.UnprefixedResourceIdentifier)
                     .ToHashSet(Comparer),
                 Comparer);
+    }
+
+    private static CommandDefinition BuildSinglePartyCommand(
+        UnprefixedParty party,
+        CancellationToken cancellationToken)
+    {
+        const string sql =
+            """
+            WITH res AS MATERIALIZED (
+                SELECT "Id", "UnprefixedResourceIdentifier" FROM partyresource."Resource"
+            )
+            SELECT p."ShortPrefix" AS "ShortPrefix"
+                 , p."UnprefixedPartyIdentifier" AS "UnprefixedPartyIdentifier"
+                 , r."UnprefixedResourceIdentifier" AS "UnprefixedResourceIdentifier"
+            FROM partyresource."Party" p
+            JOIN partyresource."PartyResource" pr
+              ON pr."PartyId" = p."Id"
+            JOIN res r
+              ON r."Id" = pr."ResourceId"
+            WHERE p."ShortPrefix" = @ShortPrefix::char(1)
+              AND p."UnprefixedPartyIdentifier" = @UnprefixedPartyIdentifier
+            """;
+
+        return new CommandDefinition(
+            sql,
+            new
+            {
+                ShortPrefix = party.ShortPrefix.ToString(),
+                party.UnprefixedPartyIdentifier
+            },
+            cancellationToken: cancellationToken);
+    }
+
+    private static CommandDefinition BuildMultiPartyCommand(
+        List<UnprefixedParty> parties,
+        CancellationToken cancellationToken)
+    {
+        const string sql =
+            """
+            WITH input_parties AS (
+                SELECT x."ShortPrefix"
+                     , x."UnprefixedPartyIdentifier"
+                FROM jsonb_to_recordset(@Parties::jsonb)
+                    AS x("ShortPrefix" char(1), "UnprefixedPartyIdentifier" text)
+            ),
+            res AS MATERIALIZED (
+                SELECT "Id", "UnprefixedResourceIdentifier" FROM partyresource."Resource"
+            )
+            SELECT p."ShortPrefix" AS "ShortPrefix"
+                 , p."UnprefixedPartyIdentifier" AS "UnprefixedPartyIdentifier"
+                 , r."UnprefixedResourceIdentifier" AS "UnprefixedResourceIdentifier"
+            FROM input_parties ip
+            JOIN partyresource."Party" p
+              ON p."ShortPrefix" = ip."ShortPrefix"
+             AND p."UnprefixedPartyIdentifier" = ip."UnprefixedPartyIdentifier"
+            JOIN partyresource."PartyResource" pr
+              ON pr."PartyId" = p."Id"
+            JOIN res r
+              ON r."Id" = pr."ResourceId"
+            """;
+
+        return new CommandDefinition(
+            sql,
+            new
+            {
+                Parties = JsonSerializer.Serialize(parties)
+            },
+            cancellationToken: cancellationToken);
     }
 
     private static bool TryNormalizeRequest(

@@ -164,11 +164,13 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, DialogFirstFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GinFirstFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SingleServiceFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiPartyFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SingleServiceStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiPartyStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }

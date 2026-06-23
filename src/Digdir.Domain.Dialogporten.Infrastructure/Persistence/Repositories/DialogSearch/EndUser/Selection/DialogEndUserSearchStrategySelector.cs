@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Sql;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.Selection;
 using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
@@ -26,6 +27,18 @@ internal sealed partial class DialogEndUserSearchStrategySelector(
         if (logger.IsEnabled(LogLevel.Information))
         {
             LogSelectionDiagnostics(context, scoredStrategies, selected);
+        }
+
+        if (selected.Score == QueryStrategyScores.Ineligible)
+        {
+            // No strategy claimed this context. Fail loudly rather than dispatch to an arbitrary
+            // (alphabetically-first) strategy whose BuildSql may throw -> 500 with no diagnostic.
+            throw new InvalidOperationException(
+                "No eligible end-user search strategy for the request "
+                + $"(hasFreeTextSearch={context.Query.Search is not null}, "
+                + $"effectivePartyCount={DialogEndUserSearchSqlHelpers.CountEffectiveParties(context.AuthorizedResources)}, "
+                + $"effectiveServiceCount={DialogEndUserSearchSqlHelpers.CountEffectiveServices(context.AuthorizedResources)}, "
+                + $"delegatedDialogCount={context.AuthorizedResources.DialogIds.Count}).");
         }
 
         return selected.Strategy;

@@ -9,14 +9,14 @@ using Microsoft.Extensions.Options;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 
-internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchContext>
+internal sealed class MultiPartyStrategy : IQueryStrategy<EndUserSearchContext>
 {
     private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
-    private readonly ILogger<GenericPartyDrivenStrategy> _logger;
+    private readonly ILogger<MultiPartyStrategy> _logger;
 
-    public GenericPartyDrivenStrategy(
+    public MultiPartyStrategy(
         IOptionsSnapshot<ApplicationSettings> applicationSettings,
-        ILogger<GenericPartyDrivenStrategy> logger)
+        ILogger<MultiPartyStrategy> logger)
     {
         ArgumentNullException.ThrowIfNull(applicationSettings);
         ArgumentNullException.ThrowIfNull(logger);
@@ -25,10 +25,10 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
         _logger = logger;
     }
 
-    // Generic party-driven fallback strategy for end-user search.
+    // Non-FTS party-driven fallback strategy for end-user search.
     // Drives candidate lookup by party, which is usually preferable when the effective party set is
     // small or the effective service set is too broad for stable service-driven fan-out.
-    public string Name => nameof(GenericPartyDrivenStrategy);
+    public string Name => nameof(MultiPartyStrategy);
 
     public int Score(EndUserSearchContext context)
     {
@@ -37,13 +37,13 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
             return QueryStrategyScores.Ineligible;
         }
 
-        var effectivePartyCount = DialogEndUserSearchSqlHelpers.CountEffectiveParties(context.AuthorizedResources);
-        var effectiveServiceCount = DialogEndUserSearchSqlHelpers.CountEffectiveServices(context.AuthorizedResources);
-
-        return effectivePartyCount <= _applicationSettings.Value.Limits.EndUserSearch.MinServiceDrivenStrategyPartyCount
-               || effectiveServiceCount > _applicationSettings.Value.Limits.EndUserSearch.MaxServiceResourceFilterValues
-            ? QueryStrategyScores.Preferred
-            : QueryStrategyScores.Eligible;
+        // Preferred unless this is service-driven territory (large party set + small service set), where
+        // MultiServiceStrategy is the better driver and this stays an eligible fallback.
+        var limits = _applicationSettings.Value.Limits.EndUserSearch;
+        return DialogEndUserSearchSqlHelpers.IsServiceDrivenTerritory(
+            context.EffectivePartyCount, context.EffectiveServiceCount, limits)
+            ? QueryStrategyScores.Eligible
+            : QueryStrategyScores.Preferred;
     }
 
     public PostgresFormattableStringBuilder BuildSql(EndUserSearchContext context)
@@ -62,7 +62,6 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
         var delegatedDialogIds = authorizedResources.DialogIds.ToArray();
         var hasDelegatedDialogIds = delegatedDialogIds.Length > 0;
         var delegatedCandidateDialogs = BuildDelegatedCandidateDialogs(query, delegatedDialogIds);
-        var postPermissionOrderAndLimit = BuildPostPermissionOrderAndLimit(query);
         var orderColumnSelection = DialogEndUserSearchSqlHelpers.BuildOrderColumnSelection(query.OrderBy!);
 
         return new PostgresFormattableStringBuilder()
@@ -113,12 +112,12 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
             .ApplyPaginationOrder(query.OrderBy!, alias: "cd")
             .ApplyPaginationLimit(query.Limit)
             .Append(
-                $"""
+                """
                 ) cd
                 JOIN "Dialog" d ON d."Id" = cd."Id"
-                {postPermissionOrderAndLimit}
-
-                """);
+                """)
+            .ApplyPaginationOrder(query.OrderBy!, alias: "d")
+            .ApplyPaginationLimit(query.Limit);
     }
 
     private static PostgresFormattableStringBuilder BuildPermissionCandidateDialogs(GetDialogsQuery query)
@@ -168,9 +167,4 @@ internal sealed class GenericPartyDrivenStrategy : IQueryStrategy<EndUserSearchC
                 {permissionCandidateFilters}
                 """);
     }
-
-    private static PostgresFormattableStringBuilder BuildPostPermissionOrderAndLimit(GetDialogsQuery query) =>
-        new PostgresFormattableStringBuilder()
-            .ApplyPaginationOrder(query.OrderBy!, alias: "d")
-            .ApplyPaginationLimit(query.Limit);
 }

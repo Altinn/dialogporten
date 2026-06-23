@@ -237,6 +237,12 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(nameof(IPartyResourceReferenceRepository), new()
         {
+            // High cardinality: one entry per caller party (ps:<hash> keys written by
+            // PartyResourceRepository.GetReferencedResourcesByParty). Keeping these in the in-memory (L1)
+            // tier is unbounded (the shared MemoryCache has no SizeLimit), so working set grows with the
+            // number of distinct parties seen within the cache window. Rely solely on the distributed
+            // (Redis) tier, mirroring the high-cardinality Altinn.Authorization PDP cache above.
+            SkipMemoryCache = true,
             Duration = TimeSpan.FromMinutes(30),
             FailSafeMaxDuration = TimeSpan.FromMinutes(60)
         })

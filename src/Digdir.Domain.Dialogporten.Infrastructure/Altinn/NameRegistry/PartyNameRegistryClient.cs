@@ -115,7 +115,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
         if (name is not null) return FlipNameIfPerson(partyIdentifier, name);
 
-        if (!externalIdWithPrefix.StartsWith(SystemUserIdentifier.Prefix, InvariantCultureIgnoreCase))
+        if (partyIdentifier is not SystemUserIdentifier)
         {
             _logger.LogError(
                 "Failed to get name from party name registry for external id {ExternalId}. Response: {@Response}",
@@ -139,7 +139,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         name = nameLookupRetryResult.Data.FirstOrDefault()?.DisplayName;
 
-        if (name is not null) return FlipNameIfPerson(partyIdentifier, name);
+        if (name is not null) return name; // We are system user here, no need to FlipNameIfPerson
 
         _logger.LogError(
             "Failed to get system name from party name registry for external id {ExternalId}. Response: {@Response}. Retries: 1",

@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.118.1](https://github.com/Altinn/dialogporten/compare/v1.118.0...v1.118.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* skip memory cache in partyserviceresource ([#4154](https://github.com/Altinn/dialogporten/issues/4154)) ([6b2be96](https://github.com/Altinn/dialogporten/commit/6b2be966c588e0402019aeac4c31e69b3a411ffa))
+
+
+### Miscellaneous Chores
+
+* **perf:** optimized FetchResourcesByParty query shape ([#4150](https://github.com/Altinn/dialogporten/issues/4150)) ([07ce4a8](https://github.com/Altinn/dialogporten/commit/07ce4a82e9d53c0bb992cd472cc2a03d9b9b053f))
+* remove refitter from sdk ([#4140](https://github.com/Altinn/dialogporten/issues/4140)) ([f660a57](https://github.com/Altinn/dialogporten/commit/f660a5728c27e7e4437054d2bd8561b843f072eb))
+
 ## [1.118.0](https://github.com/Altinn/dialogporten/compare/v1.117.3...v1.118.0) (2026-06-21)
 
 

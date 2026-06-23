@@ -53,7 +53,11 @@ internal sealed class GetServiceOwnerLabelsQueryHandler : IRequestHandler<GetSer
         return new ServiceOwnerLabelResultDto
         {
             Revision = serviceOwnerContext.Revision,
-            Labels = [.. serviceOwnerContext.ServiceOwnerLabels.OrderBy(x => x.Value).Select(x => x.ToDto())],
+            Labels = [
+                .. serviceOwnerContext.ServiceOwnerLabels
+                    .OrderBy(x => x.Value, StringComparer.Ordinal)
+                    .Select(x => x.ToDto())
+            ],
         };
     }
 }

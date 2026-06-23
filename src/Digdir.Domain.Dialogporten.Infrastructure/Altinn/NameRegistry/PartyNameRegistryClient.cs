@@ -107,11 +107,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         const string apiUrl = "register/api/v1/dialogporten/parties/query";
-        var nameLookupResult = await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
-            apiUrl,
-            nameLookup,
-            serializerOptions: SerializerOptions,
-            cancellationToken: cancellationToken);
+        var nameLookupResult = await PerformPartyNameRequest(apiUrl, nameLookup, cancellationToken);
 
         var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
 
@@ -139,11 +135,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         );
 
         await Task.Delay(retryAfter, cancellationToken);
-        var nameLookupRetryResult = await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
-            apiUrl,
-            nameLookup,
-            serializerOptions: SerializerOptions,
-            cancellationToken: cancellationToken);
+        var nameLookupRetryResult = await PerformPartyNameRequest(apiUrl, nameLookup, cancellationToken);
 
         name = nameLookupRetryResult.Data.FirstOrDefault()?.DisplayName;
 
@@ -156,6 +148,15 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         );
 
         return null;
+    }
+
+    private async Task<NameLookupResult> PerformPartyNameRequest(string apiUrl, NameLookup nameLookup, CancellationToken cancellationToken)
+    {
+        return await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
+            apiUrl,
+            nameLookup,
+            serializerOptions: SerializerOptions,
+            cancellationToken: cancellationToken);
     }
 
     private string FlipNameIfPerson(IPartyIdentifier partyIdentifier, string name)

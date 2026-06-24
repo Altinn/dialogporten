@@ -9,7 +9,8 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Json;
 
 public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
 {
-    private const string JwtBearerAuth = "JWTBearerAuth";
+    public const string IdPortenSecurityScheme = "IdPorten";
+    public const string JwtBearerAuth = "JWTBearerAuth";
     private static readonly HashSet<string> ServiceOwnerSearchPaths = new(StringComparer.OrdinalIgnoreCase)
     {
         "/api/v1/serviceowner/dialogs",
@@ -24,19 +25,28 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
             return true;
         }
 
-        securityRequirement[JwtBearerAuth] =
-            context.OperationDescription.Operation.Tags.FirstOrDefault() switch
+        var tag = context.OperationDescription.Operation.Tags.FirstOrDefault();
+
+        securityRequirement[JwtBearerAuth] = tag switch
+        {
+            var t when string.Equals(t, ServiceOwnerGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
+                => IsServiceOwnerSearchEndpoint(context.OperationDescription)
+                    ? [AuthorizationScope.ServiceProvider, AuthorizationScope.ServiceProviderSearch]
+                    : [AuthorizationScope.ServiceProvider],
+
+            var t when string.Equals(t, EndUserGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
+                => [AuthorizationScope.EndUser],
+
+            _ => value
+        };
+
+        if (string.Equals(tag, EndUserGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            context.OperationDescription.Operation.Security!.Add(new OpenApiSecurityRequirement
             {
-                var tag when string.Equals(tag, ServiceOwnerGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
-                    => IsServiceOwnerSearchEndpoint(context.OperationDescription)
-                        ? new[] { AuthorizationScope.ServiceProvider, AuthorizationScope.ServiceProviderSearch }
-                        : new[] { AuthorizationScope.ServiceProvider },
-
-                var tag when string.Equals(tag, EndUserGroup.RoutePrefix, StringComparison.OrdinalIgnoreCase)
-                    => new[] { AuthorizationScope.EndUser },
-
-                _ => value
-            };
+                [IdPortenSecurityScheme] = [AuthorizationScope.EndUser, AuthorizationScope.EndUserNoConsent]
+            });
+        }
 
         return true;
     }

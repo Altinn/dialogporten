@@ -1,7 +1,11 @@
+using Digdir.Domain.Dialogporten.Application;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
+using Microsoft.AspNetCore.Authorization;
 using NJsonSchema;
 using NSwag;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Json.SecurityRequirementsOperationProcessor;
 
 namespace Digdir.Domain.Dialogporten.WebApi;
 
@@ -42,6 +46,75 @@ public static class OpenApiDocumentExtensions
                 securityScheme.Scheme = "bearer";
             }
         }
+    }
+
+    /// <summary>
+    /// Replaces/Adds the security schemes with hard-coded values instead of letting refitter generate them.
+    /// </summary>
+    /// <param name="openApiDocument"></param>
+    /// <param name="settings"></param>
+    public static void UpsertSecuritySchemes(
+        this OpenApiDocument openApiDocument,
+        DialogportenSwaggerUiSettings settings
+    )
+    {
+        openApiDocument.Components.SecuritySchemes[IdPortenSecurityScheme] = new OpenApiSecurityScheme
+        {
+            ExtensionData = null,
+            Type = OpenApiSecuritySchemeType.OAuth2,
+            Name = "ID-Porten",
+            Description = $"""
+                          Browser login using ID-Porten (OIDC).
+                          - You can obtain a token from ID-Porten using the Authorization Code flow.
+                          - This token can be only be used with the Enduser endpoints.
+                          
+                          Scopes:
+                          - {AuthorizationScope.EndUser}
+                          - {AuthorizationScope.EndUserNoConsent}
+                          """,
+            In = OpenApiSecurityApiKeyLocation.Header,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Flows = new OpenApiOAuthFlows
+            {
+                AuthorizationCode = new OpenApiOAuthFlow
+                {
+                    AuthorizationUrl = settings.IdportenAuthorizationUrl,
+                    TokenUrl = settings.IdportenTokenUrl,
+                    RefreshUrl = null,
+                    Scopes = new Dictionary<string, string>
+                    {
+                        ["openid"] = "Access to core user information",
+                        ["profile"] = "Access to user profile details",
+                        [AuthorizationScope.EndUser] = "Access to dialogporten",
+                        [AuthorizationScope.EndUserNoConsent] = "Access to dialogporten",
+                    }
+                }
+            },
+        };
+        openApiDocument.Components.SecuritySchemes[JwtBearerAuth] = new OpenApiSecurityScheme
+        {
+            ExtensionData = null,
+            Type = OpenApiSecuritySchemeType.Http,
+            Name = "Maskinporten",
+            Description = $"""
+                          Machine login using Maskinporten.
+                          - You can obtain a token from Maskinporten using JWT Bearer Grant (RFC 7523).
+                          - This token can be used for all secured endpoints.
+                          - To use this token with the Enduser API's, you have to register a "system" and "system user".
+                          - Required scopes are listed per endpoint as Security Requirement Objects.
+                          
+                          Please refer to the Dialogporten documentation for how to get tokens and register system users.
+                          Scopes:
+                          - {AuthorizationScope.ServiceProvider}
+                          - {AuthorizationScope.ServiceProviderSearch}
+                          - {AuthorizationScope.ServiceProviderChangeTransmissions}
+                          """,
+            In = OpenApiSecurityApiKeyLocation.Header,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            TokenUrl = settings.MaskinportenTokenUrl,
+        };
     }
 
     public static void AddServiceUnavailableResponse(this OpenApiDocument openApiDocument)

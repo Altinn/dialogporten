@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
@@ -12,8 +10,8 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
@@ -24,11 +22,13 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using NSwag;
+using NSwag.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
+using SwaggerSettings = NSwag.AspNetCore.SwaggerSettings;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -89,6 +89,10 @@ static void BuildAndRun(string[] args)
         ));
     }
 
+    var swaggerUiSettings = builder.Configuration
+        .GetRequiredSection(DialogportenSwaggerUiSettings.ConfigurationSectionName)
+        .Get<DialogportenSwaggerUiSettings>()!;
+
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
@@ -121,15 +125,21 @@ static void BuildAndRun(string[] args)
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, "v1", "Dialogporten");
+            ConfigureOpenApiV1Document(x, swaggerUiSettings, "v1", "Dialogporten");
         })
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
+            ConfigureOpenApiV1Document(x, swaggerUiSettings, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
         })
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, "v1.serviceowner", "Dialogporten ServiceOwner", audience: "serviceowner");
+            ConfigureOpenApiV1Document(
+                x,
+                swaggerUiSettings,
+                "v1.serviceowner",
+                "Dialogporten ServiceOwner",
+                audience: "serviceowner"
+            );
         })
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))
             .AddNewtonsoftJson()
@@ -170,6 +180,8 @@ static void BuildAndRun(string[] args)
         .MapControllers();
 
     var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
+
+    if (swaggerUiSettings?.EnableOidcLogin == true) app.UseStaticFiles();
 
     app.MapScalarApiReference("/scalar", options => options
         .WithTitle("Dialogporten API")
@@ -261,13 +273,32 @@ static void BuildAndRun(string[] args)
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
+            uiConfig.CustomJavaScriptPath = swaggerUiSettings?.EnableOidcLogin == true
+                ? dialogPrefix + "/swagger-oidc-workaround.js"
+                : null;
+            uiConfig.OAuth2Client = new OAuth2ClientSettings
+            {
+                ClientId = swaggerUiSettings?.EnableOidcLogin == true ? swaggerUiSettings.IdportenClientId : null,
+                ClientSecret = null,
+                UsePkceWithAuthorizationCodeGrant = true,
+                Scopes = { "openid", "profile", "digdir:dialogporten" },
+            };
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = swaggerUiSettings?.EnableOidcLogin == true
+                ? swaggerUiSettings.IdportenLogoutUrl
+                : null;
         })
         .UseFeatureMetrics();
 
     app.Run();
 }
 
-static void ConfigureOpenApiV1Document(DocumentOptions options, string documentName, string title, string? audience = null)
+static void ConfigureOpenApiV1Document(
+    DocumentOptions options,
+    DialogportenSwaggerUiSettings swaggerUiSettings,
+    string documentName,
+    string title,
+    string? audience = null
+)
 {
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;
@@ -279,6 +310,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
             document.Generator = null;
             document.MakeCollectionsNullable();
             document.FixJwtBearerCasing();
+            document.UpsertSecuritySchemes(swaggerUiSettings);
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();

@@ -28,6 +28,18 @@ public enum BadDataHandling
     Throw
 }
 
+public sealed class DialogportenSwaggerUiSettings
+{
+    public const string ConfigurationSectionName = "SwaggerUi";
+
+    public required bool EnableOidcLogin { get; init; }
+    public required string? IdportenClientId { get; init; }
+    public required string? IdportenLogoutUrl { get; init; }
+    public required string IdportenAuthorizationUrl { get; init; }
+    public required string IdportenTokenUrl { get; init; }
+    public required string MaskinportenTokenUrl { get; init; }
+}
+
 public sealed class DialogportenSettings
 {
     public required Uri BaseUri { get; init; }

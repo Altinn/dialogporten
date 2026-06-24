@@ -14,13 +14,13 @@ public partial class Queries
 {
     public async Task<ServiceResourceMetadataModel> GetServiceResources(
         [Service] ISender mediator,
-        [Service] IOptionsMonitor<ApplicationSettings> applicationSettings,
+        [Service] IOptionsSnapshot<ApplicationSettings> applicationSettings,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         string[]? parties = null,
         bool includeUnauthorized = false,
         CancellationToken cancellationToken = default)
     {
-        if (includeUnauthorized || !applicationSettings.CurrentValue.FeatureToggle.EnableGraphQlAuthorizedServiceResources)
+        if (includeUnauthorized || !applicationSettings.Value.FeatureToggle.EnableGraphQlAuthorizedServiceResources)
         {
             // Full public catalogue: returns every referenced resource regardless of the caller's
             // authorizations. Parties filter is ignored on this branch.

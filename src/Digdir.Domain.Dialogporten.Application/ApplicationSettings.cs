@@ -19,6 +19,7 @@ public sealed class FeatureToggle
     public bool EnablePartyFiltersForSystemUsers { get; init; }
     public bool EnablePartyFiltersForEmailUsers { get; init; }
     public bool EnablePartyCacheForEmailUsers { get; init; }
+    public bool EnableGraphQlAuthorizedServiceResources { get; init; }
     public bool UseCorrectPersonNameOrdering { get; init; }
 }
 

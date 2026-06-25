@@ -20,41 +20,53 @@ internal sealed class SearchAuthorizedServiceResourcesQueryHandler
     : IRequestHandler<SearchAuthorizedServiceResourcesQuery, SearchAuthorizedServiceResourcesDto>
 {
     private readonly IAuthorizedServiceResourcesProvider _authorizedServiceResourcesProvider;
-    private readonly IServiceResourceMetadataItemBuilder _itemBuilder;
+    private readonly IServiceResourceMetadataCatalogue _catalogue;
 
     public SearchAuthorizedServiceResourcesQueryHandler(
         IAuthorizedServiceResourcesProvider authorizedServiceResourcesProvider,
-        IServiceResourceMetadataItemBuilder itemBuilder)
+        IServiceResourceMetadataCatalogue catalogue)
     {
         ArgumentNullException.ThrowIfNull(authorizedServiceResourcesProvider);
-        ArgumentNullException.ThrowIfNull(itemBuilder);
+        ArgumentNullException.ThrowIfNull(catalogue);
 
         _authorizedServiceResourcesProvider = authorizedServiceResourcesProvider;
-        _itemBuilder = itemBuilder;
+        _catalogue = catalogue;
     }
 
     public async Task<SearchAuthorizedServiceResourcesDto> Handle(
         SearchAuthorizedServiceResourcesQuery request,
         CancellationToken cancellationToken)
     {
-        var resourcesByParty = await _authorizedServiceResourcesProvider
-            .GetAuthorizedServiceResourcesByParty(cancellationToken);
+        // Per-caller authorized + referenced resources (bounded, cached). For callers authorized to a very large
+        // number of parties on an unfiltered request, the provider signals the full catalogue should be returned
+        // instead (the expensive per-party union is skipped).
+        var authorized = await _authorizedServiceResourcesProvider
+            .GetAuthorizedServiceResources(request.Parties, cancellationToken);
 
-        var partyFilter = request.Parties is { Length: > 0 }
-            ? new HashSet<string>(request.Parties, StringComparer.OrdinalIgnoreCase)
-            : null;
-
-        var authorizedResources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var (party, resources) in resourcesByParty)
+        // Select from the shared, pre-sorted, all-language catalogue and prune localizations into fresh
+        // per-request copies. Filtering preserves the catalogue's name/id ordering.
+        var entries = await _catalogue.GetEntries(cancellationToken);
+        IEnumerable<ServiceResourceMetadataCatalogueEntry> selected;
+        if (authorized.IncludeFullCatalogue)
         {
-            if (partyFilter is null || partyFilter.Contains(party))
-            {
-                authorizedResources.UnionWith(resources);
-            }
+            selected = entries;
+        }
+        else
+        {
+            var authorizedSet = new HashSet<string>(authorized.ResourceUrns, StringComparer.OrdinalIgnoreCase);
+            selected = entries.Where(entry => authorizedSet.Contains(entry.ResourceUrn));
         }
 
-        var items = await _itemBuilder.BuildItems(authorizedResources, request.AcceptedLanguages, cancellationToken);
+        // Prune localizations into fresh per-request copies and re-sort by the pruned (requested-language) name
+        // (see ToSortedPrunedItems).
+        var items = selected.ToSortedPrunedItems(request.AcceptedLanguages);
 
-        return new SearchAuthorizedServiceResourcesDto { Items = items };
+        return new SearchAuthorizedServiceResourcesDto
+        {
+            // Only signal the surprising case: the caller got the full catalogue as a fallback (too many
+            // parties) instead of their authorized subset. Null for a normal authorization-scoped result.
+            IsFullCatalogueFallback = authorized.IncludeFullCatalogue ? true : null,
+            Items = items
+        };
     }
 }

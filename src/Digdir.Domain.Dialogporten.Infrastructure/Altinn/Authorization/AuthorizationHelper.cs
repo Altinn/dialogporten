@@ -40,7 +40,7 @@ internal static class AuthorizationHelper
         var result = new DialogSearchAuthorizationResult
         {
             // Pre-size with a reasonable capacity to reduce re-allocations.
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(100)
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>>(100)
         };
 
         if (authorizedParties.AuthorizedParties.Count == 0)
@@ -102,39 +102,99 @@ internal static class AuthorizationHelper
         }
 
         // Step 3: Process each relevant party to aggregate all its authorizations.
-        // This single loop handles role-based resources, direct resources, and instance delegations.
+        // Many parties share the same set of roles/access packages (e.g. the same role across every party a user
+        // represents), which resolve to the same resources. We memoize the role-derived resource set per role-set
+        // so that union is computed once and reused, instead of recomputing it for every party. When a party has
+        // no directly-granted resources we reuse the memoized instance by reference: downstream consumers treat
+        // these sets as read-only and group parties by resource-set equality, so sharing is safe and reduces work.
+        var roleDerivedResourcesByRoleSet = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         foreach (var party in relevantParties)
         {
-            var partyResources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var partySubjects = party.AuthorizedRolesAndAccessPackages
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var roleDerivedResources = ResolveRoleDerivedResources(
+                party.AuthorizedRolesAndAccessPackages, subjectToResources, roleDerivedResourcesByRoleSet);
 
-            // Aggregate resources granted via roles and access packages.
-            foreach (var role in partySubjects)
+            HashSet<string> partyResources;
+            if (party.AuthorizedResources.Count == 0)
             {
-                if (subjectToResources.TryGetValue(role, out var resourcesFromRole))
+                if (roleDerivedResources.Count == 0)
                 {
-                    partyResources.UnionWith(resourcesFromRole);
+                    continue;
+                }
+
+                // No directly-granted resources: reuse the shared, memoized role-derived set as-is.
+                partyResources = roleDerivedResources;
+            }
+            else
+            {
+                // Copy the memoized role-derived set before adding this party's directly-granted resources.
+                partyResources = new HashSet<string>(roleDerivedResources, StringComparer.OrdinalIgnoreCase);
+                foreach (var resource in party.AuthorizedResources)
+                {
+                    if (constraintResourcesSet is null || constraintResourcesSet.Contains(resource))
+                    {
+                        partyResources.Add(resource);
+                    }
+                }
+
+                if (partyResources.Count == 0)
+                {
+                    continue;
                 }
             }
 
-            // Aggregate resources granted directly to the party.
-            foreach (var resource in party.AuthorizedResources)
-            {
-                if (constraintResourcesSet is null || constraintResourcesSet.Contains(resource))
-                {
-                    partyResources.Add(resource);
-                }
-            }
-
-            // If the party has been granted access to any resources, add them to the result.
-            if (partyResources.Count > 0)
-            {
-                result.ResourcesByParties[party.Party] = partyResources;
-            }
+            result.ResourcesByParties[party.Party] = partyResources;
         }
 
         return result;
+    }
+
+    private static readonly HashSet<string> EmptyResources = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Returns the (memoized) union of resources granted by the given set of roles/access packages. Identical
+    /// role-sets share a single computed instance. The returned set must be treated as read-only by callers.
+    /// </summary>
+    private static HashSet<string> ResolveRoleDerivedResources(
+        List<string> rolesAndAccessPackages,
+        Dictionary<string, HashSet<string>> subjectToResources,
+        Dictionary<string, HashSet<string>> roleDerivedResourcesByRoleSet)
+    {
+        if (rolesAndAccessPackages.Count == 0)
+        {
+            return EmptyResources;
+        }
+
+        // Single role is the common case; use it directly as the key to avoid sorting/joining allocations.
+        var roleSetKey = rolesAndAccessPackages.Count == 1
+            ? rolesAndAccessPackages[0]
+            : BuildRoleSetKey(rolesAndAccessPackages);
+
+        if (roleDerivedResourcesByRoleSet.TryGetValue(roleSetKey, out var cached))
+        {
+            return cached;
+        }
+
+        var resources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var subject in rolesAndAccessPackages)
+        {
+            if (subjectToResources.TryGetValue(subject, out var subjectResources))
+            {
+                resources.UnionWith(subjectResources);
+            }
+        }
+
+        roleDerivedResourcesByRoleSet[roleSetKey] = resources;
+        return resources;
+    }
+
+    private static string BuildRoleSetKey(List<string> rolesAndAccessPackages)
+    {
+        var sorted = rolesAndAccessPackages.ToArray();
+        // OrdinalIgnoreCase to match the role-set memo dictionary's comparer (so case-variant role sets resolve
+        // to the same key). Unit separator is not a valid character in role/access-package URNs, so the joined
+        // key is unambiguous.
+        Array.Sort(sorted, StringComparer.OrdinalIgnoreCase);
+        return string.Join('\u001f', sorted);
     }
 
     /// <summary>
@@ -164,13 +224,22 @@ internal static class AuthorizationHelper
             return;
         }
 
-        var distinctResources = result.ResourcesByParties
-            .Values
-            .SelectMany(x => x)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
+        // Compute the distinct authorized resources across all parties. Many parties share the SAME set instance
+        // (ResolveDialogSearchAuthorization memoizes role-derived sets), so dedupe by instance reference first and
+        // union only the distinct instances, instead of enumerating every party's resources.
+        var distinctSetInstances = new HashSet<IReadOnlySet<string>>(ReferenceEqualityComparer.Instance);
+        foreach (var resources in result.ResourcesByParties.Values)
+        {
+            distinctSetInstances.Add(resources);
+        }
 
-        if (distinctResources.Length <= minResourcesPruningThreshold)
+        var distinctResources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var instance in distinctSetInstances)
+        {
+            distinctResources.UnionWith(instance);
+        }
+
+        if (distinctResources.Count <= minResourcesPruningThreshold)
         {
             return;
         }
@@ -180,13 +249,44 @@ internal static class AuthorizationHelper
             distinctResources,
             cancellationToken);
 
-        var prunedEntries = result.ResourcesByParties
-            .Select(x => (x.Key, Resources: existingResourcesByParty.TryGetValue(x.Key, out var existingServices)
-                ? x.Value.Intersect(existingServices, StringComparer.OrdinalIgnoreCase)
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase)
-                : []))
-            .Where(x => x.Resources.Count > 0)
-            .ToList();
+        var prunedEntries = new List<(string Party, HashSet<string> Resources)>(result.ResourcesByParties.Count);
+        foreach (var (party, authorizedResources) in result.ResourcesByParties)
+        {
+            if (!existingResourcesByParty.TryGetValue(party, out var existingServices) || existingServices.Count == 0)
+            {
+                continue;
+            }
+
+            // Intersect two sets directly (probe the larger with the smaller) instead of Enumerable.Intersect,
+            // which would rebuild a set from the second operand on every party. Both operands use
+            // StringComparer.OrdinalIgnoreCase (authorized sets here, referenced sets from PartyResourceRepository),
+            // so membership is comparer-stable regardless of which one is the larger/probed set.
+            IReadOnlySet<string> smaller, larger;
+            if (authorizedResources.Count <= existingServices.Count)
+            {
+                smaller = authorizedResources;
+                larger = existingServices;
+            }
+            else
+            {
+                smaller = existingServices;
+                larger = authorizedResources;
+            }
+
+            var pruned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var resource in smaller)
+            {
+                if (larger.Contains(resource))
+                {
+                    pruned.Add(resource);
+                }
+            }
+
+            if (pruned.Count > 0)
+            {
+                prunedEntries.Add((party, pruned));
+            }
+        }
 
         result.ResourcesByParties.Clear();
         foreach (var (party, services) in prunedEntries)

@@ -30,6 +30,7 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
 
     public async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(List<string> constraintParties, List<string> serviceResources,
         bool includeDialogIds = true,
+        int? minResourcesPruningThreshold = null,
         CancellationToken cancellationToken = default)
     {
 
@@ -44,7 +45,7 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
 
         // Keep the number of parties and resources reasonable
         var allParties = dialogData.Select(x => x.Party).Distinct().Take(1000).ToList();
-        var allResources = dialogData.Select(x => x.ServiceResource).Distinct().Take(1000).ToHashSet();
+        IReadOnlySet<string> allResources = dialogData.Select(x => x.ServiceResource).Distinct().Take(1000).ToHashSet();
 
         var authorizedResources = new DialogSearchAuthorizationResult
         {

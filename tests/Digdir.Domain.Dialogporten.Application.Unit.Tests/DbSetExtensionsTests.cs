@@ -13,13 +13,13 @@ public class DbSetExtensionsTests
         var authorizedResources = new DialogSearchAuthorizationResult
         {
             DialogIds = [Guid.CreateVersion7()],
-            ResourcesByParties = new Dictionary<string, HashSet<string>>
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>>
             {
-                { "Party1", ["Resource1", "Resource2"] },
-                { "Party2", ["Resource1", "Resource2"] },
-                { "Party3", ["Resource1", "Resource2", "Resource3"] },
-                { "Party4", ["Resource3"] },
-                { "Party5", ["Resource4"] }
+                { "Party1", new HashSet<string> { "Resource1", "Resource2" } },
+                { "Party2", new HashSet<string> { "Resource1", "Resource2" } },
+                { "Party3", new HashSet<string> { "Resource1", "Resource2", "Resource3" } },
+                { "Party4", new HashSet<string> { "Resource3" } },
+                { "Party5", new HashSet<string> { "Resource4" } }
             }
         };
 

@@ -12,7 +12,9 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Infrastructure;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
@@ -160,6 +162,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<LocalDevelopmentAltinnAuthorization>()
             .AddScoped<IAltinnAuthorization, RoutedAltinnAuthorization>()
             .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
+            .AddTransient<IServiceResourceMetadataCatalogue, ServiceResourceMetadataCatalogue>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()

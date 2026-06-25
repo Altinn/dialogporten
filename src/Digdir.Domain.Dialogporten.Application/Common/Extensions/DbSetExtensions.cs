@@ -50,12 +50,12 @@ public static class DbSetExtensions
 }
 
 
-public sealed class HashSetEqualityComparer<T> : IEqualityComparer<HashSet<T>>
+public sealed class HashSetEqualityComparer<T> : IEqualityComparer<IReadOnlySet<T>>
 {
-    public bool Equals(HashSet<T>? x, HashSet<T>? y) =>
+    public bool Equals(IReadOnlySet<T>? x, IReadOnlySet<T>? y) =>
         ReferenceEquals(x, y) || (x is not null && y is not null && x.SetEquals(y));
 
-    public int GetHashCode(HashSet<T> obj)
+    public int GetHashCode(IReadOnlySet<T> obj)
     {
         ArgumentNullException.ThrowIfNull(obj);
         unchecked

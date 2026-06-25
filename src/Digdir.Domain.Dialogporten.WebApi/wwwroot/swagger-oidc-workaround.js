@@ -1,3 +1,8 @@
+/**
+ * Modify the query-parameters when doing the OAuth2 authorization request.
+ * - We need to add a nonce for OIDC
+ * - Add the prompt=login to always prompt a login in case logout doesn't work
+ */
 const oriOpen = window.open;
 window.open = function (...args) {
     const url = new URL(args[0]);
@@ -10,6 +15,10 @@ window.open = function (...args) {
     oriOpen.apply(window, args);
 }
 
+/**
+ * Attack a global click listener that scans for logout button clicks
+ * If we clicked a logout button, navigate to the OIDC logout endpoint.
+ */
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;

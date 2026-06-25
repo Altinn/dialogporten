@@ -195,6 +195,7 @@ static void BuildAndRun(string[] args)
                 .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
                 .DisableAgent();
 
+            options.HideTestRequestButton = !openApiSettings.EnableTryItOut;
             options.AddAuthorizationCodeFlow(SecurityRequirementsOperationProcessor.IdportenSecurityScheme,
                 authOptions => authOptions
                     .WithClientId(openApiSettings.IdportenClientId)
@@ -289,7 +290,12 @@ static void BuildAndRun(string[] args)
                 UsePkceWithAuthorizationCodeGrant = true,
                 Scopes = { "openid", "profile", "digdir:dialogporten" },
             };
+            uiConfig.EnableTryItOut = false; // Don't open try-it-out by default (this does not remove the button)
             uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = openApiSettings.IdportenLogoutUrl;
+            if (!openApiSettings.EnableTryItOut)
+            {
+                uiConfig.AdditionalSettings["supportedSubmitMethods"] = new List<string>();
+            }
         })
         .UseFeatureMetrics();
 

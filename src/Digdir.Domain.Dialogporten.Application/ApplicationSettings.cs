@@ -33,6 +33,11 @@ public sealed class DialogportenOpenApiSettings
     public const string ConfigurationSectionName = "OpenApi";
 
     /// <summary>
+    /// Enable/Disable the swagger-ui/scalar try it out feature
+    /// </summary>
+    public required bool EnableTryItOut { get; init; }
+
+    /// <summary>
     /// Prefill a clientId into swagger-ui and scalar, optional.
     /// </summary>
     public required string? IdportenClientId { get; init; }

@@ -7852,7 +7852,7 @@
   },
   "tags": [
     {
-      "description": "Endpoints for service owners to create and manage dialogs. Requires a Maskinporten token with the relevant \u0060digdir:dialogporten.serviceprovider\u0060 scope. The search endpoint additionally requires the \u0060digdir:dialogporten.serviceprovider.search\u0060 scope.",
+      "description": "Endpoints for service owners to create and manage dialogs. Requires a Maskinporten token with the relevant \u0060digdir:dialogporten.serviceprovider\u0060 scope. The search endpoint additionally requires the \u0060digdir:dialogporten.serviceprovider.search\u0060 scope.\n\nA .NET client SDK is available: [Altinn.ApiClients.Dialogporten.ServiceOwner](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.ServiceOwner/).",
       "name": "Serviceowner"
     },
     {

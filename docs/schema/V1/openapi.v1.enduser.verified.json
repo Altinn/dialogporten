@@ -2733,9 +2733,28 @@
       }
     },
     "securitySchemes": {
-      "JWTBearerAuth": {
+      "idporten": {
         "bearerFormat": "JWT",
-        "description": "Enter a JWT token to authorize the requests...",
+        "description": "Browser login using ID-Porten (OIDC).\n- You can obtain a token from ID-Porten using the Authorization Code \u002B PKCE flow.\n- This token can be only be used with the Enduser endpoints.\n\nClaims we look for:\n- pid (identifies the end user)\n\nThere is only one scope available for this security scheme:\n- digdir:dialogporten",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://login.test.idporten.no/authorize",
+            "scopes": {
+              "digdir:dialogporten": "Access to dialogporten"
+            },
+            "tokenUrl": "https://test.idporten.no/token"
+          }
+        },
+        "in": "header",
+        "name": "ID-Porten",
+        "scheme": "bearer",
+        "type": "oauth2"
+      },
+      "maskinporten": {
+        "bearerFormat": "JWT",
+        "description": "Machine login using Maskinporten.\n\n- This is a OAuth2 scheme that uses the JWT Bearer Grant (RFC 7523).\n  We can\u0027t express this flow in the OpenAPI specification. \n  That\u0027s why we use the more generic \u0022Http\u0022 type for this scheme instead.\n  Please refer to the Maskinporten documentation for how to implement this flow.\n- This token can be used for all secured endpoints (enduser and serviceowner).\n- To use this token with the Enduser API\u0027s, you have to register a \u0022system\u0022 and \u0022system user\u0022.\n  Please refer to the Dialogporten documentation for how to register systems and system users.\n- Required scopes are listed per endpoint as Security Requirement Objects.\n\nClaims we look for:\n- pid (identifies the service owner on behalf of the end user)\n- authorization_details (contains the system user ID)\n- consumer (identifies the organization/service owner)\n- email (identifies Email-users in the case the amr claim is Selfregistered-email)\n\nAvailable scopes for this security scheme are:\n- digdir:dialogporten (system user only)\n- digdir:dialogporten.serviceprovider\n- digdir:dialogporten.serviceprovider.search\n- digdir:dialogporten.serviceprovider.changetransmissions",
+        "in": "header",
+        "name": "Maskinporten",
         "scheme": "bearer",
         "type": "http"
       }
@@ -2796,7 +2815,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Authenticated end user is not authorized for the supplied instance reference."
@@ -2833,7 +2852,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3119,7 +3143,7 @@
             "description": "Successfully returned the dialog list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "503": {
             "content": {
@@ -3143,7 +3167,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3193,7 +3222,7 @@
             "description": "Successfully returned the dialog aggregate."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3230,7 +3259,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3283,7 +3317,7 @@
             "description": "Successfully returned the dialog activity list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3320,7 +3354,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3379,7 +3418,7 @@
             "description": "Successfully returned the dialog activity."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
@@ -3416,7 +3455,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3457,7 +3501,7 @@
             "description": "Successfully returned the dialog label assignment log list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3497,7 +3541,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3569,7 +3618,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3632,7 +3681,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3673,7 +3727,7 @@
             "description": "Successfully returned the dialog seen log records."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -3710,7 +3764,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3757,7 +3816,7 @@
             "description": "Successfully returned the dialog seen log record."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -3794,7 +3853,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3847,7 +3911,7 @@
             "description": "Successfully returned the dialog transmission list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3887,7 +3951,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -3946,7 +4015,7 @@
             "description": "Successfully returned the dialog transmission."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
@@ -3986,7 +4055,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -4027,7 +4101,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -4077,7 +4151,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -4104,7 +4183,7 @@
             "description": "The list of authorized parties for the end user"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -4131,7 +4210,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }
@@ -4213,7 +4297,12 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
               "digdir:dialogporten"
             ]
           }

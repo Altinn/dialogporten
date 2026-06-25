@@ -12,8 +12,8 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Json;
 
 public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
 {
-    public const string IdportenSecurityScheme = "Idporten";
-    public const string MaskinportenSecurityScheme = "Maskinporten";
+    public const string IdportenSecurityScheme = "idporten";
+    public const string MaskinportenSecurityScheme = "maskinporten";
     public const string FastEndpointsDefaultSecurityScheme = "JWTBearerAuth";
 
     public bool Process(OperationProcessorContext context)

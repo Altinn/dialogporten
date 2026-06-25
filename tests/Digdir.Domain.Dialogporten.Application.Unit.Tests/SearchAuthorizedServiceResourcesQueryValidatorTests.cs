@@ -39,6 +39,16 @@ public class SearchAuthorizedServiceResourcesQueryValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    [Fact]
+    public void Rejects_Empty_Party_Filter()
+    {
+        // A supplied (non-null) but empty filter must be rejected, not silently normalized to an unfiltered
+        // (full-catalogue) request in the provider. Use null to request the unfiltered result.
+        var result = CreateValidator().Validate(new SearchAuthorizedServiceResourcesQuery { Parties = [] });
+
+        result.IsValid.Should().BeFalse();
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

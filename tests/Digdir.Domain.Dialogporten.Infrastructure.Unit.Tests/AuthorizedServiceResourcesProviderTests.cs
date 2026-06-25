@@ -17,6 +17,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 public class AuthorizedServiceResourcesProviderTests
 {
     private const string Pid = "22834498646";
+    private const string OtherPid = "13213312833";
     private const string PartyA = "urn:altinn:organization:identifier-no:111111111";
     private const string ReferencedResource = "urn:altinn:resource:referenced";
 
@@ -94,6 +95,40 @@ public class AuthorizedServiceResourcesProviderTests
         // Second call for the same caller is served from cache; the upstream authorization runs only once.
         second.ResourceUrns.Should().BeEquivalentTo([ReferencedResource]);
         authorization.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Cache_Is_Keyed_By_Caller_And_Filter()
+    {
+        // One shared cache provider across separate provider instances, so a hit/miss reflects the cache KEY
+        // (caller identity + normalized filter), not instance-local state.
+        var authorization = new CountingAltinnAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
+        });
+        var cacheProvider = CreateCacheProvider();
+
+        AuthorizedServiceResourcesProvider ProviderFor(string pid)
+        {
+            return new AuthorizedServiceResourcesProvider(
+                authorization, CreateUserWithPid(pid), CreateUserParties(partyCount: 1), CreateSettings(), cacheProvider);
+        }
+
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        // Same caller, same (unfiltered) key -> served from cache, factory runs once.
+        await ProviderFor(Pid).GetAuthorizedServiceResources(partyFilter: null, cancellationToken);
+        await ProviderFor(Pid).GetAuthorizedServiceResources(partyFilter: null, cancellationToken);
+        authorization.CallCount.Should().Be(1);
+
+        // A different caller has a different cache key -> the factory runs again (no cross-caller leakage).
+        await ProviderFor(OtherPid).GetAuthorizedServiceResources(partyFilter: null, cancellationToken);
+        authorization.CallCount.Should().Be(2);
+
+        // The same caller with a party filter is keyed separately from its unfiltered entry -> runs again.
+        var filtered = await ProviderFor(Pid).GetAuthorizedServiceResources([PartyA], cancellationToken);
+        authorization.CallCount.Should().Be(3);
+        filtered.ResourceUrns.Should().BeEquivalentTo([ReferencedResource]);
     }
 
     [Fact]

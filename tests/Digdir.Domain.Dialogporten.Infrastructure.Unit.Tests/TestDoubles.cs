@@ -12,16 +12,22 @@ internal static class TestFusionCache
 {
     /// <summary>
     /// An <see cref="IFusionCacheProvider"/> backed by a single in-process <see cref="FusionCache"/> for the
-    /// given cache name (L1-only, no serializer/backplane) — enough to exercise GetOrSet caching behavior.
+    /// given cache name (L1-only, no serializer/backplane) — enough to exercise GetOrSet caching behavior. The
+    /// provider only serves this one cache name, so a component asking for the wrong named cache fails the test.
     /// </summary>
     public static IFusionCacheProvider CreateProvider(string cacheName) =>
-        new StubFusionCacheProvider(new FusionCache(Options.Create(new FusionCacheOptions { CacheName = cacheName })));
+        new StubFusionCacheProvider(cacheName, new FusionCache(Options.Create(new FusionCacheOptions { CacheName = cacheName })));
 }
 
-internal sealed class StubFusionCacheProvider(IFusionCache cache) : IFusionCacheProvider
+internal sealed class StubFusionCacheProvider(string cacheName, IFusionCache cache) : IFusionCacheProvider
 {
-    public IFusionCache GetCache(string cacheName) => cache;
-    public IFusionCache? GetCacheOrNull(string cacheName) => cache;
+    public IFusionCache GetCache(string name) =>
+        name == cacheName
+            ? cache
+            : throw new InvalidOperationException(
+                $"Requested cache '{name}' but this provider only serves '{cacheName}'.");
+
+    public IFusionCache? GetCacheOrNull(string name) => name == cacheName ? cache : null;
 }
 
 internal sealed class StubUser(ClaimsPrincipal principal) : IUser

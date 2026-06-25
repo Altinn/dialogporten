@@ -171,6 +171,60 @@ public class AuthorizationHelperTests
         Assert.DoesNotContain("resourceX", party1);
     }
 
+    [Fact]
+    public async Task PruneUnreferencedResources_PrunesSharedMemoizedSet_PerParty_WithoutMutatingIt()
+    {
+        // party1 and party2 have the same role-set and no direct resources, so resolve gives them ONE shared
+        // role-derived HashSet instance ({resource1, resource2}). Pruning must intersect each party against its
+        // own referenced resources without mutating that shared instance or letting one party affect the other.
+        var authorizedParties = new AuthorizedPartiesResult
+        {
+            AuthorizedParties =
+            [
+                MakeParty("party1", roles: ["role1"], resources: []),
+                MakeParty("party2", roles: ["role1"], resources: [])
+            ]
+        };
+
+        var resolved = await AuthorizationHelper.ResolveDialogSearchAuthorization(
+            authorizedParties,
+            constraintParties: [],
+            constraintResources: [],
+            GetSubjectResources,
+            CancellationToken.None);
+
+        // Same role-set, no direct resources -> one shared instance.
+        var sharedSet = resolved.ResourcesByParties["party1"];
+        Assert.Same(sharedSet, resolved.ResourcesByParties["party2"]);
+
+        var repo = new FakePartyResourceReferenceRepository
+        {
+            ReferencedResourcesByParty = new Dictionary<string, HashSet<string>>
+            {
+                ["party1"] = ["resource1"],
+                ["party2"] = ["resource2"]
+            }
+        };
+
+        // Threshold 0 forces pruning regardless of size.
+        await AuthorizationHelper.PruneUnreferencedResources(
+            resolved,
+            repo,
+            minResourcesPruningThreshold: 0,
+            CancellationToken.None);
+
+        // Each party is pruned to its OWN referenced resource, even though both started from the shared set.
+        Assert.Single(resolved.ResourcesByParties["party1"]);
+        Assert.Contains("resource1", resolved.ResourcesByParties["party1"]);
+        Assert.Single(resolved.ResourcesByParties["party2"]);
+        Assert.Contains("resource2", resolved.ResourcesByParties["party2"]);
+
+        // The shared role-derived instance is untouched (still the full union), so no party corrupted another.
+        Assert.Equal(2, sharedSet.Count);
+        Assert.Contains("resource1", sharedSet);
+        Assert.Contains("resource2", sharedSet);
+    }
+
     private static AuthorizedParty MakeParty(string party, List<string> roles, List<string> resources) => new()
     {
         Party = party,

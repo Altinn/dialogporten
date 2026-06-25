@@ -14,45 +14,61 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
         _options = options.Value;
     }
 
-    internal static readonly Dictionary<string, (ScopeRequirementOperation Operation, string[] Scopes)[]> ScopeRulesByPolicy = new()
-    {
-        [AuthorizationPolicy.EndUser] =
-        [
-            (ScopeRequirementOperation.And, [AuthorizationScope.EndUser])
-        ],
-        [AuthorizationPolicy.ServiceProvider] =
-        [
-            (ScopeRequirementOperation.And, [AuthorizationScope.ServiceProvider])
-        ],
-        [AuthorizationPolicy.ServiceProviderSearch] =
-        [
-            (
-                ScopeRequirementOperation.And,
-                [
-                    AuthorizationScope.ServiceProvider,
-                    AuthorizationScope.ServiceProviderSearch
-                ]
-            )
-        ],
-        [AuthorizationPolicy.NotificationConditionCheck] =
-        [
-            (ScopeRequirementOperation.And, [AuthorizationScope.NotificationConditionCheck])
-        ],
-        [AuthorizationPolicy.ServiceProviderAdmin] =
-        [
-            (
-                ScopeRequirementOperation.And,
-                [
-                    AuthorizationScope.ServiceProvider,
-                    AuthorizationScope.ServiceOwnerAdminScope
-                ]
-            )
-        ],
-        [AuthorizationPolicy.Testing] =
-        [
-            (ScopeRequirementOperation.And, [AuthorizationScope.Testing])
-        ],
-    };
+    /// <summary>
+    /// A map of AuthorizationPolicy to a set of scope rules.
+    /// Used to align the openapi-specification security requirements with the scope requirements of each policy.
+    /// Remember to ipdate this when changing the policy configuration below.
+    /// </summary>
+    internal static readonly Dictionary<string, (ScopeRequirementOperation Operation, string[] Scopes)[]>
+        ScopeRulesByPolicy = new()
+        {
+            [AuthorizationPolicy.EndUser] =
+            [
+                (ScopeRequirementOperation.And, [AuthorizationScope.EndUser])
+            ],
+            [AuthorizationPolicy.ServiceProvider] =
+            [
+                (ScopeRequirementOperation.And, [AuthorizationScope.ServiceProvider])
+            ],
+            [AuthorizationPolicy.ServiceProviderSearch] =
+            [
+                (
+                    ScopeRequirementOperation.And,
+                    [
+                        AuthorizationScope.ServiceProvider,
+                        AuthorizationScope.ServiceProviderSearch
+                    ]
+                )
+            ],
+            [AuthorizationPolicy.ServiceProviderChangeTransmissions] =
+            [
+                (
+                    ScopeRequirementOperation.And,
+                    [
+                        AuthorizationScope.ServiceProvider,
+                        AuthorizationScope.ServiceProviderChangeTransmissions
+                    ]
+                )
+            ],
+            [AuthorizationPolicy.NotificationConditionCheck] =
+            [
+                (ScopeRequirementOperation.And, [AuthorizationScope.NotificationConditionCheck])
+            ],
+            [AuthorizationPolicy.ServiceProviderAdmin] =
+            [
+                (
+                    ScopeRequirementOperation.And,
+                    [
+                        AuthorizationScope.ServiceProvider,
+                        AuthorizationScope.ServiceOwnerAdminScope
+                    ]
+                )
+            ],
+            [AuthorizationPolicy.Testing] =
+            [
+                (ScopeRequirementOperation.And, [AuthorizationScope.Testing])
+            ],
+        };
 
     public void Configure(AuthorizationOptions options)
     {
@@ -89,9 +105,9 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
             .RequireScope(AuthorizationScope.ServiceProviderSearch));
 
-        options.AddPolicy(AuthorizationPolicy.Testing, builder => builder
-            .Combine(options.DefaultPolicy)
-            .RequireScope(AuthorizationScope.Testing));
+        options.AddPolicy(AuthorizationPolicy.ServiceProviderChangeTransmissions, builder => builder
+            .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
+            .RequireScope(AuthorizationScope.ServiceProviderChangeTransmissions));
 
         options.AddPolicy(AuthorizationPolicy.NotificationConditionCheck, builder => builder
             .Combine(options.DefaultPolicy)

@@ -17,7 +17,8 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
     /// <summary>
     /// A map of AuthorizationPolicy to a set of scope rules.
     /// Used to align the openapi-specification security requirements with the scope requirements of each policy.
-    /// Remember to ipdate this when changing the policy configuration below.
+    /// Remember to update this when changing the policy configuration below.
+    /// You should also include any application level scope checks in this map.
     /// </summary>
     internal static readonly Dictionary<string, (ScopeRequirementOperation Operation, string[] Scopes)[]>
         ScopeRulesByPolicy = new()

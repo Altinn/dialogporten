@@ -98,6 +98,26 @@ public class AuthorizedServiceResourcesProviderTests
     }
 
     [Fact]
+    public async Task Makes_The_Caller_Principal_Available_To_The_Factory()
+    {
+        // The cache factory can run detached from the request (eager refresh / soft-timeout background
+        // completion), where HttpContext-based principal resolution is unavailable. The provider must flow the
+        // caller's principal into the factory so the downstream authorization calls can resolve it.
+        var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimsPrincipalExtensions.PidClaim, Pid)]));
+        var authorization = new CountingAltinnAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
+        });
+        var provider = new AuthorizedServiceResourcesProvider(
+            authorization, new StubUser(principal), CreateUserParties(partyCount: 1), CreateSettings(), CreateCacheProvider());
+
+        await provider.GetAuthorizedServiceResources(partyFilter: null, TestContext.Current.CancellationToken);
+
+        // The factory established AmbientUserPrincipal before resolving, so the authorization call saw the caller.
+        authorization.AmbientPrincipalDuringCall.Should().BeSameAs(principal);
+    }
+
+    [Fact]
     public async Task Cache_Is_Keyed_By_Caller_And_Filter()
     {
         // One shared cache provider across separate provider instances, so a hit/miss reflects the cache KEY
@@ -205,6 +225,7 @@ public class AuthorizedServiceResourcesProviderTests
         public bool? LastIncludeDialogIds { get; private set; }
         public List<string>? LastConstraintParties { get; private set; }
         public int? LastMinResourcesPruningThreshold { get; private set; }
+        public ClaimsPrincipal? AmbientPrincipalDuringCall { get; private set; }
 
         public Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
             List<string> constraintParties,
@@ -217,6 +238,7 @@ public class AuthorizedServiceResourcesProviderTests
             LastIncludeDialogIds = includeDialogIds;
             LastConstraintParties = constraintParties;
             LastMinResourcesPruningThreshold = minResourcesPruningThreshold;
+            AmbientPrincipalDuringCall = AmbientUserPrincipal.Current;
 
             // Honor the pushed-down party constraint, like the production AltinnAuthorizationClient and
             // LocalDevelopmentAltinnAuthorization do, so the provider can trust the constraint and the result is

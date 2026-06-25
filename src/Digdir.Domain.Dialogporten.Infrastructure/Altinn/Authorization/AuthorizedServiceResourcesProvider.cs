@@ -52,9 +52,10 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
         string[]? partyFilter,
         CancellationToken cancellationToken)
     {
-        // Resolve the end-user party identifier first (throws if the principal is not an end user) so unauthorized
-        // principals fail before any cache access and are never cached.
-        var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifierOrThrow();
+        // Resolve the principal on the request thread (throws if it is not an end user) so unauthorized principals
+        // fail before any cache access and are never cached.
+        var principal = _user.GetPrincipal();
+        var partyIdentifier = principal.GetEndUserPartyIdentifierOrThrow();
 
         // Normalize the optional party filter so semantically-equal filters share a cache entry.
         var normalizedFilter = NormalizeFilter(partyFilter);
@@ -64,7 +65,15 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
         // request it is the tiny "return the full catalogue" signal (the expensive per-party pruning is skipped).
         return await _cache.GetOrSetAsync<AuthorizedServiceResources>(
             GetCacheKey(partyIdentifier.FullId, normalizedFilter),
-            ct => ResolveAuthorizedServiceResources(normalizedFilter, ct),
+            async ct =>
+            {
+                // The factory may run detached from the request (eager refresh / soft-timeout background
+                // completion), where HttpContext — and thus IUser.GetPrincipal() — is no longer available. The
+                // downstream resolution (IUserParties / IAltinnAuthorization) needs the principal, so flow the
+                // request-thread principal into the factory's execution context.
+                using var _ = AmbientUserPrincipal.Use(principal);
+                return await ResolveAuthorizedServiceResources(normalizedFilter, ct);
+            },
             token: cancellationToken);
     }
 

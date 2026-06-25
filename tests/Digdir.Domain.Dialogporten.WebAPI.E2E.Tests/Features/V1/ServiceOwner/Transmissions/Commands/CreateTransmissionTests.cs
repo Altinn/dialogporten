@@ -38,8 +38,8 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
-        content.Attachments.Should().ContainSingle().Which.Name.Should().Be(transmissionAttachmentName);
+        response.Content.Should().NotBeNull();
+        response.Content.Attachments.Should().ContainSingle().Which.Name.Should().Be(transmissionAttachmentName);
     }
 
     [E2EFact(SkipOnEnvironments = ["yt01"])]

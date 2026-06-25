@@ -114,7 +114,7 @@ jobs:
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' )}}
     with:
       version: ${{ github.event.client_payload.version }}-rc+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

@@ -84,11 +84,11 @@ The following files are manually maintained SDK client files that mirror the Web
 
 | File | Project | Description |
 |------|---------|-------------|
-| `src/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/RefitterInterface.cs` | EndUser SDK | Refit interfaces for the end-user API |
-| `src/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/RefitterInterfaceContracts.cs` | EndUser SDK | DTO contracts for the end-user API |
-| `src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/RefitterInterface.cs` | ServiceOwner SDK | Refit interfaces for the service-owner API |
-| `src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/RefitterInterfaceContracts.cs` | ServiceOwner SDK | DTO contracts for the service-owner API |
-| `src/Digdir.Library.Dialogporten.WebApiClient/Features/V1/RefitterInterface.cs` | ServiceOwner SDK (legacy) | Refit interfaces for the legacy service-owner API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/RefitterInterface.cs` | EndUser SDK | Refit interfaces for the end-user API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/RefitterInterfaceContracts.cs` | EndUser SDK | DTO contracts for the end-user API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/RefitterInterface.cs` | ServiceOwner SDK | Refit interfaces for the service-owner API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/RefitterInterfaceContracts.cs` | ServiceOwner SDK | DTO contracts for the service-owner API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Features/V1/RefitterInterface.cs` | ServiceOwner SDK (legacy) | Refit interfaces for the legacy service-owner API |
 
 What triggers an update:
 - Adding or removing an API endpoint

@@ -43,9 +43,8 @@ internal sealed class SearchAuthorizedServiceResourcesQueryHandler
         var authorized = await _authorizedServiceResourcesProvider
             .GetAuthorizedServiceResources(request.Parties, cancellationToken);
 
-        // Select from the shared, pre-sorted, all-language catalogue and prune localizations into fresh
-        // per-request copies. Filtering preserves the catalogue's name/id ordering.
-        var entries = await _catalogue.GetEntries(cancellationToken);
+        // Select from the shared, all-language catalogue. Localization pruning and requested-language sorting are
+        // applied below via ToSortedPrunedItems; filtering here only selects which entries to include.
         IEnumerable<ServiceResourceMetadataCatalogueEntry> selected;
         if (authorized.IncludeFullCatalogue)
         {

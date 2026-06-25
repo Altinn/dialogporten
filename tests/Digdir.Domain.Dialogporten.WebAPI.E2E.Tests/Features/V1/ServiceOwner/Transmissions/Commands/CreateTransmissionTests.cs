@@ -47,6 +47,47 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+
+        var (firstTransmission, secondTransmission) = CreateTransmissionRequests();
+
+        // Act
+        var firstCreateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(
+                dialogId,
+                firstTransmission,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+        firstCreateResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
+
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(firstCreateResponse.Content),
+            fileNameSuffix: "created-response");
+
+        var secondCreateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(
+                dialogId,
+                secondTransmission,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+        secondCreateResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
+
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(
+                dialogId,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        response.Content.Should().NotBeNull();
+
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(response.Content));
+    }
+
+    private static (V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest firstTransmission,
+        V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest secondTransmission) CreateTransmissionRequests()
+    {
         var parentTransmissionId = Guid.CreateVersion7();
 
         // First (parent) transmission: service owner sender, title + summary + content reference,
@@ -147,37 +188,6 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             ]
         };
 
-        // Act
-        var firstCreateResponse = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(
-                dialogId,
-                firstTransmission,
-                if_Match: null,
-                TestContext.Current.CancellationToken);
-        firstCreateResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
-
-        await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(firstCreateResponse.Content),
-            fileNameSuffix: "created-response");
-
-        var secondCreateResponse = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(
-                dialogId,
-                secondTransmission,
-                if_Match: null,
-                TestContext.Current.CancellationToken);
-        secondCreateResponse.ShouldHaveStatusCode(HttpStatusCode.Created);
-
-        var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsQueriesSearchTransmissionsDialogTransmission(
-                dialogId,
-                TestContext.Current.CancellationToken);
-
-        // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        response.Content.Should().NotBeNull();
-
-        await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(response.Content));
+        return (firstTransmission, secondTransmission);
     }
 }

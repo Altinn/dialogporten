@@ -1,6 +1,8 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+﻿using Azure;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Extensions.SecurityRequirementExtensions;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 
@@ -12,6 +14,46 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
     {
         _options = options.Value;
     }
+
+    internal static readonly Dictionary<string, (ScopeRequirementOperation Operation, string[] Scopes)[]> ScopeRulesByPolicy = new()
+    {
+        [AuthorizationPolicy.EndUser] =
+        [
+            (ScopeRequirementOperation.And, [AuthorizationScope.EndUser])
+        ],
+        [AuthorizationPolicy.ServiceProvider] =
+        [
+            (ScopeRequirementOperation.And, [AuthorizationScope.ServiceProvider])
+        ],
+        [AuthorizationPolicy.ServiceProviderSearch] =
+        [
+            (
+                ScopeRequirementOperation.And,
+                [
+                    AuthorizationScope.ServiceProvider,
+                    AuthorizationScope.ServiceProviderSearch
+                ]
+            )
+        ],
+        [AuthorizationPolicy.NotificationConditionCheck] =
+        [
+            (ScopeRequirementOperation.And, [AuthorizationScope.NotificationConditionCheck])
+        ],
+        [AuthorizationPolicy.ServiceProviderAdmin] =
+        [
+            (
+                ScopeRequirementOperation.And,
+                [
+                    AuthorizationScope.ServiceProvider,
+                    AuthorizationScope.ServiceOwnerAdminScope
+                ]
+            )
+        ],
+        [AuthorizationPolicy.Testing] =
+        [
+            (ScopeRequirementOperation.And, [AuthorizationScope.Testing])
+        ],
+    };
 
     public void Configure(AuthorizationOptions options)
     {

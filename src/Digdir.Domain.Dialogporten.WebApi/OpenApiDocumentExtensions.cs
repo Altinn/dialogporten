@@ -53,24 +53,26 @@ public static class OpenApiDocumentExtensions
     /// </summary>
     /// <param name="openApiDocument"></param>
     /// <param name="settings"></param>
-    public static void UpsertSecuritySchemes(
+    public static void PostProcessSecuritySchemes(
         this OpenApiDocument openApiDocument,
-        DialogportenSwaggerUiSettings settings
+        DialogportenOpenApiSettings settings
     )
     {
-        openApiDocument.Components.SecuritySchemes[IdPortenSecurityScheme] = new OpenApiSecurityScheme
+        openApiDocument.Components.SecuritySchemes[IdportenSecurityScheme] = new OpenApiSecurityScheme
         {
             ExtensionData = null,
             Type = OpenApiSecuritySchemeType.OAuth2,
             Name = "ID-Porten",
             Description = $"""
                           Browser login using ID-Porten (OIDC).
-                          - You can obtain a token from ID-Porten using the Authorization Code flow.
+                          - You can obtain a token from ID-Porten using the Authorization Code + PKCE flow.
                           - This token can be only be used with the Enduser endpoints.
                           
-                          Scopes:
+                          Claims we look for:
+                          - pid (identifies the end user)
+                          
+                          There is only one scope available for this security scheme:
                           - {AuthorizationScope.EndUser}
-                          - {AuthorizationScope.EndUserNoConsent}
                           """,
             In = OpenApiSecurityApiKeyLocation.Header,
             Scheme = "bearer",
@@ -84,28 +86,37 @@ public static class OpenApiDocumentExtensions
                     RefreshUrl = null,
                     Scopes = new Dictionary<string, string>
                     {
-                        ["openid"] = "Access to core user information",
-                        ["profile"] = "Access to user profile details",
                         [AuthorizationScope.EndUser] = "Access to dialogporten",
-                        [AuthorizationScope.EndUserNoConsent] = "Access to dialogporten",
                     }
                 }
             },
         };
-        openApiDocument.Components.SecuritySchemes[JwtBearerAuth] = new OpenApiSecurityScheme
+        openApiDocument.Components.SecuritySchemes.Remove(FastEndpointsDefaultSecurityScheme);
+        openApiDocument.Components.SecuritySchemes[MaskinportenSecurityScheme] = new OpenApiSecurityScheme
         {
             ExtensionData = null,
             Type = OpenApiSecuritySchemeType.Http,
             Name = "Maskinporten",
             Description = $"""
                           Machine login using Maskinporten.
-                          - You can obtain a token from Maskinporten using JWT Bearer Grant (RFC 7523).
-                          - This token can be used for all secured endpoints.
+                          
+                          - This is a OAuth2 scheme that uses the JWT Bearer Grant (RFC 7523).
+                            We can't express this flow in the OpenAPI specification. 
+                            That's why we use the more generic "Http" type for this scheme instead.
+                            Please refer to the Maskinporten documentation for how to implement this flow.
+                          - This token can be used for all secured endpoints (enduser and serviceowner).
                           - To use this token with the Enduser API's, you have to register a "system" and "system user".
+                            Please refer to the Dialogporten documentation for how to register systems and system users.
                           - Required scopes are listed per endpoint as Security Requirement Objects.
                           
-                          Please refer to the Dialogporten documentation for how to get tokens and register system users.
-                          Scopes:
+                          Claims we look for:
+                          - pid (identifies the service owner on behalf of the end user)
+                          - authorization_details (contains the system user ID)
+                          - consumer (identifies the organization/service owner)
+                          - email (identifies Email-users in the case the amr claim is Selfregistered-email)
+                          
+                          Available scopes for this security scheme are:
+                          - {AuthorizationScope.EndUser} (system user only)
                           - {AuthorizationScope.ServiceProvider}
                           - {AuthorizationScope.ServiceProviderSearch}
                           - {AuthorizationScope.ServiceProviderChangeTransmissions}
@@ -114,6 +125,7 @@ public static class OpenApiDocumentExtensions
             Scheme = "bearer",
             BearerFormat = "JWT",
             TokenUrl = settings.MaskinportenTokenUrl,
+            Flows = null
         };
     }
 

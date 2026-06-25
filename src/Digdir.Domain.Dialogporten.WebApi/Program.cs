@@ -28,7 +28,6 @@ using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
-using SwaggerSettings = NSwag.AspNetCore.SwaggerSettings;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -89,9 +88,9 @@ static void BuildAndRun(string[] args)
         ));
     }
 
-    var swaggerUiSettings = builder.Configuration
-        .GetRequiredSection(DialogportenSwaggerUiSettings.ConfigurationSectionName)
-        .Get<DialogportenSwaggerUiSettings>()!;
+    var openApiSettings = builder.Configuration
+        .GetRequiredSection(DialogportenOpenApiSettings.ConfigurationSectionName)
+        .Get<DialogportenOpenApiSettings>()!;
 
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
@@ -125,17 +124,17 @@ static void BuildAndRun(string[] args)
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, swaggerUiSettings, "v1", "Dialogporten");
+            ConfigureOpenApiV1Document(x, openApiSettings, "v1", "Dialogporten");
         })
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, swaggerUiSettings, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
+            ConfigureOpenApiV1Document(x, openApiSettings, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
         })
         .SwaggerDocument(x =>
         {
             ConfigureOpenApiV1Document(
                 x,
-                swaggerUiSettings,
+                openApiSettings,
                 "v1.serviceowner",
                 "Dialogporten ServiceOwner",
                 audience: "serviceowner"
@@ -181,19 +180,28 @@ static void BuildAndRun(string[] args)
 
     var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
 
-    if (swaggerUiSettings?.EnableOidcLogin == true) app.UseStaticFiles();
+    app.UseStaticFiles();
+    app.MapScalarApiReference("/scalar", options =>
+        {
+            options
+                .WithTitle("Dialogporten API")
+                // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
+                // the base path it auto-detects (window.location.pathname minus the server request path).
+                // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
+                // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
+                .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+                .AddDocument("v1", "Dialogporten - EndUser/ServiceOwner combined (legacy)")
+                .AddDocument("v1.enduser", "Dialogporten EndUser")
+                .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
+                .DisableAgent();
 
-    app.MapScalarApiReference("/scalar", options => options
-        .WithTitle("Dialogporten API")
-        // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
-        // the base path it auto-detects (window.location.pathname minus the server request path).
-        // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
-        // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
-        .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
-        .AddDocument("v1", "Dialogporten - EndUser/ServiceOwner combined (legacy)")
-        .AddDocument("v1.enduser", "Dialogporten EndUser")
-        .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
-        .DisableAgent());
+            options.AddAuthorizationCodeFlow(SecurityRequirementsOperationProcessor.IdportenSecurityScheme,
+                authOptions => authOptions
+                    .WithClientId(openApiSettings.IdportenClientId)
+                    .WithAuthorizationUrl(openApiSettings.IdportenAuthorizationUrl + "?prompt=login")
+            );
+        }
+    );
 
     app.UseHttpsRedirection();
     // Wraps the response body before any downstream middleware writes. Must precede
@@ -273,19 +281,15 @@ static void BuildAndRun(string[] args)
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
-            uiConfig.CustomJavaScriptPath = swaggerUiSettings?.EnableOidcLogin == true
-                ? dialogPrefix + "/swagger-oidc-workaround.js"
-                : null;
+            uiConfig.CustomJavaScriptPath = dialogPrefix + "/swagger-oidc-workaround.js";
             uiConfig.OAuth2Client = new OAuth2ClientSettings
             {
-                ClientId = swaggerUiSettings?.EnableOidcLogin == true ? swaggerUiSettings.IdportenClientId : null,
+                ClientId = openApiSettings.IdportenClientId,
                 ClientSecret = null,
                 UsePkceWithAuthorizationCodeGrant = true,
                 Scopes = { "openid", "profile", "digdir:dialogporten" },
             };
-            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = swaggerUiSettings?.EnableOidcLogin == true
-                ? swaggerUiSettings.IdportenLogoutUrl
-                : null;
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = openApiSettings.IdportenLogoutUrl;
         })
         .UseFeatureMetrics();
 
@@ -294,7 +298,7 @@ static void BuildAndRun(string[] args)
 
 static void ConfigureOpenApiV1Document(
     DocumentOptions options,
-    DialogportenSwaggerUiSettings swaggerUiSettings,
+    DialogportenOpenApiSettings openApiSettings,
     string documentName,
     string title,
     string? audience = null
@@ -310,7 +314,7 @@ static void ConfigureOpenApiV1Document(
             document.Generator = null;
             document.MakeCollectionsNullable();
             document.FixJwtBearerCasing();
-            document.UpsertSecuritySchemes(swaggerUiSettings);
+            document.PostProcessSecuritySchemes(openApiSettings);
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();

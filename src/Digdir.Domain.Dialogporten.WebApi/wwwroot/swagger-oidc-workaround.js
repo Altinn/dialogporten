@@ -14,9 +14,14 @@ document.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
     if (!(/logout/i.test(btn.textContent))) return;
-    if (!ui.getState().hasIn(['auth', 'authorized', 'AuthorizationCode'])) return;
+    if (!ui.getState().hasIn(['auth', 'authorized', 'AuthorizationCode', 'clientId'])) return;
 
-    const logoutUrl = ui.getConfigs().SWAGGER_IDPORTEN_LOGOUT_URL.replace(/\+$/, "");
+    const logoutUrl = ui.getConfigs().SWAGGER_IDPORTEN_LOGOUT_URL?.replace(/\+$/, "");
+    if (!logoutUrl) {
+        console.error("SWAGGER_IDPORTEN_LOGOUT_URL is missing, can't log out properly")
+        return;
+    }
+
     const clientId = ui.getState().getIn(['auth', 'authorized', 'AuthorizationCode', 'clientId']);
     const logoutRedirectUri = `${encodeURIComponent(window.location.origin)}/swagger/index.html`;
     const params = {

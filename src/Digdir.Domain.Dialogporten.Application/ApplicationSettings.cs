@@ -28,15 +28,33 @@ public enum BadDataHandling
     Throw
 }
 
-public sealed class DialogportenSwaggerUiSettings
+public sealed class DialogportenOpenApiSettings
 {
     public const string ConfigurationSectionName = "SwaggerUi";
 
-    public required bool EnableOidcLogin { get; init; }
+    /// <summary>
+    /// Prefill a clientId into swagger-ui and scalar, optional.
+    /// </summary>
     public required string? IdportenClientId { get; init; }
-    public required string? IdportenLogoutUrl { get; init; }
+
+    /// <summary>
+    /// Swagger-ui can't clear it's session properly. It needs a logout url.
+    /// </summary>
+    public required string IdportenLogoutUrl { get; init; }
+
+    /// <summary>
+    /// Authorization URL for the OpenAPI Specification security scheme "idporten"
+    /// </summary>
     public required string IdportenAuthorizationUrl { get; init; }
+
+    /// <summary>
+    /// Token URL for the OpenAPI Specification security scheme "idporten"
+    /// </summary>
     public required string IdportenTokenUrl { get; init; }
+
+    /// <summary>
+    /// Token URL for the OpenAPI Specification security scheme "maskinporten"
+    /// </summary>
     public required string MaskinportenTokenUrl { get; init; }
 }
 

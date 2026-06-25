@@ -30,7 +30,7 @@ public enum BadDataHandling
 
 public sealed class DialogportenOpenApiSettings
 {
-    public const string ConfigurationSectionName = "SwaggerUi";
+    public const string ConfigurationSectionName = "OpenApi";
 
     /// <summary>
     /// Prefill a clientId into swagger-ui and scalar, optional.

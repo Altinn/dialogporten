@@ -1,5 +1,4 @@
-﻿using Azure;
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Extensions.SecurityRequirementExtensions;

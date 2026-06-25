@@ -8,26 +8,26 @@ public class BulkSetSystemLabel
     /// List of target dialog ids with optional revision ids
     /// </summary>
     [JsonPropertyName("dialogs")]
-    public ICollection<DialogRevision>? Dialogs { get; set; }
+    public ICollection<DialogRevision> Dialogs { get; set; } = [];
 
     /// <summary>
     /// List of system labels to set on target dialogs
     /// </summary>
     [JsonPropertyName("systemLabels")]
     [Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-    public ICollection<SystemLabel>? SystemLabels { get; set; }
+    public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 
     /// <summary>
     /// List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
     /// </summary>
     [JsonPropertyName("addLabels")]
-    public ICollection<SystemLabel>? AddLabels { get; set; }
+    public ICollection<SystemLabel> AddLabels { get; set; } = [];
 
     /// <summary>
     /// List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
     /// </summary>
     [JsonPropertyName("removeLabels")]
-    public ICollection<SystemLabel>? RemoveLabels { get; set; }
+    public ICollection<SystemLabel> RemoveLabels { get; set; } = [];
 }
 
 public class SetDialogSystemLabelRequest
@@ -37,19 +37,19 @@ public class SetDialogSystemLabelRequest
     /// </summary>
     [JsonPropertyName("systemLabels")]
     [Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-    public ICollection<SystemLabel>? SystemLabels { get; set; }
+    public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 
     /// <summary>
     /// List of system labels to add to the target dialog. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
     /// </summary>
     [JsonPropertyName("addLabels")]
-    public ICollection<SystemLabel>? AddLabels { get; set; }
+    public ICollection<SystemLabel> AddLabels { get; set; } = [];
 
     /// <summary>
     /// List of system labels to remove from the target dialog. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
     /// </summary>
     [JsonPropertyName("removeLabels")]
-    public ICollection<SystemLabel>? RemoveLabels { get; set; }
+    public ICollection<SystemLabel> RemoveLabels { get; set; } = [];
 }
 
 public class DialogRevision

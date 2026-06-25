@@ -165,13 +165,13 @@ public class DialogSearchItem
     /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     [JsonPropertyName("seenSinceLastUpdate")]
-    public ICollection<DialogSeenLog>? SeenSinceLastUpdate { get; set; }
+    public ICollection<DialogSeenLog> SeenSinceLastUpdate { get; set; } = [];
 
     /// <summary>
     /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
     /// </summary>
     [JsonPropertyName("seenSinceLastContentUpdate")]
-    public ICollection<DialogSeenLog>? SeenSinceLastContentUpdate { get; set; }
+    public ICollection<DialogSeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 
     /// <summary>
     /// Indicates whether a dialog has been seen since its last content update.

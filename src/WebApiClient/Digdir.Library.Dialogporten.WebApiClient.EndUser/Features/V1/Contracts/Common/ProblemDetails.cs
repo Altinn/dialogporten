@@ -14,7 +14,7 @@ public class ProblemDetailsError
     public string? Detail { get; set; }
 
     [JsonPropertyName("paths")]
-    public ICollection<string>? Paths { get; set; }
+    public ICollection<string> Paths { get; set; } = [];
 
     [JsonExtensionData]
     public IDictionary<string, object> AdditionalProperties { get; set; } = new Dictionary<string, object>();
@@ -47,7 +47,7 @@ public class ProblemDetails
     public string? TraceId { get; set; }
 
     [JsonPropertyName("validationErrors")]
-    public ICollection<ProblemDetailsError>? ValidationErrors { get; set; }
+    public ICollection<ProblemDetailsError> ValidationErrors { get; set; } = [];
 
     [JsonPropertyName("errors")]
     public IDictionary<string, ICollection<string>> Errors { get; set; } = null!;

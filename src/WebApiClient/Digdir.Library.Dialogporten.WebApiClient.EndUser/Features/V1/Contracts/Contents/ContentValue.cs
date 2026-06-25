@@ -8,7 +8,7 @@ public class ContentValue
     /// A list of localizations for the content.
     /// </summary>
     [JsonPropertyName("value")]
-    public ICollection<Localization>? Value { get; set; }
+    public ICollection<Localization> Value { get; set; } = [];
 
     /// <summary>
     /// Media type of the content, this can also indicate that the content is embeddable.

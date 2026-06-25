@@ -5,7 +5,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.ServiceRe
 public class ServiceResourceMetadataList
 {
     [JsonPropertyName("items")]
-    public ICollection<ServiceResourceMetadata>? Items { get; set; }
+    public ICollection<ServiceResourceMetadata> Items { get; set; } = [];
 }
 
 public class ServiceResourceMetadata

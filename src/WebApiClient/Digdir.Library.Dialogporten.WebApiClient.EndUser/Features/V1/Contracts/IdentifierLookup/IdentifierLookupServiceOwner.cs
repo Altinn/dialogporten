@@ -11,5 +11,5 @@ public class IdentifierLookupServiceOwner
     public string Code { get; set; } = null!;
 
     [JsonPropertyName("name")]
-    public ICollection<Localization>? Name { get; set; }
+    public ICollection<Localization> Name { get; set; } = [];
 }

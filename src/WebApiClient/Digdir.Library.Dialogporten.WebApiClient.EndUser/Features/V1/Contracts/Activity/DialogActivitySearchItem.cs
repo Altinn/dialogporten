@@ -21,5 +21,32 @@ public class DialogActivitySearchItem
     public Guid? TransmissionId { get; set; }
 
     [JsonPropertyName("description")]
-    public ICollection<Localization>? Description { get; set; }
+    public ICollection<Localization> Description { get; set; } = [];
+    public enum DialogTransmissionType
+    {
+        [System.Runtime.Serialization.EnumMember(Value = @"Information")]
+        Information = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Acceptance")]
+        Acceptance = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Rejection")]
+        Rejection = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Request")]
+        Request = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Alert")]
+        Alert = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Decision")]
+        Decision = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Submission")]
+        Submission = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Correction")]
+        Correction = 7,
+    }
+
 }

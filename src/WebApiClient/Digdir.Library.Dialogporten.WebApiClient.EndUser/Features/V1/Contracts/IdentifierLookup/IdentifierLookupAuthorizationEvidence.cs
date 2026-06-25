@@ -27,7 +27,7 @@ public class IdentifierLookupAuthorizationEvidenceItem
     public string Subject { get; set; } = null!;
 
     [JsonPropertyName("name")]
-    public ICollection<Localization>? Name { get; set; }
+    public ICollection<Localization> Name { get; set; } = [];
 
     [JsonPropertyName("links")]
     public Links? Links { get; set; }
@@ -51,5 +51,5 @@ public class IdentifierLookupAuthorizationEvidence
     public bool ViaInstanceDelegation { get; set; }
 
     [JsonPropertyName("evidence")]
-    public ICollection<IdentifierLookupAuthorizationEvidenceItem>? Evidence { get; set; }
+    public ICollection<IdentifierLookupAuthorizationEvidenceItem> Evidence { get; set; } = [];
 }

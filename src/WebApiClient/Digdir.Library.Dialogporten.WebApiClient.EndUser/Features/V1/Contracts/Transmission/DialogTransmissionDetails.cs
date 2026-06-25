@@ -76,11 +76,11 @@ public class DialogTransmissionDetails
     /// The attachments associated with the transmission.
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<DialogAttachment>? Attachments { get; set; }
+    public ICollection<DialogAttachment> Attachments { get; set; } = [];
 
     /// <summary>
     /// The navigational actions associated with the transmission.
     /// </summary>
     [JsonPropertyName("navigationalActions")]
-    public ICollection<DialogTransmissionNavigationalAction>? NavigationalActions { get; set; }
+    public ICollection<DialogTransmissionNavigationalAction> NavigationalActions { get; set; } = [];
 }

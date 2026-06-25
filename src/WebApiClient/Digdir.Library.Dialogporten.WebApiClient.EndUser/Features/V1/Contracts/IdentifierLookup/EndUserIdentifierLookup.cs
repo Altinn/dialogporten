@@ -20,7 +20,7 @@ public class EndUserIdentifierLookup
     public IdentifierLookupServiceOwner ServiceOwner { get; set; } = null!;
 
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; }
+    public ICollection<Localization> Title { get; set; } = [];
 
     [JsonPropertyName("authorizationEvidence")]
     public IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; } = null!;

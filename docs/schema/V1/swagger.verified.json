@@ -11684,5 +11684,19 @@
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "description": "Endpoints for service owners to create and manage dialogs. Requires a Maskinporten token with the relevant \u0060digdir:dialogporten.serviceprovider\u0060 scope. The search endpoint additionally requires the \u0060digdir:dialogporten.serviceprovider.search\u0060 scope.",
+      "name": "Serviceowner"
+    },
+    {
+      "description": "Endpoints for end users (citizens and representatives) to read and act on their own dialogs. Requires a personal token (e.g. via ID-porten) with the relevant end user scope.",
+      "name": "Enduser"
+    },
+    {
+      "description": "Public, unauthenticated metadata endpoints such as health and configuration information.",
+      "name": "Metadata"
+    }
+  ]
 }

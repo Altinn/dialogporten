@@ -152,8 +152,9 @@ public static class OpenApiDocumentExtensions
         var descriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["Serviceowner"] =
-                "Endpoints for service owners to create and manage dialogs on behalf of a service. " +
-                "Requires a Maskinporten token with the relevant `digdir:dialogporten.serviceprovider` scope.",
+                "Endpoints for service owners to create and manage dialogs. " +
+                "Requires a Maskinporten token with the relevant `digdir:dialogporten.serviceprovider` scope. " +
+                "The search endpoint additionally requires the `digdir:dialogporten.serviceprovider.search` scope.",
             ["Enduser"] =
                 "Endpoints for end users (citizens and representatives) to read and act on their own dialogs. " +
                 "Requires a personal token (e.g. via ID-porten) with the relevant end user scope.",

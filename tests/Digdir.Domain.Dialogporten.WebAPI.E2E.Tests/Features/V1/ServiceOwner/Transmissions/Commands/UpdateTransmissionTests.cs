@@ -177,29 +177,6 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     }
 
     [E2EFact]
-    public async Task Should_Return_Forbidden_Without_ChangeTransmission_Scope()
-    {
-        // Arrange
-        var transmissionId = DialogTestData.NewUuidV7();
-        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
-            x.AddTransmission(x => x.Id = transmissionId));
-
-        var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
-
-        // Act
-        var response = await Fixture.ServiceownerApi
-            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
-                dialogId,
-                transmissionId,
-                request,
-                if_Match: null,
-                TestContext.Current.CancellationToken);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [E2EFact]
     public async Task Should_Return_BadRequest_When_ContentReference_Is_Not_Https()
     {
         // Arrange

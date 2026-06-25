@@ -4337,7 +4337,7 @@
   },
   "tags": [
     {
-      "description": "Endpoints for end users (citizens and representatives) to read and act on their own dialogs. Requires a personal token (e.g. via ID-porten) with the relevant end user scope.",
+      "description": "Endpoints for end users to read and act on dialogs they are authorized to access. Used both by persons logged in via ID-porten and by Altinn system users authenticated via Maskinporten. Requires a token with the \u0060digdir:dialogporten\u0060 scope (or \u0060digdir:dialogporten.noconsent\u0060).",
       "name": "Enduser"
     },
     {

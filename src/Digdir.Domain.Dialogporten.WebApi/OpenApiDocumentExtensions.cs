@@ -156,8 +156,9 @@ public static class OpenApiDocumentExtensions
                 "Requires a Maskinporten token with the relevant `digdir:dialogporten.serviceprovider` scope. " +
                 "The search endpoint additionally requires the `digdir:dialogporten.serviceprovider.search` scope.",
             ["Enduser"] =
-                "Endpoints for end users (citizens and representatives) to read and act on their own dialogs. " +
-                "Requires a personal token (e.g. via ID-porten) with the relevant end user scope.",
+                "Endpoints for end users to read and act on dialogs they are authorized to access. " +
+                "Used both by persons logged in via ID-porten and by Altinn system users authenticated via Maskinporten. " +
+                "Requires a token with the `digdir:dialogporten` scope (or `digdir:dialogporten.noconsent`).",
             ["Metadata"] =
                 "Public, unauthenticated metadata endpoints such as health and configuration information."
         };

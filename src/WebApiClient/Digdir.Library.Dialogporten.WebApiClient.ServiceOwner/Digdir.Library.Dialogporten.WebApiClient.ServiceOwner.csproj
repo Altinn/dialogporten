@@ -21,7 +21,7 @@
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="/"/>
-        <None Include="../../LICENSE" Pack="true" PackagePath="/"/>
+        <None Include="../../../LICENSE" Pack="true" PackagePath="/"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -38,7 +38,7 @@
     </Target>
 
     <ItemGroup>
-        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.0.3-alpha" />
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.1.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.9" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0"/>
         <PackageReference Include="Refit" Version="10.2.0" />

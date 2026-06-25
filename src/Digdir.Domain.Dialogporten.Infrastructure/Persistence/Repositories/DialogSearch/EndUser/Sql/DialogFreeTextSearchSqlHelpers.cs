@@ -22,20 +22,6 @@ internal static partial class DialogFreeTextSearchSqlHelpers
                 AND ds."SearchVector" @@ websearch_to_tsquery({ftsQuery.TsConfigName}::regconfig, {ftsQuery.SearchString}::text)
                 """);
 
-    internal static int GetCandidateLimitPerParty(
-        int effectivePartyCount,
-        int candidateCap,
-        int candidateMinimumPerParty)
-    {
-        if (effectivePartyCount <= 0)
-        {
-            return candidateMinimumPerParty;
-        }
-
-        var fairShare = (int)Math.Ceiling((double)candidateCap / effectivePartyCount);
-        return Math.Max(candidateMinimumPerParty, fairShare);
-    }
-
     private static string BuildOrSearchString(string search)
     {
         var terms = SearchTermRegex()

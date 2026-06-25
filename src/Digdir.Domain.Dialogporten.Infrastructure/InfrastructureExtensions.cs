@@ -135,11 +135,13 @@ public static class InfrastructureExtensions
             // Transient
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, DialogFirstFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GinFirstFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SingleServiceFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiPartyFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SingleServiceStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiPartyStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
@@ -237,6 +239,12 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(nameof(IPartyResourceReferenceRepository), new()
         {
+            // High cardinality: one entry per caller party (ps:<hash> keys written by
+            // PartyResourceRepository.GetReferencedResourcesByParty). Keeping these in the in-memory (L1)
+            // tier is unbounded (the shared MemoryCache has no SizeLimit), so working set grows with the
+            // number of distinct parties seen within the cache window. Rely solely on the distributed
+            // (Redis) tier, mirroring the high-cardinality Altinn.Authorization PDP cache above.
+            SkipMemoryCache = true,
             Duration = TimeSpan.FromMinutes(30),
             FailSafeMaxDuration = TimeSpan.FromMinutes(60)
         })

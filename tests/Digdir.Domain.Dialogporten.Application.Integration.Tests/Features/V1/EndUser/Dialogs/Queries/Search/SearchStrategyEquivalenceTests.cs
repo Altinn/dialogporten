@@ -118,6 +118,23 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
     }
 
     [Fact]
+    public async Task Search_WithoutFts_Should_ReturnExpectedDialogs_ForManyPartiesMultipleEffectiveServices()
+    {
+        // Many parties (> threshold) across 2..20 services, no FTS -> exercises MultiServiceStrategy's
+        // per-service UNION (each block drives the service index and early-terminates; branches merge-appended).
+        var parties = CreateParties(101);
+        var services = CreateServices(2);
+        var dialogs = CreateDialogs(parties, services, count: 202);
+
+        await SeedDialogs(dialogs);
+        ConfigureSearchAuthorization(CreateAuthorization(parties, services));
+
+        var result = await Search(services: services, limit: 300);
+
+        AssertIds(result, ExpectedIds(dialogs));
+    }
+
+    [Fact]
     public async Task Search_WithoutFts_Should_ReturnExpectedDialogs_ForManyPartiesManyEffectiveServices()
     {
         var parties = CreateParties(101);
@@ -131,6 +148,172 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         var result = await Search(parties: parties, limit: 200);
 
         AssertIds(result, ExpectedIds(dialogs));
+    }
+
+    [Fact]
+    public async Task Search_WithFts_Should_ReturnExpectedDialogs_ForManyPartiesSingleEffectiveService()
+    {
+        // #4128: no party filter, a single service resource, many authorized parties (> the service-driven
+        // threshold of 100) -> exercises SingleServiceFtsStrategy (scalar service + bound party param).
+        var parties = CreateParties(101);
+        var services = CreateServices(1);
+        var dialogs = CreateDialogs(
+            parties,
+            services,
+            count: 101,
+            matchingIndexes: Enumerable.Range(0, 101).Where(x => x % 2 == 0));
+
+        await SeedDialogs(dialogs, indexDialogs: true);
+        ConfigureSearchAuthorization(CreateAuthorization(parties, services));
+
+        var result = await Search(services: services, search: MatchTerm, limit: 200);
+
+        AssertIds(result, ExpectedIds(dialogs, x => x.SearchText.Contains(MatchTerm, StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task Search_WithFts_Should_ReturnExpectedDialogs_ForManyPartiesMultipleEffectiveServices()
+    {
+        // Many authorized parties (> the service-driven threshold) across more than one service ->
+        // exercises MultiServiceFtsStrategy's per-service UNION (each service block drives the service
+        // index and early-terminates; branches are merge-appended).
+        var parties = CreateParties(101);
+        var services = CreateServices(2);
+        var dialogs = CreateDialogs(
+            parties,
+            services,
+            count: 202,
+            matchingIndexes: Enumerable.Range(0, 202).Where(x => x % 3 == 0));
+
+        await SeedDialogs(dialogs, indexDialogs: true);
+        ConfigureSearchAuthorization(CreateAuthorization(parties, services));
+
+        var result = await Search(services: services, search: MatchTerm, limit: 300);
+
+        AssertIds(result, ExpectedIds(dialogs, x => x.SearchText.Contains(MatchTerm, StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task Search_WithFts_AndContentUpdatedRange_Should_ReturnOnlyMatchesWithinRange()
+    {
+        // The temporal escape hatch: a ContentUpdatedAfter range bounds an FTS search.
+        // ContentUpdatedAt == UpdatedAt == CreatedAt (== DateAnchor + index minutes) at creation time,
+        // so the cutoff below includes only matches with index >= 3.
+        var parties = CreateParties(1);
+        var services = CreateServices(1);
+        var dialogs = CreateDialogs(parties, services, count: 6, matchingIndexes: [0, 2, 4, 5]);
+
+        await SeedDialogs(dialogs, indexDialogs: true);
+        ConfigureSearchAuthorization(CreateAuthorization(parties, services));
+
+        var contentUpdatedAfter = DateAnchor.AddMinutes(2).AddSeconds(30);
+
+        var result = await Search(parties: parties, search: MatchTerm, contentUpdatedAfter: contentUpdatedAfter);
+
+        AssertIds(result, ExpectedIds(dialogs, x =>
+            x.SearchText.Contains(MatchTerm, StringComparison.Ordinal)
+            && x.CreatedAt >= contentUpdatedAfter));
+    }
+
+    [Fact]
+    public async Task Search_WithFts_Should_ExcludeMatches_ForUnauthorizedService()
+    {
+        // Authorization is applied on the Dialog join, not bypassed by the GIN term probe:
+        // a matching dialog under a service the caller is not authorized for must be excluded.
+        var parties = CreateParties(1);
+        var services = CreateServices(2);
+        var authorizedMatch = CreateDialog(parties[0], services[0], index: 0, searchText: $"{MatchTerm} authorized");
+        var unauthorizedMatch = CreateDialog(parties[0], services[1], index: 1, searchText: $"{MatchTerm} unauthorized");
+        var dialogs = new[] { authorizedMatch, unauthorizedMatch };
+
+        await SeedDialogs(dialogs, indexDialogs: true);
+        ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal)
+            {
+                [parties[0]] = [services[0]]
+            }
+        });
+
+        var result = await Search(parties: parties, search: MatchTerm);
+
+        AssertIds(result, [authorizedMatch.Id]);
+    }
+
+    [Fact]
+    public async Task Search_WithFts_Should_ReturnDelegatedDialogs_WhenNoAuthorizedParties()
+    {
+        // Delegated-only authorization: the request carries a serviceResource filter (required by the
+        // validator), but the caller is authorized for no party on it — authorization fans out to empty
+        // ResourcesByParties + non-empty DialogIds. effectivePartyCount == 0, so MultiPartyFtsStrategy owns
+        // the fallback and the delegated UNION branch carries the results (no other FTS strategy is eligible).
+        var parties = CreateParties(1);
+        var services = CreateServices(1);
+        var delegatedMatch = CreateDialog(parties[0], services[0], index: 0, searchText: DelegatedTerm);
+        var unrelated = CreateDialog(parties[0], services[0], index: 1, searchText: $"ordinary {DelegatedTerm}x");
+        var dialogs = new[] { delegatedMatch, unrelated };
+
+        await SeedDialogs(dialogs, indexDialogs: true);
+        ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
+        {
+            DialogIds = [delegatedMatch.Id]
+        });
+
+        var result = await Search(services: services, search: DelegatedTerm);
+
+        AssertIds(result, [delegatedMatch.Id]);
+    }
+
+    [Fact]
+    public async Task Search_WithFts_Should_IncludeDelegatedDialogs_ForManyPartiesMultipleEffectiveServices()
+    {
+        // Exercises the delegated-UNION branch of the multi-service strategy: a delegated dialog owned by
+        // an UNauthorized party must still be returned alongside the directly-authorized matches.
+        var allParties = CreateParties(102);
+        var authorizedParties = allParties[..101];
+        var services = CreateServices(2);
+        var dialogs = CreateDialogs(
+                authorizedParties,
+                services,
+                count: 202,
+                matchingIndexes: Enumerable.Range(0, 202).Where(x => x % 2 == 0))
+            .ToList();
+        var delegatedMatch = CreateDialog(allParties[101], services[0], index: 500, searchText: MatchTerm);
+        var all = dialogs.Append(delegatedMatch).ToArray();
+
+        await SeedDialogs(all, indexDialogs: true);
+        ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = authorizedParties.ToDictionary(
+                x => x,
+                _ => services.ToHashSet(StringComparer.Ordinal),
+                StringComparer.Ordinal),
+            DialogIds = [delegatedMatch.Id]
+        });
+
+        var result = await Search(services: services, search: MatchTerm, limit: 300);
+
+        AssertIds(result, ExpectedIds(all, x => x.SearchText.Contains(MatchTerm, StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task Search_WithFts_AndContentUpdatedRange_Should_IncludeDialogExactlyOnCutoff()
+    {
+        // Pins the inclusivity of the ContentUpdatedAfter bound (>=, not >). ContentUpdatedAt == CreatedAt
+        // == DateAnchor + index minutes, so a cutoff equal to index 2's timestamp must include index 2.
+        var parties = CreateParties(1);
+        var services = CreateServices(1);
+        var dialogs = CreateDialogs(parties, services, count: 4, matchingIndexes: [0, 1, 2, 3]);
+
+        await SeedDialogs(dialogs, indexDialogs: true);
+        ConfigureSearchAuthorization(CreateAuthorization(parties, services));
+
+        var cutoff = DateAnchor.AddMinutes(2);
+
+        var result = await Search(parties: parties, search: MatchTerm, contentUpdatedAfter: cutoff);
+
+        AssertIds(result, ExpectedIds(dialogs, x =>
+            x.SearchText.Contains(MatchTerm, StringComparison.Ordinal) && x.CreatedAt >= cutoff));
     }
 
     [Fact]
@@ -268,6 +451,81 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         result.Select(x => x.Id).Should().Equal(ExpectedIds(dialogs));
     }
 
+    [Fact]
+    public async Task Search_Pagination_WithoutFts_AndMoreDelegatedDialogsThanPageSize_Should_InterleaveByOrder_ForMultiService()
+    {
+        // The delegated dialogs are UNION'd into the multi-service candidate set without a per-branch LIMIT.
+        // This pins that, across page boundaries, they neither drown (when the service branches fill a page)
+        // nor get stranded last - the outer ORDER BY ranks them with everything else - even when there are
+        // more delegated dialogs than fit on a single page. Even indexes are authorized, odd indexes are
+        // delegated, so the delegated dialogs are spread across the whole recency range (not all newest).
+        var allParties = CreateParties(102);
+        var authorizedParties = allParties[..101];
+        var delegatedOwner = allParties[101];
+        var services = CreateServices(2);
+
+        var authorizedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 0)
+            .Select(i => CreateDialog(authorizedParties[i % authorizedParties.Length], services[i % services.Length], index: i, searchText: $"ordinary {i}"))
+            .ToArray();
+        var delegatedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 1)
+            .Where((_, k) => k % 3 == 0) // spread across the full range
+            .Select(i => CreateDialog(delegatedOwner, services[i % services.Length], index: i, searchText: $"ordinary {i}"))
+            .ToArray();
+        var all = authorizedDialogs.Concat(delegatedDialogs).ToArray();
+        delegatedDialogs.Length.Should().BeGreaterThan(10, "the delegated set must span multiple pages for this test to be meaningful");
+
+        await SeedDialogs(all);
+        ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = authorizedParties.ToDictionary(
+                x => x,
+                _ => services.ToHashSet(StringComparer.Ordinal),
+                StringComparer.Ordinal),
+            DialogIds = delegatedDialogs.Select(x => x.Id).ToList()
+        });
+
+        var result = await SearchAllPages(services: services, pageSize: 10);
+
+        var orderedIds = result.Select(x => x.Id).ToList();
+        orderedIds.Should().Equal(ExpectedIds(all));
+    }
+
+    [Fact]
+    public async Task Search_Pagination_WithFts_AndMoreDelegatedDialogsThanPageSize_Should_InterleaveByOrder_ForMultiService()
+    {
+        // FTS counterpart of the above (MultiServiceFtsStrategy shares the same delegated-UNION tail): the
+        // delegated matches must interleave by order across pages even when they outnumber the page size.
+        var allParties = CreateParties(102);
+        var authorizedParties = allParties[..101];
+        var delegatedOwner = allParties[101];
+        var services = CreateServices(2);
+
+        var authorizedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 0)
+            .Select(i => CreateDialog(authorizedParties[i % authorizedParties.Length], services[i % services.Length], index: i, searchText: $"{MatchTerm} {i}"))
+            .ToArray();
+        var delegatedDialogs = Enumerable.Range(0, 150).Where(i => i % 2 == 1)
+            .Where((_, k) => k % 3 == 0) // spread across the full range
+            .Select(i => CreateDialog(delegatedOwner, services[i % services.Length], index: i, searchText: $"{MatchTerm} {i}"))
+            .ToArray();
+        var all = authorizedDialogs.Concat(delegatedDialogs).ToArray();
+        delegatedDialogs.Length.Should().BeGreaterThan(10, "the delegated set must span multiple pages for this test to be meaningful");
+
+        await SeedDialogs(all, indexDialogs: true);
+        ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = authorizedParties.ToDictionary(
+                x => x,
+                _ => services.ToHashSet(StringComparer.Ordinal),
+                StringComparer.Ordinal),
+            DialogIds = delegatedDialogs.Select(x => x.Id).ToList()
+        });
+
+        var result = await SearchAllPages(services: services, search: MatchTerm, pageSize: 10);
+
+        var orderedIds = result.Select(x => x.Id).ToList();
+        orderedIds.Should().Equal(ExpectedIds(all));
+    }
+
     private async Task SeedDialogs(IEnumerable<SearchDialogSeed> dialogs, bool indexDialogs = false)
     {
         foreach (var dialog in dialogs)
@@ -286,14 +544,16 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         IReadOnlyCollection<string>? parties = null,
         IReadOnlyCollection<string>? services = null,
         string? search = null,
-        int limit = 100)
+        int limit = 100,
+        DateTimeOffset? contentUpdatedAfter = null)
     {
         var result = await Application.Send(CreateSearchQuery(
             parties,
             services,
             search,
             limit,
-            continuationToken: null), TestContext.Current.CancellationToken);
+            continuationToken: null,
+            contentUpdatedAfter: contentUpdatedAfter), TestContext.Current.CancellationToken);
 
         return result.Value.Should().BeOfType<PaginatedList<DialogDto>>().Subject;
     }
@@ -332,7 +592,8 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         IReadOnlyCollection<string>? services,
         string? search,
         int limit,
-        string? continuationToken)
+        string? continuationToken,
+        DateTimeOffset? contentUpdatedAfter = null)
     {
         var token = continuationToken is not null
                     && ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(
@@ -348,7 +609,8 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
             Search = search,
             Limit = limit,
             OrderBy = CreatedAtDescendingOrder(),
-            ContinuationToken = token
+            ContinuationToken = token,
+            ContentUpdatedAfter = contentUpdatedAfter
         };
     }
 
@@ -424,6 +686,9 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
 
     private static void AssertIds(PaginatedList<DialogDto> result, Guid[] expectedIds)
     {
+        // Every test here expects at least one dialog, so an empty expected set means the seed/filter logic is broken, 
+        // not that the search result is correct - fail fast with a clear message in that case.
+        expectedIds.Should().NotBeEmpty();
         result.Items.Select(x => x.Id).Should().Equal(expectedIds);
         result.Items.Select(x => x.Id).Should().OnlyHaveUniqueItems();
         result.HasNextPage.Should().BeFalse();

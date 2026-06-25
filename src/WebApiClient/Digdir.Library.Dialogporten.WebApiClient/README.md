@@ -77,4 +77,4 @@ The following services are available after registration:
 
 A background service (`IHostedService`) is also registered that periodically fetches the public key from the Dialogporten API. This is required to validate dialog token signatures.
 
-See [sample project](../Digdir.Library.Dialogporten.WebApiClient.WebApiSample/Program.cs) for examples on how to use the services.
+See [sample project](../../Digdir.Library.Dialogporten.WebApiClient.WebApiSample/Program.cs) for examples on how to use the services.

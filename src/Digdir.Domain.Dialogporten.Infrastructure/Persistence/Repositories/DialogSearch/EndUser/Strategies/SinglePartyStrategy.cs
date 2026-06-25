@@ -6,18 +6,16 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
 
-internal sealed class SinglePartyNoFtsStrategy : IQueryStrategy<EndUserSearchContext>
+internal sealed class SinglePartyStrategy : IQueryStrategy<EndUserSearchContext>
 {
     // Direct single-party lookup for the common case with no FTS.
     // Uses an ID-only limited candidate subquery before fetching full rows, so the candidate scan
     // can use covering indexes and avoid heap lookups until the final page-sized result set.
-    public string Name => nameof(SinglePartyNoFtsStrategy);
+    public string Name => nameof(SinglePartyStrategy);
 
     public int Score(EndUserSearchContext context) =>
         context.Query.Search is null
-        && DialogEndUserSearchSqlHelpers.TryGetSinglePartyAuthorization(
-            context.AuthorizedResources,
-            out _)
+        && context.EffectivePartyCount == 1
             ? QueryStrategyScores.HighlyPreferred
             : QueryStrategyScores.Ineligible;
 

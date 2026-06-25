@@ -26,13 +26,13 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-        content.Content.Title.Value.Should().HaveCount(1);
-        content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.Title.Value.Should().HaveCount(1);
+        content.DialogContent.Title.Value.First().LanguageCode.Should().Be("nb");
 
-        content.Content.Summary!.Value.Should().HaveCount(2);
+        content.DialogContent.Summary!.Value.Should().HaveCount(2);
 
-        content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-        content.Content.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.ExtendedStatus!.Value.Should().HaveCount(1);
+        content.DialogContent.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -68,13 +68,13 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-        content.Content.Title.Value.Should().HaveCount(1);
-        content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.Title.Value.Should().HaveCount(1);
+        content.DialogContent.Title.Value.First().LanguageCode.Should().Be("nb");
 
-        content.Content.Summary!.Value.Should().HaveCount(2);
+        content.DialogContent.Summary!.Value.Should().HaveCount(2);
 
-        content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-        content.Content.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.ExtendedStatus!.Value.Should().HaveCount(1);
+        content.DialogContent.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -94,13 +94,13 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-        content.Content.Title.Value.Should().HaveCount(1);
-        content.Content.Title.Value.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.Title.Value.Should().HaveCount(1);
+        content.DialogContent.Title.Value.First().LanguageCode.Should().Be("nb");
 
-        content.Content.Summary!.Value.Should().HaveCount(2);
+        content.DialogContent.Summary!.Value.Should().HaveCount(2);
 
-        content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-        content.Content.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.ExtendedStatus!.Value.Should().HaveCount(1);
+        content.DialogContent.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -120,13 +120,13 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-        content.Content.Title.Value.Should().HaveCount(1);
-        content.Content.Title.Value.First().LanguageCode.Should().Be("en");
+        content.DialogContent.Title.Value.Should().HaveCount(1);
+        content.DialogContent.Title.Value.First().LanguageCode.Should().Be("en");
 
-        content.Content.Summary!.Value.Should().HaveCount(2);
+        content.DialogContent.Summary!.Value.Should().HaveCount(2);
 
-        content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-        content.Content.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.ExtendedStatus!.Value.Should().HaveCount(1);
+        content.DialogContent.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -146,14 +146,14 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-        content.Content.Title.Value.Should().HaveCount(1);
-        content.Content.Title.Value.First().LanguageCode.Should().Be("en");
+        content.DialogContent.Title.Value.Should().HaveCount(1);
+        content.DialogContent.Title.Value.First().LanguageCode.Should().Be("en");
 
-        content.Content.Summary!.Value.Should().HaveCount(1);
-        content.Content.Summary!.Value!.First().LanguageCode.Should().Be("it");
+        content.DialogContent.Summary!.Value.Should().HaveCount(1);
+        content.DialogContent.Summary!.Value!.First().LanguageCode.Should().Be("it");
 
-        content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
-        content.Content.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
+        content.DialogContent.ExtendedStatus!.Value.Should().HaveCount(1);
+        content.DialogContent.ExtendedStatus!.Value!.First().LanguageCode.Should().Be("nb");
     }
 
     [E2EFact]
@@ -171,9 +171,9 @@ public class GetDialogAcceptLanguageTests(WebApiE2EFixture fixture) : E2ETestBas
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
         var content = response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-        content.Content.Title.Value.Should().HaveCount(2);
-        content.Content.Summary!.Value.Should().HaveCount(2);
-        content.Content.ExtendedStatus!.Value.Should().HaveCount(1);
+        content.DialogContent.Title.Value.Should().HaveCount(2);
+        content.DialogContent.Summary!.Value.Should().HaveCount(2);
+        content.DialogContent.ExtendedStatus!.Value.Should().HaveCount(1);
     }
 
     private async Task<Guid> CreateDialogWithMultilingualContent() =>

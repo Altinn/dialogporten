@@ -1,6 +1,9 @@
 ﻿using Refit;
 
+// TODO: Removing scope based namespace makes diff messy. Remove in different PR
+#pragma warning disable IDE0161
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
+#pragma warning restore IDE0161
 {
     public class SearchDialogEndUserContextsQueryParams
     {

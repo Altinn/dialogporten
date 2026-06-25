@@ -1,6 +1,9 @@
 using System.Text.Json.Serialization;
 
+// TODO: Removing scope based namespace makes diff messy. Remove in different PR
+#pragma warning disable IDE0161
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
+#pragma warning restore IDE0161
 {
     public class ServiceOwnerLabel
     {
@@ -43,13 +46,11 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         [JsonPropertyName("errors")]
         public IDictionary<string, ICollection<string>> Errors { get; set; } = null!;
 
-        private IDictionary<string, object>? _additionalProperties;
-
         [JsonExtensionData]
         public IDictionary<string, object> AdditionalProperties
         {
-            get => _additionalProperties ??= new Dictionary<string, object>();
-            set => _additionalProperties = value;
+            get => field ??= new Dictionary<string, object>();
+            set;
         }
     }
 
@@ -67,13 +68,11 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         [JsonPropertyName("paths")]
         public ICollection<string>? Paths { get; set; }
 
-        private IDictionary<string, object>? _additionalProperties;
-
         [JsonExtensionData]
         public IDictionary<string, object> AdditionalProperties
         {
-            get => _additionalProperties ??= new Dictionary<string, object>();
-            set => _additionalProperties = value;
+            get => field ??= new Dictionary<string, object>();
+            set;
         }
     }
 

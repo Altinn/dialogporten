@@ -12,6 +12,7 @@ public interface IAltinnAuthorization
     Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
         List<string> constraintParties,
         List<string> constraintServiceResources,
+        bool includeDialogIds = true,
         CancellationToken cancellationToken = default);
 
     Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,

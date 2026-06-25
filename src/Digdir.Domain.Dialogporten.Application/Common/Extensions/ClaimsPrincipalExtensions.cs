@@ -347,6 +347,29 @@ public static class ClaimsPrincipalExtensions
         };
     }
 
+    /// <summary>
+    /// Resolves the end user party identifier, throwing if it cannot be determined. A null identifier is treated
+    /// as an unreachable state: endpoints reaching this should already have constrained the principal to user
+    /// types that resolve to a party identifier.
+    /// </summary>
+    public static IPartyIdentifier GetEndUserPartyIdentifierOrThrow(this ClaimsPrincipal claimsPrincipal)
+    {
+        ArgumentNullException.ThrowIfNull(claimsPrincipal);
+
+        return claimsPrincipal.GetEndUserPartyIdentifier()
+               ?? throw CreateMissingEndUserPartyIdentifierException(claimsPrincipal);
+    }
+
+    private static UnreachableException CreateMissingEndUserPartyIdentifierException(ClaimsPrincipal principal)
+    {
+        var (userType, _) = principal.GetUserType();
+
+        return new UnreachableException(
+            "GetEndUserPartyIdentifier returned null. " +
+            $"UserType={userType}, " +
+            principal.GetDiagnosticSummary());
+    }
+
     private static bool TryGetAuthorizationDetailsClaimValue(this ClaimsPrincipal claimsPrincipal,
         [NotNullWhen(true)] out SystemUserAuthorizationDetails[]? authorizationDetails)
     {

@@ -15,11 +15,11 @@ public sealed class ApplicationSettings
 
 public sealed class FeatureToggle
 {
-    public bool UsePartyResourcePruning { get; init; }
     public bool UseAltinnAutoAuthorizedPartiesQueryParameters { get; init; }
     public bool EnablePartyFiltersForSystemUsers { get; init; }
     public bool EnablePartyFiltersForEmailUsers { get; init; }
     public bool EnablePartyCacheForEmailUsers { get; init; }
+    public bool EnableGraphQlAuthorizedServiceResources { get; init; }
     public bool UseCorrectPersonNameOrdering { get; init; }
 }
 
@@ -63,14 +63,19 @@ public sealed class PartyResourcePruningLimits
 
 public sealed class EndUserSearchQueryLimits
 {
-    public int MaxPartyFilterValues { get; init; } = 20;
+    public int MaxPartyFilterValues { get; init; } = 100;
     public int MaxServiceResourceFilterValues { get; init; } = 20;
     public int MaxOrgFilterValues { get; init; } = 20;
     public int MaxExtendedStatusFilterValues { get; init; } = 20;
     public int MinServiceDrivenStrategyPartyCount { get; init; } = 100;
-    public int MaxFreeTextSearchCandidates { get; init; } = 5000;
-    public int MinFreeTextSearchCandidatesPerParty { get; init; } = 100;
-    public int MaxDialogFirstFreeTextSearchPartyCount { get; init; } = 50;
+
+    /// <summary>
+    /// Server-side statement_timeout (seconds) applied to all end-user search queries (free-text and
+    /// otherwise). Bounds the worst case — a broad search with no narrowing — which is otherwise unbounded
+    /// (a common term's GIN scan or a wide service/party-driven scan can't be limited). On timeout the
+    /// query is cancelled and surfaced as a 422 telling the caller to narrow the search. Set to 0 to disable.
+    /// </summary>
+    public int SearchStatementTimeoutSeconds { get; init; } = 20;
 }
 
 public sealed class ServiceOwnerSearchQueryLimits
@@ -134,9 +139,7 @@ internal sealed class EndUserSearchQueryLimitsValidator : AbstractValidator<EndU
         RuleFor(x => x.MaxOrgFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
         RuleFor(x => x.MaxExtendedStatusFilterValues).GreaterThan(0).LessThanOrEqualTo(1000);
         RuleFor(x => x.MinServiceDrivenStrategyPartyCount).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.MaxFreeTextSearchCandidates).GreaterThan(0).LessThanOrEqualTo(100_000);
-        RuleFor(x => x.MinFreeTextSearchCandidatesPerParty).GreaterThan(0).LessThanOrEqualTo(100_000);
-        RuleFor(x => x.MaxDialogFirstFreeTextSearchPartyCount).GreaterThanOrEqualTo(0).LessThanOrEqualTo(1000);
+        RuleFor(x => x.SearchStatementTimeoutSeconds).GreaterThanOrEqualTo(0).LessThanOrEqualTo(600);
     }
 }
 

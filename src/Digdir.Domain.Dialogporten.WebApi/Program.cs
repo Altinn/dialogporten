@@ -94,7 +94,8 @@ static void BuildAndRun(string[] args)
             additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
-                .AddAspNetCoreInstrumentationExcludingHealthPaths())
+                .AddAspNetCoreInstrumentationExcludingHealthPaths(),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
         // Options setup
         .AddAspNetCommon(builder.Configuration.GetSection(WebApiSettings.SectionName)
             .GetSection(WebHostCommonSettings.SectionName))
@@ -276,7 +277,6 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.PostProcess = document =>
         {
             document.Generator = null;
-            document.ReplaceProblemDetailsDescriptions();
             document.MakeCollectionsNullable();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();

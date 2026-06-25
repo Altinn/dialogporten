@@ -3,7 +3,6 @@ using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using static Digdir.Library.Dialogporten.E2E.Common.JsonSnapshotVerifier;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.ErrorResponse;
 
@@ -21,7 +20,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -36,7 +35,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -52,7 +51,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -68,7 +67,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Gone);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -85,6 +84,6 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 }

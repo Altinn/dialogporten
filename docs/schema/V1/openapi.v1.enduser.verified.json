@@ -147,6 +147,19 @@
         },
         "type": "object"
       },
+      "AuthorizedServiceResourceList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceResourceMetadata"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
@@ -2383,61 +2396,99 @@
         "type": "object"
       },
       "ProblemDetails": {
-        "additionalProperties": false,
-        "properties": {
-          "detail": {
-            "nullable": true,
-            "type": "string"
-          },
-          "errors": {
-            "items": {
-              "$ref": "#/components/schemas/ProblemDetails_Error"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "instance": {
-            "default": "/api/route",
-            "type": "string"
-          },
-          "status": {
-            "default": 400,
-            "format": "int32",
-            "type": "integer"
-          },
-          "title": {
-            "default": "One or more validation errors occurred.",
-            "type": "string"
-          },
-          "traceId": {
-            "default": "0HMPNHL0JHL76:00000001",
-            "type": "string"
-          },
-          "type": {
-            "default": "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1",
-            "type": "string"
-          }
+        "additionalProperties": {
+          "nullable": true
         },
-        "type": "object"
-      },
-      "ProblemDetails_Error": {
-        "additionalProperties": false,
         "properties": {
           "code": {
             "nullable": true,
             "type": "string"
           },
-          "name": {
-            "default": "Error or field name",
-            "type": "string"
-          },
-          "reason": {
-            "default": "Error reason",
-            "type": "string"
-          },
-          "severity": {
+          "detail": {
             "nullable": true,
             "type": "string"
+          },
+          "errors": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "instance": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "statusDescription": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "traceId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "string"
+          },
+          "validationErrors": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemDetails_Error"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ProblemDetails_Error": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "nullable": true,
+            "type": "string"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "paths": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchAuthorizedServiceResourcesRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
           }
         },
         "type": "object"
@@ -2524,6 +2575,12 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -2872,7 +2929,7 @@
             "style": "form"
           },
           {
-            "description": "Only return dialogs created after this date",
+            "description": "Only return dialogs created after this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "createdAfter",
             "schema": {
@@ -2882,7 +2939,7 @@
             }
           },
           {
-            "description": "Only return dialogs created before this date",
+            "description": "Only return dialogs created before this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "createdBefore",
             "schema": {
@@ -2892,7 +2949,7 @@
             }
           },
           {
-            "description": "Only return dialogs updated after this date",
+            "description": "Only return dialogs updated after this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "updatedAfter",
             "schema": {
@@ -2902,7 +2959,7 @@
             }
           },
           {
-            "description": "Only return dialogs updated before this date",
+            "description": "Only return dialogs updated before this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "updatedBefore",
             "schema": {
@@ -2912,7 +2969,7 @@
             }
           },
           {
-            "description": "Only return dialogs with content updated after this date",
+            "description": "Only return dialogs with content updated after this date. Recommended for free text search: this is the only date filter that limits how much a broad search has to scan. A broad search term without a \u0027contentUpdatedAfter\u0027 bound may exceed the server-side time limit and return 422 - narrow it with this filter (and/or fewer parties or a service resource).",
             "in": "query",
             "name": "contentUpdatedAfter",
             "schema": {
@@ -2922,7 +2979,7 @@
             }
           },
           {
-            "description": "Only return dialogs with content updated before this date",
+            "description": "Only return dialogs with content updated before this date. Unlike \u0027contentUpdatedAfter\u0027, this upper bound does not by itself limit how much a free text search has to scan.",
             "in": "query",
             "name": "contentUpdatedBefore",
             "schema": {
@@ -3011,6 +3068,7 @@
             }
           },
           {
+            "description": "Order the results by one or more fields. Defaults to \u0022contentUpdatedAt\u0022 descending. For free text search, keeping the default \u0022contentUpdatedAt\u0022 ordering together with \u0022contentUpdatedAfter\u0022 gives the fastest results.",
             "in": "query",
             "name": "orderBy",
             "schema": {
@@ -3063,6 +3121,19 @@
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
             "content": {
@@ -4080,6 +4151,88 @@
           }
         ],
         "summary": "Gets the list of authorized parties for the end user",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/serviceresources": {
+      "get": {
+        "description": "Returns the same service resource metadata as the public metadata endpoint, filtered to the resources the calling end user is authorized to use. Optionally narrowed by one or more party URNs.",
+        "operationId": "SearchAuthorizedServiceResources",
+        "parameters": [
+          {
+            "description": "Filter by one or more party URNs. Parties the caller is not authorized for are silently ignored.",
+            "explode": true,
+            "in": "query",
+            "name": "party",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorizedServiceResourceList"
+                }
+              }
+            },
+            "description": "Authorized service resource metadata."
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTBearerAuth": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets the service resources the authenticated end user is authorized to use.",
         "tags": [
           "Enduser"
         ]

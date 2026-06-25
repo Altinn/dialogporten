@@ -9,18 +9,18 @@
         <PackageReference Include="coverlet.collector" Version="10.0.1" />
         <PackageReference Include="AwesomeAssertions" Version="9.4.0" />
         <PackageReference Include="Verify.XunitV3" Version="31.17.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.8" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
-        <PackageReference Include="Polly" Version="8.6.6" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.9" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.9" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
+        <PackageReference Include="Polly" Version="8.7.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
         <PackageReference Include="xunit.v3" Version="3.2.2" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj" />
-        <ProjectReference Include="..\..\src\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
+        <ProjectReference Include="..\..\src\WebApiClient\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj" />
     </ItemGroup>
 
     <ItemGroup>

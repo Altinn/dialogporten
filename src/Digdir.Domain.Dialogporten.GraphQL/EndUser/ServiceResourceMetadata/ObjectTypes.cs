@@ -18,6 +18,8 @@ public sealed class ServiceResourceMetadataItem
 public sealed class ServiceResourceMetadataServiceResource
 {
     public string Id { get; set; } = null!;
+    public string ResourceType { get; set; } = null!;
+    public string Status { get; set; } = null!;
     public bool IsDelegable { get; set; }
     public int MinimumAuthenticationLevel { get; set; }
     public List<Localization> Name { get; set; } = [];

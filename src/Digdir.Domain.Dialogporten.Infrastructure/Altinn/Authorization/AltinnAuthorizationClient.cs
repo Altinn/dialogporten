@@ -117,6 +117,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     public async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
         List<string> constraintParties,
         List<string> serviceResources,
+        bool includeDialogIds = true,
         CancellationToken cancellationToken = default)
     {
         var claims = _user.GetPrincipal().Claims.ToList();
@@ -129,7 +130,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
         // We don't cache at this level, as the principal information is received from GetAuthorizedParties,
         // which is already cached
-        return await PerformDialogSearchAuthorization(request, cancellationToken);
+        return await PerformDialogSearchAuthorization(request, includeDialogIds, cancellationToken);
     }
 
     public async Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,
@@ -196,7 +197,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
     {
         var authorizedResourcesForSearch = await GetAuthorizedResourcesForSearch(
-            [dialog.Party], [dialog.ServiceResource], cancellationToken);
+            [dialog.Party], [dialog.ServiceResource], cancellationToken: cancellationToken);
 
         return authorizedResourcesForSearch.ResourcesByParties.Count > 0
                || authorizedResourcesForSearch.DialogIds.Contains(dialog.Id);
@@ -239,10 +240,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return result;
     }
 
-    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
+    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, bool includeDialogIds, CancellationToken cancellationToken)
     {
-        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier()
-            ?? throw CreateMissingEndUserPartyIdentifierException(_user.GetPrincipal());
+        var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifierOrThrow();
 
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
             partyIdentifier,
@@ -264,35 +264,26 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             GetAllSubjectResources,
             cancellationToken);
 
-        var applicationSettings = _applicationSettings.CurrentValue;
-        var featureToggle = applicationSettings.FeatureToggle;
-        if (featureToggle.UsePartyResourcePruning)
+        // Pruning intersects the authorized resources with those actually referenced by Dialogporten.
+        // This is a functional requirement (not just a search optimization): the authorized service
+        // resources API relies on this pipeline to return a subset of the referenced resource catalogue.
+        var partyResourcePruningLimits = _applicationSettings.CurrentValue.Limits.PartyResourcePruning;
+        await AuthorizationHelper.PruneUnreferencedResources(
+            result,
+            _partyResourceReferenceRepository,
+            partyResourcePruningLimits.MinResourcesPruningThreshold,
+            cancellationToken);
+
+        if (includeDialogIds)
         {
-            var partyResourcePruningLimits = applicationSettings.Limits.PartyResourcePruning;
-            await AuthorizationHelper.PruneUnreferencedResources(
+            await PopulateDialogIdsFromInstanceRefs(
                 result,
-                _partyResourceReferenceRepository,
-                partyResourcePruningLimits.MinResourcesPruningThreshold,
+                authorizedParties,
+                request.ConstraintServiceResources,
                 cancellationToken);
         }
 
-        await PopulateDialogIdsFromInstanceRefs(
-            result,
-            authorizedParties,
-            request.ConstraintServiceResources,
-            cancellationToken);
-
         return result;
-    }
-
-    private static UnreachableException CreateMissingEndUserPartyIdentifierException(ClaimsPrincipal principal)
-    {
-        var (userType, _) = principal.GetUserType();
-
-        return new(
-            "GetEndUserPartyIdentifier returned null. " +
-            $"UserType={userType}, " +
-            principal.GetDiagnosticSummary());
     }
 
     private async Task PopulateDialogIdsFromInstanceRefs(

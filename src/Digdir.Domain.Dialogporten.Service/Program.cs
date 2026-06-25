@@ -66,7 +66,8 @@ static void BuildAndRun(string[] args)
             additionalTracing: x =>
             {
                 x.AddAspNetCoreInstrumentationExcludingHealthPaths();
-            })
+            },
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
         .AddAzureAppConfiguration()
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)

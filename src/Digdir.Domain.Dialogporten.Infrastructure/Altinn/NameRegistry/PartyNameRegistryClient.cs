@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
+using static System.StringComparison;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 
@@ -58,13 +59,11 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return async (ctx, ct) =>
         {
             var name = await GetNameFromRegister(externalIdWithPrefix, ct);
-            if (name is null)
-            {
-                // Short negative cache
-                ctx.Options.Duration = TimeSpan.FromSeconds(10);
-            }
+            if (name is not null) return name;
 
-            return name;
+            ctx.Options.SkipMemoryCacheWrite = true;
+            ctx.Options.SkipDistributedCacheWrite = true;
+            return null;
         };
     }
 
@@ -108,25 +107,56 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         const string apiUrl = "register/api/v1/dialogporten/parties/query";
-        var nameLookupResult = await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
+        var nameLookupResult = await PerformPartyNameRequest(apiUrl, nameLookup, cancellationToken);
+
+        var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
+
+        // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does
+        // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
+        if (name is not null) return FlipNameIfPerson(partyIdentifier, name);
+
+        if (partyIdentifier is not SystemUserIdentifier)
+        {
+            _logger.LogError(
+                "Failed to get name from party name registry for external id {ExternalId}. Response: {@Response}",
+                externalIdWithPrefix,
+                nameLookupResult
+            );
+            return null;
+        }
+
+        // We inline a simple retry for systems to account for propagation delays in register
+        // This will delay responses to GET requests performed by system users, but might save them a 500
+        var retryAfter = TimeSpan.FromMilliseconds(500);
+        _logger.LogWarning(
+            "Got null when getting system name. Retrying once after {RetryAfter}. ExternalId: {ExternalId}",
+            retryAfter,
+            externalIdWithPrefix
+        );
+
+        await Task.Delay(retryAfter, cancellationToken);
+        var nameLookupRetryResult = await PerformPartyNameRequest(apiUrl, nameLookup, cancellationToken);
+
+        name = nameLookupRetryResult.Data.FirstOrDefault()?.DisplayName;
+
+        if (name is not null) return name; // We are system user here, no need to FlipNameIfPerson
+
+        _logger.LogError(
+            "Failed to get system name from party name registry for external id {ExternalId}. Response: {@Response}. Retries: 1",
+            externalIdWithPrefix,
+            nameLookupRetryResult
+        );
+
+        return null;
+    }
+
+    private async Task<NameLookupResult> PerformPartyNameRequest(string apiUrl, NameLookup nameLookup, CancellationToken cancellationToken)
+    {
+        return await _client.PostAsJsonEnsuredAsync<NameLookupResult>(
             apiUrl,
             nameLookup,
             serializerOptions: SerializerOptions,
             cancellationToken: cancellationToken);
-
-        var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
-        if (name is null)
-        {
-            // This is PII, but this is an error condition (probably due to missing Altinn profile)
-            _logger.LogError("Failed to get name from party name registry for external id {ExternalId}", externalIdWithPrefix);
-            return null;
-        }
-
-        // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does
-        // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
-        name = FlipNameIfPerson(partyIdentifier, name);
-
-        return name;
     }
 
     private string FlipNameIfPerson(IPartyIdentifier partyIdentifier, string name)

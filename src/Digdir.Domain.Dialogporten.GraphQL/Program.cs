@@ -108,9 +108,6 @@ static void BuildAndRun(string[] args)
         // Graph QL
         .AddDialogportenGraphQl()
 
-        // Response compression (opt-in per resolver via [EnableResponseCompression])
-        .AddDialogportenResponseCompression()
-
         // Add controllers
         .AddControllers()
             .Services
@@ -128,7 +125,8 @@ static void BuildAndRun(string[] args)
                     {
                         RenameRootActivityListener.EnrichRootActivity(activity);
                     };
-                }))
+                }),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
 
         // Add health checks with configured endpoints and well-known auth metadata endpoints
         .AddAspNetHealthChecks((x, y) =>
@@ -164,8 +162,6 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
 
     app.UseCors();
-    // Must precede MapGraphQL so HotChocolate's response body stream is wrapped before write.
-    app.UseResponseCompression();
     app.MapAspNetHealthChecks()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()

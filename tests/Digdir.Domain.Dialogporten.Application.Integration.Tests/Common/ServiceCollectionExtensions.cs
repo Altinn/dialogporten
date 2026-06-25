@@ -51,6 +51,7 @@ internal static class ServiceCollectionExtensions
         altinnAuthorization.GetAuthorizedResourcesForSearch(
                 Arg.Any<List<string>>(),
                 Arg.Any<List<string>>(),
+                Arg.Any<bool>(),
                 Arg.Any<CancellationToken>())
             .Returns(result);
 }

@@ -75,7 +75,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         else
         {
             var authorizedResources =
-                await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken);
+                await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken: cancellationToken);
 
             dialogs = await _db.Dialogs
                 .PrefilterAuthorizedDialogs(authorizedResources)

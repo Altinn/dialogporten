@@ -5,12 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
-        <ProjectReference Include="..\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj"/>
+        <ProjectReference Include="..\WebApiClient\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
+        <ProjectReference Include="..\WebApiClient\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -115,14 +115,14 @@ jobs:
             tests:
               - 'tests/**/*'
             web_api_client:
-              - 'src/Digdir.Library.Dialogporten.WebApiClient/**/*'
-              - 'src/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
+              - 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/**/*'
+              - 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
             web_api_enduser_client:
-              - 'src/Digdir.Library.Dialogporten.WebApiClient.EndUser/**/*'
-              - 'src/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
+              - 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/**/*'
+              - 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
             web_api_serviceowner_client:
-              - 'src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/**/*'
-              - 'src/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
+              - 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/**/*'
+              - 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.Common/**/*'
             swagger_schema:
               - 'docs/schema/V1/swagger.verified.json'
             openapi_enduser_schema:

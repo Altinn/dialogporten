@@ -1,0 +1,93 @@
+﻿{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "idempotentKey": null,
+  "revision": "00000000-0000-0000-0000-000000000000",
+  "org": "ttd",
+  "serviceResource": "urn:altinn:resource:ttd-dialogporten-automated-tests",
+  "serviceResourceType": "genericaccessresource",
+  "party": "urn:altinn:person:identifier-no:08844397713",
+  "progress": null,
+  "process": null,
+  "precedingProcess": null,
+  "extendedStatus": null,
+  "externalReference": null,
+  "deletedAt": null,
+  "visibleFrom": null,
+  "dueAt": null,
+  "expiresAt": null,
+  "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "updatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "contentUpdatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "status": "NotApplicable",
+  "systemLabel": "Default",
+  "isApiOnly": false,
+  "hasUnopenedContent": false,
+  "content": {
+    "title": {
+      "value": [
+        {
+          "value": "Create dialog title",
+          "languageCode": "en"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "nonSensitiveTitle": null,
+    "summary": null,
+    "nonSensitiveSummary": null,
+    "senderName": null,
+    "additionalInfo": null,
+    "extendedStatus": null,
+    "mainContentReference": null
+  },
+  "fromServiceOwnerTransmissionsCount": 0,
+  "fromPartyTransmissionsCount": 0,
+  "searchTags": [],
+  "attachments": [],
+  "transmissions": [],
+  "guiActions": [],
+  "apiActions": [],
+  "activities": [],
+  "seenSinceLastUpdate": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "seenBy": {
+        "actorType": "PartyRepresentative",
+        "actorName": "LITTERATUR UROMANTISK",
+        "actorId": "urn:altinn:person:identifier-no:08844397713"
+      },
+      "isViaServiceOwner": false,
+      "isCurrentEndUser": true
+    }
+  ],
+  "seenSinceLastContentUpdate": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "seenBy": {
+        "actorType": "PartyRepresentative",
+        "actorName": "LITTERATUR UROMANTISK",
+        "actorId": "urn:altinn:person:identifier-no:08844397713"
+      },
+      "isViaServiceOwner": false,
+      "isCurrentEndUser": true
+    }
+  ],
+  "isContentSeen": true,
+  "serviceOwnerContext": {
+    "serviceOwnerLabels": [
+      {
+        "value": "digdir:dialogporten:ephemeral-dialog"
+      }
+    ],
+    "revision": "00000000-0000-0000-0000-000000000000"
+  },
+  "endUserContext": {
+    "revision": "00000000-0000-0000-0000-000000000000",
+    "systemLabels": [
+      0
+    ]
+  }
+}

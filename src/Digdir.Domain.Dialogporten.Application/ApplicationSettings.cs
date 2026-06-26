@@ -53,12 +53,29 @@ public sealed class LimitsSettings
     public EndUserSearchQueryLimits EndUserSearch { get; init; } = new();
     public ServiceOwnerSearchQueryLimits ServiceOwnerSearch { get; init; } = new();
     public PartyResourcePruningLimits PartyResourcePruning { get; init; } = new();
+    public AuthorizedServiceResourceLimits AuthorizedServiceResources { get; init; } = new();
 }
 
 public sealed class PartyResourcePruningLimits
 {
     public int MaxPartiesCachingThreshold { get; init; } = 1500; // 0 means no limit.
     public int MinResourcesPruningThreshold { get; init; } = 5;
+}
+
+public sealed class AuthorizedServiceResourceLimits
+{
+    /// <summary>
+    /// On an UNFILTERED authorized-service-resources request, if the caller is authorized to more parties than
+    /// this, return the full referenced catalogue instead of computing the per-party authorized union. This caps
+    /// the work for users with very many parties (where the per-party pruning query is expensive). 0 disables the
+    /// fallback. This must take effect no later than
+    /// <see cref="PartyResourcePruningLimits.MaxPartiesCachingThreshold"/> (above that threshold the per-party
+    /// pruning query still runs but its results are not written to the per-party cache, so the fallback must trip
+    /// first to keep such callers off the uncached multi-party query path). That relationship is not enforced by
+    /// configuration validation; instead <c>AuthorizedServiceResourcesProvider</c> clamps this limit down to the
+    /// caching threshold at runtime when the threshold is the lower of the two.
+    /// </summary>
+    public int MaxAuthorizedPartiesBeforeFullCatalogue { get; init; } = 1000;
 }
 
 public sealed class EndUserSearchQueryLimits
@@ -114,7 +131,8 @@ internal sealed class LimitsSettingsValidator : AbstractValidator<LimitsSettings
     public LimitsSettingsValidator(
         IValidator<EndUserSearchQueryLimits> endUserSearchValidator,
         IValidator<ServiceOwnerSearchQueryLimits> serviceOwnerSearchValidator,
-        IValidator<PartyResourcePruningLimits> partyResourcePruningValidator)
+        IValidator<PartyResourcePruningLimits> partyResourcePruningValidator,
+        IValidator<AuthorizedServiceResourceLimits> authorizedServiceResourceValidator)
     {
         RuleFor(x => x.EndUserSearch)
             .NotEmpty()
@@ -127,6 +145,25 @@ internal sealed class LimitsSettingsValidator : AbstractValidator<LimitsSettings
         RuleFor(x => x.PartyResourcePruning)
             .NotEmpty()
             .SetValidator(partyResourcePruningValidator);
+
+        RuleFor(x => x.AuthorizedServiceResources)
+            .NotEmpty()
+            .SetValidator(authorizedServiceResourceValidator);
+
+        // Note: the relationship between AuthorizedServiceResources.MaxAuthorizedPartiesBeforeFullCatalogue and
+        // PartyResourcePruning.MaxPartiesCachingThreshold is intentionally NOT validated here. The provider
+        // reconciles them at runtime by clamping the fallback limit down to the (lower) caching threshold, so a
+        // misordered configuration cannot reopen the uncached multi-party path. See AuthorizedServiceResourceLimits
+        // and AuthorizedServiceResourcesProvider.
+    }
+}
+
+internal sealed class AuthorizedServiceResourceLimitsValidator : AbstractValidator<AuthorizedServiceResourceLimits>
+{
+    public AuthorizedServiceResourceLimitsValidator()
+    {
+        RuleFor(x => x.MaxAuthorizedPartiesBeforeFullCatalogue)
+            .GreaterThanOrEqualTo(0);
     }
 }
 

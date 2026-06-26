@@ -50,8 +50,9 @@ internal sealed class RoutedAltinnAuthorization : IAltinnAuthorization
         List<string> constraintParties,
         List<string> constraintServiceResources,
         bool includeDialogIds = true,
+        int? minResourcesPruningThreshold = null,
         CancellationToken cancellationToken = default) =>
-        Current.GetAuthorizedResourcesForSearch(constraintParties, constraintServiceResources, includeDialogIds, cancellationToken);
+        Current.GetAuthorizedResourcesForSearch(constraintParties, constraintServiceResources, includeDialogIds, minResourcesPruningThreshold, cancellationToken);
 
     public Task<AuthorizedPartiesResult> GetAuthorizedParties(
         IPartyIdentifier authenticatedParty,

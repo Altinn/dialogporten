@@ -18,7 +18,9 @@ using FluentValidation;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.AccessManagement;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Events;
@@ -150,6 +152,7 @@ public static class InfrastructureExtensions
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient<IMetadataLinkProvider, MetadataLinkProvider>()
             .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
+            .AddTransient<IServiceResourceMetadataCatalogue, ServiceResourceMetadataCatalogue>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddTransient(x => new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
@@ -169,11 +172,14 @@ public static class InfrastructureExtensions
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
         services.AddFusionCacheStackExchangeRedisBackplane(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
 
+        // Party/person/org display names from Altinn Name Registry (slow-moving). Keyed per looked-up id.
         services.ConfigureFusionCache(nameof(Altinn.NameRegistry), new()
         {
             Duration = TimeSpan.FromHours(24),
             FailSafeMaxDuration = TimeSpan.FromHours(26)
         })
+        // Full Altinn service-resource definitions (title/owner/delegable/status/type). Low cardinality, large
+        // payload; an input to the service-resource metadata catalogue.
         .ConfigureFusionCache(nameof(Altinn.ResourceRegistry), new()
         {
             Duration = TimeSpan.FromMinutes(20),
@@ -181,6 +187,7 @@ public static class InfrastructureExtensions
             // The resource list is several megabytes and might take a while to process
             FactoryHardTimeout = TimeSpan.FromSeconds(10)
         })
+        // Service-owner org metadata / short names from Altinn Organization Registry (slow-moving).
         .ConfigureFusionCache(nameof(Altinn.OrganizationRegistry), new()
         {
             Duration = TimeSpan.FromHours(24),
@@ -207,7 +214,7 @@ public static class InfrastructureExtensions
             FactorySoftTimeout = TimeSpan.FromSeconds(4),
             // Timeout for the cache to wait for the factory to complete, which when reached without fail-safe data
             // will cause an exception to be thrown
-            FactoryHardTimeout = TimeSpan.FromSeconds(20)
+            FactoryHardTimeout = TimeSpan.FromSeconds(25)
         })
         .ConfigureFusionCache(nameof(AuthorizedPartiesResult), new()
         {
@@ -223,15 +230,17 @@ public static class InfrastructureExtensions
             // If the request to Altinn Access Management takes too long, we allow the cache to return stale data
             // temporarily whilst updating the cache in the background. Eager refresh is enabled, and a registered
             // backplane is used when available.
-            FactorySoftTimeout = TimeSpan.FromSeconds(6),
+            FactorySoftTimeout = TimeSpan.FromSeconds(10),
             // Timeout for the cache to wait for the factory to complete, which when reached without fail-safe data
             // will cause an exception to be thrown
-            FactoryHardTimeout = TimeSpan.FromSeconds(20)
+            FactoryHardTimeout = TimeSpan.FromSeconds(25)
         })
+        // Subject -> resource (role / access-package) mappings used by dialog-search authorization.
         .ConfigureFusionCache(nameof(SubjectResource), new()
         {
             Duration = TimeSpan.FromMinutes(20)
         })
+        // dialog id -> service-resource lookup for feature-metric tagging; short-lived, no fail-safe.
         .ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
         {
             IsFailSafeEnabled = false,
@@ -248,12 +257,17 @@ public static class InfrastructureExtensions
             Duration = TimeSpan.FromMinutes(30),
             FailSafeMaxDuration = TimeSpan.FromMinutes(60)
         })
+        // Single global list ("all") of every Dialogporten-referenced resource urn. Memory-only; the input set
+        // for the service-resource metadata catalogue and the includeUnauthorized catalogue path. Distinct from
+        // the per-party ps:<hash> cache above (which serves dialog-search pruning fan-out).
         .ConfigureFusionCache(PartyResourceRepository.ReferencedResourcesCacheName, new()
         {
             Duration = TimeSpan.FromMinutes(30),
             FailSafeMaxDuration = TimeSpan.FromMinutes(60),
             SkipDistributedCache = true
         })
+        // Subjects (roles/access packages) per referenced party-resource; used by the metadata item builder.
+        // Invalidated on SubjectResourceRepository.Merge.
         .ConfigureFusionCache(SubjectResourceRepository.ReferencedPartyResourcesCacheName, new()
         {
             Duration = TimeSpan.FromMinutes(20)
@@ -267,8 +281,50 @@ public static class InfrastructureExtensions
         })
         .ConfigureFusionCache(AccessManagementMetadataClient.CacheName, new()
         {
+            // Altinn Access Management role + access-package metadata (names, links), assembled and per-language.
+            // Low cardinality (a few global entries); an input to the service-resource metadata catalogue.
             Duration = TimeSpan.FromHours(1),
             FailSafeMaxDuration = TimeSpan.FromHours(2)
+        })
+        .ConfigureFusionCache(ServiceResourceMetadataCatalogue.CacheName, new()
+        {
+            // Shared, caller-independent, all-language catalogue of every Dialogporten-referenced service
+            // resource's metadata item (~3k entries). Built once from GetReferencedResources + the item builder
+            // and reused by BOTH the public-catalogue query and the authorized-resources query, so the expensive
+            // per-resource DTO construction no longer runs per request. Single low-cardinality entry -> L1 is
+            // wanted (do not SkipMemoryCache). Memory-only (SkipDistributedCache) to avoid serializing the
+            // several-MB graph to Redis; each replica rebuilds cheaply from its already-cached inputs. Eager
+            // refresh + fail-safe keep the multi-MB rebuild off the request path.
+            Duration = TimeSpan.FromMinutes(20),
+            FailSafeMaxDuration = TimeSpan.FromHours(2),
+            EagerRefreshThreshold = 0.8f,
+            FactorySoftTimeout = TimeSpan.FromSeconds(6),
+            FactoryHardTimeout = TimeSpan.FromSeconds(10),
+            SkipDistributedCache = true
+        })
+        .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()
+        {
+            // Per-caller (and per party-filter) bounded set of authorized + referenced resource ids backing the
+            // /enduser/serviceresources endpoint and the GraphQL serviceResources query. Replaces a per-request
+            // rebuild of the per-party authorization map + pruning (a multi-second, large query for users with
+            // very many parties). High cardinality (one entry per caller/filter) -> L2-only (SkipMemoryCache),
+            // mirroring Altinn.Authorization and IPartyResourceReferenceRepository; the value is bounded by the
+            // referenced catalogue so it stays tiny even for 25k-party users.
+            // Staleness tradeoff: PartyResourceReferenceCacheInvalidator only expires the lower-level per-party
+            // IPartyResourceReferenceRepository cache on reference changes, NOT this entry. A dialog create/delete
+            // that changes a party's referenced resources is therefore reflected here only after Duration elapses
+            // (up to 15 min). Targeted invalidation is not done because this entry is keyed per authenticated
+            // caller, not per party, so the invalidator (which knows only the party) cannot address it; the
+            // authorized-resource set changes rarely, so the bounded staleness is accepted.
+            SkipMemoryCache = true,
+            FactorySoftTimeout = TimeSpan.FromSeconds(10),
+            // Must be >= the hard timeouts of the caches this factory transitively awaits (AuthorizedPartiesResult
+            // and Altinn.Authorization, both 25s). A smaller value would make this outer factory time out (and, on
+            // a cold entry with no fail-safe data, throw) while the inner authorization call is still legitimately
+            // running within its own larger budget.
+            FactoryHardTimeout = TimeSpan.FromSeconds(25),
+            Duration = TimeSpan.FromMinutes(15),
+            FailSafeMaxDuration = TimeSpan.FromMinutes(30)
         });
 
         if (environment.IsEnvironment("yt01"))

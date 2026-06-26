@@ -62,7 +62,6 @@ public static class OpenApiDocumentExtensions
         {
             ExtensionData = null,
             Type = OpenApiSecuritySchemeType.OAuth2,
-            Name = "ID-Porten",
             Description = $"""
                           Browser login using ID-Porten (OIDC).
                           - You can obtain a token from ID-Porten using the Authorization Code + PKCE flow.
@@ -74,9 +73,6 @@ public static class OpenApiDocumentExtensions
                           There is only one scope available for this security scheme:
                           - {AuthorizationScope.EndUser}
                           """,
-            In = OpenApiSecurityApiKeyLocation.Header,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
             Flows = new OpenApiOAuthFlows
             {
                 AuthorizationCode = new OpenApiOAuthFlow
@@ -96,7 +92,6 @@ public static class OpenApiDocumentExtensions
         {
             ExtensionData = null,
             Type = OpenApiSecuritySchemeType.Http,
-            Name = "Maskinporten",
             Description = $"""
                           Machine login using Maskinporten.
                           
@@ -122,7 +117,6 @@ public static class OpenApiDocumentExtensions
                           - {AuthorizationScope.ServiceProviderChangeTransmissions}
                           - {AuthorizationScope.NotificationConditionCheck}
                           """,
-            In = OpenApiSecurityApiKeyLocation.Header,
             Scheme = "bearer",
             BearerFormat = "JWT",
             TokenUrl = settings.MaskinportenTokenUrl,

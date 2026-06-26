@@ -8,7 +8,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Http;
-using Digdir.Domain.Dialogporten.Domain.Localizations;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
@@ -161,19 +160,4 @@ internal static class Mappers
             ExpiresAt = source.ExpiresAt,
             Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!
         };
-
-    private static TLocalizationSet? ToLocalizationSet<TLocalizationSet>(
-        this IEnumerable<LocalizationDto>? source)
-        where TLocalizationSet : LocalizationSet, new()
-    {
-        var localizations = source as ICollection<LocalizationDto> ?? source?.ToList();
-        if (localizations is null || localizations.Count == 0)
-        {
-            return null;
-        }
-
-        var destination = new TLocalizationSet();
-        destination.Localizations.MergeFrom(localizations);
-        return destination;
-    }
 }

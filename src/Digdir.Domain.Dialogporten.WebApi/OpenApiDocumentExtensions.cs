@@ -257,7 +257,7 @@ public static class OpenApiDocumentExtensions
             ["Enduser"] =
                 "Endpoints for end users to read and act on dialogs they are authorized to access. " +
                 "Used both by persons logged in via ID-porten and by Altinn system users authenticated via Maskinporten. " +
-                "Requires a token with the `digdir:dialogporten` scope (or `digdir:dialogporten.noconsent`).\n\n" +
+                "Requires a token with the `digdir:dialogporten` scope.\n\n" +
                 "A .NET client SDK is available: " +
                 "[Altinn.ApiClients.Dialogporten.EndUser](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.EndUser/).",
             ["Metadata"] =

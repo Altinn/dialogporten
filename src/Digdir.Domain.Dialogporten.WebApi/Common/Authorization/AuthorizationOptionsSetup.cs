@@ -19,6 +19,10 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
     /// Used to align the openapi-specification security requirements with the scope requirements of each policy.
     /// Remember to update this when changing the policy configuration below.
     /// You should also include any application level scope checks in this map.
+    ///
+    /// Exceptions:
+    /// - We ignore the scope <see cref="AuthorizationScope.EndUserNoConsent"/> scope. It is not for public use.
+    /// - We ignore the policy <see cref="AuthorizationPolicy.Testing"/>. Its endpoints are not public.
     /// </summary>
     internal static readonly Dictionary<string, (ScopeRequirementOperation Operation, string[] Scopes)[]>
         ScopeRulesByPolicy = new()
@@ -64,10 +68,6 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
                         AuthorizationScope.ServiceOwnerAdminScope
                     ]
                 )
-            ],
-            [AuthorizationPolicy.Testing] =
-            [
-                (ScopeRequirementOperation.And, [AuthorizationScope.Testing])
             ],
         };
 

@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
-using Microsoft.AspNetCore.Authorization;
 using NJsonSchema;
 using NSwag;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Json.SecurityRequirementsOperationProcessor;

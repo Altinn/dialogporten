@@ -124,19 +124,45 @@ static void BuildAndRun(string[] args)
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, openApiSettings, "v1", "Dialogporten");
-        })
-        .SwaggerDocument(x =>
-        {
-            ConfigureOpenApiV1Document(x, openApiSettings, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
+            ConfigureOpenApiV1Document(
+                options: x,
+                postProcess: document =>
+                {
+
+                    document.RemoveDefaultSecurityScheme();
+                    document.AddMaskinportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Maskinporten"));
+                    document.AddIdportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Idporten"));
+                },
+                documentName: "v1",
+                title: "Dialogporten"
+            );
         })
         .SwaggerDocument(x =>
         {
             ConfigureOpenApiV1Document(
-                x,
-                openApiSettings,
-                "v1.serviceowner",
-                "Dialogporten ServiceOwner",
+                options: x,
+                postProcess: document =>
+                {
+                    document.RemoveDefaultSecurityScheme();
+                    document.AddMaskinportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Maskinporten"));
+                    document.AddIdportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Idporten"));
+                },
+                documentName: "v1.enduser",
+                title: "Dialogporten EndUser",
+                audience: "enduser"
+            );
+        })
+        .SwaggerDocument(x =>
+        {
+            ConfigureOpenApiV1Document(
+                options: x,
+                postProcess: document =>
+                {
+                    document.RemoveDefaultSecurityScheme();
+                    document.AddMaskinportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Maskinporten"));
+                },
+                documentName: "v1.serviceowner",
+                title: "Dialogporten ServiceOwner",
                 audience: "serviceowner"
             );
         })
@@ -302,9 +328,21 @@ static void BuildAndRun(string[] args)
     app.Run();
 }
 
+
+static string GetWellKnown(IServiceProvider services, string name)
+{
+    var settings = services.GetRequiredService<IOptions<WebApiSettings>>().Value;
+    var schema = settings.Authentication.JwtBearerTokenSchemas.Find(x => x.Name == name);
+
+    return schema is null
+        ? throw new InvalidOperationException($"Unable to find authentication schema '{name}'")
+        : schema.WellKnown;
+}
+
+
 static void ConfigureOpenApiV1Document(
     DocumentOptions options,
-    DialogportenOpenApiSettings openApiSettings,
+    Action<OpenApiDocument> postProcess,
     string documentName,
     string title,
     string? audience = null
@@ -320,11 +358,11 @@ static void ConfigureOpenApiV1Document(
             document.Generator = null;
             document.MakeCollectionsNullable();
             document.FixJwtBearerCasing();
-            document.PostProcessSecuritySchemes(openApiSettings);
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();
             document.RemoveRequiredPropertiesFromSchemas();
+            postProcess.Invoke(document);
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;

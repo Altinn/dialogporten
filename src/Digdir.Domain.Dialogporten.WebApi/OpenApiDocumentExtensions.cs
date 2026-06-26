@@ -49,13 +49,20 @@ public static class OpenApiDocumentExtensions
     }
 
     /// <summary>
-    /// Replaces/Adds the security schemes with hard-coded values instead of letting refitter generate them.
+    /// Remove the default security scheme added by fastendpoints.
+    /// We replace it with these:
+    /// <see cref="AddIdportenSecurityScheme"/>
+    /// <see cref="AddMaskinportenSecurityScheme"/>
     /// </summary>
-    /// <param name="openApiDocument"></param>
-    /// <param name="settings"></param>
-    public static void PostProcessSecuritySchemes(
+    public static void RemoveDefaultSecurityScheme(this OpenApiDocument openApiDocument)
+    {
+        openApiDocument.Components.SecuritySchemes.Remove(FastEndpointsDefaultSecurityScheme);
+    }
+
+    public static void AddIdportenSecurityScheme(
         this OpenApiDocument openApiDocument,
-        DialogportenOpenApiSettings settings
+        DialogportenOpenApiSettings settings,
+        string wellKnownUrlIdporten
     )
     {
         openApiDocument.Components.SecuritySchemes[IdportenSecurityScheme] = new OpenApiSecurityScheme
@@ -63,23 +70,23 @@ public static class OpenApiDocumentExtensions
             ExtensionData = null,
             Type = OpenApiSecuritySchemeType.OAuth2,
             Description = $"""
-                          Browser login using ID-Porten (OIDC).
-                          - You can obtain a token from ID-Porten using the Authorization Code + PKCE flow.
-                          - This token can be only be used with the Enduser endpoints.
-                          
-                          Claims we look for:
-                          - pid (identifies the end user)
-                          
-                          There is only one scope available for this security scheme:
-                          - {AuthorizationScope.EndUser}
-                          """,
+                           Browser login using ID-Porten (OIDC).
+                           - You can obtain a token from ID-Porten using the Authorization Code + PKCE flow.
+                           - Well known: {wellKnownUrlIdporten}
+                           - This token can be only be used with the Enduser endpoints.
+
+                           Claims we look for:
+                           - pid (identifies the end user)
+
+                           There is only one scope available for this security scheme:
+                           - {AuthorizationScope.EndUser}
+                           """,
             Flows = new OpenApiOAuthFlows
             {
                 AuthorizationCode = new OpenApiOAuthFlow
                 {
                     AuthorizationUrl = settings.IdportenAuthorizationUrl,
                     TokenUrl = settings.IdportenTokenUrl,
-                    RefreshUrl = null,
                     Scopes = new Dictionary<string, string>
                     {
                         [AuthorizationScope.EndUser] = "Access to dialogporten",
@@ -87,7 +94,17 @@ public static class OpenApiDocumentExtensions
                 }
             },
         };
-        openApiDocument.Components.SecuritySchemes.Remove(FastEndpointsDefaultSecurityScheme);
+    }
+
+    /// <summary>
+    /// Replaces/Adds the security schemes with hard-coded values instead of letting refitter generate them.
+    /// </summary>
+    public static void AddMaskinportenSecurityScheme(
+        this OpenApiDocument openApiDocument,
+        DialogportenOpenApiSettings settings,
+        string wellKnownUrlMaskinporten
+    )
+    {
         openApiDocument.Components.SecuritySchemes[MaskinportenSecurityScheme] = new OpenApiSecurityScheme
         {
             ExtensionData = null,
@@ -99,6 +116,7 @@ public static class OpenApiDocumentExtensions
                             We can't express this flow in the OpenAPI specification. 
                             That's why we use the more generic "Http" type for this scheme instead.
                             Please refer to the Maskinporten documentation for how to implement this flow.
+                          - Well known: {wellKnownUrlMaskinporten}
                           - This token can be used for all secured endpoints (enduser and serviceowner).
                           - To use this token with the Enduser API's, you have to register a "system" and "system user".
                             Please refer to the Dialogporten documentation for how to register systems and system users.

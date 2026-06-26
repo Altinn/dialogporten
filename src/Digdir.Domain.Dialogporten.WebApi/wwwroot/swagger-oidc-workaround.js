@@ -6,13 +6,19 @@
 const oriOpen = window.open;
 window.open = function (...args) {
     const url = new URL(args[0]);
-    const hasOpenId = url.searchParams.get('scope').split(' ').some(x => x === 'openid');
+    const hasOpenId = url
+        .searchParams
+        .get('scope')
+        ?.split(' ')
+        ?.some(x => x === 'openid');
+
     if (hasOpenId) {
         url.searchParams.set('nonce', crypto.randomUUID());
         url.searchParams.set('prompt', "login");
         args[0] = url.toString();
     }
-    oriOpen.apply(window, args);
+
+    return oriOpen.apply(window, args);
 }
 
 /**

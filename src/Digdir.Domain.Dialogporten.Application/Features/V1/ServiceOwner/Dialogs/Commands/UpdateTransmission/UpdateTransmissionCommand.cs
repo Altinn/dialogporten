@@ -68,6 +68,11 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
 
     public async Task<UpdateTransmissionResult> Handle(UpdateTransmissionCommand request, CancellationToken cancellationToken)
     {
+        if (!_userResourceRegistry.CurrentUserCanChangeTransmissions())
+        {
+            return new Forbidden($"Use of transmission updates requires the scope {AuthorizationScope.ServiceProviderChangeTransmissions}.");
+        }
+
         var dialog = await LoadDialogAsync(request.DialogId, cancellationToken);
         if (dialog is null)
         {

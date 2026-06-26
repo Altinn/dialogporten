@@ -21,12 +21,15 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.S
 public class UpdateTransmissionTests(DialogApplication application) : ApplicationCollectionFixture(application)
 {
     [Fact]
-    public Task UpdateTransmission_Returns_Success_Without_ChangeTransmissions_Scope_As_Auth_Is_Handled_In_Http_Layer() =>
+    public Task UpdateTransmission_Returns_Forbidden_Without_ChangeTransmissions_Scope() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .CreateTransmission()
-            .UpdateTransmission((x, _) => x.IsSilentUpdate = true)
-            .ExecuteAndAssert<UpdateTransmissionSuccess>();
+            .UpdateTransmission((x, _) =>
+                x.IsSilentUpdate = true)
+            .ExecuteAndAssert<Forbidden>(error =>
+                error.Reasons.Should().ContainSingle(reason =>
+                    reason.Contains(AuthorizationScope.ServiceProviderChangeTransmissions)));
 
     [Fact]
     public Task UpdateTransmission_Returns_NotFound_When_DialogId_Does_Not_Exist() =>

@@ -11684,5 +11684,19 @@
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "description": "Endpoints for service owners to create and manage dialogs. Requires a Maskinporten token with the relevant \u0060digdir:dialogporten.serviceprovider\u0060 scope. The search endpoint additionally requires the \u0060digdir:dialogporten.serviceprovider.search\u0060 scope.\n\nA .NET client SDK is available: [Altinn.ApiClients.Dialogporten.ServiceOwner](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.ServiceOwner/).",
+      "name": "Serviceowner"
+    },
+    {
+      "description": "Endpoints for end users to read and act on dialogs they are authorized to access. Used both by persons logged in via ID-porten and by Altinn system users authenticated via Maskinporten. Requires a token with the \u0060digdir:dialogporten\u0060 scope (or \u0060digdir:dialogporten.noconsent\u0060).\n\nA .NET client SDK is available: [Altinn.ApiClients.Dialogporten.EndUser](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.EndUser/).",
+      "name": "Enduser"
+    },
+    {
+      "description": "Public, unauthenticated metadata endpoints such as health and configuration information.",
+      "name": "Metadata"
+    }
+  ]
 }

@@ -1,0 +1,15 @@
+using System.Text.Json.Serialization;
+
+namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.IdentifierLookup;
+
+public class IdentifierLookupServiceOwner
+{
+    [JsonPropertyName("orgNumber")]
+    public string OrgNumber { get; set; } = null!;
+
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = null!;
+
+    [JsonPropertyName("name")]
+    public ICollection<Localization> Name { get; set; } = [];
+}

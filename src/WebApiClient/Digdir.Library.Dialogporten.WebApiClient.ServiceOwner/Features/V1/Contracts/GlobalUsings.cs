@@ -1,0 +1,15 @@
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Action;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Activity;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Actors;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Attachment;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Common;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Content;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Context;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Dialog;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.IdentifierLookup;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.JsonPatch;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Labels;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Notification;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Search;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.ServiceResource;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Contracts.Transmission;

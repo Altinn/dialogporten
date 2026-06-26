@@ -426,7 +426,7 @@
       "isAuthorized": true,
       "isDeleteDialogAction": false,
       "priority": "Primary",
-      "httpMethod": "GET",
+      "httpMethod": "Get",
       "title": [
         {
           "value": "G\u00E5 til dialog",
@@ -443,7 +443,7 @@
       "isAuthorized": true,
       "isDeleteDialogAction": false,
       "priority": "Secondary",
-      "httpMethod": "POST",
+      "httpMethod": "Post",
       "title": [
         {
           "value": "Utf\u00F8r handling uten navigasjon",
@@ -470,7 +470,7 @@
           "id": "00000000-0000-0000-0000-000000000000",
           "version": null,
           "url": "urn:dialogporten:unauthorized",
-          "httpMethod": "GET",
+          "httpMethod": "Get",
           "documentationUrl": null,
           "requestSchema": null,
           "responseSchema": null,
@@ -481,7 +481,7 @@
           "id": "00000000-0000-0000-0000-000000000000",
           "version": null,
           "url": "urn:dialogporten:unauthorized",
-          "httpMethod": "GET",
+          "httpMethod": "Get",
           "documentationUrl": null,
           "requestSchema": null,
           "responseSchema": null,

@@ -31,7 +31,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
 
         var response = await Fixture.EndUserApi.V1.SearchDialogs(
             queryParams,
-            accept_Language: new());
+            acceptLanguage: new());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -63,7 +63,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
 
         var response = await Fixture.EndUserApi.V1.SearchDialogs(
             queryParams,
-            accept_Language: new());
+            acceptLanguage: new());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -95,7 +95,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
 
         var response = await Fixture.EndUserApi.V1.SearchDialogs(
             queryParams,
-            accept_Language: new());
+            acceptLanguage: new());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -126,7 +126,7 @@ public class SearchDialogSystemUserTests(WebApiE2EFixture fixture) : E2ETestBase
 
         var response = await Fixture.EndUserApi.V1.SearchDialogs(
             queryParams,
-            accept_Language: new());
+            acceptLanguage: new());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

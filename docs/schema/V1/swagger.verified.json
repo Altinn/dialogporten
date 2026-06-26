@@ -7313,7 +7313,7 @@
             "style": "form"
           },
           {
-            "description": "Only return dialogs created after this date",
+            "description": "Only return dialogs created after this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "createdAfter",
             "schema": {
@@ -7323,7 +7323,7 @@
             }
           },
           {
-            "description": "Only return dialogs created before this date",
+            "description": "Only return dialogs created before this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "createdBefore",
             "schema": {
@@ -7333,7 +7333,7 @@
             }
           },
           {
-            "description": "Only return dialogs updated after this date",
+            "description": "Only return dialogs updated after this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "updatedAfter",
             "schema": {
@@ -7343,7 +7343,7 @@
             }
           },
           {
-            "description": "Only return dialogs updated before this date",
+            "description": "Only return dialogs updated before this date. For free text search this does not limit how much the search has to scan; use \u0027contentUpdatedAfter\u0027 to narrow a broad search and avoid a 422 timeout.",
             "in": "query",
             "name": "updatedBefore",
             "schema": {
@@ -7353,7 +7353,7 @@
             }
           },
           {
-            "description": "Only return dialogs with content updated after this date",
+            "description": "Only return dialogs with content updated after this date. Recommended for free text search: this is the only date filter that limits how much a broad search has to scan. A broad search term without a \u0027contentUpdatedAfter\u0027 bound may exceed the server-side time limit and return 422 - narrow it with this filter (and/or fewer parties or a service resource).",
             "in": "query",
             "name": "contentUpdatedAfter",
             "schema": {
@@ -7363,7 +7363,7 @@
             }
           },
           {
-            "description": "Only return dialogs with content updated before this date",
+            "description": "Only return dialogs with content updated before this date. Unlike \u0027contentUpdatedAfter\u0027, this upper bound does not by itself limit how much a free text search has to scan.",
             "in": "query",
             "name": "contentUpdatedBefore",
             "schema": {
@@ -7452,6 +7452,7 @@
             }
           },
           {
+            "description": "Order the results by one or more fields. Defaults to \u0022contentUpdatedAt\u0022 descending. For free text search, keeping the default \u0022contentUpdatedAt\u0022 ordering together with \u0022contentUpdatedAfter\u0022 gives the fastest results.",
             "in": "query",
             "name": "orderBy",
             "schema": {
@@ -7504,6 +7505,19 @@
           },
           "401": {
             "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
             "content": {
@@ -11754,5 +11768,19 @@
         ]
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "description": "Endpoints for service owners to create and manage dialogs. Requires a Maskinporten token with the relevant \u0060digdir:dialogporten.serviceprovider\u0060 scope. The search endpoint additionally requires the \u0060digdir:dialogporten.serviceprovider.search\u0060 scope.\n\nA .NET client SDK is available: [Altinn.ApiClients.Dialogporten.ServiceOwner](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.ServiceOwner/).",
+      "name": "Serviceowner"
+    },
+    {
+      "description": "Endpoints for end users to read and act on dialogs they are authorized to access. Used both by persons logged in via ID-porten and by Altinn system users authenticated via Maskinporten. Requires a token with the \u0060digdir:dialogporten\u0060 scope (or \u0060digdir:dialogporten.noconsent\u0060).\n\nA .NET client SDK is available: [Altinn.ApiClients.Dialogporten.EndUser](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.EndUser/).",
+      "name": "Enduser"
+    },
+    {
+      "description": "Public, unauthenticated metadata endpoints such as health and configuration information.",
+      "name": "Metadata"
+    }
+  ]
 }

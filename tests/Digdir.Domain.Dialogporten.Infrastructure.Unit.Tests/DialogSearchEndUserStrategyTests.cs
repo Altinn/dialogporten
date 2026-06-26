@@ -16,8 +16,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Unit.Tests;
 public sealed class DialogSearchEndUserStrategyTests
 {
     [Fact]
-    public void Selector_Should_Select_SinglePartyNoFts_For_SingleParty_Without_Fts() =>
-        AssertSelectedStrategy<SinglePartyNoFtsStrategy>(
+    public void Selector_Should_Select_SingleParty_For_SingleParty_Without_Fts() =>
+        AssertSelectedStrategy<SinglePartyStrategy>(
             CreateContext(partyCount: 1, hasFreeTextSearch: false));
 
     [Fact]
@@ -26,33 +26,48 @@ public sealed class DialogSearchEndUserStrategyTests
             CreateContext(partyCount: 1, hasFreeTextSearch: true));
 
     [Fact]
-    public void Selector_Should_Select_DialogFirstFts_For_SmallMultiParty_With_Fts() =>
-        AssertSelectedStrategy<DialogFirstFtsStrategy>(
+    public void Selector_Should_Select_MultiPartyFts_For_SmallMultiParty_With_Fts() =>
+        AssertSelectedStrategy<MultiPartyFtsStrategy>(
             CreateContext(partyCount: 2, hasFreeTextSearch: true));
 
     [Fact]
-    public void Selector_Should_Select_GenericPartyDriven_For_SmallMultiParty_Without_Fts() =>
-        AssertSelectedStrategy<GenericPartyDrivenStrategy>(
+    public void Selector_Should_Select_MultiParty_For_SmallMultiParty_Without_Fts() =>
+        AssertSelectedStrategy<MultiPartyStrategy>(
             CreateContext(partyCount: 2, hasFreeTextSearch: false));
 
     [Fact]
-    public void Selector_Should_Select_GinFirstFts_For_LargeMultiParty_With_Fts() =>
-        AssertSelectedStrategy<GinFirstFtsStrategy>(
-            CreateContext(partyCount: 1000, hasFreeTextSearch: true));
+    public void Selector_Should_Select_SingleServiceFts_For_LargeMultiParty_With_Fts_And_Single_Service() =>
+        AssertSelectedStrategy<SingleServiceFtsStrategy>(
+            CreateContext(partyCount: 1000, hasFreeTextSearch: true, serviceCount: 1));
 
     [Fact]
-    public void Selector_Should_Select_GenericServiceDriven_For_LargeMultiParty_Without_Fts_When_Effective_Service_Set_Is_Small() =>
-        AssertSelectedStrategy<GenericServiceDrivenStrategy>(
-            CreateContext(partyCount: 1000, hasFreeTextSearch: false));
+    public void Selector_Should_Select_MultiServiceFts_For_LargeMultiParty_With_Fts_And_Small_Multi_Service_Set() =>
+        AssertSelectedStrategy<MultiServiceFtsStrategy>(
+            CreateContext(partyCount: 1000, hasFreeTextSearch: true, serviceCount: 2));
 
     [Fact]
-    public void Selector_Should_Select_GenericPartyDriven_For_LargeMultiParty_Without_Fts_When_Effective_Service_Set_Is_Large() =>
-        AssertSelectedStrategy<GenericPartyDrivenStrategy>(
+    public void Selector_Should_Select_MultiPartyFts_For_LargeMultiParty_With_Fts_And_Large_Service_Set() =>
+        AssertSelectedStrategy<MultiPartyFtsStrategy>(
+            CreateContext(partyCount: 1000, hasFreeTextSearch: true, serviceCount: 21));
+
+    [Fact]
+    public void Selector_Should_Select_SingleService_For_LargeMultiParty_Without_Fts_And_Single_Service() =>
+        AssertSelectedStrategy<SingleServiceStrategy>(
+            CreateContext(partyCount: 1000, hasFreeTextSearch: false, serviceCount: 1));
+
+    [Fact]
+    public void Selector_Should_Select_MultiService_For_LargeMultiParty_Without_Fts_When_Effective_Service_Set_Is_Small_Multi() =>
+        AssertSelectedStrategy<MultiServiceStrategy>(
+            CreateContext(partyCount: 1000, hasFreeTextSearch: false, serviceCount: 2));
+
+    [Fact]
+    public void Selector_Should_Select_MultiParty_For_LargeMultiParty_Without_Fts_When_Effective_Service_Set_Is_Large() =>
+        AssertSelectedStrategy<MultiPartyStrategy>(
             CreateContext(partyCount: 1000, hasFreeTextSearch: false, serviceCount: 21));
 
     [Fact]
-    public void Selector_Should_Select_SinglePartyNoFts_For_SingleParty_Without_Fts_With_Delegated_Dialogs() =>
-        AssertSelectedStrategy<SinglePartyNoFtsStrategy>(
+    public void Selector_Should_Select_SingleParty_For_SingleParty_Without_Fts_With_Delegated_Dialogs() =>
+        AssertSelectedStrategy<SinglePartyStrategy>(
             CreateContext(
                 partyCount: 1,
                 hasFreeTextSearch: false,
@@ -83,21 +98,26 @@ public sealed class DialogSearchEndUserStrategyTests
         return new DialogEndUserSearchStrategySelector(
             [
                 new SinglePartyFtsStrategy(
-                    options,
                     NullLogger<SinglePartyFtsStrategy>.Instance),
-                new DialogFirstFtsStrategy(
+                new SingleServiceFtsStrategy(
                     options,
-                    NullLogger<DialogFirstFtsStrategy>.Instance),
-                new GinFirstFtsStrategy(
+                    NullLogger<SingleServiceFtsStrategy>.Instance),
+                new MultiServiceFtsStrategy(
                     options,
-                    NullLogger<GinFirstFtsStrategy>.Instance),
-                new SinglePartyNoFtsStrategy(),
-                new GenericPartyDrivenStrategy(
+                    NullLogger<MultiServiceFtsStrategy>.Instance),
+                new MultiPartyFtsStrategy(
                     options,
-                    NullLogger<GenericPartyDrivenStrategy>.Instance),
-                new GenericServiceDrivenStrategy(
+                    NullLogger<MultiPartyFtsStrategy>.Instance),
+                new SinglePartyStrategy(),
+                new SingleServiceStrategy(
                     options,
-                    NullLogger<GenericServiceDrivenStrategy>.Instance)
+                    NullLogger<SingleServiceStrategy>.Instance),
+                new MultiPartyStrategy(
+                    options,
+                    NullLogger<MultiPartyStrategy>.Instance),
+                new MultiServiceStrategy(
+                    options,
+                    NullLogger<MultiServiceStrategy>.Instance)
             ],
             NullLogger<DialogEndUserSearchStrategySelector>.Instance);
     }
@@ -151,9 +171,7 @@ public sealed class DialogSearchEndUserStrategyTests
                 EndUserSearch = new EndUserSearchQueryLimits
                 {
                     MinServiceDrivenStrategyPartyCount = 100,
-                    MaxFreeTextSearchCandidates = 5000,
-                    MinFreeTextSearchCandidatesPerParty = 100,
-                    MaxDialogFirstFreeTextSearchPartyCount = 50
+                    MaxServiceResourceFilterValues = 20
                 }
             }
         };

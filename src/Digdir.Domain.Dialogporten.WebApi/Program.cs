@@ -207,28 +207,28 @@ static void BuildAndRun(string[] args)
     var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
 
     app.UseStaticFiles();
-    app.MapScalarApiReference("/scalar", options =>
-        {
-            options
-                .WithTitle("Dialogporten API")
-                // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
-                // the base path it auto-detects (window.location.pathname minus the server request path).
-                // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
-                // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
-                .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
-                .AddDocument("v1", "Dialogporten - EndUser/ServiceOwner combined (legacy)")
-                .AddDocument("v1.enduser", "Dialogporten EndUser")
-                .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
-                .DisableAgent();
 
-            options.HideTestRequestButton = !openApiSettings.EnableTryItOut;
-            options.AddAuthorizationCodeFlow(SecurityRequirementsOperationProcessor.IdportenSecurityScheme,
-                authOptions => authOptions
-                    .WithClientId(openApiSettings.IdportenClientId)
-                    .WithAuthorizationUrl(openApiSettings.IdportenAuthorizationUrl + "?prompt=login")
-            );
-        }
-    );
+    app.MapScalarApiReference("/scalar", options =>
+    {
+        options
+            .WithTitle("Dialogporten API")
+            // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
+            // the base path it auto-detects (window.location.pathname minus the server request path).
+            // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
+            // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
+            .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+            .AddDocument("v1", "(Legacy) Dialogporten - EndUser/ServiceOwner combined")
+            .AddDocument("v1.enduser", "Dialogporten EndUser")
+            .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
+            .DisableAgent();
+
+        options.HideTestRequestButton = !openApiSettings.EnableTryItOut;
+        options.AddAuthorizationCodeFlow(SecurityRequirementsOperationProcessor.IdportenSecurityScheme,
+            authOptions => authOptions
+                .WithClientId(openApiSettings.IdportenClientId)
+                .WithAuthorizationUrl(openApiSettings.IdportenAuthorizationUrl + "?prompt=login")
+        );
+    });
 
     app.UseHttpsRedirection();
     // Wraps the response body before any downstream middleware writes. Must precede
@@ -357,6 +357,7 @@ static void ConfigureOpenApiV1Document(
         {
             document.Generator = null;
             document.MakeCollectionsNullable();
+            document.AddTagDescriptions();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();

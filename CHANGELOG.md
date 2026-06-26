@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.118.2](https://github.com/Altinn/dialogporten/compare/v1.118.1...v1.118.2) (2026-06-25)
+
+
+### Bug Fixes
+
+* improve fts performance ([#4142](https://github.com/Altinn/dialogporten/issues/4142)) ([6fb6cd5](https://github.com/Altinn/dialogporten/commit/6fb6cd5a9b39a6dfb856f31cbe039a6e70abfaae))
+
+
+### Miscellaneous Chores
+
+* add feature flag to enable gql authorized service resources ([#4160](https://github.com/Altinn/dialogporten/issues/4160)) ([834b3d8](https://github.com/Altinn/dialogporten/commit/834b3d802fdf4605988ada383a605e397a1ec32c))
+* consolidate WebApiClient projects under src/WebApiClient ([#4170](https://github.com/Altinn/dialogporten/issues/4170)) ([5e3b440](https://github.com/Altinn/dialogporten/commit/5e3b440caa2659732fe80dce94badc0b9dd6fee0))
+* **deps:** update maskinporten api to 10.1.0 ([#4167](https://github.com/Altinn/dialogporten/issues/4167)) ([82eb168](https://github.com/Altinn/dialogporten/commit/82eb1680f3bedb24a3ceb90b0dd138942c1b6b32))
+* **infra:** add OOB deploy workflows ([#4152](https://github.com/Altinn/dialogporten/issues/4152)) ([001a615](https://github.com/Altinn/dialogporten/commit/001a615b9b7dad4d4092cb23d2397e9e88f6d12f))
+
 ## [1.118.1](https://github.com/Altinn/dialogporten/compare/v1.118.0...v1.118.1) (2026-06-23)
 
 

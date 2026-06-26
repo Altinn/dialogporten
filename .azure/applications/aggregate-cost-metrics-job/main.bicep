@@ -83,7 +83,7 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
 
 var storageAccountName = take('${toLower(replace(namePrefix, '-', ''))}storage${uniqueString(resourceGroup().id)}', 24)
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: storageAccountName
   location: location
   sku: {
@@ -113,12 +113,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
   tags: tags
 }
 
-resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2025-01-01' = {
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2026-04-01' = {
   name: 'default'
   parent: storageAccount
 }
 
-resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-01-01' = {
+resource storageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2026-04-01' = {
   name: storageContainerName
   parent: blobService
   properties: {

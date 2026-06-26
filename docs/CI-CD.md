@@ -95,6 +95,8 @@ Available manual workflows for all environments:
 - `dispatch-k6-performance.yml`: Performance testing
 - `dispatch-k6-breakpoint.yml`: Breakpoint testing
 - `dispatch-deployment-lag-check.yml`: Deployment lag monitoring
+- `dispatch-deploy-branch-yt01.yml`: Deploy an arbitrary branch to YT01 (see [Out-of-band deploys](#out-of-band-deploys))
+- `dispatch-build-hotfix-prod.yml`: Build + release an emergency production hotfix image (see [Out-of-band deploys](#out-of-band-deploys))
 
 ### 6. Automated Monitoring
 
@@ -143,6 +145,59 @@ This workflow facilitates the deployment of infrastructure to the specified envi
 ### 8. Visual Workflow
 
 ![Deployment process](deploy-process.png)
+
+## Out-of-band deploys
+
+The normal flow promotes a release tag through `main → test → [yt01 + staging] → prod`. Two dispatch
+workflows support deploying *outside* that chain. Both are run **from `main`** and take an explicit
+`ref` input (branch/tag/sha) that is what actually gets built and deployed — GitHub only lists a
+workflow in the "Run workflow" picker if the file exists on the chosen branch, so a hotfix branch cut
+from an older tag would not show a newly added workflow. Running from `main` and passing the target as
+`ref` avoids that.
+
+### Experimental branch in YT01 (`dispatch-deploy-branch-yt01.yml`)
+
+Deploy an unmerged branch to YT01 for early performance testing. This is **ephemeral**: it builds and
+pushes images from the ref and updates the YT01 container apps, but does **not** update the
+`dialogporten-manifests` GitOps repo, so the next normal YT01 deploy overwrites it.
+
+Scope is intentionally just *build + deploy apps*. Migrations, infrastructure and performance tests are
+handled by their own dispatch workflows (`dispatch-apps.yml`, `dispatch-infrastructure.yml`,
+`dispatch-k6-performance.yml`) and can be run separately against YT01.
+
+1. YT01 is scale-to-zero. Bring the environment up first via the `Scale yt01 (manual)` workflow
+   (`dispatch-scale-yt01-manual.yml`, action `on`).
+2. Run **Dispatch Deploy Branch to YT01** from `main` with **ref** = the branch/tag/sha to deploy.
+
+Images are tagged `<version>-<shortsha>` (from `version.txt` + the ref's short sha), same as the main
+build convention.
+
+### Emergency production hotfix (`dispatch-build-hotfix-prod.yml`)
+
+A governed fast path to prod that skips test/staging but keeps the prod approval gate, produces a real
+tag/release (rollback point + audit trail), and updates the prod manifests — by reusing the existing
+**CI/CD Production** workflow for the actual deploy. The hotfix workflow itself only builds, tags and
+releases.
+
+1. **Branch from the currently deployed prod release tag** and commit the fix:
+   ```bash
+   git switch -c hotfix/<desc> v<currentProdVersion>
+   # ...make the fix...
+   git commit -am "fix: <desc>"
+   git push -u origin hotfix/<desc>
+   ```
+   Branching from the prod tag (not `main`) keeps unreleased work off the hotfix.
+2. Run **Build Production Hotfix Release** from `main` with **ref** = `hotfix/<desc>`. It builds and
+   pushes images, creates tag `v<base>-hotfix<shortsha>` and a GitHub **prerelease**, and prints the
+   resulting hotfix version in the run summary.
+3. Run the **CI/CD Production** workflow with `version = <base>-hotfix<shortsha>` (the value from the
+   summary). The prod approval gate fires; on approval it deploys infra/apps from the hotfix tag,
+   updates the prod manifests, tags issues and reports to Swarmia/Slack.
+4. **Back-merge (mandatory):** open a PR to merge `hotfix/<desc>` into `main` so the fix is not lost on
+   the next release.
+
+**Rollback:** redeploy the previous prod version by running **CI/CD Production** with the prior
+`version = <x.y.z>` (same input format as step 3, without a leading `v`).
 
 ## Version Tracking and Change Detection
 

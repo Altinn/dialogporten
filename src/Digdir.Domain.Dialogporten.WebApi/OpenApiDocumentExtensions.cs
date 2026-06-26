@@ -239,6 +239,57 @@ public static class OpenApiDocumentExtensions
         openApiDocument.Components.Schemas.Remove("OrderSetOfTOrderDefinitionAndTTarget");
     }
 
+    /// <summary>
+    /// Adds descriptions to the top-level tags (endpoint groups). These are rendered
+    /// underneath the group heading in the OpenAPI reference UI (e.g. Scalar/Swagger).
+    /// Descriptions support Markdown. Only tags actually used by an operation in the
+    /// document get a description, so audience-specific documents don't gain empty sections.
+    /// </summary>
+    public static void AddTagDescriptions(this OpenApiDocument openApiDocument)
+    {
+        var descriptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Serviceowner"] =
+                "Endpoints for service owners to create and manage dialogs. " +
+                "Requires a Maskinporten token with the relevant `digdir:dialogporten.serviceprovider` scope. " +
+                "The search endpoint additionally requires the `digdir:dialogporten.serviceprovider.search` scope.\n\n" +
+                "A .NET client SDK is available: " +
+                "[Altinn.ApiClients.Dialogporten.ServiceOwner](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.ServiceOwner/).",
+            ["Enduser"] =
+                "Endpoints for end users to read and act on dialogs they are authorized to access. " +
+                "Used both by persons logged in via ID-porten and by Altinn system users authenticated via Maskinporten. " +
+                "Requires a token with the `digdir:dialogporten` scope (or `digdir:dialogporten.noconsent`).\n\n" +
+                "A .NET client SDK is available: " +
+                "[Altinn.ApiClients.Dialogporten.EndUser](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.EndUser/).",
+            ["Metadata"] =
+                "Public, unauthenticated metadata endpoints such as health and configuration information."
+        };
+
+        var usedTagNames = openApiDocument.Paths
+            .SelectMany(path => path.Value.Values)
+            .SelectMany(operation => operation.Tags)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (name, description) in descriptions)
+        {
+            if (!usedTagNames.Contains(name))
+            {
+                continue;
+            }
+
+            var tag = openApiDocument.Tags
+                .FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
+
+            if (tag is null)
+            {
+                tag = new OpenApiTag { Name = name };
+                openApiDocument.Tags.Add(tag);
+            }
+
+            tag.Description = description;
+        }
+    }
+
     private static void MakeCollectionsNullable(JsonSchema schema)
     {
         if (schema.Properties == null)

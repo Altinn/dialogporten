@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.118.3](https://github.com/Altinn/dialogporten/compare/v1.118.2...v1.118.3) (2026-06-26)
+
+
+### Bug Fixes
+
+* **perf:** improve perf, add max party count bounding ([#4173](https://github.com/Altinn/dialogporten/issues/4173)) ([16d6946](https://github.com/Altinn/dialogporten/commit/16d69462652bbace675b06ff8c1ea9dc116d2182))
+
+
+### Miscellaneous Chores
+
+* bump Azure Storage Bicep API versions ([#4169](https://github.com/Altinn/dialogporten/issues/4169)) ([a1eec3f](https://github.com/Altinn/dialogporten/commit/a1eec3fb415f682c539d3abe9fe99cdfa28826c3))
+* bump OperationalInsights workspace API version ([#4175](https://github.com/Altinn/dialogporten/issues/4175)) ([0b54bec](https://github.com/Altinn/dialogporten/commit/0b54bece95ec13e7100f6eaf439405d49d728793))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.24.0 ([#4164](https://github.com/Altinn/dialogporten/issues/4164)) ([5f58121](https://github.com/Altinn/dialogporten/commit/5f58121ca5dfd42cd84767577bd092ffdfddcb83))
+* **deps:** update hotchocolate dependencies to 16.1.4 ([#4162](https://github.com/Altinn/dialogporten/issues/4162)) ([cad141a](https://github.com/Altinn/dialogporten/commit/cad141ad46782aa00b521b91b4315efc861bb183))
+* **deps:** update prom/prometheus docker tag to v3.12.0 ([#4165](https://github.com/Altinn/dialogporten/issues/4165)) ([7c2404e](https://github.com/Altinn/dialogporten/commit/7c2404e8bdac8ac1a7b738b011d1b3f2a4710f6d))
+* **deps:** update serilog dependencies ([#4163](https://github.com/Altinn/dialogporten/issues/4163)) ([33c8cea](https://github.com/Altinn/dialogporten/commit/33c8cea74dd5ea7c11022ccd58b764549cd481c1))
+* remove AutoMapper from ServiceOwner CreateTransmission ([#4168](https://github.com/Altinn/dialogporten/issues/4168)) ([4edd3cb](https://github.com/Altinn/dialogporten/commit/4edd3cb2f0a7f28dea507e1c750d18db16a36297)), closes [#967](https://github.com/Altinn/dialogporten/issues/967)
+
 ## [1.118.2](https://github.com/Altinn/dialogporten/compare/v1.118.1...v1.118.2) (2026-06-25)
 
 

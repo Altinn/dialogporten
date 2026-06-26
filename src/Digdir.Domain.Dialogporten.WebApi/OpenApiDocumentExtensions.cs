@@ -1,7 +1,10 @@
+using Digdir.Domain.Dialogporten.Application;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using NJsonSchema;
 using NSwag;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Json.SecurityRequirementsOperationProcessor;
 
 namespace Digdir.Domain.Dialogporten.WebApi;
 
@@ -42,6 +45,100 @@ public static class OpenApiDocumentExtensions
                 securityScheme.Scheme = "bearer";
             }
         }
+    }
+
+    /// <summary>
+    /// Remove the default security scheme added by fastendpoints.
+    /// We replace it with these:
+    /// <see cref="AddIdportenSecurityScheme"/>
+    /// <see cref="AddMaskinportenSecurityScheme"/>
+    /// </summary>
+    public static void RemoveDefaultSecurityScheme(this OpenApiDocument openApiDocument)
+    {
+        openApiDocument.Components.SecuritySchemes.Remove(FastEndpointsDefaultSecurityScheme);
+    }
+
+    public static void AddIdportenSecurityScheme(
+        this OpenApiDocument openApiDocument,
+        DialogportenOpenApiSettings settings,
+        string wellKnownUrlIdporten
+    )
+    {
+        openApiDocument.Components.SecuritySchemes[IdportenSecurityScheme] = new OpenApiSecurityScheme
+        {
+            ExtensionData = null,
+            Type = OpenApiSecuritySchemeType.OAuth2,
+            Description = $"""
+                           Browser login using ID-Porten (OIDC).
+                           - You can obtain a token from ID-Porten using the Authorization Code + PKCE flow.
+                           - Well known: {wellKnownUrlIdporten}
+                           - This token can be only be used with the Enduser endpoints.
+
+                           Claims we look for:
+                           - pid (identifies the end user)
+
+                           There is only one scope available for this security scheme:
+                           - {AuthorizationScope.EndUser}
+                           """,
+            Flows = new OpenApiOAuthFlows
+            {
+                AuthorizationCode = new OpenApiOAuthFlow
+                {
+                    AuthorizationUrl = settings.IdportenAuthorizationUrl,
+                    TokenUrl = settings.IdportenTokenUrl,
+                    Scopes = new Dictionary<string, string>
+                    {
+                        [AuthorizationScope.EndUser] = "Access to dialogporten",
+                    }
+                }
+            },
+        };
+    }
+
+    /// <summary>
+    /// Replaces/Adds the security schemes with hard-coded values instead of letting refitter generate them.
+    /// </summary>
+    public static void AddMaskinportenSecurityScheme(
+        this OpenApiDocument openApiDocument,
+        DialogportenOpenApiSettings settings,
+        string wellKnownUrlMaskinporten
+    )
+    {
+        openApiDocument.Components.SecuritySchemes[MaskinportenSecurityScheme] = new OpenApiSecurityScheme
+        {
+            ExtensionData = null,
+            Type = OpenApiSecuritySchemeType.Http,
+            Description = $"""
+                          Machine login using Maskinporten.
+                          
+                          - This is a OAuth2 scheme that uses the JWT Bearer Grant (RFC 7523).
+                            We can't express this flow in the OpenAPI specification. 
+                            That's why we use the more generic "Http" type for this scheme instead.
+                            Please refer to the Maskinporten documentation for how to implement this flow.
+                          - Well known: {wellKnownUrlMaskinporten}
+                          - This token can be used for all secured endpoints (enduser and serviceowner).
+                          - To use this token with the Enduser API's, you have to register a "system" and "system user".
+                            Please refer to the Dialogporten documentation for how to register systems and system users.
+                          - Required scopes are listed per endpoint as Security Requirement Objects.
+                          
+                          Claims we look for:
+                          - pid (identifies the service owner on behalf of the end user)
+                          - authorization_details (contains the system user ID)
+                          - consumer (identifies the organization/service owner)
+                          - email (identifies Email-users in the case the amr claim is Selfregistered-email)
+                          
+                          Available scopes for this security scheme are:
+                          - {AuthorizationScope.EndUser} (system user only)
+                          - {AuthorizationScope.ServiceProvider}
+                          - {AuthorizationScope.ServiceProviderSearch}
+                          - {AuthorizationScope.ServiceProviderChangeTransmissions}
+                          - {AuthorizationScope.NotificationConditionCheck}
+                          """,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            TokenUrl = settings.MaskinportenTokenUrl,
+            Flows = null
+        };
     }
 
     public static void AddServiceUnavailableResponse(this OpenApiDocument openApiDocument)
@@ -160,7 +257,7 @@ public static class OpenApiDocumentExtensions
             ["Enduser"] =
                 "Endpoints for end users to read and act on dialogs they are authorized to access. " +
                 "Used both by persons logged in via ID-porten and by Altinn system users authenticated via Maskinporten. " +
-                "Requires a token with the `digdir:dialogporten` scope (or `digdir:dialogporten.noconsent`).\n\n" +
+                "Requires a token with the `digdir:dialogporten` scope.\n\n" +
                 "A .NET client SDK is available: " +
                 "[Altinn.ApiClients.Dialogporten.EndUser](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten.EndUser/).",
             ["Metadata"] =

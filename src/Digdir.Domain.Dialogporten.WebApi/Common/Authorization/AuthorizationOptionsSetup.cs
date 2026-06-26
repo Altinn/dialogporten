@@ -1,6 +1,7 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Extensions.SecurityRequirementExtensions;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 
@@ -12,6 +13,63 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
     {
         _options = options.Value;
     }
+
+    /// <summary>
+    /// A map of AuthorizationPolicy to a set of scope rules.
+    /// Used to align the openapi-specification security requirements with the scope requirements of each policy.
+    /// Remember to update this when changing the policy configuration below.
+    /// You should also include any application level scope checks in this map.
+    ///
+    /// Exceptions:
+    /// - We ignore the scope <see cref="AuthorizationScope.EndUserNoConsent"/> scope. It is not for public use.
+    /// - We ignore the policy <see cref="AuthorizationPolicy.Testing"/>. Its endpoints are not public.
+    /// </summary>
+    internal static readonly Dictionary<string, (ScopeRequirementOperation Operation, string[] Scopes)[]>
+        ScopeRulesByPolicy = new()
+        {
+            [AuthorizationPolicy.EndUser] =
+            [
+                (ScopeRequirementOperation.And, [AuthorizationScope.EndUser])
+            ],
+            [AuthorizationPolicy.ServiceProvider] =
+            [
+                (ScopeRequirementOperation.And, [AuthorizationScope.ServiceProvider])
+            ],
+            [AuthorizationPolicy.ServiceProviderSearch] =
+            [
+                (
+                    ScopeRequirementOperation.And,
+                    [
+                        AuthorizationScope.ServiceProvider,
+                        AuthorizationScope.ServiceProviderSearch
+                    ]
+                )
+            ],
+            [AuthorizationPolicy.ServiceProviderChangeTransmissions] =
+            [
+                (
+                    ScopeRequirementOperation.And,
+                    [
+                        AuthorizationScope.ServiceProvider,
+                        AuthorizationScope.ServiceProviderChangeTransmissions
+                    ]
+                )
+            ],
+            [AuthorizationPolicy.NotificationConditionCheck] =
+            [
+                (ScopeRequirementOperation.And, [AuthorizationScope.NotificationConditionCheck])
+            ],
+            [AuthorizationPolicy.ServiceProviderAdmin] =
+            [
+                (
+                    ScopeRequirementOperation.And,
+                    [
+                        AuthorizationScope.ServiceProvider,
+                        AuthorizationScope.ServiceOwnerAdminScope
+                    ]
+                )
+            ],
+        };
 
     public void Configure(AuthorizationOptions options)
     {
@@ -48,9 +106,9 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
             .RequireScope(AuthorizationScope.ServiceProviderSearch));
 
-        options.AddPolicy(AuthorizationPolicy.Testing, builder => builder
-            .Combine(options.DefaultPolicy)
-            .RequireScope(AuthorizationScope.Testing));
+        options.AddPolicy(AuthorizationPolicy.ServiceProviderChangeTransmissions, builder => builder
+            .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
+            .RequireScope(AuthorizationScope.ServiceProviderChangeTransmissions));
 
         options.AddPolicy(AuthorizationPolicy.NotificationConditionCheck, builder => builder
             .Combine(options.DefaultPolicy)

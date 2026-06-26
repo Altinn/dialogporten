@@ -120,6 +120,7 @@ public static class OpenApiDocumentExtensions
                           - {AuthorizationScope.ServiceProvider}
                           - {AuthorizationScope.ServiceProviderSearch}
                           - {AuthorizationScope.ServiceProviderChangeTransmissions}
+                          - {AuthorizationScope.NotificationConditionCheck}
                           """,
             In = OpenApiSecurityApiKeyLocation.Header,
             Scheme = "bearer",

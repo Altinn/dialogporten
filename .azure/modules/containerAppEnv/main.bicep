@@ -30,7 +30,7 @@ param workloadProfiles array = [
   }
 ]
 
-resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {
   name: appInsightWorkspaceName
 }
 

@@ -1130,8 +1130,8 @@
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
-        "resolved": "10.0.8",
-        "contentHash": "e+kYYRb0HmNo5FTOcjXkP0mIEFHEyygm4ea/iLWpdumsACzCH078nZMfnk6RQFmtSrnNbh654c8nNtmUSwQoow=="
+        "resolved": "10.0.9",
+        "contentHash": "Aq7M8lG6BrHeatqKqncVm9m55ec34k6nnfPRLe/PvGg+b/pAsRM2ejofeKmCLjTXMa+5NGXm382f8CG/D5WDow=="
       },
       "Microsoft.Bcl.HashCode": {
         "type": "Transitive",
@@ -2281,8 +2281,8 @@
       },
       "Verify": {
         "type": "Transitive",
-        "resolved": "31.17.0",
-        "contentHash": "xgVXJ7Bqy1P9VMb4kMvzODnG8/G7ZKZ0KAzSU08YijXZEFYTwANmFlvyFikDVeLEzDVu5yzDuQqlDI5BN/cweA==",
+        "resolved": "31.20.0",
+        "contentHash": "rG9Uvg49LwBHRBagYjBj3ckMj2PwEl6QhI5GUhqec1Z3sNWX9+58oVUH90ckPOhj/2VgVi0lh7kYIXcLkxur2A==",
         "dependencies": {
           "Argon": "0.34.0",
           "DiffEngine": "19.2.0",
@@ -2291,14 +2291,14 @@
       },
       "Verify.XunitV3": {
         "type": "Transitive",
-        "resolved": "31.17.0",
-        "contentHash": "t56er1XbMlprMbfPGZlbCwkupxKDjSBDX6SjdCeGVEU4YsobnfRVvC3zus6OoDKTufjhD16bF1FdRAWF+km8XQ==",
+        "resolved": "31.20.0",
+        "contentHash": "rWaM0L/ufScjyvGqZ81phrRKoIphIkxhBANduyQY/gnm4yv1aARHAiUtnIDjqZak3k6w7mV3T2EiXwMe+zZM5g==",
         "dependencies": {
           "Argon": "0.34.0",
           "DiffEngine": "19.2.0",
-          "Microsoft.Bcl.AsyncInterfaces": "10.0.8",
+          "Microsoft.Bcl.AsyncInterfaces": "10.0.9",
           "SimpleInfoName": "3.2.0",
-          "Verify": "31.17.0",
+          "Verify": "31.20.0",
           "xunit.v3.extensibility.core": "3.2.2"
         }
       },
@@ -2615,7 +2615,7 @@
           "Microsoft.Extensions.Configuration.UserSecrets": "[10.0.9, )",
           "Microsoft.NET.Test.Sdk": "[18.6.0, )",
           "Polly": "[8.7.0, )",
-          "Verify.XunitV3": "[31.17.0, )",
+          "Verify.XunitV3": "[31.20.0, )",
           "coverlet.collector": "[10.0.1, )",
           "xunit.runner.visualstudio": "[3.1.5, )",
           "xunit.v3": "[3.2.2, )"

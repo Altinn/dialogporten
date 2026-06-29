@@ -20,6 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\WebApiClient\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
         <ProjectReference Include="..\..\src\WebApiClient\Digdir.Library.Dialogporten.WebApiClient\Digdir.Library.Dialogporten.WebApiClient.csproj"/>
+        <ProjectReference Include="..\..\src\WebApiClient\Digdir.Library.Dialogporten.WebApiClient.ServiceOwner\Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj"/>
     </ItemGroup>
 
 </Project>

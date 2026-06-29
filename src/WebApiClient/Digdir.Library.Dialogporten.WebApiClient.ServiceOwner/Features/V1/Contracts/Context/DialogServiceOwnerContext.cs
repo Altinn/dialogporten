@@ -8,7 +8,7 @@ public class DialogServiceOwnerContext
     /// A list of labels, not visible in end-user APIs.
     /// </summary>
     [JsonPropertyName("serviceOwnerLabels")]
-    public ICollection<ServiceOwnerLabel>? ServiceOwnerLabels { get; set; }
+    public ICollection<ServiceOwnerLabel> ServiceOwnerLabels { get; set; } = [];
 
     /// <summary>
     /// The unique identifier for the service owner context revision in UUIDv4 format.

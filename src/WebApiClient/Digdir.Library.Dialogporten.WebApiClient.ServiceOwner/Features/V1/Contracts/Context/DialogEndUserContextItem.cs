@@ -11,5 +11,5 @@ public class DialogEndUserContextItem
     public Guid EndUserContextRevision { get; set; }
 
     [JsonPropertyName("systemLabels")]
-    public ICollection<SystemLabel>? SystemLabels { get; set; }
+    public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 }

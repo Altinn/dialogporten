@@ -28,9 +28,10 @@ public class DialogApiAction
 
     /// <summary>
     /// True if the authenticated user (set in the query) is authorized for this action.
+    /// <remarks>Is ignored for create and updates</remarks>
     /// </summary>
     [JsonPropertyName("isAuthorized")]
-    public bool? IsAuthorized { get; set; }
+    public bool? IsAuthorized { get; set; } // TODO: Not in create
 
     /// <summary>
     /// The logical name of the operation the API action refers to.
@@ -42,5 +43,5 @@ public class DialogApiAction
     /// The endpoints associated with the action.
     /// </summary>
     [JsonPropertyName("endpoints")]
-    public ICollection<DialogApiActionEndpoint>? Endpoints { get; set; }
+    public ICollection<DialogApiActionEndpoint> Endpoints { get; set; } = [];
 }

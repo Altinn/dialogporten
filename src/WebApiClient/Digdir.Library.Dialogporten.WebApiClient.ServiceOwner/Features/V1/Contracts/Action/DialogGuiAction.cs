@@ -45,9 +45,10 @@ public class DialogGuiAction
 
     /// <summary>
     /// Whether the user, if supplied in the query, is authorized to perform the action.
+    /// <remarks>Is ignored for create and updates</remarks>
     /// </summary>
     [JsonPropertyName("isAuthorized")]
-    public bool? IsAuthorized { get; set; }
+    public bool? IsAuthorized { get; set; } // TODO: Not in create
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -75,12 +76,12 @@ public class DialogGuiAction
     /// The title of the action, this should be short and in verb form.
     /// </summary>
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; }
+    public ICollection<Localization> Title { get; set; } = [];
 
     /// <summary>
     /// If there should be a prompt asking the user for confirmation before the action is executed,
     /// <br/>this field should contain the prompt text.
     /// </summary>
     [JsonPropertyName("prompt")]
-    public ICollection<Localization>? Prompt { get; set; }
+    public ICollection<Localization> Prompt { get; set; } = [];
 }

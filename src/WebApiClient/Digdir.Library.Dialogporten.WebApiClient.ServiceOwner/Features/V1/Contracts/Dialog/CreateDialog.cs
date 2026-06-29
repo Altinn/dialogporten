@@ -135,13 +135,13 @@ public class CreateDialog
     /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
     /// </summary>
     [JsonPropertyName("searchTags")]
-    public ICollection<DialogTag>? SearchTags { get; set; }
+    public ICollection<DialogTag> SearchTags { get; set; } = [];
 
     /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<CreateDialogAttachment>? Attachments { get; set; }
+    public ICollection<DialogAttachment> Attachments { get; set; } = [];
 
     /// <summary>
     /// The immutable list of transmissions associated with the dialog.
@@ -153,7 +153,7 @@ public class CreateDialog
     /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
     /// </summary>
     [JsonPropertyName("guiActions")]
-    public ICollection<CreateDialogGuiAction>? GuiActions { get; set; }
+    public ICollection<DialogGuiAction> GuiActions { get; set; } = [];
 
     /// <summary>
     /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.

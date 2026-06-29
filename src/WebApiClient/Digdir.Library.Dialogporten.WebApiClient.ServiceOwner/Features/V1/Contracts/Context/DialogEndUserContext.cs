@@ -14,5 +14,5 @@ public class DialogEndUserContext
     /// System defined labels used to categorize dialogs.
     /// </summary>
     [JsonPropertyName("systemLabels")]
-    public ICollection<SystemLabel>? SystemLabels { get; set; }
+    public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 }

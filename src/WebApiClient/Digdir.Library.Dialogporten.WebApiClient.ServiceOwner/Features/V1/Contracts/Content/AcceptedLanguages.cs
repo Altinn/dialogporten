@@ -13,11 +13,11 @@ public class AcceptedLanguages
             static language => language.ToString());
 }
 
-
 public class AcceptedLanguage
 {
     public override string ToString() =>
         AcceptedLanguagesHeaderFormatter.FormatAcceptedLanguage(LanguageCode, Weight);
+
     [JsonPropertyName("languageCode")]
     public string LanguageCode { get; set; } = null!;
 

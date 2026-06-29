@@ -8,5 +8,5 @@ public class CreateDialogServiceOwnerContext
     /// A list of labels, not visible in end-user APIs.
     /// </summary>
     [JsonPropertyName("serviceOwnerLabels")]
-    public ICollection<ServiceOwnerLabel>? ServiceOwnerLabels { get; set; }
+    public ICollection<ServiceOwnerLabel> ServiceOwnerLabels { get; set; } = [];
 }

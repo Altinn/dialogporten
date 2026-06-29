@@ -9,7 +9,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     {
         public SearchDialogEndUserContextsQueryParams(IEnumerable<string> party)
         {
-
             Party = party;
         }
 
@@ -771,7 +770,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         [Headers("Accept: application/json, application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/{dialogId}/activities")]
         Task<IApiResponse<string>> CreateDialogActivity(
-            Guid dialogId, [Body, AliasAs("CreateActivityRequest")] CreateDialogActivityRequest createActivityRequest, [Header("if-Match")] Guid? ifMatch = null,
+            Guid dialogId, [Body, AliasAs("CreateActivityRequest")] DialogActivity createActivityRequest, [Header("if-Match")] Guid? ifMatch = null,
             CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialogs</summary>

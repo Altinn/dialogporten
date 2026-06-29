@@ -1,5 +1,8 @@
 using Altinn.ApiClients.Dialogporten.EndUser;
-using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Activity;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Contents;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Dialog;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Labels;
 using Refit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;

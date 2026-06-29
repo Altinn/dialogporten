@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Action;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
@@ -8,7 +8,7 @@ using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
-using EndUserSystemLabel = Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabel;
+using EndUserSystemLabel = Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Labels.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialogs.Queries.Get;
 

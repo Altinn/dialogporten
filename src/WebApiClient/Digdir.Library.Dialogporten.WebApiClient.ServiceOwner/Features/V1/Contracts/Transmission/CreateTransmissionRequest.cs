@@ -76,7 +76,7 @@ public class CreateTransmissionRequest
     /// The transmission-level attachments.
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<CreateDialogAttachment>? Attachments { get; set; }
+    public ICollection<DialogAttachment>? Attachments { get; set; }
 
     /// <summary>
     /// The transmission-level navigational actions.

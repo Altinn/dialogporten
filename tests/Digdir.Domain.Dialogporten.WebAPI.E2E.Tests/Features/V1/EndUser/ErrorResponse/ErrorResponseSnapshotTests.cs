@@ -1,5 +1,6 @@
 using System.Net;
-using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Common;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Contracts.Contents;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;

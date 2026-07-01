@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using FastEndpoints;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.AccessManagement.Queries.GetParties;
@@ -12,5 +13,6 @@ public sealed class GetPartiesEndpointSummary : Summary<GetPartiesEndpoint>
                       """;
 
         Responses[StatusCodes.Status200OK] = "The list of authorized parties for the end user";
+        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
     }
 }

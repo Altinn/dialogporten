@@ -16,7 +16,7 @@ public sealed class SearchDialogLabelAssignmentLogEndpointSummary : Summary<Sear
                       """;
 
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("label assignment log list");
-        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure.FormatInvariant(AuthorizationScope.EndUser);
+        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
         Responses[StatusCodes.Status410Gone] = Constants.SwaggerSummary.DialogDeleted;

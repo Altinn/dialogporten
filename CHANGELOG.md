@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.118.4](https://github.com/Altinn/dialogporten/compare/v1.118.3...v1.118.4) (2026-07-01)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency azure.storage.blobs to 12.29.1 ([#4184](https://github.com/Altinn/dialogporten/issues/4184)) ([93dec3d](https://github.com/Altinn/dialogporten/commit/93dec3d50c75c5bb3ee7389a71c6d71667cc6d01))
+* **deps:** update dependency scalar.aspnetcore to 2.16.5 ([#4185](https://github.com/Altinn/dialogporten/issues/4185)) ([a4dc22d](https://github.com/Altinn/dialogporten/commit/a4dc22d4b897b8a650a733a141bcb72901f64e44))
+* remove AutoMapper from CreateDialog ([#4176](https://github.com/Altinn/dialogporten/issues/4176)) ([7d5fd17](https://github.com/Altinn/dialogporten/commit/7d5fd17815331cb42d081439987f294e3d573951)), closes [#967](https://github.com/Altinn/dialogporten/issues/967)
+
 ## [1.118.3](https://github.com/Altinn/dialogporten/compare/v1.118.2...v1.118.3) (2026-06-28)
 
 

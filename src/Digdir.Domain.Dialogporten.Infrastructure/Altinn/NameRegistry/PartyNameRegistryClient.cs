@@ -125,26 +125,33 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             return null;
         }
 
-        // We inline a simple retry for systems to account for propagation delays in register
-        // This will delay responses to GET requests performed by system users, but might save them a 500
-        var retryAfter = TimeSpan.FromMilliseconds(500);
-        _logger.LogWarning(
-            "Got null when getting system name. Retrying once after {RetryAfter}. ExternalId: {ExternalId}",
-            retryAfter,
-            externalIdWithPrefix
-        );
+        // Retry for system users to account for propagation delays in the registry.
+        // Delays responses to GET requests by system users, but avoids returning a 500.
+        int[] retryDelaysMs = [500, 1000, 2000, 4000];
+        NameLookupResult? lastRetryResult = null;
+        for (var attempt = 0; attempt < retryDelaysMs.Length; attempt++)
+        {
+            var retryAfter = TimeSpan.FromMilliseconds(retryDelaysMs[attempt]);
+            _logger.LogWarning(
+                "Got null when getting system name. Retrying (attempt {Attempt}/{MaxAttempts}) after {RetryAfter}. ExternalId: {ExternalId}",
+                attempt + 1,
+                retryDelaysMs.Length,
+                retryAfter,
+                externalIdWithPrefix
+            );
 
-        await Task.Delay(retryAfter, cancellationToken);
-        var nameLookupRetryResult = await PerformPartyNameRequest(apiUrl, nameLookup, cancellationToken);
+            await Task.Delay(retryAfter, cancellationToken);
+            lastRetryResult = await PerformPartyNameRequest(apiUrl, nameLookup, cancellationToken);
 
-        name = nameLookupRetryResult.Data.FirstOrDefault()?.DisplayName;
-
-        if (name is not null) return name; // We are system user here, no need to FlipNameIfPerson
+            name = lastRetryResult.Data.FirstOrDefault()?.DisplayName;
+            if (name is not null) return name; // We are system user here, no need to FlipNameIfPerson
+        }
 
         _logger.LogError(
-            "Failed to get system name from party name registry for external id {ExternalId}. Response: {@Response}. Retries: 1",
+            "Failed to get system name from party name registry for external id {ExternalId}. Response: {@Response}. Retries: {Retries}",
             externalIdWithPrefix,
-            nameLookupRetryResult
+            lastRetryResult,
+            retryDelaysMs.Length
         );
 
         return null;

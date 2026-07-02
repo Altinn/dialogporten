@@ -68,7 +68,22 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     }
 
     [E2EFact]
-    public async Task Should_Return_404_For_Unauthorized_Dialog()
+    public async Task Should_Return_404_For_Unknown_Dialog()
+    {
+        // Act
+        var setLabelResponse = await Fixture.ServiceownerApi
+            .SetSystemLabel(
+                Guid.CreateVersion7(),
+                E2EConstants.DefaultParty,
+                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]
+            );
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Dialog_Has_Unauthorized_Party()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
@@ -82,7 +97,44 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 request => request.AddLabels = [ServiceOwnerSystemLabel.Archive]);
 
         // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Trying_To_Modify_Another_Party()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        var setLabelResponse = await Fixture.ServiceownerApi
+            .SetSystemLabel(
+                dialogId,
+                E2EConstants.AlternateParty,
+                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]
+            );
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_For_Unauthorized_Dialog_When_Token_Has_Unauthorized_Org()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        Fixture.UseServiceOwnerTokenOverrides("964951284", "hko");
+        var setLabelResponse = await Fixture.ServiceownerApi
+            .SetSystemLabel(
+                dialogId,
+                E2EConstants.DefaultParty,
+                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]
+            );
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NotFound);
     }
 
     [E2ETheory]

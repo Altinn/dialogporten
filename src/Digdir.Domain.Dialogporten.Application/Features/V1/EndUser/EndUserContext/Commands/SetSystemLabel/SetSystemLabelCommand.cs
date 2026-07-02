@@ -24,7 +24,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IFea
 public sealed record SetSystemLabelSuccess(Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, DomainError, ValidationError, ConcurrencyError, Conflict>;
+public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, Forbidden, EntityDeleted, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLabelCommand, SetSystemLabelResult>
 {
@@ -46,17 +46,16 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         _altinnAuthorization = altinnAuthorization;
     }
 
-    public async Task<SetSystemLabelResult> Handle(
-        SetSystemLabelCommand request,
-        CancellationToken cancellationToken)
+    public async Task<SetSystemLabelResult> Handle(SetSystemLabelCommand request, CancellationToken ct)
     {
-        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, ct);
+
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels)
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: ct);
 
         if (dialog is null)
         {
@@ -68,10 +67,9 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
-        if (!authorizationResult.HasAccessToMainResource())
+        if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, ct))
         {
-            return new EntityNotFound<DialogEntity>(request.DialogId);
+            return new Forbidden("Forbidden");
         }
 
         if (request.IfMatchEndUserContextRevision is { } revision && revision != dialog.EndUserContext.Revision)
@@ -79,14 +77,14 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new ConcurrencyError();
         }
 
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
+        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(ct);
         var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
 
         dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, performedBy);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)
-                               .SaveChangesAsync(cancellationToken);
+                               .SaveChangesAsync(ct);
 
         return saveResult.Match<SetSystemLabelResult>(
             _ => new SetSystemLabelSuccess(dialog.EndUserContext.Revision),

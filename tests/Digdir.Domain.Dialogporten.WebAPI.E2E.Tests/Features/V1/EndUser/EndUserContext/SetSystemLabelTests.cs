@@ -1,6 +1,7 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
@@ -152,6 +153,55 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_For_Unknown_Dialog()
+    {
+        // Act
+        var setLabelResponse = await Fixture.EndUserApi
+            .SetSystemLabels(
+                Guid.CreateVersion7(),
+                request => request.AddLabels = [Bin]
+        );
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_403_For_Unauthorized_Access()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        Fixture.UseEndUserTokenOverrides(ssn: "27069815400");
+        var setLabelResponse = await Fixture.EndUserApi
+            .SetSystemLabels(
+                dialogId,
+                request => request.AddLabels = [Bin]
+            );
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Dialog_Has_Unauthorized_Party()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+            dialog.Party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{E2EConstants.AlternateEndUserSsn}");
+
+        // Act
+        var response = await Fixture.EndUserApi
+            .SetSystemLabels(
+                dialogId,
+                request => request.AddLabels = [Archive]);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
     }
 
     [E2EFact]

@@ -32,7 +32,7 @@ public sealed class SetSystemLabelEntityNotFound : ISetSystemLabelError
 
 public sealed class SetSystemLabelForbidden : ISetSystemLabelError
 {
-    public string Message { get; set; } = null!;
+    public string Message { get; set; } = "Forbidden";
 }
 
 public sealed class SetSystemLabelDomainError : ISetSystemLabelError

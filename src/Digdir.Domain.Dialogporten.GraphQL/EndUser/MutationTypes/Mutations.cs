@@ -32,6 +32,10 @@ public sealed class Mutations
             {
                 Errors = [new SetSystemLabelEntityNotFound { Message = entityNotFound.Message }]
             },
+            forbidden => new SetSystemLabelPayload
+            {
+                Errors = [new SetSystemLabelForbidden()]
+            },
             entityDeleted => new SetSystemLabelPayload
             {
                 Errors = [new SetSystemLabelEntityDeleted { Message = entityDeleted.Message }]

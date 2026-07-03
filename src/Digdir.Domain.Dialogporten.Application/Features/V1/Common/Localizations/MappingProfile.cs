@@ -18,18 +18,16 @@ internal sealed class MappingProfile : Profile
         CreateMap<LocalizationDto, Localization>();
 
         // Create incoming mappings for all types derived from LocalizationSet
-        var localizationDtoEnumerableType = typeof(IEnumerable<LocalizationDto>);
-        var localizationSetType = typeof(LocalizationSet);
-        var openLocalizationSetConverter = typeof(LocalizationSetConverter<>);
-        var derivedLocalizationSetTypes = localizationSetType
+        var derivedLocalizationSetTypes = typeof(LocalizationSet)
             .Assembly
             .GetTypes()
-            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(localizationSetType))
+            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(typeof(LocalizationSet)))
             .ToList();
+
         foreach (var derivedSetType in derivedLocalizationSetTypes)
         {
-            CreateMap(localizationDtoEnumerableType, derivedSetType)
-                .ConvertUsing(openLocalizationSetConverter.MakeGenericType(derivedSetType));
+            CreateMap(typeof(IEnumerable<LocalizationDto>), derivedSetType)
+                .ConvertUsing(typeof(LocalizationSetConverter<>).MakeGenericType(derivedSetType));
         }
     }
 }

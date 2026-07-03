@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
@@ -12,8 +10,8 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;

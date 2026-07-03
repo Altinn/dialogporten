@@ -84,6 +84,14 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 var newSeenLog = seenResult.NewSeenLog;
                 if (seenResult.CausedChangesOutsideEf) dialog.AddUpdateEvent();
                 if (newSeenLog != null) dialog.AddSeenEvent(userId.ExternalIdWithPrefix, userId.Type, newSeenLog.Id);
+                if (newSeenLog != null && seenResult.OutOfSyncActorNameId)
+                {
+                    var actorNameId = newSeenLog.SeenBy.ActorNameEntityId ?? throw new UnreachableException();
+                    dialog.AddResyncActorNameEvent(
+                        actorNameId,
+                        $"{nameof(GetDialogQueryHandler)} (SO): Failed to get actor name for SeenLog {newSeenLog.Id}"
+                    );
+                }
             }
 
             var saveResult = await _unitOfWork

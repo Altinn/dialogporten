@@ -6,11 +6,13 @@ using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
 internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
+    private readonly ILogger<PopulateActorNameInterceptor> _logger;
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
     private readonly ITransactionTime _transactionTime;
@@ -19,7 +21,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     public PopulateActorNameInterceptor(
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IPartyNameRegistry partyNameRegistry)
+        IPartyNameRegistry partyNameRegistry,
+        ILogger<PopulateActorNameInterceptor> logger)
     {
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(domainContext);
@@ -27,6 +30,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         _domainContext = domainContext;
         _partyNameRegistry = partyNameRegistry;
+        _logger = logger;
         _transactionTime = transactionTime;
     }
 
@@ -85,12 +89,19 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         foreach (var actorName in relevantActorNameEntities)
         {
-            actorName.Name = actorNameById[actorName.ActorId!];
+            var newActorName = actorNameById[actorName.ActorId!];
 
-            if (string.IsNullOrWhiteSpace(actorName.Name))
+            if (!string.IsNullOrWhiteSpace(newActorName))
             {
-                _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
+                actorName.Name = newActorName;
+                continue;
             }
+
+            actorName.AddResyncActorNameEvent($"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name");
+
+            _logger.LogWarning("Unable to look up name for actor id: {ActorId}",
+                nameof(Actor.ActorNameEntity.ActorId)
+            );
         }
 
         return _domainContext.IsValid;

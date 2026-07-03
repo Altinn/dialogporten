@@ -5,7 +5,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 
 namespace Digdir.Domain.Dialogporten.Domain.Parties;
 
-public sealed class NorwegianPersonIdentifier : IPartyIdentifier
+public sealed record NorwegianPersonIdentifier : IPartyIdentifier
 {
     private static readonly int[] SocialSecurityNumberWeights1 = [3, 7, 6, 1, 8, 9, 4, 5, 2, 1];
     private static readonly int[] SocialSecurityNumberWeights2 = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2, 1];

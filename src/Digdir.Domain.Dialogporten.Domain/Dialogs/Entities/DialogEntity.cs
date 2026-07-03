@@ -152,6 +152,11 @@ public sealed class DialogEntity :
         );
     }
 
+    public void AddResyncActorNameEvent(Guid actorNameId, string actorUrn)
+    {
+        _domainEvents.Add(new ResyncActorNameEvent(actorNameId, actorUrn));
+    }
+
     public void OnUpdate(AggregateNode self, DateTimeOffset utcNow, bool enableUpdatableFilter)
     {
         AddUpdateEvent();

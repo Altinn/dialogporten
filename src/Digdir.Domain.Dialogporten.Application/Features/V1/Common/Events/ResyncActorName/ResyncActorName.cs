@@ -13,9 +13,9 @@ public class ResyncActorName(
 {
     public async Task Handle(ResyncActorNameEvent resyncActorNameEvent, CancellationToken cancellationToken)
     {
-        var existingActorNameEntity = db.ActorName
+        var existingActorNameEntity = await db.ActorName
             .Include(x => x.ActorEntities)
-            .First(x => x.Id == resyncActorNameEvent.ActorNameId);
+            .FirstAsync(x => x.Id == resyncActorNameEvent.ActorNameId, cancellationToken);
 
         if (existingActorNameEntity.Name != null) return;
 

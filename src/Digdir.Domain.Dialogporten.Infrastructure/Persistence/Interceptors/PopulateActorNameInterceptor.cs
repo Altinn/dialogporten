@@ -24,6 +24,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         IPartyNameRegistry partyNameRegistry,
         ILogger<PopulateActorNameInterceptor> logger)
     {
+        ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(domainContext);
         ArgumentNullException.ThrowIfNull(partyNameRegistry);

@@ -41,7 +41,6 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
 
     public async Task<SearchSeenLogResult> Handle(SearchSeenLogQuery request, CancellationToken cancellationToken)
     {
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
 
         var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
             dbCtx.Dialogs
@@ -81,13 +80,15 @@ internal sealed class SearchSeenLogQueryHandler : IRequestHandler<SearchSeenLogQ
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
+        var currentUserId = _userRegistry.GetCurrentUserId();
+
         return dialog.SeenLog
             .OrderBy(x => x.CreatedAt)
             .ThenBy(x => x.Id)
             .Select(x =>
             {
                 var dto = x.ToDto();
-                dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == x.SeenBy.ActorNameEntity?.ActorId;
+                dto.IsCurrentEndUser = currentUserId.ExternalIdWithPrefix == x.SeenBy.ActorNameEntity?.ActorId;
                 return dto;
             })
             .ToList();

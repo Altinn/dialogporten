@@ -151,14 +151,18 @@ internal sealed class DialogSeenLogWriter(
                                                        ON CONFLICT ("ActorId", "Name") DO NOTHING
                                                        """, cancellationToken);
 
+        var query = new PostgresFormattableStringBuilder()
+            .Append($"""
+                      SELECT "Id" AS "Value"
+                      FROM "ActorName"
+                      WHERE "ActorId" = {actorId}
+                     """)
+            .AppendIf(actorName != null, $""" AND "Name" = {actorName}""")
+            .AppendIf(actorName == null, """ AND "Name" IS NULL""")
+            .Append(" LIMIT 1");
+
         return await db.Database
-            .SqlQuery<Guid>($"""
-                             SELECT "Id" AS "Value"
-                             FROM "ActorName"
-                             WHERE "ActorId" = {actorId}
-                               AND "Name" = {actorName}
-                             LIMIT 1
-                             """)
+            .SqlQuery<Guid>(query.ToFormattableString())
             .SingleAsync(cancellationToken);
     }
 

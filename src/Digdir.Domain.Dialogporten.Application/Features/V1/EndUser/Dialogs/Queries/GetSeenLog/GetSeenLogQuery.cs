@@ -43,8 +43,6 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
     public async Task<GetSeenLogResult> Handle(GetSeenLogQuery request,
         CancellationToken cancellationToken)
     {
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-
         var dialog = await _dbContext.WrapWithRepeatableRead((dbCtx, ct) =>
             dbCtx.Dialogs
                 .AsNoTracking()
@@ -90,7 +88,8 @@ internal sealed class GetSeenLogQueryHandler : IRequestHandler<GetSeenLogQuery, 
         }
 
         var dto = seenLog.ToDto();
-        dto.IsCurrentEndUser = currentUserInformation.UserId.ExternalIdWithPrefix == seenLog.SeenBy.ActorNameEntity?.ActorId;
+        var currentUserId = _userRegistry.GetCurrentUserId();
+        dto.IsCurrentEndUser = currentUserId.ExternalIdWithPrefix == seenLog.SeenBy.ActorNameEntity?.ActorId;
 
         return dto;
     }

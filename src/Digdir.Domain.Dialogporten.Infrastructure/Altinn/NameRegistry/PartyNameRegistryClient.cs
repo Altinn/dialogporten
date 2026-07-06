@@ -59,11 +59,12 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return async (ctx, ct) =>
         {
             var name = await GetNameFromRegister(externalIdWithPrefix, ct);
-            if (name is not null) return name;
+            if (name is not (null or Constants.FallbackSystemUsername)) return name;
 
             ctx.Options.SkipMemoryCacheWrite = true;
             ctx.Options.SkipDistributedCacheWrite = true;
-            return null;
+
+            return name;
         };
     }
 

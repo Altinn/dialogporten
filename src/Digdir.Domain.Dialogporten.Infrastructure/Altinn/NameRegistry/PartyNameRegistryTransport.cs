@@ -6,7 +6,7 @@ using Digdir.Domain.Dialogporten.Domain.Common;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 
-public interface IPartyNameRegistryTransport
+internal interface IPartyNameRegistryTransport
 {
     Task<HttpResponseMessage> QueryPartyName(
         NameLookup nameLookup,

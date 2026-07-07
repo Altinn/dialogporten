@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.ResyncActorName;
 
-public class ResyncActorName(
+public sealed class ResyncActorName(
     IDialogDbContext db,
     IUnitOfWork unitOfWork,
     IPartyNameRegistry partyNameRegistry

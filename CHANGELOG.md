@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.118.5](https://github.com/Altinn/dialogporten/compare/v1.118.4...v1.118.5) (2026-07-06)
+
+
+### Bug Fixes
+
+* Dont lookup party names when getting/searching seen logs ([#4192](https://github.com/Altinn/dialogporten/issues/4192)) ([35e7d9c](https://github.com/Altinn/dialogporten/commit/35e7d9cdec233f6e98693ec8cecf4057e9ea4046))
+* Skip cache for FallbackSystemUsername ([#4195](https://github.com/Altinn/dialogporten/issues/4195)) ([e4557e8](https://github.com/Altinn/dialogporten/commit/e4557e8bf17e1b7ce4ee0311ebd6ca882aaf5582))
+
+
+### Miscellaneous Chores
+
+* **deps:** update grafana/loki docker tag to v3.7.3 ([#4199](https://github.com/Altinn/dialogporten/issues/4199)) ([5a88402](https://github.com/Altinn/dialogporten/commit/5a88402dc82d2eb7175a9461c67a0a204fbfff78))
+* **deps:** update nginx docker tag to v1.31.2 ([#4200](https://github.com/Altinn/dialogporten/issues/4200)) ([b7a000b](https://github.com/Altinn/dialogporten/commit/b7a000bf98012578c6a25648c45f6a98db1997a5))
+
 ## [1.118.4](https://github.com/Altinn/dialogporten/compare/v1.118.3...v1.118.4) (2026-07-03)
 
 

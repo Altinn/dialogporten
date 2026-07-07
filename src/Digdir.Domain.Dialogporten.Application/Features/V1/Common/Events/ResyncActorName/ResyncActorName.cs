@@ -8,28 +8,36 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.Resyn
 
 public class ResyncActorName(
     IDialogDbContext db,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IPartyNameRegistry partyNameRegistry
 ) : INotificationHandler<ResyncActorNameEvent>
 {
     public async Task Handle(ResyncActorNameEvent resyncActorNameEvent, CancellationToken cancellationToken)
     {
-        var existingActorNameEntity = await db.ActorName
+        var outdatedActorNameEntitiy = await db.ActorName
             .Include(x => x.ActorEntities)
             .FirstAsync(x => x.Id == resyncActorNameEvent.ActorNameId, cancellationToken);
 
-        if (existingActorNameEntity.Name != null) return;
+        var actorId = outdatedActorNameEntitiy.ActorId;
+        if (actorId == null) return;
 
-        var newActorName = new ActorName
+        var newName = await partyNameRegistry.GetName(actorId, cancellationToken)
+                      ?? throw new InvalidOperationException($"Unable to resync party name for actor {actorId}");
+        var existingActorNewNameEntity = await db.ActorName
+            .FirstOrDefaultAsync(x => x.ActorId == actorId && x.Name == newName, cancellationToken);
+
+        var newActorNameEntity = existingActorNewNameEntity ?? new ActorName
         {
-            ActorId = existingActorNameEntity.ActorId
+            ActorId = actorId,
+            Name = newName
         };
+        if (existingActorNewNameEntity == null) db.ActorName.Add(newActorNameEntity);
 
-        foreach (var actorEntity in existingActorNameEntity.ActorEntities)
+        foreach (var actorEntity in outdatedActorNameEntitiy.ActorEntities)
         {
-            actorEntity.ActorNameEntity = newActorName;
+            actorEntity.ActorNameEntity = newActorNameEntity;
         }
 
-        db.ActorName.Add(newActorName);
         await unitOfWork
             .DisableAggregateFilter()
             .DisableImmutableFilter()

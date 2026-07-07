@@ -16,8 +16,10 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.SeenLogTests;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
@@ -323,6 +325,59 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         var seenLog = seenLogs.Should().ContainSingle(x => x.SeenBy.ActorNameEntityId == actor.Subject.Id);
         seenByActors.Should().ContainSingle(x => x.DialogSeenLogId == seenLog.Subject.Id);
     }
+
+    [Fact]
+    public Task Party_Name_Register_Down_Should_Fallback_To_Async_Name_Fetch() =>
+        FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError);
+            })
+            .ConsumeEvents()
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialogAsEndUser()
+            .AssertResult<DialogDtoSO>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
+                }
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetServiceOwnerDialogAsEndUser()
+            .ExecuteAndAssert<DialogDtoSO>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando");
+                }
+            );
+
+    [Fact]
+    public Task Party_Name_Register_Returns_No_Results_Should_Fallback_To_Async_Name_Fetch() =>
+        FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.Ok(new NameLookupResult
+                    {
+                        Data = []
+                    }));
+            })
+            .ConsumeEvents()
+            .CreateSimpleDialog()
+            .GetServiceOwnerDialogAsEndUser()
+            .AssertResult<DialogDtoSO>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
+                }
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetServiceOwnerDialogAsEndUser()
+            .ExecuteAndAssert<DialogDtoSO>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando");
+                }
+            );
 
     private async Task OnSeen(ConcurrentSeenLogWriterGate gate, DialogEntity dialogEntity)
     {

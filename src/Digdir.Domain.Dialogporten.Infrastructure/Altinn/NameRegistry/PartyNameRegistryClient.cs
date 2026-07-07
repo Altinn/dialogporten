@@ -1,7 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Parties;
@@ -9,30 +7,24 @@ using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 
 internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 {
     private readonly IFusionCache _cache;
-    private readonly HttpClient _client;
     private readonly ILogger<PartyNameRegistryClient> _logger;
-    private readonly IOptionsMonitor<ApplicationSettings> _applicationSettings;
+    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
+    private readonly IPartyNameRegistryTransport _partyNameRegistryTransport;
     private bool _useCorrectPersonNameOrdering;
 
-    private static readonly JsonSerializerOptions SerializerOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-    };
-
     public PartyNameRegistryClient(
-        HttpClient client,
         IFusionCacheProvider cacheProvider,
         ILogger<PartyNameRegistryClient> logger,
-        IOptionsMonitor<ApplicationSettings> applicationSettings)
+        IOptionsSnapshot<ApplicationSettings> applicationSettings,
+        IPartyNameRegistryTransport partyNameRegistryTransport)
     {
-        ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(cacheProvider);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(applicationSettings);
@@ -40,10 +32,10 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         var cache = cacheProvider.GetCache(nameof(NameRegistry));
         ArgumentNullException.ThrowIfNull(cache);
 
-        _client = client;
         _logger = logger;
         _cache = cache;
         _applicationSettings = applicationSettings;
+        _partyNameRegistryTransport = partyNameRegistryTransport;
     }
 
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>
@@ -79,7 +71,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     private string GetCacheKey(string externalIdWithPrefix)
     {
         // Use a instance member to ensure we use the same value in the factory method
-        _useCorrectPersonNameOrdering = _applicationSettings.CurrentValue.FeatureToggle.UseCorrectPersonNameOrdering;
+        _useCorrectPersonNameOrdering = _applicationSettings.Value.FeatureToggle.UseCorrectPersonNameOrdering;
         return $"Name{(_useCorrectPersonNameOrdering ? "_v2" : "")}_{externalIdWithPrefix}";
     }
 
@@ -109,8 +101,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         CancellationToken ct
     )
     {
-        const string apiUrl = "register/api/v1/dialogporten/parties/query";
-        var nameLookupResult = await PerformPartyNameRequestIgnoreErrors(apiUrl, nameLookup, ct);
+        var nameLookupResult = await PerformPartyNameRequestIgnoreErrors(nameLookup, ct);
         if (nameLookupResult is null) return null;
 
         var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
@@ -128,23 +119,17 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     }
 
     private async Task<NameLookupResult?> PerformPartyNameRequestIgnoreErrors(
-        string apiUrl,
         NameLookup nameLookup,
         CancellationToken cancellationToken
     )
     {
-        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, apiUrl)
-        {
-            Content = JsonContent.Create(nameLookup, options: SerializerOptions)
-        };
-
-        var response = await _client.SendAsync(httpRequestMessage, cancellationToken);
+        var response = await _partyNameRegistryTransport.QueryPartyName(nameLookup, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogWarning(
                 "Failed POST {ApiUrl} with: {RequestBody}. Status code: {StatusCode}. ResponseBody: {ResponseBody}",
-                apiUrl,
+                PartyNameRegistryTransport.QueryPartiesUrl,
                 nameLookup,
                 response.StatusCode,
                 await response.Content.ReadAsStringAsync(cancellationToken)
@@ -154,9 +139,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         var content = await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
-                      throw new JsonException(
-                          $"Failed to deserialize JSON to type {typeof(NameLookup).FullName} from {apiUrl}"
-                      );
+                      throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookup).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
         return content;
     }
 
@@ -173,55 +156,5 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         return name;
-    }
-
-    private static bool TryGetLookupDto(IPartyIdentifier partyIdentifier,
-        [NotNullWhen(true)] out NameLookup? nameLookup)
-    {
-        nameLookup = partyIdentifier switch
-        {
-            AltinnSelfIdentifiedUserIdentifier => null,
-            FeideUserIdentifier => null,
-            IdportenEmailUserIdentifier => null,
-            NorwegianPersonIdentifier personIdentifier => new() { Data = [personIdentifier.FullId] },
-            NorwegianOrganizationIdentifier organizationIdentifier => new() { Data = [organizationIdentifier.FullId] },
-            SystemUserIdentifier systemUserIdentifier => new() { Data = [systemUserIdentifier.FullId] },
-            _ => throw new ArgumentOutOfRangeException(nameof(partyIdentifier), partyIdentifier, null)
-        };
-
-        return nameLookup is not null;
-    }
-
-    private sealed class NameLookup
-    {
-        public List<string> Data { get; set; } = null!;
-    }
-
-    private sealed class NameLookupResult
-    {
-        public List<NameLookupEntry> Data { get; set; } = null!;
-    }
-
-    private sealed class NameLookupEntry
-    {
-        public string? DisplayName { get; set; }
-    }
-}
-
-internal sealed class LocalPartNameRegistryClient : IPartyNameRegistry
-{
-    private readonly Dictionary<string, string> _fakeCache = new();
-
-    public Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
-    {
-        return _fakeCache.TryGetValue(externalIdWithPrefix, out var cachedName)
-            ? Task.FromResult<string?>(cachedName)
-            : Task.FromResult<string?>("Gunnar Gunnarson");
-    }
-
-    public void CacheName(string actorId, string name)
-    {
-        _fakeCache.Remove(actorId);
-        _fakeCache.Add(actorId, name);
     }
 }

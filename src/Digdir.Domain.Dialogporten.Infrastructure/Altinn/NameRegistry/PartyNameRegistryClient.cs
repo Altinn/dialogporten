@@ -38,6 +38,15 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         _partyNameRegistryTransport = partyNameRegistryTransport;
     }
 
+    public async Task<string> GetNameOrFail(string externalIdWithPrefix, CancellationToken ct)
+    {
+        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
+            throw new ArgumentException($"Unable to parse PartyIdentifier {externalIdWithPrefix}");
+
+        return TryGetLocalName(partyIdentifier)
+            ?? await GetNameFromRegisterOrFail(partyIdentifier, ToNameLookup(partyIdentifier), ct);
+    }
+
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>
         await _cache.GetOrSetAsync<string?>(
             GetCacheKey(externalIdWithPrefix),
@@ -78,47 +87,104 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken ct)
     {
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
-        {
             throw new ArgumentException($"Unable to parse PartyIdentifier {externalIdWithPrefix}");
-        }
 
-        // We do not have any information self-identified users or Feide users in the party name registry
-        return partyIdentifier switch
-        {
-            AltinnSelfIdentifiedUserIdentifier x => x.Id,
-            IdportenEmailUserIdentifier x => x.Id,
-            FeideUserIdentifier x => $"Feide User ({x.Id[..6]})",
-            NorwegianPersonIdentifier x => await GetNameFromRegister(x, new NameLookup { Data = [x.FullId] }, ct),
-            NorwegianOrganizationIdentifier x => await GetNameFromRegister(x, new NameLookup { Data = [x.FullId] }, ct),
-            SystemUserIdentifier x => await GetNameFromRegister(x, new NameLookup { Data = [x.FullId] }, ct),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        return TryGetLocalName(partyIdentifier)
+            ?? await GetNameFromRegister(partyIdentifier, ToNameLookup(partyIdentifier), ct);
     }
 
-    private async Task<string?> GetNameFromRegister(
-        IPartyIdentifier partyIdentifier,
-        NameLookup nameLookup,
-        CancellationToken ct
-    )
+    private static string? TryGetLocalName(IPartyIdentifier partyIdentifier) => partyIdentifier switch
     {
-        var nameLookupResult = await PerformPartyNameRequestIgnoreErrors(nameLookup, ct);
+        AltinnSelfIdentifiedUserIdentifier x => x.Id,
+        IdportenEmailUserIdentifier x => x.Id,
+        FeideUserIdentifier x => $"Feide User ({x.Id[..6]})",
+        NorwegianPersonIdentifier => null,
+        NorwegianOrganizationIdentifier => null,
+        SystemUserIdentifier => null,
+        _ => throw new ArgumentOutOfRangeException()
+    };
+
+    private static NameLookup ToNameLookup(IPartyIdentifier partyIdentifier) => partyIdentifier switch
+    {
+        NorwegianPersonIdentifier => new NameLookup { Data = [partyIdentifier.FullId] },
+        NorwegianOrganizationIdentifier => new NameLookup { Data = [partyIdentifier.FullId] },
+        SystemUserIdentifier => new NameLookup { Data = [partyIdentifier.FullId] },
+        _ => throw new ArgumentOutOfRangeException()
+    };
+
+    private async Task<string?> GetNameFromRegister(IPartyIdentifier partyIdentifier, NameLookup nameLookup,
+        CancellationToken ct)
+    {
+        var nameLookupResult = await PerformPartyNameRequest(nameLookup, ct);
         if (nameLookupResult is null) return null;
 
+        var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);
+
+        if (name is not null) return name;
+
+        _logger.LogWarning(
+            "Search in party name registry returned no results for external id {ExternalId}. Response: {@Response}",
+            partyIdentifier.FullId,
+            nameLookupResult
+        );
+
+        return null;
+    }
+
+    private async Task<string> GetNameFromRegisterOrFail(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)
+    {
+        var nameLookupResult = await PerformPartyNameRequestOrFail(nameLookup, ct);
+        var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);
+
+        if (name is not null) return name;
+
+        _logger.LogError(
+            "Search in party name registry returned no results for external id {ExternalId}. Response: {@Response}",
+            partyIdentifier.FullId,
+            nameLookupResult
+        );
+
+        throw new InvalidOperationException("Search in party name registry returned no results");
+
+    }
+
+    private string? ProcessPartyNameResponse(
+        IPartyIdentifier partyIdentifier,
+        NameLookupResult nameLookupResult
+    )
+    {
         var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
 
         // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does
         // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
-        if (!string.IsNullOrWhiteSpace(name)) return FlipNameIfPerson(partyIdentifier, name);
-
-        _logger.LogWarning(
-            "Failed to get name from party name registry for external id {ExternalId}. Response: {@Response}",
-            partyIdentifier.FullId,
-            nameLookupResult
-        );
-        return null;
+        return !string.IsNullOrWhiteSpace(name) ? FlipNameIfPerson(partyIdentifier, name) : null;
     }
 
-    private async Task<NameLookupResult?> PerformPartyNameRequestIgnoreErrors(
+    private async Task<NameLookupResult> PerformPartyNameRequestOrFail(
+        NameLookup nameLookup,
+        CancellationToken cancellationToken
+    )
+    {
+        var response = await _partyNameRegistryTransport.QueryPartyName(nameLookup, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError(
+                "Failed POST {ApiUrl} with: {RequestBody}. Status code: {StatusCode}. ResponseBody: {ResponseBody}",
+                PartyNameRegistryTransport.QueryPartiesUrl,
+                nameLookup,
+                response.StatusCode,
+                await response.Content.ReadAsStringAsync(cancellationToken)
+            );
+
+            throw new HttpRequestException("Failed POST {ApiUrl}");
+        }
+
+        return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
+                      throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookup).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
+    }
+
+    private async Task<NameLookupResult?> PerformPartyNameRequest(
         NameLookup nameLookup,
         CancellationToken cancellationToken
     )
@@ -138,9 +204,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             return null;
         }
 
-        var content = await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
+        return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
                       throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookup).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
-        return content;
     }
 
     private string FlipNameIfPerson(IPartyIdentifier partyIdentifier, string name)

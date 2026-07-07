@@ -21,8 +21,7 @@ public class ResyncActorName(
         var actorId = outdatedActorNameEntitiy.ActorId;
         if (actorId == null) return;
 
-        var newName = await partyNameRegistry.GetName(actorId, cancellationToken)
-                      ?? throw new InvalidOperationException($"Unable to resync party name for actor {actorId}");
+        var newName = await partyNameRegistry.GetNameOrFail(actorId, cancellationToken);
         var existingActorNewNameEntity = await db.ActorName
             .FirstOrDefaultAsync(x => x.ActorId == actorId && x.Name == newName, cancellationToken);
 

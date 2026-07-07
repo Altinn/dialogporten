@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
@@ -312,6 +313,144 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         };
 
         modify?.Invoke(request);
+        return request;
+    }
+
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Update_Transmission_Verify_Snapshot()
+    {
+        // Arrange
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
+
+        var transmissionId = DialogTestData.NewUuidV7();
+        var existingAttachmentId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+            dialog.AddTransmission(transmission =>
+            {
+                transmission.Id = transmissionId;
+                transmission.Attachments =
+                [
+                    new()
+                    {
+                        Id = existingAttachmentId,
+                        Name = "existing-attachment",
+                        DisplayName = [DialogTestData.CreateLocalization("Existing attachment")],
+                        Urls =
+                        [
+                            new()
+                            {
+                                Url = new Uri("https://digdir.com/existing-attachment-url"),
+                                MediaType = "application/pdf",
+                                ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                            }
+                        ]
+                    }
+                ];
+            }));
+
+        var request = CreateComplexUpdateRequest(existingAttachmentId);
+
+        // Act
+        var updateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                request,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        var getResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        getResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        getResponse.Content.Should().NotBeNull();
+
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(getResponse.Content));
+    }
+
+    private static V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest CreateComplexUpdateRequest(
+        Guid existingAttachmentId)
+    {
+        var request = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest
+        {
+            IsSilentUpdate = true,
+            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Submission,
+            ExternalReference = "updated-external-reference",
+            ExtendedType = new Uri("https://digdir.com/updated-transmission-type"),
+            Sender = new()
+            {
+                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorId = $"urn:altinn:organization:identifier-no:{E2EConstants.GetDefaultServiceOwnerOrgNr()}"
+            },
+            Content = new()
+            {
+                Title = DialogTestData.CreateContentValue(
+                    value: "Oppdatert forsendelsestittel",
+                    languageCode: "nb"),
+                Summary = DialogTestData.CreateContentValue(
+                    value: "Oppdatert oppsummering",
+                    languageCode: "nb"),
+                ContentReference = DialogTestData.CreateContentValue(
+                    mediaType: "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+                    value: [DialogTestData.CreateLocalization("https://digdir.com/updated-content-reference")])
+            },
+            Attachments =
+            [
+                // Existing attachment matched by id: fields are updated and the url list is replaced.
+                new()
+                {
+                    Id = existingAttachmentId,
+                    Name = "updated-existing-attachment",
+                    DisplayName = [DialogTestData.CreateLocalization("Updated existing attachment")],
+                    Urls =
+                    [
+                        new()
+                        {
+                            Url = new Uri("https://digdir.com/updated-existing-attachment-gui-url"),
+                            MediaType = "text/html",
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                        },
+                        new()
+                        {
+                            Url = new Uri("https://digdir.com/updated-existing-attachment-api-url"),
+                            MediaType = "application/json",
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Api
+                        }
+                    ]
+                },
+                // Attachment without id: created by the update.
+                new()
+                {
+                    Name = "new-attachment",
+                    DisplayName = [DialogTestData.CreateLocalization("New attachment")],
+                    ExpiresAt = new DateTimeOffset(2124, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    Urls =
+                    [
+                        new()
+                        {
+                            Url = new Uri("https://digdir.com/new-attachment-url"),
+                            MediaType = "application/pdf",
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                        }
+                    ]
+                }
+            ],
+            NavigationalActions =
+            [
+                new()
+                {
+                    Title = [DialogTestData.CreateLocalization("Updated action title")],
+                    ExpiresAt = new DateTimeOffset(2124, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    Url = new Uri("https://digdir.com/updated-action-url")
+                }
+            ]
+        };
         return request;
     }
 }

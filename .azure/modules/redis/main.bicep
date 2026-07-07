@@ -64,7 +64,7 @@ var redisAccessKeys = redis.listKeys()
 // private endpoint name max characters is 80
 var redisPrivateEndpointName = uniqueResourceName('${namePrefix}-redis-pe', 80)
 
-resource redisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = {
+resource redisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2025-07-01' = {
   name: redisPrivateEndpointName
   location: location
   properties: {

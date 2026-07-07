@@ -13,17 +13,17 @@ internal interface IPartyNameRegistryTransport
         CancellationToken cancellationToken
     );
 
-    sealed class NameLookup
+    internal sealed class NameLookup
     {
         public List<string> Data { get; set; } = null!;
     }
 
-    sealed class NameLookupResult
+    internal sealed class NameLookupResult
     {
         public List<NameLookupEntry> Data { get; set; } = null!;
     }
 
-    sealed class NameLookupEntry
+    internal sealed class NameLookupEntry
     {
         public string? DisplayName { get; set; }
     }

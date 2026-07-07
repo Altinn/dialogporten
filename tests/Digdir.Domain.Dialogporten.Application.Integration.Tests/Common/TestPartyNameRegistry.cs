@@ -7,7 +7,7 @@ using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPart
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
-public sealed class TestPartyNameRegistry
+internal sealed class TestPartyNameRegistry
 {
     public static readonly HttpResponseMessage InternalServerError = new()
     {

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
-public partial class CreateTransmissionNavigationalAction
+public class CreateTransmissionNavigationalAction
 {
     /// <summary>
     /// The title of the navigational action.

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
-public partial class UpdateDialogAttachment
+public class UpdateDialogAttachment
 {
     /// <summary>
     /// A self-defined UUIDv7 may be provided to support idempotent additions of attachments. If not provided, a new UUIDv7 will be generated.

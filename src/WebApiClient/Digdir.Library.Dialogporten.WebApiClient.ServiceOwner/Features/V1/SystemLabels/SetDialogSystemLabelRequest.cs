@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.SystemLabels;
 
-public partial class SetDialogSystemLabelRequest
+public class SetDialogSystemLabelRequest
 {
     /// <summary>
     /// List of system labels to set on target dialogs

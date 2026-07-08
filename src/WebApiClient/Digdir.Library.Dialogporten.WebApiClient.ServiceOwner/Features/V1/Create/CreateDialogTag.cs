@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
-public partial class CreateDialogTag
+public class CreateDialogTag
 {
     /// <summary>
     /// A search tag value.

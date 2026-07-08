@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogSeenLogDetails
+public class DialogSeenLogDetails
 {
     [JsonPropertyName("id")]
     public Guid Id { get; set; }

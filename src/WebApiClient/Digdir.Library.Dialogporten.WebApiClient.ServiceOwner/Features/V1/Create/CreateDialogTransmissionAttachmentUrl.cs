@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
-public partial class CreateDialogTransmissionAttachmentUrl
+public class CreateDialogTransmissionAttachmentUrl
 {
     /// <summary>
     /// The fully qualified URL of the attachment.

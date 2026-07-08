@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResource;
 
-public partial class IdentifierLookupServiceResource
+public class IdentifierLookupServiceResource
 {
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;

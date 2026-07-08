@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
-public partial class DialogListItem
+public class DialogListItem
 {
     /// <summary>
     /// The unique identifier for the dialog in UUIDv7 format.

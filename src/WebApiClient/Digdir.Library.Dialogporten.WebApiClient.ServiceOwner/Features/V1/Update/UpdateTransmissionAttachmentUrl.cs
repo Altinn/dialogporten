@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
-public partial class UpdateTransmissionAttachmentUrl
+public class UpdateTransmissionAttachmentUrl
 {
     /// <summary>
     /// The fully qualified URL of the attachment.

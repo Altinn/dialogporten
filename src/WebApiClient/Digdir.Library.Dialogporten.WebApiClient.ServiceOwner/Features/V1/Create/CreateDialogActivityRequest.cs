@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
-public partial class CreateDialogActivityRequest
+public class CreateDialogActivityRequest
 {
     /// <summary>
     /// A UUIDv7 may be provided to support idempotent additions to the list of activities.

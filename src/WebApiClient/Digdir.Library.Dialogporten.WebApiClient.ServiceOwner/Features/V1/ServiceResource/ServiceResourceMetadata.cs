@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResource;
 
-public partial class ServiceResourceMetadata
+public class ServiceResourceMetadata
 {
     [JsonPropertyName("serviceResource")]
     public ServiceResource ServiceResource { get; set; } = default!;

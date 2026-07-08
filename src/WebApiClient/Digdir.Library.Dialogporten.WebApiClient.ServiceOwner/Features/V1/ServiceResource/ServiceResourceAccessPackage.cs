@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResource;
 
-public partial class ServiceResourceAccessPackage
+public class ServiceResourceAccessPackage
 {
     [JsonPropertyName("urn")]
     public string Urn { get; set; } = default!;

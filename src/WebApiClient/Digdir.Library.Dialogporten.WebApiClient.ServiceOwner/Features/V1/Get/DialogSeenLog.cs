@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogSeenLog
+public class DialogSeenLog
 {
     /// <summary>
     /// The unique identifier for the seen log entry in UUIDv7 format.

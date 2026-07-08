@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
-public partial class Localization
+public class Localization
 {
     /// <summary>
     /// The localized text (or URL if a front-channel embed).

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResource;
 
-public partial class IdentifierLookupServiceOwner
+public class IdentifierLookupServiceOwner
 {
     [JsonPropertyName("orgNumber")]
     public string OrgNumber { get; set; } = default!;

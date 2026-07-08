@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
-public partial class Content
+public class Content
 {
     /// <summary>
     /// The title of the dialog.

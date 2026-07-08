@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Errors;
 
-public partial class ProblemDetailsError
+public class ProblemDetailsError
 {
     [JsonPropertyName("title")]
     public string? Title { get; set; }

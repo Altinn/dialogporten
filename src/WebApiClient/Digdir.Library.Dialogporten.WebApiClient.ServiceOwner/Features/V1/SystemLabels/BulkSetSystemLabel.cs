@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.SystemLabels;
 
-public partial class BulkSetSystemLabel
+public class BulkSetSystemLabel
 {
     /// <summary>
     /// List of target dialog ids with optional revision ids

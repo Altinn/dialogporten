@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogTransmissionDetails
+public class DialogTransmissionDetails
 {
     /// <summary>
     /// The unique identifier for the transmission in UUIDv7 format.

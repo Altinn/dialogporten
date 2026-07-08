@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
-public partial class UpdateDialogTag
+public class UpdateDialogTag
 {
     /// <summary>
     /// A search tag value.

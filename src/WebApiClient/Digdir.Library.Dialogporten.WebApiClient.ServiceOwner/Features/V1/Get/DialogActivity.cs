@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogActivity
+public class DialogActivity
 {
     /// <summary>
     /// The unique identifier for the activity in UUIDv7 format.

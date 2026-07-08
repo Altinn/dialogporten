@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
-public partial class EndUserSearchLimits
+public class EndUserSearchLimits
 {
     [JsonPropertyName("maxPartyFilterValues")]
     public int MaxPartyFilterValues { get; set; }

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
-public partial class DialogListItemEndUserContext
+public class DialogListItemEndUserContext
 {
     /// <summary>
     /// The unique identifier for the end user context revision in UUIDv4 format.

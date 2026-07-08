@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
-public partial class ContentValue
+public class ContentValue
 {
     /// <summary>
     /// A list of localizations for the content.

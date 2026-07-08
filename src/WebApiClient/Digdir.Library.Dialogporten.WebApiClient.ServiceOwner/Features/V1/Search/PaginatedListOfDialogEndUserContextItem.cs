@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
-public partial class PaginatedListOfDialogEndUserContextItem
+public class PaginatedListOfDialogEndUserContextItem
 {
     /// <summary>
     /// The paginated list of items

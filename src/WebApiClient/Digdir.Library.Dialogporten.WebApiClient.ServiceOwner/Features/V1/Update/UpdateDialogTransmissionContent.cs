@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
-public partial class UpdateDialogTransmissionContent
+public class UpdateDialogTransmissionContent
 {
     /// <summary>
     /// The transmission title. Must be text/plain.

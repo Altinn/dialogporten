@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogApiActionEndpoint
+public class DialogApiActionEndpoint
 {
     /// <summary>
     /// The unique identifier for the endpoint in UUIDv7 format.

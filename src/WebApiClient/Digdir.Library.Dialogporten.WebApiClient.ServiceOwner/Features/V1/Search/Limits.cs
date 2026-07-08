@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
-public partial class Limits
+public class Limits
 {
     [JsonPropertyName("endUserSearch")]
     public EndUserSearchLimits EndUserSearch { get; set; } = default!;

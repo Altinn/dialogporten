@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
-public partial class UpdateTransmissionNavigationalAction
+public class UpdateTransmissionNavigationalAction
 {
     /// <summary>
     /// The title of the navigational action.

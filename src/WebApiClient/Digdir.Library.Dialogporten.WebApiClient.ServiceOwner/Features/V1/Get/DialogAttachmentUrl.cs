@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogAttachmentUrl
+public class DialogAttachmentUrl
 {
     /// <summary>
     /// The unique identifier for the attachment URL in UUIDv7 format.

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
-public partial class CreateDialogServiceOwnerLabel
+public class CreateDialogServiceOwnerLabel
 {
     /// <summary>
     /// A label value.

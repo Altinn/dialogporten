@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
-public partial class JsonPatchOperation
+public class JsonPatchOperation
 {
     [JsonPropertyName("operationType")]
     [JsonConverter(typeof(JsonStringEnumConverter<JsonPatchOperationType>))]

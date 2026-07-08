@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
-public partial class DialogServiceOwnerContextListItem
+public class DialogServiceOwnerContextListItem
 {
     /// <summary>
     /// The unique identifier for the service owner context revision in UUIDv4 format.

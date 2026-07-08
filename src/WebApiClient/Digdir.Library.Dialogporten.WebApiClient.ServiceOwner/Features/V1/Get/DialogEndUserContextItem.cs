@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogEndUserContextItem
+public class DialogEndUserContextItem
 {
     [JsonPropertyName("dialogId")]
     public Guid DialogId { get; set; }

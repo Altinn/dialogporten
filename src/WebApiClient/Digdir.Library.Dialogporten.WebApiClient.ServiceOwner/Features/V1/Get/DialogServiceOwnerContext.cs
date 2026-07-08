@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
-public partial class DialogServiceOwnerContext
+public class DialogServiceOwnerContext
 {
     /// <summary>
     /// A list of labels, not visible in end-user APIs.

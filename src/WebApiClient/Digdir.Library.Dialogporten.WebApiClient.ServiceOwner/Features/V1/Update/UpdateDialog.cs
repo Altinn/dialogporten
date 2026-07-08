@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
-public partial class UpdateDialog
+public class UpdateDialog
 {
     /// <summary>
     /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come

@@ -91,7 +91,7 @@ All methods return `IApiResponse<T>` (or `IApiResponse` for void responses) from
 | `GetDialogLookup(instanceRef, acceptLanguage, ct)` | Resolve dialog metadata by an external instance reference. |
 
 **Search filter highlights** (`SearchDialogsQueryParams`):
-- `ServiceResource`, `Party`, `EndUserId` — filter by resource, owning party, or a specific end user
+- `ServiceResource`, `Party`, `EndUserId` — filter by resource, receiving party, or a specific end user
 - `Status` — `New`, `InProgress`, `Waiting`, `Signing`, `Cancelled`, `Completed`
 - `Deleted` — `Include`, `Exclude` (default), or `Only`
 - `SystemLabel`, `ServiceOwnerLabels` — filter by system or custom service-owner labels (prefix matching with `*` supported)

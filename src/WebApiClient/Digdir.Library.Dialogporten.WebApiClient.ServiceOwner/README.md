@@ -19,8 +19,7 @@ Register the client in your DI container using `AddDialogportenClient`. The `Bas
 | Environment | BaseUri |
 |---|---|
 | Production | `https://platform.altinn.no/dialogporten` |
-| TT02 (staging) | `https://platform.tt02.altinn.no/dialogporten` |
-| AT23 (test) | `https://platform.at23.altinn.cloud/dialogporten` |
+| TT02 | `https://platform.tt02.altinn.no/dialogporten` |
 
 ### Built-in Maskinporten authentication
 

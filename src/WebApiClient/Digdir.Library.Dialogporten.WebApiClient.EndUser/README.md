@@ -85,7 +85,7 @@ All methods return `IApiResponse<T>` (or `IApiResponse` for void responses) from
 | `GetDialogLookup(instanceRef, acceptLanguage, ct)` | Resolve dialog metadata by an external instance reference. |
 
 **Search filter highlights** (`SearchDialogsQueryParams`):
-- `Org`, `ServiceResource`, `Party` — filter by org, resource, or owning party
+- `Org`, `ServiceResource`, `Party` — filter by org, resource, or receiving party
 - `Status` — `New`, `InProgress`, `Waiting`, `Signing`, `Cancelled`, `Completed`
 - `SystemLabel` — `Default`, `Bin`, `Archive`
 - `CreatedAfter/Before`, `UpdatedAfter/Before`, `DueAfter/Before`

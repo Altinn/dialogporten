@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 

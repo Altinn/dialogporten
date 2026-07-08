@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
@@ -76,37 +77,37 @@ public class UpdateDialog
     /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
     /// </summary>
     [JsonPropertyName("searchTags")]
-    public ICollection<UpdateDialogTag>? SearchTags { get; set; }
+    public ICollection<UpdateDialogTag>? SearchTags { get; set; } = [];
 
     /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<UpdateDialogAttachment>? Attachments { get; set; }
+    public ICollection<UpdateDialogAttachment>? Attachments { get; set; } = [];
 
     /// <summary>
     /// The immutable list of transmissions associated with the dialog. When updating via PUT, any transmissions
     /// <br/>added here will be appended to the existing list of transmissions.
     /// </summary>
     [JsonPropertyName("transmissions")]
-    public ICollection<UpdateDialogTransmission>? Transmissions { get; set; }
+    public ICollection<UpdateDialogTransmission>? Transmissions { get; set; } = [];
 
     /// <summary>
     /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
     /// </summary>
     [JsonPropertyName("guiActions")]
-    public ICollection<UpdateDialogGuiAction>? GuiActions { get; set; }
+    public ICollection<UpdateDialogGuiAction>? GuiActions { get; set; } = [];
 
     /// <summary>
     /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
     /// </summary>
     [JsonPropertyName("apiActions")]
-    public ICollection<UpdateDialogApiAction>? ApiActions { get; set; }
+    public ICollection<UpdateDialogApiAction>? ApiActions { get; set; } = [];
 
     /// <summary>
     /// An immutable list of activities associated with the dialog. When updating via PUT, any activities added here
     /// <br/>will be appended to the existing list of activities.
     /// </summary>
     [JsonPropertyName("activities")]
-    public ICollection<UpdateDialogActivity>? Activities { get; set; }
+    public ICollection<UpdateDialogActivity>? Activities { get; set; } = [];
 }

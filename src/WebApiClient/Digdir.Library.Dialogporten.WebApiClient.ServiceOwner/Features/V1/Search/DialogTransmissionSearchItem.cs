@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
@@ -69,11 +71,11 @@ public class DialogTransmissionSearchItem
     /// The attachments associated with the transmission.
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<DialogTransmissionSearchAttachment>? Attachments { get; set; }
+    public ICollection<DialogTransmissionSearchAttachment>? Attachments { get; set; } = [];
 
     /// <summary>
     /// The navigational actions associated with the transmission.
     /// </summary>
     [JsonPropertyName("navigationalActions")]
-    public ICollection<DialogTransmissionSearchNavigationalAction>? NavigationalActions { get; set; }
+    public ICollection<DialogTransmissionSearchNavigationalAction>? NavigationalActions { get; set; } = [];
 }

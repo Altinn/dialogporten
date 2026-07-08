@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
@@ -8,7 +9,7 @@ public class DialogTransmissionNavigationalAction
     /// The title of the navigational action.
     /// </summary>
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; }
+    public ICollection<Localization>? Title { get; set; } = [];
 
     /// <summary>
     /// The fully qualified URL of the navigational action.

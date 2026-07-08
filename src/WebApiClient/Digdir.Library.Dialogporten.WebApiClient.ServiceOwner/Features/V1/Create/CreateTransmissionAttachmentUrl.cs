@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 

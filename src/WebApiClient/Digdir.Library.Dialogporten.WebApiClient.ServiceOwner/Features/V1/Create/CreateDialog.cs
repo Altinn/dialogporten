@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
@@ -135,35 +136,35 @@ public class CreateDialog
     /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.
     /// </summary>
     [JsonPropertyName("searchTags")]
-    public ICollection<CreateDialogTag>? SearchTags { get; set; }
+    public ICollection<CreateDialogTag>? SearchTags { get; set; } = [];
 
     /// <summary>
     /// The attachments associated with the dialog (on an aggregate level).
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<CreateDialogAttachment>? Attachments { get; set; }
+    public ICollection<CreateDialogAttachment>? Attachments { get; set; } = [];
 
     /// <summary>
     /// The immutable list of transmissions associated with the dialog.
     /// </summary>
     [JsonPropertyName("transmissions")]
-    public ICollection<CreateDialogTransmission>? Transmissions { get; set; }
+    public ICollection<CreateDialogTransmission>? Transmissions { get; set; } = [];
 
     /// <summary>
     /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
     /// </summary>
     [JsonPropertyName("guiActions")]
-    public ICollection<CreateDialogGuiAction>? GuiActions { get; set; }
+    public ICollection<CreateDialogGuiAction>? GuiActions { get; set; } = [];
 
     /// <summary>
     /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
     /// </summary>
     [JsonPropertyName("apiActions")]
-    public ICollection<CreateDialogApiAction>? ApiActions { get; set; }
+    public ICollection<CreateDialogApiAction>? ApiActions { get; set; } = [];
 
     /// <summary>
     /// An immutable list of activities associated with the dialog.
     /// </summary>
     [JsonPropertyName("activities")]
-    public ICollection<CreateDialogActivity>? Activities { get; set; }
+    public ICollection<CreateDialogActivity>? Activities { get; set; } = [];
 }

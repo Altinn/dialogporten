@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResource;
 
@@ -20,8 +21,8 @@ public class ServiceOwnerIdentifierLookup
     public IdentifierLookupServiceOwner ServiceOwner { get; set; } = default!;
 
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; }
+    public ICollection<Localization>? Title { get; set; } = [];
 
     [JsonPropertyName("nonSensitiveTitle")]
-    public ICollection<Localization>? NonSensitiveTitle { get; set; }
+    public ICollection<Localization>? NonSensitiveTitle { get; set; } = [];
 }

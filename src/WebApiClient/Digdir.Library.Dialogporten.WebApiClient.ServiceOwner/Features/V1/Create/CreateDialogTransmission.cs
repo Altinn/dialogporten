@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
@@ -75,11 +77,11 @@ public class CreateDialogTransmission
     /// The transmission-level attachments.
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<CreateDialogTransmissionAttachment>? Attachments { get; set; }
+    public ICollection<CreateDialogTransmissionAttachment>? Attachments { get; set; } = [];
 
     /// <summary>
     /// The transmission-level navigational actions.
     /// </summary>
     [JsonPropertyName("navigationalActions")]
-    public ICollection<CreateDialogTransmissionNavigationalAction>? NavigationalActions { get; set; }
+    public ICollection<CreateDialogTransmissionNavigationalAction>? NavigationalActions { get; set; } = [];
 }

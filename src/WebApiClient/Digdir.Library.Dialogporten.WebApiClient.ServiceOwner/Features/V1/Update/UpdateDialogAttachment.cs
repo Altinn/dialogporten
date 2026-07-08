@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
@@ -14,7 +15,7 @@ public class UpdateDialogAttachment
     /// The display name of the attachment that should be used in GUIs.
     /// </summary>
     [JsonPropertyName("displayName")]
-    public ICollection<Localization>? DisplayName { get; set; }
+    public ICollection<Localization>? DisplayName { get; set; } = [];
 
     /// <summary>
     /// The logical name of the attachment.
@@ -26,7 +27,7 @@ public class UpdateDialogAttachment
     /// The URLs associated with the attachment, each referring to a different representation of the attachment.
     /// </summary>
     [JsonPropertyName("urls")]
-    public ICollection<UpdateDialogAttachmentUrl>? Urls { get; set; }
+    public ICollection<UpdateDialogAttachmentUrl>? Urls { get; set; } = [];
 
     /// <summary>
     /// The UTC timestamp when the attachment expires and is no longer available.

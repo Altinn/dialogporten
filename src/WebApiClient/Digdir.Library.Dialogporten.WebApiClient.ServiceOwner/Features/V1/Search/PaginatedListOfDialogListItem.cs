@@ -8,7 +8,7 @@ public class PaginatedListOfDialogListItem
     /// The paginated list of items
     /// </summary>
     [JsonPropertyName("items")]
-    public ICollection<DialogListItem>? Items { get; set; }
+    public ICollection<DialogListItem>? Items { get; set; } = [];
 
     /// <summary>
     /// Whether there are more items available that can be fetched by supplying the continuation token

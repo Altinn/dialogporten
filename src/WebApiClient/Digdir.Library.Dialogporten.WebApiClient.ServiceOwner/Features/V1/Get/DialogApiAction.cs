@@ -42,5 +42,5 @@ public class DialogApiAction
     /// The endpoints associated with the action.
     /// </summary>
     [JsonPropertyName("endpoints")]
-    public ICollection<DialogApiActionEndpoint>? Endpoints { get; set; }
+    public ICollection<DialogApiActionEndpoint>? Endpoints { get; set; } = [];
 }

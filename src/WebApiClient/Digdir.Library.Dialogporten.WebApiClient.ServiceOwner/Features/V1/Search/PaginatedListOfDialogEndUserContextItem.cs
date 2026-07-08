@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 
@@ -8,7 +9,7 @@ public class PaginatedListOfDialogEndUserContextItem
     /// The paginated list of items
     /// </summary>
     [JsonPropertyName("items")]
-    public ICollection<DialogEndUserContextItem>? Items { get; set; }
+    public ICollection<DialogEndUserContextItem>? Items { get; set; } = [];
 
     /// <summary>
     /// Whether there are more items available that can be fetched by supplying the continuation token

@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
@@ -48,5 +50,5 @@ public class UpdateDialogActivity
     /// Unstructured text describing the activity. Only set if the activity type is "Information".
     /// </summary>
     [JsonPropertyName("description")]
-    public ICollection<Localization>? Description { get; set; }
+    public ICollection<Localization>? Description { get; set; } = [];
 }

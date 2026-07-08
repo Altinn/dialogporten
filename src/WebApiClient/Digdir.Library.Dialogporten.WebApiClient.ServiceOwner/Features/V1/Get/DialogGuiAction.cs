@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
@@ -63,12 +65,12 @@ public class DialogGuiAction
     /// The title of the action, this should be short and in verb form.
     /// </summary>
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; }
+    public ICollection<Localization>? Title { get; set; } = [];
 
     /// <summary>
     /// If there should be a prompt asking the user for confirmation before the action is executed,
     /// <br/>this field should contain the prompt text.
     /// </summary>
     [JsonPropertyName("prompt")]
-    public ICollection<Localization>? Prompt { get; set; }
+    public ICollection<Localization>? Prompt { get; set; } = [];
 }

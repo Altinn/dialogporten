@@ -8,10 +8,10 @@ public class ServiceResourceMetadata
     public ServiceResource ServiceResource { get; set; } = default!;
 
     [JsonPropertyName("roles")]
-    public ICollection<ServiceResourceRole>? Roles { get; set; }
+    public ICollection<ServiceResourceRole>? Roles { get; set; } = [];
 
     [JsonPropertyName("accessPackages")]
-    public ICollection<ServiceResourceAccessPackage>? AccessPackages { get; set; }
+    public ICollection<ServiceResourceAccessPackage>? AccessPackages { get; set; } = [];
 
     [JsonPropertyName("serviceOwner")]
     public ServiceResourceOwner ServiceOwner { get; set; } = default!;

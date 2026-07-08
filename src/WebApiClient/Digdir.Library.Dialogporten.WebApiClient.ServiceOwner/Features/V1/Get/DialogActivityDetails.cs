@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
@@ -24,5 +26,5 @@ public class DialogActivityDetails
     public Actor PerformedBy { get; set; } = default!;
 
     [JsonPropertyName("description")]
-    public ICollection<Localization>? Description { get; set; }
+    public ICollection<Localization>? Description { get; set; } = [];
 }

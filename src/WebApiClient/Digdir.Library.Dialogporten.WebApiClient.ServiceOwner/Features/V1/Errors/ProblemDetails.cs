@@ -29,7 +29,7 @@ public class ProblemDetails
     public string? TraceId { get; set; }
 
     [JsonPropertyName("validationErrors")]
-    public ICollection<ProblemDetailsError>? ValidationErrors { get; set; }
+    public ICollection<ProblemDetailsError>? ValidationErrors { get; set; } = [];
 
     [JsonPropertyName("errors")]
     public IDictionary<string, ICollection<string>> Errors { get; set; } = default!;

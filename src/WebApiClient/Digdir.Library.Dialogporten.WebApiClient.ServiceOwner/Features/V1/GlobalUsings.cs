@@ -1,0 +1,9 @@
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Errors;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResource;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.SystemLabels;
+global using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;

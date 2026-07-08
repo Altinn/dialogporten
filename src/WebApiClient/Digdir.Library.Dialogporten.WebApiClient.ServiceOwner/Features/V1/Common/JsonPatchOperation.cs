@@ -1,0 +1,22 @@
+using System.Text.Json.Serialization;
+
+namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+
+public partial class JsonPatchOperation
+{
+    [JsonPropertyName("operationType")]
+    [JsonConverter(typeof(JsonStringEnumConverter<JsonPatchOperationType>))]
+    public JsonPatchOperationType OperationType { get; set; }
+
+    [JsonPropertyName("path")]
+    public string? Path { get; set; }
+
+    [JsonPropertyName("op")]
+    public string? Op { get; set; }
+
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    [JsonPropertyName("value")]
+    public object? Value { get; set; }
+}

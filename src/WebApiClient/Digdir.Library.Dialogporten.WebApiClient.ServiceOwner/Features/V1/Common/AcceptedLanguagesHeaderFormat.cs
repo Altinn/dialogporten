@@ -1,6 +1,6 @@
 using Altinn.ApiClients.Dialogporten.Common;
 
-namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1;
+namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 
 public partial class AcceptedLanguages
 {

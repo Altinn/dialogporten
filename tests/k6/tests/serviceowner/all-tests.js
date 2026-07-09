@@ -5,7 +5,6 @@ import { default as dialogCreateExternalResource } from './dialogCreateExternalR
 import { default as dialogCreateIdempotentKey } from './dialogCreateIdempotentKey.js';
 import { default as dialogCreateInvalidActionCount } from './dialogCreateInvalidActionCount.js';
 import { default as dialogCreateInvalidProcess } from './dialogCreateInvalidProcess.js';
-import { default as dialogCreatePatchDelete } from './dialogCreatePatchDelete.js';
 import { default as dialogCreateUpdatePatchDeleteCorrespondenceResource } from './dialogCreateUpdatePatchDeleteCorrespondenceResource.js';
 import { default as dialogFreeze } from './dialogFreeze.js';
 import { default as dialogSearchServiceOwnerLabel } from './dialogSearchServiceOwnerLabel.js';
@@ -19,7 +18,6 @@ export default function() {
   dialogCreateIdempotentKey();
   dialogCreateInvalidActionCount();
   dialogCreateInvalidProcess();
-  dialogCreatePatchDelete();
   dialogCreateUpdatePatchDeleteCorrespondenceResource();
   dialogFreeze();
   dialogSearchServiceOwnerLabel();

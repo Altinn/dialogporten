@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.1.0" />
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.1.0" PrivateAssets="all" />
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj"/>
     </ItemGroup>
 

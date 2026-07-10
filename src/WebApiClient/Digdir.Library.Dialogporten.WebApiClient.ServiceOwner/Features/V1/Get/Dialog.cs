@@ -141,16 +141,6 @@ public class Dialog
     public DialogStatus Status { get; set; }
 
     /// <summary>
-    /// System defined label used to categorize dialogs.
-    /// <br/>This is obsolete and will only show; Default, Bin or Archive.
-    /// <br/>Use SystemLabels on EndUserContext instead.
-    /// </summary>
-    [JsonPropertyName("systemLabel")]
-    [JsonConverter(typeof(JsonStringEnumConverter<SystemLabel>))]
-    [Obsolete("Use EndUserContext.SystemLabels instead.")]
-    public SystemLabel SystemLabel { get; set; }
-
-    /// <summary>
     /// Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.
     /// </summary>
     [JsonPropertyName("isApiOnly")]

@@ -178,9 +178,6 @@ The validator caches public keys fetched from the Dialogporten `.well-known` end
 **`DialogTokenValidationParameters`** lets you override defaults globally or per-call:
 
 ```csharp
-// Disable lifetime validation (useful in tests)
-DialogTokenValidationParameters.Default.ValidateLifetime = false;
-
 // Per-call override with extra clock skew
 var result = validator.Validate(token, options: new DialogTokenValidationParameters
 {

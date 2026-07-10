@@ -160,8 +160,6 @@ The validator caches public keys fetched from the Dialogporten `.well-known` end
 // Per-call override with extra clock skew
 var result = validator.Validate(token, options: new DialogTokenValidationParameters
 {
-    // Disable lifetime validation (useful in tests)
-    ValidateLifetime = false,
     ClockSkew = TimeSpan.FromSeconds(30)
 });
 ```

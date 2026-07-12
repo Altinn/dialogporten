@@ -2037,8 +2037,8 @@
       },
       "Scalar.AspNetCore": {
         "type": "Transitive",
-        "resolved": "2.16.6",
-        "contentHash": "rT7Pdk9wA25xfJJM5cCCTl4HXPsJd6/WcO5UfmB1iCjNl/zKy+ZftsW8rosERio1uJe3VlVJ4SfAaA8w3QmV4w=="
+        "resolved": "2.16.10",
+        "contentHash": "dJsam1uxJ+h6YzaqDGjja1y3miyBd4VDumMwwow03yJapiRp3OtV5lMaOUvp8w5b16gAflYyvfj7HDL+0X2Rqw=="
       },
       "ScottBrady.IdentityModel": {
         "type": "Transitive",
@@ -2583,7 +2583,7 @@
           "Microsoft.Azure.AppConfiguration.AspNetCore": "[8.5.0, )",
           "NSwag.AspNetCore": "[14.7.1, )",
           "NSwag.MSBuild": "[14.7.1, )",
-          "Scalar.AspNetCore": "[2.16.6, )",
+          "Scalar.AspNetCore": "[2.16.10, )",
           "Serilog.AspNetCore": "[10.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.OpenTelemetry": "[4.2.0, )"

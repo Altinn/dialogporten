@@ -144,7 +144,7 @@ param deployerPrincipalName string
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
-var postgresServerName = uniqueResourceName('${namePrefix}-${serverNameStem}', postgresServerNameMaxLength)
+var postgresServerName = uniqueResourceName('${namePrefix}-${serverNameStem}', postgresServerNameMaxLength, subscription().id, resourceGroup().id)
 var shouldPublishCanonicalConnectionSecrets = publishCanonicalConnectionSecrets && !empty(environmentKeyVaultName)
 var postgresStorage = storage.type == 'PremiumV2_LRS'
   ? {

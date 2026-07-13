@@ -4,13 +4,19 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
+using Altinn.ApiClients.Maskinporten.Config;
+using Altinn.ApiClients.Maskinporten.Extensions;
+using Altinn.ApiClients.Maskinporten.Services;
 using Bogus;
 using CommandLine;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 
-public static class Program
+public class Program
 {
     private const int RefreshRateMs = 200; // How often the progress is updated
     private const int DialogsPerBatch = 5; // How many dialogs to generate per call DialogGenerator
@@ -18,6 +24,7 @@ public static class Program
     private const int Consumers = 20; // Number of consumers posting to the API
     private const string FailedDirectory = "failed"; // Directory to write failed requests to
     private const string OutputDirectory = "output"; // Directory to write files to when not posting to the API
+    private const string clientBuilderName = "dialogporten";
 
     public static async Task Main(string[] args) => await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(RunAsync);
 
@@ -79,16 +86,19 @@ public static class Program
         var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
-        using var client = new HttpClient();
-        client.BaseAddress = new Uri(options.Url);
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            cancellationTokenSource.Cancel();
+        };
 
         Console.WriteLine($"Generating {options.Count} fake dialogs...");
         Stopwatch.Start();
 
         var producerTask = Task.Run(() => ProduceDialogs(options, writer, cancellationToken), cancellationToken);
         var progressTask = Task.Run(() => UpdateProgress(options, cancellationToken), cancellationToken);
+        var host = await CreateHost(options, cancellationToken);
+        using var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient(clientBuilderName);
 
         var consumerTasks = new List<Task>();
         for (var i = 0; i < Consumers; i++)
@@ -112,6 +122,33 @@ public static class Program
 
         Stopwatch.Stop();
         await progressTask;
+    }
+
+    private static async Task<IHost> CreateHost(Options options, CancellationToken cancellationToken)
+    {
+        var host = Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration(config => config.AddUserSecrets<Program>())
+            .ConfigureServices((ctx, services) =>
+            {
+                if (string.IsNullOrEmpty(options.Token))
+                {
+                    var settings = new MaskinportenSettings();
+                    ctx.Configuration.GetRequiredSection("DialogportenSettings:Maskinporten").Bind(settings);
+
+                    settings.Scope = "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.admin";
+                    settings.Environment = "test";
+
+                    services.RegisterMaskinportenClientDefinition<SettingsJwkClientDefinition>(clientBuilderName, settings);
+                    services.AddHttpClient(clientBuilderName)
+                        .AddMaskinportenHttpMessageHandler<SettingsJwkClientDefinition>(clientBuilderName);
+                }
+                else
+                {
+                    services.AddHttpClient(clientBuilderName);
+                }
+            }).Build();
+        await host.StartAsync(cancellationToken);
+        return host;
     }
 
     private const double RateCalculationIntervalMilliseconds = 1000;
@@ -240,14 +277,15 @@ public static class Program
         return _partyList[MyRandomizer.Number(_partyList.Count - 1)];
     }
 
-    private static async Task ConsumeDialogsAndPost(Options options, ChannelReader<(int, CreateDialogDto)> reader, HttpClient client, CancellationToken cancellationToken)
+    private static async Task ConsumeDialogsAndPost(Options options, ChannelReader<(int, CreateDialogDto)> reader, HttpClient client, CancellationToken ct)
     {
-        await foreach (var item in reader.ReadAllAsync(cancellationToken))
+        await foreach (var item in reader.ReadAllAsync(ct))
         {
             try
             {
+                var requestUri = $"{options.Url}/api/v1/serviceowner/dialogs";
                 var json = JsonSerializer.Serialize(item.Item2, JsonSerializerOptions);
-                using var request = new HttpRequestMessage(HttpMethod.Post, options.Url)
+                using var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
                 {
                     Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
@@ -258,7 +296,7 @@ public static class Program
                         new AuthenticationHeaderValue("Bearer", options.Token);
                 }
 
-                var response = await client.SendAsync(request, cancellationToken);
+                var response = await client.SendAsync(request, ct);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -267,13 +305,13 @@ public static class Program
 
                 Interlocked.Increment(ref _dialogCounter);
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 break;
             }
             catch (Exception ex)
             {
-                if (!cancellationToken.IsCancellationRequested)
+                if (!ct.IsCancellationRequested)
                 {
                     Console.WriteLine($"\nException occurred while posting dialog: {ex.Message}");
                 }
@@ -361,8 +399,8 @@ public sealed class Options
     public bool Benchmark { get; set; } = false;
 
     [Option('u', "url", Required = false,
-        Default = "https://localhost:7214/api/v1/serviceowner/dialogs",
-        HelpText = "Service owner endpoint to post dialogs")]
+        Default = "https://localhost:7214",
+        HelpText = "Base url for dialogporten")]
     public string Url { get; set; } = null!;
 
     [Option('t', "token", Required = false, HelpText = "Bearer token to send as authorization header.")]

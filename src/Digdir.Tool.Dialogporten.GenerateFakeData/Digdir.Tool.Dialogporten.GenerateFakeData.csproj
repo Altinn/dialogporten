@@ -7,6 +7,7 @@
     <!-- Make default build configuration Release for easier "dotnet run" usage -->
     <PropertyGroup>
         <Configuration>Release</Configuration>
+        <UserSecretsId>750256a4-f332-4783-8802-8a7d9566f9ca</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.1.0" PrivateAssets="all" />
         <ProjectReference Include="..\Digdir.Domain.Dialogporten.Application\Digdir.Domain.Dialogporten.Application.csproj"/>
     </ItemGroup>
 

@@ -21,7 +21,7 @@ type Sku = {
 param sku Sku
 
 var appConfigNameMaxLength = 63
-var appConfigName = uniqueResourceName('${namePrefix}-appConfiguration', appConfigNameMaxLength)
+var appConfigName = uniqueResourceName('${namePrefix}-appConfiguration', appConfigNameMaxLength, subscription().id, resourceGroup().id)
 
 resource appConfig 'Microsoft.AppConfiguration/configurationStores@2024-06-01' = {
   name: appConfigName

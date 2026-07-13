@@ -30,7 +30,7 @@ param subnetId string?
 param vnetId string?
 
 var serviceBusNameMaxLength = 50
-var serviceBusName = uniqueResourceName('${namePrefix}-service-bus', serviceBusNameMaxLength)
+var serviceBusName = uniqueResourceName('${namePrefix}-service-bus', serviceBusNameMaxLength, subscription().id, resourceGroup().id)
 
 var vnetRequested = subnetId != null || vnetId != null
 var vnetSkuValidation = vnetRequested && sku.name != 'Premium'
@@ -55,7 +55,7 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
 }
 
 // private endpoint name max characters is 80
-var serviceBusPrivateEndpointName = uniqueResourceName('${namePrefix}-service-bus-pe', 80)
+var serviceBusPrivateEndpointName = uniqueResourceName('${namePrefix}-service-bus-pe', 80, subscription().id, resourceGroup().id)
 
 resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2025-07-01' = if (vnetEnabled) {
   name: serviceBusPrivateEndpointName
@@ -72,7 +72,7 @@ resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2025-07-0
         }
       }
     ]
-    customNetworkInterfaceName: uniqueResourceName('${namePrefix}-service-bus-pe-nic', 80)
+    customNetworkInterfaceName: uniqueResourceName('${namePrefix}-service-bus-pe-nic', 80, subscription().id, resourceGroup().id)
     subnet: {
       id: subnetId!
     }

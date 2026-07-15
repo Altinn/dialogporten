@@ -29,7 +29,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 {
     using System = global::System;
 
-    
+
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ServiceOwnerLabel
@@ -426,7 +426,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// True if the authenticated user is authorized for this content. If not, the endpoints will
         /// <br/>be replaced with a fixed placeholder. Can be null if not applicable.
-        /// <br/>            
+        /// <br/>
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool? IsAuthorized { get; set; } = default!;
@@ -797,7 +797,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
@@ -806,7 +806,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("externalReference")]
@@ -886,15 +886,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
         /// <br/>A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction.
-        /// <br/>            
+        /// <br/>
         /// <br/>The value of this field is:
         /// <br/>- true when there are any new unopened Transmissions sent from the service owner.
         /// <br/>- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
-        /// <br/>            
+        /// <br/>
         /// <br/>Note that the value is
         /// <br/>- determined by the service owner and not to be confused with IsContentSeen
         /// <br/>- not affected by SystemLabels
-        /// <br/>            
+        /// <br/>
         /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
@@ -920,12 +920,12 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Indicates whether a dialog has been seen since its last content update.
-        /// <br/>            
+        /// <br/>
         /// <br/>The value of this field is
         /// <br/>- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened
         /// <br/>- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update
         /// <br/>- false after the dialog receives a content update.
-        /// <br/>            
+        /// <br/>
         /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
         [JsonPropertyName("isContentSeen")]
@@ -993,7 +993,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// An arbitrary string with a service-specific activity type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -1050,7 +1050,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
-        /// <br/>            
+        /// <br/>
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
         [JsonPropertyName("isViaServiceOwner")]
@@ -1446,7 +1446,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// An optional key to ensure idempotency in dialog creation. If provided, it allows for the safe re-submission of the same dialog creation request without creating duplicate entries.
-        /// <br/>            
+        /// <br/>
         /// </summary>
         [JsonPropertyName("idempotentKey")]
         public string? IdempotentKey { get; set; } = default!;
@@ -1504,7 +1504,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of
         /// <br/>the dialog to further specify the "status" enum.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details on the possible values (if
         /// <br/>in use).
         /// </summary>
@@ -1513,7 +1513,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary string with a service-specific reference to an external system or service.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("externalReference")]
@@ -1539,7 +1539,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>            
+        /// <br/>
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed by the service
         /// <br/>owner after the dialog has been created.
@@ -1591,15 +1591,15 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
         /// <br/>A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction.
-        /// <br/>            
+        /// <br/>
         /// <br/>The value of this field is:
         /// <br/>- true when there are any new unopened Transmissions sent from the service owner.
         /// <br/>- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
-        /// <br/>            
+        /// <br/>
         /// <br/>Note that the value is
         /// <br/>- determined by the service owner and not to be confused with IsContentSeen
         /// <br/>- not affected by SystemLabels
-        /// <br/>            
+        /// <br/>
         /// <br/>For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
         /// </summary>
         [JsonPropertyName("hasUnopenedContent")]
@@ -1673,12 +1673,12 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Indicates whether a dialog has been seen since its last content update.
-        /// <br/>            
+        /// <br/>
         /// <br/>The value of this field is
         /// <br/>- true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabels MarkedAsUnopened
         /// <br/>- false if there is a SystemLabels MarkedAsUnopened, even if the dialog has been seen since its last content update
         /// <br/>- false after the dialog receives a content update.
-        /// <br/>            
+        /// <br/>
         /// <br/>Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
         /// </summary>
         [JsonPropertyName("isContentSeen")]
@@ -1859,7 +1859,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -1873,7 +1873,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -2071,7 +2071,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -2188,7 +2188,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -2226,7 +2226,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary string indicating the version of the endpoint.
-        /// <br/>            
+        /// <br/>
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("version")]
@@ -2299,7 +2299,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// An arbitrary URI/URN with a service-specific activity type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Consult the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -2356,7 +2356,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Flag indicating whether the seen log entry was created via the service owner.
-        /// <br/>            
+        /// <br/>
         /// <br/>This is used when the service owner uses the service owner API to implement its own frontend.
         /// </summary>
         [JsonPropertyName("isViaServiceOwner")]
@@ -2438,7 +2438,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -2446,7 +2446,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -2636,7 +2636,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -2644,7 +2644,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -2739,7 +2739,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>            
+        /// <br/>
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
         /// </summary>
@@ -2999,7 +2999,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3007,7 +3007,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -3193,7 +3193,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3256,7 +3256,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3658,7 +3658,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// The expiration date for the dialog. This is the last date when the dialog is available for the end user.
-        /// <br/>            
+        /// <br/>
         /// <br/>After this date is passed, the dialog will be considered expired and no longer available for the end user in any
         /// <br/>API. If not supplied, the dialog will be considered to never expire. This field can be changed after creation.
         /// </summary>
@@ -3940,7 +3940,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -3948,7 +3948,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
-        /// <br/>            
+        /// <br/>
         /// <br/>Refer to the service-specific documentation provided by the service owner for details (if in use).
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -4134,7 +4134,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -4197,7 +4197,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// <summary>
         /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
         /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
-        /// <br/>            
+        /// <br/>
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
@@ -4544,10 +4544,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     public partial class JsonPatchOperation
     {
 
-        [JsonPropertyName("operationType")]
-        [JsonConverter(typeof(JsonStringEnumConverter<JsonPatchOperationType>))]
-        public JsonPatchOperationType OperationType { get; set; } = default!;
-
         [JsonPropertyName("path")]
         public string? Path { get; set; } = default!;
 
@@ -4561,35 +4557,6 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         public object? Value { get; set; } = default!;
 
     }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum JsonPatchOperationType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Add")]
-        Add = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Remove")]
-        Remove = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Replace")]
-        Replace = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Move")]
-        Move = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Copy")]
-        Copy = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Test")]
-        Test = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Invalid")]
-        Invalid = 6,
-
-    }
-
-
 }
 
 #pragma warning restore  108

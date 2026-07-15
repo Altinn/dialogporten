@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.118.6](https://github.com/Altinn/dialogporten/compare/v1.118.5...v1.118.6) (2026-07-15)
+
+
+### Bug Fixes
+
+* make resource name bicep export pure ([#4214](https://github.com/Altinn/dialogporten/issues/4214)) ([1cf2ae3](https://github.com/Altinn/dialogporten/commit/1cf2ae3edaea0337ba5710d8c5cbab57f85f0a09))
+* throw unreachableexception on unknown party identifier ([#4204](https://github.com/Altinn/dialogporten/issues/4204)) ([f875f4d](https://github.com/Altinn/dialogporten/commit/f875f4da975f662d5b18af4a201857ebc85e0308))
+
+
+### Miscellaneous Chores
+
+* **bicep:** bump Microsoft.Network resources to 2025-07-01 API version ([#4205](https://github.com/Altinn/dialogporten/issues/4205)) ([71af5dc](https://github.com/Altinn/dialogporten/commit/71af5dc1822deed26d07953c68b672ff49c0fbac))
+* **deps:** update actions/setup-dotnet action to v5.4.0 ([#4212](https://github.com/Altinn/dialogporten/issues/4212)) ([ac3f286](https://github.com/Altinn/dialogporten/commit/ac3f286f8d971077021357512f0e446b09559e47))
+* **deps:** update dependency fastendpoints.swagger to 8.2.0 ([#4213](https://github.com/Altinn/dialogporten/issues/4213)) ([34524a6](https://github.com/Altinn/dialogporten/commit/34524a6262a1dbfa743450e1c456816cc01fd3cb))
+* **deps:** update dependency scalar.aspnetcore to 2.16.10 ([#4207](https://github.com/Altinn/dialogporten/issues/4207)) ([8a86157](https://github.com/Altinn/dialogporten/commit/8a86157df31ae9f4d7d4d3274923b356212f0404))
+* **deps:** update dependency scalar.aspnetcore to 2.16.6 ([#4197](https://github.com/Altinn/dialogporten/issues/4197)) ([5b0fc1b](https://github.com/Altinn/dialogporten/commit/5b0fc1b6cb1729fbdc3b23bbd0f460278f611451))
+* **deps:** update dependency testcontainers.postgresql to 4.13.0 ([#4218](https://github.com/Altinn/dialogporten/issues/4218)) ([e0508fd](https://github.com/Altinn/dialogporten/commit/e0508fda62d0eb68be47548d0f4415c0bdb3c804))
+* **deps:** update docker/build-push-action action to v7.3.0 ([#4219](https://github.com/Altinn/dialogporten/issues/4219)) ([76739f4](https://github.com/Altinn/dialogporten/commit/76739f440d9ab4bfba22e724b4cafb92fa4486d2))
+* **deps:** update docker/login-action action to v4.4.0 ([#4220](https://github.com/Altinn/dialogporten/issues/4220)) ([d335826](https://github.com/Altinn/dialogporten/commit/d335826700d52167ad0e6a83b1d399cd401d858e))
+* **deps:** update docker/metadata-action action to v6.2.0 ([#4221](https://github.com/Altinn/dialogporten/issues/4221)) ([da97371](https://github.com/Altinn/dialogporten/commit/da973713e9745ff2422523f5c128894024f8f3bf))
+* **deps:** update grafana/grafana docker tag to v12.4.3 ([#4198](https://github.com/Altinn/dialogporten/issues/4198)) ([00d7d51](https://github.com/Altinn/dialogporten/commit/00d7d51a28fa3313a46f3242d3f336e42bf75de2))
+* update azure cli to 2.88.0 ([#4216](https://github.com/Altinn/dialogporten/issues/4216)) ([2d3c5fc](https://github.com/Altinn/dialogporten/commit/2d3c5fc6bb1b07f9a49490da2f4dd436ed9029d1))
+
 ## [1.118.5](https://github.com/Altinn/dialogporten/compare/v1.118.4...v1.118.5) (2026-07-06)
 
 

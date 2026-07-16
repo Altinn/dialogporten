@@ -3,8 +3,8 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.ServiceResources.Queries.Search;
-using Xunit;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests;
 
@@ -52,9 +52,11 @@ public class SearchAuthorizedServiceResourcesQueryHandlerTests
 
     private sealed class StubCatalogue(IReadOnlyList<string> resourceUrns) : IServiceResourceMetadataCatalogue
     {
-        public Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
-                resourceUrns.Select(urn => new ServiceResourceMetadataCatalogueEntry(urn, CreateItem(urn))).ToList());
+        public Task<HashSet<string>> GetKnownLanguages(CancellationToken _) => Task.FromResult(new HashSet<string>());
+        public Task<IReadOnlyList<ServiceResourceMetadataItemDto>> GetCatalogueDtos(
+            List<AcceptedLanguage>? lng,
+            CancellationToken _
+        ) => Task.FromResult<IReadOnlyList<ServiceResourceMetadataItemDto>>(resourceUrns.Select(CreateItem).ToList());
     }
 
     private static ServiceResourceMetadataItemDto CreateItem(string fullUrn) => new()

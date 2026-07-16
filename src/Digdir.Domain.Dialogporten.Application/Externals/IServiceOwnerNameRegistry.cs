@@ -5,7 +5,7 @@ public interface IServiceOwnerNameRegistry
     Task<ServiceOwnerInfo?> GetServiceOwnerInfo(string orgNumber, CancellationToken cancellationToken);
 
     Task<IReadOnlyDictionary<string, ServiceOwnerInfo>> GetServiceOwnerInfo(
-        IReadOnlyCollection<string> orgNumbers,
+        IEnumerable<string> orgNumbers,
         CancellationToken cancellationToken);
 }
 

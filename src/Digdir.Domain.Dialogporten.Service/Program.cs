@@ -1,9 +1,8 @@
 ﻿using System.Globalization;
 using Digdir.Domain.Dialogporten.Application;
-using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Serilog;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Service;
 using Digdir.Domain.Dialogporten.Service.Common;
 using Digdir.Library.Utils.AspNet;
@@ -11,6 +10,7 @@ using MassTransit;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Metrics;
+using Serilog;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()

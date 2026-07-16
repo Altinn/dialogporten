@@ -1,9 +1,10 @@
 using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -183,14 +184,27 @@ internal sealed partial class WarmupService : IHostedService
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    private async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
+    private async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken ct)
     {
         try
         {
-            var sender = services.GetRequiredService<ISender>();
-            await sender.Send(new GetServiceResourceMetadataQuery(), cancellationToken);
+            var catalogueService = services.GetRequiredService<IServiceResourceMetadataCatalogue>();
+
+            await catalogueService.GetCatalogueDtos(null, ct);
+            await catalogueService.GetKnownLanguages(ct);
+
+            var preloadLanguages = new List<string> { "nn", "nb", "en" };
+            var languagesSets = preloadLanguages
+                .Permutations(1).Concat(preloadLanguages.Permutations(2))
+                .Select(set => set.Select((code, i) => new AcceptedLanguage(code, 100 - i)).ToList())
+                .ToList();
+
+            foreach (var languageSet in languagesSets)
+            {
+                await catalogueService.GetCatalogueDtos(languageSet, ct);
+            }
         }
-        catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
             ServiceResourceMetadataWarmupFailed(_logger, ex);
         }

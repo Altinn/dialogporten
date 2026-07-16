@@ -3,31 +3,26 @@ using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
-using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Polly.Extensions.Http;
-using Polly;
-using Polly.Contrib.WaitAndRetry;
-using Digdir.Domain.Dialogporten.Infrastructure.Common;
-using FluentValidation;
 using Digdir.Domain.Dialogporten.Application;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
-using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
-using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.AccessManagement;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.OrganizationRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
+using Digdir.Domain.Dialogporten.Infrastructure.Common;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
+using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -35,21 +30,26 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
+using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
+using FluentValidation;
 using HotChocolate.Subscriptions;
-using MessagePack.Resolvers;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using StackExchange.Redis;
-using ZiggyCreatures.Caching.Fusion;
-using ZiggyCreatures.Caching.Fusion.NullObjects;
-using ZiggyCreatures.Caching.Fusion.Locking.AsyncKeyed;
-using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
-using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using MassTransit;
 using MediatR;
+using MessagePack.Resolvers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Npgsql;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Polly.Extensions.Http;
+using StackExchange.Redis;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Locking.AsyncKeyed;
+using ZiggyCreatures.Caching.Fusion.NullObjects;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 
@@ -557,11 +557,20 @@ public static class InfrastructureExtensions
     {
         services.AddHealthChecks()
             .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies"])
-            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"])
+            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
+
+        services
+            .AddSingleton<RedisHealthCheck>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddWarmupHealthChecks(this IServiceCollection services)
+    {
+        services.AddHealthChecks()
             .AddCheck<WarmupHealthCheck>("warmup", tags: ["warmup"]);
 
         services
-            .AddSingleton<RedisHealthCheck>()
             .AddSingleton<WarmupState>()
             .AddSingleton<WarmupHealthCheck>()
             .AddHostedService<WarmupService>();

@@ -8,7 +8,6 @@ public static class ServiceResourceMetadataPruneExtensions
 {
     /// <summary>
     /// Produces a fresh <see cref="ServiceResourceMetadataItemDto"/> with its localized names pruned to
-    /// <paramref name="acceptedLanguages"/>. New DTO instances and new <c>Name</c> lists are allocated (via the
     /// copying <see cref="LocalizationExtensions.Pruned"/>), so the source item — which is a shared, cached,
     /// all-language catalogue entry — is never mutated. Immutable scalar/link data is shared by reference.
     /// Passing null keeps all languages. Roles and access packages are sorted by their pruned name via

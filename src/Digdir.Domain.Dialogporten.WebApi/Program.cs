@@ -104,8 +104,8 @@ static void BuildAndRun(string[] args)
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithPubCapabilities()
+            .WithWarmupHealthChecks()
             .Build()
-
         // Asp infrastructure
         .AddExceptionHandler<GlobalExceptionHandler>()
         .AddAutoMapper(WebApiAssemblyMarker.Assembly)

@@ -4,8 +4,8 @@ using System.Xml;
 using Altinn.Authorization.ABAC.Utils;
 using Altinn.Authorization.ABAC.Xacml;
 using AsyncKeyedLock;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.Extensions.Logging;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -206,7 +206,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         return null;
     }
 
-    private async Task<ServiceResourceInformation[]> FetchServiceResources(CancellationToken cancellationToken)
+    private async Task<IEnumerable<ServiceResourceInformation>> FetchServiceResources(CancellationToken cancellationToken)
     {
         const string searchEndpoint = $"{ResourceRegistryResourceEndpoint}resourcelist?includeMigratedApps=true";
 
@@ -221,17 +221,16 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
                 return response
                     .Where(x => !string.IsNullOrWhiteSpace(x.HasCompetentAuthority.Organization))
                     .Where(x => !string.IsNullOrWhiteSpace(x.HasCompetentAuthority.OrgCode))
-                    .Where(x => Application.Common.Authorization.Constants.SupportedResourceTypes.Contains(x.ResourceType))
+                    .Where(x => Constants.SupportedResourceTypes.Contains(x.ResourceType))
                     .Select(x => new ServiceResourceInformation(
-                        $"{Constants.ServiceResourcePrefix}{x.Identifier}",
-                        x.ResourceType,
-                        x.HasCompetentAuthority.Organization!,
-                        x.HasCompetentAuthority.OrgCode!,
-                        x.Title.ToLocalizations(),
-                        x.Description.ToLocalizations(),
-                        x.Delegable,
-                        x.Status ?? string.Empty))
-                    .ToArray();
+                        ResourceId: $"{Domain.Common.Constants.ServiceResourcePrefix}{x.Identifier}",
+                        ResourceType: x.ResourceType,
+                        OwnerOrgNumber: x.HasCompetentAuthority.Organization!,
+                        OwnOrgShortName: x.HasCompetentAuthority.OrgCode!,
+                        DisplayName: x.Title.ToLocalizations(),
+                        Description: x.Description.ToLocalizations(),
+                        Delegable: x.Delegable,
+                        Status: x.Status ?? string.Empty));
             },
             token: cancellationToken);
     }

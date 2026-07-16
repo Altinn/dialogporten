@@ -44,23 +44,25 @@ internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServi
     {
         var requestedResources = serviceResources
             .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .Distinct(StringComparer.OrdinalIgnoreCase);
 
-        if (requestedResources.Count == 0)
-        {
-            return new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        }
-
-        var fetchedMinimumAuthenticationLevels = await _resourcePolicyInformationRepository
-            .GetMinimumAuthenticationLevels(cancellationToken);
+        IReadOnlyDictionary<string, int>? fetchedMinimumAuthenticationLevels = null;
 
         var minimumAuthenticationLevels = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        foreach (var serviceResource in requestedResources)
+
+        using var enumerator = requestedResources.GetEnumerator();
+        var first = true;
+        while (enumerator.MoveNext())
         {
-            if (fetchedMinimumAuthenticationLevels.TryGetValue(serviceResource, out var minimumAuthenticationLevel))
+            if (first)
             {
-                minimumAuthenticationLevels[serviceResource] = minimumAuthenticationLevel;
+                fetchedMinimumAuthenticationLevels = await _resourcePolicyInformationRepository.GetMinimumAuthenticationLevels(cancellationToken);
+                first = false;
+            }
+
+            if (fetchedMinimumAuthenticationLevels!.TryGetValue(enumerator.Current, out var minimumAuthenticationLevel))
+            {
+                minimumAuthenticationLevels[enumerator.Current] = minimumAuthenticationLevel;
                 continue;
             }
 
@@ -68,7 +70,7 @@ internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServi
             // logs might get spammed with lots of warnings if the cache is stale. Currently, the policy information
             // is only updated once every 24 hours so we drop logging here for now.
 
-            minimumAuthenticationLevels[serviceResource] = DefaultMinimumAuthenticationLevel;
+            minimumAuthenticationLevels[enumerator.Current] = DefaultMinimumAuthenticationLevel;
         }
 
         return minimumAuthenticationLevels;

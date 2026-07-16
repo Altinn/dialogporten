@@ -22,13 +22,12 @@ internal sealed class GetServiceResourceMetadataQueryHandler : IRequestHandler<G
 
     public async Task<GetServiceResourceMetadataDto> Handle(
         GetServiceResourceMetadataQuery request,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
-        // Full public catalogue: every referenced resource, from the shared cached catalogue, with localizations
-        // pruned into fresh per-request copies and re-sorted by the pruned (requested-language) name
-        // (see ToSortedPrunedItems).
-        var entries = await _catalogue.GetEntries(cancellationToken);
-        var items = entries.ToSortedPrunedItems(request.AcceptedLanguages);
+        var knownLanguages = await _catalogue.GetKnownLanguages(ct);
+        var languages = request.AcceptedLanguages?.Where(x => knownLanguages.Contains(x.LanguageCode)).ToList();
+        var items = await _catalogue.GetCatalogueDtos(languages, ct);
+
         return new GetServiceResourceMetadataDto { Items = items };
     }
 }

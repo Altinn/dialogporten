@@ -189,9 +189,6 @@
             "nullable": true,
             "type": "string"
           },
-          "operationType": {
-            "$ref": "#/components/schemas/JsonPatchOperations_OperationType"
-          },
           "path": {
             "nullable": true,
             "type": "string"
@@ -201,28 +198,6 @@
           }
         },
         "type": "object"
-      },
-      "JsonPatchOperations_OperationType": {
-        "description": "",
-        "enum": [
-          "Add",
-          "Remove",
-          "Replace",
-          "Move",
-          "Copy",
-          "Test",
-          "Invalid"
-        ],
-        "type": "string",
-        "x-enumNames": [
-          "Add",
-          "Remove",
-          "Replace",
-          "Move",
-          "Copy",
-          "Test",
-          "Invalid"
-        ]
       },
       "PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog": {
         "additionalProperties": false,

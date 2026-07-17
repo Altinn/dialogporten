@@ -3357,9 +3357,6 @@
             "nullable": true,
             "type": "string"
           },
-          "operationType": {
-            "$ref": "#/components/schemas/JsonPatchOperationType"
-          },
           "path": {
             "nullable": true,
             "type": "string"
@@ -3369,28 +3366,6 @@
           }
         },
         "type": "object"
-      },
-      "JsonPatchOperationType": {
-        "description": "",
-        "enum": [
-          "Add",
-          "Remove",
-          "Replace",
-          "Move",
-          "Copy",
-          "Test",
-          "Invalid"
-        ],
-        "type": "string",
-        "x-enumNames": [
-          "Add",
-          "Remove",
-          "Replace",
-          "Move",
-          "Copy",
-          "Test",
-          "Invalid"
-        ]
       },
       "Limits": {
         "additionalProperties": false,

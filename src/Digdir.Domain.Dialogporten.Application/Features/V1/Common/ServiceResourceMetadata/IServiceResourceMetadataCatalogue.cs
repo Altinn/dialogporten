@@ -18,6 +18,5 @@ public sealed record ServiceResourceMetadataCatalogueEntry(string ResourceUrn, S
 /// </summary>
 public interface IServiceResourceMetadataCatalogue
 {
-    Task<HashSet<string>> GetKnownLanguages(CancellationToken cancellationToken);
     Task<IReadOnlyList<ServiceResourceMetadataItemDto>> GetCatalogueDtos(List<AcceptedLanguage>? languages, CancellationToken cancellationToken);
 }

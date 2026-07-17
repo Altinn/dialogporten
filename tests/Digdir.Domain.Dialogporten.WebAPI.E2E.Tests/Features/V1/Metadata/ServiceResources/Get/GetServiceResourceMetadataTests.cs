@@ -7,7 +7,7 @@ using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Metadata.ServiceResources.Get;
 
 [Collection(nameof(WebApiTestCollectionFixture))]
-public class GetServiceResourceMetadataSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
+public class GetServiceResourceMetadataTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     [E2ETheory]
     [InlineData("nb")]
@@ -36,10 +36,13 @@ public class GetServiceResourceMetadataSnapshotTests(WebApiE2EFixture fixture) :
         // Assert
         resWithLanguage.ShouldHaveStatusCode(HttpStatusCode.OK);
         resWithLanguage.Content.Should().NotBeNull();
+        resWithLanguage.Content.Items.Should().NotBeNullOrEmpty();
+
         var localizedItemByResourceId = resWithLanguage.Content.Items
             .GroupBy(x => x.ServiceResource.Id)
             .ToDictionary(k => k.Key, v => v.Select(y => y));
 
+        resNoLanguage.Content.Items.Should().NotBeNullOrEmpty();
         resNoLanguage.Content.Items.Should().AllSatisfy(item =>
         {
             var resourceId = item.ServiceResource.Id;

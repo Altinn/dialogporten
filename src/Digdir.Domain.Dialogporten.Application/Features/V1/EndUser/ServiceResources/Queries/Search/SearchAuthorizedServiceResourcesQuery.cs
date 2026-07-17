@@ -44,18 +44,16 @@ internal sealed class SearchAuthorizedServiceResourcesQueryHandler
         // instead (the expensive per-party union is skipped).
         var authorized = await _authorizedServiceResourcesProvider.GetAuthorizedServiceResources(request.Parties, ct);
 
-        var knownLanguages = await _catalogue.GetKnownLanguages(ct);
-        var languages = request.AcceptedLanguages?.Where(x => knownLanguages.Contains(x.LanguageCode)).ToList();
         IReadOnlyList<ServiceResourceMetadataItemDto> items;
 
         if (authorized.IncludeFullCatalogue)
         {
-            items = await _catalogue.GetCatalogueDtos(languages, ct);
+            items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, ct);
         }
         else
         {
             var authorizedSet = new HashSet<string>(authorized.ResourceUrns, StringComparer.OrdinalIgnoreCase);
-            var dtos = await _catalogue.GetCatalogueDtos(languages, ct);
+            var dtos = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, ct);
             items = dtos.Where(x => authorizedSet.Contains(CreateUrn(x.ServiceResource.Id))).ToList();
         }
 

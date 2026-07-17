@@ -24,9 +24,7 @@ internal sealed class GetServiceResourceMetadataQueryHandler : IRequestHandler<G
         GetServiceResourceMetadataQuery request,
         CancellationToken ct)
     {
-        var knownLanguages = await _catalogue.GetKnownLanguages(ct);
-        var languages = request.AcceptedLanguages?.Where(x => knownLanguages.Contains(x.LanguageCode)).ToList();
-        var items = await _catalogue.GetCatalogueDtos(languages, ct);
+        var items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, ct);
 
         return new GetServiceResourceMetadataDto { Items = items };
     }

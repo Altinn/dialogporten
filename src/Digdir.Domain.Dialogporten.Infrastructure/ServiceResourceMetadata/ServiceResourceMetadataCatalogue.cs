@@ -69,7 +69,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
                 token: cancellationToken);
     }
 
-    public async Task<HashSet<string>> GetKnownLanguages(CancellationToken ct)
+    private async Task<HashSet<string>> GetKnownLanguages(CancellationToken ct)
     {
         return await _cache.GetOrSetAsync<HashSet<string>>(
             CacheKeyKnownLanguages,

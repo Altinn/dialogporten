@@ -103,7 +103,8 @@ internal sealed partial class WarmupService : IHostedService
 
             await RunPhaseAsync("db-pool", () => WarmupDbPoolAsync(services, timeoutCts.Token));
             await RunPhaseAsync("ef-model", () => WarmupEfModelAsync(services, timeoutCts.Token));
-            await RunPhaseAsync("service-resource-metadata", () => WarmupServiceResourceMetadataAsync(services, timeoutCts.Token));
+            await RunPhaseAsync("service-resource-metadata",
+                () => WarmupServiceResourceMetadataAsync(services, timeoutCts.Token));
 
             if (_settings.RunEndUserSearch)
             {
@@ -113,7 +114,8 @@ internal sealed partial class WarmupService : IHostedService
             _logger.LogInformation("Readiness warmup completed successfully.");
             _warmupState.MarkWarmupComplete();
         }
-        catch (OperationCanceledException ex) when (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (timeoutCts.IsCancellationRequested &&
+                                                    !cancellationToken.IsCancellationRequested)
         {
             _logger.LogError(ex, "Readiness warmup timed out after {TimeoutSeconds}s.", _settings.TimeoutSeconds);
             _warmupState.MarkWarmupFailed("timeout", ex);
@@ -148,10 +150,12 @@ internal sealed partial class WarmupService : IHostedService
         WarmupPhaseCompleted(_logger, phase);
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Starting readiness warmup phase {WarmupPhase}.")]
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information,
+        Message = "Starting readiness warmup phase {WarmupPhase}.")]
     private static partial void WarmupPhaseStarting(ILogger logger, string warmupPhase);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Completed readiness warmup phase {WarmupPhase}.")]
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information,
+        Message = "Completed readiness warmup phase {WarmupPhase}.")]
     private static partial void WarmupPhaseCompleted(ILogger logger, string warmupPhase);
 
     private async Task WarmupDbPoolAsync(IServiceProvider services, CancellationToken cancellationToken)
@@ -191,7 +195,6 @@ internal sealed partial class WarmupService : IHostedService
             var catalogueService = services.GetRequiredService<IServiceResourceMetadataCatalogue>();
 
             await catalogueService.GetCatalogueDtos(null, ct);
-            await catalogueService.GetKnownLanguages(ct);
 
             var preloadLanguages = new List<string> { "nn", "nb", "en" };
             var languagesSets = preloadLanguages
@@ -249,19 +252,25 @@ internal sealed partial class WarmupService : IHostedService
         }
     }
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Skipping end-user search warmup because Infrastructure:Warmup:EndUserPid is not configured.")]
+    [LoggerMessage(EventId = 3, Level = LogLevel.Warning,
+        Message = "Skipping end-user search warmup because Infrastructure:Warmup:EndUserPid is not configured.")]
     private static partial void EndUserSearchSkippedMissingPid(ILogger logger);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Warning, Message = "End-user search warmup returned no rows for PID {EndUserPid}.")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Warning,
+        Message = "End-user search warmup returned no rows for PID {EndUserPid}.")]
     private static partial void EndUserSearchReturnedNoRows(ILogger logger, string endUserPid);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "End-user search warmup returned {ResultType} for PID {EndUserPid}.")]
+    [LoggerMessage(EventId = 5, Level = LogLevel.Warning,
+        Message = "End-user search warmup returned {ResultType} for PID {EndUserPid}.")]
     private static partial void EndUserSearchReturnedNonSuccess(ILogger logger, string resultType, string endUserPid);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "End-user search warmup failed for PID {EndUserPid}; readiness will not be failed by this optional phase.")]
+    [LoggerMessage(EventId = 6, Level = LogLevel.Warning,
+        Message =
+            "End-user search warmup failed for PID {EndUserPid}; readiness will not be failed by this optional phase.")]
     private static partial void EndUserSearchFailed(ILogger logger, string endUserPid, Exception exception);
 
-    [LoggerMessage(EventId = 7, Level = LogLevel.Warning, Message = "Service resource metadata warmup failed; readiness will not be failed by this optional phase.")]
+    [LoggerMessage(EventId = 7, Level = LogLevel.Warning,
+        Message = "Service resource metadata warmup failed; readiness will not be failed by this optional phase.")]
     private static partial void ServiceResourceMetadataWarmupFailed(ILogger logger, Exception exception);
 }
 

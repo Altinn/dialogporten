@@ -426,7 +426,6 @@ type SearchAuthorizedServiceResourcesDto {
   """
   isFullCatalogueFallback: Boolean
   items: [ServiceResourceMetadataItemDto!]!
-  itemsAsRawJsonString: String
 }
 
 type SearchContent {

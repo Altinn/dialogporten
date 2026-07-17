@@ -15,7 +15,4 @@ public sealed class SearchAuthorizedServiceResourcesDto
     public bool? IsFullCatalogueFallback { get; set; }
 
     public IReadOnlyList<ServiceResourceMetadataItemDto> Items { get; set; } = [];
-
-    [JsonIgnore]
-    public string? ItemsAsRawJsonString { get; set; }
 }

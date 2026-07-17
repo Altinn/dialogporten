@@ -43,7 +43,7 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
             return new Dictionary<string, ServiceOwnerInfo>(StringComparer.OrdinalIgnoreCase);
         }
 
-        var orgInfoByOrgNumber = await FusionCacheExtMethods.GetOrSetAsync(_cache, ServiceOwnerShortNameReferenceCacheKey, GetServiceOwnerInfo, token: cancellationToken);
+        var orgInfoByOrgNumber = await _cache.GetOrSetAsync(ServiceOwnerShortNameReferenceCacheKey, GetServiceOwnerInfo, token: cancellationToken);
         return orgInfoByOrgNumber
             .Where(x => requestedOrgNumbers.Contains(x.Key))
             .ToDictionary(

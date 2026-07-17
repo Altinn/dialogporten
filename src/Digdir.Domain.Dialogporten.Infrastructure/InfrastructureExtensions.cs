@@ -559,8 +559,7 @@ public static class InfrastructureExtensions
             .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies"])
             .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
 
-        services
-            .AddSingleton<RedisHealthCheck>();
+        services.AddSingleton<RedisHealthCheck>();
 
         return services;
     }

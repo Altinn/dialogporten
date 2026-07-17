@@ -102,8 +102,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
         var partyResourceReferenceRepository = scope.ServiceProvider
             .GetRequiredService<IPartyResourceReferenceRepository>();
 
-        var referencedResources = await partyResourceReferenceRepository
-            .GetReferencedResources(cancellationToken); // Trigger updated. service resources + party (in dialogs)
+        var referencedResources = await partyResourceReferenceRepository.GetReferencedResources(cancellationToken);
 
         // acceptedLanguages: null => build the full, all-language items. Per-request language pruning is
         // applied by the query handlers via PrunedCopy, so these cached items are never mutated.

@@ -21,7 +21,7 @@ public interface IServiceResourceMetadataItemBuilder
     Task<List<ServiceResourceMetadataItemDto>> BuildItems(
         IReadOnlyCollection<string> serviceResources,
         List<AcceptedLanguage>? acceptedLanguages,
-        CancellationToken cancellationToken);
+        CancellationToken ct);
 }
 
 internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetadataItemBuilder
@@ -59,7 +59,7 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
     public async Task<List<ServiceResourceMetadataItemDto>> BuildItems(
         IReadOnlyCollection<string> serviceResources,
         List<AcceptedLanguage>? acceptedLanguages,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
         if (serviceResources.Count == 0)
         {
@@ -70,28 +70,30 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
         // the same scoped DbContext, which is not thread-safe. Running them concurrently throws
         // "A second operation was started on this context instance". The underlying calls are cached, so
         // the sequential cost is negligible.
-        var subjectsByResource = await _subjectResourceRepository.GetSubjectsForReferencedPartyResources(cancellationToken); // Janitor synced
-        var rolesAndAccessPackages = await _accessManagementMetadata.GetMetadata(cancellationToken); // Accessmanagement open metadata api
-        var resourceInformationByResource = await _resourceRegistry.GetResourceInformation(serviceResources, cancellationToken); // resource list from Resource registry, filtered on trigger filled service resource
-        var minimumAuthenticationLevels = await _minimumAuthenticationLevelResolver
-            .GetMinimumAuthenticationLevels(serviceResources, cancellationToken); // db lookup for get idporten auth levels required by the service resource
+        var subjectsByResource = await _subjectResourceRepository.GetSubjectsForReferencedPartyResources(ct);
+        var rolesAndAccessPackages = await _accessManagementMetadata.GetMetadata(ct);
+        var resourceInformationByResource = await _resourceRegistry.GetResourceInformation(serviceResources, ct);
+        var minimumAuthenticationLevels = await _minimumAuthenticationLevelResolver.GetMinimumAuthenticationLevels(
+            serviceResources,
+            ct
+        );
 
         var ownerOrgNumbers = resourceInformationByResource.Values
             .Select(x => x.OwnerOrgNumber)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase);
 
-        var ownerInfoByOrgNumber = await _serviceOwnerNameRegistry.GetServiceOwnerInfo(ownerOrgNumbers, cancellationToken); // get org names
+        var ownerInfoByOrgNumber = await _serviceOwnerNameRegistry.GetServiceOwnerInfo(ownerOrgNumbers, ct);
 
         return serviceResources
             .Select(resource => CreateItem(
-                serviceResource: resource,
-                subjectsByResource: subjectsByResource,
-                metadata: rolesAndAccessPackages,
-                resourceInformationByResource: resourceInformationByResource,
-                ownerInfoByOrgNumber: ownerInfoByOrgNumber,
-                minimumAuthenticationLevels: minimumAuthenticationLevels,
-                acceptedLanguages: acceptedLanguages))
+                resource,
+                subjectsByResource,
+                rolesAndAccessPackages,
+                resourceInformationByResource,
+                ownerInfoByOrgNumber,
+                minimumAuthenticationLevels,
+                acceptedLanguages))
             // No ordering applied here: BuildItems feeds the cached catalogue, and the query handlers order per
             // request (by the pruned, requested-language name) via ToSortedPrunedItems, so any order set here
             // would just be discarded.

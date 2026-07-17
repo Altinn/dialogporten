@@ -52,7 +52,7 @@ public class ServiceResourceMetadataCatalogueTests
         public Task<List<ServiceResourceMetadataItemDto>> BuildItems(
             IReadOnlyCollection<string> serviceResources,
             List<AcceptedLanguage>? acceptedLanguages,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             CallCount++;
             LastAcceptedLanguages = acceptedLanguages;

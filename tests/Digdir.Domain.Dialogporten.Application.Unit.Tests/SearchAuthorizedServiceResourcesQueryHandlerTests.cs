@@ -52,7 +52,6 @@ public class SearchAuthorizedServiceResourcesQueryHandlerTests
 
     private sealed class StubCatalogue(IReadOnlyList<string> resourceUrns) : IServiceResourceMetadataCatalogue
     {
-        public Task<HashSet<string>> GetKnownLanguages(CancellationToken _) => Task.FromResult(new HashSet<string>());
         public Task<IReadOnlyList<ServiceResourceMetadataItemDto>> GetCatalogueDtos(
             List<AcceptedLanguage>? lng,
             CancellationToken _

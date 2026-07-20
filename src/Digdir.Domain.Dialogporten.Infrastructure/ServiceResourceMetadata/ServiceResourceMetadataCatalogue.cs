@@ -82,7 +82,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
                         .Concat(d.AccessPackages.SelectMany(a => a.Name))
                         .Concat(d.Roles.SelectMany(r => r.Name))
                         .Select(x => x.LanguageCode))
-                    .ToHashSet();
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
             },
             token: ct);
     }

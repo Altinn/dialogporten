@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.118.7](https://github.com/Altinn/dialogporten/compare/v1.118.6...v1.118.7) (2026-07-20)
+
+
+### Miscellaneous Chores
+
+* bump Microsoft.DBforPostgreSQL API version to 2025-08-01 ([#4209](https://github.com/Altinn/dialogporten/issues/4209)) ([cbccc7e](https://github.com/Altinn/dialogporten/commit/cbccc7ea4a58bcf0e9483e9d342bf015024da501))
+* **deps:** update dependency messagepack to 3.1.8 ([#4223](https://github.com/Altinn/dialogporten/issues/4223)) ([b800164](https://github.com/Altinn/dialogporten/commit/b800164186c3c6d97c05290ed1361c57471ab1cb))
+* **deps:** update dependency npgsql.entityframeworkcore.postgresql to 10.0.3 ([#4224](https://github.com/Altinn/dialogporten/issues/4224)) ([d3e7114](https://github.com/Altinn/dialogporten/commit/d3e71149f7723986fbac4fabc92274f542d25427))
+
 ## [1.118.6](https://github.com/Altinn/dialogporten/compare/v1.118.5...v1.118.6) (2026-07-15)
 
 

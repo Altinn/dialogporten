@@ -122,7 +122,6 @@ public static class OpenApiDocumentExtensions
                           - Required scopes are listed per endpoint as Security Requirement Objects.
                           
                           Claims we look for:
-                          - pid (identifies the service owner on behalf of the end user)
                           - authorization_details (contains the system user ID)
                           - consumer (identifies the organization/service owner)
                           - email (identifies Email-users in the case the amr claim is Selfregistered-email)

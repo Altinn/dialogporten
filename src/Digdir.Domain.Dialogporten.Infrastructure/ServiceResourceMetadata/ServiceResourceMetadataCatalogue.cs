@@ -73,9 +73,9 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
     {
         return await _cache.GetOrSetAsync<HashSet<string>>(
             CacheKeyKnownLanguages,
-            async (_, ct) =>
+            async (_, cancellationToken) =>
             {
-                var dtos = await GetCatalogueDtos(null, ct);
+                var dtos = await GetCatalogueDtos(null, cancellationToken);
                 return dtos
                     .SelectMany(d => d.ServiceResource.Name
                         .Concat(d.ServiceOwner.Name)

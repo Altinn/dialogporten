@@ -20,7 +20,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
     private const string CacheKeyCatalogue = "sr-catalogue";
 
     private static readonly Func<List<AcceptedLanguage>, string> CacheKeyCatalogueByLang =
-        lng => $"full-catalogue-lang-{ToCacheString(lng)}";
+        lng => $"sr-catalogue-by-lang-{ToCacheString(lng)}";
 
     private static string ToCacheString(List<AcceptedLanguage> lng) =>
         string.Join(',', lng.OrderByDescending(x => x.Weight).Select(x => x.LanguageCode));

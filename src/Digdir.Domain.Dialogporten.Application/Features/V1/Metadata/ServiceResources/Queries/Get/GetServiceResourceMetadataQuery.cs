@@ -1,5 +1,4 @@
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using MediatR;
@@ -13,26 +12,23 @@ public sealed class GetServiceResourceMetadataQuery : IRequest<GetServiceResourc
 
 internal sealed class GetServiceResourceMetadataQueryHandler : IRequestHandler<GetServiceResourceMetadataQuery, GetServiceResourceMetadataDto>
 {
-    private readonly IPartyResourceReferenceRepository _partyResourceReferenceRepository;
-    private readonly IServiceResourceMetadataItemBuilder _itemBuilder;
+    private readonly IServiceResourceMetadataCatalogue _catalogue;
 
-    public GetServiceResourceMetadataQueryHandler(
-        IPartyResourceReferenceRepository partyResourceReferenceRepository,
-        IServiceResourceMetadataItemBuilder itemBuilder)
+    public GetServiceResourceMetadataQueryHandler(IServiceResourceMetadataCatalogue catalogue)
     {
-        ArgumentNullException.ThrowIfNull(partyResourceReferenceRepository);
-        ArgumentNullException.ThrowIfNull(itemBuilder);
-
-        _partyResourceReferenceRepository = partyResourceReferenceRepository;
-        _itemBuilder = itemBuilder;
+        ArgumentNullException.ThrowIfNull(catalogue);
+        _catalogue = catalogue;
     }
 
     public async Task<GetServiceResourceMetadataDto> Handle(
         GetServiceResourceMetadataQuery request,
         CancellationToken cancellationToken)
     {
-        var resources = await _partyResourceReferenceRepository.GetReferencedResources(cancellationToken);
-        var items = await _itemBuilder.BuildItems(resources, request.AcceptedLanguages, cancellationToken);
+        // Full public catalogue: every referenced resource, from the shared cached catalogue, with localizations
+        // pruned into fresh per-request copies and re-sorted by the pruned (requested-language) name
+        // (see ToSortedPrunedItems).
+        var entries = await _catalogue.GetEntries(cancellationToken);
+        var items = entries.ToSortedPrunedItems(request.AcceptedLanguages);
         return new GetServiceResourceMetadataDto { Items = items };
     }
 }

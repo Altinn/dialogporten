@@ -20,7 +20,8 @@ internal static class DialogportenServiceCollectionExtensions
         this IServiceCollection services,
         DialogportenSettings settings,
         string clientDefinitionKey,
-        Assembly clientAssembly)
+        Assembly clientAssembly,
+        Action<IHttpClientBuilder>? configureAuthentication = null)
     {
         if (!DialogportenSettings.Validate())
         {
@@ -29,7 +30,14 @@ internal static class DialogportenServiceCollectionExtensions
 
         services.TryAddSingleton<IOptions<DialogportenSettings>>(new OptionsWrapper<DialogportenSettings>(settings));
 
-        services.RegisterMaskinportenClientDefinition<SettingsJwkClientDefinition>(clientDefinitionKey, settings.Maskinporten);
+        // When the caller supplies their own authentication setup we do not wire up Maskinporten at all;
+        // the caller is responsible for attaching the desired auth (e.g. Maskinporten) to each Refit client.
+        if (configureAuthentication is null)
+        {
+            services.RegisterMaskinportenClientDefinition<SettingsJwkClientDefinition>(clientDefinitionKey, settings.Maskinporten
+                ?? throw new InvalidOperationException(
+                    $"{nameof(DialogportenSettings)}.{nameof(DialogportenSettings.Maskinporten)} must be set when no authentication is configured."));
+        }
 
         var refitClients = clientAssembly.GetTypes()
             .Where(x =>
@@ -45,13 +53,21 @@ internal static class DialogportenServiceCollectionExtensions
 
         foreach (var refitClient in refitClients)
         {
-            services
+            var clientBuilder = services
                 .AddRefitClient(refitClient, new RefitSettings
                 {
                     ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
                 })
-                .ConfigureHttpClient(c => c.BaseAddress = new Uri(settings.BaseUri))
-                .AddMaskinportenHttpMessageHandler<SettingsJwkClientDefinition>(clientDefinitionKey);
+                .ConfigureHttpClient(c => c.BaseAddress = new Uri(settings.BaseUri));
+
+            if (configureAuthentication is null)
+            {
+                clientBuilder.AddMaskinportenHttpMessageHandler<SettingsJwkClientDefinition>(clientDefinitionKey);
+            }
+            else
+            {
+                configureAuthentication(clientBuilder);
+            }
         }
 
         services
@@ -71,11 +87,12 @@ internal static class DialogportenServiceCollectionExtensions
         this IServiceCollection services,
         DialogportenSettings settings,
         string clientDefinitionKey,
-        Assembly clientAssembly)
+        Assembly clientAssembly,
+        Action<IHttpClientBuilder>? configureAuthentication = null)
         where TRootApi : class
         where TRootApiImplementation : class, TRootApi
     {
-        services.AddDialogportenClientCore(settings, clientDefinitionKey, clientAssembly);
+        services.AddDialogportenClientCore(settings, clientDefinitionKey, clientAssembly, configureAuthentication);
         services.TryAddTransient<TRootApi, TRootApiImplementation>();
         return services;
     }

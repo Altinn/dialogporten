@@ -229,9 +229,9 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         await SeedDialogs(dialogs, indexDialogs: true);
         ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
         {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal)
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>>(StringComparer.Ordinal)
             {
-                [parties[0]] = [services[0]]
+                [parties[0]] = new HashSet<string> { services[0] }
             }
         });
 
@@ -286,7 +286,7 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         {
             ResourcesByParties = authorizedParties.ToDictionary(
                 x => x,
-                _ => services.ToHashSet(StringComparer.Ordinal),
+                _ => (IReadOnlySet<string>)services.ToHashSet(StringComparer.Ordinal),
                 StringComparer.Ordinal),
             DialogIds = [delegatedMatch.Id]
         });
@@ -377,9 +377,9 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         await SeedDialogs(dialogs, indexDialogs: true);
         ConfigureSearchAuthorization(new DialogSearchAuthorizationResult
         {
-            ResourcesByParties = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal)
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>>(StringComparer.Ordinal)
             {
-                [parties[0]] = [services[0]]
+                [parties[0]] = new HashSet<string> { services[0] }
             },
             DialogIds = [delegatedDialog.Id]
         });
@@ -479,7 +479,7 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         {
             ResourcesByParties = authorizedParties.ToDictionary(
                 x => x,
-                _ => services.ToHashSet(StringComparer.Ordinal),
+                _ => (IReadOnlySet<string>)services.ToHashSet(StringComparer.Ordinal),
                 StringComparer.Ordinal),
             DialogIds = delegatedDialogs.Select(x => x.Id).ToList()
         });
@@ -515,7 +515,7 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         {
             ResourcesByParties = authorizedParties.ToDictionary(
                 x => x,
-                _ => services.ToHashSet(StringComparer.Ordinal),
+                _ => (IReadOnlySet<string>)services.ToHashSet(StringComparer.Ordinal),
                 StringComparer.Ordinal),
             DialogIds = delegatedDialogs.Select(x => x.Id).ToList()
         });
@@ -670,7 +670,7 @@ public sealed class SearchStrategyEquivalenceTests(DialogApplication application
         {
             ResourcesByParties = parties.ToDictionary(
                 x => x,
-                _ => services.ToHashSet(StringComparer.Ordinal),
+                _ => (IReadOnlySet<string>)services.ToHashSet(StringComparer.Ordinal),
                 StringComparer.Ordinal)
         };
 

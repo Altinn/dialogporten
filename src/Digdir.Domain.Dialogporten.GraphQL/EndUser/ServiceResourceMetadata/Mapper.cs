@@ -13,6 +13,8 @@ internal static class ServiceResourceMetadataMapExtensions
     {
         public ServiceResourceMetadata ToServiceResourceMetadata() => new()
         {
+            // The public catalogue is requested, not a fallback.
+            IsFullCatalogueFallback = null,
             Items = source.Items.Select(MapItem).ToList()
         };
     }
@@ -21,6 +23,7 @@ internal static class ServiceResourceMetadataMapExtensions
     {
         public ServiceResourceMetadata ToServiceResourceMetadata() => new()
         {
+            IsFullCatalogueFallback = source.IsFullCatalogueFallback,
             Items = source.Items.Select(MapItem).ToList()
         };
     }

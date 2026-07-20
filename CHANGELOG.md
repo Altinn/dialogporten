@@ -1,5 +1,78 @@
 # Changelog
 
+## [1.118.6](https://github.com/Altinn/dialogporten/compare/v1.118.5...v1.118.6) (2026-07-15)
+
+
+### Bug Fixes
+
+* make resource name bicep export pure ([#4214](https://github.com/Altinn/dialogporten/issues/4214)) ([1cf2ae3](https://github.com/Altinn/dialogporten/commit/1cf2ae3edaea0337ba5710d8c5cbab57f85f0a09))
+* throw unreachableexception on unknown party identifier ([#4204](https://github.com/Altinn/dialogporten/issues/4204)) ([f875f4d](https://github.com/Altinn/dialogporten/commit/f875f4da975f662d5b18af4a201857ebc85e0308))
+
+
+### Miscellaneous Chores
+
+* **bicep:** bump Microsoft.Network resources to 2025-07-01 API version ([#4205](https://github.com/Altinn/dialogporten/issues/4205)) ([71af5dc](https://github.com/Altinn/dialogporten/commit/71af5dc1822deed26d07953c68b672ff49c0fbac))
+* **deps:** update actions/setup-dotnet action to v5.4.0 ([#4212](https://github.com/Altinn/dialogporten/issues/4212)) ([ac3f286](https://github.com/Altinn/dialogporten/commit/ac3f286f8d971077021357512f0e446b09559e47))
+* **deps:** update dependency fastendpoints.swagger to 8.2.0 ([#4213](https://github.com/Altinn/dialogporten/issues/4213)) ([34524a6](https://github.com/Altinn/dialogporten/commit/34524a6262a1dbfa743450e1c456816cc01fd3cb))
+* **deps:** update dependency scalar.aspnetcore to 2.16.10 ([#4207](https://github.com/Altinn/dialogporten/issues/4207)) ([8a86157](https://github.com/Altinn/dialogporten/commit/8a86157df31ae9f4d7d4d3274923b356212f0404))
+* **deps:** update dependency scalar.aspnetcore to 2.16.6 ([#4197](https://github.com/Altinn/dialogporten/issues/4197)) ([5b0fc1b](https://github.com/Altinn/dialogporten/commit/5b0fc1b6cb1729fbdc3b23bbd0f460278f611451))
+* **deps:** update dependency testcontainers.postgresql to 4.13.0 ([#4218](https://github.com/Altinn/dialogporten/issues/4218)) ([e0508fd](https://github.com/Altinn/dialogporten/commit/e0508fda62d0eb68be47548d0f4415c0bdb3c804))
+* **deps:** update docker/build-push-action action to v7.3.0 ([#4219](https://github.com/Altinn/dialogporten/issues/4219)) ([76739f4](https://github.com/Altinn/dialogporten/commit/76739f440d9ab4bfba22e724b4cafb92fa4486d2))
+* **deps:** update docker/login-action action to v4.4.0 ([#4220](https://github.com/Altinn/dialogporten/issues/4220)) ([d335826](https://github.com/Altinn/dialogporten/commit/d335826700d52167ad0e6a83b1d399cd401d858e))
+* **deps:** update docker/metadata-action action to v6.2.0 ([#4221](https://github.com/Altinn/dialogporten/issues/4221)) ([da97371](https://github.com/Altinn/dialogporten/commit/da973713e9745ff2422523f5c128894024f8f3bf))
+* **deps:** update grafana/grafana docker tag to v12.4.3 ([#4198](https://github.com/Altinn/dialogporten/issues/4198)) ([00d7d51](https://github.com/Altinn/dialogporten/commit/00d7d51a28fa3313a46f3242d3f336e42bf75de2))
+* update azure cli to 2.88.0 ([#4216](https://github.com/Altinn/dialogporten/issues/4216)) ([2d3c5fc](https://github.com/Altinn/dialogporten/commit/2d3c5fc6bb1b07f9a49490da2f4dd436ed9029d1))
+
+## [1.118.5](https://github.com/Altinn/dialogporten/compare/v1.118.4...v1.118.5) (2026-07-06)
+
+
+### Bug Fixes
+
+* Dont lookup party names when getting/searching seen logs ([#4192](https://github.com/Altinn/dialogporten/issues/4192)) ([35e7d9c](https://github.com/Altinn/dialogporten/commit/35e7d9cdec233f6e98693ec8cecf4057e9ea4046))
+* Skip cache for FallbackSystemUsername ([#4195](https://github.com/Altinn/dialogporten/issues/4195)) ([e4557e8](https://github.com/Altinn/dialogporten/commit/e4557e8bf17e1b7ce4ee0311ebd6ca882aaf5582))
+
+
+### Miscellaneous Chores
+
+* **deps:** update grafana/loki docker tag to v3.7.3 ([#4199](https://github.com/Altinn/dialogporten/issues/4199)) ([5a88402](https://github.com/Altinn/dialogporten/commit/5a88402dc82d2eb7175a9461c67a0a204fbfff78))
+* **deps:** update nginx docker tag to v1.31.2 ([#4200](https://github.com/Altinn/dialogporten/issues/4200)) ([b7a000b](https://github.com/Altinn/dialogporten/commit/b7a000bf98012578c6a25648c45f6a98db1997a5))
+
+## [1.118.4](https://github.com/Altinn/dialogporten/compare/v1.118.3...v1.118.4) (2026-07-03)
+
+
+### Bug Fixes
+
+* Add exponential backoff to system name lookup ([#4190](https://github.com/Altinn/dialogporten/issues/4190)) ([6733f07](https://github.com/Altinn/dialogporten/commit/6733f07945b66a5c6eebb23dd8b8046d6cb3d559))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency azure.storage.blobs to 12.29.1 ([#4184](https://github.com/Altinn/dialogporten/issues/4184)) ([93dec3d](https://github.com/Altinn/dialogporten/commit/93dec3d50c75c5bb3ee7389a71c6d71667cc6d01))
+* **deps:** update dependency scalar.aspnetcore to 2.16.5 ([#4185](https://github.com/Altinn/dialogporten/issues/4185)) ([a4dc22d](https://github.com/Altinn/dialogporten/commit/a4dc22d4b897b8a650a733a141bcb72901f64e44))
+* remove AutoMapper from CreateDialog ([#4176](https://github.com/Altinn/dialogporten/issues/4176)) ([7d5fd17](https://github.com/Altinn/dialogporten/commit/7d5fd17815331cb42d081439987f294e3d573951)), closes [#967](https://github.com/Altinn/dialogporten/issues/967)
+
+## [1.118.3](https://github.com/Altinn/dialogporten/compare/v1.118.2...v1.118.3) (2026-06-28)
+
+
+### Bug Fixes
+
+* **perf:** improve perf, add max party count bounding ([#4173](https://github.com/Altinn/dialogporten/issues/4173)) ([16d6946](https://github.com/Altinn/dialogporten/commit/16d69462652bbace675b06ff8c1ea9dc116d2182))
+
+
+### Miscellaneous Chores
+
+* bump Azure Storage Bicep API versions ([#4169](https://github.com/Altinn/dialogporten/issues/4169)) ([a1eec3f](https://github.com/Altinn/dialogporten/commit/a1eec3fb415f682c539d3abe9fe99cdfa28826c3))
+* bump OperationalInsights workspace API version ([#4175](https://github.com/Altinn/dialogporten/issues/4175)) ([0b54bec](https://github.com/Altinn/dialogporten/commit/0b54bece95ec13e7100f6eaf439405d49d728793))
+* **deps:** update dependency scalar.aspnetcore to 2.16.4 ([#4178](https://github.com/Altinn/dialogporten/issues/4178)) ([2dad610](https://github.com/Altinn/dialogporten/commit/2dad6100e4b1d48b1dddfb5f60f965ad07566ca1))
+* **deps:** update dependency verify.xunitv3 to 31.20.0 ([#4179](https://github.com/Altinn/dialogporten/issues/4179)) ([a8b13b1](https://github.com/Altinn/dialogporten/commit/a8b13b14d6e4447955e96c35331f1f5c7a0e9a56))
+* **deps:** update dotnet monorepo ([#4177](https://github.com/Altinn/dialogporten/issues/4177)) ([f924c39](https://github.com/Altinn/dialogporten/commit/f924c3909e23df30baad635e4189f959557a47bc))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.24.0 ([#4164](https://github.com/Altinn/dialogporten/issues/4164)) ([5f58121](https://github.com/Altinn/dialogporten/commit/5f58121ca5dfd42cd84767577bd092ffdfddcb83))
+* **deps:** update hotchocolate dependencies to 16.1.4 ([#4162](https://github.com/Altinn/dialogporten/issues/4162)) ([cad141a](https://github.com/Altinn/dialogporten/commit/cad141ad46782aa00b521b91b4315efc861bb183))
+* **deps:** update hotchocolate dependencies to 16.3.0 ([#4180](https://github.com/Altinn/dialogporten/issues/4180)) ([b2eee20](https://github.com/Altinn/dialogporten/commit/b2eee20df3781b7195254ea6e1311e7305a757a6))
+* **deps:** update prom/prometheus docker tag to v3.12.0 ([#4165](https://github.com/Altinn/dialogporten/issues/4165)) ([7c2404e](https://github.com/Altinn/dialogporten/commit/7c2404e8bdac8ac1a7b738b011d1b3f2a4710f6d))
+* **deps:** update serilog dependencies ([#4163](https://github.com/Altinn/dialogporten/issues/4163)) ([33c8cea](https://github.com/Altinn/dialogporten/commit/33c8cea74dd5ea7c11022ccd58b764549cd481c1))
+* remove AutoMapper from ServiceOwner CreateTransmission ([#4168](https://github.com/Altinn/dialogporten/issues/4168)) ([4edd3cb](https://github.com/Altinn/dialogporten/commit/4edd3cb2f0a7f28dea507e1c750d18db16a36297)), closes [#967](https://github.com/Altinn/dialogporten/issues/967)
+
 ## [1.118.2](https://github.com/Altinn/dialogporten/compare/v1.118.1...v1.118.2) (2026-06-25)
 
 

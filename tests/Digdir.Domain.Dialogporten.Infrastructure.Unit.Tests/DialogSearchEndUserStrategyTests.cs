@@ -149,7 +149,7 @@ public sealed class DialogSearchEndUserStrategyTests
                 ResourcesByParties = Enumerable.Range(0, partyCount)
                     .ToDictionary(
                         x => $"urn:altinn:organization:identifier-no:{x:D9}",
-                        _ => services,
+                        _ => (IReadOnlySet<string>)services,
                         StringComparer.Ordinal)
             });
     }

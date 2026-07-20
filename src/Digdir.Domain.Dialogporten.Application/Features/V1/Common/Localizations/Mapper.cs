@@ -37,6 +37,23 @@ internal static class LocalizationSetMapExtensions
             set?.Localizations.Select(x => x.ToDto()).ToList();
     }
 
+    extension(IEnumerable<LocalizationDto>? source)
+    {
+        internal TLocalizationSet? ToLocalizationSet<TLocalizationSet>(TLocalizationSet? destination = null)
+            where TLocalizationSet : LocalizationSet, new()
+        {
+            var localizations = source as ICollection<LocalizationDto> ?? source?.ToList();
+            if (localizations is null || localizations.Count == 0)
+            {
+                return null;
+            }
+
+            destination ??= new TLocalizationSet();
+            destination.Localizations.MergeFrom(localizations);
+            return destination;
+        }
+    }
+
     extension(ICollection<Localization> localizations)
     {
         internal void MergeFrom(ICollection<LocalizationDto> dtos) =>

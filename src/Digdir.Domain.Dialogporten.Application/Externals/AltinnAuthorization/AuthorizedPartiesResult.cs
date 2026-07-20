@@ -12,22 +12,28 @@ public sealed class AuthorizedPartiesResult
     /// Limitation: Only considers the first level of SubParties
     /// </summary>
     /// <returns>A new instance with all depth 1 SubParties flattened to AuthorizedParties</returns>
+    /// <summary>
+    /// The number of parties <see cref="Flatten"/> would produce: top-level parties plus their depth-1
+    /// sub-parties (the only level <see cref="Flatten"/> promotes). Use this when only the count is needed, to
+    /// avoid allocating the flattened list, and to keep the depth-1 rule in one place.
+    /// </summary>
+    public int FlattenedCount()
+    {
+        var count = AuthorizedParties.Count;
+        foreach (var party in AuthorizedParties)
+        {
+            count += party.SubParties?.Count ?? 0;
+        }
+
+        return count;
+    }
+
     public AuthorizedPartiesResult Flatten()
     {
         var topLevelCount = AuthorizedParties.Count;
 
-        var totalCapacity = topLevelCount;
-        for (var i = 0; i < topLevelCount; i++)
-        {
-            var party = AuthorizedParties[i];
-            if (party.SubParties != null)
-            {
-                totalCapacity += party.SubParties.Count;
-            }
-        }
-
         // Preallocate the exact size needed
-        var flattenedList = new List<AuthorizedParty>(totalCapacity);
+        var flattenedList = new List<AuthorizedParty>(FlattenedCount());
 
         for (var i = 0; i < topLevelCount; i++)
         {

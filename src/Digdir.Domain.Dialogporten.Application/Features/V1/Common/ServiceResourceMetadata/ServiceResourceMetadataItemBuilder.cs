@@ -8,10 +8,14 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 
-internal interface IServiceResourceMetadataItemBuilder
+public interface IServiceResourceMetadataItemBuilder
 {
     /// <summary>
-    /// Builds enriched service resource metadata items for the given (full URN) resources, ordered by name.
+    /// Builds enriched service resource metadata items for the given (full URN) resources. The items are not
+    /// ordered here; display ordering (and per-request language pruning) is applied by the query handlers via
+    /// <c>ServiceResourceMetadataPruneExtensions.ToSortedPrunedItems</c>. Pass <paramref name="acceptedLanguages"/>
+    /// = null to build the full, all-language items (the form cached by
+    /// <see cref="IServiceResourceMetadataCatalogue"/>); pruning copies, so the shared cached items are never mutated.
     /// </summary>
     Task<List<ServiceResourceMetadataItemDto>> BuildItems(
         IReadOnlyCollection<string> serviceResources,
@@ -87,8 +91,9 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
                 ownerInfoByOrgNumber,
                 minimumAuthenticationLevels,
                 acceptedLanguages))
-            .OrderBy(x => GetSortName(x.ServiceResource.Name), StringComparer.CurrentCultureIgnoreCase)
-            .ThenBy(x => x.ServiceResource.Id, StringComparer.OrdinalIgnoreCase)
+            // No ordering applied here: BuildItems feeds the cached catalogue, and the query handlers order per
+            // request (by the pruned, requested-language name) via ToSortedPrunedItems, so any order set here
+            // would just be discarded.
             .ToList();
     }
 
@@ -129,7 +134,7 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
                 Name = x.Name.Pruned(acceptedLanguages),
                 x.Links
             })
-            .OrderBy(x => GetSortName(x.Name), StringComparer.CurrentCultureIgnoreCase)
+            // Roles/access packages are (re)ordered per request by PrunedCopy, so no ordering here.
             .Select(x => new ServiceResourceMetadataRoleDto
             {
                 Urn = x.Urn,
@@ -149,7 +154,6 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
                 Name = x.Name.Pruned(acceptedLanguages),
                 x.Links
             })
-            .OrderBy(x => GetSortName(x.Name), StringComparer.CurrentCultureIgnoreCase)
             .Select(x => new ServiceResourceMetadataAccessPackageDto
             {
                 Urn = x.Urn,
@@ -210,10 +214,4 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
                 }
             ];
     }
-
-    private static string GetSortName(List<LocalizationDto> localizations) =>
-        localizations.FirstOrDefault(x => x.LanguageCode is "nb")?.Value
-        ?? localizations.FirstOrDefault(x => x.LanguageCode is "en")?.Value
-        ?? localizations.FirstOrDefault()?.Value
-        ?? string.Empty;
 }

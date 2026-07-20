@@ -261,10 +261,10 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                     x.ConfigureGetAuthorizedResourcesForSearch(
                         new DialogSearchAuthorizationResult
                         {
-                            ResourcesByParties = new Dictionary<string, HashSet<string>>
+                            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>>
                             {
                                 // Default integration test user party
-                                { TestUsers.DefaultParty, [DummyService] }
+                                { TestUsers.DefaultParty, new HashSet<string> { DummyService } }
                             },
                             // Delegated dialog
                             DialogIds = [delegatedDialogId]

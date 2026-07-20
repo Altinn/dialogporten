@@ -170,5 +170,6 @@ public class SearchAuthorizedServiceResourcesTests(DialogApplication application
             x.ConfigureGetAuthorizedResourcesForSearch(new DialogSearchAuthorizationResult
             {
                 ResourcesByParties = resourcesByParties
+                    .ToDictionary(kv => kv.Key, kv => (IReadOnlySet<string>)kv.Value)
             }));
 }

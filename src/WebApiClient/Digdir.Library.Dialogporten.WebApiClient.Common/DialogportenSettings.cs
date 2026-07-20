@@ -19,7 +19,16 @@ public sealed class DialogportenSettings
     /// </remarks>
     public bool ThrowOnPublicKeyFetchInit { get; set; } = true;
 
-    public MaskinportenSettings Maskinporten { get; set; } = null!;
+    /// <summary>
+    /// Maskinporten settings used to authenticate requests to Dialogporten.
+    /// </summary>
+    /// <remarks>
+    /// Only required when using the built-in Maskinporten authentication. When registering the client with a
+    /// custom authentication setup (see the <c>AddDialogportenClient</c> overload that accepts an
+    /// <see cref="Microsoft.Extensions.DependencyInjection.IHttpClientBuilder"/> configuration delegate),
+    /// this can be left unset and the caller is responsible for attaching authentication.
+    /// </remarks>
+    public MaskinportenSettings? Maskinporten { get; set; }
 
     internal static bool Validate() => true;
 }

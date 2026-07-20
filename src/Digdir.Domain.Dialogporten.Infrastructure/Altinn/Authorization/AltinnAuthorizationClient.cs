@@ -118,6 +118,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         List<string> constraintParties,
         List<string> serviceResources,
         bool includeDialogIds = true,
+        int? minResourcesPruningThreshold = null,
         CancellationToken cancellationToken = default)
     {
         var claims = _user.GetPrincipal().Claims.ToList();
@@ -130,7 +131,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
         // We don't cache at this level, as the principal information is received from GetAuthorizedParties,
         // which is already cached
-        return await PerformDialogSearchAuthorization(request, includeDialogIds, cancellationToken);
+        return await PerformDialogSearchAuthorization(request, includeDialogIds, minResourcesPruningThreshold, cancellationToken);
     }
 
     public async Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,
@@ -240,7 +241,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return result;
     }
 
-    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, bool includeDialogIds, CancellationToken cancellationToken)
+    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, bool includeDialogIds, int? minResourcesPruningThreshold, CancellationToken cancellationToken)
     {
         var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifierOrThrow();
 
@@ -268,10 +269,11 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         // This is a functional requirement (not just a search optimization): the authorized service
         // resources API relies on this pipeline to return a subset of the referenced resource catalogue.
         var partyResourcePruningLimits = _applicationSettings.CurrentValue.Limits.PartyResourcePruning;
+        var pruningThreshold = minResourcesPruningThreshold ?? partyResourcePruningLimits.MinResourcesPruningThreshold;
         await AuthorizationHelper.PruneUnreferencedResources(
             result,
             _partyResourceReferenceRepository,
-            partyResourcePruningLimits.MinResourcesPruningThreshold,
+            pruningThreshold,
             cancellationToken);
 
         if (includeDialogIds)

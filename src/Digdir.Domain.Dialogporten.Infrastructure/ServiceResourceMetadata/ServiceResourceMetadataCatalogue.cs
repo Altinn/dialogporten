@@ -23,7 +23,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
         lng => $"full-catalogue-lang-{ToCacheString(lng)}";
 
     private static string ToCacheString(List<AcceptedLanguage> lng) =>
-        string.Join(',', lng.OrderByDescending(x => x.Weight));
+        string.Join(',', lng.OrderByDescending(x => x.Weight).Select(x => x.LanguageCode));
 
 
     private readonly IFusionCache _cache;

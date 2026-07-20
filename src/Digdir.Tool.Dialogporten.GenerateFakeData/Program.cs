@@ -290,7 +290,7 @@ public class Program
             ? throw new FileNotFoundException($"{options.ResourceListPath} was not found")
             : File.ReadLines(options.ResourceListPath).Distinct().ToList();
 
-        return _resourceList.Count == 0
+        return resources.Count == 0
             ? throw new InvalidOperationException(
                 $"{options.ResourceListPath} needs to contain newline separated resources (eg. urn:altinn:resource:foobar)")
             : resources;

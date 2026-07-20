@@ -9,7 +9,7 @@
       "workingDirectory": "$(SolutionDir)",
       "commandLineArgs": "-c 500000 -p ./src/Digdir.Tool.Dialogporten.GenerateFakeData/parties.txt -z -r ./src/Digdir.Tool.Dialogporten.GenerateFakeData/resources.txt -a"
     },
-    "Post dialogs. 1 of each resource": {
+    "Post dialogs to all resources": {
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",

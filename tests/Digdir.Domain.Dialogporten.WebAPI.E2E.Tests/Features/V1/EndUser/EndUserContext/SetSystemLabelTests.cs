@@ -153,6 +153,9 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]
@@ -185,6 +188,9 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]
@@ -202,6 +208,9 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]

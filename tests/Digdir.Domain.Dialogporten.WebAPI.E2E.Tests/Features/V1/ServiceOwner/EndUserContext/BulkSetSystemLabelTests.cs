@@ -82,7 +82,6 @@ public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<Web
 
         var getDialog1 = Fixture.ServiceownerApi.GetDialog(createDialog1.Result);
         var getDialog2 = Fixture.ServiceownerApi.GetDialog(createDialog2.Result);
-        Fixture.UseEndUserTokenOverrides(ssn: E2EConstants.AlternateEndUserSsn);
         var getDialog3 = Fixture.ServiceownerApi.GetDialog(createForbiddenDialog.Result);
         await Task.WhenAll(getDialog1, getDialog2, getDialog3);
 

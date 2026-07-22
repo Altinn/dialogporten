@@ -93,7 +93,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             // We have already checked that this org has access to the dialog. Now check the end user:
             if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, cancellationToken: cancellationToken))
             {
-                return new Forbidden("Forbidden");
+                return new EntityNotFound<DialogEntity>(request.DialogId);
             }
         }
 

@@ -24,7 +24,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IFea
 public sealed record SetSystemLabelSuccess(Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, Forbidden, EntityDeleted, DomainError, ValidationError, ConcurrencyError, Conflict>;
+public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLabelCommand, SetSystemLabelResult>
 {
@@ -69,7 +69,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
 
         if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, cancellationToken))
         {
-            return new Forbidden("Forbidden");
+            return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
         if (request.IfMatchEndUserContextRevision is { } revision && revision != dialog.EndUserContext.Revision)

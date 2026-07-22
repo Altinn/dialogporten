@@ -88,7 +88,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     }
 
     [E2EFact]
-    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Dialog_Has_Unauthorized_Party()
+    public async Task Should_Return_404_For_Unauthorized_Dialog_When_Dialog_Has_Unauthorized_Party()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
@@ -102,14 +102,14 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 request => request.AddLabels = [Archive]);
 
         // Assert
-        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
         dialog.Should().NotBeNull();
         dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]
-    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Trying_To_Modify_With_Another_Party()
+    public async Task Should_Return_404_For_Unauthorized_Dialog_When_Trying_To_Modify_With_Another_Party()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
@@ -123,7 +123,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             );
 
         // Assert
-        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NotFound);
         var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
         dialog.Should().NotBeNull();
         dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);

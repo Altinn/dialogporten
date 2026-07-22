@@ -23,7 +23,7 @@ public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResul
 public sealed record BulkSetSystemLabelSuccess;
 
 [GenerateOneOf]
-public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
+public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, EntityNotFound, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSetSystemLabelCommand, BulkSetSystemLabelResult>
 {
@@ -74,22 +74,29 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         }
         else
         {
-            var authorizedResources =
-                await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken: cancellationToken);
+            var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
+                constraintParties: [],
+                constraintServiceResources: [],
+                cancellationToken: cancellationToken
+            );
+            var org = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
 
             dialogs = await _db.Dialogs
                 .PrefilterAuthorizedDialogs(authorizedResources)
                 .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
+                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id) && x.Org == org)
                 .ToListAsync(cancellationToken);
         }
 
-        if (dialogs.Count != request.Dto.Dialogs.Count)
+        var notFound = request.Dto.Dialogs
+            .Select(x => x.DialogId)
+            .Except(dialogs.Select(d => d.Id))
+            .ToList();
+
+        if (notFound.Count > 0)
         {
-            var found = dialogs.Select(x => x.Id).ToHashSet();
-            var missing = request.Dto.Dialogs.Select(d => d.DialogId).Where(id => !found.Contains(id)).ToList();
-            return new Forbidden().WithInvalidDialogIds(missing);
+            return new EntityNotFound<DialogEntity>(notFound);
         }
 
         if (RevisionsHasMismatch(request, dialogs))

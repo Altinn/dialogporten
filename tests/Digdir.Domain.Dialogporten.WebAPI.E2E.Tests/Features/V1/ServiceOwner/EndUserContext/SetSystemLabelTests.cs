@@ -1,9 +1,11 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using static Altinn.ApiClients.Dialogporten.Features.V1.DialogEndUserContextsEntities_SystemLabel;
 using ServiceOwnerSystemLabel = Altinn.ApiClients.Dialogporten.Features.V1.DialogEndUserContextsEntities_SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.EndUserContext;
@@ -29,7 +31,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                         new() { DialogId = dialogId1 },
                         new() { DialogId = dialogId2 }
                     ],
-                    AddLabels = [ServiceOwnerSystemLabel.Bin]
+                    AddLabels = [Bin]
                 },
                 TestContext.Current.CancellationToken);
 
@@ -45,8 +47,8 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var dialog1 = dialog1Response.Content ?? throw new InvalidOperationException("Dialog content was null.");
         var dialog2 = dialog2Response.Content ?? throw new InvalidOperationException("Dialog content was null.");
 
-        dialog1.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
-        dialog2.EndUserContext.SystemLabels.Should().Contain(ServiceOwnerSystemLabel.Bin);
+        dialog1.EndUserContext.SystemLabels.Should().Contain(Bin);
+        dialog2.EndUserContext.SystemLabels.Should().Contain(Bin);
     }
 
     [E2EFact]
@@ -60,11 +62,14 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin],
+                request => request.AddLabels = [Bin],
                 ifMatch: Guid.NewGuid());
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
+        var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
+        dialog.Should().NotBeNull();
+        dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]
@@ -75,7 +80,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabel(
                 Guid.CreateVersion7(),
                 E2EConstants.DefaultParty,
-                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]
+                request => request.AddLabels = [Bin]
             );
 
         // Assert
@@ -94,14 +99,17 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                request => request.AddLabels = [ServiceOwnerSystemLabel.Archive]);
+                request => request.AddLabels = [Archive]);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
+        dialog.Should().NotBeNull();
+        dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]
-    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Trying_To_Modify_Another_Party()
+    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Trying_To_Modify_With_Another_Party()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
@@ -111,11 +119,14 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabel(
                 dialogId,
                 E2EConstants.AlternateParty,
-                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]
+                request => request.AddLabels = [Bin]
             );
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
+        dialog.Should().NotBeNull();
+        dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]
@@ -130,11 +141,15 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             .SetSystemLabel(
                 dialogId,
                 E2EConstants.DefaultParty,
-                request => request.AddLabels = [ServiceOwnerSystemLabel.Bin]
+                request => request.AddLabels = [Bin]
             );
+        Fixture.UseServiceOwnerTokenOverrides();
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
+        dialog.Should().NotBeNull();
+        dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2ETheory]
@@ -147,6 +162,43 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 dialog.SystemLabel = scenario.InitialLabel);
 
         // Act
+        var response = await Fixture.ServiceownerApi
+            .SetSystemLabel(
+                dialogId,
+                E2EConstants.DefaultParty,
+                request =>
+                {
+                    request.AddLabels = scenario.LabelsToAdd;
+                    request.RemoveLabels = scenario.LabelsToRemove;
+                });
+
+        var dialogResponse = await Fixture.ServiceownerApi
+            .GetDialog(dialogId, E2EConstants.DefaultParty);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+        dialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+
+        // The last label is selected when multiple of Default/Bin/Archive is supplied.
+        // Removing Archive or Bin resets the label to Default unless another one is added.
+        dialogResponse.Content!.EndUserContext.SystemLabels
+            .Should().ContainSingle().Which
+            .Should().Be(scenario.ExpectedLabel);
+    }
+
+    [E2ETheory]
+    [ClassData(typeof(MultipleSystemLabelTestData))]
+    public async Task Should_Apply_SystemLabel_Changes_As_Admin(MultipleSystemLabelScenario scenario)
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi
+            .CreateSimpleDialogAsync(dialog =>
+                dialog.SystemLabel = scenario.InitialLabel);
+
+        // Act
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(
+            scopes: E2EConstants.ServiceOwnerScopes + " " + AuthorizationScope.ServiceOwnerAdminScope
+        );
         var response = await Fixture.ServiceownerApi
             .SetSystemLabel(
                 dialogId,
@@ -189,138 +241,138 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Default, Bin, Archive -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Default,
+                InitialLabel = Default,
                 LabelsToAdd = [
-                    ServiceOwnerSystemLabel.Default,
-                    ServiceOwnerSystemLabel.Bin,
-                    ServiceOwnerSystemLabel.Archive],
+                    Default,
+                    Bin,
+                    Archive],
                 LabelsToRemove = [],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
+                ExpectedLabel = Archive
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Default, Archive, Bin -> Bin",
-                InitialLabel = ServiceOwnerSystemLabel.Default,
+                InitialLabel = Default,
                 LabelsToAdd = [
-                    ServiceOwnerSystemLabel.Default,
-                    ServiceOwnerSystemLabel.Archive,
-                    ServiceOwnerSystemLabel.Bin],
+                    Default,
+                    Archive,
+                    Bin],
                 LabelsToRemove = [],
-                ExpectedLabel = ServiceOwnerSystemLabel.Bin
+                ExpectedLabel = Bin
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Bin, Default, Archive -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Default,
+                InitialLabel = Default,
                 LabelsToAdd = [
-                    ServiceOwnerSystemLabel.Bin,
-                    ServiceOwnerSystemLabel.Default,
-                    ServiceOwnerSystemLabel.Archive],
+                    Bin,
+                    Default,
+                    Archive],
                 LabelsToRemove = [],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
+                ExpectedLabel = Archive
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Bin, Archive, Default -> Default",
-                InitialLabel = ServiceOwnerSystemLabel.Default,
+                InitialLabel = Default,
                 LabelsToAdd = [
-                    ServiceOwnerSystemLabel.Bin,
-                    ServiceOwnerSystemLabel.Archive,
-                    ServiceOwnerSystemLabel.Default],
+                    Bin,
+                    Archive,
+                    Default],
                 LabelsToRemove = [],
-                ExpectedLabel = ServiceOwnerSystemLabel.Default
+                ExpectedLabel = Default
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Archive, Default, Bin -> Bin",
-                InitialLabel = ServiceOwnerSystemLabel.Default,
+                InitialLabel = Default,
                 LabelsToAdd = [
-                    ServiceOwnerSystemLabel.Archive,
-                    ServiceOwnerSystemLabel.Default,
-                    ServiceOwnerSystemLabel.Bin],
+                    Archive,
+                    Default,
+                    Bin],
                 LabelsToRemove = [],
-                ExpectedLabel = ServiceOwnerSystemLabel.Bin
+                ExpectedLabel = Bin
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Archive, Bin, Default -> Default",
-                InitialLabel = ServiceOwnerSystemLabel.Default,
+                InitialLabel = Default,
                 LabelsToAdd = [
-                    ServiceOwnerSystemLabel.Archive,
-                    ServiceOwnerSystemLabel.Bin,
-                    ServiceOwnerSystemLabel.Default],
+                    Archive,
+                    Bin,
+                    Default],
                 LabelsToRemove = [],
-                ExpectedLabel = ServiceOwnerSystemLabel.Default
+                ExpectedLabel = Default
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Archive + empty AddLabels -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Archive,
+                InitialLabel = Archive,
                 LabelsToAdd = [],
                 LabelsToRemove = [],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
+                ExpectedLabel = Archive
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Archive - Archive -> Default",
-                InitialLabel = ServiceOwnerSystemLabel.Archive,
+                InitialLabel = Archive,
                 LabelsToAdd = [],
-                LabelsToRemove = [ServiceOwnerSystemLabel.Archive],
-                ExpectedLabel = ServiceOwnerSystemLabel.Default
+                LabelsToRemove = [Archive],
+                ExpectedLabel = Default
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Archive - Bin -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Archive,
+                InitialLabel = Archive,
                 LabelsToAdd = [],
-                LabelsToRemove = [ServiceOwnerSystemLabel.Bin],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
+                LabelsToRemove = [Bin],
+                ExpectedLabel = Archive
             });
 
             // RemoveLabels is evaluated before AddLabels
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Archive - Archive + Bin -> Bin",
-                InitialLabel = ServiceOwnerSystemLabel.Archive,
-                LabelsToAdd = [ServiceOwnerSystemLabel.Bin],
-                LabelsToRemove = [ServiceOwnerSystemLabel.Archive],
-                ExpectedLabel = ServiceOwnerSystemLabel.Bin
+                InitialLabel = Archive,
+                LabelsToAdd = [Bin],
+                LabelsToRemove = [Archive],
+                ExpectedLabel = Bin
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Bin - Bin + Archive -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Bin,
-                LabelsToAdd = [ServiceOwnerSystemLabel.Archive],
-                LabelsToRemove = [ServiceOwnerSystemLabel.Bin],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
+                InitialLabel = Bin,
+                LabelsToAdd = [Archive],
+                LabelsToRemove = [Bin],
+                ExpectedLabel = Archive
             });
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Archive - Archive + Archive -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Archive,
-                LabelsToAdd = [ServiceOwnerSystemLabel.Archive],
-                LabelsToRemove = [ServiceOwnerSystemLabel.Archive],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
+                InitialLabel = Archive,
+                LabelsToAdd = [Archive],
+                LabelsToRemove = [Archive],
+                ExpectedLabel = Archive
             });
 
 
             Add(new MultipleSystemLabelScenario
             {
                 DisplayName = "Default - Archive + Archive -> Archive",
-                InitialLabel = ServiceOwnerSystemLabel.Default,
-                LabelsToAdd = [ServiceOwnerSystemLabel.Archive],
-                LabelsToRemove = [ServiceOwnerSystemLabel.Archive],
-                ExpectedLabel = ServiceOwnerSystemLabel.Archive
+                InitialLabel = Default,
+                LabelsToAdd = [Archive],
+                LabelsToRemove = [Archive],
+                ExpectedLabel = Archive
             });
         }
     }

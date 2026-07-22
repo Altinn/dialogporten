@@ -62,6 +62,11 @@ public static class E2EConstants
         AuthorizationScope.ServiceProvider + " " +
         AuthorizationScope.ServiceProviderSearch;
 
+    public const string ServiceOwnerAdminScopes =
+        AuthorizationScope.ServiceProvider + " " +
+        AuthorizationScope.ServiceProviderSearch + " " +
+        AuthorizationScope.ServiceOwnerAdminScope;
+
     public const string EndUserScopes = AuthorizationScope.EndUser;
 
     public const string SystemUserScopes = AuthorizationScope.EndUser;

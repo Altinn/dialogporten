@@ -46,16 +46,16 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         _altinnAuthorization = altinnAuthorization;
     }
 
-    public async Task<SetSystemLabelResult> Handle(SetSystemLabelCommand request, CancellationToken ct)
+    public async Task<SetSystemLabelResult> Handle(SetSystemLabelCommand request, CancellationToken cancellationToken)
     {
-        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, ct);
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
 
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels)
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: ct);
+            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
 
         if (dialog is null)
         {
@@ -67,7 +67,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, ct))
+        if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, cancellationToken))
         {
             return new Forbidden("Forbidden");
         }
@@ -77,14 +77,14 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new ConcurrencyError();
         }
 
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(ct);
+        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
         var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
 
         dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, performedBy);
 
         var saveResult = await _unitOfWork
                                .EnableConcurrencyCheck(dialog.EndUserContext, request.IfMatchEndUserContextRevision)
-                               .SaveChangesAsync(ct);
+                               .SaveChangesAsync(cancellationToken);
 
         return saveResult.Match<SetSystemLabelResult>(
             _ => new SetSystemLabelSuccess(dialog.EndUserContext.Revision),

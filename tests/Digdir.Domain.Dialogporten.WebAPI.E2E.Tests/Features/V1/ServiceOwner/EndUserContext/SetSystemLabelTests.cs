@@ -152,6 +152,29 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
+    [E2EFact]
+    public async Task Should_Return_204_For_Another_Org_When_Admin()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        Fixture.UseServiceOwnerTokenOverrides("964951284", "hko", E2EConstants.ServiceOwnerAdminScopes);
+        var setLabelResponse = await Fixture.ServiceownerApi
+            .SetSystemLabel(
+                dialogId,
+                E2EConstants.DefaultParty,
+                request => request.AddLabels = [Bin]
+            );
+        Fixture.UseServiceOwnerTokenOverrides();
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+        var dialog = await Fixture.ServiceownerApi.GetDialog(dialogId);
+        dialog.Should().NotBeNull();
+        dialog.Content!.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
+    }
+
     [E2ETheory]
     [ClassData(typeof(MultipleSystemLabelTestData))]
     public async Task Should_Apply_SystemLabel_Changes(MultipleSystemLabelScenario scenario)

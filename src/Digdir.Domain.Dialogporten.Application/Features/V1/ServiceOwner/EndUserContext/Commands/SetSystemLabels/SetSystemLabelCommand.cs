@@ -1,6 +1,7 @@
 using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -64,13 +65,15 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
     {
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
 
-        var org = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+        var isAdmin = _userResourceRegistry.IsCurrentUserServiceOwnerAdmin();
+        var org = isAdmin ? null : await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels)
-            .FirstOrDefaultAsync(x => x.Id == request.DialogId && x.Org == org, cancellationToken: cancellationToken);
+            .WhereIf(!isAdmin, x => x.Org == org)
+            .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
 
         if (dialog is null)
         {
@@ -88,7 +91,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return forbidden;
         }
 
-        if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (!isAdmin)
         {
             // We have already checked that this org has access to the dialog. Now check the end user:
             if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, cancellationToken: cancellationToken))

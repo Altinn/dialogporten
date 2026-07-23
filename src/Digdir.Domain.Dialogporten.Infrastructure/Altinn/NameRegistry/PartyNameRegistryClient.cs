@@ -38,13 +38,13 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         _partyNameRegistryTransport = partyNameRegistryTransport;
     }
 
-    public async Task<string> GetNameOrFail(string externalIdWithPrefix, CancellationToken ct)
+    public async Task<string> GetNameOrFail(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
             throw new ArgumentException($"Unable to parse PartyIdentifier {externalIdWithPrefix}");
 
         return TryGetLocalName(partyIdentifier)
-            ?? await GetNameFromRegisterOrFail(partyIdentifier, ToNameLookup(partyIdentifier), ct);
+            ?? await GetNameFromRegisterOrFail(partyIdentifier, ToNameLookup(partyIdentifier), cancellationToken);
     }
 
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>

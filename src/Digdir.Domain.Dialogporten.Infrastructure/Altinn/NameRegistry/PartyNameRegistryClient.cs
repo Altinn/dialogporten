@@ -181,7 +181,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
-                      throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookup).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
+                      throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
     }
 
     private async Task<NameLookupResult?> PerformPartyNameRequest(
@@ -205,7 +205,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
-                      throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookup).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
+                      throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
     }
 
     private string FlipNameIfPerson(IPartyIdentifier partyIdentifier, string name)

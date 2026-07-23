@@ -264,13 +264,21 @@ public static class InfrastructureExtensions
         {
             Duration = TimeSpan.FromMinutes(30),
             FailSafeMaxDuration = TimeSpan.FromMinutes(60),
+            // Must exceed the factory's worst-case DB work (30s Npgsql CommandTimeout, plus connection
+            // acquisition and result mapping, which the command timeout does not cover). A tighter budget
+            // cancels slow-but-succeeding rebuilds, so refreshes never complete and fail-safe silently
+            // becomes the only data source until it runs out.
+            FactoryHardTimeout = TimeSpan.FromSeconds(60),
             SkipDistributedCache = true
         })
         // Subjects (roles/access packages) per referenced party-resource; used by the metadata item builder.
         // Invalidated on SubjectResourceRepository.Merge.
         .ConfigureFusionCache(SubjectResourceRepository.ReferencedPartyResourcesCacheName, new()
         {
-            Duration = TimeSpan.FromMinutes(20)
+            Duration = TimeSpan.FromMinutes(20),
+            // Same constraint as ReferencedResourcesCacheName above: must exceed the SubjectResource join's
+            // worst-case runtime or the refresh never completes.
+            FactoryHardTimeout = TimeSpan.FromSeconds(60)
         })
         .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
         {
@@ -299,7 +307,13 @@ public static class InfrastructureExtensions
             FailSafeMaxDuration = TimeSpan.FromHours(2),
             EagerRefreshThreshold = 0.8f,
             FactorySoftTimeout = TimeSpan.FromSeconds(6),
-            FactoryHardTimeout = TimeSpan.FromSeconds(10),
+            // Must accommodate the full sequential rebuild: referenced resources + the item builder's cached
+            // lookups, each DB-bound step capped by the 30s CommandTimeout. If rebuilds cannot finish within
+            // this budget they never succeed at all, and once FailSafeMaxDuration runs out every caller
+            // blocks here until the GraphQL execution timeout kills the request. With stale data available,
+            // callers return at FactorySoftTimeout and the rebuild finishes in the background; on a cold miss
+            // this hard timeout is the caller-facing wait ceiling.
+            FactoryHardTimeout = TimeSpan.FromSeconds(120),
             SkipDistributedCache = true
         })
         .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()

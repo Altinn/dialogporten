@@ -177,7 +177,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                 await response.Content.ReadAsStringAsync(cancellationToken)
             );
 
-            throw new HttpRequestException("Failed POST {ApiUrl}");
+            throw new HttpRequestException($"Failed to POST {PartyNameRegistryTransport.QueryPartiesUrl}");
         }
 
         return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??

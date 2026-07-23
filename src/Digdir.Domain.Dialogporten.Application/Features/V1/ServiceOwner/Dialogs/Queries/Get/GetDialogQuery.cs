@@ -88,8 +88,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 {
                     var actorNameId = newSeenLog.SeenBy.ActorNameEntityId ?? throw new UnreachableException();
                     dialog.AddResyncActorNameEvent(
-                        actorNameId,
-                        $"{nameof(GetDialogQueryHandler)} (SO): Failed to get actor name for SeenLog {newSeenLog.Id}"
+                        actorNameId: actorNameId,
+                        reason: $"{nameof(GetDialogQueryHandler)} (SO): Actor name for SeenLog is null {newSeenLog.Id}",
+                        disableUpdateableFilter: true
                     );
                 }
             }

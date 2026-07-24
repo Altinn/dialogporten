@@ -314,7 +314,11 @@ public static class InfrastructureExtensions
             // request. Freshness in normal operation is governed by Duration alone.
             FailSafeMaxDuration = TimeSpan.FromHours(24),
             EagerRefreshThreshold = 0.8f,
-            FactorySoftTimeout = TimeSpan.FromSeconds(6),
+            // Governs how quickly callers (including lock waiters) fall back to the stale value while a
+            // rebuild is in flight; it is the caller-facing latency ceiling whenever fail-safe stock exists.
+            // Deliberately below normal rebuild duration: foreground refreshes serve stale immediately and
+            // the rebuild completes in the background (eager refresh keeps entries fresh in normal operation).
+            FactorySoftTimeout = TimeSpan.FromSeconds(1),
             // Substantial headroom for the full sequential rebuild (referenced resources + the item builder's
             // cached lookups, each DB-bound step capped by the 30s CommandTimeout); sized operationally, not a
             // guaranteed worst-case bound. Rebuilds that cannot finish within this budget never succeed, and

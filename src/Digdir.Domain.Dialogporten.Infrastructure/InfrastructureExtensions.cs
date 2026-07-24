@@ -263,10 +263,10 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(PartyResourceRepository.ReferencedResourcesCacheName, new()
         {
             Duration = TimeSpan.FromMinutes(30),
-            // Fail-safe stock must outlive any realistic rebuild-failure streak: with a stale value present,
-            // lock waiters are served stale at the factory soft timeout; once the stock runs out they have no
-            // fallback and hang on the per-key memory lock until the request timeout. Freshness in normal
-            // operation is governed by Duration alone.
+            // A stale value must stay servable for longer than any realistic refresh-failure streak: while one
+            // exists, callers waiting on the per-key memory lock are served it at the factory soft timeout
+            // (behavior pinned by FusionCacheFailSafeSemanticsTests); without one they wait on the lock until
+            // their request is cancelled. Freshness in normal operation is governed by Duration alone.
             FailSafeMaxDuration = TimeSpan.FromHours(24),
             // Substantial headroom over the factory's DB work (30s Npgsql CommandTimeout, plus connection
             // acquisition and result mapping, which the command timeout does not cover). A tight budget
@@ -308,16 +308,16 @@ public static class InfrastructureExtensions
             // several-MB graph to Redis; each replica rebuilds cheaply from its already-cached inputs. Eager
             // refresh + fail-safe keep the multi-MB rebuild off the request path.
             Duration = TimeSpan.FromMinutes(20),
-            // Fail-safe stock must outlive any realistic rebuild-failure streak: with a stale value present,
-            // lock waiters are served stale at FactorySoftTimeout; once the stock runs out they have no
-            // fallback and hang on the per-key memory lock until the GraphQL execution timeout kills the
-            // request. Freshness in normal operation is governed by Duration alone.
+            // A stale value must stay servable for longer than any realistic rebuild-failure streak: while one
+            // exists, callers waiting on the per-key memory lock are served it at FactorySoftTimeout (behavior
+            // pinned by FusionCacheFailSafeSemanticsTests); without one they wait on the lock until their
+            // request is cancelled. Freshness in normal operation is governed by Duration alone.
             FailSafeMaxDuration = TimeSpan.FromHours(24),
             EagerRefreshThreshold = 0.8f,
-            // Governs how quickly callers (including lock waiters) fall back to the stale value while a
-            // rebuild is in flight; it is the caller-facing latency ceiling whenever fail-safe stock exists.
-            // Deliberately below normal rebuild duration: foreground refreshes serve stale immediately and
-            // the rebuild completes in the background (eager refresh keeps entries fresh in normal operation).
+            // The caller-facing latency ceiling while a rebuild is in flight and a stale value exists: both the
+            // triggering caller and lock waiters fall back to stale when it elapses, and the rebuild completes
+            // in the background. Kept small so callers never wait long on an in-flight rebuild; fresh data
+            // arrives via eager refresh and background completion rather than on the request path.
             FactorySoftTimeout = TimeSpan.FromSeconds(1),
             // Substantial headroom for the full sequential rebuild (referenced resources + the item builder's
             // cached lookups, each DB-bound step capped by the 30s CommandTimeout); sized operationally, not a

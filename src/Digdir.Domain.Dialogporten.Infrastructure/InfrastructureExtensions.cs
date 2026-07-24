@@ -263,11 +263,15 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(PartyResourceRepository.ReferencedResourcesCacheName, new()
         {
             Duration = TimeSpan.FromMinutes(30),
-            FailSafeMaxDuration = TimeSpan.FromMinutes(60),
-            // Must exceed the factory's worst-case DB work (30s Npgsql CommandTimeout, plus connection
-            // acquisition and result mapping, which the command timeout does not cover). A tighter budget
+            // Fail-safe stock must outlive any realistic rebuild-failure streak: with a stale value present,
+            // lock waiters are served stale at the factory soft timeout; once the stock runs out they have no
+            // fallback and hang on the per-key memory lock until the request timeout. Freshness in normal
+            // operation is governed by Duration alone.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
+            // Substantial headroom over the factory's DB work (30s Npgsql CommandTimeout, plus connection
+            // acquisition and result mapping, which the command timeout does not cover). A tight budget
             // cancels slow-but-succeeding rebuilds, so refreshes never complete and fail-safe silently
-            // becomes the only data source until it runs out.
+            // becomes the only data source.
             FactoryHardTimeout = TimeSpan.FromSeconds(60),
             SkipDistributedCache = true
         })
@@ -276,8 +280,8 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(SubjectResourceRepository.ReferencedPartyResourcesCacheName, new()
         {
             Duration = TimeSpan.FromMinutes(20),
-            // Same constraint as ReferencedResourcesCacheName above: must exceed the SubjectResource join's
-            // worst-case runtime or the refresh never completes.
+            // See ReferencedResourcesCacheName above for the rationale behind both values.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
             FactoryHardTimeout = TimeSpan.FromSeconds(60)
         })
         .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
@@ -304,15 +308,18 @@ public static class InfrastructureExtensions
             // several-MB graph to Redis; each replica rebuilds cheaply from its already-cached inputs. Eager
             // refresh + fail-safe keep the multi-MB rebuild off the request path.
             Duration = TimeSpan.FromMinutes(20),
-            FailSafeMaxDuration = TimeSpan.FromHours(2),
+            // Fail-safe stock must outlive any realistic rebuild-failure streak: with a stale value present,
+            // lock waiters are served stale at FactorySoftTimeout; once the stock runs out they have no
+            // fallback and hang on the per-key memory lock until the GraphQL execution timeout kills the
+            // request. Freshness in normal operation is governed by Duration alone.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
             EagerRefreshThreshold = 0.8f,
             FactorySoftTimeout = TimeSpan.FromSeconds(6),
-            // Must accommodate the full sequential rebuild: referenced resources + the item builder's cached
-            // lookups, each DB-bound step capped by the 30s CommandTimeout. If rebuilds cannot finish within
-            // this budget they never succeed at all, and once FailSafeMaxDuration runs out every caller
-            // blocks here until the GraphQL execution timeout kills the request. With stale data available,
-            // callers return at FactorySoftTimeout and the rebuild finishes in the background; on a cold miss
-            // this hard timeout is the caller-facing wait ceiling.
+            // Substantial headroom for the full sequential rebuild (referenced resources + the item builder's
+            // cached lookups, each DB-bound step capped by the 30s CommandTimeout); sized operationally, not a
+            // guaranteed worst-case bound. Rebuilds that cannot finish within this budget never succeed, and
+            // fail-safe silently becomes the only data source. On a cold miss this hard timeout is the
+            // caller-facing wait ceiling.
             FactoryHardTimeout = TimeSpan.FromSeconds(120),
             SkipDistributedCache = true
         })

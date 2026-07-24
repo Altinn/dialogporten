@@ -21,6 +21,7 @@ using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -89,7 +90,9 @@ static void BuildAndRun(string[] args)
 
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
-            additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
+            additionalMetrics: x => x
+                .AddAspNetCoreInstrumentation()
+                .AddNpgsqlInstrumentation(),
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths(),

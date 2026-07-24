@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.118.8](https://github.com/Altinn/dialogporten/compare/v1.118.7...v1.118.8) (2026-07-24)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency dotnet-sdk to v10.0.302 ([#4228](https://github.com/Altinn/dialogporten/issues/4228)) ([d6c3ee7](https://github.com/Altinn/dialogporten/commit/d6c3ee74c291226ba703f9f0029b88a962cb513e))
+
 ## [1.118.7](https://github.com/Altinn/dialogporten/compare/v1.118.6...v1.118.7) (2026-07-20)
 
 

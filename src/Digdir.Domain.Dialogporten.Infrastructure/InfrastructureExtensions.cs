@@ -263,14 +263,26 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(PartyResourceRepository.ReferencedResourcesCacheName, new()
         {
             Duration = TimeSpan.FromMinutes(30),
-            FailSafeMaxDuration = TimeSpan.FromMinutes(60),
+            // A stale value must stay servable for longer than any realistic refresh-failure streak: while one
+            // exists, callers waiting on the per-key memory lock are served it at the factory soft timeout
+            // (behavior pinned by FusionCacheFailSafeSemanticsTests); without one they wait on the lock until
+            // their request is cancelled. Freshness in normal operation is governed by Duration alone.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
+            // Substantial headroom over the factory's DB work (30s Npgsql CommandTimeout, plus connection
+            // acquisition and result mapping, which the command timeout does not cover). A tight budget
+            // cancels slow-but-succeeding rebuilds, so refreshes never complete and fail-safe silently
+            // becomes the only data source.
+            FactoryHardTimeout = TimeSpan.FromSeconds(60),
             SkipDistributedCache = true
         })
         // Subjects (roles/access packages) per referenced party-resource; used by the metadata item builder.
         // Invalidated on SubjectResourceRepository.Merge.
         .ConfigureFusionCache(SubjectResourceRepository.ReferencedPartyResourcesCacheName, new()
         {
-            Duration = TimeSpan.FromMinutes(20)
+            Duration = TimeSpan.FromMinutes(20),
+            // See ReferencedResourcesCacheName above for the rationale behind both values.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
+            FactoryHardTimeout = TimeSpan.FromSeconds(60)
         })
         .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
         {
@@ -296,10 +308,23 @@ public static class InfrastructureExtensions
             // several-MB graph to Redis; each replica rebuilds cheaply from its already-cached inputs. Eager
             // refresh + fail-safe keep the multi-MB rebuild off the request path.
             Duration = TimeSpan.FromMinutes(20),
-            FailSafeMaxDuration = TimeSpan.FromHours(2),
+            // A stale value must stay servable for longer than any realistic rebuild-failure streak: while one
+            // exists, callers waiting on the per-key memory lock are served it at FactorySoftTimeout (behavior
+            // pinned by FusionCacheFailSafeSemanticsTests); without one they wait on the lock until their
+            // request is cancelled. Freshness in normal operation is governed by Duration alone.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
             EagerRefreshThreshold = 0.8f,
-            FactorySoftTimeout = TimeSpan.FromSeconds(6),
-            FactoryHardTimeout = TimeSpan.FromSeconds(10),
+            // The caller-facing latency ceiling while a rebuild is in flight and a stale value exists: both the
+            // triggering caller and lock waiters fall back to stale when it elapses, and the rebuild completes
+            // in the background. Kept small so callers never wait long on an in-flight rebuild; fresh data
+            // arrives via eager refresh and background completion rather than on the request path.
+            FactorySoftTimeout = TimeSpan.FromSeconds(1),
+            // Substantial headroom for the full sequential rebuild (referenced resources + the item builder's
+            // cached lookups, each DB-bound step capped by the 30s CommandTimeout); sized operationally, not a
+            // guaranteed worst-case bound. Rebuilds that cannot finish within this budget never succeed, and
+            // fail-safe silently becomes the only data source. On a cold miss this hard timeout is the
+            // caller-facing wait ceiling.
+            FactoryHardTimeout = TimeSpan.FromSeconds(120),
             SkipDistributedCache = true
         })
         .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()

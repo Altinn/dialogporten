@@ -65,6 +65,10 @@ public class FusionCacheFailSafeSemanticsTests
                 .AsTask()
                 .WaitAsync(timeout, testToken);
 
+            // Receiving the stale value at all proves the caller did not wait for the factory: the factory
+            // cannot produce "fresh-value" until releaseFactory is set in the finally block below. No
+            // elapsed-time assertion is needed (or wanted: timing bounds flake on loaded CI runners); the
+            // WaitAsync above only guards against the semantics changing into an indefinite lock wait.
             concurrentResult.Should().Be(staleValue);
         }
         finally

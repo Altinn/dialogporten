@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.118.9](https://github.com/Altinn/dialogporten/compare/v1.118.8...v1.118.9) (2026-07-27)
+
+
+### Bug Fixes
+
+* make the service resource catalogue cache rebuild chain resilient to slow rebuilds ([#4230](https://github.com/Altinn/dialogporten/issues/4230)) ([2761732](https://github.com/Altinn/dialogporten/commit/27617321205022f55cccb426bc7c0b145185beda))
+
+
+### Miscellaneous Chores
+
+* Add Npgsql otel meters ([#4231](https://github.com/Altinn/dialogporten/issues/4231)) ([6d60748](https://github.com/Altinn/dialogporten/commit/6d607483a742a1cbde61ecd7191ee02c9eef2852))
+* **deps:** update dependency scalar.aspnetcore to 2.16.15 ([#4229](https://github.com/Altinn/dialogporten/issues/4229)) ([2ddbd92](https://github.com/Altinn/dialogporten/commit/2ddbd9205d8d8fb0727e65f7bfae1422394d4513))
+* **deps:** update nginx docker tag to v1.31.3 ([#4234](https://github.com/Altinn/dialogporten/issues/4234)) ([cf7b298](https://github.com/Altinn/dialogporten/commit/cf7b298e1b1cd3499609c31eb6abdb475e3ac4f5))
+* **deps:** update slackapi/slack-github-action action to v3.0.5 ([#4235](https://github.com/Altinn/dialogporten/issues/4235)) ([a860e00](https://github.com/Altinn/dialogporten/commit/a860e00afc2dbd15a4c730eb1a0d1c86be227270))
+
 ## [1.118.8](https://github.com/Altinn/dialogporten/compare/v1.118.7...v1.118.8) (2026-07-24)
 
 

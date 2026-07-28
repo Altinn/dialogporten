@@ -94,6 +94,7 @@ static void BuildAndRun(string[] args)
         .AddValidatorsFromAssembly(GraphQLAssemblyMarker.Assembly,
             ServiceLifetime.Transient, includeInternalTypes: true)
         .AddAzureAppConfiguration()
+        .AddDialogportenResponseCompression()
 
         // CORS
         .AddCors(options =>
@@ -165,6 +166,7 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
 
     app.UseCors();
+    app.UseResponseCompression();
     app.MapAspNetHealthChecks()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()

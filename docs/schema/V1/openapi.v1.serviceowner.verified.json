@@ -3274,6 +3274,14 @@
                 "$ref": "#/components/schemas/AcceptedLanguages"
               }
             ]
+          },
+          "acceptEncoding": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
           }
         },
         "type": "object"
@@ -4793,6 +4801,18 @@
           {
             "in": "header",
             "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AcceptedLanguages"
+                }
+              ]
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Encoding",
             "schema": {
               "nullable": true,
               "oneOf": [

@@ -20,7 +20,10 @@ public abstract class E2EFixtureBase : IAsyncLifetime
     public string DotnetEnvironment { get; private set; } = Environments.Development;
     public E2ESettings Settings { get; private set; } = null!;
 
+    public IMetadataApi MetadataApi { get; private set; } = null!;
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
+
+    public IHttpClientFactory HttpClientFactory { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -59,6 +62,10 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         }.Uri;
 
         services
+            .AddRefitClient<IMetadataApi>(new RefitSettings
+            {
+                ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions),
+            })
             .AddRefitClient<IServiceownerApi>(new RefitSettings
             {
                 ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
@@ -87,6 +94,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         _serviceProvider = services.BuildServiceProvider();
 
+        HttpClientFactory = _serviceProvider.GetRequiredService<IHttpClientFactory>();
+        MetadataApi = _serviceProvider.GetRequiredService<IMetadataApi>();
         ServiceownerApi = _serviceProvider.GetRequiredService<IServiceownerApi>();
         _tokenOverridesAccessor = _serviceProvider.GetRequiredService<ITokenOverridesAccessor>();
 

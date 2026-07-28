@@ -47,4 +47,7 @@ public sealed class GetServiceResourceMetadataRequest
 {
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]
     public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
+
+    [FromHeader(Constants.AcceptEncoding, isRequired: false)]
+    public AcceptedLanguages? AcceptEncoding { get; set; } = null;
 }

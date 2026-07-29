@@ -1,8 +1,11 @@
 using System.Net;
+using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using ValidationFailure = FluentValidation.Results.ValidationFailure;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Authorization;
 
@@ -22,5 +25,14 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             Fixture.EndUserApi.V1, endpointScenario.Method, TestContext.Current.CancellationToken);
 
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        response.Error.Should().NotBeNull();
+        var errorContent = response.Error.Content;
+        errorContent.Should().NotBeNull();
+        var errors = JsonSerializer.Deserialize<List<ValidationFailure>>(errorContent, JsonSerializerOptions.Web);
+        errors.Should().NotBeNull();
+        var validationFailure = errors.Single();
+
+        validationFailure.PropertyName.Should().Be("Forbidden");
+        validationFailure.ErrorMessage.Should().NotBeNull();
     }
 }

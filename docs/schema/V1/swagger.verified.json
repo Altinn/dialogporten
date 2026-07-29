@@ -2857,14 +2857,6 @@
                 "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
               }
             ]
-          },
-          "acceptEncoding": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
-              }
-            ]
           }
         },
         "type": "object"
@@ -8641,18 +8633,6 @@
           {
             "in": "header",
             "name": "accept-Language",
-            "schema": {
-              "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
-                }
-              ]
-            }
-          },
-          {
-            "in": "header",
-            "name": "accept-Encoding",
             "schema": {
               "nullable": true,
               "oneOf": [

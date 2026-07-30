@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.118.10](https://github.com/Altinn/dialogporten/compare/v1.118.9...v1.118.10) (2026-07-30)
+
+
+### Bug Fixes
+
+* Increase party name timeout to acommodate system user retries ([#4241](https://github.com/Altinn/dialogporten/issues/4241)) ([62613a8](https://github.com/Altinn/dialogporten/commit/62613a8ff85691ae42d4aa5758e96e5f7618408f))
+
 ## [1.118.9](https://github.com/Altinn/dialogporten/compare/v1.118.8...v1.118.9) (2026-07-27)
 
 

@@ -77,6 +77,46 @@ public class CreateDialogSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<W
             JsonSerializer.Serialize(getDialogResult.Content));
     }
 
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Create_Dialog_IdempotentId_Conflict_Verify_Snapshot()
+    {
+        // Arrange
+        var idempotentId1 = Guid.CreateVersion7().ToString();
+        var idempotentId2 = Guid.CreateVersion7().ToString();
+        var createDialogCommand1 = DialogTestData.CreateSimpleDialog(d => d
+            .AddTransmission(t => t.IdempotentKey = idempotentId1)
+            .AddTransmission(t => t.IdempotentKey = idempotentId1)
+            .AddTransmission(t => t.IdempotentKey = idempotentId2)
+            .AddTransmission(t => t.IdempotentKey = idempotentId2)
+        );
+
+        // Act
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(createDialogCommand1);
+
+        // Assert
+        response.Error.Should().NotBeNull();
+        response.Error.Content.Should().NotBeNull();
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(response.Error.Content);
+    }
+
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Create_Dialog_DialogId_Conflict_Verify_Snapshot()
+    {
+        // Arrange
+        var idempotentId = Guid.CreateVersion7().ToString();
+        var createDialogCommand = DialogTestData.CreateSimpleDialog(d => d.IdempotentKey = idempotentId);
+        var response1 = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(createDialogCommand);
+
+        // Act
+        var response2 = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(createDialogCommand);
+
+        // Assert
+        response1.ShouldHaveStatusCode(HttpStatusCode.Created);
+        response2.Error.Should().NotBeNull();
+        response2.Error.Content.Should().NotBeNull();
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(response2.Error.Content);
+    }
+
     private static void ConfigureComplexCreateDialogSnapshotData(V1ServiceOwnerDialogsCommandsCreate_Dialog dialog)
     {
         dialog.SystemLabel = ServiceOwnerSystemLabel.Archive;

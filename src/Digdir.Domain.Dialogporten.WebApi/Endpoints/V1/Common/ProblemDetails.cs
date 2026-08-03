@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common;
 
 [OpenApiTypeName("ProblemDetails")]
-public sealed class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails
+public class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails
 {
     public string? StatusDescription { get; set; }
     public string? Code { get; set; }

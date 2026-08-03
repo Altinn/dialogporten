@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -14,6 +15,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -62,89 +64,78 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .CreateTransmission()
             .UpdateTransmission((x, _) =>
                 x.Dto.IdempotentKey = ExistingKey)
-            .ExecuteAndAssert<Conflict>();
-
-    private const string FirstTransmissionIdKey = "first-transmission-id";
-    private const string SecondTransmissionIdKey = "second-transmission-id";
+            .ExecuteAndAssert<Conflict>(x =>
+            {
+                x.ErrorMessage.Should().Contain(ExistingKey);
+                x.AttemptedValues.Should().BeOfType<IdempotentKeyConflict>();
+                var attempt = x.AttemptedValues.As<IdempotentKeyConflict>();
+                attempt.ConflictingIdempotentKeys.Single().Should().Be(ExistingKey);
+            });
 
     [Fact]
     public Task UpdateTransmission_Returns_DomainError_When_RelatedTransmissionId_Is_Cyclic() =>
         FlowBuilder.For(Application)
             .AsChangeTransmissionUser()
             .CreateSimpleDialog()
+            .CreateTransmission((x, _) => x.Id = NewUuidV7())
             .CreateTransmission((x, ctx) =>
             {
                 x.Id = NewUuidV7();
-                ctx.Bag[FirstTransmissionIdKey] = x.Id.Value;
-            })
-            .CreateTransmission((x, ctx) =>
-            {
-                x.Id = NewUuidV7();
-                ctx.Bag[SecondTransmissionIdKey] = x.Id.Value;
-                x.RelatedTransmissionId = ctx.GetGuidByKey(FirstTransmissionIdKey);
+                x.RelatedTransmissionId = ctx.State.CreatedTransmissions.Single().Command.Transmissions.Single().Id;
             })
             .UpdateTransmission((x, ctx) =>
             {
-                x.TransmissionId = ctx.GetGuidByKey(FirstTransmissionIdKey);
-                x.Dto.RelatedTransmissionId = ctx.GetGuidByKey(SecondTransmissionIdKey);
+                x.TransmissionId = ctx.State.CreatedTransmissions.First().Command.Transmissions.First().Id!.Value;
+                x.Dto.RelatedTransmissionId = ctx.State.CreatedTransmissions.Last().Command.Transmissions.Single().Id;
             })
             .ExecuteAndAssert<DomainError>(x =>
                 x.ShouldHaveErrorWithText("cyclic"));
 
-    private const string InvalidRelatedKey = "invalid-related-id";
-
     [Fact]
-    public Task UpdateTransmission_Returns_Error_When_RelatedTransmissionId_Does_Not_Exist() =>
-        FlowBuilder.For(Application)
+    public Task UpdateTransmission_Returns_Error_When_RelatedTransmissionId_Does_Not_Exist()
+    {
+        var dtoRelatedTransmissionId = NewUuidV7();
+        return FlowBuilder.For(Application)
             .AsChangeTransmissionUser()
             .CreateSimpleDialog()
             .CreateTransmission()
-            .UpdateTransmission((x, ctx) =>
-            {
-                x.Dto.RelatedTransmissionId = NewUuidV7();
-                ctx.Bag[InvalidRelatedKey] = x.Dto.RelatedTransmissionId.Value;
-            })
-            .ExecuteAndAssert<DomainError>((x, ctx) =>
-                x.ShouldHaveErrorWithText(
-                    ctx.GetGuidByKey(InvalidRelatedKey).ToString()));
+            .UpdateTransmission((x, _) => x.Dto.RelatedTransmissionId = dtoRelatedTransmissionId)
+            .ExecuteAndAssert<DomainError>((x, _) => x.ShouldHaveErrorWithText(dtoRelatedTransmissionId.ToString()));
+    }
 
     private const string NewIdKey = "new-id";
 
     [Fact]
-    public Task UpdateTransmission_Should_Not_Allow_Changing_Transmission_Id() =>
-        FlowBuilder.For(Application)
+    public Task UpdateTransmission_Should_Not_Allow_Changing_Transmission_Id()
+    {
+        var newId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
             .AsChangeTransmissionUser()
             .CreateSimpleDialog()
             .CreateTransmission()
-            .UpdateTransmission((_, ctx) =>
+            .UpdateTransmission((t, _) =>
             {
-                var newId = NewUuidV7();
-                ctx.Bag[NewIdKey] = newId;
+                t.TransmissionId = newId;
             })
-            .AssertSuccess()
+            .AssertResult<EntityNotFound<DialogTransmission>>()
             .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>((x, ctx) =>
-                x.Transmissions.Single().Id
-                    .Should().NotBe(ctx.GetGuidByKey(NewIdKey)));
-
-    private const string RelatedTransmissionIdKey = "related-transmission-id";
+            .ExecuteAndAssert<DialogDto>((x, _) => x.Transmissions.Single().Id.Should().NotBe(newId));
+    }
 
     [Fact]
     public Task UpdateTransmission_Should_Allow_Changing_Related_Transmission_Id() =>
         FlowBuilder.For(Application)
             .AsChangeTransmissionUser()
-            .CreateSimpleDialog((x, ctx) =>
-                x.AddTransmission(x =>
-                    ctx.Bag[RelatedTransmissionIdKey] = x.Id))
+            .CreateSimpleDialog((x, _) => x.AddTransmission())
             .CreateTransmission((x, _) => x.RelatedTransmissionId = null)
             .UpdateTransmission((x, ctx) =>
-                x.Dto.RelatedTransmissionId =
-                    ctx.GetGuidByKey(RelatedTransmissionIdKey))
+                x.Dto.RelatedTransmissionId = ctx.State.CreatedDialogs.First().Command.Dto.Transmissions.Single().Id)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>((x, ctx) =>
                 x.Transmissions.Should().ContainSingle(x => x.Id == ctx.GetTransmissionId())
                     .Which.RelatedTransmissionId.Should()
-                    .Be(ctx.GetGuidByKey(RelatedTransmissionIdKey)));
+                    .Be(ctx.State.CreatedDialogs.First().Command.Dto.Transmissions.Single().Id));
 
     private const string InitialDialogRevisionKey = "initial-dialog-revision";
 
@@ -217,7 +208,7 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             {
                 ctx.Application.GetPublishedEvents().Should().ContainSingle()
                     .Which.Should().BeOfType<DialogUpdatedDomainEvent>()
-                    .Which.Metadata[Domain.Common.Constants.IsSilentUpdate]
+                    .Which.Metadata[Constants.IsSilentUpdate]
                     .Should().Be(bool.TrueString);
 
                 successScenario.Assert(dialog.Transmissions.Single());

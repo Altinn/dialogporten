@@ -85,6 +85,45 @@ public class CreateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             JsonSerializer.Serialize(response.Content));
     }
 
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Create_Transmissions_Conflict_Verify_Snapshot()
+    {
+        // Arrange
+        var idempotentKey = Guid.CreateVersion7().ToString();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(d => d
+            .AddTransmission(t => t.IdempotentKey = idempotentKey)
+        );
+
+        // Act
+        var firstCreateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(
+                dialogId,
+                new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
+                {
+                    Id = Guid.CreateVersion7(),
+                    IdempotentKey = idempotentKey,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+                    Sender = new V1ServiceOwnerCommonActors_Actor
+                    {
+                        ActorType = Actors_ActorType.ServiceOwner
+                    },
+                    Content = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent
+                    {
+                        Title = DialogTestData.CreateContentValue(
+                            value: "Melding med vedlegg",
+                            languageCode: "nb")
+                    }
+                },
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+        firstCreateResponse.ShouldHaveStatusCode(HttpStatusCode.Conflict);
+        firstCreateResponse.Error.Should().NotBeNull();
+        firstCreateResponse.Error.Content.Should().NotBeNull();
+
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(firstCreateResponse.Error.Content);
+    }
+
     private static (V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest firstTransmission,
         V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest secondTransmission) CreateTransmissionRequests()
     {

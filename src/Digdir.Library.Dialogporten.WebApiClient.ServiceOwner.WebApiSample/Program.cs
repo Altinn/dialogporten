@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var dialogportenSettings = builder.Configuration
     .GetSection("DialogportenSettings")
-    .Get<DialogportenSettings>()!;
-builder.Services.AddDialogportenClient(dialogportenSettings);
+    .Get<DialogportenSettings>();
+builder.Services.AddDialogportenClient(dialogportenSettings ?? throw new InvalidOperationException("No Dialogporten settings found"));
 
 builder.Services.AddOpenApi();
 

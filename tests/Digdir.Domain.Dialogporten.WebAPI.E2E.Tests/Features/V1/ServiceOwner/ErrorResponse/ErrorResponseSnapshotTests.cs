@@ -1,5 +1,6 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
+using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 
@@ -132,6 +133,28 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
         await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
+    }
+
+    [E2EFact]
+    public async Task Should_Return_409_For_Duplicate_Idempotent_Key_In_Transmissions_When_Creating_Dialog()
+    {
+        // Arrange
+        var idempotentId1 = Guid.CreateVersion7().ToString();
+        var idempotentId2 = Guid.CreateVersion7().ToString();
+        var createDialogCommand1 = DialogTestData.CreateSimpleDialog(d => d
+            .AddTransmission(t => t.IdempotentKey = idempotentId1)
+            .AddTransmission(t => t.IdempotentKey = idempotentId1)
+            .AddTransmission(t => t.IdempotentKey = idempotentId2)
+            .AddTransmission(t => t.IdempotentKey = idempotentId2)
+        );
+
+        // Act
+        var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(createDialogCommand1);
+
+        // Assert
+        response.Error.Should().NotBeNull();
+        response.Error.Content.Should().NotBeNull();
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(response.Error.Content);
     }
 
     // "This test is flaky. It sometimes fails with a 503 Service Unavailable in the Azure environments,
@@ -310,6 +333,45 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
+    }
+
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Should_Return_409_For_create_With_Duplicate_Transmission_Idempotent_Key()
+    {
+        // Arrange
+        var idempotentKey = Guid.CreateVersion7().ToString();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(d => d
+            .AddTransmission(t => t.IdempotentKey = idempotentKey)
+        );
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsCreateTransmissionDialogTransmission(
+                dialogId,
+                new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionRequest
+                {
+                    Id = Guid.CreateVersion7(),
+                    IdempotentKey = idempotentKey,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+                    Sender = new V1ServiceOwnerCommonActors_Actor
+                    {
+                        ActorType = Actors_ActorType.ServiceOwner
+                    },
+                    Content = new V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionContent
+                    {
+                        Title = DialogTestData.CreateContentValue(
+                            value: "Melding med vedlegg",
+                            languageCode: "nb")
+                    }
+                },
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+        response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
+        response.Error.Should().NotBeNull();
+        response.Error.Content.Should().NotBeNull();
+
         await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 

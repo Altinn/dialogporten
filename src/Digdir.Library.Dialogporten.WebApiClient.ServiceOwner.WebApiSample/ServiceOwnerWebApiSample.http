@@ -5,11 +5,9 @@
 ### Verify DialogToken
 
 POST {{HostAddress}}/dialogTokenVerify/
-Accept: application/json
+Content-Type: application/json
 
-{
-   "token": {{dialogToken}}
-}
+{{dialogToken}}
 
 ### Get dialog by id
 GET {{HostAddress}}/dialog/{{dialogId}}

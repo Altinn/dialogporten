@@ -152,6 +152,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
         var response = await Fixture.ServiceownerApi.V1ServiceOwnerDialogsCommandsCreateDialog(createDialogCommand1);
 
         // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
         response.Error.Should().NotBeNull();
         response.Error.Content.Should().NotBeNull();
         await JsonSnapshotVerifier.VerifyJsonSnapshot(response.Error.Content);

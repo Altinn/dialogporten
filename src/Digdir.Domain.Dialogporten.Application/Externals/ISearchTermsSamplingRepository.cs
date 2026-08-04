@@ -1,6 +1,6 @@
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 
-public interface IWordlistSamplingRepository
+public interface ISearchTermsSamplingRepository
 {
     Task<long> EstimateTotalRowCountAsync(CancellationToken ct);
 
@@ -29,6 +29,16 @@ public interface IWordlistSamplingRepository
         string dictionary,
         IReadOnlyCollection<string> words,
         CancellationToken ct);
+
+    /// <summary>
+    /// Atomically replaces the persisted search-term documents (one per language) with the
+    /// supplied set, stamping all of them with the same <paramref name="generatedAt"/>. Any
+    /// previously stored documents are removed in the same transaction.
+    /// </summary>
+    Task ReplaceAsync(
+        IReadOnlyList<SearchTermListDocument> documents,
+        DateTimeOffset generatedAt,
+        CancellationToken ct);
 }
 
 public sealed record SampledDialogIdentity(Guid Id, string ServiceResource, DateTimeOffset ContentUpdatedAt);
@@ -39,3 +49,7 @@ public sealed record SampledDialogContent(
     IReadOnlyList<SampledDialogLocalization> Localizations);
 
 public sealed record SampledDialogLocalization(string LanguageCode, string Value);
+
+/// <summary>A single per-language search-term document to persist. <paramref name="WordsJson"/> is the
+/// serialized terse words array (<c>[{ "w": …, "s": [ … ] }]</c>) stored verbatim in the jsonb column.</summary>
+public sealed record SearchTermListDocument(string Language, string WordsJson);

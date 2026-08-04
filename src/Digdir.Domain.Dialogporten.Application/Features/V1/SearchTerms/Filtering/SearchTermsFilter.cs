@@ -1,12 +1,12 @@
 using System.Reflection;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Filtering;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Filtering;
 
-internal sealed class WordlistFilter : IWordlistFilter
+internal sealed class SearchTermsFilter : ISearchTermsFilter
 {
     private readonly HashSet<string> _stopwords;
 
-    public WordlistFilter()
+    public SearchTermsFilter()
     {
         _stopwords = LoadStopwords();
     }
@@ -27,7 +27,7 @@ internal sealed class WordlistFilter : IWordlistFilter
     private static HashSet<string> LoadStopwords()
     {
         var set = new HashSet<string>(StringComparer.Ordinal);
-        var assembly = typeof(WordlistFilter).Assembly;
+        var assembly = typeof(SearchTermsFilter).Assembly;
         foreach (var name in assembly.GetManifestResourceNames())
         {
             if (!name.Contains(".Stopwords.", StringComparison.Ordinal))

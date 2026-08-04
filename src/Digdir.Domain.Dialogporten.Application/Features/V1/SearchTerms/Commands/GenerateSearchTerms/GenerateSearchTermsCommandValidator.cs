@@ -1,15 +1,14 @@
 using FluentValidation;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Commands.GenerateWordlist;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Commands.GenerateSearchTerms;
 
-internal sealed class GenerateWordlistCommandValidator : AbstractValidator<GenerateWordlistCommand>
+internal sealed class GenerateSearchTermsCommandValidator : AbstractValidator<GenerateSearchTermsCommand>
 {
-    public GenerateWordlistCommandValidator()
+    public GenerateSearchTermsCommandValidator()
     {
         RuleFor(x => x.SampleSize).InclusiveBetween(3, 100).When(x => x.SampleSize.HasValue);
         RuleFor(x => x.PoolRows).GreaterThan(0).When(x => x.PoolRows.HasValue);
         RuleFor(x => x.MinLength).GreaterThan(0).When(x => x.MinLength.HasValue);
-        RuleFor(x => x.OutputPath).NotEmpty().When(x => x.OutputPath is not null);
         RuleFor(x => x.Languages)
             .Must(x => x is null || x.Count > 0)
             .WithMessage("Languages must be non-empty when specified.");

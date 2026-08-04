@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Tokenizer;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Tokenizer;
 
-internal sealed partial class WordlistTokenizer : IWordlistTokenizer
+internal sealed partial class SearchTermsTokenizer : ISearchTermsTokenizer
 {
     public HashSet<string> Tokenize(string text)
     {

@@ -1,16 +1,17 @@
 using Dapper;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.SearchTerms;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class WordlistSamplingRepository : IWordlistSamplingRepository
+internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingRepository
 {
     private readonly DialogDbContext _db;
     private readonly NpgsqlDataSource _dataSource;
 
-    public WordlistSamplingRepository(DialogDbContext db, NpgsqlDataSource dataSource)
+    public SearchTermsSamplingRepository(DialogDbContext db, NpgsqlDataSource dataSource)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(dataSource);
@@ -171,6 +172,29 @@ internal sealed class WordlistSamplingRepository : IWordlistSamplingRepository
             }
         }
         return map;
+    }
+
+    public async Task ReplaceAsync(
+        IReadOnlyList<SearchTermListDocument> documents,
+        DateTimeOffset generatedAt,
+        CancellationToken ct)
+    {
+        // Delete-then-insert within a single transaction so readers never observe a partial set
+        // (and a failed run leaves the previous documents intact). Id and CreatedAt/UpdatedAt are
+        // populated by the auditable-entity + UUIDv7 pipeline on SaveChanges.
+        await using var transaction = await _db.Database.BeginTransactionAsync(ct);
+
+        await _db.SearchTermLists.ExecuteDeleteAsync(ct);
+
+        _db.SearchTermLists.AddRange(documents.Select(d => new SearchTermList
+        {
+            Language = d.Language,
+            Words = d.WordsJson,
+            GeneratedAt = generatedAt
+        }));
+        await _db.SaveChangesAsync(ct);
+
+        await transaction.CommitAsync(ct);
     }
 
     private sealed record ContentRow(Guid DialogId, string ServiceResource, string LanguageCode, string Value);

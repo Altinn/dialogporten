@@ -1,9 +1,10 @@
 using System.Text.Json;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Filtering;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Tokenizer;
+using Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Filtering;
+using Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Tokenizer;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using MediatR;
@@ -11,57 +12,58 @@ using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Commands.GenerateWordlist;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Commands.GenerateSearchTerms;
 
-public sealed class GenerateWordlistCommand : IRequest<GenerateWordlistResult>, IFeatureMetricServiceResourceIgnoreRequest
+public sealed class GenerateSearchTermsCommand : IRequest<GenerateSearchTermsResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public int? SampleSize { get; init; }
     public int? PoolRows { get; init; }
     public int? MinLength { get; init; }
-    public string? OutputPath { get; init; }
     public IReadOnlyList<string>? Languages { get; init; }
 }
 
 [GenerateOneOf]
-public sealed partial class GenerateWordlistResult : OneOfBase<Success, ValidationError>;
+public sealed partial class GenerateSearchTermsResult : OneOfBase<Success, ValidationError>;
 
-internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<GenerateWordlistCommand, GenerateWordlistResult>
+internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandler<GenerateSearchTermsCommand, GenerateSearchTermsResult>
 {
     private const int DefaultSampleSize = 3;
     private const int DefaultPoolRows = 150_000;
     private const int DefaultMinLength = 5;
-    private const string DefaultOutputPath = "wordlist.jsonl";
     private static readonly string[] DefaultLanguages = ["nb", "nn", "en"];
     private const double MinTableSamplePercent = 0.001;
     private const double MaxTableSamplePercent = 5.0;
 
-    private readonly IWordlistSamplingRepository _repository;
-    private readonly IWordlistTokenizer _tokenizer;
-    private readonly IWordlistFilter _filter;
-    private readonly ILogger<GenerateWordlistCommandHandler> _logger;
+    private readonly ISearchTermsSamplingRepository _repository;
+    private readonly ISearchTermsTokenizer _tokenizer;
+    private readonly ISearchTermsFilter _filter;
+    private readonly IClock _clock;
+    private readonly ILogger<GenerateSearchTermsCommandHandler> _logger;
 
-    public GenerateWordlistCommandHandler(
-        IWordlistSamplingRepository repository,
-        IWordlistTokenizer tokenizer,
-        IWordlistFilter filter,
-        ILogger<GenerateWordlistCommandHandler> logger)
+    public GenerateSearchTermsCommandHandler(
+        ISearchTermsSamplingRepository repository,
+        ISearchTermsTokenizer tokenizer,
+        ISearchTermsFilter filter,
+        IClock clock,
+        ILogger<GenerateSearchTermsCommandHandler> logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(tokenizer);
         ArgumentNullException.ThrowIfNull(filter);
+        ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(logger);
         _repository = repository;
         _tokenizer = tokenizer;
         _filter = filter;
+        _clock = clock;
         _logger = logger;
     }
 
-    public async Task<GenerateWordlistResult> Handle(GenerateWordlistCommand request, CancellationToken ct)
+    public async Task<GenerateSearchTermsResult> Handle(GenerateSearchTermsCommand request, CancellationToken ct)
     {
         var sampleSize = request.SampleSize ?? DefaultSampleSize;
         var poolRows = request.PoolRows ?? DefaultPoolRows;
         var minLength = request.MinLength ?? DefaultMinLength;
-        var outputPath = request.OutputPath ?? DefaultOutputPath;
         var languages = (request.Languages ?? DefaultLanguages)
             .Select(Localization.NormalizeCultureCode)
             .OfType<string>()
@@ -69,7 +71,7 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
             .ToHashSet(StringComparer.Ordinal);
 
 #pragma warning disable CA1873 // joining 3-4 language codes is negligible; only runs once per command invocation
-        LogStarted(sampleSize, poolRows, minLength, outputPath, string.Join(",", languages));
+        LogStarted(sampleSize, poolRows, minLength, string.Join(",", languages));
 #pragma warning restore CA1873
 
         var totalRows = await _repository.EstimateTotalRowCountAsync(ct);
@@ -80,8 +82,8 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
 
         if (resources.Count == 0)
         {
-            _logger.LogWarning("No service resources found; emitting empty wordlist.");
-            await File.WriteAllTextAsync(outputPath, string.Empty, ct);
+            // Don't wipe a previously-good persisted set on a degenerate run; leave existing data in place.
+            _logger.LogWarning("No service resources found; leaving any existing search terms untouched.");
             return new Success();
         }
 
@@ -154,8 +156,7 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
         var allIds = samplesByResource.Values.SelectMany(x => x).Distinct().ToList();
         if (allIds.Count == 0)
         {
-            _logger.LogWarning("No sampled dialog IDs after Stage A/B; emitting empty wordlist.");
-            await File.WriteAllTextAsync(outputPath, string.Empty, ct);
+            _logger.LogWarning("No sampled dialog IDs after Stage A/B; leaving any existing search terms untouched.");
             return new Success();
         }
 
@@ -234,7 +235,7 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
         // Stage 3a: build a GLOBAL stem→canonical map per language across ALL surviving words.
         // This must be global (not per-resource) so the same stem yields the same surface form
         // everywhere — otherwise resource A emits 'virksomhet' and resource B emits 'virksomheten'
-        // for the same underlying stem 'virksom', creating duplicate suggestions in the wordlist.
+        // for the same underlying stem 'virksom', creating duplicate suggestions in the search-term list.
         var canonicalByStemByLanguage = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
         foreach (var language in languages)
         {
@@ -310,11 +311,42 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
         }
         LogIntersectionSummary(resourcesProcessed, wordIndex.Count);
 
-        await WriteJsonlAsync(outputPath, wordIndex, ct);
-        LogWritten(outputPath, wordIndex.Count);
+        // Pivot the inverted index into one terse document per configured language and persist
+        // them atomically. All documents share a single generatedAt so the served ETag / Last-Modified
+        // is consistent across languages. Languages with no surviving words get an empty document
+        // (so the endpoint serves an empty list rather than 404).
+        var generatedAt = _clock.UtcNowOffset;
+        var documents = BuildDocuments(languages, wordIndex);
+        await _repository.ReplaceAsync(documents, generatedAt, ct);
+        LogPersisted(documents.Count, wordIndex.Count, generatedAt);
 
         return new Success();
     }
+
+    private static List<SearchTermListDocument> BuildDocuments(
+        HashSet<string> languages,
+        Dictionary<(string Word, string Language), HashSet<string>> wordIndex)
+    {
+        var documents = new List<SearchTermListDocument>(languages.Count);
+        foreach (var language in languages.OrderBy(x => x, StringComparer.Ordinal))
+        {
+            var words = wordIndex
+                .Where(kv => kv.Key.Language == language)
+                .OrderBy(kv => kv.Key.Word, StringComparer.Ordinal)
+                .Select(kv => new SearchTermJson(
+                    kv.Key.Word,
+                    kv.Value.OrderBy(x => x, StringComparer.Ordinal).ToArray()))
+                .ToArray();
+            var wordsJson = JsonSerializer.Serialize(words);
+            documents.Add(new SearchTermListDocument(language, wordsJson));
+        }
+        return documents;
+    }
+
+    // Terse wire/storage shape: { "w": canonical word, "s": [sorted unprefixed resource ids] }.
+    private sealed record SearchTermJson(
+        [property: System.Text.Json.Serialization.JsonPropertyName("w")] string Word,
+        [property: System.Text.Json.Serialization.JsonPropertyName("s")] IReadOnlyList<string> Resources);
 
     private static string ResolveStemDictionary(string language) => language switch
     {
@@ -390,38 +422,10 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
         public int ResourcesWithSurvivingWords { get; set; }
     }
 
-    private static async Task WriteJsonlAsync(
-        string path,
-        Dictionary<(string Word, string Language), HashSet<string>> wordIndex,
-        CancellationToken ct)
-    {
-        var directory = Path.GetDirectoryName(Path.GetFullPath(path));
-        if (!string.IsNullOrEmpty(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        await using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-        await using var writer = new StreamWriter(stream);
-
-        var serializerOptions = new JsonSerializerOptions { WriteIndented = false };
-        var orderedKeys = wordIndex.Keys
-            .OrderBy(k => k.Word, StringComparer.Ordinal)
-            .ThenBy(k => k.Language, StringComparer.Ordinal);
-        foreach (var key in orderedKeys)
-        {
-            var entries = wordIndex[key]
-                .OrderBy(x => x, StringComparer.Ordinal)
-                .ToArray();
-            var line = JsonSerializer.Serialize(new { w = key.Word, l = key.Language, s = entries }, serializerOptions);
-            await writer.WriteLineAsync(line.AsMemory(), ct);
-        }
-    }
-
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "GenerateWordlist started. SampleSize={SampleSize}, PoolRows={PoolRows}, MinLength={MinLength}, Output={Output}, Languages={Languages}")]
-    private partial void LogStarted(int sampleSize, int poolRows, int minLength, string output, string languages);
+        Message = "GenerateSearchTerms started. SampleSize={SampleSize}, PoolRows={PoolRows}, MinLength={MinLength}, Languages={Languages}")]
+    private partial void LogStarted(int sampleSize, int poolRows, int minLength, string languages);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Estimated total Dialog rows: {TotalRows}")]
     private partial void LogTotalRows(long totalRows);
@@ -438,7 +442,7 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
     [LoggerMessage(Level = LogLevel.Information, Message = "Stage B fallback triggered for {Count} resources")]
     private partial void LogStageBHits(int count);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Hydrated {Count} dialogs (title/summary/searchTags).")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Hydrated {Count} dialogs (title/summary).")]
     private partial void LogHydrated(int count);
 
     [LoggerMessage(
@@ -453,9 +457,11 @@ internal sealed partial class GenerateWordlistCommandHandler : IRequestHandler<G
 
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "Intersection complete. ResourcesProcessed={ResourcesProcessed}, TotalEntries={TotalEntries} (rows in JSONL).")]
+        Message = "Intersection complete. ResourcesProcessed={ResourcesProcessed}, TotalEntries={TotalEntries} ((word, language) pairs).")]
     private partial void LogIntersectionSummary(int resourcesProcessed, int totalEntries);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Wordlist written to {Path} ({EntryCount} entries).")]
-    private partial void LogWritten(string path, int entryCount);
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Search terms persisted: {LanguageCount} language documents, {EntryCount} total (word, language) entries, GeneratedAt={GeneratedAt}.")]
+    private partial void LogPersisted(int languageCount, int entryCount, DateTimeOffset generatedAt);
 }

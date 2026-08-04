@@ -12,8 +12,8 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Filtering;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Wordlist.Tokenizer;
+using Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Filtering;
+using Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Tokenizer;
 using FluentValidation;
 using MediatR;
 using MediatR.NotificationPublishers;
@@ -59,8 +59,8 @@ public static class ApplicationExtensions
 
             // Singleton
             .AddSingleton<ICompactJwsGenerator, Ed25519Generator>()
-            .AddSingleton<IWordlistTokenizer, WordlistTokenizer>()
-            .AddSingleton<IWordlistFilter, WordlistFilter>()
+            .AddSingleton<ISearchTermsTokenizer, SearchTermsTokenizer>()
+            .AddSingleton<ISearchTermsFilter, SearchTermsFilter>()
 
             // Scoped
             .AddScoped<IApplicationContext, ApplicationContext>()

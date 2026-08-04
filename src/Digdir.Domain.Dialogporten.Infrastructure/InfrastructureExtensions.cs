@@ -3,31 +3,26 @@ using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
-using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Polly.Extensions.Http;
-using Polly;
-using Polly.Contrib.WaitAndRetry;
-using Digdir.Domain.Dialogporten.Infrastructure.Common;
-using FluentValidation;
 using Digdir.Domain.Dialogporten.Application;
+using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
-using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
-using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.AccessManagement;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.OrganizationRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
+using Digdir.Domain.Dialogporten.Infrastructure.Common;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
+using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -35,21 +30,26 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
+using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
+using FluentValidation;
 using HotChocolate.Subscriptions;
-using MessagePack.Resolvers;
-using Microsoft.Extensions.Logging;
-using Npgsql;
-using StackExchange.Redis;
-using ZiggyCreatures.Caching.Fusion;
-using ZiggyCreatures.Caching.Fusion.NullObjects;
-using ZiggyCreatures.Caching.Fusion.Locking.AsyncKeyed;
-using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Development;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence.FusionCache;
-using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
-using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using MassTransit;
 using MediatR;
+using MessagePack.Resolvers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Npgsql;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Polly.Extensions.Http;
+using StackExchange.Redis;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Locking.AsyncKeyed;
+using ZiggyCreatures.Caching.Fusion.NullObjects;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 
@@ -173,10 +173,12 @@ public static class InfrastructureExtensions
         services.AddFusionCacheStackExchangeRedisBackplane(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
 
         // Party/person/org display names from Altinn Name Registry (slow-moving). Keyed per looked-up id.
+        // FactoryHardTimeout must exceed the system-user retry loop: 3x delays (500+1000+2000ms) + 4 HTTP calls.
         services.ConfigureFusionCache(nameof(Altinn.NameRegistry), new()
         {
             Duration = TimeSpan.FromHours(24),
-            FailSafeMaxDuration = TimeSpan.FromHours(26)
+            FailSafeMaxDuration = TimeSpan.FromHours(26),
+            FactoryHardTimeout = TimeSpan.FromSeconds(20)
         })
         // Full Altinn service-resource definitions (title/owner/delegable/status/type). Low cardinality, large
         // payload; an input to the service-resource metadata catalogue.
@@ -263,14 +265,26 @@ public static class InfrastructureExtensions
         .ConfigureFusionCache(PartyResourceRepository.ReferencedResourcesCacheName, new()
         {
             Duration = TimeSpan.FromMinutes(30),
-            FailSafeMaxDuration = TimeSpan.FromMinutes(60),
+            // A stale value must stay servable for longer than any realistic refresh-failure streak: while one
+            // exists, callers waiting on the per-key memory lock are served it at the factory soft timeout
+            // (behavior pinned by FusionCacheFailSafeSemanticsTests); without one they wait on the lock until
+            // their request is cancelled. Freshness in normal operation is governed by Duration alone.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
+            // Substantial headroom over the factory's DB work (30s Npgsql CommandTimeout, plus connection
+            // acquisition and result mapping, which the command timeout does not cover). A tight budget
+            // cancels slow-but-succeeding rebuilds, so refreshes never complete and fail-safe silently
+            // becomes the only data source.
+            FactoryHardTimeout = TimeSpan.FromSeconds(60),
             SkipDistributedCache = true
         })
         // Subjects (roles/access packages) per referenced party-resource; used by the metadata item builder.
         // Invalidated on SubjectResourceRepository.Merge.
         .ConfigureFusionCache(SubjectResourceRepository.ReferencedPartyResourcesCacheName, new()
         {
-            Duration = TimeSpan.FromMinutes(20)
+            Duration = TimeSpan.FromMinutes(20),
+            // See ReferencedResourcesCacheName above for the rationale behind both values.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
+            FactoryHardTimeout = TimeSpan.FromSeconds(60)
         })
         .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
         {
@@ -296,10 +310,23 @@ public static class InfrastructureExtensions
             // several-MB graph to Redis; each replica rebuilds cheaply from its already-cached inputs. Eager
             // refresh + fail-safe keep the multi-MB rebuild off the request path.
             Duration = TimeSpan.FromMinutes(20),
-            FailSafeMaxDuration = TimeSpan.FromHours(2),
+            // A stale value must stay servable for longer than any realistic rebuild-failure streak: while one
+            // exists, callers waiting on the per-key memory lock are served it at FactorySoftTimeout (behavior
+            // pinned by FusionCacheFailSafeSemanticsTests); without one they wait on the lock until their
+            // request is cancelled. Freshness in normal operation is governed by Duration alone.
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
             EagerRefreshThreshold = 0.8f,
-            FactorySoftTimeout = TimeSpan.FromSeconds(6),
-            FactoryHardTimeout = TimeSpan.FromSeconds(10),
+            // The caller-facing latency ceiling while a rebuild is in flight and a stale value exists: both the
+            // triggering caller and lock waiters fall back to stale when it elapses, and the rebuild completes
+            // in the background. Kept small so callers never wait long on an in-flight rebuild; fresh data
+            // arrives via eager refresh and background completion rather than on the request path.
+            FactorySoftTimeout = TimeSpan.FromSeconds(1),
+            // Substantial headroom for the full sequential rebuild (referenced resources + the item builder's
+            // cached lookups, each DB-bound step capped by the 30s CommandTimeout); sized operationally, not a
+            // guaranteed worst-case bound. Rebuilds that cannot finish within this budget never succeed, and
+            // fail-safe silently becomes the only data source. On a cold miss this hard timeout is the
+            // caller-facing wait ceiling.
+            FactoryHardTimeout = TimeSpan.FromSeconds(120),
             SkipDistributedCache = true
         })
         .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()

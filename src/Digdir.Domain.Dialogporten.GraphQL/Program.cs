@@ -12,6 +12,7 @@ using Digdir.Library.Utils.AspNet;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
@@ -108,16 +109,15 @@ static void BuildAndRun(string[] args)
         // Graph QL
         .AddDialogportenGraphQl()
 
-        // Response compression (opt-in per resolver via [EnableResponseCompression])
-        .AddDialogportenResponseCompression()
-
         // Add controllers
         .AddControllers()
             .Services
 
         // Telemetry
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
-            additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
+            additionalMetrics: x => x
+                .AddAspNetCoreInstrumentation()
+                .AddNpgsqlInstrumentation(),
             additionalTracing: x => x
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()
@@ -126,9 +126,10 @@ static void BuildAndRun(string[] args)
                 {
                     o.EnrichWithHttpResponse = (activity, _) =>
                     {
-                        DialogportenGqlActivityEnricher.RenameOperationName(activity);
+                        RenameRootActivityListener.EnrichRootActivity(activity);
                     };
-                }))
+                }),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
 
         // Add health checks with configured endpoints and well-known auth metadata endpoints
         .AddAspNetHealthChecks((x, y) =>
@@ -164,8 +165,6 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
 
     app.UseCors();
-    // Must precede MapGraphQL so HotChocolate's response body stream is wrapped before write.
-    app.UseResponseCompression();
     app.MapAspNetHealthChecks()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()

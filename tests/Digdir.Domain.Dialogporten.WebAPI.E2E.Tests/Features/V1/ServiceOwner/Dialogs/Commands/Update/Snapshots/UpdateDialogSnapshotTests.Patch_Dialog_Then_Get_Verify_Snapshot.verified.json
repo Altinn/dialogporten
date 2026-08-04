@@ -250,7 +250,7 @@
           "expiresAt": null
         }
       ],
-      "navigationalActions": null
+      "navigationalActions": []
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -324,7 +324,7 @@
           "expiresAt": null
         }
       ],
-      "navigationalActions": null
+      "navigationalActions": []
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -398,7 +398,7 @@
           "expiresAt": null
         }
       ],
-      "navigationalActions": null
+      "navigationalActions": []
     }
   ],
   "guiActions": [
@@ -525,8 +525,8 @@
       ]
     }
   ],
-  "seenSinceLastUpdate": null,
-  "seenSinceLastContentUpdate": null,
+  "seenSinceLastUpdate": [],
+  "seenSinceLastContentUpdate": [],
   "isContentSeen": false,
   "serviceOwnerContext": {
     "serviceOwnerLabels": [

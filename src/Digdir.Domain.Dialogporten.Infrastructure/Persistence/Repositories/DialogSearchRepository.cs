@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Dapper;
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
@@ -25,22 +27,26 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
     private readonly NpgsqlDataSource _dataSource;
     private readonly ISearchStrategySelector<EndUserSearchContext> _endUserSearchStrategySelector;
     private readonly IOptionsSnapshot<InfrastructureSettings> _infrastructureSettings;
+    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
 
     public DialogSearchRepository(
         DialogDbContext dbContext,
         NpgsqlDataSource dataSource,
         ISearchStrategySelector<EndUserSearchContext> endUserSearchStrategySelector,
-        IOptionsSnapshot<InfrastructureSettings> infrastructureSettings)
+        IOptionsSnapshot<InfrastructureSettings> infrastructureSettings,
+        IOptionsSnapshot<ApplicationSettings> applicationSettings)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(dataSource);
         ArgumentNullException.ThrowIfNull(endUserSearchStrategySelector);
         ArgumentNullException.ThrowIfNull(infrastructureSettings);
+        ArgumentNullException.ThrowIfNull(applicationSettings);
 
         _db = dbContext;
         _dataSource = dataSource;
         _endUserSearchStrategySelector = endUserSearchStrategySelector;
         _infrastructureSettings = infrastructureSettings;
+        _applicationSettings = applicationSettings;
     }
 
     public async Task UpsertFreeTextSearchIndex(Guid dialogId, CancellationToken cancellationToken)
@@ -321,15 +327,54 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             .IgnoreQueryFilters()
             .AsNoTracking();
 
-        var dialogs = await efQuery.ToPaginatedListAsync(
-            query.OrderBy!,
-            query.ContinuationToken,
-            query.Limit,
-            applyOrder: true,
-            applyContinuationToken: false,
-            cancellationToken);
+        // Every end-user search runs inside a transaction so we can pin session settings with SET LOCAL:
+        //   * plan_cache_mode = force_custom_plan (ALWAYS): the service-driven strategies pass the
+        //     authorized party set as a bound text[] parameter; only a custom plan (which inspects the
+        //     actual array) drives the recency-ordered ServiceResource index with the party set as a
+        //     filter. A GENERIC plan treats the array as opaque, picks the party-first index, and probes
+        //     once per party (tens of thousands of index searches) -> it times out. Verified on prod:
+        //     custom ~0.7s, generic > 60s. EF/Npgsql use custom plans by default (no auto-prepare); this
+        //     pins that requirement in code and is required independently of the timeout.
+        //   * statement_timeout (only when SearchStatementTimeoutSeconds > 0): caps the worst case (a
+        //     common term with no narrowing range whose GIN scan is unbounded; or a broad
+        //     service/party-driven search). On timeout PostgreSQL cancels the statement (SQLSTATE 57014),
+        //     surfaced as a "too broad" 422. Set the timeout to 0 to disable *only* the timeout, never the
+        //     custom-plan pinning.
+        // Built as one batched command (single round-trip) by concatenation (not interpolation) so EF
+        // doesn't flag it as raw-SQL injection; the value is a server-controlled integer (milliseconds)
+        // and SET does not accept bind parameters. (No retry execution strategy is configured, so an
+        // explicit transaction here is safe.)
+        var timeoutSeconds = _applicationSettings.Value.Limits.EndUserSearch.SearchStatementTimeoutSeconds;
+        var sessionSetupSql = "SET LOCAL plan_cache_mode = force_custom_plan";
+        if (timeoutSeconds > 0)
+        {
+            sessionSetupSql += "; SET LOCAL statement_timeout = "
+                + (timeoutSeconds * 1000).ToString(CultureInfo.InvariantCulture);
+        }
 
-        return dialogs;
+        await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await _db.Database.ExecuteSqlRawAsync(sessionSetupSql, cancellationToken);
+            var dialogs = await efQuery.ToPaginatedListAsync(
+                query.OrderBy!,
+                query.ContinuationToken,
+                query.Limit,
+                applyOrder: true,
+                applyContinuationToken: false,
+                cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return dialogs;
+        }
+        // Only a genuine server-side statement_timeout maps to "too broad". A client disconnect / request
+        // cancellation also surfaces as 57014 (Npgsql cancels the running statement), but there the caller
+        // has gone away and it must not be reported as a domain error — let it propagate.
+        catch (PostgresException ex)
+            when (ex.SqlState == PostgresErrorCodes.QueryCanceled && !cancellationToken.IsCancellationRequested)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw new SearchTermTooBroadException(ex);
+        }
     }
 
 

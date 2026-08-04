@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
@@ -75,8 +76,15 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
     public DateTimeOffset? UpdatedBefore { get; set; }
 
     /// <summary>
-    /// Only return dialogs with content updated after this date
+    /// Only return dialogs with content updated after this date.
     /// </summary>
+    /// <remarks>
+    /// For free-text search (<see cref="Search"/>) this is the only date filter that limits how much the
+    /// search has to scan, so it is the recommended way to narrow a broad search. A broad term without a
+    /// <see cref="ContentUpdatedAfter"/> bound may exceed the server-side time limit and return 422; the
+    /// other date filters (including <see cref="ContentUpdatedBefore"/>, <see cref="CreatedAfter"/> and
+    /// <see cref="UpdatedAfter"/>) do not have this effect.
+    /// </remarks>
     public DateTimeOffset? ContentUpdatedAfter { get; set; }
 
     /// <summary>
@@ -142,7 +150,7 @@ public sealed class SearchDialogQuery : SortablePaginationParameter<SearchDialog
 }
 
 [GenerateOneOf]
-public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogDto>, ValidationError, Forbidden>;
+public sealed partial class SearchDialogResult : OneOfBase<PaginatedList<DialogDto>, ValidationError, Forbidden, DomainError>;
 
 internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQuery, SearchDialogResult>
 {
@@ -184,10 +192,21 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             return PaginatedList<DialogDto>.CreateEmpty(request);
         }
 
-        var dialogs = await _searchRepository.GetDialogsAsEndUser(
-            request.ToGetDialogsQuery(_clock.UtcNowOffset),
-            authorizedResources,
-            cancellationToken);
+        PaginatedList<DialogEntity> dialogs;
+        try
+        {
+            dialogs = await _searchRepository.GetDialogsAsEndUser(
+                request.ToGetDialogsQuery(_clock.UtcNowOffset),
+                authorizedResources,
+                cancellationToken);
+        }
+        catch (SearchTermTooBroadException)
+        {
+            return new DomainError(new DomainFailure(
+                nameof(SearchDialogQuery.Search),
+                "The search matched too many dialogs to complete. Narrow it with a date range "
+                + "(contentUpdatedAfter), fewer parties, or a service resource."));
+        }
 
         var dialogIds = dialogs.Items
             .Select(x => x.Id)

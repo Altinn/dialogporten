@@ -13,6 +13,7 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
     private const string LocalResourceType = "LocalResourceType";
     private const string LocalOrgId = "742859274";
     private const string LocalOrgShortName = "ttd";
+    private const string LocalStatus = "Active";
     private static readonly HashSet<ServiceResourceInformation> CachedResourceIds = new(new ServiceResourceInformationEqualityComparer());
     private readonly IDialogDbContext _db;
 
@@ -41,7 +42,8 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
                 LocalOrgShortName,
                 [new ResourceLocalization("nb", id)],
                 [],
-                false));
+                false,
+                LocalStatus));
         }
 
         return CachedResourceIds
@@ -73,7 +75,8 @@ internal class LocalDevelopmentResourceRegistry : IResourceRegistry
                 ownerOrgShortName,
                 [new ResourceLocalization("nb", serviceResourceId)],
                 [],
-                false));
+                false,
+                LocalStatus));
     }
 
     public virtual async Task<IReadOnlyDictionary<string, ServiceResourceInformation>> GetResourceInformation(

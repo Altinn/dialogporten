@@ -135,7 +135,7 @@ public sealed class DialogEndUserSearchSqlHelpersTests
         {
             ResourcesByParties = authorizations.ToDictionary(
                 x => x.Party,
-                x => x.Services.ToHashSet(StringComparer.Ordinal),
+                x => (IReadOnlySet<string>)x.Services.ToHashSet(StringComparer.Ordinal),
                 StringComparer.Ordinal)
         };
 

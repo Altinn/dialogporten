@@ -761,6 +761,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
             });
 
     [Fact]
+    public Task Can_Create_Dialog_With_100_Linked_Transmissions() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.Dto.Transmissions = CreateLinkedTransmissions(100))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Transmissions.Should().HaveCount(100));
+
+    [Fact]
+    public Task Cannot_Create_Dialog_With_101_Linked_Transmissions() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.Dto.Transmissions = CreateLinkedTransmissions(101))
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText("depth violation"));
+
+    [Fact]
     public Task Creating_Dialog_Should_Set_ContentUpdatedAt() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -1115,6 +1132,32 @@ public class CreateDialogTests : ApplicationCollectionFixture
     {
         Value = [new() { Value = content, LanguageCode = "nb" }]
     };
+
+    private static List<TransmissionDto> CreateLinkedTransmissions(int count)
+    {
+        var ids = Enumerable
+            .Range(0, count)
+            .Select(_ => IdentifiableExtensions.CreateVersion7())
+            .ToArray();
+
+        return ids
+            .Select((id, index) => new TransmissionDto
+            {
+                Id = id,
+                RelatedTransmissionId = index == 0 ? null : ids[index - 1],
+                Type = DialogTransmissionType.Values.Information,
+                Sender = new ActorDto
+                {
+                    ActorType = ActorType.Values.ServiceOwner,
+                },
+                Content = new TransmissionContentDto
+                {
+                    Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) },
+                    Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) }
+                }
+            })
+            .ToList();
+    }
 
     private static ActivityDto CreateActivityDto(string description) => new()
     {

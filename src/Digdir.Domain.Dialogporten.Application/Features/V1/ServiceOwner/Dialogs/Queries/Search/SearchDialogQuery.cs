@@ -188,7 +188,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             ? await _altinnAuthorization.GetAuthorizedResourcesForSearch(
                 request.Party?.Select(x => x.ToLowerInvariant()).ToList() ?? [],
                 request.ServiceResource ?? [],
-                cancellationToken)
+                cancellationToken: cancellationToken)
             : null;
 
         var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);

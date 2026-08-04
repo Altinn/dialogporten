@@ -9,7 +9,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
-using Digdir.Domain.Dialogporten.Domain.Localizations;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
@@ -362,22 +361,6 @@ public static class Mappers
 
     private static DialogStatusInput ToDialogStatusInput(this DialogStatus.Values source) =>
         (DialogStatusInput)source;
-
-    private static TLocalizationSet? ToLocalizationSet<TLocalizationSet>(
-        this IEnumerable<LocalizationDto>? source,
-        TLocalizationSet? destination = null)
-        where TLocalizationSet : LocalizationSet, new()
-    {
-        var localizations = source as ICollection<LocalizationDto> ?? source?.ToList();
-        if (localizations is null || localizations.Count == 0)
-        {
-            return null;
-        }
-
-        destination ??= new TLocalizationSet();
-        destination.Localizations.MergeFrom(localizations);
-        return destination;
-    }
 
     private static ContentValueDto? Copy(this ContentValueDto? source) =>
         source is null

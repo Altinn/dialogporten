@@ -12,7 +12,9 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Infrastructure;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
@@ -159,15 +161,19 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton(AltinnAuthorization)
             .AddScoped<LocalDevelopmentAltinnAuthorization>()
             .AddScoped<IAltinnAuthorization, RoutedAltinnAuthorization>()
+            .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
+            .AddTransient<IServiceResourceMetadataCatalogue, ServiceResourceMetadataCatalogue>()
             .AddSingleton<ICloudEventBus, IntegrationTestCloudBus>()
             .AddScoped<IFeatureMetricServiceResourceCache, TestFeatureMetricServiceResourceCache>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, DialogFirstFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GinFirstFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyNoFtsStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericPartyDrivenStrategy>()
-            .AddTransient<IQueryStrategy<EndUserSearchContext>, GenericServiceDrivenStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SingleServiceFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiPartyFtsStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, SingleServiceStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiPartyStrategy>()
+            .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }

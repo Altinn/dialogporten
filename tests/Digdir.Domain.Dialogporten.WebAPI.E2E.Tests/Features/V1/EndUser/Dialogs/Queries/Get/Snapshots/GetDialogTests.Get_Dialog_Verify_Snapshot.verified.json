@@ -414,7 +414,7 @@
           "expiresAt": null
         }
       ],
-      "navigationalActions": null
+      "navigationalActions": []
     }
   ],
   "guiActions": [

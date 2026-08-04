@@ -34,10 +34,10 @@ param postgresConfiguration = {
     tier: 'Burstable'
   }
   storage: {
-    storageSizeGB: 32
-    autoGrow: 'Enabled'
+    storageSizeGB: 64
+    autoGrow: 'Disabled'
     type: 'Premium_LRS'
-    tier: 'P4'
+    tier: 'P6'
   }
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: false

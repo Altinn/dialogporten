@@ -173,14 +173,14 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             case IdentifierLookupGrantType.Role:
                 if (metadata.RolesBySubject.TryGetValue(evidenceItem.Subject, out var role))
                 {
-                    evidenceItem.Name = PruneLocalizations(role.Name, acceptedLanguages);
+                    evidenceItem.Name = role.Name.Pruned(acceptedLanguages);
                     evidenceItem.Links = role.Links;
                 }
                 break;
             case IdentifierLookupGrantType.AccessPackage:
                 if (metadata.AccessPackagesBySubject.TryGetValue(evidenceItem.Subject, out var accessPackage))
                 {
-                    evidenceItem.Name = PruneLocalizations(accessPackage.Name, acceptedLanguages);
+                    evidenceItem.Name = accessPackage.Name.Pruned(acceptedLanguages);
                     evidenceItem.Links = accessPackage.Links;
                 }
                 break;
@@ -190,15 +190,6 @@ internal sealed class IdentifierLookupAuthorizationResolver : IIdentifierLookupA
             default:
                 throw new ArgumentOutOfRangeException(nameof(evidenceItem), evidenceItem.GrantType, "Unknown grant type.");
         }
-    }
-
-    private static List<LocalizationDto> PruneLocalizations(
-        IReadOnlyList<LocalizationDto> localizations,
-        List<AcceptedLanguage>? acceptedLanguages)
-    {
-        var prunedLocalizations = localizations.ToList();
-        prunedLocalizations.PruneLocalizations(acceptedLanguages);
-        return prunedLocalizations;
     }
 
     private async Task<List<string>> ResolveRoleAndAccessPackageSubjects(

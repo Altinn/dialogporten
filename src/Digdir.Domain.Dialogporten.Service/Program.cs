@@ -1,16 +1,17 @@
 ﻿using System.Globalization;
 using Digdir.Domain.Dialogporten.Application;
-using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Serilog;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Service;
 using Digdir.Domain.Dialogporten.Service.Common;
 using Digdir.Library.Utils.AspNet;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using OpenTelemetry.Metrics;
+using Serilog;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -62,11 +63,14 @@ static void BuildAndRun(string[] args)
 
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
-            additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
+            additionalMetrics: x => x
+                .AddAspNetCoreInstrumentation()
+                .AddNpgsqlInstrumentation(),
             additionalTracing: x =>
             {
                 x.AddAspNetCoreInstrumentationExcludingHealthPaths();
-            })
+            },
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
         .AddAzureAppConfiguration()
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)

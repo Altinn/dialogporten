@@ -169,7 +169,7 @@ jobs:
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      path: 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
+      path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
@@ -180,7 +180,7 @@ jobs:
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasOpenApiEndUserSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiEndUserClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      path: 'src/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj'
+      path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj'
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
@@ -191,7 +191,7 @@ jobs:
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasOpenApiServiceOwnerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiServiceOwnerClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      path: 'src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj'
+      path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj'
       source: 'https://api.nuget.org/v3/index.json'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

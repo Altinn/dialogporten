@@ -50,7 +50,7 @@ jobs:
     uses: ./.github/workflows/workflow-publish-nuget.yml
     with:
       version: ${{ inputs.publish_as_stable && inputs.version || format('{0}-rc+{1}', inputs.version, needs.generate-git-short-sha.outputs.gitShortSha) }}
-      path: ${{ (inputs.project == 'ServiceOwner (Legacy)' && 'src/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj') || (inputs.project == 'ServiceOwner' && 'src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj') || 'src/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj' }}
+      path: ${{ (inputs.project == 'ServiceOwner (Legacy)' && 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj') || (inputs.project == 'ServiceOwner' && 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj') || 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj' }}
       source: ${{ inputs.source }}
       ref: ${{ inputs.ref || github.ref }}
     secrets:

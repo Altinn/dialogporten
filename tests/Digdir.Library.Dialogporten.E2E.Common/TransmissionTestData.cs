@@ -9,14 +9,19 @@ public static class TransmissionTestData
     public static void AddComplexTransmissions(V1ServiceOwnerDialogsCommandsCreate_Dialog dialog)
     {
         var transmissionId = Guid.CreateVersion7();
+        var firstTransmissionCreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var secondTransmissionCreatedAt = firstTransmissionCreatedAt.AddSeconds(1);
+
         dialog.Transmissions.Clear();
         dialog.AddTransmission(t =>
         {
             t.ExternalReference = "first-transmission";
             t.Id = transmissionId;
+            t.CreatedAt = firstTransmissionCreatedAt;
         });
         dialog.AddTransmission(t =>
         {
+            t.CreatedAt = secondTransmissionCreatedAt;
             t.Sender = new()
             {
                 ActorType = Actors_ActorType.PartyRepresentative,

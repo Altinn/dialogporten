@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
@@ -12,8 +10,8 @@ using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
@@ -23,6 +21,7 @@ using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using NSwag;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -91,10 +90,13 @@ static void BuildAndRun(string[] args)
 
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
-            additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
+            additionalMetrics: x => x
+                .AddAspNetCoreInstrumentation()
+                .AddNpgsqlInstrumentation(),
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
-                .AddAspNetCoreInstrumentationExcludingHealthPaths())
+                .AddAspNetCoreInstrumentationExcludingHealthPaths(),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
         // Options setup
         .AddAspNetCommon(builder.Configuration.GetSection(WebApiSettings.SectionName)
             .GetSection(WebHostCommonSettings.SectionName))
@@ -177,7 +179,7 @@ static void BuildAndRun(string[] args)
         // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
         // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
         .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
-        .AddDocument("v1", "Dialogporten - EndUser/ServiceOwner combined (legacy)")
+        .AddDocument("v1", "(Legacy) Dialogporten - EndUser/ServiceOwner combined")
         .AddDocument("v1.enduser", "Dialogporten EndUser")
         .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
         .DisableAgent());
@@ -228,11 +230,6 @@ static void BuildAndRun(string[] args)
             };
             x.Serializer.Options.RespectNullableAnnotations = true;
             x.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            // Do not serialize empty collections
-            x.Serializer.Options.TypeInfoResolver = new DefaultJsonTypeInfoResolver
-            {
-                Modifiers = { IgnoreEmptyCollections }
-            };
             x.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
@@ -271,17 +268,6 @@ static void BuildAndRun(string[] args)
     app.Run();
 }
 
-static void IgnoreEmptyCollections(JsonTypeInfo typeInfo)
-{
-    foreach (var property in typeInfo.Properties)
-    {
-        if (property.PropertyType.IsAssignableTo(typeof(ICollection)))
-        {
-            property.ShouldSerialize = (_, val) => val is ICollection collection && collection.Count > 0;
-        }
-    }
-}
-
 static void ConfigureOpenApiV1Document(DocumentOptions options, string documentName, string title, string? audience = null)
 {
     options.MaxEndpointVersion = 1;
@@ -292,8 +278,8 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.PostProcess = document =>
         {
             document.Generator = null;
-            document.ReplaceProblemDetailsDescriptions();
             document.MakeCollectionsNullable();
+            document.AddTagDescriptions();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();

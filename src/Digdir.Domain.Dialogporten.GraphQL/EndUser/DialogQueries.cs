@@ -140,6 +140,10 @@ public partial class Queries
             {
                 Errors = [.. validationError.Errors.Select(x => new SearchDialogValidationError { Message = x.ErrorMessage })]
             },
-            forbidden => new SearchDialogsPayload { Errors = [new SearchDialogForbidden()] });
+            forbidden => new SearchDialogsPayload { Errors = [new SearchDialogForbidden()] },
+            domainError => new SearchDialogsPayload
+            {
+                Errors = [.. domainError.Errors.Select(x => new SearchDialogDomainError { Message = x.ErrorMessage })]
+            });
     }
 }

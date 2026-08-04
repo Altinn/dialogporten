@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   send-deployment-to-swarmia:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: Send deployment to Swarmia
       run: |

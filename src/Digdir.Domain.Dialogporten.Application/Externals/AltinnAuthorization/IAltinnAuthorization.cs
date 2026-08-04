@@ -12,6 +12,11 @@ public interface IAltinnAuthorization
     Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
         List<string> constraintParties,
         List<string> constraintServiceResources,
+        bool includeDialogIds = true,
+        // Overrides Limits.PartyResourcePruning.MinResourcesPruningThreshold for this call. Pass 0 to force
+        // pruning regardless of result size (the authorized-service-resources endpoint requires the result to be
+        // a subset of the referenced catalogue). Null keeps the configured threshold (the search optimization).
+        int? minResourcesPruningThreshold = null,
         CancellationToken cancellationToken = default);
 
     Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,

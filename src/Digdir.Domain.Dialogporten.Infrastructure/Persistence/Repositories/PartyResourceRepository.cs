@@ -27,7 +27,10 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
     private const string CacheKeyPrefix = "ps:";
     private const string ReferencedResourcesCacheKey = "all";
 
-    private static readonly StringComparer Comparer = StringComparer.InvariantCultureIgnoreCase;
+    // OrdinalIgnoreCase across the board: party/resource URNs are ASCII, and the authorization pipeline that
+    // consumes these sets (AuthorizationHelper) compares with OrdinalIgnoreCase, so a single shared comparer
+    // keeps set membership/intersection stable regardless of which set is probed.
+    private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
 
     private readonly NpgsqlDataSource _dataSource;
     private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
@@ -126,6 +129,72 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
             return [];
         }
 
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        // The single-party case is by far the most common; it uses a non-JSON shape with scalar
+        // parameters so the planner gets an accurate cardinality and we avoid jsonb (de)serialization.
+        // Both shapes join the tiny Resource table through a MATERIALIZED CTE, which forces a hash join
+        // instead of a per-row nested loop on PK_Resource (the dominant buffer cost for multi-party sets).
+        var command = unprefixedParties.Count == 1
+            ? BuildSinglePartyCommand(unprefixedParties[0], cancellationToken)
+            : BuildMultiPartyCommand(unprefixedParties, cancellationToken);
+
+        // The query aggregates resources per party (array_agg), so it returns one row per party rather than one
+        // row per (party, resource). This keeps the result row count proportional to the number of parties (not
+        // party-resource pairs, which can be millions for callers authorized to many parties) and lets us build
+        // the party URN once per party instead of once per row.
+        //
+        // The resource array is read directly from the DbDataReader: Dapper's object mapper cannot bind a
+        // Postgres array column (it sees the field type as System.Array), but Npgsql materializes text[] as
+        // string[] via GetFieldValue. Dapper still handles parameter binding via the CommandDefinition.
+        var result = new Dictionary<string, HashSet<string>>(Comparer);
+        await using var reader = await connection.ExecuteReaderAsync(command);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var shortPrefix = reader.GetString(0)[0];
+            var unprefixedPartyIdentifier = reader.GetString(1);
+            var resources = reader.GetFieldValue<string[]>(2);
+            result[ToPartyUrn(shortPrefix, unprefixedPartyIdentifier)] = new HashSet<string>(resources, Comparer);
+        }
+
+        return result;
+    }
+
+    private static CommandDefinition BuildSinglePartyCommand(
+        UnprefixedParty party,
+        CancellationToken cancellationToken)
+    {
+        const string sql =
+            """
+            WITH res AS MATERIALIZED (
+                SELECT "Id", "UnprefixedResourceIdentifier" FROM partyresource."Resource"
+            )
+            SELECT p."ShortPrefix" AS "ShortPrefix"
+                 , p."UnprefixedPartyIdentifier" AS "UnprefixedPartyIdentifier"
+                 , array_agg(r."UnprefixedResourceIdentifier") AS "Resources"
+            FROM partyresource."Party" p
+            JOIN partyresource."PartyResource" pr
+              ON pr."PartyId" = p."Id"
+            JOIN res r
+              ON r."Id" = pr."ResourceId"
+            WHERE p."ShortPrefix" = @ShortPrefix::char(1)
+              AND p."UnprefixedPartyIdentifier" = @UnprefixedPartyIdentifier
+            GROUP BY p."ShortPrefix", p."UnprefixedPartyIdentifier"
+            """;
+
+        return new CommandDefinition(
+            sql,
+            new
+            {
+                ShortPrefix = party.ShortPrefix.ToString(),
+                party.UnprefixedPartyIdentifier
+            },
+            cancellationToken: cancellationToken);
+    }
+
+    private static CommandDefinition BuildMultiPartyCommand(
+        List<UnprefixedParty> parties,
+        CancellationToken cancellationToken)
+    {
         const string sql =
             """
             WITH input_parties AS (
@@ -133,40 +202,31 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
                      , x."UnprefixedPartyIdentifier"
                 FROM jsonb_to_recordset(@Parties::jsonb)
                     AS x("ShortPrefix" char(1), "UnprefixedPartyIdentifier" text)
+            ),
+            res AS MATERIALIZED (
+                SELECT "Id", "UnprefixedResourceIdentifier" FROM partyresource."Resource"
             )
             SELECT p."ShortPrefix" AS "ShortPrefix"
                  , p."UnprefixedPartyIdentifier" AS "UnprefixedPartyIdentifier"
-                 , r."UnprefixedResourceIdentifier" AS "UnprefixedResourceIdentifier"
+                 , array_agg(r."UnprefixedResourceIdentifier") AS "Resources"
             FROM input_parties ip
             JOIN partyresource."Party" p
               ON p."ShortPrefix" = ip."ShortPrefix"
              AND p."UnprefixedPartyIdentifier" = ip."UnprefixedPartyIdentifier"
             JOIN partyresource."PartyResource" pr
               ON pr."PartyId" = p."Id"
-            JOIN partyresource."Resource" r
+            JOIN res r
               ON r."Id" = pr."ResourceId"
+            GROUP BY p."ShortPrefix", p."UnprefixedPartyIdentifier"
             """;
 
-        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var command = new CommandDefinition(
+        return new CommandDefinition(
             sql,
             new
             {
-                Parties = JsonSerializer.Serialize(unprefixedParties)
+                Parties = JsonSerializer.Serialize(parties)
             },
             cancellationToken: cancellationToken);
-        var rows = await connection.QueryAsync<SummaryRow>(command);
-
-        return rows
-            .GroupBy(
-                x => ToPartyUrn(x.ShortPrefix, x.UnprefixedPartyIdentifier),
-                Comparer)
-            .ToDictionary(
-                x => x.Key,
-                x => x
-                    .Select(y => y.UnprefixedResourceIdentifier)
-                    .ToHashSet(Comparer),
-                Comparer);
     }
 
     private static bool TryNormalizeRequest(
@@ -180,8 +240,7 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
         }
 
         var requestedParties = parties
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(Comparer)
+            .NormalizeParties(Comparer)
             .ToList();
 
         if (requestedParties.Count == 0)
@@ -326,8 +385,4 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
 
     private sealed record UnprefixedParty(char ShortPrefix, string UnprefixedPartyIdentifier);
 
-    private sealed record SummaryRow(
-        char ShortPrefix,
-        string UnprefixedPartyIdentifier,
-        string UnprefixedResourceIdentifier);
 }

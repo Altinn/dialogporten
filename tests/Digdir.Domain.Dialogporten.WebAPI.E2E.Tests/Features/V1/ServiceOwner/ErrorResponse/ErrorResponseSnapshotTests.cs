@@ -2,7 +2,6 @@ using System.Net;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using static Digdir.Library.Dialogporten.E2E.Common.JsonSnapshotVerifier;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.ErrorResponse;
 
@@ -20,7 +19,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -62,7 +61,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -80,7 +79,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Gone);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -96,7 +95,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -116,7 +115,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -132,7 +131,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     // "This test is flaky. It sometimes fails with a 503 Service Unavailable in the Azure environments,
@@ -152,7 +151,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.RequestEntityTooLarge);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -167,7 +166,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -208,7 +207,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.BadRequest);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -223,7 +222,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -239,7 +238,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Gone);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -254,7 +253,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -280,7 +279,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -311,7 +310,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.UnprocessableEntity);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     [E2EFact]
@@ -347,7 +346,7 @@ public class ErrorResponseSnapshotTests(WebApiE2EFixture fixture) : E2ETestBase<
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.Conflict);
-        await VerifyJsonSnapshot(response.Error!.Content!);
+        await response.VerifyProblemDetailsSnapshot<ProblemDetails>();
     }
 
     private static V1ServiceOwnerDialogsCommandsUpdate_Dialog CreateSimpleUpdateDialog(

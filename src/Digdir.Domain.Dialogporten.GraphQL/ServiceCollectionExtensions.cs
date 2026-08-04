@@ -10,11 +10,9 @@ namespace Digdir.Domain.Dialogporten.GraphQL;
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDialogportenGraphQl(this IServiceCollection services) => services
-        .AddTransient<ActivityEnricher, DialogportenGqlActivityEnricher>()
         .AddGraphQLServer()
         .BindRuntimeType<Uri, UrlType>()
         .AddHttpRequestInterceptor<DialogportenHttpRequestInterceptor>()
-        .TryAddTypeInterceptor<EnableResponseCompressionTypeInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
         // This assumes that subscriptions have been set up by the infrastructure
         .AddSubscriptionType<Subscriptions>()
@@ -25,5 +23,8 @@ public static class ServiceCollectionExtensions
         .AddErrorTypes()
         .AddMaxExecutionDepthRule(12)
         .AddInstrumentation()
+        // In HotChocolate 16 the root span is owned by ASP.NET Core, so we capture the operation name
+        // here and apply it to the request activity in Program.cs (EnrichWithHttpResponse).
+        .AddDiagnosticEventListener<RenameRootActivityListener>()
         .Services;
 }

@@ -175,12 +175,13 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
         setLabelsResponse.ShouldHaveStatusCode(HttpStatusCode.NoContent);
 
         // Act
-        var getDialogResult = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EndUserApi.GetDialog(dialogId, cancellationToken: ct),
-            isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
-            degradationMessage: "Seen log creation delayed");
+        var getDialogResult = await Fixture.EndUserApi.GetDialog(
+            dialogId,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
+        getDialogResult.ShouldHaveStatusCode(HttpStatusCode.OK);
+        getDialogResult.Content.Should().NotBeNull();
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
             JsonSerializer.Serialize(getDialogResult.Content));
     }

@@ -25,6 +25,58 @@
           "Api"
         ]
       },
+      "ConflictProblemDetails": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "conflictingDialogId": {
+            "description": "The conflicting DialogId.\nSet if applicable, otherwise null.",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
+          "conflictingIdempotentKeys": {
+            "description": "All conflicting idempotent keys.\nSet if applicable, otherwise null.",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errors": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "instance": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "DialogEndUserContextsEntities_SystemLabel": {
         "description": "",
         "enum": [
@@ -7945,6 +7997,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -8393,6 +8452,13 @@
             "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -9168,6 +9234,13 @@
             "description": "Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created."
           },
           "422": {
@@ -9277,6 +9350,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -9640,6 +9720,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -9762,6 +9849,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -9855,6 +9949,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -9945,6 +10046,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -10249,6 +10357,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -10535,6 +10650,13 @@
             "description": "Forbidden"
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -10642,6 +10764,13 @@
             "description": "The given dialog or service owner label was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -10772,6 +10901,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -11162,6 +11298,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -11391,6 +11534,13 @@
             "description": "The specified dialog ID or transmission ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -11609,6 +11759,13 @@
             "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {

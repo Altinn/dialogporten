@@ -9,5 +9,11 @@
       "\u0027duplicate-idempotent-key\u0027 already exists with DialogId \u002700000000-0000-0000-0000-000000000000\u0027"
     ]
   },
-  "conflictingDialogId": "00000000-0000-0000-0000-000000000000"
+  "conflicts": [
+    {
+      "key": "Id",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "reason": "Dialog Id already exists for this IdempotentKey"
+    }
+  ]
 }

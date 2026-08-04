@@ -9,7 +9,11 @@
       "Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: \u002700000000-0000-0000-0000-000000000000\u0027."
     ]
   },
-  "conflictingIdempotentKeys": [
-    "00000000-0000-0000-0000-000000000000"
+  "conflicts": [
+    {
+      "key": "IdempotentKey",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "reason": "IdempotentKey already exists"
+    }
   ]
 }

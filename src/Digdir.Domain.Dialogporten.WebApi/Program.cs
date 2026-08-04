@@ -296,6 +296,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.EnsureJsonPatchConsumes();
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
+        s.SchemaSettings.SchemaProcessors.Add(new OneOfTypesSchemaProcessor());
 
         if (audience is not null)
         {

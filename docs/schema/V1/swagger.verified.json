@@ -25,21 +25,41 @@
           "Api"
         ]
       },
+      "Conflict": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "int32",
+                "type": "integer"
+              },
+              {
+                "format": "guid",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "ConflictProblemDetails": {
         "additionalProperties": {
           "nullable": true
         },
         "properties": {
-          "conflictingDialogId": {
-            "description": "The conflicting DialogId.\nSet if applicable, otherwise null.",
-            "format": "guid",
-            "nullable": true,
-            "type": "string"
-          },
-          "conflictingIdempotentKeys": {
-            "description": "All conflicting idempotent keys.\nSet if applicable, otherwise null.",
+          "conflicts": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/Conflict"
             },
             "nullable": true,
             "type": "array"

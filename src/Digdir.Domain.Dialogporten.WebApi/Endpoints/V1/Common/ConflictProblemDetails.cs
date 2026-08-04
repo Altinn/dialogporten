@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.WebApi.Common;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common;
@@ -6,15 +7,14 @@ namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common;
 [OpenApiTypeName("ConflictProblemDetails")]
 public sealed class ConflictProblemDetails(IDictionary<string, string[]> errors) : ValidationProblemDetails(errors)
 {
-    /// <summary>
-    /// All conflicting idempotent keys.
-    /// Set if applicable, otherwise null.
-    /// </summary>
-    public List<string>? ConflictingIdempotentKeys { get; set; }
+    public List<Conflict> Conflicts { get; set; } = [];
+}
 
-    /// <summary>
-    /// The conflicting DialogId.
-    /// Set if applicable, otherwise null.
-    /// </summary>
-    public Guid? ConflictingDialogId { get; set; }
+[OpenApiTypeName("Conflict")]
+public sealed class Conflict
+{
+    public required string Key { get; set; }
+    [OneOfTypes(typeof(string), typeof(int), typeof(Guid))]
+    public required object Value { get; set; }
+    public required string Reason { get; set; }
 }

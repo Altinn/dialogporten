@@ -3,9 +3,17 @@
   "title": "Conflict.",
   "status": 409,
   "instance": "/api/v1/serviceowner/dialogs",
-  "conflictingIdempotentKeys": [
-    "00000000-0000-0000-0000-000000000000",
-    "00000000-0000-0000-0000-000000000000"
+  "conflicts": [
+    {
+      "key": "IdempotentKey",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "reason": "IdempotentKey already exists"
+    },
+    {
+      "key": "IdempotentKey",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "reason": "IdempotentKey already exists"
+    }
   ],
   "errors": {
     "IdempotentKey": [

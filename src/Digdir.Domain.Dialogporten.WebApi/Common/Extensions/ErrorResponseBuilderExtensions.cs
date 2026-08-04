@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Conflict = Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Conflict;
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
@@ -122,28 +124,35 @@ internal static class ErrorResponseBuilderExtensions
         [DisallowNull] int? statusCode,
         Dictionary<string, string[]> errors)
     {
-        var validationProblemDetails = new ConflictProblemDetails(errors)
+        var firstAttemptedValue = failures?.Select(failure => failure.AttemptedValue).FirstOrDefault(x => x != null);
+
+        var conflicts = firstAttemptedValue switch
+        {
+            DialogIdByIdempotentKeyConflict c => [
+                new Conflict
+                {
+                    Key = nameof(DialogDto.Id),
+                    Value = c.ConflictingDialogId,
+                    Reason = "Dialog Id already exists for this IdempotentKey"
+                }
+            ],
+            IdempotentKeyConflict c => c.ConflictingIdempotentKeys.Select(key => new Conflict
+            {
+                Key = nameof(DialogDto.IdempotentKey),
+                Value = key,
+                Reason = "IdempotentKey already exists"
+            }).ToList(),
+            _ => []
+        };
+
+        return new ConflictProblemDetails(errors)
         {
             Title = "Conflict.",
             Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8",
             Status = statusCode,
             Instance = ctx.Request.Path,
             Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } },
+            Conflicts = conflicts
         };
-        var firstAttemptedValue = failures?.Select(failure => failure.AttemptedValue).FirstOrDefault(x => x != null);
-
-        switch (firstAttemptedValue)
-        {
-            case DialogIdByIdempotentKeyConflict c:
-                validationProblemDetails.ConflictingDialogId = c.ConflictingDialogId;
-                break;
-            case IdempotentKeyConflict c:
-                validationProblemDetails.ConflictingIdempotentKeys = c.ConflictingIdempotentKeys;
-                break;
-            default:
-                break;
-        }
-
-        return validationProblemDetails;
     }
 }

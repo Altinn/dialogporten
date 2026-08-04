@@ -45,8 +45,6 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        EnsureLazyLoadedServices();
-
         var dbContext = eventData.Context;
 
         if (dbContext is null)
@@ -64,9 +62,15 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
 
         if (_domainEvents.Count == 0)
         {
+            // Nothing to publish, so don't touch the publishing services at all. Hosts registered
+            // without pub/sub capabilities (e.g. the Janitor) have no IPublishEndpoint or
+            // ITopicEventSender registered, and resolving them here would fail every SaveChanges
+            // that merely writes entities producing no domain events.
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
+        // There are events to publish, so the publishing services are genuinely required. Fail
+        // loudly (before we attempt any publishing) if the host cannot provide them.
         EnsureLazyLoadedServices();
         foreach (var domainEvent in _domainEvents)
         {

@@ -89,6 +89,54 @@ Below are the available commands (commands are always the first argument):
 ---
 
 
+### generate-searchterms
+
+- **Description:**  
+  Generates the curated, per-language search-term lists used for search autocomplete, and persists them to the `SearchTermList` table (one row per language). The result is served from `GET /api/v1/metadata/searchterms`.
+
+  The command samples dialogs per service resource, extracts words that are *common to all samples* of a resource (a strict per-language intersection, which filters out dialog-specific content such as names and reference numbers), filters the survivors, collapses inflections via Postgres stemming, and stores the result as an inverted index of `word → service resources`.
+
+  Pipeline in brief:
+
+    1. **Sampling (Stage A)** — a single global `TABLESAMPLE SYSTEM` pass over `Dialog`, with the sample percentage derived from `--pool-rows` and the estimated row count (clamped to 0.001–5 %). Rows are bucketed per service resource and the `--sample-size` most recently content-updated dialogs are kept per bucket, biasing terms toward fresh content.
+    2. **Sampling (Stage B)** — resources that the random pool under-sampled are topped up through a direct index lookup, so small resources are not omitted.
+    3. **Intersection** — titles and summaries of a resource's samples are tokenized (letters only, lowercased) per language, and only words present in *every* sample survive. A sample with no content in the given language collapses that resource/language intersection to empty.
+    4. **Filtering** — survivors shorter than `--min-length` or present in the bundled stopword lists (`no.txt`, `en.txt`) are dropped.
+    5. **Stemming** — remaining words are stemmed in bulk with `ts_lexize` using the same dictionaries as the search side (`norwegian_stem` for `nb`/`nn`, `english_stem` for `en`), and each stem is collapsed to one canonical surface form *globally per language*, so the same stem never yields duplicate suggestions across resources.
+    6. **Persistence** — the inverted index is pivoted into one JSON document per configured language and written atomically. All documents from a run share the same `GeneratedAt`, which drives the endpoint's `ETag` / `Last-Modified`.
+
+  The command is safe to run repeatedly and replaces the previous set on success. If no service resources or no samples are found, it logs a warning and leaves the existing data untouched rather than publishing an empty set.
+
+- **Argument(s):**
+
+    - `-n`, `--sample-size`  
+      *Optional*: Samples per service resource, 3–100 (default: `3`). Higher values make the intersection stricter and yield fewer, more generic terms.
+
+    - `--pool-rows`  
+      *Optional*: Target number of rows for the Stage A `TABLESAMPLE` pool (default: `150000`).
+
+    - `-m`, `--min-length`  
+      *Optional*: Minimum word length to keep (default: `5`).
+
+    - `-l`, `--languages`  
+      *Optional*: Comma-separated language codes to generate documents for (default: `nb,nn,en`). Languages with no surviving words get an empty document, so the endpoint serves an empty list rather than a 404.
+
+- **Examples:**
+
+  ```bash
+  # Generate with defaults (3 samples per resource, nb/nn/en)
+  janitor generate-searchterms
+
+  # Stricter intersection from a larger pool
+  janitor generate-searchterms -n 10 --pool-rows 500000
+
+  # Bokmål only, allowing shorter words
+  janitor generate-searchterms -l nb -m 4
+  ```
+
+---
+
+
 ### collect-custom-metrics
 
 - **Description:**  

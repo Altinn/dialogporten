@@ -2,7 +2,6 @@ using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
-using Microsoft.AspNetCore.Http.Extensions;
 using AuthorizationPolicy = Microsoft.AspNetCore.Authorization.AuthorizationPolicy;
 using ContentType = Azure.Core.ContentType;
 
@@ -43,7 +42,7 @@ internal sealed class DialogportenAuthorizationMiddlewareResultHandler : IAuthor
     private string? GetForbiddenMessageFromEndpointSummary(HttpContext context)
     {
         var endpointMetadata = context.GetEndpoint()?.Metadata;
-        var displayUrl = context.Request.GetDisplayUrl();
+        var displayUrl = context.Request.PathBase + context.Request.Path;
         if (endpointMetadata == null)
         {
             _logger.LogWarning("Found no Endpoint metadata for request url {Url}.", displayUrl);

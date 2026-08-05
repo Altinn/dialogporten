@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.119.0](https://github.com/Altinn/dialogporten/compare/v1.118.10...v1.119.0) (2026-08-05)
+
+
+### Features
+
+* Add dialog token validation sample for enduser and serviceowner sdk ([#4194](https://github.com/Altinn/dialogporten/issues/4194)) ([558c774](https://github.com/Altinn/dialogporten/commit/558c774259033e28288bbbb498aed80e47ca3dda))
+
 ## [1.118.10](https://github.com/Altinn/dialogporten/compare/v1.118.9...v1.118.10) (2026-07-30)
 
 

@@ -5,7 +5,7 @@ using NJsonSchema.Generation;
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class OneOfTypesAttribute : Attribute
+public sealed class OneOfTypesAttribute : Attribute
 {
     public Type[] Types { get; }
     public OneOfTypesAttribute(params Type[] types)
@@ -14,7 +14,7 @@ public class OneOfTypesAttribute : Attribute
     }
 }
 
-public class OneOfTypesSchemaProcessor : ISchemaProcessor
+public sealed class OneOfTypesSchemaProcessor : ISchemaProcessor
 {
     public void Process(SchemaProcessorContext context)
     {

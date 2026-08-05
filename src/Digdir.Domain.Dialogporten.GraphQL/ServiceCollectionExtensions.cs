@@ -1,9 +1,9 @@
 using Digdir.Domain.Dialogporten.GraphQL.Common;
+using Digdir.Domain.Dialogporten.GraphQL.Common.Extensions.HotChocolate;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using HotChocolate.Diagnostics;
 
 namespace Digdir.Domain.Dialogporten.GraphQL;
 
@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDialogportenGraphQl(this IServiceCollection services) => services
         .AddGraphQLServer()
         .BindRuntimeType<Uri, UrlType>()
+        .TryAddTypeInterceptor<ResponseCompressionTypeInterceptor>()
         .AddHttpRequestInterceptor<DialogportenHttpRequestInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
         // This assumes that subscriptions have been set up by the infrastructure

@@ -28,7 +28,7 @@ permissions:
 jobs:
   tag-issues-with-environment:
     name: Tag PRs and issues with ${{ inputs.environment-label }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       GH_TOKEN: ${{ github.token }}
       LABEL: ${{ inputs.environment-label }}

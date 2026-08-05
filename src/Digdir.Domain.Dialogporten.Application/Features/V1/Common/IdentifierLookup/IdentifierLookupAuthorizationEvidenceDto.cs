@@ -1,3 +1,6 @@
+using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 
 public sealed class IdentifierLookupAuthorizationEvidenceDto
@@ -14,6 +17,8 @@ public sealed class IdentifierLookupAuthorizationEvidenceItemDto
 {
     public IdentifierLookupGrantType GrantType { get; set; }
     public required string Subject { get; set; }
+    public List<LocalizationDto> Name { get; set; } = [];
+    public LinkDto? Links { get; set; }
 }
 
 public enum IdentifierLookupGrantType

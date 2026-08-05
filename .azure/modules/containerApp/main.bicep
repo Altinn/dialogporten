@@ -181,7 +181,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   name: last(split(userAssignedIdentityId, '/'))
 }
 
-resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
+resource containerApp 'Microsoft.App/containerApps@2026-01-01' = {
   name: name
   location: location
   identity: {

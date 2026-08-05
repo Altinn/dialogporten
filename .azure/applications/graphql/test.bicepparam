@@ -9,6 +9,11 @@ param whitelistedIPs = [
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')
 
+param resources = {
+    cpu: 1
+    memory: '2Gi'
+}
+
 param otelTraceSamplerRatio = '1'
 
 // secrets

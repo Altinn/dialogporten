@@ -2,10 +2,13 @@ using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
+using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
+using HotChocolate.Authorization;
 using MediatR;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 
+[Authorize(Policy = AuthorizationPolicy.EndUser)]
 public sealed class Mutations
 {
     public async Task<SetSystemLabelPayload> SetSystemLabel(

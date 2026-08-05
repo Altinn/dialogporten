@@ -24,6 +24,7 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
     public CreateTransmissionTests(DialogApplication application) : base(application) { }
 
     private const string ParentTransmissionIdKey = nameof(ParentTransmissionIdKey);
+    private const string DeepChainTailTransmissionIdKey = nameof(DeepChainTailTransmissionIdKey);
 
     [Fact]
     public Task Can_Create_Transmission_Related_To_Existing_Transmission() =>
@@ -50,6 +51,56 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 result.Transmissions.Last().RelatedTransmissionId.Should()
                     .Be(result.Transmissions.First().Id);
             });
+
+    [Fact]
+    public Task Can_Create_100_Linked_Transmissions() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new CreateTransmissionCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                Transmissions = CreateLinkedTransmissions(100)
+            })
+            .AssertResult<CreateTransmissionSuccess>()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(result =>
+                result.Transmissions.Should().HaveCount(100));
+
+    [Fact]
+    public Task Cannot_Create_101_Linked_Transmissions() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) => new CreateTransmissionCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                Transmissions = CreateLinkedTransmissions(101)
+            })
+            .ExecuteAndAssert<DomainError>(result =>
+                result.ShouldHaveErrorWithText("depth violation"));
+
+    [Fact]
+    public Task Cannot_Create_Transmission_That_Extends_Existing_100_Linked_Chain() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand((_, ctx) =>
+            {
+                var transmissions = CreateLinkedTransmissions(100);
+                ctx.Bag[DeepChainTailTransmissionIdKey] = transmissions.Last().Id!.Value;
+
+                return new CreateTransmissionCommand
+                {
+                    DialogId = ctx.GetDialogId(),
+                    Transmissions = transmissions
+                };
+            })
+            .AssertResult<CreateTransmissionSuccess>()
+            .CreateTransmission((transmission, ctx) =>
+                transmission.RelatedTransmissionId = ctx.GetGuidByKey(DeepChainTailTransmissionIdKey))
+            .ExecuteAndAssert<DomainError>(result =>
+                result.ShouldHaveErrorWithText("depth violation"));
 
     private const string TransmissionAttachmentName = "transmission-attachment";
 
@@ -132,4 +183,30 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 x.AddAttachment(x =>
                     x.Urls.First().MediaType = new string('a', TestConstants.DefaultMaxStringLength + 1)))
             .ExecuteAndAssert<ValidationError>();
+
+    private static List<CreateTransmissionDto> CreateLinkedTransmissions(int count)
+    {
+        var ids = Enumerable
+            .Range(0, count)
+            .Select(_ => IdentifiableExtensions.CreateVersion7())
+            .ToArray();
+
+        return ids
+            .Select((id, index) => new CreateTransmissionDto
+            {
+                Id = id,
+                RelatedTransmissionId = index == 0 ? null : ids[index - 1],
+                Type = Domain.Dialogs.Entities.Transmissions.DialogTransmissionType.Values.Information,
+                Sender = new()
+                {
+                    ActorType = Domain.Actors.ActorType.Values.ServiceOwner
+                },
+                Content = new()
+                {
+                    Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) },
+                    Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) }
+                }
+            })
+            .ToList();
+    }
 }

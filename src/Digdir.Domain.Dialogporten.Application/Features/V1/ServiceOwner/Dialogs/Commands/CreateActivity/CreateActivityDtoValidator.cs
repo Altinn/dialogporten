@@ -11,8 +11,8 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 internal sealed class CreateActivityDtoValidator : AbstractValidator<CreateActivityDto>
 {
     public CreateActivityDtoValidator(
-        IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
         IValidator<ActorDto> actorValidator,
+        LocalizationDtosValidatorFactory localizationDtosValidatorFactory,
         IClock clock)
     {
         RuleFor(x => x.Id)
@@ -36,7 +36,7 @@ internal sealed class CreateActivityDtoValidator : AbstractValidator<CreateActiv
         RuleFor(x => x.Description)
             .NotEmpty()
             .WithMessage("Description is required when the type is '" + nameof(DialogActivityType.Values.Information) + "'.")
-            .SetValidator(localizationsValidator)
+            .SetValidator(localizationDtosValidatorFactory.CreateActivityDescriptionLocalizationDtosValidator())
             .When(x => x.Type == DialogActivityType.Values.Information);
 
         RuleFor(x => x.Description)

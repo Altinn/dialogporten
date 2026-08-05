@@ -6,7 +6,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 internal static class AuthorizedPartiesHelper
 {
     public const string PartyTypeSelfIdentified = "SelfIdentified";
-    public const string SelfIdentifiedUserRoleCode = "seln";
 
     private const string PartyTypeOrganization = "Organization";
     private const string PartyTypePerson = "Person";
@@ -38,9 +37,7 @@ internal static class AuthorizedPartiesHelper
         {
             PartyTypeOrganization => NorwegianOrganizationIdentifier.PrefixWithSeparator + dto.OrganizationNumber,
             PartyTypePerson => NorwegianPersonIdentifier.PrefixWithSeparator + dto.PersonId,
-
-            // We need a hack here, as we only support scenarios where the self-identified user is the authenticated user.
-            PartyTypeSelfIdentified => authenticatedUser.PartyIdentifier.FullId,
+            PartyTypeSelfIdentified => GetSelfIdentifiedPartyUrn(dto),
             _ => throw new ArgumentOutOfRangeException(nameof(dto))
         };
 
@@ -60,7 +57,9 @@ internal static class AuthorizedPartiesHelper
             },
             IsDeleted = dto.IsDeleted,
             HasKeyRole = dto.AuthorizedRoles.Exists(role => KeyRoleCodes.Contains(role)),
-            IsCurrentEndUser = dto.PersonId == authenticatedUser.PartyIdentifier.Id || dto.Type == PartyTypeSelfIdentified,
+            IsCurrentEndUser = dto.Type == PartyTypeSelfIdentified
+                ? string.Equals(party, authenticatedUser.PartyIdentifier.FullId, StringComparison.OrdinalIgnoreCase)
+                : dto.PersonId == authenticatedUser.PartyIdentifier.Id,
             IsMainAdministrator = dto.AuthorizedRoles.Contains(MainAdministratorRoleCode),
             IsAccessManager = dto.AuthorizedRoles.Contains(AccessManagerRoleCode),
             HasOnlyAccessToSubParties = dto.OnlyHierarchyElementWithNoAccess,
@@ -75,6 +74,16 @@ internal static class AuthorizedPartiesHelper
                 }).ToList(),
             SubParties = dto.Subunits.Count > 0 ? dto.Subunits.Select(x => MapFromDto(x, authenticatedUser)).ToList() : null
         };
+    }
+
+    private static string GetSelfIdentifiedPartyUrn(AuthorizedPartiesResultDto dto)
+    {
+        // Access Management identifies idporten-email users via the emailId field.
+        // Other SelfIdentified parties (returned alongside an email user's authorized parties) are legacy
+        // self-identified users, addressed by their username (the Name field).
+        return dto.EmailId is not null
+            ? IdportenEmailUserIdentifier.PrefixWithSeparator + dto.EmailId.ToLowerInvariant()
+            : AltinnSelfIdentifiedUserIdentifier.PrefixWithSeparator + dto.Name.ToLowerInvariant();
     }
 
     private static List<string> GetPrefixedRolesAndAccessPackages(List<string> dtoAuthorizedRoles, List<string> dtoAuthorizedAccessPackages) =>

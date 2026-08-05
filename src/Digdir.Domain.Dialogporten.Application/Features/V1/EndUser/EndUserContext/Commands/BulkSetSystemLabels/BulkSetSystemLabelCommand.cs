@@ -59,7 +59,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             await GetDistinctPartiesAndServiceResources(dialogIds, cancellationToken);
 
         var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
-            distinctParties, distinctServiceResources, cancellationToken);
+            distinctParties, distinctServiceResources, cancellationToken: cancellationToken);
 
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var dialogs = await _db.Dialogs

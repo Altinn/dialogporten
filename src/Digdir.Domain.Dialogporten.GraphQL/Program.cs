@@ -10,9 +10,9 @@ using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Library.Utils.AspNet;
 using FluentValidation;
-using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
@@ -115,7 +115,9 @@ static void BuildAndRun(string[] args)
 
         // Telemetry
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
-            additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
+            additionalMetrics: x => x
+                .AddAspNetCoreInstrumentation()
+                .AddNpgsqlInstrumentation(),
             additionalTracing: x => x
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()
@@ -124,9 +126,10 @@ static void BuildAndRun(string[] args)
                 {
                     o.EnrichWithHttpResponse = (activity, _) =>
                     {
-                        DialogportenGqlActivityEnricher.RenameOperationName(activity);
+                        RenameRootActivityListener.EnrichRootActivity(activity);
                     };
-                }))
+                }),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
 
         // Add health checks with configured endpoints and well-known auth metadata endpoints
         .AddAspNetHealthChecks((x, y) =>
@@ -172,13 +175,10 @@ static void BuildAndRun(string[] args)
     app.MapGraphQL()
         .RequireCors(GraphQlCorsOptions.PolicyName)
         .RequireAuthorization()
-        .WithOptions(new GraphQLServerOptions
+        .WithOptions(options =>
         {
-            EnableSchemaRequests = true,
-            Tool =
-            {
-                Enable = true
-            }
+            options.EnableSchemaRequests = true;
+            options.Tool.Enable = true;
         });
 
     app.Run();

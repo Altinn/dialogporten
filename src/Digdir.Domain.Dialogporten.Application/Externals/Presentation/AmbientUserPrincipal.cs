@@ -28,9 +28,6 @@ public static class AmbientUserPrincipal
             _previousPrincipal = previousPrincipal;
         }
 
-        public void Dispose()
-        {
-            CurrentPrincipal.Value = _previousPrincipal;
-        }
+        public void Dispose() => CurrentPrincipal.Value = _previousPrincipal;
     }
 }

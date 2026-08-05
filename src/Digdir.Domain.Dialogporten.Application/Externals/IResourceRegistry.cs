@@ -6,6 +6,10 @@ public interface IResourceRegistry
 
     Task<ServiceResourceInformation?> GetResourceInformation(string serviceResourceId, CancellationToken cancellationToken);
 
+    Task<IReadOnlyDictionary<string, ServiceResourceInformation>> GetResourceInformation(
+        IReadOnlyCollection<string> serviceResourceIds,
+        CancellationToken cancellationToken);
+
     IAsyncEnumerable<List<UpdatedSubjectResource>> GetUpdatedSubjectResources(DateTimeOffset since, int batchSize,
         CancellationToken cancellationToken);
 
@@ -20,7 +24,8 @@ public sealed record ServiceResourceInformation(
     string OwnOrgShortName,
     IReadOnlyList<ResourceLocalization> DisplayName,
     IReadOnlyList<ResourceLocalization> Description,
-    bool Delegable)
+    bool Delegable,
+    string Status)
 {
     public static readonly ServiceResourceInformation Empty = new(
         string.Empty,
@@ -29,12 +34,14 @@ public sealed record ServiceResourceInformation(
         string.Empty,
         [],
         [],
-        false);
+        false,
+        string.Empty);
 
     public string ResourceType { get; } = ResourceType.ToLowerInvariant();
     public string OwnerOrgNumber { get; } = OwnerOrgNumber.ToLowerInvariant();
     public string OwnOrgShortName { get; } = OwnOrgShortName.ToLowerInvariant();
     public string ResourceId { get; } = ResourceId.ToLowerInvariant();
+    public string Status { get; } = Status.ToLowerInvariant();
 }
 
 public sealed record ResourceLocalization(string LanguageCode, string Value);

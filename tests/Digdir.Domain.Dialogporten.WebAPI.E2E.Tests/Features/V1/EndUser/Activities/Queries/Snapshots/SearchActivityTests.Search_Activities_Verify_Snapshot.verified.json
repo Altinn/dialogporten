@@ -5,7 +5,7 @@
     "extendedType": "uri:dialog-opened",
     "type": "DialogOpened",
     "transmissionId": null,
-    "description": null
+    "description": []
   },
   {
     "id": "00000000-0000-0000-0000-000000000000",
@@ -30,6 +30,6 @@
     "extendedType": null,
     "type": "TransmissionOpened",
     "transmissionId": "00000000-0000-0000-0000-000000000000",
-    "description": null
+    "description": []
   }
 ]

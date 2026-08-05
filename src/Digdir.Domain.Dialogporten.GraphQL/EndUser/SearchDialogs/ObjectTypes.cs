@@ -29,6 +29,14 @@ public sealed class SearchDialogValidationError : ISearchDialogError
     public string Message { get; set; } = null!;
 }
 
+// A domain-level failure (mirrors the DomainError member of SearchDialogResult; REST maps it to 422),
+// distinct from input-validation errors. Currently the only case is a search that matched too much to
+// complete in time; the Message carries the specifics and a narrow-your-search hint.
+public sealed class SearchDialogDomainError : ISearchDialogError
+{
+    public string Message { get; set; } = null!;
+}
+
 public sealed class SearchDialogsPayload
 {
     public List<SearchDialog>? Items { get; set; }
@@ -101,8 +109,17 @@ public sealed class SearchDialog
     [GraphQLDescription("The aggregated status of the dialog.")]
     public DialogStatus Status { get; set; }
 
-    [GraphQLDeprecated($"Use {nameof(IsContentSeen)} instead. See the new field's description for an explanation of the new behavior.")]
-    [GraphQLDescription("Indicates whether the dialog contains content that has not been viewed or opened by the user yet.")]
+    [GraphQLDescription("""
+                         Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
+                         A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of Submission or Correction.
+                         The value of this field is:
+                         - true when there are any new unopened Transmissions sent from the service owner.
+                         - false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.
+                         Note that the value is
+                         - determined by the service owner and not to be confused with IsContentSeen
+                         - not affected by SystemLabels
+                         For correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened
+                        """)]
     public bool HasUnopenedContent { get; set; }
 
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.")]
@@ -126,7 +143,14 @@ public sealed class SearchDialog
     [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.")]
     public List<SeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 
-    [GraphQLDescription("A dialog is considered seen if it has been retrieved by a user since its last content update, and there is no SystemLabel MarkedAsUnopened")]
+    [GraphQLDescription("""
+                        Indicates whether a dialog has been seen since its last content update.
+                        The value of this field is
+                         - true if the dialog has been retrieved since its last content update by either GET /enduser/dialogs/{dialogId} or GET /serviceowner/dialogs/{dialogId}?EndUserId={userId} and there is no SystemLabel MarkedAsUnopened
+                         - false if there is a SystemLabel MarkedAsUnopened, even if the dialog has been seen since its last content update
+                         - false after the dialog receives a content update.
+                        Note that the value is determined by Dialogporten and not to be confused with HasUnopenedContent
+                        """)]
     public bool IsContentSeen { get; set; }
 
     [GraphQLDescription("Metadata about the dialog owned by end-users.")]
@@ -177,25 +201,25 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Whether to exclude API-only dialogs from the results. Defaults to false.")]
     public bool? ExcludeApiOnly { get; init; } = false;
 
-    [GraphQLDescription("Only return dialogs created after this date")]
+    [GraphQLDescription("Only return dialogs created after this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? CreatedAfter { get; init; }
 
-    [GraphQLDescription("Only return dialogs created before this date")]
+    [GraphQLDescription("Only return dialogs created before this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? CreatedBefore { get; init; }
 
-    [GraphQLDescription("Only return dialogs with content updated after this date")]
+    [GraphQLDescription("Only return dialogs with content updated after this date. Recommended for free text search: this is the only date filter that limits how much a broad search has to scan. A broad search term without a contentUpdatedAfter bound may exceed the server-side time limit and return 422 - narrow it with this filter (and/or fewer parties or a service resource).")]
     public DateTimeOffset? ContentUpdatedAfter { get; init; }
 
-    [GraphQLDescription("Only return dialogs with content updated before this date")]
+    [GraphQLDescription("Only return dialogs with content updated before this date. Unlike contentUpdatedAfter, this upper bound does not by itself limit how much a free text search has to scan.")]
     public DateTimeOffset? ContentUpdatedBefore { get; init; }
 
     [GraphQLDescription("Only return dialogs that have content that has/hasn't been seen by the user. A dialog is considered seen if it has been retrieved by a user, since it's last content update, and there is no SystemLabel MarkedAsUnopened.")]
     public bool? IsContentSeen { get; set; }
 
-    [GraphQLDescription("Only return dialogs updated after this date")]
+    [GraphQLDescription("Only return dialogs updated after this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? UpdatedAfter { get; init; }
 
-    [GraphQLDescription("Only return dialogs updated before this date")]
+    [GraphQLDescription("Only return dialogs updated before this date. For free text search this does not limit how much the search has to scan; use contentUpdatedAfter to narrow a broad search and avoid a 422 timeout.")]
     public DateTimeOffset? UpdatedBefore { get; init; }
 
     [GraphQLDescription("Only return dialogs with due date after this date")]
@@ -216,6 +240,6 @@ public sealed class SearchDialogInput
     [GraphQLDescription("Continuation token for pagination")]
     public string? ContinuationToken { get; init; }
 
-    [GraphQLDescription("Sort the results by one or more fields")]
+    [GraphQLDescription("Sort the results by one or more fields. Defaults to contentUpdatedAt descending. For free text search, keeping the default contentUpdatedAt ordering together with contentUpdatedAfter gives the fastest results.")]
     public List<SearchDialogSortType>? OrderBy { get; set; }
 }

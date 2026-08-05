@@ -70,6 +70,13 @@ public sealed class DialogLookupAuthorizationEvidenceItem
 {
     public DialogLookupGrantType GrantType { get; set; }
     public string Subject { get; set; } = null!;
+    public List<Localization> Name { get; set; } = [];
+    public DialogLookupLinks? Links { get; set; }
+}
+
+public sealed class DialogLookupLinks
+{
+    public string Metadata { get; set; } = null!;
 }
 
 public enum DialogLookupGrantType

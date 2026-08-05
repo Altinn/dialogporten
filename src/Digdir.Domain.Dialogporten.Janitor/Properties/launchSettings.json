@@ -3,28 +3,32 @@
     "subject-resources": {
       "commandName": "Project",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "janitor-subject-resources"
       },
       "commandLineArgs": "sync-subject-resource-mappings"
     },
     "resource-policy-information": {
       "commandName": "Project",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "janitor-resource-policy-information"
       },
       "commandLineArgs": "sync-resource-policy-information -c 1"
     },
     "reindex-dialogsearch": {
       "commandName": "Project",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "janitor-reindex-dialogsearch"
       },
       "commandLineArgs": "reindex-dialogsearch -f"
     },
     "aggregate-cost-metrics": {
       "commandName": "Project",
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "janitor-aggregate-cost-metrics"
       },
       "commandLineArgs": "aggregate-cost-metrics"
     }

@@ -25,7 +25,7 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
             dialogId,
             transmissionId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -43,15 +43,15 @@ public class GetTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<WebApi
         var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
         dialog.Content.Should().NotBeNull();
 
-        var transmissionId = dialog.Content.Transmissions
-            .Single(t => t.RelatedTransmissionId is not null).Id;
+        var transmissionId = dialog.Content.Transmissions.Should()
+            .ContainSingle(t => t.RelatedTransmissionId != null).Which.Id;
 
         // Act
         var response = await Fixture.EndUserApi.V1.GetDialogTransmission(
             dialogId,
             transmissionId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

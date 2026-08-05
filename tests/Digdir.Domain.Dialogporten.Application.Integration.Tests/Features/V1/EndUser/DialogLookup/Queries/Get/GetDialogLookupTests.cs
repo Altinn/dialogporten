@@ -542,6 +542,10 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                     .ContainSingle(x =>
                         x.GrantType == IdentifierLookupGrantType.Role
                         && x.Subject == roleSubject);
+                var evidence = result.AuthorizationEvidence.Evidence.Single(x => x.GrantType == IdentifierLookupGrantType.Role);
+                evidence.Name.Should().ContainSingle(x => x.LanguageCode == "nb" && x.Value == "Dialogleser");
+                evidence.Links.Should().NotBeNull();
+                evidence.Links.Metadata.Should().Be("https://platform.example/accessmanagement/api/v1/meta/info/roles/11111111-1111-1111-1111-111111111111");
             });
     }
 
@@ -609,6 +613,10 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
                     .ContainSingle(x =>
                         x.GrantType == IdentifierLookupGrantType.AccessPackage
                         && x.Subject == accessPackageSubject);
+                var evidence = result.AuthorizationEvidence.Evidence.Single(x => x.GrantType == IdentifierLookupGrantType.AccessPackage);
+                evidence.Name.Should().ContainSingle(x => x.LanguageCode == "nb" && x.Value == "Dialogoppslagspakke");
+                evidence.Links.Should().NotBeNull();
+                evidence.Links.Metadata.Should().Be("https://platform.example/accessmanagement/api/v1/meta/info/accesspackages/package/urn/urn:altinn:accesspackage:dialog_lookup_package");
             });
     }
 

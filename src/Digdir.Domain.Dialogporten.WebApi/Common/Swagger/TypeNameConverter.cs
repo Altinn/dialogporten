@@ -14,6 +14,7 @@ internal static class TypeNameConverter
     private static readonly string[] ExcludedNamespacePrefixes =
     [
         "FastEndpoints",
+        "Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common",
         "Digdir.Domain.Dialogporten.Domain.",
         "Digdir.Domain.Dialogporten.WebApi.Endpoints.",
         "Digdir.Domain.Dialogporten.Application.Features.",

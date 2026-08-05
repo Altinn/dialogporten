@@ -188,7 +188,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
             ? await _altinnAuthorization.GetAuthorizedResourcesForSearch(
                 request.Party?.Select(x => x.ToLowerInvariant()).ToList() ?? [],
                 request.ServiceResource ?? [],
-                cancellationToken)
+                cancellationToken: cancellationToken)
             : null;
 
         var orgName = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
@@ -397,10 +397,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     }
 
     private Task<Dictionary<Guid, int>> FetchGuiAttachmentCountByDialogId(Guid[] dialogIds,
-        CancellationToken cancellationToken)
-    {
-        return _searchRepository.FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
-    }
+        CancellationToken cancellationToken) => _searchRepository.FetchGuiAttachmentCountByDialogId(dialogIds, cancellationToken);
 }
 
 internal static class SearchDialogQueryExtensions

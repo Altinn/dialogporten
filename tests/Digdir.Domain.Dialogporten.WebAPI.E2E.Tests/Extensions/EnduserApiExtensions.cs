@@ -23,7 +23,7 @@ public static class EnduserApiExtensions
                 dialogId,
                 request,
                 revision,
-                cancellationToken ?? TestContext.Current.CancellationToken);
+                cancellationToken: cancellationToken ?? TestContext.Current.CancellationToken);
         }
 
         public Task<IApiResponse<Dialog>> GetDialog(
@@ -33,7 +33,7 @@ public static class EnduserApiExtensions
             enduserApi.V1.GetDialog(
                 dialogId,
                 acceptedLanguages ?? new(),
-                cancellationToken);
+                cancellationToken: cancellationToken);
 
         public Task<IApiResponse> BulkSetSystemLabels(
             Action<BulkSetSystemLabel> modify,
@@ -43,7 +43,7 @@ public static class EnduserApiExtensions
             modify(request);
             return enduserApi.V1.BulkSetDialogSystemLabels(
                 request,
-                cancellationToken ?? TestContext.Current.CancellationToken);
+                cancellationToken: cancellationToken ?? TestContext.Current.CancellationToken);
         }
 
         public Task<IApiResponse<ICollection<LabelAssignmentLog>>> GetSystemLabelAssignmentLog(
@@ -51,6 +51,6 @@ public static class EnduserApiExtensions
             CancellationToken? cancellationToken = null) =>
             enduserApi.V1.SearchDialogLabelAssignmentLogs(
                 dialogId,
-                cancellationToken ?? TestContext.Current.CancellationToken);
+                cancellationToken: cancellationToken ?? TestContext.Current.CancellationToken);
     }
 }

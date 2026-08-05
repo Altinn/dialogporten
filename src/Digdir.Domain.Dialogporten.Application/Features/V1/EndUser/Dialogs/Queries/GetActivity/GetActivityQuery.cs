@@ -89,7 +89,7 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
             return new EntityNotFound<DialogActivity>(request.ActivityId);
         }
 
-        activity.FilterLocalizations(request.AcceptedLanguages);
+        activity.FilterActivityLocalizations(request.AcceptedLanguages);
         return activity.ToDto();
     }
 }

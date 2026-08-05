@@ -23,7 +23,7 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var response = await Fixture.EndUserApi.V1.SearchDialogTransmissions(
             dialogId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
@@ -42,12 +42,15 @@ public class SearchTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var response = await Fixture.EndUserApi.V1.SearchDialogTransmissions(
             dialogId,
             new AcceptedLanguages(),
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        response.Content.Should().NotBeNull();
+        response.Content.Should().NotBeEmpty();
 
         await JsonSnapshotVerifier.VerifyJsonSnapshot(
-            JsonSerializer.Serialize(response.Content));
+            JsonSerializer.Serialize(response.Content)
+        );
     }
 }

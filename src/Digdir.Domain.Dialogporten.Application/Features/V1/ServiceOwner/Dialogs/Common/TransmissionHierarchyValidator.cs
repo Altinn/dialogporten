@@ -18,8 +18,8 @@ internal interface ITransmissionHierarchyValidator
 
 internal sealed class TransmissionHierarchyValidator : ITransmissionHierarchyValidator
 {
-    private const int MaxHierarchyDepth = 20;
-    private const int MaxHierarchyWidth = 20;
+    private const int MaxHierarchyDepth = 100;
+    private const int MaxHierarchyWidth = 100;
 
     private readonly ITransmissionHierarchyRepository _hierarchyRepository;
     private readonly IDomainContext _domainContext;

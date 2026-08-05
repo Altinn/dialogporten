@@ -71,10 +71,10 @@ public sealed class UserRegistry : IUserRegistry
         {
             UserIdType.Person
                 or UserIdType.ServiceOwnerOnBehalfOfPerson
-                or UserIdType.AltinnSelfIdentifiedUser
                 or UserIdType.IdportenEmailIdentifiedUser
-                or UserIdType.FeideUser
                 or UserIdType.SystemUser => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
+            UserIdType.AltinnSelfIdentifiedUser => throw new UnreachableException(),
+            UserIdType.FeideUser => throw new UnreachableException(),
             UserIdType.Unknown => throw new UnreachableException(),
             UserIdType.ServiceOwner => throw new UnreachableException(),
             _ => throw new UnreachableException()

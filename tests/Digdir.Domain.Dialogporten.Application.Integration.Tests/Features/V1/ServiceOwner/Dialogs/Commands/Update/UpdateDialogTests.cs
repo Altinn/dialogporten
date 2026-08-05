@@ -1,6 +1,7 @@
 ﻿using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -11,6 +12,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -815,64 +817,139 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 }
             });
 
-    [Theory, ClassData(typeof(DialogContentLengthTestData))]
-    public Task Content_Length_Validation_Test(
-        DialogContentLengthScenario scenario) =>
-        FlowBuilder.For(Application)
+    [Theory, ClassData(typeof(DialogLengthTestData))]
+    public Task Length_Validation_Test(DialogContentLengthScenario scenario)
+    {
+        var flowExecutor = FlowBuilder.For(Application);
+
+        flowExecutor = scenario.ModifyFlow?.Invoke(flowExecutor) ?? flowExecutor;
+
+        return flowExecutor
             .CreateSimpleDialog()
             .UpdateDialog(scenario.UpdateDialog)
-            .ExecuteAndAssert(scenario.ExpectedResultType);
+            .ExecuteAndAssert(result =>
+            {
+                result.Should().BeOfType(
+                    expectedType: scenario.ExpectedResultType,
+                    because: result is ValidationError ve
+                        ? $"there should be no validation errors: {string.Join(", ", ve.Errors.Select(e => e.ErrorMessage))}"
+                        : "there should be validation errors"
+                );
+            });
+    }
 
     public sealed record DialogContentLengthScenario(
         string DisplayName,
         Action<UpdateDialogCommand> UpdateDialog,
-        Type ExpectedResultType) : IClassDataBase
+        Type ExpectedResultType,
+        Func<IFlowStep, IFlowStep>? ModifyFlow = null
+    ) : IClassDataBase
     {
         public override string ToString() => DisplayName;
     }
 
-    private sealed class DialogContentLengthTestData : TheoryData<DialogContentLengthScenario>
+    private sealed class DialogLengthTestData : TheoryData<DialogContentLengthScenario>
     {
         private static string Repeat(char c, int x) => new(c, x);
         private static int GetMaxLength(DialogContentType.Values value) =>
             DialogContentType.GetValue(value).MaxLength;
 
-        public DialogContentLengthTestData()
+        public DialogLengthTestData()
         {
-            AddLengthTests((x, value) => x.Dto.Content!.Title = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.Title));
+            AddLengthTests(
+                caseName: "Content title",
+                applyValue: (x, value) => x.Dto.Content!.Title = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.Title)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.SenderName));
+            AddLengthTests(
+                caseName: "Content Sender Name",
+                applyValue: (x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.SenderName)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.Summary));
+            AddLengthTests(
+                caseName: "Content Summary",
+                applyValue: (x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.Summary)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.AdditionalInfo));
+            AddLengthTests(
+                caseName: "Content AdditionalInfo",
+                applyValue: (x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.AdditionalInfo)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.ExtendedStatus));
+            AddLengthTests(
+                caseName: "Content ExtendedStatus",
+                applyValue: (x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.ExtendedStatus)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.NonSensitiveTitle));
+            AddLengthTests(
+                caseName: "Content NonSensitiveTitle",
+                applyValue: (x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.NonSensitiveTitle)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.NonSensitiveSummary));
+            AddLengthTests(
+                caseName: "Content NonSensitiveSummary",
+                applyValue: (x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
+                maxLength: GetMaxLength(DialogContentType.Values.NonSensitiveSummary)
+            );
+
+            AddLengthTests(
+                caseName: "Content Activities Description",
+                applyValue: (x, value) => x.Dto.Activities.Add(CreateActivityDto(value)),
+                maxLength: Constants.DefaultMaxStringLength
+            );
+
+            AddLengthTests(
+                caseName: "Content Activities Description (as Correspondence)",
+                modifyFlow: flow => flow.AsCorrespondenceUser(),
+                applyValue: (x, value) => x.Dto.Activities.Add(CreateActivityDto(value)),
+                maxLength: Constants.CorrespondenceActivityDescriptionMaxLength
+            );
         }
 
-        private void AddLengthTests(Action<UpdateDialogCommand, string> applyValue, int maxLength)
+        private void AddLengthTests(
+            string caseName,
+            Action<UpdateDialogCommand, string> applyValue,
+            int maxLength,
+            Func<IFlowStep, IFlowStep>? modifyFlow = null
+        )
         {
             Add(new DialogContentLengthScenario(
-                DisplayName: $"Dialog content length {maxLength} characters",
+                DisplayName: $"Valid length for case {caseName}: {maxLength} chars",
                 UpdateDialog: x => applyValue(x, Repeat('x', maxLength)),
-                ExpectedResultType: typeof(UpdateDialogSuccess)));
+                ModifyFlow: modifyFlow,
+                ExpectedResultType: typeof(UpdateDialogSuccess))
+            );
 
             Add(new DialogContentLengthScenario(
-                DisplayName: $"Dialog content length {maxLength + 1} characters",
+                DisplayName: $"Too long length for case {caseName}: {maxLength + 1} chars",
                 UpdateDialog: x => applyValue(x, Repeat('x', maxLength + 1)),
-                ExpectedResultType: typeof(ValidationError)));
+                ModifyFlow: modifyFlow,
+                ExpectedResultType: typeof(ValidationError))
+            );
         }
+
+        private static ActivityDto CreateActivityDto(string description) => new()
+        {
+            Type = DialogActivityType.Values.Information,
+            PerformedBy = new ActorDto
+            {
+                ActorType = ActorType.Values.PartyRepresentative,
+                ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+            },
+            Description = [
+                new LocalizationDto
+                {
+                    LanguageCode = "nb",
+                    Value = description
+                },
+            ]
+        };
 
         private static ContentValueDto CreateContentDto(string content) => new()
         {

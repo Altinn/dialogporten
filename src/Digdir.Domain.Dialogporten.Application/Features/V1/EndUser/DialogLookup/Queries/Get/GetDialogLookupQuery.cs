@@ -81,6 +81,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         var authorization = await _authorizationResolver.Resolve(
             dialogData,
             parsedResponseInstanceRef.Value,
+            request.AcceptedLanguages,
             cancellationToken);
 
         if (!authorization.HasAccess)

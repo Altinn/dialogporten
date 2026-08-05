@@ -10,5 +10,5 @@ public interface IDialogSeenLogWriter
 
 public sealed record DialogSeenResult(
     DialogSeenLog? NewSeenLog,
-    bool IsContentSeen
-);
+    bool CausedChangesOutsideEf,
+    bool IsContentSeen);

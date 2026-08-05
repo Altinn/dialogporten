@@ -39,11 +39,11 @@ public class SchemaSnapshotTests
         var app = builder.Build();
         var requestExecutor =
             await app.Services
-                .GetRequiredService<IRequestExecutorResolver>()
-                .GetRequestExecutorAsync(null, TestContext.Current.CancellationToken);
+                .GetRequiredService<IRequestExecutorProvider>()
+                .GetExecutorAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Act
-        var schema = requestExecutor.Schema.Print();
+        var schema = requestExecutor.Schema.ToString();
 
         // Assert
         await Verify(schema, extension: "graphql")

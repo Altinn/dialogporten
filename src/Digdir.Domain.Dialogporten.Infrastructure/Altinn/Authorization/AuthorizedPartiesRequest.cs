@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 
@@ -60,10 +58,7 @@ internal static class AuthorizedPartiesRequestExtensions
 
         var rawKey = $"{request.PartyIdentifier.FullId}|{optionsKey}|{partyFilterKey}";
 
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
-        var hashString = Convert.ToHexStringLower(hashBytes);
-
-        return $"auth:parties:{hashString}";
+        return CacheKeyHash.Build("auth:parties:", rawKey);
     }
 
     private static char BoolToChar(bool value) => value ? '1' : '0';

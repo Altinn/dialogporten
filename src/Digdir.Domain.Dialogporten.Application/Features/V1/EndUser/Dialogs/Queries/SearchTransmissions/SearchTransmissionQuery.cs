@@ -91,7 +91,7 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        dialog.FilterLocalizations(request.AcceptedLanguages);
+        dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
         var dto = dialog.Transmissions
             .OrderBy(x => x.CreatedAt)

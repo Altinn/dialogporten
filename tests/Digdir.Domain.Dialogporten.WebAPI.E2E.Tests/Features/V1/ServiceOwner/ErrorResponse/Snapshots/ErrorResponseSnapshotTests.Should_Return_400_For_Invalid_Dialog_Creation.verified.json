@@ -3,6 +3,7 @@
   "title": "One or more validation errors occurred.",
   "status": 400,
   "instance": "/api/v1/serviceowner/dialogs",
+  "traceId": "00-00000000000000000000000000000000-0000000000000000-00",
   "errors": {
     "dto.serviceResource": [
       "\u0027ServiceResource\u0027 must start with \u0027urn:altinn:resource:\u0027."
@@ -31,6 +32,5 @@
     "dto.process": [
       "The length of \u0027Process\u0027 must be 1023 characters or fewer. You entered 1024 characters."
     ]
-  },
-  "traceId": "00-00000000000000000000000000000000-0000000000000000-00"
+  }
 }

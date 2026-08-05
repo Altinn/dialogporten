@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -15,6 +16,7 @@ using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -22,6 +24,7 @@ using Digdir.Tool.Dialogporten.GenerateFakeData;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 
@@ -192,6 +195,53 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 dialog.CreatedAt.Should().Be(dialog.VisibleFrom);
                 dialog.UpdatedAt.Should().Be(dialog.VisibleFrom);
                 dialog.ContentUpdatedAt.Should().Be(dialog.VisibleFrom);
+            });
+    }
+
+    [Fact]
+    public Task Past_VisibleFrom_Should_Not_Control_Default_Timestamps_On_Create()
+    {
+        var utcNow = new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero);
+        var visibleFrom = utcNow.AddDays(-7);
+
+        return FlowBuilder.For(Application)
+            .OverrideUtc(utcNow)
+            .AsAdminUser()
+            .CreateSimpleDialog((x, _) => x.Dto.VisibleFrom = visibleFrom)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+            {
+                dialog.VisibleFrom.Should().Be(visibleFrom);
+                dialog.CreatedAt.Should().Be(utcNow);
+                dialog.UpdatedAt.Should().Be(utcNow);
+                dialog.ContentUpdatedAt.Should().Be(utcNow);
+            });
+    }
+
+    [Fact]
+    public Task Past_VisibleFrom_Should_Not_Control_Supplied_Timestamps_On_Create()
+    {
+        var utcNow = new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero);
+        var visibleFrom = utcNow.AddDays(-7);
+        var createdAt = utcNow.AddDays(-3);
+        var updatedAt = utcNow.AddDays(-1);
+
+        return FlowBuilder.For(Application)
+            .OverrideUtc(utcNow)
+            .AsAdminUser()
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.VisibleFrom = visibleFrom;
+                x.Dto.CreatedAt = createdAt;
+                x.Dto.UpdatedAt = updatedAt;
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+            {
+                dialog.VisibleFrom.Should().Be(visibleFrom);
+                dialog.CreatedAt.Should().Be(createdAt);
+                dialog.UpdatedAt.Should().Be(updatedAt);
+                dialog.ContentUpdatedAt.Should().Be(updatedAt);
             });
     }
 
@@ -711,6 +761,23 @@ public class CreateDialogTests : ApplicationCollectionFixture
             });
 
     [Fact]
+    public Task Can_Create_Dialog_With_100_Linked_Transmissions() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.Dto.Transmissions = CreateLinkedTransmissions(100))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.Transmissions.Should().HaveCount(100));
+
+    [Fact]
+    public Task Cannot_Create_Dialog_With_101_Linked_Transmissions() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.Dto.Transmissions = CreateLinkedTransmissions(101))
+            .ExecuteAndAssert<DomainError>(x =>
+                x.ShouldHaveErrorWithText("depth violation"));
+
+    [Fact]
     public Task Creating_Dialog_Should_Set_ContentUpdatedAt() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -944,66 +1011,168 @@ public class CreateDialogTests : ApplicationCollectionFixture
                     x.ContentUpdatedAt == x.UpdatedAt &&
                     x.ContentUpdatedAt == x.CreatedAt));
 
-    [Theory, ClassData(typeof(DialogContentLengthTestData))]
-    public Task Content_Length_Validation_Test(DialogContentLengthScenario scenario) =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog(scenario.ModifyCommand)
-            .ExecuteAndAssert(scenario.ExpectedResultType);
+    [Theory, ClassData(typeof(DialogLengthTestData))]
+    public Task Length_Validation_Test(DialogLengthScenario scenario)
+    {
+        var flowExecutor = FlowBuilder.For(Application);
 
-    public sealed record DialogContentLengthScenario(
+        flowExecutor = scenario.ModifyFlow?.Invoke(flowExecutor) ?? flowExecutor;
+
+        return flowExecutor
+            .CreateSimpleDialog(scenario.ModifyCommand)
+            .ExecuteAndAssert(result =>
+        {
+            result.Should().BeOfType(
+                expectedType: scenario.ExpectedResultType,
+                because: result is ValidationError ve
+                    ? $"there should be no validation errors: {string.Join(", ", ve.Errors.Select(e => e.ErrorMessage))}"
+                    : "there should be validation errors"
+                );
+        });
+    }
+
+    public sealed record DialogLengthScenario(
         string DisplayName,
         Action<CreateDialogCommand, FlowContext> ModifyCommand,
-        Type ExpectedResultType) : IClassDataBase
+        Type ExpectedResultType,
+        Func<IFlowStep, IFlowStep>? ModifyFlow = null
+    ) : IClassDataBase
     {
         public override string ToString() => DisplayName;
     }
 
-    private sealed class DialogContentLengthTestData : TheoryData<DialogContentLengthScenario>
+    private sealed class DialogLengthTestData : TheoryData<DialogLengthScenario>
     {
         private static string Repeat(char c, int x) => new(c, x);
-        private static int GetMaxLength(DialogContentType.Values value) =>
+        private static int GetMaxLengthForContent(DialogContentType.Values value) =>
             DialogContentType.GetValue(value).MaxLength;
 
-        public DialogContentLengthTestData()
+        public DialogLengthTestData()
         {
-            AddLengthTests((x, value) => x.Dto.Content!.Title = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.Title));
+            AddLengthTests(
+                caseName: "Content title",
+                applyValue: (x, value) => x.Dto.Content!.Title = CreateContentDto(value),
+                maxLength: GetMaxLengthForContent(DialogContentType.Values.Title)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.SenderName));
+            AddLengthTests(
+                caseName: "Content Sender Name",
+                applyValue: (x, value) => x.Dto.Content!.SenderName = CreateContentDto(value),
+                maxLength: GetMaxLengthForContent(DialogContentType.Values.SenderName)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.Summary));
+            AddLengthTests(
+                caseName: "Content Summary",
+                applyValue: (x, value) => x.Dto.Content!.Summary = CreateContentDto(value),
+                maxLength: GetMaxLengthForContent(DialogContentType.Values.Summary)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.AdditionalInfo));
+            AddLengthTests(
+                caseName: "Content AdditionalInfo",
+                applyValue: (x, value) => x.Dto.Content!.AdditionalInfo = CreateContentDto(value),
+                maxLength: GetMaxLengthForContent(DialogContentType.Values.AdditionalInfo)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.ExtendedStatus));
+            AddLengthTests(
+                caseName: "Content ExtendedStatus",
+                applyValue: (x, value) => x.Dto.Content!.ExtendedStatus = CreateContentDto(value),
+                maxLength: GetMaxLengthForContent(DialogContentType.Values.ExtendedStatus)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.NonSensitiveTitle));
+            AddLengthTests(
+                caseName: "Content NonSensitiveTitle",
+                applyValue: (x, value) => x.Dto.Content!.NonSensitiveTitle = CreateContentDto(value),
+                maxLength: GetMaxLengthForContent(DialogContentType.Values.NonSensitiveTitle)
+            );
 
-            AddLengthTests((x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
-                GetMaxLength(DialogContentType.Values.NonSensitiveSummary));
+            AddLengthTests(
+                caseName: "Content NonSensitiveSummary",
+                applyValue: (x, value) => x.Dto.Content!.NonSensitiveSummary = CreateContentDto(value),
+                maxLength: GetMaxLengthForContent(DialogContentType.Values.NonSensitiveSummary)
+            );
+
+            AddLengthTests(
+                caseName: "Content Activities Description",
+                applyValue: (x, value) => x.Dto.Activities.Add(CreateActivityDto(value)),
+                maxLength: Constants.DefaultMaxStringLength
+            );
+
+            AddLengthTests(
+                caseName: "Content Activities Description (as Correspondence)",
+                modifyFlow: flow => flow.AsCorrespondenceUser(),
+                applyValue: (x, value) => x.Dto.Activities.Add(CreateActivityDto(value)),
+                maxLength: Constants.CorrespondenceActivityDescriptionMaxLength
+            );
         }
 
-        private void AddLengthTests(Action<CreateDialogCommand, string> applyValue, int maxLength)
+        private void AddLengthTests(
+            string caseName,
+            Action<CreateDialogCommand, string> applyValue,
+            int maxLength,
+            Func<IFlowStep, IFlowStep>? modifyFlow = null
+        )
         {
-            Add(new DialogContentLengthScenario(
-                DisplayName: $"Valid dialog content ({maxLength} chars)",
+            Add(new DialogLengthScenario(
+                DisplayName: $"Valid length for case {caseName}: {maxLength} chars",
                 ModifyCommand: (x, _) => applyValue(x, Repeat('x', maxLength)),
-                ExpectedResultType: typeof(CreateDialogSuccess)));
+                ModifyFlow: modifyFlow,
+                ExpectedResultType: typeof(CreateDialogSuccess))
+            );
 
-            Add(new DialogContentLengthScenario(
-                DisplayName: $"Too long dialog content ({maxLength + 1} chars)",
+            Add(new DialogLengthScenario(
+                DisplayName: $"Too long length for case {caseName}: {maxLength + 1} chars",
                 ModifyCommand: (x, _) => applyValue(x, Repeat('x', maxLength + 1)),
-                ExpectedResultType: typeof(ValidationError)));
+                ModifyFlow: modifyFlow,
+                ExpectedResultType: typeof(ValidationError))
+            );
         }
     }
 
     private static ContentValueDto CreateContentDto(string content) => new()
     {
         Value = [new() { Value = content, LanguageCode = "nb" }]
+    };
+
+    private static List<TransmissionDto> CreateLinkedTransmissions(int count)
+    {
+        var ids = Enumerable
+            .Range(0, count)
+            .Select(_ => IdentifiableExtensions.CreateVersion7())
+            .ToArray();
+
+        return ids
+            .Select((id, index) => new TransmissionDto
+            {
+                Id = id,
+                RelatedTransmissionId = index == 0 ? null : ids[index - 1],
+                Type = DialogTransmissionType.Values.Information,
+                Sender = new ActorDto
+                {
+                    ActorType = ActorType.Values.ServiceOwner,
+                },
+                Content = new TransmissionContentDto
+                {
+                    Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) },
+                    Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) }
+                }
+            })
+            .ToList();
+    }
+
+    private static ActivityDto CreateActivityDto(string description) => new()
+    {
+        Type = DialogActivityType.Values.Information,
+        PerformedBy = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
+        },
+        Description = [
+            new LocalizationDto
+            {
+                LanguageCode = "nb",
+                Value = description
+            },
+        ]
     };
 }

@@ -117,6 +117,8 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     public async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
         List<string> constraintParties,
         List<string> serviceResources,
+        bool includeDialogIds = true,
+        int? minResourcesPruningThreshold = null,
         CancellationToken cancellationToken = default)
     {
         var claims = _user.GetPrincipal().Claims.ToList();
@@ -129,7 +131,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
         // We don't cache at this level, as the principal information is received from GetAuthorizedParties,
         // which is already cached
-        return await PerformDialogSearchAuthorization(request, cancellationToken);
+        return await PerformDialogSearchAuthorization(request, includeDialogIds, minResourcesPruningThreshold, cancellationToken);
     }
 
     public async Task<AuthorizedPartiesResult> GetAuthorizedParties(IPartyIdentifier authenticatedParty, bool flatten = false,
@@ -158,28 +160,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         bool flatten,
         CancellationToken cancellationToken)
     {
-        // Self-identified/Feide users are not currently supported in the access management API, so we need to emulate it.
-        // Assume they can only represent themselves, and have no delegated rights.
-
-        // We currently do not have any support in the Register API to resolve the name of self-identified users,
-        // so we need to get this from the request context, which means this will ONLY work in end-user contexts
-        // where there is a end-user token available, ie. not in service owner contexts (using ?EndUserId=...) or
-        // service contexts.
-        switch (authorizedPartiesRequest.PartyIdentifier)
-        {
-            case IdportenEmailUserIdentifier
-                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForIdportenEmailUsers:
-            case AltinnSelfIdentifiedUserIdentifier
-                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForAltinnSelfIdentifiedUsers:
-            case FeideUserIdentifier
-                when !_applicationSettings.CurrentValue.FeatureToggle.UseAccessManagementForFeideUsers:
-                return GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(authorizedPartiesRequest);
-
-            // ReSharper disable once RedundantEmptySwitchSection
-            default:
-                break;
-        }
-
         // Currently, access management is unable to properly leverage party filters on system users. Disable
         // filtering here to ensure better cache hit rate for system users iterating over many parties.
         if (authorizedPartiesRequest.PartyIdentifier is SystemUserIdentifier
@@ -188,45 +168,37 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             authorizedPartiesRequest.PartyFilter.Clear();
         }
 
+        // Party filtering for SI users is mostly useless, as it very often is just one or two
+        // parties. Disable by default to reduce cache cardinality.
+        if (authorizedPartiesRequest.PartyIdentifier is IdportenEmailUserIdentifier
+            && !_applicationSettings.CurrentValue.FeatureToggle.EnablePartyFiltersForEmailUsers)
+        {
+            authorizedPartiesRequest.PartyFilter.Clear();
+        }
+
         AuthorizedPartiesResult authorizedParties;
         using (_logger.TimeOperation(nameof(GetAuthorizedParties)))
         {
-            authorizedParties = await _partiesCache.GetOrSetAsync(
-                authorizedPartiesRequest.GenerateCacheKey(),
-                async token => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token),
-                token: cancellationToken
-            );
+            // Party cache for SI users is problematic due to merging of legacy SI users and e-mail users,
+            // since this flow assumes that the user is immediately able to load the updated party list. The
+            // list is cheap to generate in AM, so we pay the cost of doing this lookup for all SI user requests
+            authorizedParties = authorizedPartiesRequest.PartyIdentifier is IdportenEmailUserIdentifier
+                && !_applicationSettings.CurrentValue.FeatureToggle.EnablePartyCacheForEmailUsers
+                ? await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, cancellationToken)
+                : await _partiesCache.GetOrSetAsync(
+                    authorizedPartiesRequest.GenerateCacheKey(),
+                    async token => await PerformAuthorizedPartiesRequest(authorizedPartiesRequest, token),
+                    token: cancellationToken
+                );
         }
 
         return flatten ? authorizedParties.Flatten() : authorizedParties;
     }
 
-    private AuthorizedPartiesResult GetSyntheticAuthorizedPartiesResultForSelfIdentifiedUser(
-        AuthorizedPartiesRequest authorizedPartiesRequest)
-    {
-        var authorizedPartiesResultDto = new AuthorizedPartiesResultDto
-        {
-            PartyUuid = _user.GetPrincipal().TryGetPartyUuid(out var uuid) ? uuid : throw new UnreachableException("Expected party UUID to be present in current principal"),
-            PartyId = _user.GetPrincipal().TryGetPartyId(out var partyId) ? partyId : throw new UnreachableException("Expected party ID to be present in current principal"),
-            Name = authorizedPartiesRequest.PartyIdentifier.Id,
-            OrganizationNumber = "",
-            Type = AuthorizedPartiesHelper.PartyTypeSelfIdentified,
-            IsDeleted = false,
-            AuthorizedRoles = [AuthorizedPartiesHelper.SelfIdentifiedUserRoleCode],
-            OnlyHierarchyElementWithNoAccess = false,
-            AuthorizedResources = [],
-            AuthorizedAccessPackages = [],
-            AuthorizedInstances = [],
-            Subunits = []
-        };
-
-        return AuthorizedPartiesHelper.CreateAuthorizedPartiesResult([authorizedPartiesResultDto], authorizedPartiesRequest);
-    }
-
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
     {
         var authorizedResourcesForSearch = await GetAuthorizedResourcesForSearch(
-            [dialog.Party], [dialog.ServiceResource], cancellationToken);
+            [dialog.Party], [dialog.ServiceResource], cancellationToken: cancellationToken);
 
         return authorizedResourcesForSearch.ResourcesByParties.Count > 0
                || authorizedResourcesForSearch.DialogIds.Contains(dialog.Id);
@@ -269,10 +241,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return result;
     }
 
-    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, CancellationToken cancellationToken)
+    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, bool includeDialogIds, int? minResourcesPruningThreshold, CancellationToken cancellationToken)
     {
-        var partyIdentifier = request.Claims.GetEndUserPartyIdentifier()
-            ?? throw CreateMissingEndUserPartyIdentifierException(_user.GetPrincipal());
+        var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifierOrThrow();
 
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
             partyIdentifier,
@@ -294,35 +265,27 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             GetAllSubjectResources,
             cancellationToken);
 
-        var applicationSettings = _applicationSettings.CurrentValue;
-        var featureToggle = applicationSettings.FeatureToggle;
-        if (featureToggle.UsePartyResourcePruning)
+        // Pruning intersects the authorized resources with those actually referenced by Dialogporten.
+        // This is a functional requirement (not just a search optimization): the authorized service
+        // resources API relies on this pipeline to return a subset of the referenced resource catalogue.
+        var partyResourcePruningLimits = _applicationSettings.CurrentValue.Limits.PartyResourcePruning;
+        var pruningThreshold = minResourcesPruningThreshold ?? partyResourcePruningLimits.MinResourcesPruningThreshold;
+        await AuthorizationHelper.PruneUnreferencedResources(
+            result,
+            _partyResourceReferenceRepository,
+            pruningThreshold,
+            cancellationToken);
+
+        if (includeDialogIds)
         {
-            var partyResourcePruningLimits = applicationSettings.Limits.PartyResourcePruning;
-            await AuthorizationHelper.PruneUnreferencedResources(
+            await PopulateDialogIdsFromInstanceRefs(
                 result,
-                _partyResourceReferenceRepository,
-                partyResourcePruningLimits.MinResourcesPruningThreshold,
+                authorizedParties,
+                request.ConstraintServiceResources,
                 cancellationToken);
         }
 
-        await PopulateDialogIdsFromInstanceRefs(
-            result,
-            authorizedParties,
-            request.ConstraintServiceResources,
-            cancellationToken);
-
         return result;
-    }
-
-    private static UnreachableException CreateMissingEndUserPartyIdentifierException(ClaimsPrincipal principal)
-    {
-        var (userType, _) = principal.GetUserType();
-
-        return new(
-            "GetEndUserPartyIdentifier returned null. " +
-            $"UserType={userType}, " +
-            principal.GetDiagnosticSummary());
     }
 
     private async Task PopulateDialogIdsFromInstanceRefs(

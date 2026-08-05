@@ -9,7 +9,9 @@ using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using FluentValidation;
 using MediatR;
@@ -66,6 +68,7 @@ public static class ApplicationExtensions
             // Transient
             .AddTransient<IServiceResourceAuthorizer, ServiceResourceAuthorizer>()
             .AddTransient<IServiceResourceMinimumAuthenticationLevelResolver, ServiceResourceMinimumAuthenticationLevelResolver>()
+            .AddTransient<IServiceResourceMetadataItemBuilder, ServiceResourceMetadataItemBuilder>()
             .AddTransient<IUserResourceRegistry, UserResourceRegistry>()
             .AddTransient<IUserRegistry, UserRegistry>()
             .AddTransient<IUserParties, UserParties>()
@@ -76,6 +79,7 @@ public static class ApplicationExtensions
             .AddTransient<IDialogTransmissionAppender, DialogTransmissionAppender>()
             .AddTransient<ITransmissionHierarchyValidator, TransmissionHierarchyValidator>()
             .AddTransient<ISystemLabelAdder, SystemLabelAdder>()
+            .AddTransient<LocalizationDtosValidatorFactory>()
             .AddDataLoaders()
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ApplicationFeatureToggleBehavior<,>))
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(FeatureMetricBehaviour<,>))

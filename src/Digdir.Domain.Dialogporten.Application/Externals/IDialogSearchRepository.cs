@@ -21,6 +21,11 @@ public interface IDialogSearchRepository
     Task<int> WorkBatchAsync(int batchSize, long workMemBytes, bool staleFirst, CancellationToken ct);
     Task<DialogSearchReindexProgress> GetProgressAsync(CancellationToken ct);
     Task OptimizeIndexAsync(CancellationToken ct);
+
+    /// <exception cref="SearchTermTooBroadException">
+    /// The free-text search exceeded the server-side statement timeout (a broad term with no narrowing
+    /// date range). Callers should surface this as guidance to narrow the search.
+    /// </exception>
     Task<PaginatedList<DialogEntity>> GetDialogsAsEndUser(
         GetDialogsQuery query,
         DialogSearchAuthorizationResult authorizedResources,

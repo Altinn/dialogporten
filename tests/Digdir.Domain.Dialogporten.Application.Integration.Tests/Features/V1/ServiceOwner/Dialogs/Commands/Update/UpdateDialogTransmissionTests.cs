@@ -95,6 +95,25 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
                 dialog.Transmissions.Count.Should().Be(2));
 
     [Fact]
+    public Task Can_Add_100_Linked_Transmissions_In_Update() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x =>
+                x.Dto.Transmissions = CreateLinkedTransmissions(100))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+                dialog.Transmissions.Should().HaveCount(100));
+
+    [Fact]
+    public Task Cannot_Add_101_Linked_Transmissions_In_Update() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x =>
+                x.Dto.Transmissions = CreateLinkedTransmissions(101))
+            .ExecuteAndAssert<DomainError>(error =>
+                error.ShouldHaveErrorWithText("depth violation"));
+
+    [Fact]
     public Task Can_Add_Transmission_Without_Summary_On_Update() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -223,5 +242,27 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
             Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) }
         }
     };
-}
 
+    private static List<TransmissionDto> CreateLinkedTransmissions(int count)
+    {
+        var ids = Enumerable
+            .Range(0, count)
+            .Select(_ => IdentifiableExtensions.CreateVersion7())
+            .ToArray();
+
+        return ids
+            .Select((id, index) => new TransmissionDto
+            {
+                Id = id,
+                RelatedTransmissionId = index == 0 ? null : ids[index - 1],
+                Type = DialogTransmissionType.Values.Information,
+                Sender = new() { ActorType = ActorType.Values.ServiceOwner },
+                Content = new()
+                {
+                    Title = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) },
+                    Summary = new() { Value = DialogGenerator.GenerateFakeLocalizations(1) }
+                }
+            })
+            .ToList();
+    }
+}

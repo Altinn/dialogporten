@@ -1,4 +1,3 @@
-using System.Linq;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -68,9 +67,6 @@ public class ConfigurationExtensionsTests
             Environment.SetEnvironmentVariable(variableName, value);
         }
 
-        public void Dispose()
-        {
-            Environment.SetEnvironmentVariable(_variableName, _originalValue);
-        }
+        public void Dispose() => Environment.SetEnvironmentVariable(_variableName, _originalValue);
     }
 }

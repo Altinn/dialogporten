@@ -24,10 +24,32 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
 
     public async Task<ServiceOwnerInfo?> GetServiceOwnerInfo(string orgNumber, CancellationToken cancellationToken)
     {
-        var orgInfoByOrgNumber = await _cache.GetOrSetAsync(ServiceOwnerShortNameReferenceCacheKey, GetServiceOwnerInfo, token: cancellationToken);
+        var orgInfoByOrgNumber = await GetServiceOwnerInfo([orgNumber], cancellationToken);
         orgInfoByOrgNumber.TryGetValue(orgNumber, out var orgInfo);
 
         return orgInfo;
+    }
+
+    public async Task<IReadOnlyDictionary<string, ServiceOwnerInfo>> GetServiceOwnerInfo(
+        IReadOnlyCollection<string> orgNumbers,
+        CancellationToken cancellationToken)
+    {
+        var requestedOrgNumbers = orgNumbers
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (requestedOrgNumbers.Count == 0)
+        {
+            return new Dictionary<string, ServiceOwnerInfo>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var orgInfoByOrgNumber = await _cache.GetOrSetAsync(ServiceOwnerShortNameReferenceCacheKey, GetServiceOwnerInfo, token: cancellationToken);
+        return orgInfoByOrgNumber
+            .Where(x => requestedOrgNumbers.Contains(x.Key))
+            .ToDictionary(
+                x => x.Key,
+                x => x.Value,
+                StringComparer.OrdinalIgnoreCase);
     }
 
     private async Task<Dictionary<string, ServiceOwnerInfo>> GetServiceOwnerInfo(CancellationToken cancellationToken)

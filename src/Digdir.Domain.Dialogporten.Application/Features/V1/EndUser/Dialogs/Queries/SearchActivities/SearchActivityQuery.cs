@@ -76,7 +76,7 @@ internal sealed class SearchActivityQueryHandler : IRequestHandler<SearchActivit
             return new Forbidden(Constants.AltinnAuthLevelTooLow);
         }
 
-        dialog.FilterLocalizations(request.AcceptedLanguages);
+        dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
         return dialog.Activities
             .OrderBy(x => x.CreatedAt)

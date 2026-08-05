@@ -67,7 +67,8 @@ static void BuildAndRun(string[] args)
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalTracing: x => x.AddFusionCacheInstrumentation(),
-            additionalMetrics: x => x.AddMeter(CustomMetrics.MeterName))
+            additionalMetrics: x => x.AddMeter(CustomMetrics.MeterName),
+            httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithoutPubSubCapabilities()

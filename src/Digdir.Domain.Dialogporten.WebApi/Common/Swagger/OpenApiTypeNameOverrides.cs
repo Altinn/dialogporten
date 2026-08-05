@@ -19,12 +19,24 @@ internal static class OpenApiTypeNameOverrides
         ["DialogsEntitiesActions_DialogGuiActionPriority"] = "DialogGuiActionPriority",
         ["DialogsEntitiesActivities_DialogActivityType"] = "DialogActivityType",
         ["DialogsEntitiesTransmissions_DialogTransmissionType"] = "DialogTransmissionType",
+        ["DigdirDomainDialogportenApplicationCommon_Link"] = "Links",
         ["Http_HttpVerb"] = "HttpVerb",
         ["ProblemDetails_Error"] = "ProblemDetailsError",
         ["V1CommonContent_ContentValue"] = "ContentValue",
         ["V1CommonLocalizations_Localization"] = "Localization",
+        // The service resource metadata item types are shared by the public metadata endpoint and the
+        // authorized service resources endpoint. These names preserve the existing public OAS contract.
+        ["V1CommonServiceResourceMetadata_ServiceResourceMetadataAccessPackage"] = "ServiceResourceAccessPackage",
+        ["V1CommonServiceResourceMetadata_ServiceResourceMetadataItem"] = "ServiceResourceMetadata",
+        ["V1CommonServiceResourceMetadata_ServiceResourceMetadataRole"] = "ServiceResourceRole",
+        ["V1CommonServiceResourceMetadata_ServiceResourceMetadataServiceOwner"] = "ServiceResourceOwner",
+        ["V1CommonServiceResourceMetadata_ServiceResourceMetadataServiceResource"] = "ServiceResource",
         ["V1EndUserCommon_AcceptedLanguage"] = "AcceptedLanguage",
-        ["V1EndUserCommon_AcceptedLanguages"] = "AcceptedLanguages"
+        ["V1EndUserCommon_AcceptedLanguages"] = "AcceptedLanguages",
+        ["V1MetadataLimitsQueriesGet_EndUserSearchLimits"] = "EndUserSearchLimits",
+        ["V1MetadataLimitsQueriesGet_Limits"] = "Limits",
+        ["V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits"] = "ServiceOwnerSearchLimits",
+        ["V1MetadataServiceResourcesQueriesGet_ServiceResourceMetadata"] = "ServiceResourceMetadataList"
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static readonly FrozenDictionary<string, string> EndUserOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -78,7 +90,8 @@ internal static class OpenApiTypeNameOverrides
         ["V1EndUserEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"] = "BulkSetSystemLabel",
         ["V1EndUserEndUserContextCommandsBulkSetSystemLabels_DialogRevision"] = "DialogRevision",
         ["V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLogQuery"] = "SearchDialogLabelAssignmentLogsRequest",
-        ["V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog"] = "LabelAssignmentLog"
+        ["V1EndUserEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog"] = "LabelAssignmentLog",
+        ["V1EndUserServiceResourcesQueriesSearch_AuthorizedServiceResources"] = "AuthorizedServiceResourceList"
     }.ToFrozenDictionary(StringComparer.Ordinal);
 
     private static readonly FrozenDictionary<string, string> ServiceOwnerOverrides = new Dictionary<string, string>(StringComparer.Ordinal)

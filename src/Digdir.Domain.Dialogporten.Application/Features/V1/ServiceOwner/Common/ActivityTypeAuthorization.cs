@@ -29,5 +29,5 @@ internal static class ActivityTypeAuthorization
             DialogActivityType.Values.CorrespondenceOpened);
 
     private static bool IsCorrespondenceUser(IUser user) =>
-        user.GetPrincipal().HasScope(AuthorizationScope.CorrespondenceScope);
+        user.GetPrincipal().IsCorrespondence();
 }

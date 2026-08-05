@@ -17,23 +17,23 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
 
-        var getDialogResponse = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EndUserApi.GetDialog(dialogId, cancellationToken: ct),
-            isSuccessful: result => result is { IsSuccessful: true, Content.SeenSinceLastUpdate.Count: 1 },
-            degradationMessage: "Seen log creation delayed");
+        var getDialogResponse = await Fixture.EndUserApi.GetDialog(
+            dialogId,
+            cancellationToken: TestContext.Current.CancellationToken);
 
+        getDialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         getDialogResponse.Content.Should().NotBeNull();
-        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Single().Id;
+        var seenLogId = getDialogResponse.Content.SeenSinceLastUpdate.Should().ContainSingle().Which.Id;
 
         // Act
         var response = await Fixture.EndUserApi.V1.SearchDialogSeenLogs(
             dialogId,
-            TestContext.Current.CancellationToken);
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = response.Content ?? throw new InvalidOperationException("Seen log content was null.");
-        content.Should().ContainSingle().Which.Id.Should().Be(seenLogId);
+        response.Content.Should().NotBeNull();
+        response.Content.Should().ContainSingle().Which.Id.Should().Be(seenLogId);
     }
 
     [E2EFact]
@@ -63,11 +63,9 @@ public class SearchSeenLogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         getDialogResponse2.ShouldHaveStatusCode(HttpStatusCode.OK);
 
         // Act
-        var response = await E2ERetryPolicies.RetryUntilAsync(
-            operation: ct => Fixture.EndUserApi.V1.SearchDialogSeenLogs(
-                dialogId, ct),
-            isSuccessful: result => result is { IsSuccessful: true, Content.Count: 2 },
-            degradationMessage: "Seen log creation delayed");
+        var response = await Fixture.EndUserApi.V1.SearchDialogSeenLogs(
+            dialogId,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         response.ShouldHaveStatusCode(HttpStatusCode.OK);

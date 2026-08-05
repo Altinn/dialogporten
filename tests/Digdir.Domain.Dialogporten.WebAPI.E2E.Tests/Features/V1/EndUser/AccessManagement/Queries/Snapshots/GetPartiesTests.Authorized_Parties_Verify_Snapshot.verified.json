@@ -1,6 +1,21 @@
 ﻿{
   "authorizedParties": [
     {
+      "party": "urn:altinn:organization:identifier-no:310010693",
+      "partyUuid": "7e0067a7-694f-4897-981b-16cd5ec704d9",
+      "partyId": 51186218,
+      "name": "TAKTFULL ORDENTLIG APE",
+      "dateOfBirth": null,
+      "partyType": "Organization",
+      "isDeleted": false,
+      "hasKeyRole": false,
+      "isCurrentEndUser": false,
+      "isMainAdministrator": false,
+      "isAccessManager": false,
+      "hasOnlyAccessToSubParties": false,
+      "subParties": null
+    },
+    {
       "party": "urn:altinn:organization:identifier-no:310923044",
       "partyUuid": "3b3efe7f-8814-4d36-b0c3-dc754189c8e5",
       "partyId": 51267836,
@@ -30,21 +45,6 @@
           "subParties": null
         }
       ]
-    },
-    {
-      "party": "urn:altinn:organization:identifier-no:310010693",
-      "partyUuid": "7e0067a7-694f-4897-981b-16cd5ec704d9",
-      "partyId": 51186218,
-      "name": "TAKTFULL ORDENTLIG APE",
-      "dateOfBirth": null,
-      "partyType": "Organization",
-      "isDeleted": false,
-      "hasKeyRole": false,
-      "isCurrentEndUser": false,
-      "isMainAdministrator": false,
-      "isAccessManager": false,
-      "hasOnlyAccessToSubParties": false,
-      "subParties": null
     },
     {
       "party": "urn:altinn:person:identifier-no:08844397713",

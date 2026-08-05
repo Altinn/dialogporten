@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -30,7 +29,6 @@ public sealed partial class GetDialogResult : OneOfBase<DialogDto, EntityNotFoun
 internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, GetDialogResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IClock _clock;
     private readonly IUserRegistry _userRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
@@ -41,7 +39,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     public GetDialogQueryHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
-        IMapper mapper,
         IClock clock,
         IUserRegistry userRegistry,
         IAltinnAuthorization altinnAuthorization,
@@ -49,7 +46,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         IDialogSeenLogWriter dialogSeenLogWriter)
     {
         ArgumentNullException.ThrowIfNull(db);
-        ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(userRegistry);
@@ -58,7 +54,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         ArgumentNullException.ThrowIfNull(dialogSeenLogWriter);
 
         _db = db;
-        _mapper = mapper;
         _unitOfWork = unitOfWork;
         _clock = clock;
         _userRegistry = userRegistry;
@@ -203,7 +198,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
             if (!listAuthorizationResult)
             {
-                return new EntityNotFound<DialogEntity>(request.DialogId);
+                return new Forbidden("Forbidden");
             }
         }
 
@@ -231,7 +226,15 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
         var seenResult = await _dialogSeenLogWriter.OnSeen(dialog, userId, cancellationToken);
 
+        if (seenResult != null)
+        {
+            var newSeenLog = seenResult.NewSeenLog;
+            if (seenResult.CausedChangesOutsideEf) dialog.AddUpdateEvent();
+            if (newSeenLog != null) dialog.AddSeenEvent(userId.ExternalIdWithPrefix, userId.Type, newSeenLog.Id);
+        }
+
         var saveResult = await _unitOfWork
+            .DisableAggregateFilter()
             .DisableUpdatableFilter()
             .DisableVersionableFilter()
             .SaveChangesAsync(cancellationToken);
@@ -244,9 +247,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             conflict => throw new UnreachableException("Should not get conflict when updating SeenAt."));
 
 
-        dialog.FilterLocalizations(request.AcceptedLanguages);
+        dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
-        var dialogDto = _mapper.Map<DialogDto>(dialog);
+        var dialogDto = dialog.ToDto();
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
             dialog.SeenLog,
@@ -278,7 +281,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         return dialogDto;
     }
 
-    private List<DialogSeenLogDto> GetSeenLogs(
+    private static List<DialogSeenLogDto> GetSeenLogs(
         IEnumerable<DialogSeenLog> seenLogs,
         DateTimeOffset filterDate,
         string externalId,
@@ -294,10 +297,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             .Select(log => ToSeenLogDto(externalId, log))
             .ToList();
 
-    private DialogSeenLogDto ToSeenLogDto(string externalId, DialogSeenLog log)
+    private static DialogSeenLogDto ToSeenLogDto(string externalId, DialogSeenLog log)
     {
         var actorId = log.SeenBy.ActorNameEntity?.ActorId;
-        var logDto = _mapper.Map<DialogSeenLogDto>(log);
+        var logDto = log.ToDto();
         logDto.IsCurrentEndUser = externalId == actorId;
         return logDto;
     }

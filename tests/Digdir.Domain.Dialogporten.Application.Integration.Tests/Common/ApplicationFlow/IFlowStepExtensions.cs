@@ -117,8 +117,7 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
         Guid? ifMatchDialogRevision = null) =>
-        step.CreateTransmission((_, _) =>
-            { }, ifMatchDialogRevision);
+        step.CreateTransmission((_, _) => { }, ifMatchDialogRevision);
 
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
@@ -196,12 +195,15 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<SearchLabelAssignmentLogResult> GetLabelAssignmentLogs(this IFlowStep step) =>
+    public static IFlowExecutor<SearchLabelAssignmentLogResult> GetLabelAssignmentLogs(
+        this IFlowStep step,
+        Guid? dialogId = null
+    ) =>
         step.SendCommand(x =>
         {
             var command = new SearchLabelAssignmentLogQuery
             {
-                DialogId = x.GetDialogId(),
+                DialogId = dialogId ?? x.GetDialogId(),
             };
             return command;
         });
@@ -352,12 +354,13 @@ public static class IFlowStepExtensions
                         }).ToList(),
                         ExpiresAt = x.ExpiresAt
                     }).ToList(),
-                    NavigationalActions = transmission.NavigationalActions.Select(x => new TransmissionNavigationalActionDto
-                    {
-                        Title = x.Title,
-                        Url = x.Url,
-                        ExpiresAt = x.ExpiresAt,
-                    }).ToList(),
+                    NavigationalActions = transmission.NavigationalActions.Select(x =>
+                        new TransmissionNavigationalActionDto
+                        {
+                            Title = x.Title,
+                            Url = x.Url,
+                            ExpiresAt = x.ExpiresAt,
+                        }).ToList(),
                 };
 
                 var updateTransmissionCommand = new UpdateTransmissionCommand
@@ -529,16 +532,24 @@ public static class IFlowStepExtensions
                 };
                 modify(createActivityCommand, ctx);
                 return createActivityCommand;
+            })
+            .Select<CreateActivityResult>((x, a) =>
+            {
+                if (x.Value is CreateActivitySuccess success)
+                {
+                    a.Bag[ActivityIdKey] = success.ActivityId;
+                }
+
+                return x;
             });
 
-    public static IFlowExecutor<GetActivityResult> GetActivity(
-        this IFlowStep<CreateActivityResult> step) =>
-        step.AssertResult<CreateActivitySuccess>((x, a) => a.Bag[ActivityIdKey] = x.ActivityId)
-            .SendCommand(ctx => new GetActivityQuery
-            {
-                DialogId = ctx.GetDialogId(),
-                ActivityId = ctx.GetActivityId()
-            });
+    public static IFlowExecutor<GetActivityResult> GetActivity<TIn>(
+        this IFlowStep<TIn> step) =>
+        step.SendCommand(ctx => new GetActivityQuery
+        {
+            DialogId = ctx.GetDialogId(),
+            ActivityId = ctx.GetActivityId()
+        });
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,

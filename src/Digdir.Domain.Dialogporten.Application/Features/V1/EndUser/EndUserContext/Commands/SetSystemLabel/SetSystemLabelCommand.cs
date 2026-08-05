@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using static Digdir.Domain.Dialogporten.Domain.Actors.ActorType.Values;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 
@@ -79,8 +80,8 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new ConcurrencyError();
         }
 
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation);
+        var userId = _userRegistry.GetCurrentUserId();
+        var performedBy = LabelAssignmentLogActorFactory.Create(PartyRepresentative, userId.ExternalIdWithPrefix);
 
         dialog.EndUserContext.UpdateSystemLabels(request.AddLabels, request.RemoveLabels, performedBy);
 

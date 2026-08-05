@@ -6,11 +6,13 @@ using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
 internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
+    private readonly ILogger<PopulateActorNameInterceptor> _logger;
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
     private readonly ITransactionTime _transactionTime;
@@ -19,14 +21,17 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     public PopulateActorNameInterceptor(
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IPartyNameRegistry partyNameRegistry)
+        IPartyNameRegistry partyNameRegistry,
+        ILogger<PopulateActorNameInterceptor> logger)
     {
+        ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(domainContext);
         ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
         _domainContext = domainContext;
         _partyNameRegistry = partyNameRegistry;
+        _logger = logger;
         _transactionTime = transactionTime;
     }
 
@@ -48,7 +53,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        var actorNameEntities = dbContext.ChangeTracker
+        var newActorNameEntities = dbContext.ChangeTracker
             .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
             .Where(e => e.Entity.ActorId is not null || e.Entity.Name is not null)
@@ -60,18 +65,33 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             })
             .ToList();
 
-        if (!await TrySetActorNames(actorNameEntities, cancellationToken))
+        if (!await TrySetActorNames(newActorNameEntities, cancellationToken))
         {
             _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
+        await ConsolidateActorNameInstances(dbContext, newActorNameEntities, cancellationToken);
+        MarkActorNamesForResync(newActorNameEntities, dbContext);
         _hasBeenExecuted = true;
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
+    private static void MarkActorNamesForResync(List<ActorName> actorNameEntities, DbContext dbContext)
+    {
+        var actorNames = actorNameEntities
+            .Where(x => x.ActorId is not null && x.Name is null)
+            .Where(x => dbContext.Entry(x).State is EntityState.Added)
+            .DistinctBy(x => x.ActorId);
+
+        foreach (var actorName in actorNames)
+        {
+            actorName.AddResyncActorNameEvent($"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name");
+        }
+    }
+
+    private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities,
+        CancellationToken cancellationToken)
     {
         var relevantActorNameEntities = actorNameEntities
             .Where(x => x.ActorId is not null)
@@ -85,22 +105,25 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         foreach (var actorName in relevantActorNameEntities)
         {
-            actorName.Name = actorNameById[actorName.ActorId!];
+            var newActorName = actorNameById[actorName.ActorId!];
 
-            if (string.IsNullOrWhiteSpace(actorName.Name))
+            if (string.IsNullOrWhiteSpace(newActorName))
             {
-                _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
+                _logger.LogWarning("Unable to look up name for actor id: {ActorId}", actorName.ActorId);
+                actorName.Name = null;
+            }
+            else
+            {
+                actorName.Name = newActorName;
             }
         }
 
         return _domainContext.IsValid;
     }
 
-    private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added, CancellationToken cancellationToken)
+    private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added,
+        CancellationToken cancellationToken)
     {
-        // There may be an actorNameEntity with an Id where name is null.
-        // One can argue that this method should consider those as well.
-        // however we chose to put that responsibility to actorName clean up job.
         var existing = await GetExistingActorNames(dbContext, added, cancellationToken);
 
         var actorNamePairs = added
@@ -134,10 +157,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
     }
 
-    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
+    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId,
+        CancellationToken cancellationToken) =>
         (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
 
-    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
+    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext,
+        IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         // Why are we doing "composite key contains" this way, you ask?
         // See https://stackoverflow.com/a/26201371/2301766
@@ -145,10 +170,11 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             .Select(x => (x.ActorId, x.Name))
             .Distinct()
             .ToList();
+        var hasNull = distinctIdNameTupples.Any(x => x.Name == null);
         var actorIds = distinctIdNameTupples.Select(x => x.ActorId).Distinct();
         var actorNames = distinctIdNameTupples.Select(x => x.Name).Distinct();
         var existingActorNames = await dbContext.Set<ActorName>()
-            .Where(x => actorIds.Contains(x.ActorId) && actorNames.Contains(x.Name))
+            .Where(x => actorIds.Contains(x.ActorId) && (actorNames.Contains(x.Name) || (hasNull && x.Name == null)))
             .ToListAsync(cancellationToken);
         return existingActorNames
             .Where(x => distinctIdNameTupples.Any(xx => xx.ActorId == x.ActorId && xx.Name == x.Name))

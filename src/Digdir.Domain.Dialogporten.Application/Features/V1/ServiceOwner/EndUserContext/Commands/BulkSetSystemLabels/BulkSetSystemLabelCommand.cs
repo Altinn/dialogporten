@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using static Digdir.Domain.Dialogporten.Domain.Actors.ActorType.Values;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 
@@ -55,7 +56,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
 
     public async Task<BulkSetSystemLabelResult> Handle(BulkSetSystemLabelCommand request, CancellationToken cancellationToken)
     {
-        var (performedBy, forbidden) = await TryCreatePerformedByActor(request, cancellationToken);
+        var (performedBy, forbidden) = TryCreatePerformedByActor(request);
         if (forbidden is not null)
         {
             return forbidden;
@@ -130,9 +131,9 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         return false;
     }
 
-    private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(
-        BulkSetSystemLabelCommand request,
-        CancellationToken cancellationToken)
+    private (LabelAssignmentLogActor? Actor, Forbidden? Error) TryCreatePerformedByActor(
+        BulkSetSystemLabelCommand request
+    )
     {
         if (request.Dto.PerformedBy is not null)
         {
@@ -148,7 +149,7 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return (actor, null);
         }
 
-        var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        return (LabelAssignmentLogActorFactory.FromUserInformation(userInfo), null);
+        var userId = _userRegistry.GetCurrentUserId();
+        return (LabelAssignmentLogActorFactory.Create(PartyRepresentative, userId.ExternalIdWithPrefix), null);
     }
 }

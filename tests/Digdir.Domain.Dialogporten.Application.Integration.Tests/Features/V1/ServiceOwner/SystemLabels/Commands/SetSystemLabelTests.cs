@@ -1,19 +1,19 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using Digdir.Domain.Dialogporten.Application.Externals;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.SystemLabels.Commands;
 
@@ -133,10 +133,105 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
-            .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
+            .AssertResult<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive))
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                        x.PerformedBy.ActorId.Should().Be(AdminPerformedByActorId);
+                    });
+            });
+    }
 
-        await AssertPerformedByActorAsync();
+    [Fact]
+    public async Task Set_Allows_PerformedBy_With_Override_Name_For_Admin()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AsAdminUser()
+            .SetSystemLabelsServiceOwner(command =>
+            {
+                command.EndUserId = null;
+                command.PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = "Set by an admin"
+                };
+                command.AddLabels = [SystemLabel.Values.Archive];
+            })
+            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            .AssertResult<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive))
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorName.Should().Be("Set by an admin");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                        x.PerformedBy.ActorId.Should().BeNull();
+                    });
+            });
+    }
+
+    [Fact]
+    public async Task Set_Allows_PerformedBy_For_Admin_Even_When_Party_Name_Registry_Is_Down()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError);
+            })
+            .AsAdminUser()
+            .SetSystemLabelsServiceOwner(command =>
+            {
+                command.EndUserId = null;
+                command.PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorId = AdminPerformedByActorId
+                };
+                command.AddLabels = [SystemLabel.Values.Archive];
+            })
+            // .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            // .AssertResult<DialogDto>(x =>
+            //     x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive))
+            .GetLabelAssignmentLogs()
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorName.Should().BeNull();
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                        x.PerformedBy.ActorId.Should().Be(AdminPerformedByActorId);
+                    });
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                        x.PerformedBy.ActorId.Should().Be(AdminPerformedByActorId);
+                    });
+            });
     }
 
     [Fact]
@@ -156,20 +251,4 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .ExecuteAndAssert<Forbidden>();
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
-
-    private async Task AssertPerformedByActorAsync()
-    {
-        using var scope = Application.GetServiceProvider().CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IDialogDbContext>();
-        var expectedLabelName = SystemLabel.Values.Archive.ToNamespacedName();
-
-        var log = await dbContext.LabelAssignmentLogs
-            .Include(x => x.PerformedBy)
-            .ThenInclude(x => x.ActorNameEntity)
-            .SingleAsync(x => x.Name == expectedLabelName);
-
-        log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
-        log.PerformedBy.ActorNameEntity.Should().NotBeNull();
-        log.PerformedBy.ActorNameEntity.ActorId.Should().Be(AdminPerformedByActorId);
-    }
 }

@@ -1,18 +1,22 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
 
@@ -41,6 +45,125 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             .AssertResult<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin))
             .SendCommand(_ => GetDialog(dialogId2))
             .ExecuteAndAssert<DialogDto>(x => x.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(SystemLabel.Values.Bin));
+    }
+
+    [Fact]
+    public async Task BulkSet_Adds_Label_Assignment_Logs()
+    {
+        Guid? dialogId1 = NewUuidV7();
+        Guid? dialogId2 = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
+            .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
+            {
+                Dialogs =
+                [
+                    new() { DialogId = dialogId1.Value },
+                    new() { DialogId = dialogId2.Value }
+                ],
+                AddLabels = [SystemLabel.Values.Bin]
+            })
+            .GetLabelAssignmentLogs(dialogId1)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .GetLabelAssignmentLogs(dialogId2)
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            });
+    }
+
+    [Fact]
+    public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down()
+    {
+        Guid? dialogId1 = NewUuidV7();
+        Guid? dialogId2 = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError);
+            })
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
+            .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
+            {
+                Dialogs =
+                [
+                    new() { DialogId = dialogId1.Value },
+                    new() { DialogId = dialogId2.Value }
+                ],
+                AddLabels = [SystemLabel.Values.Bin]
+            })
+            .GetLabelAssignmentLogs(dialogId1)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().BeNull();
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .GetLabelAssignmentLogs(dialogId2)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().BeNull();
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs(dialogId1)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .GetLabelAssignmentLogs(dialogId2)
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            });
     }
 
     [Fact]

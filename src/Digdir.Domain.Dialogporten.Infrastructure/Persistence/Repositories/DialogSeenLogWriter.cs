@@ -15,6 +15,7 @@ internal sealed class DialogSeenLogWriter(
     IUnitOfWork unitOfWork
 ) : IDialogSeenLogWriter
 {
+
     /// <summary>
     /// This method handles everything that needs to be done when a dialog is "seen":
     /// - Flips IsSeenSinceLastContentUpdate to true, unless another thread modified the dialog content
@@ -81,7 +82,8 @@ internal sealed class DialogSeenLogWriter(
         return new DialogSeenResult(
             NewSeenLog: newSeenLog,
             CausedChangesOutsideEf: isSeenSinceLastContentUpdateSetToTrue || newSeenLog is not null,
-            IsContentSeen: isSeenSinceLastContentUpdateSetToTrue || dialog.IsSeenSinceLastContentUpdate
+            IsContentSeen: isSeenSinceLastContentUpdateSetToTrue || dialog.IsSeenSinceLastContentUpdate,
+            OutOfSyncActorNameId: seenLogWriteResult.OutOfSyncActorNameId
         );
     }
 
@@ -97,7 +99,8 @@ internal sealed class DialogSeenLogWriter(
     }
 
     private sealed record EnsureSeenLogResult(
-        DialogSeenLog? NewDialogSeenLog
+        DialogSeenLog? NewDialogSeenLog,
+        bool OutOfSyncActorNameId
     );
 
     private async Task<EnsureSeenLogResult> EnsureSeenLog(
@@ -110,11 +113,6 @@ internal sealed class DialogSeenLogWriter(
     {
         var normalizedActorId = actorId.ToLowerInvariant();
         var actorName = await partyNameRegistry.GetName(normalizedActorId, cancellationToken);
-        if (string.IsNullOrWhiteSpace(actorName))
-        {
-            throw new InvalidOperationException("Unable to look up actor name.");
-        }
-
         var actorNameId = await EnsureActorName(normalizedActorId, actorName, cancellationToken);
         var actorType = ActorType.Values.PartyRepresentative;
 
@@ -123,7 +121,7 @@ internal sealed class DialogSeenLogWriter(
 
         return new EnsureSeenLogResult
         (
-            rowsUpdated == 0
+            NewDialogSeenLog: rowsUpdated == 0
                 ? null
                 : new DialogSeenLog
                 {
@@ -131,18 +129,21 @@ internal sealed class DialogSeenLogWriter(
                     CreatedAt = seenAt,
                     SeenBy = new DialogSeenLogSeenByActor
                     {
+                        ActorNameEntityId = actorNameId,
                         ActorNameEntity = new ActorName
                         {
+                            Id = actorNameId,
                             ActorId = normalizedActorId,
                             Name = actorName
                         },
                         ActorTypeId = actorType
                     }
-                }
+                },
+            OutOfSyncActorNameId: actorName == null
         );
     }
 
-    private async Task<Guid> EnsureActorName(string actorId, string actorName, CancellationToken cancellationToken)
+    private async Task<Guid> EnsureActorName(string actorId, string? actorName, CancellationToken cancellationToken)
     {
         await db.Database.ExecuteSqlInterpolatedAsync($"""
                                                        INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt")
@@ -150,14 +151,18 @@ internal sealed class DialogSeenLogWriter(
                                                        ON CONFLICT ("ActorId", "Name") DO NOTHING
                                                        """, cancellationToken);
 
+        var query = new PostgresFormattableStringBuilder()
+            .Append($"""
+                      SELECT "Id" AS "Value"
+                      FROM "ActorName"
+                      WHERE "ActorId" = {actorId}
+                     """)
+            .AppendIf(actorName != null, $""" AND "Name" = {actorName}""")
+            .AppendIf(actorName == null, """ AND "Name" IS NULL""")
+            .Append(" LIMIT 1");
+
         return await db.Database
-            .SqlQuery<Guid>($"""
-                             SELECT "Id" AS "Value"
-                             FROM "ActorName"
-                             WHERE "ActorId" = {actorId}
-                               AND "Name" = {actorName}
-                             LIMIT 1
-                             """)
+            .SqlQuery<Guid>(query.ToFormattableString())
             .SingleAsync(cancellationToken);
     }
 
@@ -169,15 +174,15 @@ internal sealed class DialogSeenLogWriter(
         CancellationToken cancellationToken)
     {
         return await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                       INSERT INTO "DialogSeenLog" ("Id", "CreatedAt", "DialogId", "EndUserTypeId", "IsViaServiceOwner")
-                                                       VALUES (
-                                                           {seenLogId},
-                                                           {seenAt},
-                                                           {dialogId},
-                                                           {(int)userType},
-                                                           {userType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson})
-                                                       ON CONFLICT ("Id") DO NOTHING
-                                                       """, cancellationToken);
+                                                              INSERT INTO "DialogSeenLog" ("Id", "CreatedAt", "DialogId", "EndUserTypeId", "IsViaServiceOwner")
+                                                              VALUES (
+                                                                  {seenLogId},
+                                                                  {seenAt},
+                                                                  {dialogId},
+                                                                  {(int)userType},
+                                                                  {userType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson})
+                                                              ON CONFLICT ("Id") DO NOTHING
+                                                              """, cancellationToken);
     }
 
     private async Task EnsureSeenByActor(

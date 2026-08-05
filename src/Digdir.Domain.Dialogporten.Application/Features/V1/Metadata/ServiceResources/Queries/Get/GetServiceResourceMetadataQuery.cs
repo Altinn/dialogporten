@@ -22,9 +22,9 @@ internal sealed class GetServiceResourceMetadataQueryHandler : IRequestHandler<G
 
     public async Task<GetServiceResourceMetadataDto> Handle(
         GetServiceResourceMetadataQuery request,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
-        var items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, ct);
+        var items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, cancellationToken);
 
         return new GetServiceResourceMetadataDto { Items = items };
     }

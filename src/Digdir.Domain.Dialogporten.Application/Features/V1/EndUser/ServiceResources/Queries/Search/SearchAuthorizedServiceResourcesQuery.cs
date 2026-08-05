@@ -36,24 +36,27 @@ internal sealed class SearchAuthorizedServiceResourcesQueryHandler
 
     public async Task<SearchAuthorizedServiceResourcesDto> Handle(
         SearchAuthorizedServiceResourcesQuery request,
-        CancellationToken ct
+        CancellationToken cancellationToken
     )
     {
         // Per-caller authorized + referenced resources (bounded, cached). For callers authorized to a very large
         // number of parties on an unfiltered request, the provider signals the full catalogue should be returned
         // instead (the expensive per-party union is skipped).
-        var authorized = await _authorizedServiceResourcesProvider.GetAuthorizedServiceResources(request.Parties, ct);
+        var authorized = await _authorizedServiceResourcesProvider.GetAuthorizedServiceResources(
+            request.Parties,
+            cancellationToken
+        );
 
         IReadOnlyList<ServiceResourceMetadataItemDto> items;
 
         if (authorized.IncludeFullCatalogue)
         {
-            items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, ct);
+            items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, cancellationToken);
         }
         else
         {
             var authorizedSet = new HashSet<string>(authorized.ResourceUrns, StringComparer.OrdinalIgnoreCase);
-            var dtos = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, ct);
+            var dtos = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, cancellationToken);
             items = dtos.Where(x => authorizedSet.Contains(CreateUrn(x.ServiceResource.Id))).ToList();
         }
 

@@ -14,7 +14,7 @@ public sealed class ConflictProblemDetails(IDictionary<string, string[]> errors)
 public sealed class Conflict
 {
     public required string Key { get; set; }
-    [OneOfTypes(typeof(string), typeof(int), typeof(Guid))]
+    [OneOfTypes(typeof(string), typeof(int))]
     public required object Value { get; set; }
     public required string Reason { get; set; }
 }

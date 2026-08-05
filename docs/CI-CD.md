@@ -18,7 +18,7 @@ Naming conventions for GitHub Actions:
    - Merge to `main`
 
 2. **Main Branch Triggers**  
-When code is merged to `main`, two parallel workflows are triggered:
+When code is merged to `main`, three parallel workflows are triggered:
 
    a. **CI/CD Main** (`ci-cd-main.yml`)
    - Automatically deploys to Test environment
@@ -33,10 +33,18 @@ When code is merged to `main`, two parallel workflows are triggered:
      - Creates/updates release PR, or
      - Builds and publishes Docker images if release is complete
 
+   c. **Publish Schema NPM** (`ci-cd-publish-schema.yml`)
+   - Only starts when the push touches `docs/schema/**` or the schema build itself
+   - Publishes `@digdir/dialogporten-schema@${version.txt}-${shortSha}` if the
+     schema package changed
+   - Runs independently of `ci-cd-main.yml`, so it is **not** gated on a
+     successful deployment to Test
+
 ### 2. Release & Deployment Flow
 
 #### When Release is Created/Published:
-Three parallel workflows are triggered:
+`ci-cd-release-please.yml` emits a `release_created` repository dispatch, which
+four parallel workflows consume:
 
 1. **Production Dry Run** (`ci-cd-prod-dry-run.yml`)
    - Validates production deployment configuration
@@ -49,13 +57,23 @@ Three parallel workflows are triggered:
      - Infrastructure updates
      - Application deployment
      - Database migrations
-     - SDK publishing
+     - SDK (NuGet) publishing
      - End-to-end testing
 
 3. **YT01 Deployment** (`ci-cd-yt01.yml`)
    - Deploys to YT01 environment
    - Performance testing environment
-   - Deployment similar to staging, but does not publish SDK or schema packages
+   - Deployment similar to staging, but does not publish the SDK
+
+4. **Publish Schema NPM** (`ci-cd-publish-schema.yml`)
+   - Publishes `@digdir/dialogporten-schema` at the release version
+   - Runs in parallel with the staging deployment, not after it
+
+> **Note:** `ci-cd-publish-schema.yml` is the sole publisher of the npm schema
+> package and is registered as the Trusted Publisher for it on npmjs.com. npm
+> binds that record to the exact workflow **filename**, so the file cannot be
+> renamed, and the publish step cannot be moved into a reusable `workflow-*.yml`,
+> without updating the npmjs.com configuration first.
 
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)

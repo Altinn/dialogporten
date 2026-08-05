@@ -13,6 +13,15 @@ on:
         required: false
         default: ''
         type: string
+      ref:
+        description: >-
+          Ref to evaluate changes at (the "head" of the comparison). Defaults to
+          the ref that triggered the caller. Set this when the caller acts on a
+          ref other than its own trigger ref - e.g. a release tag - so the gate
+          and the artifact being built are read from the same commit.
+        required: false
+        default: ''
+        type: string
     outputs:
       hasInfraChanges:
         description: "Infrastructure related files changed"
@@ -79,6 +88,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          ref: ${{ inputs.ref }}
 
       - uses: step-security/changed-files@2e07db73e5ccdb319b9a6c7766bd46d39d304bad # v47.0.5
         id: filter

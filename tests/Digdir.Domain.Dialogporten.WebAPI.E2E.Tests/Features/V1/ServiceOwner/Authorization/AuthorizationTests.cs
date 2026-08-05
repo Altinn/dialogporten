@@ -1,10 +1,12 @@
 using System.Net;
+using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using FluentValidation.Results;
 using Refit;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.Authorization;
@@ -211,6 +213,15 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
             Fixture.ServiceownerApi, endpointScenario.Method, TestContext.Current.CancellationToken);
 
         response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+        response.Error.Should().NotBeNull();
+        var errorContent = response.Error.Content;
+        errorContent.Should().NotBeNull();
+        var errors = JsonSerializer.Deserialize<List<ValidationFailure>>(errorContent, JsonSerializerOptions.Web);
+        errors.Should().NotBeNull();
+        var validationFailure = errors.Single();
+
+        validationFailure.PropertyName.Should().Be("Forbidden");
+        validationFailure.ErrorMessage.Should().NotBeNull();
     }
 
     [E2EFact]
@@ -294,10 +305,10 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
     private static V1ServiceOwnerDialogsCommandsCreateActivity_ActivityRequest CreateActivityRequest() =>
         new()
         {
-            Type = Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesActivities_DialogActivityType.DialogCreated,
+            Type = DialogsEntitiesActivities_DialogActivityType.DialogCreated,
             PerformedBy = new()
             {
-                ActorType = Altinn.ApiClients.Dialogporten.Features.V1.Actors_ActorType.PartyRepresentative,
+                ActorType = Actors_ActorType.PartyRepresentative,
                 ActorName = "Some custom name"
             }
         };

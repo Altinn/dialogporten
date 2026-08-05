@@ -48,19 +48,16 @@ internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingReposi
         double percent,
         CancellationToken ct)
     {
-        // TABLESAMPLE accepts a literal percent — interpolate rather than parameterize.
-        // Clamp on the caller side.
-        var p = percent.ToString("0.######", System.Globalization.CultureInfo.InvariantCulture);
-        var sql =
-            $"""
-             SELECT "Id", "ServiceResource", "ContentUpdatedAt"
-             FROM "Dialog" TABLESAMPLE SYSTEM ({p})
-             WHERE "Deleted" = false AND "ServiceResource" IS NOT NULL;
-             """;
+        const string sql =
+            """
+            SELECT "Id", "ServiceResource", "ContentUpdatedAt"
+            FROM "Dialog" TABLESAMPLE SYSTEM (@Percent)
+            WHERE "Deleted" = false AND "ServiceResource" IS NOT NULL;
+            """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(ct);
         var rows = await connection.QueryAsync<(Guid Id, string ServiceResource, DateTime ContentUpdatedAt)>(
-            new CommandDefinition(sql, cancellationToken: ct));
+            new CommandDefinition(sql, new { Percent = percent }, cancellationToken: ct));
         return rows
             .Select(r => new SampledDialogIdentity(
                 r.Id,
@@ -136,7 +133,7 @@ internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingReposi
         IReadOnlyCollection<string> words,
         CancellationToken ct)
     {
-        // Restrict to known dictionaries since the name is interpolated into the ::regdictionary cast.
+        // Restrict to known dictionaries so typos fail with a clear error instead of a SQL error.
         if (dictionary is not ("norwegian_stem" or "english_stem" or "simple"))
         {
             throw new ArgumentException(
@@ -153,15 +150,15 @@ internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingReposi
 
         // ts_lexize returns text[] (multiple lexemes for compound words); we take the first.
         // Words the dictionary doesn't recognize (stop words / unknown) yield NULL — filtered out below.
-        var sql =
-            $"""
-             SELECT w AS "Word", (ts_lexize('{dictionary}'::regdictionary, w))[1] AS "Stem"
-             FROM unnest(@Words::text[]) AS w;
-             """;
+        const string sql =
+            """
+            SELECT w AS "Word", (ts_lexize(@Dictionary::regdictionary, w))[1] AS "Stem"
+            FROM unnest(@Words::text[]) AS w;
+            """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(ct);
         var rows = await connection.QueryAsync<StemRow>(
-            new CommandDefinition(sql, new { Words = wordArray }, cancellationToken: ct));
+            new CommandDefinition(sql, new { Dictionary = dictionary, Words = wordArray }, cancellationToken: ct));
 
         var map = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var row in rows)

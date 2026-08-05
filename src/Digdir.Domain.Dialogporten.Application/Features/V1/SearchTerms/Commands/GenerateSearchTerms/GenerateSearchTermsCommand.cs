@@ -59,7 +59,7 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         _logger = logger;
     }
 
-    public async Task<GenerateSearchTermsResult> Handle(GenerateSearchTermsCommand request, CancellationToken ct)
+    public async Task<GenerateSearchTermsResult> Handle(GenerateSearchTermsCommand request, CancellationToken cancellationToken)
     {
         var sampleSize = request.SampleSize ?? DefaultSampleSize;
         var poolRows = request.PoolRows ?? DefaultPoolRows;
@@ -74,10 +74,10 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         LogStarted(sampleSize, poolRows, minLength, string.Join(",", languages));
 #pragma warning restore CA1873
 
-        var totalRows = await _repository.EstimateTotalRowCountAsync(ct);
+        var totalRows = await _repository.EstimateTotalRowCountAsync(cancellationToken);
         LogTotalRows(totalRows);
 
-        var resources = await _repository.EnumerateServiceResourcesAsync(ct);
+        var resources = await _repository.EnumerateServiceResourcesAsync(cancellationToken);
         LogEnumeratedResources(resources.Count);
 
         if (resources.Count == 0)
@@ -87,50 +87,79 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             return new Success();
         }
 
+        var samplesByResource = await SampleDialogsAsync(resources, totalRows, sampleSize, poolRows, cancellationToken);
+
+        var allIds = samplesByResource.Values.SelectMany(x => x).Distinct().ToList();
+        if (allIds.Count == 0)
+        {
+            _logger.LogWarning("No sampled dialog IDs after Stage A/B; leaving any existing search terms untouched.");
+            return new Success();
+        }
+
+        var contentById = await HydrateContentAsync(allIds, cancellationToken);
+        LogHydrated(contentById.Count);
+
+        var statsByLanguage = languages.ToDictionary(
+            lang => lang,
+            _ => new LanguageStats(),
+            StringComparer.Ordinal);
+
+        var survivors = ComputeSurvivors(samplesByResource, languages, minLength, contentById, statsByLanguage);
+        var stemsByLanguage = await StemSurvivorsAsync(languages, survivors, cancellationToken);
+        var canonicalByStemByLanguage = BuildCanonicalMaps(languages, stemsByLanguage, survivors);
+        var wordIndex = BuildWordIndex(survivors, stemsByLanguage, canonicalByStemByLanguage, statsByLanguage);
+
+        LogRunStatistics(languages, statsByLanguage, wordIndex, samplesByResource.Count);
+
+        // Pivot the inverted index into one terse document per configured language and persist
+        // them atomically. All documents share a single generatedAt so the served ETag / Last-Modified
+        // is consistent across languages. Languages with no surviving words get an empty document
+        // (so the endpoint serves an empty list rather than 404).
+        var generatedAt = _clock.UtcNowOffset;
+        var documents = BuildDocuments(languages, wordIndex);
+        await _repository.ReplaceAsync(documents, generatedAt, cancellationToken);
+        LogPersisted(documents.Count, wordIndex.Count, generatedAt);
+
+        return new Success();
+    }
+
+    private async Task<Dictionary<string, List<Guid>>> SampleDialogsAsync(
+        IReadOnlyList<string> resources,
+        long totalRows,
+        int sampleSize,
+        int poolRows,
+        CancellationToken cancellationToken)
+    {
         // Stage A: global TABLESAMPLE pool.
         var percent = totalRows > 0
             ? Math.Clamp((double)poolRows / totalRows * 100d, MinTableSamplePercent, MaxTableSamplePercent)
             : MaxTableSamplePercent;
         LogStageAStarting(percent);
 
-        var pool = await _repository.SampleViaTableSampleAsync(percent, ct);
+        var pool = await _repository.SampleViaTableSampleAsync(percent, cancellationToken);
         LogStageAPool(pool.Count);
 
-        // Collect the full pool per resource, then sort each bucket by ContentUpdatedAt DESC
-        // and keep the top N. This biases toward recently-updated content for autocomplete
-        // freshness; the trade-off (older vocabulary under-represented) is accepted.
-        var poolByResource = new Dictionary<string, List<SampledDialogIdentity>>(StringComparer.Ordinal);
-        foreach (var row in pool)
-        {
-            if (!poolByResource.TryGetValue(row.ServiceResource, out var list))
-            {
-                list = [];
-                poolByResource[row.ServiceResource] = list;
-            }
-            list.Add(row);
-        }
-        var samplesByResource = new Dictionary<string, List<Guid>>(StringComparer.Ordinal);
-        foreach (var (resource, bucket) in poolByResource)
-        {
-            samplesByResource[resource] = bucket
-                .OrderByDescending(r => r.ContentUpdatedAt)
-                .Take(sampleSize)
-                .Select(r => r.Id)
-                .ToList();
-        }
+        // Sort each resource's pool bucket by ContentUpdatedAt DESC and keep the top N. This
+        // biases toward recently-updated content for autocomplete freshness; the trade-off
+        // (older vocabulary under-represented) is accepted.
+        var samplesByResource = pool
+            .GroupBy(r => r.ServiceResource, StringComparer.Ordinal)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(r => r.ContentUpdatedAt).Take(sampleSize).Select(r => r.Id).ToList(),
+                StringComparer.Ordinal);
 
         // Stage B: fill missing resources via direct index lookup.
         var stageBHits = 0;
         foreach (var resource in resources)
         {
             samplesByResource.TryGetValue(resource, out var existing);
-            var have = existing?.Count ?? 0;
-            if (have >= sampleSize)
+            var needed = sampleSize - (existing?.Count ?? 0);
+            if (needed <= 0)
             {
                 continue;
             }
-            var needed = sampleSize - have;
-            var extra = await _repository.SampleByResourceAsync(resource, needed, ct);
+            var extra = await _repository.SampleByResourceAsync(resource, needed, cancellationToken);
             if (extra.Count == 0)
             {
                 continue;
@@ -142,50 +171,45 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             }
             else
             {
-                foreach (var id in extra)
-                {
-                    if (!existing.Contains(id))
-                    {
-                        existing.Add(id);
-                    }
-                }
+                existing.AddRange(extra.Except(existing));
             }
         }
         LogStageBHits(stageBHits);
 
-        var allIds = samplesByResource.Values.SelectMany(x => x).Distinct().ToList();
-        if (allIds.Count == 0)
-        {
-            _logger.LogWarning("No sampled dialog IDs after Stage A/B; leaving any existing search terms untouched.");
-            return new Success();
-        }
+        return samplesByResource;
+    }
 
-        // Hydrate in chunks to avoid oversized parameter arrays.
+    // Hydrate in chunks to avoid oversized parameter arrays.
+    private async Task<Dictionary<Guid, SampledDialogContent>> HydrateContentAsync(
+        List<Guid> allIds,
+        CancellationToken cancellationToken)
+    {
         const int hydrationBatchSize = 1000;
         var contentById = new Dictionary<Guid, SampledDialogContent>();
         for (var i = 0; i < allIds.Count; i += hydrationBatchSize)
         {
             var batch = allIds.GetRange(i, Math.Min(hydrationBatchSize, allIds.Count - i));
-            var rows = await _repository.FetchContentAsync(batch, ct);
+            var rows = await _repository.FetchContentAsync(batch, cancellationToken);
             foreach (var row in rows)
             {
                 contentById[row.Id] = row;
             }
         }
-        LogHydrated(contentById.Count);
+        return contentById;
+    }
 
-        // Stage 1: per-(resource, language) strict intersection + filter. Collect surviving
-        // surface forms; stemming happens in bulk afterward (one SQL round-trip per language).
-        var perResourceLanguageSurvivors = new Dictionary<(string Resource, string Language), HashSet<string>>();
-        var statsByLanguage = languages.ToDictionary(
-            lang => lang,
-            _ => new LanguageStats(),
-            StringComparer.Ordinal);
-        var resourcesProcessed = 0;
-
+    // Stage 1: per-(resource, language) strict intersection + filter. Collect surviving
+    // surface forms; stemming happens in bulk afterward (one SQL round-trip per language).
+    private Dictionary<(string Resource, string Language), HashSet<string>> ComputeSurvivors(
+        Dictionary<string, List<Guid>> samplesByResource,
+        HashSet<string> languages,
+        int minLength,
+        Dictionary<Guid, SampledDialogContent> contentById,
+        Dictionary<string, LanguageStats> statsByLanguage)
+    {
+        var survivors = new Dictionary<(string Resource, string Language), HashSet<string>>();
         foreach (var (resource, ids) in samplesByResource)
         {
-            resourcesProcessed++;
             foreach (var language in languages)
             {
                 var intersection = ComputePerLanguageIntersection(language, ids, contentById);
@@ -197,28 +221,30 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
                 var stats = statsByLanguage[language];
                 stats.TermsBeforeFilter += intersection.Count;
 
-                var kept = new HashSet<string>(StringComparer.Ordinal);
-                foreach (var word in intersection)
-                {
-                    if (_filter.ShouldKeep(word, minLength))
-                    {
-                        kept.Add(word);
-                    }
-                }
+                var kept = intersection
+                    .Where(word => _filter.ShouldKeep(word, minLength))
+                    .ToHashSet(StringComparer.Ordinal);
                 if (kept.Count == 0)
                 {
                     continue;
                 }
                 stats.TermsAfterFilter += kept.Count;
-                perResourceLanguageSurvivors[(resource, language)] = kept;
+                survivors[(resource, language)] = kept;
             }
         }
+        return survivors;
+    }
 
-        // Stage 2: bulk stem per language via Postgres ts_lexize (same dictionary the search side uses).
+    // Stage 2: bulk stem per language via Postgres ts_lexize (same dictionary the search side uses).
+    private async Task<Dictionary<string, IReadOnlyDictionary<string, string>>> StemSurvivorsAsync(
+        HashSet<string> languages,
+        Dictionary<(string Resource, string Language), HashSet<string>> survivors,
+        CancellationToken cancellationToken)
+    {
         var stemsByLanguage = new Dictionary<string, IReadOnlyDictionary<string, string>>(StringComparer.Ordinal);
         foreach (var language in languages)
         {
-            var distinctWords = perResourceLanguageSurvivors
+            var distinctWords = survivors
                 .Where(kv => kv.Key.Language == language)
                 .SelectMany(kv => kv.Value)
                 .ToHashSet(StringComparer.Ordinal);
@@ -229,53 +255,59 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             }
             var dictionary = ResolveStemDictionary(language);
             LogStemmingLanguage(language, dictionary, distinctWords.Count);
-            stemsByLanguage[language] = await _repository.StemAsync(dictionary, distinctWords, ct);
+            stemsByLanguage[language] = await _repository.StemAsync(dictionary, distinctWords, cancellationToken);
         }
+        return stemsByLanguage;
+    }
 
-        // Stage 3a: build a GLOBAL stem→canonical map per language across ALL surviving words.
-        // This must be global (not per-resource) so the same stem yields the same surface form
-        // everywhere — otherwise resource A emits 'virksomhet' and resource B emits 'virksomheten'
-        // for the same underlying stem 'virksom', creating duplicate suggestions in the search-term list.
+    // Stage 3a: build a GLOBAL stem→canonical map per language across ALL surviving words.
+    // This must be global (not per-resource) so the same stem yields the same surface form
+    // everywhere — otherwise resource A emits 'virksomhet' and resource B emits 'virksomheten'
+    // for the same underlying stem 'virksom', creating duplicate suggestions in the search-term list.
+    private static Dictionary<string, Dictionary<string, string>> BuildCanonicalMaps(
+        HashSet<string> languages,
+        Dictionary<string, IReadOnlyDictionary<string, string>> stemsByLanguage,
+        Dictionary<(string Resource, string Language), HashSet<string>> survivors)
+    {
         var canonicalByStemByLanguage = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
         foreach (var language in languages)
         {
             var stemMap = stemsByLanguage[language];
             var canonical = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (var (key, survivors) in perResourceLanguageSurvivors)
+            var words = survivors
+                .Where(kv => kv.Key.Language == language)
+                .SelectMany(kv => kv.Value);
+            foreach (var word in words)
             {
-                if (key.Language != language)
+                var stemKey = stemMap.TryGetValue(word, out var stem) ? stem : word;
+                if (!canonical.TryGetValue(stemKey, out var current) || IsBetterCanonical(word, current))
                 {
-                    continue;
-                }
-                foreach (var word in survivors)
-                {
-                    var stemKey = stemMap.TryGetValue(word, out var stem) ? stem : word;
-                    if (!canonical.TryGetValue(stemKey, out var current) || IsBetterCanonical(word, current))
-                    {
-                        canonical[stemKey] = word;
-                    }
+                    canonical[stemKey] = word;
                 }
             }
             canonicalByStemByLanguage[language] = canonical;
         }
+        return canonicalByStemByLanguage;
+    }
 
-        // Stage 3b: per (resource, language), map each survivor to its (global) canonical form,
-        // dedupe within the resource, and accumulate into the inverted index. Values are HashSets
-        // of unprefixed resource IDs — the same (canonical, language, resource) triple may be hit
-        // multiple times if several surviving surface forms collapse to the same canonical for
-        // that resource.
+    // Stage 3b: per (resource, language), map each survivor to its (global) canonical form,
+    // dedupe within the resource, and accumulate into the inverted index. Values are HashSets
+    // of unprefixed resource IDs — the same (canonical, language, resource) triple may be hit
+    // multiple times if several surviving surface forms collapse to the same canonical for
+    // that resource.
+    private static Dictionary<(string Word, string Language), HashSet<string>> BuildWordIndex(
+        Dictionary<(string Resource, string Language), HashSet<string>> survivors,
+        Dictionary<string, IReadOnlyDictionary<string, string>> stemsByLanguage,
+        Dictionary<string, Dictionary<string, string>> canonicalByStemByLanguage,
+        Dictionary<string, LanguageStats> statsByLanguage)
+    {
         var wordIndex = new Dictionary<(string Word, string Language), HashSet<string>>();
-        foreach (var ((resource, language), survivors) in perResourceLanguageSurvivors)
+        foreach (var ((resource, language), survivingWords) in survivors)
         {
-            var stemMap = stemsByLanguage[language];
-            var canonical = canonicalByStemByLanguage[language];
-            var canonicalsForResource = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var word in survivors)
-            {
-                var stemKey = stemMap.TryGetValue(word, out var stem) ? stem : word;
-                var canon = canonical.TryGetValue(stemKey, out var c) ? c : word;
-                canonicalsForResource.Add(canon);
-            }
+            var canonicalsForResource = MapToCanonicalForms(
+                survivingWords,
+                stemsByLanguage[language],
+                canonicalByStemByLanguage[language]);
 
             var unprefixed = StripResourcePrefix(resource);
             statsByLanguage[language].TermsAfterStemCollapse += canonicalsForResource.Count;
@@ -283,16 +315,37 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
 
             foreach (var canon in canonicalsForResource)
             {
-                var key = (canon, language);
-                if (!wordIndex.TryGetValue(key, out var set))
+                if (!wordIndex.TryGetValue((canon, language), out var set))
                 {
                     set = new HashSet<string>(StringComparer.Ordinal);
-                    wordIndex[key] = set;
+                    wordIndex[(canon, language)] = set;
                 }
                 set.Add(unprefixed);
             }
         }
+        return wordIndex;
+    }
 
+    private static HashSet<string> MapToCanonicalForms(
+        HashSet<string> words,
+        IReadOnlyDictionary<string, string> stemMap,
+        Dictionary<string, string> canonicalByStem)
+    {
+        var result = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var word in words)
+        {
+            var stemKey = stemMap.TryGetValue(word, out var stem) ? stem : word;
+            result.Add(canonicalByStem.TryGetValue(stemKey, out var canonical) ? canonical : word);
+        }
+        return result;
+    }
+
+    private void LogRunStatistics(
+        HashSet<string> languages,
+        Dictionary<string, LanguageStats> statsByLanguage,
+        Dictionary<(string Word, string Language), HashSet<string>> wordIndex,
+        int resourcesProcessed)
+    {
         var distinctCanonicalByLanguage = wordIndex.Keys
             .GroupBy(k => k.Language, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
@@ -300,7 +353,7 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         foreach (var language in languages.OrderBy(x => x, StringComparer.Ordinal))
         {
             var stats = statsByLanguage[language];
-            var distinct = distinctCanonicalByLanguage.TryGetValue(language, out var n) ? n : 0;
+            var distinct = distinctCanonicalByLanguage.GetValueOrDefault(language);
             LogPerLanguageStats(
                 language,
                 stats.TermsBeforeFilter,
@@ -310,17 +363,6 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
                 stats.ResourcesWithSurvivingWords);
         }
         LogIntersectionSummary(resourcesProcessed, wordIndex.Count);
-
-        // Pivot the inverted index into one terse document per configured language and persist
-        // them atomically. All documents share a single generatedAt so the served ETag / Last-Modified
-        // is consistent across languages. Languages with no surviving words get an empty document
-        // (so the endpoint serves an empty list rather than 404).
-        var generatedAt = _clock.UtcNowOffset;
-        var documents = BuildDocuments(languages, wordIndex);
-        await _repository.ReplaceAsync(documents, generatedAt, ct);
-        LogPersisted(documents.Count, wordIndex.Count, generatedAt);
-
-        return new Success();
     }
 
     private static List<SearchTermListDocument> BuildDocuments(
@@ -376,18 +418,7 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             {
                 return [];
             }
-            var tokens = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var loc in content.Localizations)
-            {
-                if (loc.LanguageCode != language)
-                {
-                    continue;
-                }
-                foreach (var token in _tokenizer.Tokenize(loc.Value))
-                {
-                    tokens.Add(token);
-                }
-            }
+            var tokens = TokenizeLocalizations(content, language);
             if (tokens.Count == 0)
             {
                 // Strict per-language rule: a sample with no content for this language collapses the intersection.
@@ -408,6 +439,12 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         }
         return intersection ?? [];
     }
+
+    private HashSet<string> TokenizeLocalizations(SampledDialogContent content, string language) =>
+        content.Localizations
+            .Where(loc => loc.LanguageCode == language)
+            .SelectMany(loc => _tokenizer.Tokenize(loc.Value))
+            .ToHashSet(StringComparer.Ordinal);
 
     private static string StripResourcePrefix(string serviceResource) =>
         serviceResource.StartsWith(Constants.ServiceResourcePrefix, StringComparison.Ordinal)

@@ -12,7 +12,7 @@ public sealed class SearchTermList : IEntity
     public Guid Id { get; set; }
 
     /// <summary>Normalized two-letter language code (e.g. <c>nb</c>, <c>nn</c>, <c>en</c>). Unique.</summary>
-    public string Language { get; set; } = null!;
+    public required string Language { get; set; }
 
     /// <summary>When this generation run produced the document. Drives the served ETag / Last-Modified.</summary>
     public DateTimeOffset GeneratedAt { get; set; }
@@ -21,7 +21,7 @@ public sealed class SearchTermList : IEntity
     /// The terse words array stored verbatim as jsonb: <c>[{ "w": "skattemelding", "s": ["app_skd_x"] }]</c>
     /// where <c>w</c> is the canonical word and <c>s</c> the sorted unprefixed resource identifiers.
     /// </summary>
-    public string Words { get; set; } = null!;
+    public required string Words { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }

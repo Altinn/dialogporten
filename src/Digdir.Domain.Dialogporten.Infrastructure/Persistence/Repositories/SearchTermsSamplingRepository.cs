@@ -149,26 +149,23 @@ internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingReposi
         var wordArray = words.ToArray();
 
         // ts_lexize returns text[] (multiple lexemes for compound words); we take the first.
-        // Words the dictionary doesn't recognize (stop words / unknown) yield NULL — filtered out below.
+        // Words the dictionary doesn't recognize (stop words / unknown) yield NULL and are
+        // filtered out in SQL, so every returned row has a usable stem.
         const string sql =
             """
-            SELECT w AS "Word", (ts_lexize(@Dictionary::regdictionary, w))[1] AS "Stem"
-            FROM unnest(@Words::text[]) AS w;
+            SELECT "Word", "Stem"
+            FROM (
+                SELECT w AS "Word", (ts_lexize(@Dictionary::regdictionary, w))[1] AS "Stem"
+                FROM unnest(@Words::text[]) AS w
+            ) stems
+            WHERE "Stem" IS NOT NULL AND "Stem" <> '';
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(ct);
         var rows = await connection.QueryAsync<StemRow>(
             new CommandDefinition(sql, new { Dictionary = dictionary, Words = wordArray }, cancellationToken: ct));
 
-        var map = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var row in rows)
-        {
-            if (!string.IsNullOrEmpty(row.Stem))
-            {
-                map[row.Word] = row.Stem;
-            }
-        }
-        return map;
+        return rows.ToDictionary(r => r.Word, r => r.Stem, StringComparer.Ordinal);
     }
 
     public async Task ReplaceAsync(
@@ -195,5 +192,5 @@ internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingReposi
     }
 
     private sealed record ContentRow(Guid DialogId, string ServiceResource, string LanguageCode, string Value);
-    private sealed record StemRow(string Word, string? Stem);
+    private sealed record StemRow(string Word, string Stem);
 }

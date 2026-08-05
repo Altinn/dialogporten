@@ -222,10 +222,6 @@
               {
                 "format": "int32",
                 "type": "integer"
-              },
-              {
-                "format": "guid",
-                "type": "string"
               }
             ]
           }

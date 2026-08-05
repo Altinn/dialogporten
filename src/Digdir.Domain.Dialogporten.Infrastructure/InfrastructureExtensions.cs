@@ -584,11 +584,19 @@ public static class InfrastructureExtensions
     {
         services.AddHealthChecks()
             .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies"])
-            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"])
+            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"]);
+
+        services.AddSingleton<RedisHealthCheck>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddWarmupHealthChecks(this IServiceCollection services)
+    {
+        services.AddHealthChecks()
             .AddCheck<WarmupHealthCheck>("warmup", tags: ["warmup"]);
 
         services
-            .AddSingleton<RedisHealthCheck>()
             .AddSingleton<WarmupState>()
             .AddSingleton<WarmupHealthCheck>()
             .AddHostedService<WarmupService>();

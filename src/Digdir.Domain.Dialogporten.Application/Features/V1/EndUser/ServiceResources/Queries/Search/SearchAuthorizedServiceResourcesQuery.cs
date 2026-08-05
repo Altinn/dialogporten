@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using MediatR;
+using static Digdir.Domain.Dialogporten.Domain.Common.ServiceResourceUrnFactory;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.ServiceResources.Queries.Search;
 
@@ -35,31 +36,29 @@ internal sealed class SearchAuthorizedServiceResourcesQueryHandler
 
     public async Task<SearchAuthorizedServiceResourcesDto> Handle(
         SearchAuthorizedServiceResourcesQuery request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         // Per-caller authorized + referenced resources (bounded, cached). For callers authorized to a very large
         // number of parties on an unfiltered request, the provider signals the full catalogue should be returned
         // instead (the expensive per-party union is skipped).
-        var authorized = await _authorizedServiceResourcesProvider
-            .GetAuthorizedServiceResources(request.Parties, cancellationToken);
+        var authorized = await _authorizedServiceResourcesProvider.GetAuthorizedServiceResources(
+            request.Parties,
+            cancellationToken
+        );
 
-        // Select from the shared, all-language catalogue. Localization pruning and requested-language sorting are
-        // applied below via ToSortedPrunedItems; filtering here only selects which entries to include.
-        var entries = await _catalogue.GetEntries(cancellationToken);
-        IEnumerable<ServiceResourceMetadataCatalogueEntry> selected;
+        IReadOnlyList<ServiceResourceMetadataItemDto> items;
+
         if (authorized.IncludeFullCatalogue)
         {
-            selected = entries;
+            items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, cancellationToken);
         }
         else
         {
             var authorizedSet = new HashSet<string>(authorized.ResourceUrns, StringComparer.OrdinalIgnoreCase);
-            selected = entries.Where(entry => authorizedSet.Contains(entry.ResourceUrn));
+            var dtos = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, cancellationToken);
+            items = dtos.Where(x => authorizedSet.Contains(CreateUrn(x.ServiceResource.Id))).ToList();
         }
-
-        // Prune localizations into fresh per-request copies and re-sort by the pruned (requested-language) name
-        // (see ToSortedPrunedItems).
-        var items = selected.ToSortedPrunedItems(request.AcceptedLanguages);
 
         return new SearchAuthorizedServiceResourcesDto
         {

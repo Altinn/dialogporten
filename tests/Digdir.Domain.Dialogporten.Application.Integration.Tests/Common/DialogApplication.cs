@@ -11,10 +11,9 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
-using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
@@ -24,6 +23,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
+using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using HotChocolate.Subscriptions;
 using MassTransit;
@@ -206,10 +206,10 @@ public class DialogApplication : IAsyncLifetime
             });
 
         organizationRegistrySubstitute
-            .GetServiceOwnerInfo(Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>())
+            .GetServiceOwnerInfo(Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
             .Returns(callInfo =>
             {
-                var orgNumbers = callInfo.ArgAt<IReadOnlyCollection<string>>(0);
+                var orgNumbers = callInfo.ArgAt<IEnumerable<string>>(0);
                 return orgNumbers
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(

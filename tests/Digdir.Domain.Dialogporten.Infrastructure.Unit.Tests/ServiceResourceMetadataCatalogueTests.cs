@@ -29,15 +29,15 @@ public class ServiceResourceMetadataCatalogueTests
         var catalogue = new ServiceResourceMetadataCatalogue(
             CreateCacheProvider(), serviceProvider.GetRequiredService<IServiceScopeFactory>());
 
-        var first = await catalogue.GetEntries(TestContext.Current.CancellationToken);
-        var second = await catalogue.GetEntries(TestContext.Current.CancellationToken);
+        var first = await catalogue.GetCatalogueDtos(null, TestContext.Current.CancellationToken);
+        var second = await catalogue.GetCatalogueDtos(null, TestContext.Current.CancellationToken);
 
         // The expensive build runs once regardless of how many times the catalogue is requested (churn removed).
         builder.CallCount.Should().Be(1);
         // The catalogue is built all-language (acceptedLanguages == null), so per-request pruning can happen later.
         builder.LastAcceptedLanguages.Should().BeNull();
         // Entries are keyed by full URN (matching the authorized-set comparison in the handler).
-        first.Should().ContainSingle().Which.ResourceUrn.Should().Be(ResourceUrn);
+        first.Should().ContainSingle().Which.ServiceResource.Id.Should().Be("some-service");
         second.Should().BeSameAs(first);
     }
 
@@ -52,7 +52,7 @@ public class ServiceResourceMetadataCatalogueTests
         public Task<List<ServiceResourceMetadataItemDto>> BuildItems(
             IReadOnlyCollection<string> serviceResources,
             List<AcceptedLanguage>? acceptedLanguages,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             CallCount++;
             LastAcceptedLanguages = acceptedLanguages;

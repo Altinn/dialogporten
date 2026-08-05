@@ -24,6 +24,7 @@ public interface ISubscriptionInfrastructureOptions : IInfrastructureBuilder
 
 public interface IInfrastructureBuilder
 {
+    IInfrastructureBuilder WithWarmupHealthChecks();
     IServiceCollection Build();
 }
 
@@ -83,6 +84,12 @@ internal sealed class InfrastructureBuilder :
     }
 
     public IInfrastructureBuilder WithPubCapabilities() => AddAction(AddPubCapabilities);
+    public IInfrastructureBuilder WithWarmupHealthChecks()
+    {
+        _services.AddWarmupHealthChecks();
+        return this;
+    }
+
     public IInfrastructureBuilder WithoutPubSubCapabilities() => this;
 
     private InfrastructureBuilder AddAction(Action<InfrastructureBuilderContext> action)

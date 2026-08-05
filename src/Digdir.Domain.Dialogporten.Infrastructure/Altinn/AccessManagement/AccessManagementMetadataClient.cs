@@ -109,8 +109,8 @@ internal sealed class AccessManagementMetadataClient : IAccessManagementMetadata
                 await Task.WhenAll(rolesTask, accessPackagesTask);
 
                 return new LocalizedAccessManagementMetadata(
-                    [.. rolesTask.Result.SelectMany(x => ToLocalizedRoles(x, language))],
-                    [.. accessPackagesTask.Result
+                    Roles: [.. rolesTask.Result.SelectMany(x => ToLocalizedRoles(x, language))],
+                    AccessPackages: [.. accessPackagesTask.Result
                         .SelectMany(FlattenPackages)
                         .Where(x => !string.IsNullOrWhiteSpace(x.Urn))
                         .Select(x => new LocalizedAccessPackage(
@@ -119,7 +119,8 @@ internal sealed class AccessManagementMetadataClient : IAccessManagementMetadata
                             {
                                 LanguageCode = language,
                                 Value = x.Name ?? x.Urn!
-                            }))]);
+                            }))
+                    ]);
             },
             token: cancellationToken);
 

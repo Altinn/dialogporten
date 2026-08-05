@@ -22,7 +22,7 @@ public sealed class UpdateDialogTransmissionEndpoint : Endpoint<UpdateTransmissi
     public override void Configure()
     {
         Put("dialogs/{dialogId}/transmissions/{transmissionId}");
-        Policies(AuthorizationPolicy.ServiceProvider);
+        Policies(AuthorizationPolicy.ServiceProviderChangeTransmissions);
         Group<ServiceOwnerGroup>();
 
         Description(b => b.ProducesOneOf(

@@ -15,7 +15,7 @@ public sealed class SearchDialogTransmissionEndpointSummary : Summary<SearchDial
                       Gets the list of transmissions belonging to a dialog
                       """;
         Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("transmission list");
-        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure.FormatInvariant(AuthorizationScope.EndUser);
+        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
         Responses[StatusCodes.Status410Gone] = Constants.SwaggerSummary.DialogDeleted;

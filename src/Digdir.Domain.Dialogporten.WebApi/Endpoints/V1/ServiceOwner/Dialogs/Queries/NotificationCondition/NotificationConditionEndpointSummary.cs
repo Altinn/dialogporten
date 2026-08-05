@@ -7,9 +7,9 @@ using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.NotificationCondition;
 
-public sealed class SearchDialogActivityEndpointSummary : Summary<NotificationConditionEndpoint, NotificationConditionQuery>
+public sealed class NotificationConditionEndpointSummary : Summary<NotificationConditionEndpoint, NotificationConditionQuery>
 {
-    public SearchDialogActivityEndpointSummary()
+    public NotificationConditionEndpointSummary()
     {
         Summary = "Returns a boolean value based on conditions used to determine if a notification is to be sent";
         Description = """

@@ -1,7 +1,8 @@
-using Digdir.Domain.Dialogporten.WebApi.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Freeze;
 
@@ -17,6 +18,10 @@ public sealed class FreezeDialogEndpointSummary : Summary<FreezeDialogEndpoint>
         ResponseHeaders = [HttpResponseHeaderExamples.NewDialogETagHeader(StatusCodes.Status204NoContent)];
         Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Frozen.FormatInvariant("aggregate");
         Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
+        Responses[StatusCodes.Status401Unauthorized] = Constants
+            .SwaggerSummary
+            .ServiceOwnerAuthenticationFailure
+            .FormatInvariant(AuthorizationScope.ServiceProvider);
         Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("freeze");
         Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
         Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;

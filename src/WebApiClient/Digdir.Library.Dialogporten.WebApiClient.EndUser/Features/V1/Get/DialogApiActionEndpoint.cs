@@ -24,7 +24,7 @@ public class DialogApiActionEndpoint
     /// <br/>not authorized to perform the action.
     /// </summary>
     [JsonPropertyName("url")]
-    public Uri Url { get; set; } = default!;
+    public Uri Url { get; set; } = null!;
 
     /// <summary>
     /// The HTTP method that the endpoint expects for this action.

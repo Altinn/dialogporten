@@ -8,7 +8,7 @@ public class Content
     /// The title of the dialog.
     /// </summary>
     [JsonPropertyName("title")]
-    public ContentValue Title { get; set; } = default!;
+    public ContentValue Title { get; set; } = null!;
 
     /// <summary>
     /// A short summary of the dialog and its current state.

@@ -12,7 +12,7 @@ public class DialogSeenLogDetails
     public DateTimeOffset SeenAt { get; set; }
 
     [JsonPropertyName("seenBy")]
-    public Actor SeenBy { get; set; } = default!;
+    public Actor SeenBy { get; set; } = null!;
 
     [JsonPropertyName("isViaServiceOwner")]
     public bool IsViaServiceOwner { get; set; }

@@ -6,7 +6,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.ServiceResource;
 public class IdentifierLookupServiceResource
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = default!;
+    public string Id { get; set; } = null!;
 
     [JsonPropertyName("isDelegable")]
     public bool IsDelegable { get; set; }

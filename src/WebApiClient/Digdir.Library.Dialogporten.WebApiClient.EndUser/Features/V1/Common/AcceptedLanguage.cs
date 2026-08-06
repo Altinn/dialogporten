@@ -9,7 +9,7 @@ public class AcceptedLanguage
         AcceptedLanguagesHeaderFormatter.FormatAcceptedLanguage(LanguageCode, Weight);
 
     [JsonPropertyName("languageCode")]
-    public string LanguageCode { get; set; } = default!;
+    public string LanguageCode { get; set; } = null!;
 
     [JsonPropertyName("weight")]
     public int Weight { get; set; }

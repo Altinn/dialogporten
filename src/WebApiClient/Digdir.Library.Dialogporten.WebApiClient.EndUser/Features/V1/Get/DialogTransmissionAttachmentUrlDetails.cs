@@ -16,7 +16,7 @@ public class DialogTransmissionAttachmentUrlDetails
     /// <br/>not authorized to access the transmission.
     /// </summary>
     [JsonPropertyName("url")]
-    public Uri Url { get; set; } = default!;
+    public Uri Url { get; set; } = null!;
 
     /// <summary>
     /// The media type of the attachment.

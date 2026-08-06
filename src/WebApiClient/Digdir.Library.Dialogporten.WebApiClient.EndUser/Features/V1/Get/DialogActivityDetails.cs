@@ -23,7 +23,7 @@ public class DialogActivityDetails
     public Guid? TransmissionId { get; set; }
 
     [JsonPropertyName("performedBy")]
-    public Actor PerformedBy { get; set; } = default!;
+    public Actor PerformedBy { get; set; } = null!;
 
     [JsonPropertyName("description")]
     public ICollection<Localization>? Description { get; set; } = [];

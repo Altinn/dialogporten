@@ -14,7 +14,7 @@ public class ContentValue
     /// Media type of the content, this can also indicate that the content is embeddable.
     /// </summary>
     [JsonPropertyName("mediaType")]
-    public string MediaType { get; set; } = default!;
+    public string MediaType { get; set; } = null!;
 
     /// <summary>
     /// True if the authenticated user is authorized for this content. If not, the endpoints will

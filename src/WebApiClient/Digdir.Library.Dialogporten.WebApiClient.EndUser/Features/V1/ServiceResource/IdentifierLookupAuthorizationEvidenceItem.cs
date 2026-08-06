@@ -11,7 +11,7 @@ public class IdentifierLookupAuthorizationEvidenceItem
     public IdentifierLookupGrantType GrantType { get; set; }
 
     [JsonPropertyName("subject")]
-    public string Subject { get; set; } = default!;
+    public string Subject { get; set; } = null!;
 
     [JsonPropertyName("name")]
     public ICollection<Localization>? Name { get; set; } = [];

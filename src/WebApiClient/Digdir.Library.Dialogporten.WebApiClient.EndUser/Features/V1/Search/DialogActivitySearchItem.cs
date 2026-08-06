@@ -23,5 +23,5 @@ public class DialogActivitySearchItem
     public Guid? TransmissionId { get; set; }
 
     [JsonPropertyName("description")]
-    public ICollection<Localization>? Description { get; set; } = [];
+    public ICollection<Localization> Description { get; set; } = [];
 }

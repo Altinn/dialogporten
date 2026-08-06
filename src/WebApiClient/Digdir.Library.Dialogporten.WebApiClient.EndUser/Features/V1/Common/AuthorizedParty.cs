@@ -8,7 +8,7 @@ public class AuthorizedParty
     /// The party identifier in URN format
     /// </summary>
     [JsonPropertyName("party")]
-    public string Party { get; set; } = default!;
+    public string Party { get; set; } = null!;
 
     /// <summary>
     /// The UUID for the party.
@@ -26,7 +26,7 @@ public class AuthorizedParty
     /// The name of the party (verbatim from CCR, usually in all caps)
     /// </summary>
     [JsonPropertyName("name")]
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!;
 
     /// <summary>
     /// The date of birth of the party, if a person.
@@ -38,7 +38,7 @@ public class AuthorizedParty
     /// The type of the party, either "Organization" or "Person".
     /// </summary>
     [JsonPropertyName("partyType")]
-    public string PartyType { get; set; } = default!;
+    public string PartyType { get; set; } = null!;
 
     /// <summary>
     /// Whether the party is deleted or not

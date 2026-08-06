@@ -15,7 +15,7 @@ public class DialogAttachmentUrl
     /// The fully qualified URL of the attachment.
     /// </summary>
     [JsonPropertyName("url")]
-    public Uri Url { get; set; } = default!;
+    public Uri Url { get; set; } = null!;
 
     /// <summary>
     /// The media type of the attachment.

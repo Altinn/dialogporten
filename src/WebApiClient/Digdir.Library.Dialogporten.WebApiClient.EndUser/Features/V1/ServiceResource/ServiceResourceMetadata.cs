@@ -5,7 +5,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.ServiceResource;
 public class ServiceResourceMetadata
 {
     [JsonPropertyName("serviceResource")]
-    public ServiceResource ServiceResource { get; set; } = default!;
+    public ServiceResource ServiceResource { get; set; } = null!;
 
     [JsonPropertyName("roles")]
     public ICollection<ServiceResourceRole>? Roles { get; set; } = [];
@@ -14,5 +14,5 @@ public class ServiceResourceMetadata
     public ICollection<ServiceResourceAccessPackage>? AccessPackages { get; set; } = [];
 
     [JsonPropertyName("serviceOwner")]
-    public ServiceResourceOwner ServiceOwner { get; set; } = default!;
+    public ServiceResourceOwner ServiceOwner { get; set; } = null!;
 }

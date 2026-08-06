@@ -22,26 +22,26 @@ public class Dialog
     /// The service owner code representing the organization (service owner) related to this dialog.
     /// </summary>
     [JsonPropertyName("org")]
-    public string Org { get; set; } = default!;
+    public string Org { get; set; } = null!;
 
     /// <summary>
     /// The service identifier for the service that the dialog is related to in URN-format.
     /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
     /// </summary>
     [JsonPropertyName("serviceResource")]
-    public string ServiceResource { get; set; } = default!;
+    public string ServiceResource { get; set; } = null!;
 
     /// <summary>
     /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
     /// </summary>
     [JsonPropertyName("serviceResourceType")]
-    public string ServiceResourceType { get; set; } = default!;
+    public string ServiceResourceType { get; set; } = null!;
 
     /// <summary>
     /// The party code representing the organization or person that the dialog belongs to in URN format.
     /// </summary>
     [JsonPropertyName("party")]
-    public string Party { get; set; } = default!;
+    public string Party { get; set; } = null!;
 
     /// <summary>
     /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
@@ -158,7 +158,7 @@ public class Dialog
     /// The dialog unstructured text content.
     /// </summary>
     [JsonPropertyName("content")]
-    public Content Content { get; set; } = default!;
+    public Content Content { get; set; } = null!;
 
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,
@@ -238,5 +238,5 @@ public class Dialog
     /// Metadata about the dialog owned by end-users.
     /// </summary>
     [JsonPropertyName("endUserContext")]
-    public DialogEndUserContext EndUserContext { get; set; } = default!;
+    public DialogEndUserContext EndUserContext { get; set; } = null!;
 }

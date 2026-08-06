@@ -43,7 +43,7 @@ public class DialogActivityListItem
     /// The actor that performed the activity.
     /// </summary>
     [JsonPropertyName("performedBy")]
-    public Actor PerformedBy { get; set; } = default!;
+    public Actor PerformedBy { get; set; } = null!;
 
     /// <summary>
     /// Unstructured text describing the activity. Only set if the activity type is "Information".

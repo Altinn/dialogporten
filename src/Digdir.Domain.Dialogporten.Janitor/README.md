@@ -101,7 +101,7 @@ Below are the available commands (commands are always the first argument):
     1. **Sampling (Stage A)** — a single global `TABLESAMPLE SYSTEM` pass over `Dialog`, with the sample percentage derived from `--pool-rows` and the estimated row count (clamped to 0.001–5 %). Rows are bucketed per service resource and the `--sample-size` most recently content-updated dialogs are kept per bucket, biasing terms toward fresh content.
     2. **Sampling (Stage B)** — resources that the random pool under-sampled are topped up through a direct index lookup, so small resources are not omitted.
     3. **Intersection** — titles and summaries of a resource's samples are tokenized (letters only, lowercased) per language, and only words present in *every* sample survive. A sample with no content in the given language collapses that resource/language intersection to empty.
-    4. **Filtering** — survivors shorter than `--min-length` or present in the bundled stopword lists (`no.txt`, `en.txt`) are dropped.
+    4. **Filtering** — survivors shorter than `--min-length` or present in the bundled stopword lists (`no.txt`, `en.txt`) are dropped. Stopwords are matched both on the exact surface form and by stem (using the same `ts_lexize` dictionaries as step 5), so a stoplisted `innsending` also removes inflections like `innsendingen`/`innsendinga` without listing every form.
     5. **Stemming** — remaining words are stemmed in bulk with `ts_lexize` using the same dictionaries as the search side (`norwegian_stem` for `nb`/`nn`, `english_stem` for `en`), and each stem is collapsed to one canonical surface form *globally per language*, so the same stem never yields duplicate suggestions across resources.
     6. **Persistence** — the inverted index is pivoted into one JSON document per configured language and written atomically. All documents from a run share the same `GeneratedAt`, which drives the endpoint's `ETag` / `Last-Modified`.
 
@@ -121,6 +121,9 @@ Below are the available commands (commands are always the first argument):
     - `-l`, `--languages`  
       *Optional*: Comma-separated language codes to generate documents for (default: `nb,nn,en`). Languages with no surviving words get an empty document, so the endpoint serves an empty list rather than a 404.
 
+    - `-o`, `--output`  
+      *Optional*: Write the generated documents to this path as JSONL (one line per language, same content as the `SearchTermList` rows) **instead of persisting to the database** — the database write is skipped entirely. Useful as a dry run for inspecting output, and lets the command run against a read-only connection or an environment where the `SearchTermList` table does not exist yet.
+
 - **Examples:**
 
   ```bash
@@ -132,6 +135,9 @@ Below are the available commands (commands are always the first argument):
 
   # Bokmål only, allowing shorter words
   janitor generate-searchterms -l nb -m 4
+
+  # Dry run: write JSONL to disk, no database writes
+  janitor generate-searchterms -o searchterms.jsonl
   ```
 
 ---

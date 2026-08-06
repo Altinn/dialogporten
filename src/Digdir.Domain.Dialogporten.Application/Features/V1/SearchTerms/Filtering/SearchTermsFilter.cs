@@ -11,6 +11,8 @@ internal sealed class SearchTermsFilter : ISearchTermsFilter
         _stopwords = LoadStopwords();
     }
 
+    public IReadOnlyCollection<string> Stopwords => _stopwords;
+
     public bool ShouldKeep(string word, int minLength)
     {
         if (word.Length < minLength)

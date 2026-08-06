@@ -131,7 +131,8 @@ internal static partial class Commands
                 [Option('n', Description = "Samples per service resource (3-100, default 3)")] int? sampleSize,
                 [Option("pool-rows", Description = "Stage A TABLESAMPLE pool target rows (default 150000)")] int? poolRows,
                 [Option('m', Description = "Minimum word length (default 5)")] int? minLength,
-                [Option('l', Description = "Comma-separated language codes (default nb,nn,en)")] string? languages)
+                [Option('l', Description = "Comma-separated language codes (default nb,nn,en)")] string? languages,
+                [Option('o', Description = "Write results to a JSONL file instead of persisting to the database (dry-run)")] string? output = null)
             =>
             {
                 var langs = string.IsNullOrWhiteSpace(languages)
@@ -143,7 +144,8 @@ internal static partial class Commands
                         SampleSize = sampleSize,
                         PoolRows = poolRows,
                         MinLength = minLength,
-                        Languages = langs
+                        Languages = langs,
+                        OutputPath = output
                     },
                     ctx.CancellationToken);
                 return result.Match(success => 0, validationError => -1);

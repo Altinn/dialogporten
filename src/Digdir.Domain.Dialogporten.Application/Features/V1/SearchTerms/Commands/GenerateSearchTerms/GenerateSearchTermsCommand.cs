@@ -20,6 +20,13 @@ public sealed class GenerateSearchTermsCommand : IRequest<GenerateSearchTermsRes
     public int? PoolRows { get; init; }
     public int? MinLength { get; init; }
     public IReadOnlyList<string>? Languages { get; init; }
+
+    /// <summary>
+    /// When set, the generated documents are written as JSONL to this path instead of being
+    /// persisted to the database. Lets the command run against read-only environments (or
+    /// environments without the SearchTermList table) for output inspection.
+    /// </summary>
+    public string? OutputPath { get; init; }
 }
 
 [GenerateOneOf]
@@ -106,6 +113,7 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
 
         var survivors = ComputeSurvivors(samplesByResource, languages, minLength, contentById, statsByLanguage);
         var stemsByLanguage = await StemSurvivorsAsync(languages, survivors, cancellationToken);
+        await RemoveStemStoplistedSurvivorsAsync(languages, survivors, stemsByLanguage, cancellationToken);
         var canonicalByStemByLanguage = BuildCanonicalMaps(languages, stemsByLanguage, survivors);
         var wordIndex = BuildWordIndex(survivors, stemsByLanguage, canonicalByStemByLanguage, statsByLanguage);
 
@@ -117,8 +125,16 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         // (so the endpoint serves an empty list rather than 404).
         var generatedAt = _clock.UtcNowOffset;
         var documents = BuildDocuments(languages, wordIndex);
-        await _repository.ReplaceAsync(documents, generatedAt, cancellationToken);
-        LogPersisted(documents.Count, wordIndex.Count, generatedAt);
+        if (request.OutputPath is not null)
+        {
+            await WriteDocumentsToFileAsync(request.OutputPath, documents, generatedAt, cancellationToken);
+            LogWroteToFile(documents.Count, wordIndex.Count, request.OutputPath);
+        }
+        else
+        {
+            await _repository.ReplaceAsync(documents, generatedAt, cancellationToken);
+            LogPersisted(documents.Count, wordIndex.Count, generatedAt);
+        }
 
         return new Success();
     }
@@ -260,6 +276,52 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         return stemsByLanguage;
     }
 
+    // Stage 2b: drop survivors whose STEM matches a stoplisted stem. The exact-match check in
+    // ComputeSurvivors can't catch inflections (stoplisted 'innsending' lets 'innsendingen'
+    // through); stemming both sides with the same dictionary closes that gap without having to
+    // enumerate every surface form in the stoplist files. Stopwords the dictionary doesn't
+    // recognize are absent from the stem map and simply keep exact-match-only behavior.
+    private async Task RemoveStemStoplistedSurvivorsAsync(
+        HashSet<string> languages,
+        Dictionary<(string Resource, string Language), HashSet<string>> survivors,
+        Dictionary<string, IReadOnlyDictionary<string, string>> stemsByLanguage,
+        CancellationToken cancellationToken)
+    {
+        var stopStemsByDictionary = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        foreach (var language in languages)
+        {
+            var dictionary = ResolveStemDictionary(language);
+            if (!stopStemsByDictionary.TryGetValue(dictionary, out var stopStems))
+            {
+                var stemmedStopwords = await _repository.StemAsync(dictionary, _filter.Stopwords, cancellationToken);
+                stopStems = stemmedStopwords.Values.ToHashSet(StringComparer.Ordinal);
+                stopStemsByDictionary[dictionary] = stopStems;
+            }
+
+            var stemMap = stemsByLanguage[language];
+            var dropped = 0;
+            foreach (var (key, words) in survivors)
+            {
+                if (key.Language != language)
+                {
+                    continue;
+                }
+                dropped += words.RemoveWhere(word =>
+                    stemMap.TryGetValue(word, out var stem) && stopStems.Contains(stem));
+            }
+            if (dropped > 0)
+            {
+                LogStemStoplistDropped(dropped, language);
+            }
+        }
+
+        // Prune emptied entries so they don't count as resources with surviving words downstream.
+        foreach (var key in survivors.Where(kv => kv.Value.Count == 0).Select(kv => kv.Key).ToList())
+        {
+            survivors.Remove(key);
+        }
+    }
+
     // Stage 3a: build a GLOBAL stem→canonical map per language across ALL surviving words.
     // This must be global (not per-resource) so the same stem yields the same surface form
     // everywhere — otherwise resource A emits 'virksomhet' and resource B emits 'virksomheten'
@@ -385,6 +447,30 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         return documents;
     }
 
+    // JSONL dump of exactly what ReplaceAsync would have persisted: one line per language document.
+    // WordsJson is already-serialized JSON, so it is embedded via WriteRawValue without a re-parse.
+    private static async Task WriteDocumentsToFileAsync(
+        string path,
+        IReadOnlyList<SearchTermListDocument> documents,
+        DateTimeOffset generatedAt,
+        CancellationToken cancellationToken)
+    {
+        await using var stream = File.Create(path);
+        await using var writer = new Utf8JsonWriter(stream);
+        foreach (var document in documents)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("language", document.Language);
+            writer.WriteString("generatedAt", generatedAt);
+            writer.WritePropertyName("words");
+            writer.WriteRawValue(document.WordsJson);
+            writer.WriteEndObject();
+            await writer.FlushAsync(cancellationToken);
+            stream.WriteByte((byte)'\n');
+            writer.Reset();
+        }
+    }
+
     // Terse wire/storage shape: { "w": canonical word, "s": [sorted unprefixed resource ids] }.
     private sealed record SearchTermJson(
         [property: System.Text.Json.Serialization.JsonPropertyName("w")] string Word,
@@ -499,6 +585,16 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
 
     [LoggerMessage(
         Level = LogLevel.Information,
+        Message = "Stem-based stoplist dropped {Count} surviving word occurrences for language [{Language}].")]
+    private partial void LogStemStoplistDropped(int count, string language);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
         Message = "Search terms persisted: {LanguageCount} language documents, {EntryCount} total (word, language) entries, GeneratedAt={GeneratedAt}.")]
     private partial void LogPersisted(int languageCount, int entryCount, DateTimeOffset generatedAt);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Search terms written to {OutputPath} (database persistence skipped): {LanguageCount} language documents, {EntryCount} total (word, language) entries.")]
+    private partial void LogWroteToFile(int languageCount, int entryCount, string outputPath);
 }

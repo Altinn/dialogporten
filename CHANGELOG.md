@@ -1,5 +1,66 @@
 # Changelog
 
+## [1.118.10](https://github.com/Altinn/dialogporten/compare/v1.118.9...v1.118.10) (2026-07-30)
+
+
+### Bug Fixes
+
+* Increase party name timeout to acommodate system user retries ([#4241](https://github.com/Altinn/dialogporten/issues/4241)) ([62613a8](https://github.com/Altinn/dialogporten/commit/62613a8ff85691ae42d4aa5758e96e5f7618408f))
+
+## [1.118.9](https://github.com/Altinn/dialogporten/compare/v1.118.8...v1.118.9) (2026-07-27)
+
+
+### Bug Fixes
+
+* make the service resource catalogue cache rebuild chain resilient to slow rebuilds ([#4230](https://github.com/Altinn/dialogporten/issues/4230)) ([2761732](https://github.com/Altinn/dialogporten/commit/27617321205022f55cccb426bc7c0b145185beda))
+
+
+### Miscellaneous Chores
+
+* Add Npgsql otel meters ([#4231](https://github.com/Altinn/dialogporten/issues/4231)) ([6d60748](https://github.com/Altinn/dialogporten/commit/6d607483a742a1cbde61ecd7191ee02c9eef2852))
+* **deps:** update dependency scalar.aspnetcore to 2.16.15 ([#4229](https://github.com/Altinn/dialogporten/issues/4229)) ([2ddbd92](https://github.com/Altinn/dialogporten/commit/2ddbd9205d8d8fb0727e65f7bfae1422394d4513))
+* **deps:** update nginx docker tag to v1.31.3 ([#4234](https://github.com/Altinn/dialogporten/issues/4234)) ([cf7b298](https://github.com/Altinn/dialogporten/commit/cf7b298e1b1cd3499609c31eb6abdb475e3ac4f5))
+* **deps:** update slackapi/slack-github-action action to v3.0.5 ([#4235](https://github.com/Altinn/dialogporten/issues/4235)) ([a860e00](https://github.com/Altinn/dialogporten/commit/a860e00afc2dbd15a4c730eb1a0d1c86be227270))
+
+## [1.118.8](https://github.com/Altinn/dialogporten/compare/v1.118.7...v1.118.8) (2026-07-24)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency dotnet-sdk to v10.0.302 ([#4228](https://github.com/Altinn/dialogporten/issues/4228)) ([d6c3ee7](https://github.com/Altinn/dialogporten/commit/d6c3ee74c291226ba703f9f0029b88a962cb513e))
+
+## [1.118.7](https://github.com/Altinn/dialogporten/compare/v1.118.6...v1.118.7) (2026-07-20)
+
+
+### Miscellaneous Chores
+
+* bump Microsoft.DBforPostgreSQL API version to 2025-08-01 ([#4209](https://github.com/Altinn/dialogporten/issues/4209)) ([cbccc7e](https://github.com/Altinn/dialogporten/commit/cbccc7ea4a58bcf0e9483e9d342bf015024da501))
+* **deps:** update dependency messagepack to 3.1.8 ([#4223](https://github.com/Altinn/dialogporten/issues/4223)) ([b800164](https://github.com/Altinn/dialogporten/commit/b800164186c3c6d97c05290ed1361c57471ab1cb))
+* **deps:** update dependency npgsql.entityframeworkcore.postgresql to 10.0.3 ([#4224](https://github.com/Altinn/dialogporten/issues/4224)) ([d3e7114](https://github.com/Altinn/dialogporten/commit/d3e71149f7723986fbac4fabc92274f542d25427))
+
+## [1.118.6](https://github.com/Altinn/dialogporten/compare/v1.118.5...v1.118.6) (2026-07-15)
+
+
+### Bug Fixes
+
+* make resource name bicep export pure ([#4214](https://github.com/Altinn/dialogporten/issues/4214)) ([1cf2ae3](https://github.com/Altinn/dialogporten/commit/1cf2ae3edaea0337ba5710d8c5cbab57f85f0a09))
+* throw unreachableexception on unknown party identifier ([#4204](https://github.com/Altinn/dialogporten/issues/4204)) ([f875f4d](https://github.com/Altinn/dialogporten/commit/f875f4da975f662d5b18af4a201857ebc85e0308))
+
+
+### Miscellaneous Chores
+
+* **bicep:** bump Microsoft.Network resources to 2025-07-01 API version ([#4205](https://github.com/Altinn/dialogporten/issues/4205)) ([71af5dc](https://github.com/Altinn/dialogporten/commit/71af5dc1822deed26d07953c68b672ff49c0fbac))
+* **deps:** update actions/setup-dotnet action to v5.4.0 ([#4212](https://github.com/Altinn/dialogporten/issues/4212)) ([ac3f286](https://github.com/Altinn/dialogporten/commit/ac3f286f8d971077021357512f0e446b09559e47))
+* **deps:** update dependency fastendpoints.swagger to 8.2.0 ([#4213](https://github.com/Altinn/dialogporten/issues/4213)) ([34524a6](https://github.com/Altinn/dialogporten/commit/34524a6262a1dbfa743450e1c456816cc01fd3cb))
+* **deps:** update dependency scalar.aspnetcore to 2.16.10 ([#4207](https://github.com/Altinn/dialogporten/issues/4207)) ([8a86157](https://github.com/Altinn/dialogporten/commit/8a86157df31ae9f4d7d4d3274923b356212f0404))
+* **deps:** update dependency scalar.aspnetcore to 2.16.6 ([#4197](https://github.com/Altinn/dialogporten/issues/4197)) ([5b0fc1b](https://github.com/Altinn/dialogporten/commit/5b0fc1b6cb1729fbdc3b23bbd0f460278f611451))
+* **deps:** update dependency testcontainers.postgresql to 4.13.0 ([#4218](https://github.com/Altinn/dialogporten/issues/4218)) ([e0508fd](https://github.com/Altinn/dialogporten/commit/e0508fda62d0eb68be47548d0f4415c0bdb3c804))
+* **deps:** update docker/build-push-action action to v7.3.0 ([#4219](https://github.com/Altinn/dialogporten/issues/4219)) ([76739f4](https://github.com/Altinn/dialogporten/commit/76739f440d9ab4bfba22e724b4cafb92fa4486d2))
+* **deps:** update docker/login-action action to v4.4.0 ([#4220](https://github.com/Altinn/dialogporten/issues/4220)) ([d335826](https://github.com/Altinn/dialogporten/commit/d335826700d52167ad0e6a83b1d399cd401d858e))
+* **deps:** update docker/metadata-action action to v6.2.0 ([#4221](https://github.com/Altinn/dialogporten/issues/4221)) ([da97371](https://github.com/Altinn/dialogporten/commit/da973713e9745ff2422523f5c128894024f8f3bf))
+* **deps:** update grafana/grafana docker tag to v12.4.3 ([#4198](https://github.com/Altinn/dialogporten/issues/4198)) ([00d7d51](https://github.com/Altinn/dialogporten/commit/00d7d51a28fa3313a46f3242d3f336e42bf75de2))
+* update azure cli to 2.88.0 ([#4216](https://github.com/Altinn/dialogporten/issues/4216)) ([2d3c5fc](https://github.com/Altinn/dialogporten/commit/2d3c5fc6bb1b07f9a49490da2f4dd436ed9029d1))
+
 ## [1.118.5](https://github.com/Altinn/dialogporten/compare/v1.118.4...v1.118.5) (2026-07-06)
 
 

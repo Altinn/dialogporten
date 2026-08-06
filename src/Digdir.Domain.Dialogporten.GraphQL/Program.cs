@@ -12,6 +12,7 @@ using Digdir.Library.Utils.AspNet;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
@@ -114,7 +115,9 @@ static void BuildAndRun(string[] args)
 
         // Telemetry
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
-            additionalMetrics: x => x.AddAspNetCoreInstrumentation(),
+            additionalMetrics: x => x
+                .AddAspNetCoreInstrumentation()
+                .AddNpgsqlInstrumentation(),
             additionalTracing: x => x
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()

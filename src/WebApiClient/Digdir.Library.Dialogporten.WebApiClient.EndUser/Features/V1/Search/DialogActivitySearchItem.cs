@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
-using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
+using Localization = Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common.Localization;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Search;
 
@@ -23,5 +23,5 @@ public class DialogActivitySearchItem
     public Guid? TransmissionId { get; set; }
 
     [JsonPropertyName("description")]
-    public ICollection<Localization> Description { get; set; } = [];
+    public ICollection<Localization>? Description { get; set; } = [];
 }

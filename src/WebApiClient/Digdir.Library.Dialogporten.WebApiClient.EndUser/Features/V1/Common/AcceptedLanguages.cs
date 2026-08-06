@@ -11,5 +11,5 @@ public class AcceptedLanguages
             static language => language.ToString());
 
     [JsonPropertyName("acceptedLanguage")]
-    public ICollection<AcceptedLanguage>? AcceptedLanguage { get; set; } = [];
+    public ICollection<AcceptedLanguage> AcceptedLanguage { get; set; } = [];
 }

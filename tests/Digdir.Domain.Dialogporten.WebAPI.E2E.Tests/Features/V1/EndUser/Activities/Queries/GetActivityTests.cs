@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
 using AwesomeAssertions;
 using Digdir.Library.Dialogporten.E2E.Common;

@@ -3,18 +3,15 @@
 // </auto-generated>
 
 
-using Refit;
-using Altinn.ApiClients.Maskinporten.Models;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
+using System.CodeDom.Compiler;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Get;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Search;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.ServiceResource;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabels;
+using Altinn.ApiClients.Maskinporten.Models;
+using Refit;
 
 #nullable enable annotations
 
@@ -63,37 +60,37 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
                 /// Only return dialogs created after this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? CreatedAfter { get; set; }
+        public DateTimeOffset? CreatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs created before this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? CreatedBefore { get; set; }
+        public DateTimeOffset? CreatedBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs updated after this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? UpdatedAfter { get; set; }
+        public DateTimeOffset? UpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs updated before this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? UpdatedBefore { get; set; }
+        public DateTimeOffset? UpdatedBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with content updated after this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? ContentUpdatedAfter { get; set; }
+        public DateTimeOffset? ContentUpdatedAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with content updated before this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? ContentUpdatedBefore { get; set; }
+        public DateTimeOffset? ContentUpdatedBefore { get; set; }
 
                 /// <summary>
                 /// Only return dialogs that have content that has/hasn't been seen.
@@ -112,13 +109,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
                 /// Only return dialogs with due date after this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? DueAfter { get; set; }
+        public DateTimeOffset? DueAfter { get; set; }
 
                 /// <summary>
                 /// Only return dialogs with due date before this date
                 /// </summary>
         [Query] 
-        public System.DateTimeOffset? DueBefore { get; set; }
+        public DateTimeOffset? DueBefore { get; set; }
 
                 /// <summary>
                 /// Filter by process
@@ -168,7 +165,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
     }
 
     /// <summary>Gets service resources currently in use in Dialogporten.</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
+    [GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IMetadataApi
     {
         /// <summary>Gets service resources currently in use in Dialogporten.</summary>
@@ -222,7 +219,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
     }
 
     /// <summary>Gets the service resources the authenticated end user is authorized to use.</summary>
-    [System.CodeDom.Compiler.GeneratedCode("Refitter", "1.7.3.0")]
+    [GeneratedCode("Refitter", "1.7.3.0")]
     public partial interface IEnduserApi
     {
         /// <summary>Gets the service resources the authenticated end user is authorized to use.</summary>
@@ -298,7 +295,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/context/labellog")]
-        Task<IApiResponse<ICollection<LabelAssignmentLog>>> SearchDialogLabelAssignmentLogs(System.Guid dialogId, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<LabelAssignmentLog>>> SearchDialogLabelAssignmentLogs(Guid dialogId, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Sets the system labels of a dialog</summary>
         /// <remarks>
@@ -361,7 +358,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/enduser/dialogs/{dialogId}/context/systemlabels")]
-        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] System.Guid? if_Match = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse> SetDialogSystemLabels(Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Header("if-Match")] Guid? if_Match = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
@@ -452,7 +449,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions")]
-        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchDialogTransmissions(Guid dialogId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets all seen log records for a dialog</summary>
         /// <remarks>Gets all seen log records for a dialog.</remarks>
@@ -489,7 +486,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog")]
-        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(System.Guid dialogId, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogSeenLogSearchItem>>> SearchDialogSeenLogs(Guid dialogId, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog activities</summary>
         /// <remarks>Gets the list of activities belonging to a dialog</remarks>
@@ -527,7 +524,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities")]
-        Task<IApiResponse<ICollection<DialogActivitySearchItem>>> SearchDialogActivities(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<ICollection<DialogActivitySearchItem>>> SearchDialogActivities(Guid dialogId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialogs</summary>
         /// <remarks>
@@ -614,7 +611,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/transmissions/{transmissionId}")]
-        Task<IApiResponse<DialogTransmissionDetails>> GetDialogTransmission(System.Guid dialogId, System.Guid transmissionId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogTransmissionDetails>> GetDialogTransmission(Guid dialogId, Guid transmissionId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog seen log record</summary>
         /// <remarks>Gets a single dialog seen log record.</remarks>
@@ -652,7 +649,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/seenlog/{seenLogId}")]
-        Task<IApiResponse<DialogSeenLogDetails>> GetDialogSeenLog(System.Guid dialogId, System.Guid seenLogId, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogSeenLogDetails>> GetDialogSeenLog(Guid dialogId, Guid seenLogId, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog activity</summary>
         /// <remarks>Gets a single activity belonging to a dialog.</remarks>
@@ -691,7 +688,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}/activities/{activityId}")]
-        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(System.Guid dialogId, System.Guid activityId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<DialogActivityDetails>> GetDialogActivity(Guid dialogId, Guid activityId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a single dialog</summary>
         /// <remarks>Gets a single dialog aggregate.</remarks>
@@ -729,7 +726,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </returns>
         [Headers("Accept: application/json, application/problem+json, text/plain")]
         [Get("/api/v1/enduser/dialogs/{dialogId}")]
-        Task<IApiResponse<Dialog>> GetDialog(System.Guid dialogId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
+        Task<IApiResponse<Dialog>> GetDialog(Guid dialogId, [Header("accept-Language")] AcceptedLanguages? accept_Language = default, [Property("Altinn.ApiClients.Maskinporten.RequestContext")] MaskinportenRequestContext? requestContext = null, CancellationToken cancellationToken = default);
 
         /// <summary>Looks up a dialog by instance reference</summary>
         /// <remarks>Resolves dialog metadata and authorization evidence for a supported instance reference.</remarks>

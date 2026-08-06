@@ -9,7 +9,7 @@ public class DialogContentSummary
     /// The title of the dialog.
     /// </summary>
     [JsonPropertyName("title")]
-    public ContentValue Title { get; set; } = default!;
+    public ContentValue Title { get; set; } = null!;
 
     /// <summary>
     /// An optional non-sensitive title of the dialog.

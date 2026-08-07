@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are validated for backwards compatibility
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -11,7 +12,8 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
         IValidator<ActorDto> actorValidator,
         IValidator<TransmissionContentDto?> contentValidator,
         IValidator<TransmissionAttachmentDto> attachmentValidator,
-        IValidator<TransmissionNavigationalActionDto> navigationalActionValidator)
+        IValidator<TransmissionNavigationalActionDto> navigationalActionValidator,
+        IValidator<AuthorizationContextDto> authorizationContextValidator)
     {
         // CreatedAt is not validated for InPast,
         // Dialog.VisibleFrom could have set the transmission
@@ -38,6 +40,15 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
 
         RuleFor(x => x.AuthorizationAttribute)
             .IsValidAuthorizationAttribute();
+
+        RuleFor(x => x.AuthorizationAttribute)
+            .Null()
+            .WithMessage($"'{{PropertyName}}' cannot be combined with '{nameof(UpdateTransmissionDto.AuthorizationContext)}'.")
+            .When(x => x.AuthorizationContext is not null);
+
+        RuleFor(x => x.AuthorizationContext)
+            .SetValidator(authorizationContextValidator!)
+            .When(x => x.AuthorizationContext is not null);
 
         RuleFor(x => x.Attachments)
             .UniqueBy(x => x.Id);

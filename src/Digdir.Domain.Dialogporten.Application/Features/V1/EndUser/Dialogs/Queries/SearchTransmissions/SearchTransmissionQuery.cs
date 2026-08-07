@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are cleared during redaction
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -8,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -60,6 +62,14 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
                 .Include(x => x.Transmissions)
                     .ThenInclude(x => x.Sender)
                     .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.AuthorizationContext)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.AuthorizationContext)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.AuthorizationContext)
                 .Include(x => x.ServiceOwnerContext)
                     .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
@@ -93,44 +103,92 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
 
         dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
-        var dto = dialog.Transmissions
+        var transmissions = dialog.Transmissions
             .OrderBy(x => x.CreatedAt)
             .ThenBy(x => x.Id)
-            .Select(t => t.ToDto())
             .ToList();
 
-        foreach (var transmission in dto)
+        var dtos = new List<TransmissionDto>(transmissions.Count);
+        foreach (var transmission in transmissions)
         {
-            transmission.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
+            var dto = transmission.ToDto();
+            dto.IsAuthorized = authorizationResult.HasAccess(transmission, dialog);
 
-            if (transmission.IsAuthorized)
+            if (!dto.IsAuthorized && transmission.ShouldRedactWhenUnauthorized())
             {
-                ReplaceExpiredAttachmentUrls(transmission);
-                ReplaceExpiredNavigationalActionUrls(transmission);
+                RedactTransmission(dto);
+                dtos.Add(dto);
                 continue;
             }
 
-            var urls = transmission.Attachments.SelectMany(a => a.Urls).ToList();
-            foreach (var url in urls)
+            // Parent-first narrowing: transmission access is a precondition for its attachments and
+            // navigational actions; a child context can only further restrict access. The DTO lists are
+            // mapped 1:1 in order from the entity lists, so pairwise zipping is safe.
+            foreach (var (attachmentDto, attachment) in dto.Attachments.Zip(transmission.Attachments))
+            {
+                attachmentDto.IsAuthorized = authorizationResult.HasAccess(attachment, dto.IsAuthorized, dialog);
+                if (!attachmentDto.IsAuthorized && attachment.ShouldRedactWhenUnauthorized())
+                {
+                    attachmentDto.DisplayName = [];
+                    attachmentDto.Name = null;
+                    attachmentDto.Urls = [];
+                }
+            }
+
+            foreach (var (navigationalActionDto, navigationalAction) in dto.NavigationalActions.Zip(transmission.NavigationalActions))
+            {
+                navigationalActionDto.IsAuthorized = authorizationResult.HasAccess(navigationalAction, dto.IsAuthorized, dialog);
+                if (!navigationalActionDto.IsAuthorized && navigationalAction.ShouldRedactWhenUnauthorized())
+                {
+                    navigationalActionDto.Title = [];
+                }
+            }
+
+            foreach (var url in dto.Attachments.Where(a => !a.IsAuthorized).SelectMany(a => a.Urls))
             {
                 url.Url = Constants.UnauthorizedUri;
             }
 
-            foreach (var action in transmission.NavigationalActions)
+            foreach (var action in dto.NavigationalActions.Where(a => !a.IsAuthorized))
             {
                 action.Url = Constants.UnauthorizedUri;
             }
 
-            transmission.Content.ContentReference.ReplaceUnauthorizedContentReference();
+            if (!dto.IsAuthorized)
+            {
+                dto.Content?.ContentReference.ReplaceUnauthorizedContentReference();
+            }
+            else
+            {
+                ReplaceExpiredAttachmentUrls(dto);
+                ReplaceExpiredNavigationalActionUrls(dto);
+            }
+
+            dtos.Add(dto);
         }
 
-        return dto;
+        return dtos;
+    }
+
+    // Strips all content from a transmission the user is not authorized to see, leaving only its
+    // existence and timestamps.
+    private static void RedactTransmission(TransmissionDto transmission)
+    {
+        transmission.Sender = null;
+        transmission.Content = null;
+        transmission.ExtendedType = null;
+        transmission.ExternalReference = null;
+        transmission.AuthorizationAttribute = null;
+        transmission.RelatedTransmissionId = null;
+        transmission.Attachments = [];
+        transmission.NavigationalActions = [];
     }
 
     private void ReplaceExpiredAttachmentUrls(TransmissionDto dto)
     {
         var expiredTransmissionAttachmentUrls = dto
             .Attachments
+            .Where(x => x.IsAuthorized)
             .Where(x => x.ExpiresAt < _clock.UtcNowOffset)
             .SelectMany(x => x.Urls);
 
@@ -143,6 +201,7 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
     private void ReplaceExpiredNavigationalActionUrls(TransmissionDto dto)
     {
         var expiredNavigationalActions = dto.NavigationalActions
+            .Where(x => x.IsAuthorized)
             .Where(x => x.ExpiresAt < _clock.UtcNowOffset);
 
         foreach (var action in expiredNavigationalActions)

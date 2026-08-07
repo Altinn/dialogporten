@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -89,7 +88,7 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         claims[DialogTokenClaimTypes.DialogParty] = dialog.Party;
         claims[DialogTokenClaimTypes.ServiceResource] = dialog.ServiceResource;
         claims[DialogTokenClaimTypes.DialogId] = dialog.Id;
-        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(dialog, authorizationResult);
         claims[DialogTokenClaimTypes.Issuer] = _applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + issuerVersion;
         claims[DialogTokenClaimTypes.IssuedAt] = now;
         claims[DialogTokenClaimTypes.NotBefore] = now;
@@ -98,29 +97,50 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         return _compactJwsGenerator.GetCompactJws(claims);
     }
 
-    private static string GetAuthorizedActions(DialogDetailsAuthorizationResult authorizationResult)
+    private static string GetAuthorizedActions(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult)
     {
-        if (authorizationResult.AuthorizedAltinnActions.Count == 0)
+        var entries = new List<string>();
+        foreach (var authorizedCheck in authorizationResult.AuthorizedChecks)
         {
-            return string.Empty;
-        }
-
-        var actions = new StringBuilder();
-        foreach (var (action, resource) in authorizationResult.AuthorizedAltinnActions)
-        {
-            actions.Append(action);
-            if (resource != Authorization.Constants.MainResource)
+            var check = authorizedCheck.Check;
+            string entry;
+            switch (check.Resource.Kind)
             {
-                actions.Append(CultureInfo.InvariantCulture, $",{resource}");
+                case AuthorizationResourceSpecKind.Main:
+                    entry = check.Action;
+                    break;
+
+                case AuthorizationResourceSpecKind.Legacy:
+                    // Preserve the legacy wire format exactly: a literal "main" attribute is
+                    // indistinguishable from the main resource and serializes without a resource part.
+                    entry = check.Resource.LegacyAuthorizationAttribute == Authorization.Constants.MainResource
+                        ? check.Action
+                        : string.Create(CultureInfo.InvariantCulture, $"{check.Action},{check.Resource.LegacyAuthorizationAttribute}");
+                    break;
+
+                case AuthorizationResourceSpecKind.Context:
+                default:
+                    // The token's "p" claim asserts the dialog party, so only grants that hold for the
+                    // dialog party may be encoded. Grants authorized solely via other parties are omitted.
+                    if (!authorizedCheck.PermitsParty(dialog.Party))
+                    {
+                        continue;
+                    }
+
+                    var resource = check.Resource.ServiceResource ?? check.Resource.AdditionalResourceAttribute;
+                    entry = resource is null
+                        ? check.Action
+                        : string.Create(CultureInfo.InvariantCulture, $"{check.Action},{resource}");
+                    break;
             }
 
-            actions.Append(';');
+            if (!entries.Contains(entry, StringComparer.Ordinal))
+            {
+                entries.Add(entry);
+            }
         }
 
-        // Remove trailing semicolon
-        actions.Remove(actions.Length - 1, 1);
-
-        return actions.ToString();
+        return string.Join(';', entries);
     }
 }
 

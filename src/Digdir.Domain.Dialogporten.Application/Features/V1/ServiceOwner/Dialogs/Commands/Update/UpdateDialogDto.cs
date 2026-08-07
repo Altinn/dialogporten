@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Dia
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 
@@ -141,7 +142,14 @@ public sealed class TransmissionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this transmission.
+    /// Cannot be combined with "authorizationAttribute".
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -312,7 +320,8 @@ public sealed class ApiActionDto
     /// which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
     /// </summary>
     /// <example>write</example>
-    public string Action { get; set; } = null!;
+    [Obsolete($"Use '{nameof(AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -328,7 +337,15 @@ public sealed class ApiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+    /// "authorizationContext.action".
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// The logical name of the operation the API action refers to.
@@ -406,7 +423,8 @@ public sealed class GuiActionDto
     /// <summary>
     /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
     /// </summary>
-    public string Action { get; set; } = null!;
+    [Obsolete($"Use '{nameof(AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
@@ -432,7 +450,15 @@ public sealed class GuiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+    /// "authorizationContext.action".
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -491,6 +517,13 @@ public sealed class AttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+    /// The XACML action is always "read". Access to the parent is always required in addition; this context
+    /// can only further restrict access, never widen it.
+    /// </summary>
+    public ChildAuthorizationContextDto? AuthorizationContext { get; set; }
 }
 
 public sealed class AttachmentUrlDto
@@ -549,6 +582,13 @@ public sealed class TransmissionAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+    /// The XACML action is always "read". Access to the parent is always required in addition; this context
+    /// can only further restrict access, never widen it.
+    /// </summary>
+    public ChildAuthorizationContextDto? AuthorizationContext { get; set; }
 }
 
 public sealed class TransmissionAttachmentUrlDto
@@ -589,4 +629,102 @@ public sealed class TransmissionNavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+    /// The XACML action is always "read". Access to the parent transmission is always required in addition; this
+    /// context can only further restrict access, never widen it.
+    /// </summary>
+    public ChildAuthorizationContextDto? AuthorizationContext { get; set; }
+}
+
+public sealed class AuthorizationContextDto
+{
+    /// <summary>
+    /// A service resource that overrides the dialog's own service resource in the authorization evaluation,
+    /// referring to another service policy. The service owner must have access to the referenced resource.
+    /// When set, the dialog's instance reference no longer applies to the evaluation of this entity.
+    /// </summary>
+    /// <example>urn:altinn:resource:some-other-service-identifier</example>
+    public string? ServiceResource { get; set; }
+
+    /// <summary>
+    /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
+    /// subresource. Cannot contain a service resource reference; use "serviceResource" for that.
+    /// </summary>
+    /// <example>
+    /// urn:altinn:task:Task_1
+    /// urn:altinn:subresource:mycustomresource
+    /// </example>
+    public string? AdditionalResourceAttribute { get; set; }
+
+    /// <summary>
+    /// The parties to evaluate access on behalf of. Access is granted if the end user has access to the
+    /// effective resource for at least one of the parties. Must contain at least one party unless
+    /// "includeDialogParty" is true.
+    /// </summary>
+    /// <example>urn:altinn:organization:identifier-no:912345678</example>
+    public List<string> Parties { get; set; } = [];
+
+    /// <summary>
+    /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+    /// </summary>
+    public bool IncludeDialogParty { get; set; }
+
+    /// <summary>
+    /// The XACML action to evaluate. Required on API and GUI actions. Optional on transmissions; if not
+    /// supplied, "read" is used when "serviceResource" is set, otherwise "transmissionread".
+    /// </summary>
+    /// <example>read</example>
+    public string? Action { get; set; }
+
+    /// <summary>
+    /// Required. Controls how the entity is presented to end users that fail the authorization check:
+    /// "disabled" keeps the entity visible but masks its URLs and embedded content references, while
+    /// "redacted" additionally strips all content (titles, summaries, names, senders and children),
+    /// leaving only the entity's existence and timestamps.
+    /// </summary>
+    public AuthorizationContextUnauthorizedPresentation.Values UnauthorizedPresentation { get; set; }
+}
+
+public sealed class ChildAuthorizationContextDto
+{
+    /// <summary>
+    /// A service resource that overrides the dialog's own service resource in the authorization evaluation,
+    /// referring to another service policy. The service owner must have access to the referenced resource.
+    /// When set, the dialog's instance reference no longer applies to the evaluation of this entity.
+    /// </summary>
+    /// <example>urn:altinn:resource:some-other-service-identifier</example>
+    public string? ServiceResource { get; set; }
+
+    /// <summary>
+    /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
+    /// subresource. Cannot contain a service resource reference; use "serviceResource" for that.
+    /// </summary>
+    /// <example>
+    /// urn:altinn:task:Task_1
+    /// urn:altinn:subresource:mycustomresource
+    /// </example>
+    public string? AdditionalResourceAttribute { get; set; }
+
+    /// <summary>
+    /// The parties to evaluate access on behalf of. Access is granted if the end user has access to the
+    /// effective resource for at least one of the parties. Must contain at least one party unless
+    /// "includeDialogParty" is true.
+    /// </summary>
+    /// <example>urn:altinn:organization:identifier-no:912345678</example>
+    public List<string> Parties { get; set; } = [];
+
+    /// <summary>
+    /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+    /// </summary>
+    public bool IncludeDialogParty { get; set; }
+
+    /// <summary>
+    /// Required. Controls how the entity is presented to end users that fail the authorization check:
+    /// "disabled" keeps the entity visible but masks its URLs and embedded content references, while
+    /// "redacted" additionally strips all content (titles, summaries, names, senders and children),
+    /// leaving only the entity's existence and timestamps.
+    /// </summary>
+    public AuthorizationContextUnauthorizedPresentation.Values UnauthorizedPresentation { get; set; }
 }

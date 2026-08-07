@@ -11,6 +11,7 @@ internal sealed class CreateTransmissionTransmissionAttachmentDtoValidator : Abs
     public CreateTransmissionTransmissionAttachmentDtoValidator(
         IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
         IValidator<TransmissionAttachmentUrlDto> urlValidator,
+        IValidator<ChildAuthorizationContextDto> authorizationContextValidator,
         IClock clock)
     {
         RuleFor(x => x.Id)
@@ -27,5 +28,9 @@ internal sealed class CreateTransmissionTransmissionAttachmentDtoValidator : Abs
         RuleFor(x => x.Urls)
             .NotEmpty()
             .ForEach(x => x.SetValidator(urlValidator));
+
+        RuleFor(x => x.AuthorizationContext)
+            .SetValidator(authorizationContextValidator!)
+            .When(x => x.AuthorizationContext is not null);
     }
 }

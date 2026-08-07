@@ -1,0 +1,130 @@
+name: Dispatch generate searchterms
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run the generate-searchterms job in"
+        required: true
+        type: choice
+        options:
+          - test
+          - staging
+          - prod
+
+run-name: Generate searchterms ${{ inputs.environment }}
+
+concurrency:
+  group: dispatch-generate-searchterms-${{ inputs.environment }}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  run-generate-searchterms:
+    name: Run generate searchterms (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      JOB_NAME: dp-be-${{ inputs.environment }}-gen-searchterms
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure no generate-searchterms execution is currently running
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        with:
+          inlineScript: |
+            existing_execution="$(az containerapp job execution list \
+              --name "${JOB_NAME}" \
+              --resource-group "${RESOURCE_GROUP}" \
+              --query "[?properties.status=='Running' || properties.status=='Processing'] | [0].name" \
+              --output tsv || true)"
+
+            if [[ -n "${existing_execution}" ]]; then
+              echo "An execution is already running: ${existing_execution}"
+              exit 1
+            fi
+
+            echo "No active execution detected"
+
+      - name: Start generate-searchterms job
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        with:
+          inlineScript: |
+            # Capture timestamp before starting the job for verification step
+            start_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            echo "START_TIMESTAMP=${start_timestamp}" >> $GITHUB_ENV
+            echo "Job start initiated at: ${start_timestamp}"
+
+            # The job template's args already run generate-searchterms with default
+            # parameters (the same invocation the nightly schedule uses), so no
+            # argument juggling is needed here.
+            az containerapp job start \
+              --name "${JOB_NAME}" \
+              --resource-group "${RESOURCE_GROUP}" || { echo "Failed to start job"; exit 1; }
+
+            echo "Job ${JOB_NAME} started"
+
+      - name: Verify execution of job
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
+        timeout-minutes: 3
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        with:
+          inlineScript: |
+            echo "Looking for executions started after: ${START_TIMESTAMP}"
+
+            attempt=1
+            max_attempts=12  # 12 attempts * 10 seconds = 2 minutes max
+
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt: Checking for running execution..."
+
+              # Get the latest execution that started after our timestamp
+              latest_execution="$(az containerapp job execution list \
+                --name "${JOB_NAME}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "[?properties.startTime>='${START_TIMESTAMP}'] | sort_by(@, &properties.startTime)[-1]" \
+                --output json || true)"
+
+              if [[ -n "${latest_execution}" && "${latest_execution}" != "null" ]]; then
+                execution_name=$(echo "$latest_execution" | jq -r '.name // empty')
+                execution_status=$(echo "$latest_execution" | jq -r '.properties.status // empty')
+                execution_start_time=$(echo "$latest_execution" | jq -r '.properties.startTime // empty')
+
+                echo "Execution: ${execution_name}"
+                echo "Status: ${execution_status}"
+                echo "Start time: ${execution_start_time}"
+
+                if [[ "${execution_status}" == "Running" || "${execution_status}" == "Processing" ]]; then
+                  echo "Job execution has started successfully"
+                  exit 0
+                elif [[ "${execution_status}" == "Failed" ]]; then
+                  echo "Job execution failed"
+                  exit 1
+                fi
+              fi
+
+              echo "Execution not yet running, waiting 10 seconds..."
+              sleep 10
+              attempt=$((attempt + 1))
+            done
+
+            echo "Timeout: Job execution did not start within 2 minutes"
+            exit 1

@@ -56,6 +56,7 @@ public sealed class SetDialogSystemLabelsEndpoint : Endpoint<SetDialogSystemLabe
                 return Send.NoContentAsync(ct);
             },
             notFound => this.NotFoundAsync(notFound, ct),
+            forbidden => this.ForbiddenAsync(forbidden, ct),
             deleted => this.GoneAsync(deleted, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),

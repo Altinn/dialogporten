@@ -1,19 +1,19 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
-using Digdir.Domain.Dialogporten.Application.Externals;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Microsoft.Extensions.DependencyInjection;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -45,7 +45,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .ExecuteAndAssert<ConcurrencyError>();
 
     [Fact]
-    public Task Set_Returns_NotFound_On_Unauthorized() =>
+    public Task Set_Returns_Forbidden_On_Unauthorized() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ConfigureAltinnAuthorization(altinnAuthorization =>
@@ -58,7 +58,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             {
                 x.AddLabels = [SystemLabel.Values.Bin];
             })
-            .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
+            .ExecuteAndAssert<Forbidden>();
 
     [Fact]
     public async Task Set_Succeeds_On_Revision_Match()

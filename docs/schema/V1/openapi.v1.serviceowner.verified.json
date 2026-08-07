@@ -7776,7 +7776,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
           },
           "409": {
             "description": "Conflict occurred while processing the request."

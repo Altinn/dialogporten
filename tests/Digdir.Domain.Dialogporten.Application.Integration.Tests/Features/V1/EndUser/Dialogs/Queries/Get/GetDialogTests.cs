@@ -108,7 +108,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 // No authorized actions => no access to the main resource
                 altinnAuthorization
                     .GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
-                    .Returns(new DialogDetailsAuthorizationResult { AuthorizedAltinnActions = [] });
+                    .Returns(new DialogDetailsAuthorizationResult { AuthorizedChecks = [] });
                 // And no access via the list authorization either
                 altinnAuthorization
                     .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
@@ -135,9 +135,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction("read", "urn:altinn:resource:gui-action-0"),
-                        new AltinnAction("read", "urn:altinn:resource:gui-action-1"),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("read", "urn:altinn:resource:gui-action-0"),
+                        TestAuthorizedChecks.Authorized("read", "urn:altinn:resource:gui-action-1"),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -162,8 +162,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction("read", Constants.MainResource),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("read", Constants.MainResource),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -199,8 +199,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction("write", Constants.MainResource),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("write", Constants.MainResource),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -242,9 +242,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction("read", "urn:altinn:resource:api-action-0"),
-                        new AltinnAction("read", "urn:altinn:resource:api-action-1"),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("read", "urn:altinn:resource:api-action-0"),
+                        TestAuthorizedChecks.Authorized("read", "urn:altinn:resource:api-action-1"),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -268,8 +268,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction("write", Constants.MainResource),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("write", Constants.MainResource),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -304,8 +304,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction("write", Constants.MainResource),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("write", Constants.MainResource),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -342,9 +342,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
-                        new AltinnAction(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -391,7 +391,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.Transmissions.Should().AllSatisfy(x =>
                 {
                     x.IsAuthorized.Should().BeTrue();
-                    x.Content.ContentReference.Should().NotBeNull();
+                    x.Content!.ContentReference.Should().NotBeNull();
                     x.Content.ContentReference.Value.Should().NotBeEmpty();
                     x.Content.ContentReference.Value.Should().AllSatisfy(v =>
                     {
@@ -425,7 +425,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var transmission = x.Transmissions.Single();
                 transmission.IsAuthorized.Should().BeFalse();
-                transmission.Content.ContentReference.Should().NotBeNull();
+                transmission.Content!.ContentReference.Should().NotBeNull();
                 transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
                     .And.AllSatisfy(localization =>
                         localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
@@ -552,7 +552,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     {
         var authorizationResult = new DialogDetailsAuthorizationResult
         {
-            AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+            AuthorizedChecks = [TestAuthorizedChecks.Authorized(Constants.ReadAction)]
         };
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }
@@ -561,7 +561,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     {
         var authorizationResult = new DialogDetailsAuthorizationResult
         {
-            AuthorizedAltinnActions = [new AltinnAction("write")]
+            AuthorizedChecks = [TestAuthorizedChecks.Authorized("write")]
         };
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }

@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are validated for backwards compatibility
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Domain.Common;
@@ -9,6 +10,7 @@ internal sealed class CreateDialogDialogApiActionDtoValidator : AbstractValidato
 {
     public CreateDialogDialogApiActionDtoValidator(
         IValidator<ApiActionEndpointDto> apiActionEndpointValidator,
+        IValidator<AuthorizationContextDto> authorizationContextValidator,
         IClock clock)
     {
         RuleFor(x => x.Id)
@@ -17,10 +19,33 @@ internal sealed class CreateDialogDialogApiActionDtoValidator : AbstractValidato
 
         RuleFor(x => x.Action)
             .NotEmpty()
-            .MaximumLength(Constants.DefaultMaxStringLength);
+            .WithMessage($"'{{PropertyName}}' must not be empty when '{nameof(ApiActionDto.AuthorizationContext)}' is not supplied.")
+            .MaximumLength(Constants.DefaultMaxStringLength)
+            .When(x => x.AuthorizationContext is null);
+
+        RuleFor(x => x.Action)
+            .Null()
+            .WithMessage($"'{{PropertyName}}' cannot be combined with '{nameof(ApiActionDto.AuthorizationContext)}'; use '{nameof(ApiActionDto.AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")
+            .When(x => x.AuthorizationContext is not null);
 
         RuleFor(x => x.AuthorizationAttribute)
             .IsValidAuthorizationAttribute();
+
+        RuleFor(x => x.AuthorizationAttribute)
+            .Null()
+            .WithMessage($"'{{PropertyName}}' cannot be combined with '{nameof(ApiActionDto.AuthorizationContext)}'.")
+            .When(x => x.AuthorizationContext is not null);
+
+        When(x => x.AuthorizationContext is not null, () =>
+        {
+            RuleFor(x => x.AuthorizationContext!.Action)
+                .NotEmpty()
+                .OverridePropertyName($"{nameof(ApiActionDto.AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}")
+                .WithMessage("'{PropertyName}' is required on API actions.");
+
+            RuleFor(x => x.AuthorizationContext)
+                .SetValidator(authorizationContextValidator!);
+        });
 
         RuleFor(x => x.Name)
             .MaximumLength(Constants.DefaultMaxStringLength);

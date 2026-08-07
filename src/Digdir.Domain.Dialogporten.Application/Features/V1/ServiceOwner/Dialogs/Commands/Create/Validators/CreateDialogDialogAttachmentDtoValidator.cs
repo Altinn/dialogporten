@@ -11,6 +11,7 @@ internal sealed class CreateDialogDialogAttachmentDtoValidator : AbstractValidat
     public CreateDialogDialogAttachmentDtoValidator(
         IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
         IValidator<AttachmentUrlDto> urlValidator,
+        IValidator<ChildAuthorizationContextDto> authorizationContextValidator,
         IClock clock)
     {
         RuleFor(x => x.Id)
@@ -33,5 +34,9 @@ internal sealed class CreateDialogDialogAttachmentDtoValidator : AbstractValidat
 
         RuleFor(x => x.ExpiresAt)
             .IsInFuture(clock);
+
+        RuleFor(x => x.AuthorizationContext)
+            .SetValidator(authorizationContextValidator!)
+            .When(x => x.AuthorizationContext is not null);
     }
 }

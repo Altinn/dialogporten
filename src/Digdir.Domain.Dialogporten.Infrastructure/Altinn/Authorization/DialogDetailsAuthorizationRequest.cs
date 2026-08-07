@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -13,9 +13,10 @@ internal sealed class DialogDetailsAuthorizationRequest
     public required InstanceRef InstanceRef { get; init; }
     public required string Party { get; init; }
 
-    // Each action applies to a resource. This is the main resource, or another resource indicated by an authorization attribute
-    // eg. "urn:altinn:subresource:some-sub-resource" or "urn:altinn:task:task_1"
-    public required List<AltinnAction> AltinnActions { get; init; }
+    // Each check applies an action to a resource on behalf of one or more parties. The resource is the main
+    // resource, another resource indicated by a legacy authorization attribute (e.g.
+    // "urn:altinn:subresource:some-sub-resource" or "urn:altinn:task:task_1"), or an explicit authorization context.
+    public required List<AuthorizationCheck> Checks { get; init; }
 }
 
 internal static class DialogDetailsAuthorizationRequestExtensions
@@ -25,10 +26,13 @@ internal static class DialogDetailsAuthorizationRequestExtensions
         var claimsKey = string.Join(";", request.ClaimsPrincipal.Claims.GetIdentifyingClaims()
             .Select(c => $"{c.Type}:{c.Value}"));
 
-        var actionsKey = string.Join(";", request.AltinnActions.OrderBy(a => a.Name)
-            .Select(a => $"{a.Name}:{a.AuthorizationAttribute}"));
+        // The canonical identity covers every PDP-relevant input of a check (action, resource spec
+        // and parties); leaving anything out of this key would let differing contexts share cached decisions.
+        var checksKey = string.Join(";", request.Checks
+            .Select(c => c.CanonicalIdentity)
+            .Order(StringComparer.Ordinal));
 
-        var rawKey = $"{request.InstanceRef.Value}||{claimsKey}|{actionsKey}";
+        var rawKey = $"{request.InstanceRef.Value}||{claimsKey}|{checksKey}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
         var hashString = Convert.ToHexStringLower(hashBytes);

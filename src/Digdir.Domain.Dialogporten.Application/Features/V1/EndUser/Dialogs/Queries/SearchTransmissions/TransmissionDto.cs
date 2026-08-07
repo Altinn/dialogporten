@@ -22,6 +22,7 @@ public sealed class TransmissionDto
     /// <summary>
     /// The authorization attribute associated with the transmission.
     /// </summary>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -57,13 +58,17 @@ public sealed class TransmissionDto
 
     /// <summary>
     /// The sender actor information for the transmission.
+    ///
+    /// Null when the transmission is redacted for the authenticated user (see "isAuthorized").
     /// </summary>
-    public ActorDto Sender { get; set; } = null!;
+    public ActorDto? Sender { get; set; }
 
     /// <summary>
     /// The content of the transmission.
+    ///
+    /// Null when the transmission is redacted for the authenticated user (see "isAuthorized").
     /// </summary>
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; }
 
     /// <summary>
     /// The attachments associated with the transmission.
@@ -121,6 +126,12 @@ public sealed class AttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
 }
 
 public sealed class AttachmentUrlDto
@@ -177,4 +188,10 @@ public sealed class NavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
 }

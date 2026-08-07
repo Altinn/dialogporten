@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are validated for backwards compatibility
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -11,6 +12,7 @@ internal sealed class CreateDialogDialogGuiActionDtoValidator : AbstractValidato
 {
     public CreateDialogDialogGuiActionDtoValidator(
         IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
+        IValidator<AuthorizationContextDto> authorizationContextValidator,
         IClock clock)
     {
         RuleFor(x => x.Id)
@@ -19,7 +21,14 @@ internal sealed class CreateDialogDialogGuiActionDtoValidator : AbstractValidato
 
         RuleFor(x => x.Action)
             .NotEmpty()
-            .MaximumLength(Constants.DefaultMaxStringLength);
+            .WithMessage($"'{{PropertyName}}' must not be empty when '{nameof(GuiActionDto.AuthorizationContext)}' is not supplied.")
+            .MaximumLength(Constants.DefaultMaxStringLength)
+            .When(x => x.AuthorizationContext is null);
+
+        RuleFor(x => x.Action)
+            .Null()
+            .WithMessage($"'{{PropertyName}}' cannot be combined with '{nameof(GuiActionDto.AuthorizationContext)}'; use '{nameof(GuiActionDto.AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")
+            .When(x => x.AuthorizationContext is not null);
 
         RuleFor(x => x.Url)
             .NotNull()
@@ -28,6 +37,22 @@ internal sealed class CreateDialogDialogGuiActionDtoValidator : AbstractValidato
 
         RuleFor(x => x.AuthorizationAttribute)
             .IsValidAuthorizationAttribute();
+
+        RuleFor(x => x.AuthorizationAttribute)
+            .Null()
+            .WithMessage($"'{{PropertyName}}' cannot be combined with '{nameof(GuiActionDto.AuthorizationContext)}'.")
+            .When(x => x.AuthorizationContext is not null);
+
+        When(x => x.AuthorizationContext is not null, () =>
+        {
+            RuleFor(x => x.AuthorizationContext!.Action)
+                .NotEmpty()
+                .OverridePropertyName($"{nameof(GuiActionDto.AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}")
+                .WithMessage("'{PropertyName}' is required on GUI actions.");
+
+            RuleFor(x => x.AuthorizationContext)
+                .SetValidator(authorizationContextValidator!);
+        });
 
         RuleFor(x => x.Priority)
             .IsInEnum();

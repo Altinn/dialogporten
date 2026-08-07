@@ -61,33 +61,9 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return forbidden;
         }
 
-        List<DialogEntity> dialogs;
 
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
-        if (_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
-        {
-            dialogs = await _db.Dialogs
-                .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
-                .ToListAsync(cancellationToken);
-        }
-        else
-        {
-            var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
-                constraintParties: [],
-                constraintServiceResources: [],
-                cancellationToken: cancellationToken
-            );
-            var org = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
-
-            dialogs = await _db.Dialogs
-                .PrefilterAuthorizedDialogs(authorizedResources)
-                .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id) && x.Org == org)
-                .ToListAsync(cancellationToken);
-        }
+        var dialogs = await GetDialogs(request, cancellationToken);
 
         var notFound = request.Dto.Dialogs
             .Select(x => x.DialogId)
@@ -120,6 +96,35 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             domainError => domainError,
             concurrencyError => concurrencyError,
             conflict => conflict);
+    }
+
+    private async Task<List<DialogEntity>> GetDialogs(
+        BulkSetSystemLabelCommand request,
+        CancellationToken cancellationToken
+    )
+    {
+        if (_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            return await _db.Dialogs
+                .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
+                .ToListAsync(cancellationToken);
+        }
+
+        var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
+            constraintParties: [],
+            constraintServiceResources: [],
+            cancellationToken: cancellationToken
+        );
+        var org = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+
+        return await _db.Dialogs
+            .PrefilterAuthorizedDialogs(authorizedResources)
+            .Include(x => x.EndUserContext)
+            .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id) && x.Org == org)
+            .ToListAsync(cancellationToken);
     }
 
     private static bool RevisionsHasMismatch(BulkSetSystemLabelCommand request, List<DialogEntity> dialogs)

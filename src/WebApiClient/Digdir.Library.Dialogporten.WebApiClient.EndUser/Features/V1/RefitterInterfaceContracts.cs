@@ -434,6 +434,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// The authorization attribute associated with the transmission.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
         public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
@@ -476,15 +477,19 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// The sender actor information for the transmission.
+        /// <br/>
+        /// <br/>Null when the transmission is redacted for the authenticated user (see "isAuthorized").
         /// </summary>
         [JsonPropertyName("sender")]
-        public Actor Sender { get; set; } = default!;
+        public Actor? Sender { get; set; } = default!;
 
         /// <summary>
         /// The content of the transmission.
+        /// <br/>
+        /// <br/>Null when the transmission is redacted for the authenticated user (see "isAuthorized").
         /// </summary>
         [JsonPropertyName("content")]
-        public DialogTransmissionSearchContent Content { get; set; } = default!;
+        public DialogTransmissionSearchContent? Content { get; set; } = default!;
 
         /// <summary>
         /// The attachments associated with the transmission.
@@ -666,6 +671,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
+        /// <summary>
+        /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+        /// <br/>replaced with "urn:dialogporten:unauthorized".
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -734,6 +746,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
+
+        /// <summary>
+        /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+        /// <br/>replaced with "urn:dialogporten:unauthorized".
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; } = default!;
 
     }
 
@@ -1252,6 +1271,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// The authorization attribute associated with the transmission.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
         public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
@@ -1294,15 +1314,19 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// The sender actor information for the transmission.
+        /// <br/>
+        /// <br/>Null when the transmission is redacted for the authenticated user (see "isAuthorized").
         /// </summary>
         [JsonPropertyName("sender")]
-        public Actor Sender { get; set; } = default!;
+        public Actor? Sender { get; set; } = default!;
 
         /// <summary>
         /// The content of the transmission.
+        /// <br/>
+        /// <br/>Null when the transmission is redacted for the authenticated user (see "isAuthorized").
         /// </summary>
         [JsonPropertyName("content")]
-        public DialogTransmissionContentDetails Content { get; set; } = default!;
+        public DialogTransmissionContentDetails? Content { get; set; } = default!;
 
         /// <summary>
         /// The attachments associated with the transmission.
@@ -1376,6 +1400,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
+        /// <summary>
+        /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+        /// <br/>replaced with "urn:dialogporten:unauthorized".
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -1432,6 +1463,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
+
+        /// <summary>
+        /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+        /// <br/>replaced with "urn:dialogporten:unauthorized".
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; } = default!;
 
     }
 
@@ -1801,6 +1839,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
+        /// <summary>
+        /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+        /// <br/>replaced with "urn:dialogporten:unauthorized".
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -1857,6 +1902,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
         public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
@@ -1895,9 +1941,11 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// The actor that sent the transmission.
+        /// <br/>
+        /// <br/>Null when the transmission is redacted for the authenticated user (see "isAuthorized").
         /// </summary>
         [JsonPropertyName("sender")]
-        public Actor Sender { get; set; } = default!;
+        public Actor? Sender { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether the dialog transmission has been opened.
@@ -1907,9 +1955,11 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
 
         /// <summary>
         /// The transmission unstructured text content.
+        /// <br/>
+        /// <br/>Null when the transmission is redacted for the authenticated user (see "isAuthorized").
         /// </summary>
         [JsonPropertyName("content")]
-        public DialogTransmissionContent Content { get; set; } = default!;
+        public DialogTransmissionContent? Content { get; set; } = default!;
 
         /// <summary>
         /// The transmission-level attachments.
@@ -1983,6 +2033,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
+        /// <summary>
+        /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+        /// <br/>replaced with "urn:dialogporten:unauthorized".
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -2040,6 +2097,13 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; } = default!;
 
+        /// <summary>
+        /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+        /// <br/>replaced with "urn:dialogporten:unauthorized".
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool IsAuthorized { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -2072,6 +2136,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
         public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>
@@ -2189,6 +2254,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
         public string? AuthorizationAttribute { get; set; } = default!;
 
         /// <summary>

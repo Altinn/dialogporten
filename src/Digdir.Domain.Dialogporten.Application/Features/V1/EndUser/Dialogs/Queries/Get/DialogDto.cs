@@ -267,6 +267,7 @@ public sealed class DialogTransmissionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -299,8 +300,10 @@ public sealed class DialogTransmissionDto
 
     /// <summary>
     /// The actor that sent the transmission.
+    ///
+    /// Null when the transmission is redacted for the authenticated user (see "isAuthorized").
     /// </summary>
-    public ActorDto Sender { get; set; } = null!;
+    public ActorDto? Sender { get; set; }
 
     /// <summary>
     /// Indicates whether the dialog transmission has been opened.
@@ -309,8 +312,10 @@ public sealed class DialogTransmissionDto
 
     /// <summary>
     /// The transmission unstructured text content.
+    ///
+    /// Null when the transmission is redacted for the authenticated user (see "isAuthorized").
     /// </summary>
-    public DialogTransmissionContentDto Content { get; set; } = null!;
+    public DialogTransmissionContentDto? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.
@@ -473,6 +478,7 @@ public sealed class DialogApiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -588,6 +594,7 @@ public sealed class DialogGuiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -651,6 +658,12 @@ public sealed class DialogAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
 }
 
 public sealed class DialogAttachmentUrlDto
@@ -710,6 +723,12 @@ public sealed class DialogTransmissionAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
 }
 
 public sealed class DialogTransmissionAttachmentUrlDto
@@ -766,4 +785,10 @@ public sealed class DialogTransmissionNavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
 }

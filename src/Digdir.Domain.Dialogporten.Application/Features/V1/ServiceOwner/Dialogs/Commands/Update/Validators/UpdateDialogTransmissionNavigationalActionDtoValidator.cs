@@ -10,6 +10,7 @@ internal sealed class UpdateDialogTransmissionNavigationalActionDtoValidator : A
 {
     public UpdateDialogTransmissionNavigationalActionDtoValidator(
         IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
+        IValidator<ChildAuthorizationContextDto> authorizationContextValidator,
         IClock clock)
     {
         RuleFor(x => x.Title)
@@ -23,5 +24,9 @@ internal sealed class UpdateDialogTransmissionNavigationalActionDtoValidator : A
 
         RuleFor(x => x.ExpiresAt)
             .IsInFuture(clock);
+
+        RuleFor(x => x.AuthorizationContext)
+            .SetValidator(authorizationContextValidator!)
+            .When(x => x.AuthorizationContext is not null);
     }
 }

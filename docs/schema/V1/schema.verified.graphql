@@ -10,6 +10,7 @@ type Queries @authorize(policy: "enduser") {
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
+  searchTerms: SearchTerms
   serviceResources(parties: [String!], includeUnauthorized: Boolean! = false): ServiceResourceMetadata!
 }
 
@@ -519,6 +520,17 @@ type SearchDialogsPayload {
 
 type SearchDialogValidationError implements SearchDialogError {
   message: String!
+}
+
+type SearchTerm {
+  word: String!
+  resources: [String!]!
+}
+
+type SearchTerms {
+  language: String!
+  generatedAt: DateTime!
+  words: [SearchTerm!]!
 }
 
 type SeenLog {

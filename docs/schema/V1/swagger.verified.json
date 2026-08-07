@@ -2847,6 +2847,56 @@
         },
         "type": "object"
       },
+      "V1MetadataSearchTermsGet_SearchTermsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataSearchTermsGet_SearchTermsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "l": {
+            "type": "string"
+          },
+          "words": {
+            "items": {
+              "$ref": "#/components/schemas/V1MetadataSearchTermsGet_TermResponseItem"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "V1MetadataSearchTermsGet_TermResponseItem": {
+        "additionalProperties": false,
+        "properties": {
+          "s": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "w": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1MetadataServiceResourcesGet_ServiceResourceMetadataRequest": {
         "additionalProperties": false,
         "properties": {
@@ -8620,6 +8670,74 @@
           }
         },
         "summary": "Gets currently enforced application-level query limits",
+        "tags": [
+          "Metadata"
+        ]
+      }
+    },
+    "/api/v1/metadata/searchterms": {
+      "get": {
+        "description": "Returns a curated list of search terms derived from dialog content, each linked to the\nservice resources the term appears in. A single language is returned per request: \u0060nb\u0060\n(Bokm\u00E5l) by default, or \u0060nn\u0060/\u0060en\u0060 when requested via the \u0060Accept-Language\u0060 header.\n\nThe response includes the generation timestamp and supports conditional requests\n(\u0060If-None-Match\u0060 / \u0060If-Modified-Since\u0060), returning \u0060304 Not Modified\u0060 when the client\u0027s\ncached copy is current.",
+        "operationId": "V1MetadataSearchTermsGet_SearchTerms",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/V1EndUserCommon_AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1MetadataSearchTermsGet_SearchTermsResponse"
+                }
+              }
+            },
+            "description": "The search-term list for the resolved language."
+          },
+          "304": {
+            "description": "The cached search-term list is still current."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "No search-term list has been generated yet."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gets the curated search-term list used for client-side autocomplete.",
         "tags": [
           "Metadata"
         ]

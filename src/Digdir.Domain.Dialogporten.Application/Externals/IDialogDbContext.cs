@@ -13,6 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Domain.SearchTerms;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 
@@ -45,6 +46,7 @@ public interface IDialogDbContext
     DbSet<DialogContentType> DialogContentTypes { get; }
 
     DbSet<SubjectResource> SubjectResources { get; }
+    DbSet<SearchTermList> SearchTermLists { get; }
     DbSet<DialogEndUserContext> DialogEndUserContexts { get; }
     DbSet<DialogServiceOwnerContext> DialogServiceOwnerContexts { get; }
     DbSet<DialogServiceOwnerLabel> DialogServiceOwnerLabels { get; }

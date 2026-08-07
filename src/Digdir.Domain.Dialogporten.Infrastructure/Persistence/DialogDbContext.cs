@@ -14,6 +14,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Domain.SearchTerms;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.EntityFramework;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Conventions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.IdempotentNotifications;
@@ -51,6 +52,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<DialogContent> DialogContents => Set<DialogContent>();
     public DbSet<DialogContentType> DialogContentTypes => Set<DialogContentType>();
     public DbSet<SubjectResource> SubjectResources => Set<SubjectResource>();
+    public DbSet<SearchTermList> SearchTermLists => Set<SearchTermList>();
     public DbSet<DialogEndUserContext> DialogEndUserContexts => Set<DialogEndUserContext>();
     public DbSet<SystemLabel> SystemLabels => Set<SystemLabel>();
 

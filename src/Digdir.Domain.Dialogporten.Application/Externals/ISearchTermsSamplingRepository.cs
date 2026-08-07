@@ -8,11 +8,27 @@ public interface ISearchTermsSamplingRepository
 
     Task<IReadOnlyList<SampledDialogIdentity>> SampleViaTableSampleAsync(
         double percent,
+        IReadOnlyCollection<string> excludedOrgs,
         CancellationToken ct);
 
-    Task<IReadOnlyList<Guid>> SampleByResourceAsync(
-        string serviceResource,
+    /// <summary>
+    /// Resolves each resource's owning service-owner org code by probing a single dialog per
+    /// resource (a resource has exactly one owner). Resources with no non-deleted dialogs are
+    /// absent from the result. One round-trip per call — pass resources in batches.
+    /// </summary>
+    Task<IReadOnlyDictionary<string, string>> GetResourceOrgsAsync(
+        IReadOnlyCollection<string> serviceResources,
+        CancellationToken ct);
+
+    /// <summary>
+    /// Batched Stage B pick: for each resource, selects up to <paramref name="n"/> dialogs
+    /// uniformly at random (bounded by an internal per-resource scan cap), excluding any ids in
+    /// <paramref name="excludeDialogIds"/> (already sampled in Stage A). One round-trip per call.
+    /// </summary>
+    Task<IReadOnlyDictionary<string, IReadOnlyList<Guid>>> SampleByResourcesAsync(
+        IReadOnlyCollection<string> serviceResources,
         int n,
+        IReadOnlyCollection<Guid> excludeDialogIds,
         CancellationToken ct);
 
     Task<IReadOnlyList<SampledDialogContent>> FetchContentAsync(
@@ -41,7 +57,7 @@ public interface ISearchTermsSamplingRepository
         CancellationToken ct);
 }
 
-public sealed record SampledDialogIdentity(Guid Id, string ServiceResource, DateTimeOffset ContentUpdatedAt);
+public sealed record SampledDialogIdentity(Guid Id, string ServiceResource);
 
 public sealed record SampledDialogContent(
     Guid Id,

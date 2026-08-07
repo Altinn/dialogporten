@@ -22,6 +22,12 @@ public sealed class GenerateSearchTermsCommand : IRequest<GenerateSearchTermsRes
     public IReadOnlyList<string>? Languages { get; init; }
 
     /// <summary>
+    /// Service owner org codes whose dialogs are excluded from sampling entirely. Defaults to
+    /// the test-only service owners (acn, bft, ttd). Pass an empty list to disable exclusion.
+    /// </summary>
+    public IReadOnlyList<string>? ExcludedOrgs { get; init; }
+
+    /// <summary>
     /// When set, the generated documents are written as JSONL to this path instead of being
     /// persisted to the database. Lets the command run against read-only environments (or
     /// environments without the SearchTermList table) for output inspection.
@@ -34,10 +40,13 @@ public sealed partial class GenerateSearchTermsResult : OneOfBase<Success, Valid
 
 internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandler<GenerateSearchTermsCommand, GenerateSearchTermsResult>
 {
-    private const int DefaultSampleSize = 3;
+    private const int DefaultSampleSize = 7;
     private const int DefaultPoolRows = 150_000;
     private const int DefaultMinLength = 5;
     private static readonly string[] DefaultLanguages = ["nb", "nn", "en"];
+    private static readonly string[] DefaultExcludedOrgs = ["acn", "bft", "ttd"];
+    private const int OrgProbeBatchSize = 1000;
+    private const int StageBBatchSize = 200;
     private const double MinTableSamplePercent = 0.001;
     private const double MaxTableSamplePercent = 5.0;
 
@@ -76,9 +85,13 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             .OfType<string>()
             .Where(x => x.Length > 0)
             .ToHashSet(StringComparer.Ordinal);
+        var excludedOrgs = (request.ExcludedOrgs ?? DefaultExcludedOrgs)
+            .Select(x => x.Trim().ToLowerInvariant())
+            .Where(x => x.Length > 0)
+            .ToHashSet(StringComparer.Ordinal);
 
-#pragma warning disable CA1873 // joining 3-4 language codes is negligible; only runs once per command invocation
-        LogStarted(sampleSize, poolRows, minLength, string.Join(",", languages));
+#pragma warning disable CA1873 // joining a handful of codes is negligible; only runs once per command invocation
+        LogStarted(sampleSize, poolRows, minLength, string.Join(",", languages), string.Join(",", excludedOrgs));
 #pragma warning restore CA1873
 
         var totalRows = await _repository.EstimateTotalRowCountAsync(cancellationToken);
@@ -87,6 +100,11 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         var resources = await _repository.EnumerateServiceResourcesAsync(cancellationToken);
         LogEnumeratedResources(resources.Count);
 
+        if (excludedOrgs.Count > 0)
+        {
+            resources = await FilterExcludedOrgResourcesAsync(resources, excludedOrgs, cancellationToken);
+        }
+
         if (resources.Count == 0)
         {
             // Don't wipe a previously-good persisted set on a degenerate run; leave existing data in place.
@@ -94,7 +112,7 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             return new Success();
         }
 
-        var samplesByResource = await SampleDialogsAsync(resources, totalRows, sampleSize, poolRows, cancellationToken);
+        var samplesByResource = await SampleDialogsAsync(resources, totalRows, sampleSize, poolRows, excludedOrgs, cancellationToken);
 
         var allIds = samplesByResource.Values.SelectMany(x => x).Distinct().ToList();
         if (allIds.Count == 0)
@@ -139,11 +157,43 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
         return new Success();
     }
 
+    // A resource has exactly one owning service owner, so exclusion is resolved once per
+    // resource (one cheap LIMIT 1 probe each, batched into round-trips of OrgProbeBatchSize)
+    // instead of filtering "Org" per dialog row in the sampling queries — the per-row filter
+    // forced a heap fetch for every candidate row, which dominated Stage B on large tables.
+    private async Task<IReadOnlyList<string>> FilterExcludedOrgResourcesAsync(
+        IReadOnlyList<string> resources,
+        IReadOnlyCollection<string> excludedOrgs,
+        CancellationToken cancellationToken)
+    {
+        var kept = new List<string>(resources.Count);
+        var excluded = 0;
+        foreach (var chunk in resources.Chunk(OrgProbeBatchSize))
+        {
+            var orgByResource = await _repository.GetResourceOrgsAsync(chunk, cancellationToken);
+            foreach (var resource in chunk)
+            {
+                if (orgByResource.TryGetValue(resource, out var org)
+                    && excludedOrgs.Contains(org.ToLowerInvariant()))
+                {
+                    excluded++;
+                }
+                else
+                {
+                    kept.Add(resource);
+                }
+            }
+        }
+        LogExcludedOrgResources(excluded);
+        return kept;
+    }
+
     private async Task<Dictionary<string, List<Guid>>> SampleDialogsAsync(
         IReadOnlyList<string> resources,
         long totalRows,
         int sampleSize,
         int poolRows,
+        IReadOnlyCollection<string> excludedOrgs,
         CancellationToken cancellationToken)
     {
         // Stage A: global TABLESAMPLE pool.
@@ -152,45 +202,73 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             : MaxTableSamplePercent;
         LogStageAStarting(percent);
 
-        var pool = await _repository.SampleViaTableSampleAsync(percent, cancellationToken);
+        var pool = await _repository.SampleViaTableSampleAsync(percent, excludedOrgs, cancellationToken);
         LogStageAPool(pool.Count);
 
-        // Sort each resource's pool bucket by ContentUpdatedAt DESC and keep the top N. This
-        // biases toward recently-updated content for autocomplete freshness; the trade-off
-        // (older vocabulary under-represented) is accepted.
+        // Pick N uniformly at random within each resource's pool bucket. Newest-first selection
+        // (the original freshness bias) defeated the PII intersection heuristic: one real-world
+        // case can emit a burst of near-identical dialogs (an estate settlement notifying every
+        // heir, a migrated correspondence batch), and the newest N samples then all carry the same
+        // person's name. Random selection restores the independence assumption the intersection
+        // relies on. TABLESAMPLE rows also arrive in physical page order, so taking "any N"
+        // without shuffling would reintroduce the same burst correlation.
         var samplesByResource = pool
             .GroupBy(r => r.ServiceResource, StringComparer.Ordinal)
             .ToDictionary(
                 g => g.Key,
-                g => g.OrderByDescending(r => r.ContentUpdatedAt).Take(sampleSize).Select(r => r.Id).ToList(),
+                g => g.OrderBy(_ => Random.Shared.Next()).Take(sampleSize).Select(r => r.Id).ToList(),
                 StringComparer.Ordinal);
 
-        // Stage B: fill missing resources via direct index lookup.
+        // Stage B: top up under-represented resources via per-resource random picks, excluding
+        // ids Stage A already delivered so top-ups can't collide with them. Batched into one
+        // LATERAL round-trip per chunk — prod has thousands of long-tail resources, and one
+        // query per resource dominated the runtime (especially over a tunneled connection).
+        var missingResources = resources
+            .Where(r => (samplesByResource.GetValueOrDefault(r)?.Count ?? 0) < sampleSize)
+            .ToList();
         var stageBHits = 0;
-        foreach (var resource in resources)
+        foreach (var chunk in missingResources.Chunk(StageBBatchSize))
         {
-            samplesByResource.TryGetValue(resource, out var existing);
-            var needed = sampleSize - (existing?.Count ?? 0);
-            if (needed <= 0)
+            var excludeIds = chunk
+                .SelectMany(r => samplesByResource.GetValueOrDefault(r) ?? [])
+                .ToList();
+            var extras = await _repository.SampleByResourcesAsync(chunk, sampleSize, excludeIds, cancellationToken);
+            foreach (var (resource, ids) in extras)
             {
-                continue;
-            }
-            var extra = await _repository.SampleByResourceAsync(resource, needed, cancellationToken);
-            if (extra.Count == 0)
-            {
-                continue;
-            }
-            stageBHits++;
-            if (existing is null)
-            {
-                samplesByResource[resource] = extra.ToList();
-            }
-            else
-            {
-                existing.AddRange(extra.Except(existing));
+                samplesByResource.TryGetValue(resource, out var existing);
+                var needed = sampleSize - (existing?.Count ?? 0);
+                if (needed <= 0 || ids.Count == 0)
+                {
+                    continue;
+                }
+                stageBHits++;
+                var take = ids.Take(needed);
+                if (existing is null)
+                {
+                    samplesByResource[resource] = take.ToList();
+                }
+                else
+                {
+                    existing.AddRange(take);
+                }
             }
         }
         LogStageBHits(stageBHits);
+
+        // A resource must contribute a full set of sampleSize samples for the intersection
+        // heuristic to have filtering power — intersecting over one or two dialogs leaks their
+        // entire title/summary vocabulary (including personal names). Resources that couldn't be
+        // sampled to the full N (fewer dialogs than N, or all their dialogs owned by excluded
+        // orgs) are dropped from the run entirely.
+        var undersampled = samplesByResource
+            .Where(kv => kv.Value.Count < sampleSize)
+            .Select(kv => kv.Key)
+            .ToList();
+        foreach (var resource in undersampled)
+        {
+            samplesByResource.Remove(resource);
+        }
+        LogSkippedUndersampled(undersampled.Count, sampleSize);
 
         return samplesByResource;
     }
@@ -547,14 +625,17 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
 
     [LoggerMessage(
         Level = LogLevel.Information,
-        Message = "GenerateSearchTerms started. SampleSize={SampleSize}, PoolRows={PoolRows}, MinLength={MinLength}, Languages={Languages}")]
-    private partial void LogStarted(int sampleSize, int poolRows, int minLength, string languages);
+        Message = "GenerateSearchTerms started. SampleSize={SampleSize}, PoolRows={PoolRows}, MinLength={MinLength}, Languages={Languages}, ExcludedOrgs={ExcludedOrgs}")]
+    private partial void LogStarted(int sampleSize, int poolRows, int minLength, string languages, string excludedOrgs);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Estimated total Dialog rows: {TotalRows}")]
     private partial void LogTotalRows(long totalRows);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Enumerated {Count} distinct service resources via loose index scan.")]
     private partial void LogEnumeratedResources(int count);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Excluded {Count} resources owned by excluded service owner orgs.")]
+    private partial void LogExcludedOrgResources(int count);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Stage A: TABLESAMPLE SYSTEM({Percent:0.######})")]
     private partial void LogStageAStarting(double percent);
@@ -564,6 +645,11 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Stage B fallback triggered for {Count} resources")]
     private partial void LogStageBHits(int count);
+
+    [LoggerMessage(
+        Level = LogLevel.Information,
+        Message = "Skipped {Count} resources with fewer than {SampleSize} sampled dialogs (intersection would have no filtering power).")]
+    private partial void LogSkippedUndersampled(int count, int sampleSize);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Hydrated {Count} dialogs (title/summary).")]
     private partial void LogHydrated(int count);

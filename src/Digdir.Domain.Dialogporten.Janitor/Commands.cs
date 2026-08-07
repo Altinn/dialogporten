@@ -128,16 +128,18 @@ internal static partial class Commands
         app.AddCommand("generate-searchterms", async (
                 [FromService] CoconaAppContext ctx,
                 [FromService] ISender application,
-                [Option('n', Description = "Samples per service resource (3-100, default 3)")] int? sampleSize,
+                [Option('n', Description = "Samples per service resource (3-100, default 7)")] int? sampleSize,
                 [Option("pool-rows", Description = "Stage A TABLESAMPLE pool target rows (default 150000)")] int? poolRows,
                 [Option('m', Description = "Minimum word length (default 5)")] int? minLength,
                 [Option('l', Description = "Comma-separated language codes (default nb,nn,en)")] string? languages,
+                [Option("exclude-orgs", Description = "Comma-separated service owner org codes to exclude from sampling (default acn,bft,ttd; pass \"\" to disable)")] string? excludeOrgs = null,
                 [Option('o', Description = "Write results to a JSONL file instead of persisting to the database (dry-run)")] string? output = null)
             =>
             {
                 var langs = string.IsNullOrWhiteSpace(languages)
                     ? null
                     : languages.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var orgs = excludeOrgs?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 var result = await application.Send(
                     new GenerateSearchTermsCommand
                     {
@@ -145,6 +147,7 @@ internal static partial class Commands
                         PoolRows = poolRows,
                         MinLength = minLength,
                         Languages = langs,
+                        ExcludedOrgs = orgs,
                         OutputPath = output
                     },
                     ctx.CancellationToken);

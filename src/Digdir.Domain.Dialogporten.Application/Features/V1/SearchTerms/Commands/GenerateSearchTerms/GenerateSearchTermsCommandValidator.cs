@@ -12,6 +12,9 @@ internal sealed class GenerateSearchTermsCommandValidator : AbstractValidator<Ge
         RuleFor(x => x.Languages)
             .Must(x => x is null || x.Count > 0)
             .WithMessage("Languages must be non-empty when specified.");
+        RuleFor(x => x.ExcludedOrgs)
+            .Must(x => x is null || x.All(o => !string.IsNullOrWhiteSpace(o)))
+            .WithMessage("ExcludedOrgs must not contain empty entries.");
         RuleFor(x => x.OutputPath)
             .Must(x => !string.IsNullOrWhiteSpace(x))
             .When(x => x.OutputPath is not null)

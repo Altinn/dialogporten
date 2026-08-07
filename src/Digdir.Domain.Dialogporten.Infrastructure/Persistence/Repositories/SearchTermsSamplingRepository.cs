@@ -46,46 +46,118 @@ internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingReposi
 
     public async Task<IReadOnlyList<SampledDialogIdentity>> SampleViaTableSampleAsync(
         double percent,
+        IReadOnlyCollection<string> excludedOrgs,
         CancellationToken ct)
     {
         const string sql =
             """
-            SELECT "Id", "ServiceResource", "ContentUpdatedAt"
+            SELECT "Id", "ServiceResource"
             FROM "Dialog" TABLESAMPLE SYSTEM (@Percent)
-            WHERE "Deleted" = false AND "ServiceResource" IS NOT NULL;
+            WHERE "Deleted" = false AND "ServiceResource" IS NOT NULL
+              AND NOT ("Org" = ANY(@ExcludedOrgs));
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(ct);
-        var rows = await connection.QueryAsync<(Guid Id, string ServiceResource, DateTime ContentUpdatedAt)>(
-            new CommandDefinition(sql, new { Percent = percent }, cancellationToken: ct));
+        var rows = await connection.QueryAsync<(Guid Id, string ServiceResource)>(
+            new CommandDefinition(
+                sql,
+                new { Percent = percent, ExcludedOrgs = excludedOrgs.ToArray() },
+                cancellationToken: ct));
         return rows
-            .Select(r => new SampledDialogIdentity(
-                r.Id,
-                r.ServiceResource,
-                new DateTimeOffset(DateTime.SpecifyKind(r.ContentUpdatedAt, DateTimeKind.Utc))))
+            .Select(r => new SampledDialogIdentity(r.Id, r.ServiceResource))
             .ToList();
     }
 
-    public async Task<IReadOnlyList<Guid>> SampleByResourceAsync(
-        string serviceResource,
-        int n,
+    // Bounds the per-resource Stage B read. Stage B fires for resources the Stage A pool
+    // under-sampled, which are long-tail small by construction (well below this cap), so the
+    // random pick is effectively uniform over the whole resource. A large resource only lands
+    // here through Stage A sampling variance; the cap keeps that worst case from scanning
+    // millions of rows for 3 samples.
+    private const int StageBScanCap = 20_000;
+
+    public async Task<IReadOnlyDictionary<string, string>> GetResourceOrgsAsync(
+        IReadOnlyCollection<string> serviceResources,
         CancellationToken ct)
     {
-        // ORDER BY ContentUpdatedAt DESC biases the long-tail sample toward recently-updated
-        // content. The partial index IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted
-        // has ContentUpdatedAt as its third sort column, so the planner can serve this via an
-        // index scan (merging across Party prefixes). Cost is negligible for long-tail resources.
-        var ids = await _db.Database
-            .SqlQuery<Guid>(
-                $"""
-                 SELECT "Id" AS "Value"
-                 FROM "Dialog"
-                 WHERE "ServiceResource" = {serviceResource} AND "Deleted" = false
-                 ORDER BY "ContentUpdatedAt" DESC
-                 LIMIT {n}
-                 """)
-            .ToListAsync(ct);
-        return ids;
+        if (serviceResources.Count == 0)
+        {
+            return new Dictionary<string, string>(StringComparer.Ordinal);
+        }
+
+        const string sql =
+            """
+            SELECT r.resource AS "ServiceResource", probe."Org"
+            FROM unnest(@Resources) AS r(resource)
+            CROSS JOIN LATERAL (
+                SELECT "Org"
+                FROM "Dialog"
+                WHERE "ServiceResource" = r.resource AND "Deleted" = false
+                LIMIT 1
+            ) probe;
+            """;
+
+        await using var connection = await _dataSource.OpenConnectionAsync(ct);
+        var rows = await connection.QueryAsync<(string ServiceResource, string Org)>(
+            new CommandDefinition(
+                sql,
+                new { Resources = serviceResources.ToArray() },
+                cancellationToken: ct));
+        return rows.ToDictionary(r => r.ServiceResource, r => r.Org, StringComparer.Ordinal);
+    }
+
+    public async Task<IReadOnlyDictionary<string, IReadOnlyList<Guid>>> SampleByResourcesAsync(
+        IReadOnlyCollection<string> serviceResources,
+        int n,
+        IReadOnlyCollection<Guid> excludeDialogIds,
+        CancellationToken ct)
+    {
+        if (serviceResources.Count == 0)
+        {
+            return new Dictionary<string, IReadOnlyList<Guid>>(StringComparer.Ordinal);
+        }
+
+        // ORDER BY random() picks uniformly across the resource's rows (up to StageBScanCap).
+        // Newest-first selection defeated the PII intersection heuristic: one real-world case can
+        // emit a burst of near-identical dialogs (e.g. an estate settlement notifying every heir),
+        // and the newest N samples then all carry the same person's name. The LATERAL batches one
+        // pick per resource into a single round-trip; org exclusion happens before this via
+        // GetResourceOrgsAsync, so no per-row Org filter (and its heap fetches) is needed here.
+        const string sql =
+            """
+            SELECT r.resource AS "ServiceResource", pick."Id"
+            FROM unnest(@Resources) AS r(resource)
+            CROSS JOIN LATERAL (
+                SELECT bounded."Id"
+                FROM (
+                    SELECT "Id"
+                    FROM "Dialog"
+                    WHERE "ServiceResource" = r.resource AND "Deleted" = false
+                    LIMIT @ScanCap
+                ) bounded
+                WHERE NOT (bounded."Id" = ANY(@ExcludeIds))
+                ORDER BY random()
+                LIMIT @N
+            ) pick;
+            """;
+
+        await using var connection = await _dataSource.OpenConnectionAsync(ct);
+        var rows = await connection.QueryAsync<(string ServiceResource, Guid Id)>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    Resources = serviceResources.ToArray(),
+                    ScanCap = StageBScanCap,
+                    ExcludeIds = excludeDialogIds.ToArray(),
+                    N = n
+                },
+                cancellationToken: ct));
+        return rows
+            .GroupBy(r => r.ServiceResource, StringComparer.Ordinal)
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlyList<Guid>)g.Select(r => r.Id).ToList(),
+                StringComparer.Ordinal);
     }
 
     public async Task<IReadOnlyList<SampledDialogContent>> FetchContentAsync(

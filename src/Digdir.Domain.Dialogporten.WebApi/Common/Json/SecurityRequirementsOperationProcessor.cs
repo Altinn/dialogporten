@@ -1,7 +1,6 @@
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using NSwag;
 using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
@@ -53,7 +52,9 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
             return true;
         }
 
-        operationSecurity = operationSecurity.Skip(1).ToList();
+        operationSecurity = operationSecurity
+            .Where(x => !x.ContainsKey(FastEndpointsDefaultSecurityScheme))
+            .ToList();
 
         foreach (var rule in scopeRules)
         {

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
 
@@ -38,7 +39,7 @@ public class AuthorizedParty
     /// The type of the party, either "Organization" or "Person".
     /// </summary>
     [JsonPropertyName("partyType")]
-    public string PartyType { get; set; } = null!;
+    public AuthorizedPartyType PartyType { get; set; }
 
     /// <summary>
     /// Whether the party is deleted or not

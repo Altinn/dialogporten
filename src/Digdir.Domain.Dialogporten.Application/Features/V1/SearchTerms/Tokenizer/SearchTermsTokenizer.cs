@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Tokenizer;
@@ -13,7 +14,9 @@ internal sealed partial class SearchTermsTokenizer : ISearchTermsTokenizer
             return tokens;
         }
 
-        foreach (Match match in WordRegex().Matches(text))
+        // Compose to NFC first: \p{L}+ does not match combining marks, so decomposed input
+        // (e.g. 'å' as 'a' + U+030A) would otherwise split into bogus fragments.
+        foreach (Match match in WordRegex().Matches(text.Normalize(NormalizationForm.FormC)))
         {
             tokens.Add(match.Value.ToLower(CultureInfo.InvariantCulture));
         }

@@ -4862,10 +4862,56 @@
                 }
               }
             },
-            "description": "The search-term list for the resolved language."
+            "description": "The search-term list for the resolved language.",
+            "headers": {
+              "ETag": {
+                "description": "Strong validator for the returned representation; echo it in \u0060If-None-Match\u0060 to revalidate.",
+                "example": "\u0022nb-638849952000000000\u0022",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "description": "Generation timestamp of the search-term list; usable with \u0060If-Modified-Since\u0060.",
+                "example": "Tue, 16 Jun 2026 08:15:15 GMT",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "The representation is negotiated on \u0060Accept-Language\u0060.",
+                "example": "Accept-Language",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "304": {
-            "description": "The cached search-term list is still current."
+            "description": "The cached search-term list is still current.",
+            "headers": {
+              "ETag": {
+                "description": "Strong validator for the returned representation; echo it in \u0060If-None-Match\u0060 to revalidate.",
+                "example": "\u0022nb-638849952000000000\u0022",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "description": "Generation timestamp of the search-term list; usable with \u0060If-Modified-Since\u0060.",
+                "example": "Tue, 16 Jun 2026 08:15:15 GMT",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Vary": {
+                "description": "The representation is negotiated on \u0060Accept-Language\u0060.",
+                "example": "Accept-Language",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "404": {
             "content": {

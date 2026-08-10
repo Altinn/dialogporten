@@ -19,5 +19,29 @@ public sealed class GetSearchTermsEndpointSummary : Summary<GetSearchTermsEndpoi
         Responses[StatusCodes.Status200OK] = "The search-term list for the resolved language.";
         Responses[StatusCodes.Status304NotModified] = "The cached search-term list is still current.";
         Responses[StatusCodes.Status404NotFound] = "No search-term list has been generated yet.";
+        ResponseHeaders =
+        [
+            .. CacheValidatorHeaders(StatusCodes.Status200OK),
+            .. CacheValidatorHeaders(StatusCodes.Status304NotModified)
+        ];
     }
+
+    private static ResponseHeader[] CacheValidatorHeaders(int statusCode) =>
+    [
+        new(statusCode, "ETag")
+        {
+            Description = "Strong validator for the returned representation; echo it in `If-None-Match` to revalidate.",
+            Example = "\"nb-638849952000000000\""
+        },
+        new(statusCode, "Last-Modified")
+        {
+            Description = "Generation timestamp of the search-term list; usable with `If-Modified-Since`.",
+            Example = "Tue, 16 Jun 2026 08:15:15 GMT"
+        },
+        new(statusCode, "Vary")
+        {
+            Description = "The representation is negotiated on `Accept-Language`.",
+            Example = "Accept-Language"
+        }
+    ];
 }

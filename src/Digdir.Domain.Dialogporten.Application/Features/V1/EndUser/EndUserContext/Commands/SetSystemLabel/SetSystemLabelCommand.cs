@@ -24,7 +24,7 @@ public sealed class SetSystemLabelCommand : IRequest<SetSystemLabelResult>, IFea
 public sealed record SetSystemLabelSuccess(Guid Revision);
 
 [GenerateOneOf]
-public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, EntityDeleted, DomainError, ValidationError, ConcurrencyError, Conflict>;
+public sealed partial class SetSystemLabelResult : OneOfBase<SetSystemLabelSuccess, EntityNotFound, Forbidden, EntityDeleted, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLabelCommand, SetSystemLabelResult>
 {
@@ -46,11 +46,10 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         _altinnAuthorization = altinnAuthorization;
     }
 
-    public async Task<SetSystemLabelResult> Handle(
-        SetSystemLabelCommand request,
-        CancellationToken cancellationToken)
+    public async Task<SetSystemLabelResult> Handle(SetSystemLabelCommand request, CancellationToken cancellationToken)
     {
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
@@ -68,10 +67,9 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
-        if (!authorizationResult.HasAccessToMainResource())
+        if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, cancellationToken))
         {
-            return new EntityNotFound<DialogEntity>(request.DialogId);
+            return new Forbidden().WithInvalidDialogIds([request.DialogId]);
         }
 
         if (request.IfMatchEndUserContextRevision is { } revision && revision != dialog.EndUserContext.Revision)

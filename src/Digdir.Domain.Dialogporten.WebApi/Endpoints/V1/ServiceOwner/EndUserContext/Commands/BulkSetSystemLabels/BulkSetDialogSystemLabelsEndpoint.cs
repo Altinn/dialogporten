@@ -29,6 +29,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSy
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
+            StatusCodes.Status404NotFound,
             StatusCodes.Status403Forbidden,
             StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed,
@@ -46,6 +47,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSy
         var result = await _sender.Send(command, ct);
         await result.Match(
             _ => Send.NoContentAsync(ct),
+            notFound => this.NotFoundAsync(notFound, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),

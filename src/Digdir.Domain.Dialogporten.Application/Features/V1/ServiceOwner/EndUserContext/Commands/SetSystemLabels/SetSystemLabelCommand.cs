@@ -1,6 +1,7 @@
 using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -63,11 +64,15 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
         CancellationToken cancellationToken)
     {
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+
+        var isAdmin = _userResourceRegistry.IsCurrentUserServiceOwnerAdmin();
+        var org = isAdmin ? null : await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
         var dialog = await _db.Dialogs
             .Include(x => x.EndUserContext)
                 .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .Include(x => x.ServiceOwnerContext)
                 .ThenInclude(x => x.ServiceOwnerLabels)
+            .WhereIf(!isAdmin, x => x.Org == org)
             .FirstOrDefaultAsync(x => x.Id == request.DialogId, cancellationToken: cancellationToken);
 
         if (dialog is null)
@@ -86,12 +91,12 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return forbidden;
         }
 
-        if (!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        if (!isAdmin)
         {
-            var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
-            if (!authorizationResult.HasAccessToMainResource())
+            // We have already checked that this org has access to the d ialog. Now check the end user:
+            if (!await _altinnAuthorization.HasListAuthorizationForDialog(dialog, cancellationToken: cancellationToken))
             {
-                return new EntityNotFound<DialogEntity>(request.DialogId);
+                return new Forbidden().WithInvalidDialogIds([request.DialogId]);
             }
         }
 

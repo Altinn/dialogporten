@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -47,7 +48,7 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
     }
 
     [Fact]
-    public Task BulkSet_Returns_Forbidden_For_Invalid_Id() =>
+    public Task BulkSet_Returns_NotFound_For_Invalid_Id() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .BulkSetSystemLabelServiceOwner((x, ctx) =>
@@ -63,8 +64,7 @@ public class ObsoleteBulkSetSystemLabelTests(DialogApplication application) : Ap
                     SystemLabels = [SystemLabel.Values.Bin]
                 };
             })
-            .ExecuteAndAssert<Forbidden>(x =>
-                x.Reasons.Should().NotBeEmpty());
+            .ExecuteAndAssert<EntityNotFound<DialogEntity>>(x => x.Keys.Should().NotBeEmpty());
 
     [Fact]
     public Task BulkSet_Returns_ConcurrencyError_On_Revision_Mismatch() =>

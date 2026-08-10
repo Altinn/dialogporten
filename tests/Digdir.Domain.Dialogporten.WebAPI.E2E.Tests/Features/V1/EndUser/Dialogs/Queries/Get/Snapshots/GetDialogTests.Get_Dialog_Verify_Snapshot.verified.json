@@ -106,7 +106,8 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "isAuthorized": true
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -125,7 +126,8 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "isAuthorized": true
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -144,7 +146,8 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "isAuthorized": true
     }
   ],
   "transmissions": [
@@ -229,7 +232,8 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true
         }
       ],
       "navigationalActions": [
@@ -245,7 +249,8 @@
             }
           ],
           "url": "https://digdir.no/transmission/expired-navigation",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true
         },
         {
           "title": [
@@ -255,7 +260,8 @@
             }
           ],
           "url": "https://digdir.no/transmission/active-navigation",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true
         }
       ]
     },
@@ -327,7 +333,8 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "isAuthorized": false
         }
       ],
       "navigationalActions": [
@@ -339,7 +346,8 @@
             }
           ],
           "url": "urn:dialogporten:unauthorized",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": false
         }
       ]
     },
@@ -411,7 +419,8 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "isAuthorized": false
         }
       ],
       "navigationalActions": []

@@ -96,7 +96,8 @@
             "consumerType": "Gui"
           }
         ],
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "isAuthorized": true
       }
     ],
     "navigationalActions": [
@@ -108,7 +109,8 @@
           }
         ],
         "url": "https://digdir.com/action-url",
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "isAuthorized": true
       }
     ]
   }

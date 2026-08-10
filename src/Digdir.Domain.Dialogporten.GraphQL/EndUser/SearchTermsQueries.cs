@@ -9,8 +9,11 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser;
 
 public partial class Queries
 {
-    // Intentionally NOT compressed (unlike GetServiceResources): the WebApi endpoint owns compression
-    // for this payload. Returns null when no search-term list has been generated yet.
+    // Served uncompressed: the GraphQL host has no response compression at all — per-resolver
+    // opt-in was removed in #4113 because one compressed response can span multiple fields,
+    // reintroducing CRIME/BREACH. Clients wanting compression (and ETag/304 revalidation)
+    // should use the WebApi endpoint, which owns those concerns for this payload.
+    // Returns null when no search-term list has been generated yet.
     public async Task<SearchTermsModel?> GetSearchTerms(
         [Service] ISender mediator,
         [Service] IMapper mapper,

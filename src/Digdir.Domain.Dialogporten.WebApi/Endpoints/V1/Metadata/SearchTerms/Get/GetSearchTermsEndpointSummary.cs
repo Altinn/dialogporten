@@ -31,7 +31,8 @@ public sealed class GetSearchTermsEndpointSummary : Summary<GetSearchTermsEndpoi
         new(statusCode, "ETag")
         {
             Description = "Strong validator for the returned representation; echo it in `If-None-Match` to revalidate.",
-            Example = "\"nb-638849952000000000\""
+            // Same GeneratedAt as the Last-Modified example below (2026-06-16T08:15:15Z).
+            Example = "\"nb-639171945150000000\""
         },
         new(statusCode, "Last-Modified")
         {

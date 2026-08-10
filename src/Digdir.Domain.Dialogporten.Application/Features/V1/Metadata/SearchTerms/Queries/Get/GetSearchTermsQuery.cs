@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -46,15 +45,14 @@ internal sealed class GetSearchTermsQueryHandler : IRequestHandler<GetSearchTerm
             return new EntityNotFound<SearchTermList>([language]);
         }
 
-        var words = JsonSerializer.Deserialize<List<StoredSearchTerm>>(document.Words) ?? [];
+        // The jsonb column stores the shared terse contract (SearchTermEntry) verbatim.
+        var words = JsonSerializer.Deserialize<List<SearchTermEntry>>(document.Words) ?? [];
 
         return new SearchTermsDto
         {
             Language = document.Language,
             GeneratedAt = document.GeneratedAt,
             Words = words
-                .Select(w => new SearchTermDto { Word = w.Word, Resources = w.Resources })
-                .ToList()
         };
     }
 
@@ -76,9 +74,4 @@ internal sealed class GetSearchTermsQueryHandler : IRequestHandler<GetSearchTerm
             .Select(x => x.LanguageCode)
             .FirstOrDefault() ?? DefaultLanguage;
     }
-
-    // Mirrors the terse jsonb storage shape: { "w": word, "s": [resources] }.
-    private sealed record StoredSearchTerm(
-        [property: JsonPropertyName("w")] string Word,
-        [property: JsonPropertyName("s")] IReadOnlyList<string> Resources);
 }

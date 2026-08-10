@@ -48,8 +48,9 @@ public interface ISearchTermsSamplingRepository
 
     /// <summary>
     /// Atomically replaces the persisted search-term documents (one per language) with the
-    /// supplied set, stamping all of them with the same <paramref name="generatedAt"/>. Any
-    /// previously stored documents are removed in the same transaction.
+    /// supplied set, stamping all of them with the same <paramref name="generatedAt"/>. Only
+    /// documents for the supplied languages are replaced; documents for other languages are
+    /// left untouched, so a partial-language run never removes previously published languages.
     /// </summary>
     Task ReplaceAsync(
         IReadOnlyList<SearchTermListDocument> documents,

@@ -46,12 +46,17 @@ public sealed class GetSearchTermsEndpoint : Endpoint<GetSearchTermsRequest, Get
         await result.Match(
             async dto =>
             {
-                // Strong validator derived from the generation timestamp; identical across all
-                // languages of a single generation run.
-                var etag = $"\"{dto.GeneratedAt.UtcTicks}\"";
+                // Strong validator derived from the resolved language and the generation timestamp.
+                // The language MUST be part of the validator: the same URL serves different
+                // representations per Accept-Language, and a timestamp-only ETag would let a client
+                // switching languages revalidate its old copy into a bogus 304.
+                var etag = $"\"{dto.Language}-{dto.GeneratedAt.UtcTicks}\"";
                 HttpContext.Response.Headers.ETag = etag;
                 HttpContext.Response.Headers.LastModified =
                     dto.GeneratedAt.UtcDateTime.ToString("R", CultureInfo.InvariantCulture);
+                // The representation is negotiated on Accept-Language; without Vary, shared caches
+                // would serve one language's payload to clients requesting another.
+                HttpContext.Response.Headers.Append(HeaderNames.Vary, HeaderNames.AcceptLanguage);
 
                 if (IsNotModified(etag, dto.GeneratedAt))
                 {
@@ -69,7 +74,13 @@ public sealed class GetSearchTermsEndpoint : Endpoint<GetSearchTermsRequest, Get
         var ifNoneMatch = HttpContext.Request.Headers.IfNoneMatch;
         if (ifNoneMatch.Count > 0)
         {
-            return ifNoneMatch.Contains(etag) || ifNoneMatch.Contains("*");
+            // Parse rather than string-compare whole header values: a single header line may
+            // carry a comma-separated etag list, and intermediaries may weaken the tag (W/"...").
+            // If-None-Match uses weak comparison per RFC 9110 §13.1.2.
+            return EntityTagHeaderValue.TryParseList(ifNoneMatch, out var candidates)
+                   && candidates.Any(candidate =>
+                       candidate.Equals(EntityTagHeaderValue.Any)
+                       || candidate.Compare(new EntityTagHeaderValue(etag), useStrongComparison: false));
         }
 
         var ifModifiedSince = HttpContext.Request.Headers.IfModifiedSince.ToString();
@@ -114,6 +125,9 @@ public sealed class GetSearchTermsResponse
     };
 }
 
+// Wire twin of Domain.SearchTerms.SearchTermEntry; kept as a distinct type so the public
+// OpenAPI contract is owned by the endpoint. (Deliberately not an XML doc comment — that
+// would leak into the OpenAPI schema description and churn the verified snapshots.)
 [OpenApiTypeName(nameof(SearchTermResponseItem))]
 public sealed class SearchTermResponseItem
 {

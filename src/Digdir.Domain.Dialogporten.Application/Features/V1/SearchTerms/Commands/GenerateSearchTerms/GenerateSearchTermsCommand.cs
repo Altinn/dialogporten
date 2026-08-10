@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Filtering;
 using Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Tokenizer;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
+using Digdir.Domain.Dialogporten.Domain.SearchTerms;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -371,7 +372,15 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             var dictionary = ResolveStemDictionary(language);
             if (!stopStemsByDictionary.TryGetValue(dictionary, out var stopStems))
             {
-                var stemmedStopwords = await _repository.StemAsync(dictionary, _filter.Stopwords, cancellationToken);
+                // Stem only the language's own stoplist: stemming another language's stopwords
+                // with this dictionary yields bogus stems that collide with — and would delete —
+                // legitimate words (en 'after' -> norwegian_stem 'aft' also matches nb 'aften').
+                // Languages sharing a dictionary (nb/nn) share a stoplist, so the per-dictionary
+                // cache stays valid.
+                var stopwords = _filter.StopwordsForLanguage(language);
+                var stemmedStopwords = stopwords.Count > 0
+                    ? await _repository.StemAsync(dictionary, stopwords, cancellationToken)
+                    : new Dictionary<string, string>(StringComparer.Ordinal);
                 stopStems = stemmedStopwords.Values.ToHashSet(StringComparer.Ordinal);
                 stopStemsByDictionary[dictionary] = stopStems;
             }
@@ -515,7 +524,7 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             var words = wordIndex
                 .Where(kv => kv.Key.Language == language)
                 .OrderBy(kv => kv.Key.Word, StringComparer.Ordinal)
-                .Select(kv => new SearchTermJson(
+                .Select(kv => new SearchTermEntry(
                     kv.Key.Word,
                     kv.Value.OrderBy(x => x, StringComparer.Ordinal).ToArray()))
                 .ToArray();
@@ -548,11 +557,6 @@ internal sealed partial class GenerateSearchTermsCommandHandler : IRequestHandle
             writer.Reset();
         }
     }
-
-    // Terse wire/storage shape: { "w": canonical word, "s": [sorted unprefixed resource ids] }.
-    private sealed record SearchTermJson(
-        [property: System.Text.Json.Serialization.JsonPropertyName("w")] string Word,
-        [property: System.Text.Json.Serialization.JsonPropertyName("s")] IReadOnlyList<string> Resources);
 
     private static string ResolveStemDictionary(string language) => language switch
     {

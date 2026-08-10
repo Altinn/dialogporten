@@ -247,10 +247,16 @@ internal sealed class SearchTermsSamplingRepository : ISearchTermsSamplingReposi
     {
         // Delete-then-insert within a single transaction so readers never observe a partial set
         // (and a failed run leaves the previous documents intact). Id and CreatedAt/UpdatedAt are
-        // populated by the auditable-entity + UUIDv7 pipeline on SaveChanges.
+        // populated by the auditable-entity + UUIDv7 pipeline on SaveChanges. The delete is scoped
+        // to the languages being replaced so a partial-language run (janitor -l nb) doesn't wipe
+        // the other languages' documents and turn their endpoint responses into 404s.
+        var languages = documents.Select(d => d.Language).ToList();
+
         await using var transaction = await _db.Database.BeginTransactionAsync(ct);
 
-        await _db.SearchTermLists.ExecuteDeleteAsync(ct);
+        await _db.SearchTermLists
+            .Where(x => languages.Contains(x.Language))
+            .ExecuteDeleteAsync(ct);
 
         _db.SearchTermLists.AddRange(documents.Select(d => new SearchTermList
         {

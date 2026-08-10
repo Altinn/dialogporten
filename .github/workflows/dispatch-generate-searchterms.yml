@@ -112,8 +112,10 @@ jobs:
                 echo "Status: ${execution_status}"
                 echo "Start time: ${execution_start_time}"
 
-                if [[ "${execution_status}" == "Running" || "${execution_status}" == "Processing" ]]; then
-                  echo "Job execution has started successfully"
+                # 'Succeeded' must be a success state too: a fast run (small environments) can
+                # start and finish inside one 10s poll gap, and would otherwise time this loop out.
+                if [[ "${execution_status}" == "Running" || "${execution_status}" == "Processing" || "${execution_status}" == "Succeeded" ]]; then
+                  echo "Job execution has started successfully (status: ${execution_status})"
                   exit 0
                 elif [[ "${execution_status}" == "Failed" ]]; then
                   echo "Job execution failed"

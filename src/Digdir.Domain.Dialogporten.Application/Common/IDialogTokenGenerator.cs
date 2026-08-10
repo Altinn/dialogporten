@@ -12,6 +12,17 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 public interface IDialogTokenGenerator
 {
     string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult, string issuerVersion);
+
+    /// <summary>
+    /// Generates a token scoped to a single authorization-context-carrying entity, asserting the single
+    /// PDP-verified grant (action, effective resource) along with the parties it was permitted for.
+    /// </summary>
+    string GetDialogContextToken(
+        DialogEntity dialog,
+        AuthorizedCheck authorizedCheck,
+        Guid entityId,
+        string entityType,
+        string issuerVersion);
 }
 
 internal sealed class DialogTokenGenerator : IDialogTokenGenerator
@@ -52,8 +63,42 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
     public string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult,
         string issuerVersion)
     {
+        var claims = GetBaseClaims(dialog);
+        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+        AddIssuerAndLifetimeClaims(claims, issuerVersion);
+
+        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogToken);
+    }
+
+    public string GetDialogContextToken(
+        DialogEntity dialog,
+        AuthorizedCheck authorizedCheck,
+        Guid entityId,
+        string entityType,
+        string issuerVersion)
+    {
+        var claims = GetBaseClaims(dialog);
+        claims[DialogTokenClaimTypes.EntityId] = entityId;
+        claims[DialogTokenClaimTypes.EntityType] = entityType;
+        claims[DialogTokenClaimTypes.Actions] = authorizedCheck.Check.Action;
+
+        // The effective resource for the grant; absent when the check applies to the dialog's own resource.
+        var resource = authorizedCheck.Check.Resource.ServiceResource
+                       ?? authorizedCheck.Check.Resource.AdditionalResourceAttribute;
+        if (resource is not null)
+        {
+            claims[DialogTokenClaimTypes.EffectiveResource] = resource;
+        }
+
+        claims[DialogTokenClaimTypes.PermittedParties] = authorizedCheck.PermittedParties;
+        AddIssuerAndLifetimeClaims(claims, issuerVersion);
+
+        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogContextToken);
+    }
+
+    private Dictionary<string, object?> GetBaseClaims(DialogEntity dialog)
+    {
         var claimsPrincipal = _user.GetPrincipal();
-        var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
         var endUserPartyIdentifier = claimsPrincipal.GetEndUserPartyIdentifier();
 
         var claims = new Dictionary<string, object?>(15)
@@ -88,16 +133,20 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         claims[DialogTokenClaimTypes.DialogParty] = dialog.Party;
         claims[DialogTokenClaimTypes.ServiceResource] = dialog.ServiceResource;
         claims[DialogTokenClaimTypes.DialogId] = dialog.Id;
-        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(dialog, authorizationResult);
+
+        return claims;
+    }
+
+    private void AddIssuerAndLifetimeClaims(Dictionary<string, object?> claims, string issuerVersion)
+    {
+        var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
         claims[DialogTokenClaimTypes.Issuer] = _applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + issuerVersion;
         claims[DialogTokenClaimTypes.IssuedAt] = now;
         claims[DialogTokenClaimTypes.NotBefore] = now;
         claims[DialogTokenClaimTypes.Expires] = now + (long)_tokenLifetime.TotalSeconds;
-
-        return _compactJwsGenerator.GetCompactJws(claims);
     }
 
-    private static string GetAuthorizedActions(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult)
+    private static string GetAuthorizedActions(DialogDetailsAuthorizationResult authorizationResult)
     {
         var entries = new List<string>();
         foreach (var authorizedCheck in authorizationResult.AuthorizedChecks)
@@ -120,18 +169,9 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
 
                 case AuthorizationResourceSpecKind.Context:
                 default:
-                    // The token's "p" claim asserts the dialog party, so only grants that hold for the
-                    // dialog party may be encoded. Grants authorized solely via other parties are omitted.
-                    if (!authorizedCheck.PermitsParty(dialog.Party))
-                    {
-                        continue;
-                    }
-
-                    var resource = check.Resource.ServiceResource ?? check.Resource.AdditionalResourceAttribute;
-                    entry = resource is null
-                        ? check.Action
-                        : string.Create(CultureInfo.InvariantCulture, $"{check.Action},{resource}");
-                    break;
+                    // The dialog token is frozen at legacy semantics: grants for authorization contexts
+                    // are expressed exclusively through per-entity context tokens.
+                    continue;
             }
 
             if (!entries.Contains(entry, StringComparer.Ordinal))
@@ -142,6 +182,29 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
 
         return string.Join(';', entries);
     }
+}
+
+/// <summary>
+/// JOSE "typ" header values distinguishing the token types issued by Dialogporten (RFC 8725 explicit typing;
+/// per RFC 7515 a value without '/' is shorthand for "application/&lt;value&gt;").
+/// </summary>
+public static class DialogTokenTypes
+{
+    public const string DialogToken = "dialogtoken+jwt";
+    public const string DialogContextToken = "dialogcontexttoken+jwt";
+}
+
+/// <summary>
+/// Entity type discriminators for the <see cref="DialogTokenClaimTypes.EntityType"/> claim in context tokens.
+/// </summary>
+public static class DialogContextTokenEntityTypes
+{
+    public const string ApiAction = "apiaction";
+    public const string GuiAction = "guiaction";
+    public const string Attachment = "attachment";
+    public const string Transmission = "transmission";
+    public const string TransmissionAttachment = "transmissionattachment";
+    public const string TransmissionNavigationalAction = "navigationalaction";
 }
 
 public static class DialogTokenClaimTypes
@@ -160,4 +223,10 @@ public static class DialogTokenClaimTypes
     public const string ServiceResource = "s";
     public const string DialogId = "i";
     public const string Actions = "a";
+
+    // Context-token-only claims
+    public const string EntityId = "e";
+    public const string EntityType = "t";
+    public const string EffectiveResource = "r";
+    public const string PermittedParties = "pp";
 }

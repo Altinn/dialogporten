@@ -178,6 +178,9 @@ public sealed class Transmission
     [GraphQLDescription("Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and the attachments will not be available.")]
     public bool IsAuthorized { get; set; }
 
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific transmission, as determined by its authorization context. Only present when the transmission has an authorization context and the user is authorized. Should be used instead of the dialog token against URLs referred to by this transmission, including front-channel embeds.")]
+    public string? ContextToken { get; set; }
+
     [GraphQLDescription("Arbitrary URI/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use).")]
     public Uri? ExtendedType { get; set; }
 
@@ -281,6 +284,9 @@ public sealed class ApiAction
     [GraphQLDescription("True if the authenticated user is authorized for this action. If not, the action will not be available and all endpoints will be replaced with a fixed placeholder.")]
     public bool IsAuthorized { get; set; }
 
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's endpoints.")]
+    public string? ContextToken { get; set; }
+
     [GraphQLDescription("The logical name of the operation the API action refers to.")]
     public string? Name { get; set; }
 
@@ -350,6 +356,9 @@ public sealed class GuiAction
     [GraphQLDescription("Whether the user is authorized to perform the action.")]
     public bool IsAuthorized { get; set; }
 
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL.")]
+    public string? ContextToken { get; set; }
+
     [GraphQLDescription("Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX for delete actions.")]
     public bool IsDeleteDialogAction { get; set; }
 
@@ -392,6 +401,9 @@ public sealed class Attachment
 
     [GraphQLDescription("Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be replaced with 'urn:dialogporten:unauthorized'.")]
     public bool IsAuthorized { get; set; }
+
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific attachment, as determined by its authorization context. Only present when the attachment has an authorization context and the user is authorized. Should be used instead of the dialog token against this attachment's URLs.")]
+    public string? ContextToken { get; set; }
 }
 
 public sealed class AttachmentUrl
@@ -422,6 +434,9 @@ public sealed class TransmissionNavigationalAction
 
     [GraphQLDescription("Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be replaced with 'urn:dialogporten:unauthorized'.")]
     public bool IsAuthorized { get; set; }
+
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific navigational action, as determined by its authorization context. Only present when the navigational action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL.")]
+    public string? ContextToken { get; set; }
 }
 
 public enum AttachmentUrlConsumer

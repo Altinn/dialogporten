@@ -283,6 +283,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         );
 
         DecorateWithAuthorization(dialog, dialogDto, authorizationResult);
+        DecorateWithContextTokens(dialog, dialogDto, authorizationResult);
         ApplyRedaction(dialog, dialogDto);
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
@@ -355,6 +356,77 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 n.IsAuthorized = authorization.HasAccess(navigationalAction, t.IsAuthorized, dialog);
             }
         }
+    }
+
+    // Each authorized entity carrying an authorization context gets a token scoped to that entity's single
+    // PDP-verified grant. Grants for contexts are expressed exclusively through these tokens — the dialog
+    // token is frozen at legacy semantics. Must run after DecorateWithAuthorization (reads IsAuthorized).
+    private void DecorateWithContextTokens(DialogEntity dialog, DialogDto dto,
+        DialogDetailsAuthorizationResult authorization)
+    {
+        foreach (var (a, apiAction) in dto.ApiActions.Zip(dialog.ApiActions))
+        {
+            a.ContextToken = GetContextToken(dialog, authorization, a.IsAuthorized,
+                apiAction.AuthorizationContext, apiAction.GetAuthorizationCheck(dialog),
+                apiAction.Id, DialogContextTokenEntityTypes.ApiAction);
+        }
+
+        foreach (var (g, guiAction) in dto.GuiActions.Zip(dialog.GuiActions))
+        {
+            g.ContextToken = GetContextToken(dialog, authorization, g.IsAuthorized,
+                guiAction.AuthorizationContext, guiAction.GetAuthorizationCheck(dialog),
+                guiAction.Id, DialogContextTokenEntityTypes.GuiAction);
+        }
+
+        foreach (var (a, attachment) in dto.Attachments.Zip(dialog.Attachments))
+        {
+            a.ContextToken = GetContextToken(dialog, authorization, a.IsAuthorized,
+                attachment.AuthorizationContext, attachment.GetAuthorizationCheck(dialog),
+                attachment.Id, DialogContextTokenEntityTypes.Attachment);
+        }
+
+        foreach (var (t, transmission) in dto.Transmissions.Zip(dialog.Transmissions))
+        {
+            t.ContextToken = GetContextToken(dialog, authorization, t.IsAuthorized,
+                transmission.AuthorizationContext, transmission.GetAuthorizationCheck(dialog),
+                transmission.Id, DialogContextTokenEntityTypes.Transmission);
+
+            foreach (var (a, attachment) in t.Attachments.Zip(transmission.Attachments))
+            {
+                a.ContextToken = GetContextToken(dialog, authorization, a.IsAuthorized,
+                    attachment.AuthorizationContext, attachment.GetAuthorizationCheck(dialog),
+                    attachment.Id, DialogContextTokenEntityTypes.TransmissionAttachment);
+            }
+
+            foreach (var (n, navigationalAction) in t.NavigationalActions.Zip(transmission.NavigationalActions))
+            {
+                n.ContextToken = GetContextToken(dialog, authorization, n.IsAuthorized,
+                    navigationalAction.AuthorizationContext, navigationalAction.GetAuthorizationCheck(dialog),
+                    navigationalAction.Id, DialogContextTokenEntityTypes.TransmissionNavigationalAction);
+            }
+        }
+    }
+
+    private string? GetContextToken(
+        DialogEntity dialog,
+        DialogDetailsAuthorizationResult authorization,
+        bool isAuthorized,
+        AuthorizationContext? context,
+        AuthorizationCheck? check,
+        Guid entityId,
+        string entityType)
+    {
+        if (!isAuthorized || context is null || check is null)
+        {
+            return null;
+        }
+
+        // IsAuthorized for a context-carrying entity implies its check was authorized, so this
+        // lookup cannot miss; guard anyway to fail closed rather than throw.
+        var authorizedCheck = authorization.GetAuthorizedCheck(check);
+        return authorizedCheck is null
+            ? null
+            : _dialogTokenGenerator.GetDialogContextToken(dialog, authorizedCheck, entityId, entityType, DialogTokenIssuerVersion);
     }
 
     // Entities with an authorization context using unauthorizedPresentation = redacted are stripped of

@@ -277,6 +277,14 @@ public sealed class DialogTransmissionDto
     public bool IsAuthorized { get; set; }
 
     /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
+    /// its authorization context. Only present when the transmission has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
+    /// including front-channel embeds.
+    /// </summary>
+    public string? ContextToken { get; set; }
+
+    /// <summary>
     /// Arbitrary URI/URN describing a service-specific transmission type.
     ///
     /// Refer to the service-specific documentation provided by the service owner for details (if in use).
@@ -488,6 +496,13 @@ public sealed class DialogApiActionDto
     public bool IsAuthorized { get; set; }
 
     /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific action, as determined by its
+    /// authorization context. Only present when the action has an authorization context and the user is authorized.
+    /// Should be used instead of the dialog token against this action's endpoints.
+    /// </summary>
+    public string? ContextToken { get; set; }
+
+    /// <summary>
     /// The logical name of the operation the API action refers to.
     /// </summary>
     /// <example>confirm</example>
@@ -603,6 +618,13 @@ public sealed class DialogGuiActionDto
     public bool IsAuthorized { get; set; }
 
     /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific action, as determined by its
+    /// authorization context. Only present when the action has an authorization context and the user is authorized.
+    /// Should be used instead of the dialog token against this action's URL.
+    /// </summary>
+    public string? ContextToken { get; set; }
+
+    /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
     /// for delete actions.
     /// </summary>
@@ -664,6 +686,13 @@ public sealed class DialogAttachmentDto
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
     public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+    /// authorization context. Only present when the attachment has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against this attachment's URLs.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }
 
 public sealed class DialogAttachmentUrlDto
@@ -729,6 +758,13 @@ public sealed class DialogTransmissionAttachmentDto
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
     public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+    /// authorization context. Only present when the attachment has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against this attachment's URLs.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }
 
 public sealed class DialogTransmissionAttachmentUrlDto
@@ -791,4 +827,11 @@ public sealed class DialogTransmissionNavigationalActionDto
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
     public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
+    /// by its authorization context. Only present when the navigational action has an authorization context and the
+    /// user is authorized. Should be used instead of the dialog token against this action's URL.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }

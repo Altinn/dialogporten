@@ -1,5 +1,8 @@
+using System.Text.Json;
+using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchTransmissions;
@@ -303,4 +306,99 @@ public class GetDialogAuthorizationContextTests(DialogApplication application) :
                 navigationalAction.Title.Should().BeEmpty();
                 navigationalAction.Url.Should().Be(Constants.UnauthorizedUri);
             });
+
+    [Fact]
+    public Task Authorized_Context_Entities_Should_Get_Context_Tokens() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddGuiAction(guiAction =>
+                {
+                    guiAction.Action = null;
+                    guiAction.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled);
+                });
+                // Legacy gui action without a context must not get a context token
+                x.AddGuiAction(guiAction => guiAction.Priority = DialogGuiActionPriority.Values.Secondary);
+                x.AddAttachment(attachment =>
+                    attachment.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled));
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = null;
+                    transmission.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled, action: null);
+                    transmission.AddAttachment(attachment =>
+                        attachment.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled));
+                    transmission.AddNavigationalAction(navigationalAction =>
+                        navigationalAction.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled));
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                // The dialog token itself is typed and carries no context grants
+                GetTokenHeader(x.DialogToken!).GetProperty("typ").GetString().Should().Be(DialogTokenTypes.DialogToken);
+
+                var contextGuiAction = x.GuiActions.Single(g => g.Action == "read");
+                contextGuiAction.IsAuthorized.Should().BeTrue();
+                contextGuiAction.ContextToken.Should().NotBeNullOrEmpty();
+
+                var legacyGuiAction = x.GuiActions.Single(g => g.Action != "read");
+                legacyGuiAction.IsAuthorized.Should().BeTrue();
+                legacyGuiAction.ContextToken.Should().BeNull();
+
+                x.Attachments.Single().ContextToken.Should().NotBeNullOrEmpty();
+
+                var transmission = x.Transmissions.Single();
+                transmission.ContextToken.Should().NotBeNullOrEmpty();
+                transmission.Attachments.Single().ContextToken.Should().NotBeNullOrEmpty();
+                transmission.NavigationalActions.Single().ContextToken.Should().NotBeNullOrEmpty();
+
+                // The context token asserts exactly the entity, the grant and the permitted parties
+                GetTokenHeader(contextGuiAction.ContextToken!).GetProperty("typ").GetString()
+                    .Should().Be(DialogTokenTypes.DialogContextToken);
+
+                var payload = GetTokenPayload(contextGuiAction.ContextToken!);
+                payload.GetProperty(DialogTokenClaimTypes.EntityId).GetGuid().Should().Be(contextGuiAction.Id);
+                payload.GetProperty(DialogTokenClaimTypes.EntityType).GetString()
+                    .Should().Be(DialogContextTokenEntityTypes.GuiAction);
+                payload.GetProperty(DialogTokenClaimTypes.Actions).GetString().Should().Be("read");
+                payload.GetProperty(DialogTokenClaimTypes.EffectiveResource).GetString().Should().Be(ContextResource);
+                payload.GetProperty(DialogTokenClaimTypes.PermittedParties).EnumerateArray()
+                    .Select(p => p.GetString()).Should().BeEquivalentTo([OtherParty]);
+                payload.GetProperty(DialogTokenClaimTypes.DialogId).GetGuid().Should().Be(x.Id);
+            });
+
+    [Fact]
+    public Task Unauthorized_Context_Entities_Should_Not_Get_Context_Tokens() =>
+        FlowBuilder.For(Application, ConfigureMainReadOnlyAuthorization)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddGuiAction(guiAction =>
+                {
+                    guiAction.Action = null;
+                    guiAction.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled);
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = null;
+                    transmission.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled, action: null);
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var guiAction = x.GuiActions.Single();
+                guiAction.IsAuthorized.Should().BeFalse();
+                guiAction.ContextToken.Should().BeNull();
+
+                var transmission = x.Transmissions.Single();
+                transmission.IsAuthorized.Should().BeFalse();
+                transmission.ContextToken.Should().BeNull();
+            });
+
+    private static JsonElement GetTokenHeader(string token) => DecodeTokenPart(token, 0);
+
+    private static JsonElement GetTokenPayload(string token) => DecodeTokenPart(token, 1);
+
+    private static JsonElement DecodeTokenPart(string token, int index) =>
+        JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(token.Split('.')[index]));
 }

@@ -17,7 +17,14 @@ public sealed class DialogDetailsAuthorizationResult
     /// pair as the request) was authorized for at least one of its parties.
     /// </summary>
     public bool HasAccess(AuthorizationCheck check) =>
-        AuthorizedChecks.Any(x => x.Check == check);
+        GetAuthorizedCheck(check) is not null;
+
+    /// <summary>
+    /// The authorized check matching the given check, carrying the subset of parties the PDP permitted,
+    /// or null if the check was not authorized for any party.
+    /// </summary>
+    public AuthorizedCheck? GetAuthorizedCheck(AuthorizationCheck check) =>
+        AuthorizedChecks.FirstOrDefault(x => x.Check == check);
 
     public bool HasAccessToMainResource() =>
         AuthorizedChecks.Any(x => x.Check.Resource.Kind == AuthorizationResourceSpecKind.Main);

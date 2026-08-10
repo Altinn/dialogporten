@@ -30,6 +30,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSy
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
             StatusCodes.Status403Forbidden,
+            StatusCodes.Status404NotFound,
             StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed,
             StatusCodes.Status422UnprocessableEntity));

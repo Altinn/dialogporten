@@ -54,7 +54,8 @@ public class Program
             e.Cancel = true;
             cancellationTokenSource.Cancel();
         };
-        await LoadResources(options, cancellationToken);
+        var host = await CreateHost(options, cancellationToken);
+        await LoadResources(host, options, cancellationToken);
 
         if (options is { Submit: false, WriteToDisk: false, Benchmark: false })
         {
@@ -100,7 +101,6 @@ public class Program
 
         var producerTask = Task.Run(() => ProduceDialogs(options, writer, cancellationToken), cancellationToken);
         var progressTask = Task.Run(() => UpdateProgress(options, cancellationToken), cancellationToken);
-        var host = await CreateHost(options, cancellationToken);
         using var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient(ClientBuilderName);
 
         var consumerTasks = new List<Task>();
@@ -235,10 +235,10 @@ public class Program
     private static long _position;
     private static List<string> _resourceList = [];
 
-    private static async Task LoadResources(Options options, CancellationToken ct)
+    private static async Task LoadResources(IHost host, Options options, CancellationToken ct)
     {
         _resourceList = options.ResourceListPath == string.Empty
-            ? await LoadResourcesFromRegister(options, ct)
+            ? await LoadResourcesFromRegister(host, options, ct)
             : LoadResourcesFromFile(options);
     }
 
@@ -250,11 +250,11 @@ public class Program
     );
     private sealed record RegisterCompetentAuthority(string? Organization, string? Orgcode);
 
-    private static async Task<List<string>> LoadResourcesFromRegister(Options options, CancellationToken ct)
+    private static async Task<List<string>> LoadResourcesFromRegister(IHost host, Options options, CancellationToken ct)
     {
         var requestUri = $"{options.PlatformBaseUrl}/resourceregistry/api/v1/resource/resourcelist";
         using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-        using var client = new HttpClient();
+        using var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient(ClientBuilderName);
         var response = await client.SendAsync(request, ct);
 
         if (!response.IsSuccessStatusCode)

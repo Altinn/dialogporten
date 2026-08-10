@@ -479,6 +479,90 @@
           "Only"
         ]
       },
+      "V1CommonAuthorizationContexts_AuthorizationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Required on API and GUI actions. Optional on transmissions; if not\nsupplied, \u0022read\u0022 is used when \u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "V1CommonAuthorizationContexts_ChildAuthorizationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1CommonContent_ContentValue": {
         "additionalProperties": false,
         "properties": {
@@ -3103,7 +3187,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },
@@ -3198,7 +3282,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -3267,90 +3351,6 @@
             "description": "The fully qualified URL of the attachment.",
             "format": "uri",
             "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsCommandsCreate_AuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "action": {
-            "description": "The XACML action to evaluate. Required on API and GUI actions. Optional on transmissions; if not\nsupplied, \u0022read\u0022 is used when \u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022.",
-            "example": "read",
-            "nullable": true,
-            "type": "string"
-          },
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
           }
         },
         "type": "object"
@@ -3655,7 +3655,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },
@@ -3756,7 +3756,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },
@@ -3838,7 +3838,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -3945,7 +3945,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -4026,90 +4026,6 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogsCommandsCreateTransmission_AuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "action": {
-            "description": "The XACML action to evaluate. Required on API and GUI actions. Optional on transmissions; if not\nsupplied, \u0022read\u0022 is used when \u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022.",
-            "example": "read",
-            "nullable": true,
-            "type": "string"
-          },
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsCommandsCreateTransmission_ChildAuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
       "V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
@@ -4118,7 +4034,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -4225,7 +4141,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -4275,7 +4191,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreateTransmission_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },
@@ -4428,7 +4344,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },
@@ -4523,7 +4439,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -4593,90 +4509,6 @@
             "description": "The fully qualified URL of the attachment.",
             "format": "uri",
             "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsCommandsUpdate_AuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "action": {
-            "description": "The XACML action to evaluate. Required on API and GUI actions. Optional on transmissions; if not\nsupplied, \u0022read\u0022 is used when \u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022.",
-            "example": "read",
-            "nullable": true,
-            "type": "string"
-          },
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsCommandsUpdate_ChildAuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
           }
         },
         "type": "object"
@@ -4905,7 +4737,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },
@@ -4996,7 +4828,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },
@@ -5078,7 +4910,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -5185,7 +5017,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -5211,90 +5043,6 @@
         },
         "type": "object"
       },
-      "V1ServiceOwnerDialogsCommandsUpdateTransmission_AuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "action": {
-            "description": "The XACML action to evaluate. Required on API and GUI actions. Optional on transmissions; if not\nsupplied, \u0022read\u0022 is used when \u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022.",
-            "example": "read",
-            "nullable": true,
-            "type": "string"
-          },
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1ServiceOwnerDialogsCommandsUpdateTransmission_ChildAuthorizationContext": {
-        "additionalProperties": false,
-        "properties": {
-          "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
-            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
-            "nullable": true,
-            "type": "string"
-          },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
-          },
-          "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
-            "example": "urn:altinn:organization:identifier-no:912345678",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "serviceResource": {
-            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
-            "example": "urn:altinn:resource:some-other-service-identifier",
-            "nullable": true,
-            "type": "string"
-          },
-          "unauthorizedPresentation": {
-            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
       "V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
@@ -5303,7 +5051,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdateTransmission_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -5410,7 +5158,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdateTransmission_ChildAuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_ChildAuthorizationContext"
               }
             ]
           },
@@ -5460,7 +5208,7 @@
             "nullable": true,
             "oneOf": [
               {
-                "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdateTransmission_AuthorizationContext"
+                "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
             ]
           },

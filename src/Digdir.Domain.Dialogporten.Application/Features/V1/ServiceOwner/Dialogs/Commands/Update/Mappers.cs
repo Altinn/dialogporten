@@ -1,4 +1,7 @@
 #pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
+using AuthorizationContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.AuthorizationContextDto;
+using ChildAuthorizationContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.ChildAuthorizationContextDto;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -419,43 +422,4 @@ public static class Mappers
                 IncludeDialogParty = source.IncludeDialogParty,
                 UnauthorizedPresentation = source.UnauthorizedPresentation
             };
-
-    internal static TContext? ToAuthorizationContext<TContext>(
-        this AuthorizationContextDto? source, TContext? destination = null)
-        where TContext : AuthorizationContext, new()
-    {
-        if (source is null)
-        {
-            return null;
-        }
-
-        // Copy into the existing context when present to avoid delete+insert churn on every update.
-        var context = destination ?? new TContext();
-        context.ServiceResource = source.ServiceResource;
-        context.AdditionalResourceAttribute = source.AdditionalResourceAttribute;
-        context.Parties = [.. source.Parties];
-        context.IncludeDialogParty = source.IncludeDialogParty;
-        context.Action = source.Action;
-        context.UnauthorizedPresentationId = source.UnauthorizedPresentation;
-        return context;
-    }
-
-    internal static TContext? ToAuthorizationContext<TContext>(
-        this ChildAuthorizationContextDto? source, TContext? destination = null)
-        where TContext : AuthorizationContext, new()
-    {
-        if (source is null)
-        {
-            return null;
-        }
-
-        var context = destination ?? new TContext();
-        context.ServiceResource = source.ServiceResource;
-        context.AdditionalResourceAttribute = source.AdditionalResourceAttribute;
-        context.Parties = [.. source.Parties];
-        context.IncludeDialogParty = source.IncludeDialogParty;
-        context.Action = null;
-        context.UnauthorizedPresentationId = source.UnauthorizedPresentation;
-        return context;
-    }
 }

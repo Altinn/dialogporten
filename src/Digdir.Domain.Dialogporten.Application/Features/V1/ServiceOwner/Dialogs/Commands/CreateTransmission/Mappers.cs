@@ -1,4 +1,5 @@
 #pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -56,31 +57,4 @@ internal static class Mappers
             Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!,
             AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<DialogTransmissionNavigationalActionAuthorizationContext>()
         };
-
-    private static TContext? ToAuthorizationContext<TContext>(this AuthorizationContextDto? source)
-        where TContext : AuthorizationContext, new() =>
-        source is null
-            ? null
-            : new TContext
-            {
-                ServiceResource = source.ServiceResource,
-                AdditionalResourceAttribute = source.AdditionalResourceAttribute,
-                Parties = [.. source.Parties],
-                IncludeDialogParty = source.IncludeDialogParty,
-                Action = source.Action,
-                UnauthorizedPresentationId = source.UnauthorizedPresentation
-            };
-
-    private static TContext? ToAuthorizationContext<TContext>(this ChildAuthorizationContextDto? source)
-        where TContext : AuthorizationContext, new() =>
-        source is null
-            ? null
-            : new TContext
-            {
-                ServiceResource = source.ServiceResource,
-                AdditionalResourceAttribute = source.AdditionalResourceAttribute,
-                Parties = [.. source.Parties],
-                IncludeDialogParty = source.IncludeDialogParty,
-                UnauthorizedPresentationId = source.UnauthorizedPresentation
-            };
 }

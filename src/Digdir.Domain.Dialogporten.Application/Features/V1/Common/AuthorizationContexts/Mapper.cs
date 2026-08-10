@@ -1,8 +1,8 @@
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 
-internal static class Mappers
+internal static class AuthorizationContextMapExtensions
 {
     internal static TContext? ToAuthorizationContext<TContext>(
         this AuthorizationContextDto? source, TContext? destination = null)

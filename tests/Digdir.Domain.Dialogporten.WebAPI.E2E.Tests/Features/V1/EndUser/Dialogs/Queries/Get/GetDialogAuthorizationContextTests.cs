@@ -27,21 +27,21 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         {
             dialog.Attachments =
             [
-                CreateAttachment("granted-attachment", new V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext
+                CreateAttachment("granted-attachment", new V1CommonAuthorizationContexts_ChildAuthorizationContext
                 {
                     ServiceResource = E2EConstants.AvailableExternalResource,
                     Parties = [ForeignOrgParty],
                     IncludeDialogParty = true,
                     UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                 }),
-                CreateAttachment("denied-disabled-attachment", new V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext
+                CreateAttachment("denied-disabled-attachment", new V1CommonAuthorizationContexts_ChildAuthorizationContext
                 {
                     ServiceResource = E2EConstants.UnavailableExternalResource,
                     Parties = [ForeignOrgParty],
                     IncludeDialogParty = true,
                     UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                 }),
-                CreateAttachment("denied-redacted-attachment", new V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext
+                CreateAttachment("denied-redacted-attachment", new V1CommonAuthorizationContexts_ChildAuthorizationContext
                 {
                     ServiceResource = E2EConstants.UnavailableExternalResource,
                     Parties = [ForeignOrgParty],
@@ -90,7 +90,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                 {
                     Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
                     Sender = new V1ServiceOwnerCommonActors_Actor { ActorType = Actors_ActorType.ServiceOwner },
-                    AuthorizationContext = new V1ServiceOwnerDialogsCommandsCreate_AuthorizationContext
+                    AuthorizationContext = new V1CommonAuthorizationContexts_AuthorizationContext
                     {
                         ServiceResource = E2EConstants.UnavailableExternalResource,
                         IncludeDialogParty = true,
@@ -115,7 +115,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                         {
                             Title = [new V1CommonLocalizations_Localization { LanguageCode = "nb", Value = "Gå til sak" }],
                             Url = new Uri("https://digdir.apps.tt02.altinn.no/some-nav-action"),
-                            AuthorizationContext = new V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext
+                            AuthorizationContext = new V1CommonAuthorizationContexts_ChildAuthorizationContext
                             {
                                 ServiceResource = E2EConstants.AvailableExternalResource,
                                 IncludeDialogParty = true,
@@ -144,7 +144,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
 
     private static V1ServiceOwnerDialogsCommandsCreate_Attachment CreateAttachment(
         string name,
-        V1ServiceOwnerDialogsCommandsCreate_ChildAuthorizationContext authorizationContext) =>
+        V1CommonAuthorizationContexts_ChildAuthorizationContext authorizationContext) =>
         new()
         {
             Name = name,

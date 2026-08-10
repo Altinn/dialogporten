@@ -710,7 +710,7 @@ public static class IFlowStepExtensions
 
     private static GetDialogQuerySO CreateGetServiceOwnerDialogQuery(Guid id) => new() { DialogId = id };
 
-    private static Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission.ChildAuthorizationContextDto? ToUpdateTransmissionChildContext(
+    private static Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.ChildAuthorizationContextDto? ToUpdateTransmissionChildContext(
         this Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.ChildAuthorizationContextDto? source) =>
         source is null
             ? null

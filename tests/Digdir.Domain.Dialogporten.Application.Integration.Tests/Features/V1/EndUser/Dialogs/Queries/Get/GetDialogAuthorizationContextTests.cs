@@ -14,8 +14,8 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
-using CreateContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.AuthorizationContextDto;
-using CreateChildContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.ChildAuthorizationContextDto;
+using CreateContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.AuthorizationContextDto;
+using CreateChildContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.ChildAuthorizationContextDto;
 using GetTransmissionDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetTransmission.TransmissionDto;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.Get;

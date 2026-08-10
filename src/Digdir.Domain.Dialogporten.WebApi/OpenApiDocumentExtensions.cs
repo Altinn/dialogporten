@@ -1,6 +1,6 @@
-using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using NJsonSchema;
 using NSwag;
@@ -60,10 +60,13 @@ public static class OpenApiDocumentExtensions
 
     public static void AddIdportenSecurityScheme(
         this OpenApiDocument openApiDocument,
-        DialogportenOpenApiSettings settings,
+        WebApplicationBuilder builder,
         string wellKnownUrlIdporten
     )
     {
+        var openApiSettings = builder.Configuration
+            .GetSection(WebApiSettings.SectionName)
+            .Get<WebApiSettings>()!.OpenApi;
         openApiDocument.Components.SecuritySchemes[IdportenSecurityScheme] = new OpenApiSecurityScheme
         {
             ExtensionData = null,
@@ -84,8 +87,8 @@ public static class OpenApiDocumentExtensions
             {
                 AuthorizationCode = new OpenApiOAuthFlow
                 {
-                    AuthorizationUrl = settings.IdportenAuthorizationUrl,
-                    TokenUrl = settings.IdportenTokenUrl,
+                    AuthorizationUrl = openApiSettings.IdportenAuthorizationUrl,
+                    TokenUrl = openApiSettings.IdportenTokenUrl,
                     Scopes = new Dictionary<string, string>
                     {
                         [AuthorizationScope.EndUser] = "Access to dialogporten",
@@ -100,10 +103,13 @@ public static class OpenApiDocumentExtensions
     /// </summary>
     public static void AddMaskinportenSecurityScheme(
         this OpenApiDocument openApiDocument,
-        DialogportenOpenApiSettings settings,
+        WebApplicationBuilder builder,
         string wellKnownUrlMaskinporten
     )
     {
+        var openApiSettings = builder.Configuration
+            .GetSection(WebApiSettings.SectionName)
+            .Get<WebApiSettings>()!.OpenApi;
         openApiDocument.Components.SecuritySchemes[MaskinportenSecurityScheme] = new OpenApiSecurityScheme
         {
             ExtensionData = null,
@@ -135,7 +141,7 @@ public static class OpenApiDocumentExtensions
                           """,
             Scheme = "bearer",
             BearerFormat = "JWT",
-            TokenUrl = settings.MaskinportenTokenUrl,
+            TokenUrl = openApiSettings.MaskinportenTokenUrl,
             Flows = null
         };
     }

@@ -29,7 +29,7 @@ public enum BadDataHandling
     Throw
 }
 
-public sealed class DialogportenOpenApiSettings
+public sealed class OpenApiSettings
 {
     public const string ConfigurationSectionName = "OpenApi";
 

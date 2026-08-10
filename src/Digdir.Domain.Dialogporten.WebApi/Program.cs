@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -89,10 +90,6 @@ static void BuildAndRun(string[] args)
         ));
     }
 
-    var openApiSettings = builder.Configuration
-        .GetRequiredSection(DialogportenOpenApiSettings.ConfigurationSectionName)
-        .Get<DialogportenOpenApiSettings>()!;
-
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalMetrics: x => x
@@ -133,8 +130,8 @@ static void BuildAndRun(string[] args)
                 {
 
                     document.RemoveDefaultSecurityScheme();
-                    document.AddMaskinportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Maskinporten"));
-                    document.AddIdportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Idporten"));
+                    document.AddMaskinportenSecurityScheme(builder, GetWellKnown(x.Services, "Maskinporten"));
+                    document.AddIdportenSecurityScheme(builder, GetWellKnown(x.Services, "Idporten"));
                 },
                 documentName: "v1",
                 title: "Dialogporten"
@@ -147,8 +144,8 @@ static void BuildAndRun(string[] args)
                 postProcess: document =>
                 {
                     document.RemoveDefaultSecurityScheme();
-                    document.AddMaskinportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Maskinporten"));
-                    document.AddIdportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Idporten"));
+                    document.AddMaskinportenSecurityScheme(builder, GetWellKnown(x.Services, "Maskinporten"));
+                    document.AddIdportenSecurityScheme(builder, GetWellKnown(x.Services, "Idporten"));
                 },
                 documentName: "v1.enduser",
                 title: "Dialogporten EndUser",
@@ -162,7 +159,7 @@ static void BuildAndRun(string[] args)
                 postProcess: document =>
                 {
                     document.RemoveDefaultSecurityScheme();
-                    document.AddMaskinportenSecurityScheme(openApiSettings, GetWellKnown(x.Services, "Maskinporten"));
+                    document.AddMaskinportenSecurityScheme(builder, GetWellKnown(x.Services, "Maskinporten"));
                 },
                 documentName: "v1.serviceowner",
                 title: "Dialogporten ServiceOwner",
@@ -213,6 +210,10 @@ static void BuildAndRun(string[] args)
 
     app.MapScalarApiReference("/scalar", options =>
     {
+        var openApiSettings = builder.Configuration
+            .GetSection(WebApiSettings.SectionName)
+            .Get<WebApiSettings>()!.OpenApi;
+
         options
             .WithTitle("Dialogporten API")
             // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
@@ -307,6 +308,10 @@ static void BuildAndRun(string[] args)
             };
         }, uiConfig: uiConfig =>
         {
+            var openApiSettings = builder.Configuration
+                .GetRequiredSection(WebApiSettings.SectionName)
+                .Get<WebApiSettings>()?.OpenApi ?? throw new UnreachableException("OpenApiOptions is required");
+
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development

@@ -210,7 +210,7 @@ public class AuthorizationCheckBuilderTests
     [Theory]
     [InlineData("urn:altinn:resource:other-service", null, Constants.ReadAction)]
     [InlineData(null, "urn:altinn:task:Task_1", Constants.TransmissionReadAction)]
-    [InlineData(null, null, Constants.TransmissionReadAction)]
+    [InlineData(null, null, Constants.ReadAction)]
     public void TransmissionContextWithoutActionShouldDeriveDefaultAction(
         string? serviceResource, string? additionalResourceAttribute, string expectedAction)
     {

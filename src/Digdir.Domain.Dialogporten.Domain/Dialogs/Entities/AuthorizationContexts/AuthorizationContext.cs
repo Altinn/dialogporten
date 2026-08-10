@@ -9,7 +9,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContex
 
 public abstract class AuthorizationContext : IIdentifiableEntity, ICreatableEntity
 {
-    public const int MaxNumberOfParties = 20;
+    public const int MaxNumberOfParties = 3;
 
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

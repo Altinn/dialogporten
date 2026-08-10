@@ -100,13 +100,14 @@ public static class AuthorizationCheckBuilder
             AuthorizationResourceSpec.FromContext(context.ServiceResource, context.AdditionalResourceAttribute),
             context.IncludeDialogParty ? context.Parties.Append(dialogEntity.Party) : context.Parties);
 
-    // A context referring a separate resource (and policy) uses "read"; a context constraining access
-    // within the dialog's own policy uses "transmissionread", as having "read" on the main resource
-    // would also give access to the subresource/task. Mirrors the legacy attribute derivation below.
+    // A context narrowing access to a subresource/task within the dialog's own policy uses "transmissionread",
+    // as having "read" on the main resource would also give access to the subresource/task. Mirrors the legacy
+    // attribute derivation below. Contexts referring a separate resource (and policy), or narrowing by party
+    // alone (where there is no subresource to protect), use "read".
     private static string GetDefaultContextTransmissionAction(AuthorizationContext context) =>
-        context.ServiceResource is not null
-            ? Constants.ReadAction
-            : Constants.TransmissionReadAction;
+        context.ServiceResource is null && context.AdditionalResourceAttribute is not null
+            ? Constants.TransmissionReadAction
+            : Constants.ReadAction;
 
     // Resource attributes may refer to either sub-resources/tasks that should be considered just another
     // attribute to be matched within the same policy file, or they may refer to separate resources (and policies).

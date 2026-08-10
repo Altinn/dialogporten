@@ -55,7 +55,7 @@ public static class OpenApiDocumentExtensions
     /// </summary>
     public static void RemoveDefaultSecurityScheme(this OpenApiDocument openApiDocument)
     {
-        openApiDocument.Components.SecuritySchemes.Remove(FastEndpointsDefaultSecurityScheme);
+        openApiDocument.Components.SecuritySchemes.Remove(FastEndpointsSecurityScheme);
     }
 
     public static void AddIdportenSecurityScheme(

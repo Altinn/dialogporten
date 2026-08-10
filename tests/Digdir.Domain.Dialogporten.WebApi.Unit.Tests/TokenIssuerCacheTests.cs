@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,15 @@ public class TokenIssuerCacheTests
             Authentication = new AuthenticationOptions
             {
                 JwtBearerTokenSchemas = []
+            },
+            OpenApi = new OpenApiSettings
+            {
+                EnableTryItOut = false,
+                IdportenClientId = null,
+                IdportenLogoutUrl = "",
+                IdportenAuthorizationUrl = "",
+                IdportenTokenUrl = "",
+                MaskinportenTokenUrl = ""
             }
         };
         var cache = new TokenIssuerCache(Options.Create(settings));

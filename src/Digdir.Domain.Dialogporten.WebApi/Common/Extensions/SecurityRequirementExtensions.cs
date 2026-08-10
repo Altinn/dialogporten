@@ -4,37 +4,19 @@ namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 
 public static class SecurityRequirementExtensions
 {
-    public enum ScopeRequirementOperation
-    {
-        And,
-        Or
-    }
 
     extension(ICollection<OpenApiSecurityRequirement> requirements)
     {
-        public void Add((ScopeRequirementOperation Operation, string[] Scopes) requirement, string name)
+        /// <summary>
+        /// Adds the scopes to the open API scope requirement operation.
+        /// This method doesn't support OR-ing scopes, this means that all scopes are required to perform the operation.
+        /// </summary>
+        public void Add(string[] scopes, string name)
         {
-            switch (requirement.Operation)
+            requirements.Add(new OpenApiSecurityRequirement
             {
-                case ScopeRequirementOperation.And:
-                    requirements.Add(new OpenApiSecurityRequirement
-                    {
-                        [name] = requirement.Scopes
-                    });
-                    break;
-                case ScopeRequirementOperation.Or:
-                    foreach (var scope in requirement.Scopes)
-                    {
-                        requirements.Add(new OpenApiSecurityRequirement
-                        {
-                            [name] = [scope]
-                        });
-                    }
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                [name] = scopes
+            });
         }
     }
 }

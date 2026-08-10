@@ -4866,7 +4866,7 @@
             "headers": {
               "ETag": {
                 "description": "Strong validator for the returned representation; echo it in \u0060If-None-Match\u0060 to revalidate.",
-                "example": "\u0022nb-638849952000000000\u0022",
+                "example": "\u0022nb-639171945150000000\u0022",
                 "schema": {
                   "type": "string"
                 }
@@ -4892,7 +4892,7 @@
             "headers": {
               "ETag": {
                 "description": "Strong validator for the returned representation; echo it in \u0060If-None-Match\u0060 to revalidate.",
-                "example": "\u0022nb-638849952000000000\u0022",
+                "example": "\u0022nb-639171945150000000\u0022",
                 "schema": {
                   "type": "string"
                 }

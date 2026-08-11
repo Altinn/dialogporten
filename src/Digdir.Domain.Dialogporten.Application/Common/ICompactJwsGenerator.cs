@@ -1,5 +1,6 @@
 using System.Buffers.Text;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using NSec.Cryptography;
@@ -25,6 +26,15 @@ public sealed class Ed25519Generator : ICompactJwsGenerator
         InitSigningKey();
     }
 
+    // The default encoder escapes '+' as the JSON escape u002B, which would leave a structured token type such as
+    // "dialogcontexttoken+jwt" escaped in the header. That is legal JSON, but a needless trap for a receiver
+    // comparing the raw header bytes, so the header is written unescaped. Safe here because every value in it
+    // (alg, typ, kid) is ours, and none contains characters requiring escaping.
+    private static readonly JsonSerializerOptions HeaderSerializerOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
     public string GetCompactJws(Dictionary<string, object?> claims, string tokenType)
     {
         var header = JsonSerializer.SerializeToUtf8Bytes(new
@@ -32,7 +42,7 @@ public sealed class Ed25519Generator : ICompactJwsGenerator
             alg = "EdDSA",
             typ = tokenType,
             kid = _kid
-        });
+        }, HeaderSerializerOptions);
 
         var payload = JsonSerializer.SerializeToUtf8Bytes(claims);
 

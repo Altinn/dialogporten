@@ -7635,7 +7635,7 @@
           {
             "description": "Filter by one or more owning parties",
             "example": [
-              ""
+              "urn:altinn:organization:identifier-no:912345678"
             ],
             "explode": true,
             "in": "query",

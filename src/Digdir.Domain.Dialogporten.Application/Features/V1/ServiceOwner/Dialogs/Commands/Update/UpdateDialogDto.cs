@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -6,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Dia
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 
@@ -141,7 +143,14 @@ public sealed class TransmissionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this transmission.
+    /// Cannot be combined with "authorizationAttribute".
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -312,7 +321,8 @@ public sealed class ApiActionDto
     /// which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
     /// </summary>
     /// <example>write</example>
-    public string Action { get; set; } = null!;
+    [Obsolete($"Use '{nameof(AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -328,7 +338,15 @@ public sealed class ApiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+    /// "authorizationContext.action".
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// The logical name of the operation the API action refers to.
@@ -406,7 +424,8 @@ public sealed class GuiActionDto
     /// <summary>
     /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
     /// </summary>
-    public string Action { get; set; } = null!;
+    [Obsolete($"Use '{nameof(AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
@@ -432,7 +451,15 @@ public sealed class GuiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+    /// "authorizationContext.action".
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -491,6 +518,13 @@ public sealed class AttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+    /// The XACML action defaults to "read". Access to the parent is always required in addition; this context
+    /// can only further restrict access, never widen it.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 }
 
 public sealed class AttachmentUrlDto
@@ -549,6 +583,13 @@ public sealed class TransmissionAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+    /// The XACML action defaults to "read". Access to the parent is always required in addition; this context
+    /// can only further restrict access, never widen it.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 }
 
 public sealed class TransmissionAttachmentUrlDto
@@ -589,4 +630,11 @@ public sealed class TransmissionNavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+    /// The XACML action defaults to "read". Access to the parent transmission is always required in addition; this
+    /// context can only further restrict access, never widen it.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 }

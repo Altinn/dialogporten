@@ -7553,7 +7553,7 @@
   "paths": {
     "/api/v1/.well-known/jwks.json": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialog tokens carry the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Receiving services must validate the \u0022typ\u0022 header and reject a token whose type they do not expect: other token types signed with these keys carry an explicit type per RFC 8725.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues two token types, both signed with these keys and distinguished by the JOSE \u0022typ\u0022 header: the dialog token, which carries \u0022JWT\u0022, and \u0022dialogcontexttoken\u002Bjwt\u0022, a narrower token scoped to a single authorization-context-carrying entity. Receiving services must validate the \u0022typ\u0022 header and reject a token whose type they do not expect; in particular, a service expecting a dialog token must reject \u0022dialogcontexttoken\u002Bjwt\u0022.",
         "operationId": "V1WellKnownJwksGet_Jwks",
         "responses": {
           "200": {
@@ -7594,7 +7594,7 @@
     },
     "/api/v1/.well-known/oauth-authorization-server": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialog tokens carry the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Receiving services must validate the \u0022typ\u0022 header and reject a token whose type they do not expect: other token types signed with the same keys carry an explicit type per RFC 8725.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues two token types, both signed with the same keys and distinguished by the JOSE \u0022typ\u0022 header: the dialog token, which carries \u0022JWT\u0022, and \u0022dialogcontexttoken\u002Bjwt\u0022, a narrower token scoped to a single authorization-context-carrying entity. Receiving services must validate the \u0022typ\u0022 header and reject a token whose type they do not expect; in particular, a service expecting a dialog token must reject \u0022dialogcontexttoken\u002Bjwt\u0022.",
         "operationId": "V1WellKnownOauthAuthorizationServerGet_OauthAuthorizationServer",
         "responses": {
           "200": {

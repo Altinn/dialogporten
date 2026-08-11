@@ -10,7 +10,7 @@ public sealed class GetJwksEndpointSummary : Summary<GetJwksEndpoint>
         Description = """
                       This endpoint can be used by client integrations supporting automatic discovery of "OAuth 2.0 Authorization Server" metadata, enabling verification of dialog tokens issued by Dialogporten.
 
-                      Dialog tokens carry the JOSE "typ" header "JWT". Receiving services must validate the "typ" header and reject a token whose type they do not expect: other token types signed with these keys carry an explicit type per RFC 8725.
+                      Dialogporten issues two token types, both signed with these keys and distinguished by the JOSE "typ" header: the dialog token, which carries "JWT", and "dialogcontexttoken+jwt", a narrower token scoped to a single authorization-context-carrying entity. Receiving services must validate the "typ" header and reject a token whose type they do not expect; in particular, a service expecting a dialog token must reject "dialogcontexttoken+jwt".
                       """;
         Responses[StatusCodes.Status200OK] = "The OAuth 2.0 Authorization Server Metadata";
     }

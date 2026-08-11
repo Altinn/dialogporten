@@ -1,43 +1,57 @@
-﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
 public sealed class DialogDetailsAuthorizationResult
 {
-    // Each action applies to a resource. This is the main resource, another subresource indicated by a authorization attribute
-    // e.g. "urn:altinn:subresource:some-sub-resource" or "urn:altinn:task:task_1", or another resource (i.e. policy)
-    // e.g. urn:altinn:resource:some-other-resource
-    public List<AltinnAction> AuthorizedAltinnActions { get; init; } = [];
+    /// <summary>
+    /// The authorized checks, each carrying the subset of its parties the PDP permitted.
+    /// A check applies to the main resource, a legacy authorization attribute
+    /// (e.g. "urn:altinn:subresource:some-sub-resource", "urn:altinn:task:task_1" or
+    /// "urn:altinn:resource:some-other-resource"), or an explicit authorization context.
+    /// </summary>
+    public List<AuthorizedCheck> AuthorizedChecks { get; init; } = [];
+
+    /// <summary>
+    /// Whether the given check (built by <see cref="AuthorizationCheckBuilder"/> from the same entity/dialog
+    /// pair as the request) was authorized for at least one of its parties.
+    /// </summary>
+    public bool HasAccess(AuthorizationCheck check) =>
+        AuthorizedChecks.Any(x => x.Check == check);
 
     public bool HasAccessToMainResource() =>
-        AuthorizedAltinnActions.Any(action => action.AuthorizationAttribute == Constants.MainResource);
+        AuthorizedChecks.Any(x => x.Check.Resource.Kind == AuthorizationResourceSpecKind.Main);
 
     public bool HasAccessToAction(string requestedAction, string? authorizationAttribute)
     {
-        var actions = AuthorizedAltinnActions.FindAll(x => x.Name == requestedAction);
+        var actions = AuthorizedChecks
+            .Where(x => x.Check.Action == requestedAction && x.Check.Resource.Kind != AuthorizationResourceSpecKind.Context)
+            .ToList();
 
-        if (actions.IsNullOrEmpty()) return false;
+        if (actions.Count == 0) return false;
 
         return authorizationAttribute is null
             ? HasAccessToMainResource()
-            : actions.Any(x => x.AuthorizationAttribute == authorizationAttribute);
+            : actions.Any(x => x.Check.Resource.LegacyAuthorizationAttribute == authorizationAttribute);
     }
 
     public bool HasReadAccessToMainResource() =>
-        AuthorizedAltinnActions.Any(x => x is
+        AuthorizedChecks.Any(x => x.Check is
         {
-            Name: Constants.ReadAction,
-            AuthorizationAttribute: Constants.MainResource
+            Action: Constants.ReadAction,
+            Resource.Kind: AuthorizationResourceSpecKind.Main
         });
 
     public bool HasReadAccessToDialogTransmission(string? authorizationAttribute)
     {
+        // Dialog transmissions are authorized by either the read or transmissionRead action, depending on the
+        // authorization attribute type. The infrastructure will ensure that the correct action is used, so here
+        // we just check for either.
         return authorizationAttribute is not null
-            ? ( // Dialog transmissions are authorized by either the read or transmissionRead action, depending on the authorization attribute type
-                // The infrastructure will ensure that the correct action is used, so here we just check for either
-                AuthorizedAltinnActions.Contains(new(Constants.TransmissionReadAction, authorizationAttribute))
-                || AuthorizedAltinnActions.Contains(new(Constants.ReadAction, authorizationAttribute))
-            ) : HasAccessToMainResource();
+            ? AuthorizedChecks.Any(x =>
+                x.Check.Action is Constants.TransmissionReadAction or Constants.ReadAction
+                && x.Check.Resource.Kind == AuthorizationResourceSpecKind.Legacy
+                && x.Check.Resource.LegacyAuthorizationAttribute == authorizationAttribute)
+            : HasAccessToMainResource();
     }
 }

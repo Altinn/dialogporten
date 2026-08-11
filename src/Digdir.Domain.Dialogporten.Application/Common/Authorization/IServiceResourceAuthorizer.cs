@@ -98,10 +98,27 @@ internal sealed class ServiceResourceAuthorizer : IServiceResourceAuthorizer
             .Concat(dialog.ApiActions.Select(action => action.AuthorizationAttribute))
             .Concat(dialog.GuiActions.Select(action => action.AuthorizationAttribute))
             .Concat(dialog.Transmissions.Select(transmission => transmission.AuthorizationAttribute))
+            .Concat(GetAuthorizationContexts(dialog).SelectMany(context => new[]
+            {
+                context.ServiceResource,
+                // Defense-in-depth: validation forbids resource references here, but the prefix
+                // filter below makes sweeping this field free.
+                context.AdditionalResourceAttribute
+            }))
             .Select(x => x?.ToLowerInvariant())
             .Distinct()
             .Where(IsPrimaryResource)
             .Cast<string>();
+
+    private static IEnumerable<Domain.Dialogs.Entities.AuthorizationContexts.AuthorizationContext> GetAuthorizationContexts(DialogEntity dialog) =>
+        Enumerable.Empty<Domain.Dialogs.Entities.AuthorizationContexts.AuthorizationContext?>()
+            .Concat(dialog.ApiActions.Select(x => x.AuthorizationContext))
+            .Concat(dialog.GuiActions.Select(x => x.AuthorizationContext))
+            .Concat(dialog.Transmissions.Select(x => x.AuthorizationContext))
+            .Concat(dialog.Attachments.Select(x => x.AuthorizationContext))
+            .Concat(dialog.Transmissions.SelectMany(x => x.Attachments).Select(x => x.AuthorizationContext))
+            .Concat(dialog.Transmissions.SelectMany(x => x.NavigationalActions).Select(x => x.AuthorizationContext))
+            .OfType<Domain.Dialogs.Entities.AuthorizationContexts.AuthorizationContext>();
 
     private static bool IsPrimaryResource(string? resource) =>
         resource is not null

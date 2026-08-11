@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -285,7 +286,7 @@ public static class Mappers
         new()
         {
             Id = source.Id,
-            Action = source.Action,
+            Action = source.Action!,
             Url = source.Url,
             AuthorizationAttribute = source.AuthorizationAttribute,
             IsDeleteDialogAction = source.IsDeleteDialogAction,
@@ -313,7 +314,7 @@ public static class Mappers
         new()
         {
             Id = source.Id,
-            Action = source.Action,
+            Action = source.Action!,
             AuthorizationAttribute = source.AuthorizationAttribute,
             Name = source.Name,
             Endpoints = source.Endpoints.Select(x => x.ToUpdateApiActionEndpointDto()).ToList()

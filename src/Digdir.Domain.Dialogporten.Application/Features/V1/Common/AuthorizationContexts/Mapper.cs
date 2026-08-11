@@ -20,7 +20,7 @@ internal static class AuthorizationContextMapExtensions
         context.Parties = [.. source.Parties];
         context.IncludeDialogParty = source.IncludeDialogParty;
         context.Action = source.Action;
-        context.UnauthorizedPresentationId = source.UnauthorizedPresentation;
+        context.UnauthorizedPresentation = source.UnauthorizedPresentation;
         return context;
     }
 
@@ -39,7 +39,7 @@ internal static class AuthorizationContextMapExtensions
         context.Parties = [.. source.Parties];
         context.IncludeDialogParty = source.IncludeDialogParty;
         context.Action = null;
-        context.UnauthorizedPresentationId = source.UnauthorizedPresentation;
+        context.UnauthorizedPresentation = source.UnauthorizedPresentation;
         return context;
     }
 }

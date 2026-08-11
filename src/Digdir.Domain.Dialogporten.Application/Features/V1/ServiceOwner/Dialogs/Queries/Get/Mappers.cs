@@ -364,7 +364,7 @@ internal static class AuthorizationContextMapExtensions
                 Parties = [.. source.Parties],
                 IncludeDialogParty = source.IncludeDialogParty,
                 Action = source.Action,
-                UnauthorizedPresentation = source.UnauthorizedPresentationId
+                UnauthorizedPresentation = source.UnauthorizedPresentation
             };
 
         internal ChildAuthorizationContextDto? ToChildDto() => source is null
@@ -375,7 +375,7 @@ internal static class AuthorizationContextMapExtensions
                 AdditionalResourceAttribute = source.AdditionalResourceAttribute,
                 Parties = [.. source.Parties],
                 IncludeDialogParty = source.IncludeDialogParty,
-                UnauthorizedPresentation = source.UnauthorizedPresentationId
+                UnauthorizedPresentation = source.UnauthorizedPresentation
             };
     }
 }

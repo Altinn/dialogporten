@@ -445,6 +445,15 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public bool IsAuthorized { get; set; } = default!;
 
         /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
+        /// <br/>its authorization context. Only present when the transmission has an authorization context and the user is
+        /// <br/>authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
+        /// <br/>including front-channel embeds.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
+
+        /// <summary>
         /// The extended type URI for the transmission.
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -678,6 +687,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
 
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+        /// <br/>authorization context. Only present when the attachment has an authorization context and the user is
+        /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -753,6 +770,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
+
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
+        /// <br/>by its authorization context. Only present when the navigational action has an authorization context and the
+        /// <br/>user is authorized. Should be used instead of the dialog token against this action's URL.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
 
     }
 
@@ -1282,6 +1307,15 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         public bool IsAuthorized { get; set; } = default!;
 
         /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
+        /// <br/>its authorization context. Only present when the transmission has an authorization context and the user is
+        /// <br/>authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
+        /// <br/>including front-channel embeds.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
+
+        /// <summary>
         /// The extended type URI for the transmission.
         /// </summary>
         [JsonPropertyName("extendedType")]
@@ -1407,6 +1441,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
 
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+        /// <br/>authorization context. Only present when the attachment has an authorization context and the user is
+        /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -1470,6 +1512,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
+
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
+        /// <br/>by its authorization context. Only present when the navigational action has an authorization context and the
+        /// <br/>user is authorized. Should be used instead of the dialog token against this action's URL.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
 
     }
 
@@ -1846,6 +1896,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
 
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+        /// <br/>authorization context. Only present when the attachment has an authorization context and the user is
+        /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -1911,6 +1969,15 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
+
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
+        /// <br/>its authorization context. Only present when the transmission has an authorization context and the user is
+        /// <br/>authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
+        /// <br/>including front-channel embeds.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -2040,6 +2107,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
 
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+        /// <br/>authorization context. Only present when the attachment has an authorization context and the user is
+        /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -2104,6 +2179,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
 
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
+        /// <br/>by its authorization context. Only present when the navigational action has an authorization context and the
+        /// <br/>user is authorized. Should be used instead of the dialog token against this action's URL.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -2144,6 +2227,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
+
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific action, as determined by its
+        /// <br/>authorization context. Only present when the action has an authorization context and the user is authorized.
+        /// <br/>Should be used instead of the dialog token against this action's URL.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
 
         /// <summary>
         /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -2263,6 +2354,14 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// </summary>
         [JsonPropertyName("isAuthorized")]
         public bool IsAuthorized { get; set; } = default!;
+
+        /// <summary>
+        /// A token asserting the authenticated user's authorization for this specific action, as determined by its
+        /// <br/>authorization context. Only present when the action has an authorization context and the user is authorized.
+        /// <br/>Should be used instead of the dialog token against this action's endpoints.
+        /// </summary>
+        [JsonPropertyName("contextToken")]
+        public string? ContextToken { get; set; } = default!;
 
         /// <summary>
         /// The logical name of the operation the API action refers to.

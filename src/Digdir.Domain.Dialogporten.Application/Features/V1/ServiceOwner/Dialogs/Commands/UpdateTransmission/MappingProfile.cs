@@ -46,7 +46,7 @@ internal sealed class MappingProfile : Profile
             // The XACML action for navigational actions is always "read" and cannot be overridden
             .ForMember(dest => dest.Action, opt => opt.Ignore())
             .ForMember(dest => dest.UnauthorizedPresentation, opt => opt.Ignore())
-            .ForMember(dest => dest.UnauthorizedPresentationId, opt => opt.MapFrom(src => src.UnauthorizedPresentation))
+            .ForMember(dest => dest.UnauthorizedPresentation, opt => opt.MapFrom(src => src.UnauthorizedPresentation))
             .ForMember(dest => dest.NavigationalActionId, opt => opt.Ignore())
             .ForMember(dest => dest.NavigationalAction, opt => opt.Ignore());
     }

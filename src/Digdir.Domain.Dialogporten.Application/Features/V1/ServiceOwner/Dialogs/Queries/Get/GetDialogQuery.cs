@@ -152,33 +152,35 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     {
         foreach (var (a, apiAction) in dto.ApiActions.Zip(dialog.ApiActions))
         {
-            a.IsAuthorized = authorization.HasAccess(apiAction, dialog);
+            a.IsAuthorized = authorization.HasAccess(apiAction, apiAction.GetAuthorizationCheck(dialog));
         }
 
         foreach (var (g, guiAction) in dto.GuiActions.Zip(dialog.GuiActions))
         {
-            g.IsAuthorized = authorization.HasAccess(guiAction, dialog);
+            g.IsAuthorized = authorization.HasAccess(guiAction, guiAction.GetAuthorizationCheck(dialog));
         }
 
         dto.Content?.MainContentReference?.IsAuthorized = authorization.HasReadAccessToMainResource();
 
         foreach (var (a, attachment) in dto.Attachments.Zip(dialog.Attachments))
         {
-            a.IsAuthorized = authorization.HasAccess(attachment, dialog);
+            a.IsAuthorized = authorization.HasAccess(attachment, attachment.GetAuthorizationCheck(dialog));
         }
 
         foreach (var (t, transmission) in dto.Transmissions.Zip(dialog.Transmissions))
         {
-            t.IsAuthorized = authorization.HasAccess(transmission, dialog);
+            t.IsAuthorized = authorization.HasAccess(transmission, transmission.GetAuthorizationCheck(dialog));
 
             foreach (var (a, attachment) in t.Attachments.Zip(transmission.Attachments))
             {
-                a.IsAuthorized = authorization.HasAccess(attachment, t.IsAuthorized.Value, dialog);
+                a.IsAuthorized = authorization.HasAccess(attachment, t.IsAuthorized.Value,
+                    attachment.GetAuthorizationCheck(dialog));
             }
 
             foreach (var (n, navigationalAction) in t.NavigationalActions.Zip(transmission.NavigationalActions))
             {
-                n.IsAuthorized = authorization.HasAccess(navigationalAction, t.IsAuthorized.Value, dialog);
+                n.IsAuthorized = authorization.HasAccess(navigationalAction, t.IsAuthorized.Value,
+                    navigationalAction.GetAuthorizationCheck(dialog));
             }
         }
     }

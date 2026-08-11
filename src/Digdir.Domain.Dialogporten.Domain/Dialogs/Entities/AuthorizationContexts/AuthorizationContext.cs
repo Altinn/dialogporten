@@ -41,9 +41,11 @@ public abstract class AuthorizationContext : IIdentifiableEntity, ICreatableEnti
     /// </summary>
     public string? Action { get; set; }
 
-    // === Dependent relationships ===
-    public AuthorizationContextUnauthorizedPresentation.Values UnauthorizedPresentationId { get; set; }
-    public AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; } = null!;
+    /// <summary>
+    /// How the carrying entity is presented to end users that are not authorized for this context.
+    /// Stored as a smallint; no lookup table (see <see cref="AuthorizationContextUnauthorizedPresentation"/>).
+    /// </summary>
+    public AuthorizationContextUnauthorizedPresentation.Values UnauthorizedPresentation { get; set; }
 }
 
 public sealed class DialogTransmissionAuthorizationContext : AuthorizationContext, IImmutableEntity

@@ -12,54 +12,57 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Authorization;
 /// authorization context are matched against their <see cref="AuthorizationCheckBuilder"/>-built check;
 /// legacy entities use the legacy predicates. For child entities (attachments and navigational actions),
 /// access to the parent is a precondition — a child context can only further restrict access, never widen it.
+/// Each predicate takes the entity's check (built once by the caller via
+/// <see cref="AuthorizationCheckBuilder.GetAuthorizationCheck(DialogTransmission, Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity)"/>
+/// and its overloads) so it can be shared with context token issuance instead of being rebuilt per lookup.
 /// </summary>
 public static class DialogDetailsAuthorizationResultExtensions
 {
     public static bool HasAccess(
-        this DialogDetailsAuthorizationResult authorization, DialogApiAction apiAction, DialogEntity dialog) =>
+        this DialogDetailsAuthorizationResult authorization, DialogApiAction apiAction, AuthorizationCheck? check) =>
         apiAction.AuthorizationContext is not null
-            ? authorization.HasAccess(apiAction.GetAuthorizationCheck(dialog)!)
+            ? check is not null && authorization.HasAccess(check)
             : apiAction.Action is not null && authorization.HasAccessToAction(apiAction.Action, apiAction.AuthorizationAttribute);
 
     public static bool HasAccess(
-        this DialogDetailsAuthorizationResult authorization, DialogGuiAction guiAction, DialogEntity dialog) =>
+        this DialogDetailsAuthorizationResult authorization, DialogGuiAction guiAction, AuthorizationCheck? check) =>
         guiAction.AuthorizationContext is not null
-            ? authorization.HasAccess(guiAction.GetAuthorizationCheck(dialog)!)
+            ? check is not null && authorization.HasAccess(check)
             : guiAction.Action is not null && authorization.HasAccessToAction(guiAction.Action, guiAction.AuthorizationAttribute);
 
     public static bool HasAccess(
-        this DialogDetailsAuthorizationResult authorization, DialogTransmission transmission, DialogEntity dialog) =>
+        this DialogDetailsAuthorizationResult authorization, DialogTransmission transmission, AuthorizationCheck? check) =>
         transmission.AuthorizationContext is not null
-            ? authorization.HasAccess(transmission.GetAuthorizationCheck(dialog)!)
+            ? check is not null && authorization.HasAccess(check)
             : authorization.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
 
     public static bool HasAccess(
-        this DialogDetailsAuthorizationResult authorization, DialogAttachment attachment, DialogEntity dialog) =>
+        this DialogDetailsAuthorizationResult authorization, DialogAttachment attachment, AuthorizationCheck? check) =>
         // Dialog attachments without a context are never individually restricted; with a context,
         // read access to the dialog's main resource remains a precondition.
         attachment.AuthorizationContext is null
-        || (authorization.HasReadAccessToMainResource() && authorization.HasAccess(attachment.GetAuthorizationCheck(dialog)!));
+        || (authorization.HasReadAccessToMainResource() && check is not null && authorization.HasAccess(check));
 
     public static bool HasAccess(
         this DialogDetailsAuthorizationResult authorization,
         DialogTransmissionAttachment attachment,
         bool transmissionAuthorized,
-        DialogEntity dialog) =>
+        AuthorizationCheck? check) =>
         transmissionAuthorized
-        && (attachment.AuthorizationContext is null || authorization.HasAccess(attachment.GetAuthorizationCheck(dialog)!));
+        && (attachment.AuthorizationContext is null || (check is not null && authorization.HasAccess(check)));
 
     public static bool HasAccess(
         this DialogDetailsAuthorizationResult authorization,
         DialogTransmissionNavigationalAction navigationalAction,
         bool transmissionAuthorized,
-        DialogEntity dialog) =>
+        AuthorizationCheck? check) =>
         transmissionAuthorized
-        && (navigationalAction.AuthorizationContext is null || authorization.HasAccess(navigationalAction.GetAuthorizationCheck(dialog)!));
+        && (navigationalAction.AuthorizationContext is null || (check is not null && authorization.HasAccess(check)));
 
     /// <summary>
     /// Whether an unauthorized entity should be redacted in end user responses: all content stripped,
     /// leaving only its existence and timestamps.
     /// </summary>
     public static bool ShouldRedactWhenUnauthorized(this IAuthorizationContextCarrier carrier) =>
-        carrier.AuthorizationContext?.UnauthorizedPresentationId == AuthorizationContextUnauthorizedPresentation.Values.Redacted;
+        carrier.AuthorizationContext?.UnauthorizedPresentation == AuthorizationContextUnauthorizedPresentation.Values.Redacted;
 }

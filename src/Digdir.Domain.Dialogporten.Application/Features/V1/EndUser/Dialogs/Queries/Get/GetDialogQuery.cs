@@ -283,7 +283,6 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         );
 
         DecorateWithAuthorization(dialog, dialogDto, authorizationResult);
-        DecorateWithContextTokens(dialog, dialogDto, authorizationResult);
         ApplyRedaction(dialog, dialogDto);
         ReplaceUnauthorizedUrls(dialogDto);
         ReplaceExpiredAttachmentUrls(dialogDto);
@@ -320,113 +319,67 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
 
     // Authorization is evaluated against the domain entities (which carry the authorization contexts);
     // the DTO lists are mapped 1:1 in order from the entity lists, so pairwise zipping is safe.
-    private static void DecorateWithAuthorization(DialogEntity dialog, DialogDto dto,
+    // Each entity's check is built once and shared between the access decision and context token issuance.
+    // Each authorized entity carrying an authorization context gets a token scoped to that entity's single
+    // PDP-verified grant. Grants for contexts are expressed exclusively through these tokens — the dialog
+    // token is frozen at legacy semantics.
+    private void DecorateWithAuthorization(DialogEntity dialog, DialogDto dto,
         DialogDetailsAuthorizationResult authorization)
     {
         foreach (var (a, apiAction) in dto.ApiActions.Zip(dialog.ApiActions))
         {
-            a.IsAuthorized = authorization.HasAccess(apiAction, dialog);
+            var check = apiAction.GetAuthorizationCheck(dialog);
+            a.IsAuthorized = authorization.HasAccess(apiAction, check);
+            a.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorization, a.IsAuthorized,
+                apiAction.AuthorizationContext, check, apiAction.Id, DialogContextTokenEntityTypes.ApiAction);
         }
 
         foreach (var (g, guiAction) in dto.GuiActions.Zip(dialog.GuiActions))
         {
-            g.IsAuthorized = authorization.HasAccess(guiAction, dialog);
+            var check = guiAction.GetAuthorizationCheck(dialog);
+            g.IsAuthorized = authorization.HasAccess(guiAction, check);
+            g.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorization, g.IsAuthorized,
+                guiAction.AuthorizationContext, check, guiAction.Id, DialogContextTokenEntityTypes.GuiAction);
         }
 
         dto.Content.MainContentReference?.IsAuthorized = authorization.HasReadAccessToMainResource();
 
         foreach (var (a, attachment) in dto.Attachments.Zip(dialog.Attachments))
         {
-            a.IsAuthorized = authorization.HasAccess(attachment, dialog);
+            var check = attachment.GetAuthorizationCheck(dialog);
+            a.IsAuthorized = authorization.HasAccess(attachment, check);
+            a.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorization, a.IsAuthorized,
+                attachment.AuthorizationContext, check, attachment.Id, DialogContextTokenEntityTypes.Attachment);
         }
 
         foreach (var (t, transmission) in dto.Transmissions.Zip(dialog.Transmissions))
         {
-            t.IsAuthorized = authorization.HasAccess(transmission, dialog);
+            var transmissionCheck = transmission.GetAuthorizationCheck(dialog);
+            t.IsAuthorized = authorization.HasAccess(transmission, transmissionCheck);
+            t.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorization, t.IsAuthorized,
+                transmission.AuthorizationContext, transmissionCheck, transmission.Id,
+                DialogContextTokenEntityTypes.Transmission);
 
             // Parent-first narrowing: transmission access is a precondition for its attachments and
             // navigational actions; a child context can only further restrict access.
             foreach (var (a, attachment) in t.Attachments.Zip(transmission.Attachments))
             {
-                a.IsAuthorized = authorization.HasAccess(attachment, t.IsAuthorized, dialog);
+                var check = attachment.GetAuthorizationCheck(dialog);
+                a.IsAuthorized = authorization.HasAccess(attachment, t.IsAuthorized, check);
+                a.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorization, a.IsAuthorized,
+                    attachment.AuthorizationContext, check, attachment.Id,
+                    DialogContextTokenEntityTypes.TransmissionAttachment);
             }
 
             foreach (var (n, navigationalAction) in t.NavigationalActions.Zip(transmission.NavigationalActions))
             {
-                n.IsAuthorized = authorization.HasAccess(navigationalAction, t.IsAuthorized, dialog);
+                var check = navigationalAction.GetAuthorizationCheck(dialog);
+                n.IsAuthorized = authorization.HasAccess(navigationalAction, t.IsAuthorized, check);
+                n.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorization, n.IsAuthorized,
+                    navigationalAction.AuthorizationContext, check, navigationalAction.Id,
+                    DialogContextTokenEntityTypes.TransmissionNavigationalAction);
             }
         }
-    }
-
-    // Each authorized entity carrying an authorization context gets a token scoped to that entity's single
-    // PDP-verified grant. Grants for contexts are expressed exclusively through these tokens — the dialog
-    // token is frozen at legacy semantics. Must run after DecorateWithAuthorization (reads IsAuthorized).
-    private void DecorateWithContextTokens(DialogEntity dialog, DialogDto dto,
-        DialogDetailsAuthorizationResult authorization)
-    {
-        foreach (var (a, apiAction) in dto.ApiActions.Zip(dialog.ApiActions))
-        {
-            a.ContextToken = GetContextToken(dialog, authorization, a.IsAuthorized,
-                apiAction.AuthorizationContext, apiAction.GetAuthorizationCheck(dialog),
-                apiAction.Id, DialogContextTokenEntityTypes.ApiAction);
-        }
-
-        foreach (var (g, guiAction) in dto.GuiActions.Zip(dialog.GuiActions))
-        {
-            g.ContextToken = GetContextToken(dialog, authorization, g.IsAuthorized,
-                guiAction.AuthorizationContext, guiAction.GetAuthorizationCheck(dialog),
-                guiAction.Id, DialogContextTokenEntityTypes.GuiAction);
-        }
-
-        foreach (var (a, attachment) in dto.Attachments.Zip(dialog.Attachments))
-        {
-            a.ContextToken = GetContextToken(dialog, authorization, a.IsAuthorized,
-                attachment.AuthorizationContext, attachment.GetAuthorizationCheck(dialog),
-                attachment.Id, DialogContextTokenEntityTypes.Attachment);
-        }
-
-        foreach (var (t, transmission) in dto.Transmissions.Zip(dialog.Transmissions))
-        {
-            t.ContextToken = GetContextToken(dialog, authorization, t.IsAuthorized,
-                transmission.AuthorizationContext, transmission.GetAuthorizationCheck(dialog),
-                transmission.Id, DialogContextTokenEntityTypes.Transmission);
-
-            foreach (var (a, attachment) in t.Attachments.Zip(transmission.Attachments))
-            {
-                a.ContextToken = GetContextToken(dialog, authorization, a.IsAuthorized,
-                    attachment.AuthorizationContext, attachment.GetAuthorizationCheck(dialog),
-                    attachment.Id, DialogContextTokenEntityTypes.TransmissionAttachment);
-            }
-
-            foreach (var (n, navigationalAction) in t.NavigationalActions.Zip(transmission.NavigationalActions))
-            {
-                n.ContextToken = GetContextToken(dialog, authorization, n.IsAuthorized,
-                    navigationalAction.AuthorizationContext, navigationalAction.GetAuthorizationCheck(dialog),
-                    navigationalAction.Id, DialogContextTokenEntityTypes.TransmissionNavigationalAction);
-            }
-        }
-    }
-
-    private string? GetContextToken(
-        DialogEntity dialog,
-        DialogDetailsAuthorizationResult authorization,
-        bool isAuthorized,
-        AuthorizationContext? context,
-        AuthorizationCheck? check,
-        Guid entityId,
-        string entityType)
-    {
-        if (!isAuthorized || context is null || check is null)
-        {
-            return null;
-        }
-
-        // IsAuthorized for a context-carrying entity implies its check was authorized, so this
-        // lookup cannot miss; guard anyway to fail closed rather than throw.
-        var authorizedCheck = authorization.GetAuthorizedCheck(check);
-        return authorizedCheck is null
-            ? null
-            : _dialogTokenGenerator.GetDialogContextToken(dialog, authorizedCheck, entityId, entityType, DialogTokenIssuerVersion);
     }
 
     // Entities with an authorization context using unauthorizedPresentation = redacted are stripped of

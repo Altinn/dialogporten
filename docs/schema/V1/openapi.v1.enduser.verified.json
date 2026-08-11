@@ -335,7 +335,7 @@
             "type": "string"
           },
           "dialogToken": {
-            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.",
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nEntities carrying an authorization context are the exception: they are issued their own, narrower\n\u0022contextToken\u0022 which must be used instead of this token, as the dialog token does not assert their grant.\nSee the \u0022contextToken\u0022 property on the individual entities.",
             "nullable": true,
             "type": "string"
           },
@@ -1538,6 +1538,11 @@
       "DialogTransmissionAttachmentDetails": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "nullable": true,
+            "type": "string"
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1731,6 +1736,11 @@
               }
             ]
           },
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "nullable": true,
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
@@ -1834,6 +1844,11 @@
       "DialogTransmissionNavigationalActionDetails": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "nullable": true,
+            "type": "string"
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -1864,6 +1879,11 @@
       "DialogTransmissionSearchAttachment": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "nullable": true,
+            "type": "string"
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1994,6 +2014,11 @@
               }
             ]
           },
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "nullable": true,
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
@@ -2062,6 +2087,11 @@
       "DialogTransmissionSearchNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "nullable": true,
+            "type": "string"
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",

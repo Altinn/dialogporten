@@ -745,7 +745,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasDefaultValueSql("uuidv7()");
 
                     b.Property<string>("Action")
                         .HasMaxLength(255)
@@ -776,45 +776,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<int>("UnauthorizedPresentationId")
-                        .HasColumnType("integer");
+                    b.Property<short>("UnauthorizedPresentation")
+                        .HasColumnType("smallint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UnauthorizedPresentationId");
 
                     b.ToTable("AuthorizationContext");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("AuthorizationContext");
 
                     b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts.AuthorizationContextUnauthorizedPresentation", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AuthorizationContextUnauthorizedPresentation");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Disabled"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Redacted"
-                        });
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent", b =>
@@ -2552,17 +2523,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Navigation("Transmission");
 
                     b.Navigation("Type");
-                });
-
-            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts.AuthorizationContext", b =>
-                {
-                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts.AuthorizationContextUnauthorizedPresentation", "UnauthorizedPresentation")
-                        .WithMany()
-                        .HasForeignKey("UnauthorizedPresentationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("UnauthorizedPresentation");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContent", b =>

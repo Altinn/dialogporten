@@ -161,6 +161,10 @@ public sealed class DialogDto
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,
     /// transmissions or attachments. It should also be used for front-channel embeds.
+    ///
+    /// Entities carrying an authorization context are the exception: they are issued their own, narrower
+    /// "contextToken" which must be used instead of this token, as the dialog token does not assert their grant.
+    /// See the "contextToken" property on the individual entities.
     /// </summary>
     public string? DialogToken { get; set; }
 

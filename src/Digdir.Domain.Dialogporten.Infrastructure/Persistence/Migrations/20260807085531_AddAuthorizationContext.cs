@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
@@ -35,29 +33,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 oldMaxLength: 255);
 
             migrationBuilder.CreateTable(
-                name: "AuthorizationContextUnauthorizedPresentation",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuthorizationContextUnauthorizedPresentation", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AuthorizationContext",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuidv7()"),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp at time zone 'utc'"),
                     ServiceResource = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     AdditionalResourceAttribute = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     Parties = table.Column<List<string>>(type: "character varying(255)[]", nullable: false),
                     IncludeDialogParty = table.Column<bool>(type: "boolean", nullable: false),
                     Action = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    UnauthorizedPresentationId = table.Column<int>(type: "integer", nullable: false),
+                    UnauthorizedPresentation = table.Column<short>(type: "smallint", nullable: false),
                     Discriminator = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     AttachmentId = table.Column<Guid>(type: "uuid", nullable: true),
                     ApiActionId = table.Column<Guid>(type: "uuid", nullable: true),
@@ -74,12 +60,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         principalTable: "Attachment",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AuthorizationContext_AuthorizationContextUnauthorizedPresen~",
-                        column: x => x.UnauthorizedPresentationId,
-                        principalTable: "AuthorizationContextUnauthorizedPresentation",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AuthorizationContext_DialogApiAction_ApiActionId",
                         column: x => x.ApiActionId,
@@ -104,15 +84,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         principalTable: "DialogTransmission",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "AuthorizationContextUnauthorizedPresentation",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 1, "Disabled" },
-                    { 2, "Redacted" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -149,11 +120,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 column: "TransmissionId",
                 unique: true,
                 filter: "\"TransmissionId\" IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AuthorizationContext_UnauthorizedPresentationId",
-                table: "AuthorizationContext",
-                column: "UnauthorizedPresentationId");
         }
 
         /// <inheritdoc />
@@ -161,9 +127,6 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AuthorizationContext");
-
-            migrationBuilder.DropTable(
-                name: "AuthorizationContextUnauthorizedPresentation");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Action",

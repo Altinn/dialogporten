@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -7,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
@@ -192,6 +194,7 @@ internal static class DialogApiActionMapExtensions
             Id = source.Id,
             Action = source.Action,
             AuthorizationAttribute = source.AuthorizationAttribute,
+            AuthorizationContext = source.AuthorizationContext.ToDto(),
             Name = source.Name,
             Endpoints = source.Endpoints.ToDtoList(x => x.ToDto())
         };
@@ -227,6 +230,7 @@ internal static class DialogGuiActionMapExtensions
             Action = source.Action,
             Url = source.Url,
             AuthorizationAttribute = source.AuthorizationAttribute,
+            AuthorizationContext = source.AuthorizationContext.ToDto(),
             IsDeleteDialogAction = source.IsDeleteDialogAction,
             Priority = source.PriorityId,
             HttpMethod = source.HttpMethodId,
@@ -242,6 +246,7 @@ internal static class DialogAttachmentMapExtensions
     {
         internal DialogAttachmentDto ToDto() => new()
         {
+            AuthorizationContext = source.AuthorizationContext.ToDto(),
             Id = source.Id,
             DisplayName = source.DisplayName.ToDtoList()!,
             Name = source.Name,
@@ -293,7 +298,8 @@ internal static class DialogTransmissionMapExtensions
             Id = source.Id,
             IdempotentKey = source.IdempotentKey,
             CreatedAt = source.CreatedAt,
-            AuthorizationAttribute = source.AuthorizationAttribute,
+            AuthorizationAttribute = source.AuthorizationAttribute.WithoutExclusionSentinel,
+            AuthorizationContext = source.AuthorizationContext.ToDto(),
             ExtendedType = source.ExtendedType,
             ExternalReference = source.ExternalReference,
             RelatedTransmissionId = source.RelatedTransmissionId,
@@ -313,6 +319,7 @@ internal static class DialogTransmissionAttachmentMapExtensions
     {
         internal DialogTransmissionAttachmentDto ToDto() => new()
         {
+            AuthorizationContext = source.AuthorizationContext.ToDto(),
             Id = source.Id,
             DisplayName = source.DisplayName.ToDtoList()!,
             Name = source.Name,
@@ -328,6 +335,7 @@ internal static class DialogTransmissionNavigationalActionMapExtensions
     {
         internal DialogTransmissionNavigationalActionDto ToDto() => new()
         {
+            AuthorizationContext = source.AuthorizationContext.ToDto(),
             Title = source.Title.ToDtoList()!,
             Url = source.Url,
             ExpiresAt = source.ExpiresAt
@@ -341,5 +349,23 @@ internal static class NullableCollectionMapExtensions
     {
         internal List<TDestination> ToDtoList<TDestination>(Func<TSource, TDestination> map) =>
             source?.Select(map).ToList()!;
+    }
+}
+
+internal static class AuthorizationContextMapExtensions
+{
+    extension(AuthorizationContext? source)
+    {
+        internal AuthorizationContextDto? ToDto() => source is null
+            ? null
+            : new AuthorizationContextDto
+            {
+                ServiceResource = source.ServiceResource,
+                AdditionalResourceAttribute = source.AdditionalResourceAttribute,
+                Parties = [.. source.Parties],
+                IncludeDialogParty = source.IncludeDialogParty,
+                Action = source.Action,
+                UnauthorizedPresentation = source.UnauthorizedPresentation
+            };
     }
 }

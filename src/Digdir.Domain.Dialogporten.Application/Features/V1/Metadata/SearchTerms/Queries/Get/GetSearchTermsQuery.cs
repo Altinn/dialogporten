@@ -14,6 +14,14 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.SearchTerm
 public sealed class GetSearchTermsQuery : IRequest<GetSearchTermsResult>, IFeatureMetricServiceResourceIgnoreRequest
 {
     public List<AcceptedLanguage>? AcceptedLanguages { get; set; }
+
+    /// <summary>
+    /// When true, only <see cref="SearchTermsDto.Language"/> and <see cref="SearchTermsDto.GeneratedAt"/>
+    /// are populated (<see cref="SearchTermsDto.Words"/> is empty), skipping the jsonb wordlist transfer
+    /// and deserialization. Lets HTTP conditional requests (ETag / If-Modified-Since) be answered
+    /// without paying for the payload they won't return.
+    /// </summary>
+    public bool MetadataOnly { get; set; }
 }
 
 [GenerateOneOf]
@@ -35,6 +43,25 @@ internal sealed class GetSearchTermsQueryHandler : IRequestHandler<GetSearchTerm
     public async Task<GetSearchTermsResult> Handle(GetSearchTermsQuery request, CancellationToken cancellationToken)
     {
         var language = ResolveLanguage(request.AcceptedLanguages);
+
+        if (request.MetadataOnly)
+        {
+            // Project past the jsonb Words column entirely — this is the hot path for 304s.
+            var meta = await _db.SearchTermLists
+                .AsNoTracking()
+                .Where(x => x.Language == language)
+                .Select(x => new { x.GeneratedAt })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return meta is null
+                ? new EntityNotFound<SearchTermList>([language])
+                : new SearchTermsDto
+                {
+                    Language = language,
+                    GeneratedAt = meta.GeneratedAt,
+                    Words = []
+                };
+        }
 
         var document = await _db.SearchTermLists
             .AsNoTracking()

@@ -38,36 +38,72 @@ public sealed class GetSearchTermsEndpoint : Endpoint<GetSearchTermsRequest, Get
     [EnableResponseCompression]
     public override async Task HandleAsync(GetSearchTermsRequest req, CancellationToken ct)
     {
+        // The representation is negotiated on Accept-Language; without Vary, shared caches would
+        // serve one language's payload to clients requesting another. Set before matching the
+        // result so it also covers 404 — a language-specific not-found is cacheable too.
+        HttpContext.Response.Headers.Append(HeaderNames.Vary, HeaderNames.AcceptLanguage);
+
+        var acceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage;
+
+        // Conditional requests get a metadata-only round trip first: regeneration is nightly and
+        // clients revalidate with ETags, so in steady state nearly every request is a 304 — which
+        // must not pay for fetching and deserializing the full jsonb wordlist. Unconditional
+        // requests need the full payload no matter what, so they skip straight to it.
+        if (HasConditionalHeaders())
+        {
+            var metaResult = await _sender.Send(new GetSearchTermsQuery
+            {
+                AcceptedLanguages = acceptedLanguages,
+                MetadataOnly = true
+            }, ct);
+
+            if (metaResult.TryPickT1(out var notFound, out var meta))
+            {
+                await this.NotFoundAsync(notFound, ct);
+                return;
+            }
+
+            var etag = BuildEtag(meta);
+            if (IsNotModified(etag, meta.GeneratedAt))
+            {
+                SetValidatorHeaders(etag, meta.GeneratedAt);
+                await Send.ResultAsync(Results.StatusCode(StatusCodes.Status304NotModified));
+                return;
+            }
+        }
+
         var result = await _sender.Send(new GetSearchTermsQuery
         {
-            AcceptedLanguages = req.AcceptedLanguages?.AcceptedLanguage
+            AcceptedLanguages = acceptedLanguages
         }, ct);
 
         await result.Match(
             async dto =>
             {
-                // Strong validator derived from the resolved language and the generation timestamp.
-                // The language MUST be part of the validator: the same URL serves different
-                // representations per Accept-Language, and a timestamp-only ETag would let a client
-                // switching languages revalidate its old copy into a bogus 304.
-                var etag = $"\"{dto.Language}-{dto.GeneratedAt.UtcTicks}\"";
-                HttpContext.Response.Headers.ETag = etag;
-                HttpContext.Response.Headers.LastModified =
-                    dto.GeneratedAt.UtcDateTime.ToString("R", CultureInfo.InvariantCulture);
-                // The representation is negotiated on Accept-Language; without Vary, shared caches
-                // would serve one language's payload to clients requesting another.
-                HttpContext.Response.Headers.Append(HeaderNames.Vary, HeaderNames.AcceptLanguage);
-
-                if (IsNotModified(etag, dto.GeneratedAt))
-                {
-                    await Send.ResultAsync(Results.StatusCode(StatusCodes.Status304NotModified));
-                    return;
-                }
-
+                // Validators derive from the payload actually served: a regeneration landing
+                // between the two queries changes GeneratedAt, and the headers must match the body.
+                SetValidatorHeaders(BuildEtag(dto), dto.GeneratedAt);
                 await Send.OkAsync(GetSearchTermsResponse.From(dto), ct);
             },
-            notFound => this.NotFoundAsync(notFound, ct));
+            nf => this.NotFoundAsync(nf, ct));
     }
+
+    // Strong validator derived from the resolved language and the generation timestamp.
+    // The language MUST be part of the validator: the same URL serves different
+    // representations per Accept-Language, and a timestamp-only ETag would let a client
+    // switching languages revalidate its old copy into a bogus 304.
+    private static string BuildEtag(SearchTermsDto dto) => $"\"{dto.Language}-{dto.GeneratedAt.UtcTicks}\"";
+
+    private void SetValidatorHeaders(string etag, DateTimeOffset generatedAt)
+    {
+        HttpContext.Response.Headers.ETag = etag;
+        HttpContext.Response.Headers.LastModified =
+            generatedAt.UtcDateTime.ToString("R", CultureInfo.InvariantCulture);
+    }
+
+    private bool HasConditionalHeaders() =>
+        HttpContext.Request.Headers.IfNoneMatch.Count > 0
+        || !string.IsNullOrEmpty(HttpContext.Request.Headers.IfModifiedSince.ToString());
 
     private bool IsNotModified(string etag, DateTimeOffset generatedAt)
     {

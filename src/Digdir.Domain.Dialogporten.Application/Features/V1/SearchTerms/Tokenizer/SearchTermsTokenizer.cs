@@ -23,8 +23,12 @@ internal sealed partial class SearchTermsTokenizer : ISearchTermsTokenizer
         return tokens;
     }
 
-    // Letters only, including Norwegian æøå and other accented letters. No digits — those are
-    // dropped upstream because PII heuristics reject anything containing digits anyway.
-    [GeneratedRegex(@"\p{L}+", RegexOptions.CultureInvariant)]
+    // Letters only, including Norwegian æøå and other accented letters. The lookarounds require
+    // a non-alphanumeric boundary on both sides so letter runs inside alphanumeric identifiers
+    // ('Hansen123', 'REF2024ABC') are rejected outright rather than yielding a fragment like
+    // 'hansen' — such fragments are identifier/PII noise, and nothing downstream re-checks for
+    // digit adjacency. Both lookarounds must exclude letters as well as digits: a digit-only
+    // lookahead ((?!\p{N})) lets the engine backtrack \p{L}+ one char and match 'Hanse' anyway.
+    [GeneratedRegex(@"(?<![\p{L}\p{N}])\p{L}+(?![\p{L}\p{N}])", RegexOptions.CultureInvariant)]
     private static partial Regex WordRegex();
 }

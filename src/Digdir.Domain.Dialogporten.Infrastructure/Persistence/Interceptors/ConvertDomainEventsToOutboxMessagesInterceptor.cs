@@ -52,26 +52,32 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        _domainEvents = dbContext.ChangeTracker.Entries()
-            .SelectMany(x =>
-                x.Entity is IEventPublisher publisher
-                    ? publisher.PopDomainEvents()
-                    : [])
-            .Where(EventShouldBeIncluded)
+        var publishers = dbContext.ChangeTracker.Entries()
+            .Select(x => x.Entity)
+            .OfType<IEventPublisher>()
             .ToList();
 
-        if (_domainEvents.Count == 0)
+        if (!publishers.Any(x => x.HasEvents()))
         {
             // Nothing to publish, so don't touch the publishing services at all. Hosts registered
             // without pub/sub capabilities (e.g. the Janitor) have no IPublishEndpoint or
             // ITopicEventSender registered, and resolving them here would fail every SaveChanges
             // that merely writes entities producing no domain events.
+            _domainEvents = [];
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
         // There are events to publish, so the publishing services are genuinely required. Fail
-        // loudly (before we attempt any publishing) if the host cannot provide them.
+        // loudly if the host cannot provide them — and do so before PopDomainEvents, which clears
+        // the entities' event queues: popping first would let a retried SaveChanges on the same
+        // context persist the entities with their events silently dropped.
         EnsureLazyLoadedServices();
+
+        _domainEvents = publishers
+            .SelectMany(x => x.PopDomainEvents())
+            .Where(EventShouldBeIncluded)
+            .ToList();
+
         foreach (var domainEvent in _domainEvents)
         {
             domainEvent.Metadata = _applicationContext.Metadata;

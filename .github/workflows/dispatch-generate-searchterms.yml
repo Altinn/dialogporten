@@ -50,11 +50,16 @@ jobs:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
         with:
           inlineScript: |
-            existing_execution="$(az containerapp job execution list \
+            # Fail closed: if we cannot list executions we cannot rule out an active one,
+            # and starting anyway could cause concurrent scans with conflicting replacements.
+            if ! existing_execution="$(az containerapp job execution list \
               --name "${JOB_NAME}" \
               --resource-group "${RESOURCE_GROUP}" \
               --query "[?properties.status=='Running' || properties.status=='Processing'] | [0].name" \
-              --output tsv || true)"
+              --output tsv)"; then
+              echo "Failed to list executions for ${JOB_NAME}; refusing to start the job"
+              exit 1
+            fi
 
             if [[ -n "${existing_execution}" ]]; then
               echo "An execution is already running: ${existing_execution}"

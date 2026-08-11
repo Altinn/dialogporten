@@ -1,7 +1,10 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
@@ -23,6 +26,8 @@ internal static class Mappers
         destination.RelatedTransmissionId = source.RelatedTransmissionId;
         destination.TypeId = source.Type;
         destination.Sender = source.Sender.ToActor<DialogTransmissionSenderActor>();
+        destination.AuthorizationContext = source.AuthorizationContext
+            .ToAuthorizationContext(destination.AuthorizationContext);
         destination.Content = source.Content.ToDialogTransmissionContentList(destination.Content) ?? [];
         destination.NavigationalActions = source.NavigationalActions
             .Select(x => x.ToDialogTransmissionNavigationalAction())
@@ -36,7 +41,8 @@ internal static class Mappers
             Name = source.Name,
             ExpiresAt = source.ExpiresAt,
             DisplayName = source.DisplayName.ToLocalizationSet<AttachmentDisplayName>(),
-            Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList()
+            Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList(),
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<AttachmentAuthorizationContext>()
         };
 
     // Urls are merged separately by the handler.
@@ -45,6 +51,8 @@ internal static class Mappers
         destination.Name = source.Name;
         destination.ExpiresAt = source.ExpiresAt;
         destination.DisplayName = source.DisplayName.ToLocalizationSet(destination.DisplayName);
+        destination.AuthorizationContext = source.AuthorizationContext
+            .ToAuthorizationContext(destination.AuthorizationContext);
     }
 
     internal static AttachmentUrl ToAttachmentUrl(this TransmissionAttachmentUrlDto source) =>
@@ -70,6 +78,7 @@ internal static class Mappers
         {
             Url = source.Url,
             ExpiresAt = source.ExpiresAt,
-            Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!
+            Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!,
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<DialogTransmissionNavigationalActionAuthorizationContext>()
         };
 }

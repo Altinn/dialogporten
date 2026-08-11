@@ -106,7 +106,9 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "isAuthorized": true,
+      "contextToken": null
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -125,7 +127,9 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "isAuthorized": true,
+      "contextToken": null
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -144,7 +148,9 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "isAuthorized": true,
+      "contextToken": null
     }
   ],
   "transmissions": [
@@ -153,6 +159,7 @@
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
       "isAuthorized": true,
+      "contextToken": null,
       "extendedType": "https://digdir.no/transmission-type/authorized",
       "externalReference": "authorized-transmission",
       "relatedTransmissionId": null,
@@ -229,7 +236,9 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true,
+          "contextToken": null
         }
       ],
       "navigationalActions": [
@@ -245,7 +254,9 @@
             }
           ],
           "url": "https://digdir.no/transmission/expired-navigation",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true,
+          "contextToken": null
         },
         {
           "title": [
@@ -255,7 +266,9 @@
             }
           ],
           "url": "https://digdir.no/transmission/active-navigation",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true,
+          "contextToken": null
         }
       ]
     },
@@ -264,6 +277,7 @@
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "urn:altinn:resource:ttd-altinn-events-automated-tests",
       "isAuthorized": false,
+      "contextToken": null,
       "extendedType": null,
       "externalReference": null,
       "relatedTransmissionId": null,
@@ -327,7 +341,9 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "isAuthorized": false,
+          "contextToken": null
         }
       ],
       "navigationalActions": [
@@ -339,7 +355,9 @@
             }
           ],
           "url": "urn:dialogporten:unauthorized",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": false,
+          "contextToken": null
         }
       ]
     },
@@ -347,7 +365,8 @@
       "id": "00000000-0000-0000-0000-000000000000",
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "someunavailablesubresource",
-      "isAuthorized": false,
+      "isAuthorized": true,
+      "contextToken": null,
       "extendedType": null,
       "externalReference": null,
       "relatedTransmissionId": null,
@@ -406,12 +425,14 @@
           "urls": [
             {
               "id": "00000000-0000-0000-0000-000000000000",
-              "url": "urn:dialogporten:unauthorized",
+              "url": "https://digdir.apps.tt02.altinn.no/some-other-url",
               "mediaType": null,
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "isAuthorized": true,
+          "contextToken": null
         }
       ],
       "navigationalActions": []
@@ -424,6 +445,7 @@
       "url": "https://digdir.no/",
       "authorizationAttribute": null,
       "isAuthorized": true,
+      "contextToken": null,
       "isDeleteDialogAction": false,
       "priority": "Primary",
       "httpMethod": "GET",
@@ -441,6 +463,7 @@
       "url": "https://digdir.no/",
       "authorizationAttribute": null,
       "isAuthorized": true,
+      "contextToken": null,
       "isDeleteDialogAction": false,
       "priority": "Secondary",
       "httpMethod": "POST",
@@ -464,6 +487,7 @@
       "action": "some_unauthorized_action",
       "authorizationAttribute": null,
       "isAuthorized": false,
+      "contextToken": null,
       "name": "confirm",
       "endpoints": [
         {

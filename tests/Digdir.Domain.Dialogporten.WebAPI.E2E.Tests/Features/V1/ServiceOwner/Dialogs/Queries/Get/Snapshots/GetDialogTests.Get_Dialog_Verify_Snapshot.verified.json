@@ -197,7 +197,7 @@
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "someunavailablesubresource",
       "authorizationContext": null,
-      "isAuthorized": false,
+      "isAuthorized": true,
       "extendedType": "https://digdir.com/transmission-type",
       "externalReference": "second-transmission",
       "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
@@ -266,7 +266,7 @@
           ],
           "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
           "authorizationContext": null,
-          "isAuthorized": false
+          "isAuthorized": true
         }
       ],
       "navigationalActions": [
@@ -280,7 +280,7 @@
           "url": "https://altinn.no/get-dialog-transmission-navigation",
           "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
           "authorizationContext": null,
-          "isAuthorized": false
+          "isAuthorized": true
         }
       ]
     }

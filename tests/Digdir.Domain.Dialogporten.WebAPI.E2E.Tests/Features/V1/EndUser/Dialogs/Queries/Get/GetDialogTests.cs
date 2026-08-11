@@ -108,9 +108,12 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
             .Single(t => t.AuthorizationAttribute == "urn:altinn:resource:ttd-altinn-events-automated-tests");
         unavailableExternalResource.IsAuthorized.Should().BeFalse();
 
+        // Subresource/task-type attributes derive the "read" action, and XACML target matching ignores
+        // additional request attributes — so main-resource read access authorizes this transmission.
+        // (Narrowing requires an authorizationContext with an explicit action and a matching policy rule.)
         var unavailableSubresource = content.Transmissions
             .Single(t => t.AuthorizationAttribute == "someunavailablesubresource");
-        unavailableSubresource.IsAuthorized.Should().BeFalse();
+        unavailableSubresource.IsAuthorized.Should().BeTrue();
     }
 
     [E2EFact]

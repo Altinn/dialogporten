@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 
@@ -306,7 +307,14 @@ public sealed class DialogTransmissionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this transmission.
+    /// Null when the transmission uses legacy authorization fields.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Flag indicating if the authenticated user supplied in the query is authorized for this transmission.
@@ -521,9 +529,13 @@ public sealed class DialogApiActionDto
     /// <summary>
     /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
     /// which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+    ///
+    /// Null when the action was supplied with an authorizationContext, in which case the action is found in
+    /// authorizationContext.action.
     /// </summary>
     /// <example>write</example>
-    public string Action { get; set; } = null!;
+    [Obsolete($"Use '{nameof(AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -539,7 +551,14 @@ public sealed class DialogApiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// Null when the action uses legacy authorization fields.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// True if the authenticated user (set in the query) is authorized for this action.
@@ -621,8 +640,12 @@ public sealed class DialogGuiActionDto
 
     /// <summary>
     /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
+    ///
+    /// Null when the action was supplied with an authorizationContext, in which case the action is found in
+    /// authorizationContext.action.
     /// </summary>
-    public string Action { get; set; } = null!;
+    [Obsolete($"Use '{nameof(AuthorizationContext)}.{nameof(AuthorizationContextDto.Action)}' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered.
@@ -643,7 +666,14 @@ public sealed class DialogGuiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// Null when the action uses legacy authorization fields.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Whether the user, if supplied in the query, is authorized to perform the action.
@@ -706,6 +736,20 @@ public sealed class DialogAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+    /// The XACML action defaults to "read". Access to the parent is always required in addition; this context
+    /// can only further restrict access, never widen it.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
+
+    /// <summary>
+    /// Indicates whether the end user is authorized for this attachment.
+    ///
+    /// IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
+    /// </summary>
+    public bool? IsAuthorized { get; set; }
 }
 
 public sealed class DialogAttachmentUrlDto
@@ -765,6 +809,20 @@ public sealed class DialogTransmissionAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+    /// The XACML action defaults to "read". Access to the parent is always required in addition; this context
+    /// can only further restrict access, never widen it.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
+
+    /// <summary>
+    /// Indicates whether the end user is authorized for this attachment.
+    ///
+    /// IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
+    /// </summary>
+    public bool? IsAuthorized { get; set; }
 }
 
 public sealed class DialogTransmissionAttachmentUrlDto
@@ -818,4 +876,64 @@ public sealed class DialogTransmissionNavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+    /// The XACML action defaults to "read". Access to the parent is always required in addition; this context
+    /// can only further restrict access, never widen it.
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
+
+    /// <summary>
+    /// Indicates whether the end user is authorized for this navigational action.
+    ///
+    /// IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
+    /// </summary>
+    public bool? IsAuthorized { get; set; }
+}
+
+public sealed class AuthorizationContextDto
+{
+    /// <summary>
+    /// A service resource that overrides the dialog's own service resource in the authorization evaluation,
+    /// referring to another service policy.
+    /// </summary>
+    /// <example>urn:altinn:resource:some-other-service-identifier</example>
+    public string? ServiceResource { get; set; }
+
+    /// <summary>
+    /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
+    /// subresource.
+    /// </summary>
+    /// <example>
+    /// urn:altinn:task:Task_1
+    /// urn:altinn:subresource:mycustomresource
+    /// </example>
+    public string? AdditionalResourceAttribute { get; set; }
+
+    /// <summary>
+    /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
+    /// effective resource for at least one of the parties.
+    /// </summary>
+    /// <example>urn:altinn:organization:identifier-no:912345678</example>
+    public List<string> Parties { get; set; } = [];
+
+    /// <summary>
+    /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+    /// </summary>
+    public bool IncludeDialogParty { get; set; }
+
+    /// <summary>
+    /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
+    /// </summary>
+    /// <example>read</example>
+    public string? Action { get; set; }
+
+    /// <summary>
+    /// Controls how the entity is presented to end users that fail the authorization check:
+    /// "disabled" keeps the entity visible but masks its URLs and embedded content references, while
+    /// "redacted" additionally strips all content (titles, summaries, names, senders and children),
+    /// leaving only the entity's existence and timestamps.
+    /// </summary>
+    public AuthorizationContextUnauthorizedPresentation.Values UnauthorizedPresentation { get; set; }
 }

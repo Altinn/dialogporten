@@ -74,7 +74,7 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
             {
                 var transmission = x.Single();
                 transmission.IsAuthorized.Should().BeFalse();
-                transmission.Content.ContentReference.Should().NotBeNull();
+                transmission.Content!.ContentReference.Should().NotBeNull();
                 transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
                     .And.AllSatisfy(localization =>
                         localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));

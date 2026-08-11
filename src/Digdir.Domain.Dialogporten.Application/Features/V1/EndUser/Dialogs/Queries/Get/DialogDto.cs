@@ -161,6 +161,10 @@ public sealed class DialogDto
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,
     /// transmissions or attachments. It should also be used for front-channel embeds.
+    ///
+    /// Entities carrying an authorization context are the exception: they are issued their own, narrower
+    /// "contextToken" which must be used instead of this token, as the dialog token does not assert their grant.
+    /// See the "contextToken" property on the individual entities.
     /// </summary>
     public string? DialogToken { get; set; }
 
@@ -267,6 +271,7 @@ public sealed class DialogTransmissionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -274,6 +279,14 @@ public sealed class DialogTransmissionDto
     /// the attachments will not be available.
     /// </summary>
     public bool IsAuthorized { get; set; }
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
+    /// its authorization context. Only present when the transmission has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
+    /// including front-channel embeds.
+    /// </summary>
+    public string? ContextToken { get; set; }
 
     /// <summary>
     /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -299,8 +312,10 @@ public sealed class DialogTransmissionDto
 
     /// <summary>
     /// The actor that sent the transmission.
+    ///
+    /// Null when the transmission is redacted for the authenticated user (see "isAuthorized").
     /// </summary>
-    public ActorDto Sender { get; set; } = null!;
+    public ActorDto? Sender { get; set; }
 
     /// <summary>
     /// Indicates whether the dialog transmission has been opened.
@@ -309,8 +324,10 @@ public sealed class DialogTransmissionDto
 
     /// <summary>
     /// The transmission unstructured text content.
+    ///
+    /// Null when the transmission is redacted for the authenticated user (see "isAuthorized").
     /// </summary>
-    public DialogTransmissionContentDto Content { get; set; } = null!;
+    public DialogTransmissionContentDto? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.
@@ -473,6 +490,7 @@ public sealed class DialogApiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -480,6 +498,13 @@ public sealed class DialogApiActionDto
     /// and all endpoints will be replaced with a fixed placeholder.
     /// </summary>
     public bool IsAuthorized { get; set; }
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific action, as determined by its
+    /// authorization context. Only present when the action has an authorization context and the user is authorized.
+    /// Should be used instead of the dialog token against this action's endpoints.
+    /// </summary>
+    public string? ContextToken { get; set; }
 
     /// <summary>
     /// The logical name of the operation the API action refers to.
@@ -588,12 +613,20 @@ public sealed class DialogGuiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
     /// Whether the user is authorized to perform the action.
     /// </summary>
     public bool IsAuthorized { get; set; }
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific action, as determined by its
+    /// authorization context. Only present when the action has an authorization context and the user is authorized.
+    /// Should be used instead of the dialog token against this action's URL.
+    /// </summary>
+    public string? ContextToken { get; set; }
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -651,6 +684,19 @@ public sealed class DialogAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+    /// authorization context. Only present when the attachment has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against this attachment's URLs.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }
 
 public sealed class DialogAttachmentUrlDto
@@ -710,6 +756,19 @@ public sealed class DialogTransmissionAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+    /// authorization context. Only present when the attachment has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against this attachment's URLs.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }
 
 public sealed class DialogTransmissionAttachmentUrlDto
@@ -766,4 +825,17 @@ public sealed class DialogTransmissionNavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
+    /// by its authorization context. Only present when the navigational action has an authorization context and the
+    /// user is authorized. Should be used instead of the dialog token against this action's URL.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }

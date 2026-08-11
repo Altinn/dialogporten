@@ -22,18 +22,19 @@ public sealed class DialogDetailsAuthorizationResult
     public bool HasAccessToMainResource() =>
         AuthorizedChecks.Any(x => x.Check.Resource.Kind == AuthorizationResourceSpecKind.Main);
 
-    public bool HasAccessToAction(string requestedAction, string? authorizationAttribute)
-    {
-        var actions = AuthorizedChecks
-            .Where(x => x.Check.Action == requestedAction && x.Check.Resource.Kind != AuthorizationResourceSpecKind.Context)
-            .ToList();
-
-        if (actions.Count == 0) return false;
-
-        return authorizationAttribute is null
-            ? HasAccessToMainResource()
-            : actions.Any(x => x.Check.Resource.LegacyAuthorizationAttribute == authorizationAttribute);
-    }
+    /// <summary>
+    /// Whether the requested action was permitted on the exact resource the legacy entity refers to:
+    /// the main resource when no authorization attribute is given, otherwise that attribute.
+    /// </summary>
+    public bool HasAccessToAction(string requestedAction, string? authorizationAttribute) =>
+        authorizationAttribute is null
+            ? AuthorizedChecks.Any(x =>
+                x.Check.Action == requestedAction
+                && x.Check.Resource.Kind == AuthorizationResourceSpecKind.Main)
+            : AuthorizedChecks.Any(x =>
+                x.Check.Action == requestedAction
+                && x.Check.Resource.Kind == AuthorizationResourceSpecKind.Legacy
+                && x.Check.Resource.LegacyAuthorizationAttribute == authorizationAttribute);
 
     public bool HasReadAccessToMainResource() =>
         AuthorizedChecks.Any(x => x.Check is

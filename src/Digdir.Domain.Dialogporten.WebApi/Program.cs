@@ -285,6 +285,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();
             document.RemoveRequiredPropertiesFromSchemas();
+            document.ChangeEndUserContextPartyExample();
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;

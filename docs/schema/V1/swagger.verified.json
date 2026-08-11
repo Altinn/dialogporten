@@ -885,6 +885,23 @@
         },
         "type": "object"
       },
+      "V1EndUserCommon_ExcludedElement": {
+        "additionalProperties": false,
+        "description": "A stub standing in for an element the authenticated user is not authorized for, and whose authorization\ncontext asks for it to be excluded rather than disabled. The element is removed from the collection it\nbelongs to and recorded here instead, so that a client can tell \u0022this existed and you cannot see it\u0022\napart from \u0022this does not exist\u0022 without being shown anything about it.",
+        "properties": {
+          "createdAt": {
+            "description": "The UTC timestamp when the excluded element was created. Lets a client order exclusions against the\nelements it can see, e.g. to tell where in a transmission thread something is missing.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The identifier of the excluded element, matching the id it would have had in its own collection.",
+            "format": "guid",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "V1EndUserCommonActors_Actor": {
         "additionalProperties": false,
         "properties": {
@@ -1032,7 +1049,7 @@
             "type": "string"
           },
           "dialogToken": {
-            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.",
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nEntities carrying an authorization context are the exception: they are issued their own, narrower\n\u0022contextToken\u0022 which must be used instead of this token, as the dialog token does not assert their grant.\nSee the \u0022contextToken\u0022 property on the individual entities.",
             "nullable": true,
             "type": "string"
           },
@@ -1050,6 +1067,38 @@
                 "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_DialogEndUserContext"
               }
             ]
+          },
+          "excludedApiActions": {
+            "description": "API actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. An API action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "excludedAttachments": {
+            "description": "Dialog-level attachments that exist but are withheld from the authenticated user, listed by id and\ncreation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "excludedGuiActions": {
+            "description": "GUI actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. A GUI action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "excludedTransmissions": {
+            "description": "Transmissions that exist but are withheld from the authenticated user, listed by id and creation\ntime only. A transmission is excluded rather than returned with isAuthorized=false when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022; its children go with it.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "expiresAt": {
             "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
@@ -1258,8 +1307,15 @@
             "type": "string"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
+          },
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s endpoints.",
             "nullable": true,
             "type": "string"
           },
@@ -1350,6 +1406,11 @@
       "V1EndUserDialogsQueriesGet_DialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "nullable": true,
+            "type": "string"
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1368,6 +1429,10 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -1445,8 +1510,15 @@
             "type": "string"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
+          },
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s URL.",
             "nullable": true,
             "type": "string"
           },
@@ -1563,10 +1635,12 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -1576,10 +1650,31 @@
               }
             ]
           },
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "nullable": true,
+            "type": "string"
+          },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
             "type": "string"
+          },
+          "excludedAttachments": {
+            "description": "Transmission-level attachments that exist but are withheld from the authenticated user, listed by id\nand creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "excludedNavigationalActions": {
+            "description": "Navigational actions that exist but are withheld from the authenticated user, listed by id and\ncreation time only. A navigational action is excluded rather than returned with isAuthorized=false\nwhen its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "extendedType": {
             "description": "Arbitrary URI/URN describing a service-specific transmission type.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
@@ -1641,6 +1736,11 @@
       "V1EndUserDialogsQueriesGet_DialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "nullable": true,
+            "type": "string"
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1659,6 +1759,10 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -1743,11 +1847,20 @@
       "V1EndUserDialogsQueriesGet_DialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "nullable": true,
+            "type": "string"
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean"
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -1844,6 +1957,11 @@
       "V1EndUserDialogsQueriesGetTransmission_Attachment": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "nullable": true,
+            "type": "string"
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1862,6 +1980,10 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -1946,11 +2068,20 @@
       "V1EndUserDialogsQueriesGetTransmission_NavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "nullable": true,
+            "type": "string"
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean"
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -1981,9 +2112,11 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "content": {
             "description": "The content of the transmission.",
@@ -1992,6 +2125,11 @@
                 "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_Content"
               }
             ]
+          },
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "nullable": true,
+            "type": "string"
           },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
@@ -2003,6 +2141,22 @@
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "excludedAttachments": {
+            "description": "Attachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "excludedNavigationalActions": {
+            "description": "Navigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "extendedType": {
             "description": "The extended type URI for the transmission.",
@@ -2476,6 +2630,11 @@
       "V1EndUserDialogsQueriesSearchTransmissions_Attachment": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "nullable": true,
+            "type": "string"
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2494,6 +2653,10 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2578,11 +2741,20 @@
       "V1EndUserDialogsQueriesSearchTransmissions_NavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "nullable": true,
+            "type": "string"
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean"
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -2613,9 +2785,11 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "content": {
             "description": "The content of the transmission.",
@@ -2624,6 +2798,11 @@
                 "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_Content"
               }
             ]
+          },
+          "contextToken": {
+            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "nullable": true,
+            "type": "string"
           },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
@@ -2635,6 +2814,22 @@
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "excludedAttachments": {
+            "description": "Attachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "excludedNavigationalActions": {
+            "description": "Navigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "extendedType": {
             "description": "The extended type URI for the transmission.",

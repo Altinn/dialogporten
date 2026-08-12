@@ -150,8 +150,9 @@ This workflow facilitates the deployment of infrastructure to the specified envi
 
 The normal flow promotes a release tag through `main → test → [yt01 + staging] → prod`. Two dispatch
 workflows support deploying *outside* that chain. Both are run **from `main`** and take an explicit
-`ref` input (a branch or tag that exists in this repo; raw SHAs are not accepted) that is what
-actually gets built and deployed — GitHub only lists a
+`ref` input that is what actually gets built and deployed. The YT01 deploy accepts an existing
+branch or tag; the hotfix build accepts only an existing `hotfix/<name>` branch. Raw SHAs are not
+accepted. GitHub only lists a
 workflow in the "Run workflow" picker if the file exists on the chosen branch, so a hotfix branch cut
 from an older tag would not show a newly added workflow. Running from `main` and passing the target as
 `ref` avoids that.

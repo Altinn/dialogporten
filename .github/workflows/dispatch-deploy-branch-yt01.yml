@@ -47,9 +47,19 @@ jobs:
           # Only named branches/tags in this repository are deployable. Creating a named ref
           # requires write access, whereas a raw SHA can reference fork PR commits, which are
           # fetchable from this repository without any write access.
-          if ! git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}" \
-              "refs/heads/${INPUT_REF}" "refs/tags/${INPUT_REF}" >/dev/null; then
+          # check-ref-format rejects glob characters, which ls-remote would treat as patterns.
+          if ! git check-ref-format "refs/heads/${INPUT_REF}"; then
+            echo "::error::'${INPUT_REF}' is not a valid ref name."
+            exit 1
+          fi
+          status=0
+          git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}" \
+            "refs/heads/${INPUT_REF}" "refs/tags/${INPUT_REF}" >/dev/null || status=$?
+          if [[ "$status" -eq 2 ]]; then
             echo "::error::Ref '${INPUT_REF}' is not a branch or tag in ${GITHUB_REPOSITORY}."
+            exit 1
+          elif [[ "$status" -ne 0 ]]; then
+            echo "::error::Could not query refs in ${GITHUB_REPOSITORY} (git ls-remote exit ${status})."
             exit 1
           fi
 

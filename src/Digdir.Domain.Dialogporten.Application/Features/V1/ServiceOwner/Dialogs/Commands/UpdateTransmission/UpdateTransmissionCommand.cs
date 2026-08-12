@@ -161,11 +161,31 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         foreach (var (source, destination) in updateSets)
         {
             destination.UpdateFrom(source);
-            destination.Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList();
-            foreach (var url in destination.Urls)
-            {
-                _db.AttachmentUrls.Add(url);
-            }
+            destination.Urls
+                .Merge(source.Urls,
+                    destinationKeySelector: x => x.Id,
+                    sourceKeySelector: x => x.Id,
+                    create: CreateAttachmentUrls,
+                    update: UpdateAttachmentUrls,
+                    delete: DeleteDelegate.Default);
+        }
+    }
+
+    private static void UpdateAttachmentUrls(IEnumerable<UpdateSet<AttachmentUrl, TransmissionAttachmentUrlDto>> updateSets)
+    {
+        foreach (var (source, destination) in updateSets)
+        {
+            destination.UpdateFrom(source);
+        }
+    }
+
+    private IEnumerable<AttachmentUrl> CreateAttachmentUrls(IEnumerable<TransmissionAttachmentUrlDto> creatables)
+    {
+        foreach (var dto in creatables)
+        {
+            var url = dto.ToAttachmentUrl();
+            _db.AttachmentUrls.Add(url);
+            yield return url;
         }
     }
 

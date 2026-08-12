@@ -39,7 +39,7 @@ internal static class Mappers
             Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList()
         };
 
-    // Urls are replaced separately by the handler.
+    // Urls are merged separately by the handler.
     internal static void UpdateFrom(this DialogTransmissionAttachment destination, TransmissionAttachmentDto source)
     {
         destination.Name = source.Name;
@@ -50,10 +50,19 @@ internal static class Mappers
     internal static AttachmentUrl ToAttachmentUrl(this TransmissionAttachmentUrlDto source) =>
         new()
         {
+            Id = source.Id ?? Guid.Empty,
             Url = source.Url,
             MediaType = source.MediaType,
             ConsumerTypeId = source.ConsumerType
         };
+
+    internal static void UpdateFrom(this AttachmentUrl destination, TransmissionAttachmentUrlDto source)
+    {
+        destination.Id = source.Id ?? destination.Id;
+        destination.Url = source.Url;
+        destination.MediaType = source.MediaType;
+        destination.ConsumerTypeId = source.ConsumerType;
+    }
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(
         this TransmissionNavigationalActionDto source) =>

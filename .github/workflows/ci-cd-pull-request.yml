@@ -6,6 +6,13 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
+# Supersede in-flight runs for the same PR. Without this, every force-push (rebases,
+# amends, and stacked-PR restacks in particular) leaves the previous run to complete,
+# so a single restack of an N-branch stack can occupy 2N runs concurrently.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   generate-git-short-sha:
     name: Generate git short sha
@@ -32,10 +39,14 @@ jobs:
     permissions:
       contents: read
 
+  # These images are built with `push: false`, so on a PR they only prove the images still
+  # build. `build-and-test` already compiles the same projects, so the marginal signal is
+  # limited to the container context itself — gate on the files that can break that.
+  # `ci-cd-main` rebuilds and pushes them on merge regardless.
   build-docker-images:
     uses: ./.github/workflows/workflow-publish-docker-images.yml
     needs: [ build-and-test, check-for-changes ]
-    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    if: ${{ needs.check-for-changes.outputs.hasDockerChanges == 'true' }}
     permissions:
       contents: read
       packages: write
@@ -67,7 +78,12 @@ jobs:
     # but was not vulnerable on the base commit. Covers both direct and transitive dependencies
     # via `dotnet list package --vulnerable --include-transitive`, since GitHub's dependency graph
     # does not parse packages.lock.json for NuGet.
+    # Restores twice (base + head), so it is gated on the manifests that can change what
+    # NuGet resolves. A PR that touches no dependency manifest cannot introduce a
+    # package@version pair that the base commit did not already have.
     name: Vulnerabilities introduced
+    needs: [ check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasDependencyChanges == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

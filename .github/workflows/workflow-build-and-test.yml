@@ -20,6 +20,10 @@ jobs:
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: ./global.json
+          # Safe with RestorePackagesWithLockFile: the lock files are the cache key, and
+          # `restore --locked-mode` below still fails if resolution drifts from them.
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
 
       - name: Restore
         run: dotnet restore --locked-mode

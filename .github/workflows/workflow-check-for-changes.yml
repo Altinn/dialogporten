@@ -76,8 +76,11 @@ jobs:
       hasWebApiEndUserClientChanges: ${{ steps.filter-backend.outputs.web_api_enduser_client_any_modified == 'true'}}
       hasWebApiServiceOwnerClientChanges: ${{ steps.filter-backend.outputs.web_api_serviceowner_client_any_modified == 'true'}}
       hasSchemaPackageChanges: ${{ steps.filter-backend.outputs.schema_package_any_modified == 'true'}}
-      hasDependencyChanges: ${{ steps.filter-backend.outputs.dependencies_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}
-      hasDockerChanges: ${{ steps.filter-backend.outputs.docker_any_modified == 'true' || steps.filter-backend.outputs.dependencies_any_modified == 'true' || steps.filter.outputs.github_workflows_any_modified == 'true' }}
+      # Deliberately not OR'd with github_workflows_any_modified, unlike hasBackendChanges and
+      # hasInfraChanges: the two filters below already name the workflows that govern these
+      # jobs, so an unrelated workflow edit no longer rebuilds every image and rescans NuGet.
+      hasDependencyChanges: ${{ steps.filter-backend.outputs.dependencies_any_modified == 'true' }}
+      hasDockerChanges: ${{ steps.filter-backend.outputs.docker_any_modified == 'true' || steps.filter-backend.outputs.dependencies_any_modified == 'true' }}
     steps:
       - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
@@ -144,7 +147,8 @@ jobs:
             schema_package:
               - 'docs/schema/V*/**/*'
             # Anything that can change what NuGet resolves, and therefore what
-            # `dotnet list package --vulnerable` reports.
+            # `dotnet list package --vulnerable` reports. The last entry is the workflow
+            # that defines the scan itself, so a change to it still exercises it.
             dependencies:
               - '**/packages.lock.json'
               - '**/*.csproj'
@@ -153,11 +157,15 @@ jobs:
               - 'global.json'
               - 'nuget.config'
               - 'NuGet.config'
-            # Anything that can break an image build without also breaking `dotnet build`.
+              - '.github/workflows/ci-cd-pull-request.yml'
+            # Anything that can break an image build without also breaking `dotnet build`,
+            # plus the image-build pipeline and its call site.
             docker:
               - '**/Dockerfile'
               - '**/*.dockerfile'
               - '.dockerignore'
+              - '.github/workflows/workflow-publish-docker-images.yml'
+              - '.github/workflows/ci-cd-pull-request.yml'
 
       - name: Log backend changes
         run: |

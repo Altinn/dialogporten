@@ -150,7 +150,8 @@ This workflow facilitates the deployment of infrastructure to the specified envi
 
 The normal flow promotes a release tag through `main → test → [yt01 + staging] → prod`. Two dispatch
 workflows support deploying *outside* that chain. Both are run **from `main`** and take an explicit
-`ref` input (branch/tag/sha) that is what actually gets built and deployed — GitHub only lists a
+`ref` input (a branch or tag that exists in this repo; raw SHAs are not accepted) that is what
+actually gets built and deployed — GitHub only lists a
 workflow in the "Run workflow" picker if the file exists on the chosen branch, so a hotfix branch cut
 from an older tag would not show a newly added workflow. Running from `main` and passing the target as
 `ref` avoids that.
@@ -167,7 +168,7 @@ handled by their own dispatch workflows (`dispatch-apps.yml`, `dispatch-infrastr
 
 1. YT01 is scale-to-zero. Bring the environment up first via the `Scale yt01 (manual)` workflow
    (`dispatch-scale-yt01-manual.yml`, action `on`).
-2. Run **Dispatch Deploy Branch to YT01** from `main` with **ref** = the branch/tag/sha to deploy.
+2. Run **Dispatch Deploy Branch to YT01** from `main` with **ref** = the branch/tag to deploy.
 
 Images are tagged `<version>-<shortsha>` (from `version.txt` + the ref's short sha), same as the main
 build convention.

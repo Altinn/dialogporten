@@ -1,4 +1,4 @@
-# Deploys an arbitrary (typically unmerged) branch/tag/sha to YT01 for early performance testing.
+# Deploys an arbitrary (typically unmerged) branch/tag to YT01 for early performance testing.
 #
 # This is an *ephemeral* deploy: it builds and pushes images from the given ref and updates the YT01
 # container apps, but it deliberately does NOT update the dialogporten-manifests GitOps repo. The next
@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Branch, tag or sha to build and deploy (e.g. my-feature-branch)"
+        description: "Branch or tag to build and deploy (e.g. my-feature-branch)"
         required: true
         type: string
 
@@ -38,6 +38,21 @@ jobs:
     outputs:
       imageTag: ${{ steps.resolve.outputs.imageTag }}
     steps:
+      - name: Validate dispatched ref
+        env:
+          # Via env (not interpolated into the script) so a crafted ref can't inject shell commands.
+          INPUT_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          # Only named branches/tags in this repository are deployable. Creating a named ref
+          # requires write access, whereas a raw SHA can reference fork PR commits, which are
+          # fetchable from this repository without any write access.
+          if ! git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}" \
+              "refs/heads/${INPUT_REF}" "refs/tags/${INPUT_REF}" >/dev/null; then
+            echo "::error::Ref '${INPUT_REF}' is not a branch or tag in ${GITHUB_REPOSITORY}."
+            exit 1
+          fi
+
       - name: "Checkout ref"
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:

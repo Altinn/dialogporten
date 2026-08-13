@@ -51,10 +51,10 @@ on:
         description: "Schema package content or infrastructure has changed"
         value: ${{ jobs.check-for-changes.outputs.hasSchemaPackageChanges }}
       hasDependencyChanges:
-        description: "NuGet dependency manifests or SDK pinning changed"
+        description: "NuGet resolution inputs, SDK pinning, or a workflow governing the dependency scan changed"
         value: ${{ jobs.check-for-changes.outputs.hasDependencyChanges }}
       hasDockerChanges:
-        description: "Dockerfiles, docker context or dependency manifests changed"
+        description: "Docker build context, NuGet resolution inputs, or a workflow governing the image build changed"
         value: ${{ jobs.check-for-changes.outputs.hasDockerChanges }}
 
 jobs:
@@ -147,8 +147,8 @@ jobs:
             schema_package:
               - 'docs/schema/V*/**/*'
             # Anything that can change what NuGet resolves, and therefore what
-            # `dotnet list package --vulnerable` reports. The last entry is the workflow
-            # that defines the scan itself, so a change to it still exercises it.
+            # `dotnet list package --vulnerable` reports. The last two entries are the workflows
+            # that define and gate the scan, so a change to either still exercises it.
             dependencies:
               - '**/packages.lock.json'
               - '**/*.csproj'
@@ -158,14 +158,16 @@ jobs:
               - 'nuget.config'
               - 'NuGet.config'
               - '.github/workflows/ci-cd-pull-request.yml'
+              - '.github/workflows/workflow-check-for-changes.yml'
             # Anything that can break an image build without also breaking `dotnet build`,
-            # plus the image-build pipeline and its call site.
+            # plus the image-build pipeline, its call site, and this filter.
             docker:
               - '**/Dockerfile'
               - '**/*.dockerfile'
               - '.dockerignore'
               - '.github/workflows/workflow-publish-docker-images.yml'
               - '.github/workflows/ci-cd-pull-request.yml'
+              - '.github/workflows/workflow-check-for-changes.yml'
 
       - name: Log backend changes
         run: |

@@ -43,10 +43,14 @@ jobs:
   # build. `build-and-test` already compiles the same projects, so the marginal signal is
   # limited to the container context itself — gate on the files that can break that.
   # `ci-cd-main` rebuilds and pushes them on merge regardless.
+  # `build-and-test` stays in `needs` purely for ordering — don't burn five image builds on a
+  # branch whose tests fail. Its gate is narrower than this one though (a `.dockerignore`,
+  # `global.json` or `Directory.Build.props` change touches no `src/**` or `tests/**` file), so
+  # it can legitimately be skipped here, and a skipped dependency would otherwise skip this job.
   build-docker-images:
     uses: ./.github/workflows/workflow-publish-docker-images.yml
     needs: [ build-and-test, check-for-changes ]
-    if: ${{ needs.check-for-changes.outputs.hasDockerChanges == 'true' }}
+    if: ${{ always() && !failure() && !cancelled() && needs.check-for-changes.outputs.hasDockerChanges == 'true' }}
     permissions:
       contents: read
       packages: write

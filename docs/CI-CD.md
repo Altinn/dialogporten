@@ -253,6 +253,21 @@ releases.
    - Migrations run only when database changes exist
    - SDK published only on API/schema changes
 
+4. **Schema npm publishing uses a different base**
+   `ci-cd-publish-schema.yml` does *not* diff against a deployment watermark or
+   against the triggering push/release. It resolves the newest version published
+   to npm, maps it back to a commit (`1.118.6` → tag `v1.118.6`,
+   `1.118.10-baed70b` → that commit), and uses that as `apps_base_sha`.
+
+   The reason is that every other candidate base advances unconditionally. If a
+   publish fails, is skipped, or has its run evicted from the concurrency queue,
+   a marker like `previous_release_sha` or `github.event.before` has already
+   moved past the schema change, so the next run's diff window never contains it
+   and the change is silently never published. A base taken from the registry
+   cannot drift away from what was actually published, so the next run always
+   catches up. If npm or the GitHub API is unreachable the workflow logs a
+   warning and falls back to the triggering push/release SHA.
+
 ### 3. Implementation Example
 
 ```yaml

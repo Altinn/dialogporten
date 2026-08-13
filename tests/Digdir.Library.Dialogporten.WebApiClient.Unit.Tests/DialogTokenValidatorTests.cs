@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Altinn.ApiClients.Dialogporten;
 using Altinn.ApiClients.Dialogporten.Common;
@@ -16,6 +17,10 @@ public class DialogTokenValidatorTests
     private static readonly DateTimeOffset ValidTimeStamp = DateTimeOffset.Parse("2025-02-14T09:00:00Z", CultureInfo.InvariantCulture);
     private const string DialogToken =
         "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6ImRwLXN0YWdpbmctMjQwMzIyLW81eW1uIn0.eyJqdGkiOiIzOGNmZGNiOS0zODhiLTQ3YjgtYTFiZi05ZjE1YjI4MTk4OTQiLCJjIjoidXJuOmFsdGlubjpwZXJzb246aWRlbnRpZmllci1ubzoxNDg4NjQ5ODIyNiIsImwiOjMsInAiOiJ1cm46YWx0aW5uOnBlcnNvbjppZGVudGlmaWVyLW5vOjE0ODg2NDk4MjI2IiwicyI6InVybjphbHRpbm46cmVzb3VyY2U6ZGFnbC1jb3JyZXNwb25kZW5jZSIsImkiOiIwMTk0ZmU4Mi05MjgwLTc3YTUtYTdjZC01ZmYwZTZhNmZhMDciLCJhIjoicmVhZCIsImlzcyI6Imh0dHBzOi8vcGxhdGZvcm0udHQwMi5hbHRpbm4ubm8vZGlhbG9ncG9ydGVuL2FwaS92MSIsImlhdCI6MTczOTUyMzM2NywibmJmIjoxNzM5NTIzMzY3LCJleHAiOjE3Mzk1MjM5Njd9.O_f-RJhRPT7B76S7aOGw6jfxKDki3uJQLLC8nVlcNVJWFIOQUsy6gU4bG1ZdqoMBZPvb2K2X4I5fGpHW9dQMAA";
+    private static readonly JsonSerializerOptions RelaxedHeaderOptions =
+        new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+    private static readonly JsonSerializerOptions EscapingHeaderOptions =
+        new() { Encoder = JavaScriptEncoder.Default };
     private static readonly PublicKeyPair[] ValidPublicKeyPairs =
     [
         new("dp-staging-240322-o5ymn", ToPublicKey("zs9hR9oqgf53th2lTdrBq3C1TZ9UlR-HVJOiUpWV63o")),
@@ -299,6 +304,142 @@ public class DialogTokenValidatorTests
         Assert.False(result.IsValid);
         Assert.True(result.Errors.ContainsKey("token"));
         Assert.Contains("Invalid actions", result.Errors["token"]);
+    }
+
+    [Fact]
+    public void ShouldReturnError_GivenContextTokenType()
+    {
+        // Arrange
+        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act
+        var result = sut.Validate(token);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.ContainsKey("token"));
+        Assert.Contains("Invalid typ", result.Errors["token"]);
+        Assert.DoesNotContain("Invalid signature", result.Errors["token"]);
+    }
+
+    [Fact]
+    public void ShouldReturnIsValid_GivenContextTokenTypeWhenAccepted()
+    {
+        // Arrange
+        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act
+        var result = sut.Validate(token, options: new DialogTokenValidationParameters
+        {
+            ClockSkew = TimeSpan.Zero,
+            ValidTokenTypes = [DialogTokenTypes.DialogContextToken]
+        });
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ShouldReturnError_GivenMissingTokenType()
+    {
+        // Arrange
+        var (token, keyPair) = CreateSignedToken(tokenType: null);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act
+        var result = sut.Validate(token);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.ContainsKey("token"));
+        Assert.Contains("Invalid typ", result.Errors["token"]);
+    }
+
+    [Fact]
+    public void ShouldReturnIsValid_GivenContextTokenTypeWhenTypeValidationIsDisabled()
+    {
+        // Arrange
+        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act
+        var result = sut.Validate(token, options: new DialogTokenValidationParameters
+        {
+            ClockSkew = TimeSpan.Zero,
+            ValidateTokenType = false
+        });
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void ShouldReturnIsValid_GivenTokenTypeEscapedInHeader()
+    {
+        // A JSON header may escape the '+' of a structured type as u002B. That is the same type.
+        // Arrange
+        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken, escapeHeader: true);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+        Assert.Contains(@"dialogcontexttoken\u002Bjwt",
+            Encoding.UTF8.GetString(Base64Url.DecodeFromChars(token.Split('.')[0])),
+            StringComparison.Ordinal);
+
+        // Act
+        var result = sut.Validate(token, options: new DialogTokenValidationParameters
+        {
+            ClockSkew = TimeSpan.Zero,
+            ValidTokenTypes = [DialogTokenTypes.DialogContextToken]
+        });
+
+        // Assert
+        Assert.True(result.IsValid);
+    }
+
+    /// <summary>
+    /// Mints a token signed with a throwaway key, so the type assertions are made against a token that is
+    /// valid in every other respect. Tampering with the header of <see cref="DialogToken"/> would invalidate
+    /// its signature, which cannot be re-created without Dialogporten's private key.
+    /// </summary>
+    private static (string Token, PublicKeyPair KeyPair) CreateSignedToken(string? tokenType, bool escapeHeader = false)
+    {
+        const string kid = "dp-testing-generated-key";
+        using var key = Key.Create(SignatureAlgorithm.Ed25519, new KeyCreationParameters
+        {
+            ExportPolicy = KeyExportPolicies.AllowPlaintextExport
+        });
+
+        var header = tokenType is null
+            ? new Dictionary<string, object> { ["alg"] = "EdDSA", ["kid"] = kid }
+            : new Dictionary<string, object> { ["alg"] = "EdDSA", ["typ"] = tokenType, ["kid"] = kid };
+
+        var claims = new Dictionary<string, object>
+        {
+            ["jti"] = "38cfdcb9-388b-47b8-a1bf-9f15b2819894",
+            ["c"] = "urn:altinn:person:identifier-no:14886498226",
+            ["l"] = 3,
+            ["p"] = "urn:altinn:person:identifier-no:14886498226",
+            ["s"] = "urn:altinn:resource:dagl-correspondence",
+            ["i"] = "0194fe82-9280-77a5-a7cd-5ff0e6a6fa07",
+            ["a"] = "read",
+            ["iss"] = "https://platform.tt02.altinn.no/dialogporten/api/v1",
+            ["iat"] = ValidTimeStamp.ToUnixTimeSeconds(),
+            ["nbf"] = ValidTimeStamp.ToUnixTimeSeconds(),
+            ["exp"] = ValidTimeStamp.AddMinutes(10).ToUnixTimeSeconds()
+        };
+
+        // Dialogporten writes the header with the relaxed encoder, leaving a structured type's '+' literal;
+        // escapeHeader mints the equivalent header the default encoder would produce.
+        var headerOptions = escapeHeader ? EscapingHeaderOptions : RelaxedHeaderOptions;
+
+        var signedPart = string.Join('.',
+            Base64Url.EncodeToString(JsonSerializer.SerializeToUtf8Bytes(header, headerOptions)),
+            Base64Url.EncodeToString(JsonSerializer.SerializeToUtf8Bytes(claims)));
+        var signature = SignatureAlgorithm.Ed25519.Sign(key, Encoding.UTF8.GetBytes(signedPart));
+
+        var publicKeyPair = new PublicKeyPair(kid, key.PublicKey);
+        return ($"{signedPart}.{Base64Url.EncodeToString(signature)}", publicKeyPair);
     }
 
     private static DialogTokenValidator GetSut(

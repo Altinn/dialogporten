@@ -43,6 +43,11 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             validationResult.AddError(tokenPropertyName, "Invalid signature");
         }
 
+        if (options.ValidateTokenType && !VerifyTokenType(decodedTokenParts.Header, options.ValidTokenTypes))
+        {
+            validationResult.AddError(tokenPropertyName, "Invalid typ");
+        }
+
         if (options.ValidateLifetime && !claimsPrincipal.VerifyNotValidBefore(_clock, options.ClockSkew))
         {
             validationResult.AddError(tokenPropertyName, "Invalid nbf");
@@ -64,6 +69,29 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         }
 
         return validationResult;
+    }
+
+    private static bool VerifyTokenType(ReadOnlySpan<byte> header, IReadOnlyCollection<string> validTokenTypes)
+    {
+        const string typPropertyName = "typ";
+        var reader = new Utf8JsonReader(header);
+        while (reader.Read())
+        {
+            if (!IsPropertyName(reader, typPropertyName)) continue;
+            if (!reader.Read() || reader.TokenType != JsonTokenType.String) return false;
+
+            foreach (var validTokenType in validTokenTypes)
+            {
+                // ValueTextEquals compares the unescaped value, so a header writing the '+' of a structured
+                // type as the JSON escape u002B still matches.
+                if (reader.ValueTextEquals(validTokenType)) return true;
+            }
+
+            return false;
+        }
+
+        // A token without a "typ" header is not one of ours.
+        return false;
     }
 
     private static bool TryDecodeToken(

@@ -14,6 +14,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
@@ -54,6 +55,22 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     x.IfMatchEndUserContextRevision = Guid.NewGuid();
                 })
             .ExecuteAndAssert<ConcurrencyError>();
+
+    [Fact]
+    public Task Set_Returns_Forbidden_On_Unauthorized() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                altinnAuthorization
+                    .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(false);
+            })
+            .SetSystemLabelsEndUser(x =>
+                {
+                    x.AddLabels = [SystemLabel.Values.Bin];
+                })
+            .ExecuteAndAssert<Forbidden>();
 
     [Fact]
     public async Task Set_Succeeds_On_Revision_Match()

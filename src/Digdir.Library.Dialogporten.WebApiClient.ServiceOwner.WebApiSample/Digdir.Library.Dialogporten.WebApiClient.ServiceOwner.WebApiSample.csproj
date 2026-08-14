@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <UserSecretsId>6002da88-f29d-4f42-8bf3-3c4ce8d40e28</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
+        <!-- Pin transitive Microsoft.OpenApi to a non-vulnerable version (GHSA-v5pm-xwqc-g5wc) -->
+        <PackageReference Include="Microsoft.OpenApi" Version="2.11.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\WebApiClient\Digdir.Library.Dialogporten.WebApiClient.Common\Digdir.Library.Dialogporten.WebApiClient.Common.csproj" />
+        <ProjectReference Include="..\WebApiClient\Digdir.Library.Dialogporten.WebApiClient.ServiceOwner\Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj" />
+    </ItemGroup>
+
+</Project>

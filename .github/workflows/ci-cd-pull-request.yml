@@ -6,9 +6,8 @@ on:
     paths-ignore:
       - "tests/k6/**"
 
-# Supersede in-flight runs for the same PR. Without this, every force-push (rebases,
-# amends, and stacked-PR restacks in particular) leaves the previous run to complete,
-# so a single restack of an N-branch stack can occupy 2N runs concurrently.
+# Supersede in-flight runs for the same PR: a force-push (rebase, amend, stacked-PR
+# restack) makes the previous run's result irrelevant, so don't let it occupy runners.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -35,7 +34,7 @@ jobs:
   build-and-test:
     uses: ./.github/workflows/workflow-build-and-test.yml
     needs: [ check-for-changes ]
-    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' }}
+    if: ${{ needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true' || needs.check-for-changes.outputs.hasDependencyChanges == 'true' }}
     permissions:
       contents: read
 
@@ -44,9 +43,9 @@ jobs:
   # limited to the container context itself — gate on the files that can break that.
   # `ci-cd-main` rebuilds and pushes them on merge regardless.
   # `build-and-test` stays in `needs` purely for ordering — don't burn five image builds on a
-  # branch whose tests fail. Its gate is narrower than this one though (a `.dockerignore`,
-  # `global.json` or `Directory.Build.props` change touches no `src/**` or `tests/**` file), so
-  # it can legitimately be skipped here, and a skipped dependency would otherwise skip this job.
+  # branch whose tests fail. Its gate is narrower than this one though (a `.dockerignore` or
+  # `.editorconfig` change touches no file it gates on), so it can legitimately be skipped
+  # here, and a skipped dependency would otherwise skip this job.
   build-docker-images:
     uses: ./.github/workflows/workflow-publish-docker-images.yml
     needs: [ build-and-test, check-for-changes ]
@@ -111,6 +110,10 @@ jobs:
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: pr/global.json
+          # Safe with RestorePackagesWithLockFile: the lock files are the cache key, and the
+          # head restore below runs `--locked-mode` so drift from them still fails.
+          cache: true
+          cache-dependency-path: 'pr/**/packages.lock.json'
 
       - name: Scan base (${{ github.event.pull_request.base.ref }})
         working-directory: base
@@ -122,7 +125,7 @@ jobs:
       - name: Scan PR head
         working-directory: pr
         run: |
-          dotnet restore
+          dotnet restore --locked-mode
           dotnet list package --vulnerable --include-transitive --format json > "$GITHUB_WORKSPACE/pr-vulns.json"
 
       - name: Fail on newly-introduced vulnerabilities

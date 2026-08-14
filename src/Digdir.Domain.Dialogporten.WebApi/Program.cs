@@ -30,6 +30,7 @@ using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
+using OpenApiSecurityScheme = Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -227,7 +228,7 @@ static void BuildAndRun(string[] args)
             .DisableAgent();
 
         options.HideTestRequestButton = !openApiSettings.EnableTryItOut;
-        options.AddAuthorizationCodeFlow(SecurityRequirementsOperationProcessor.IdportenSecurityScheme,
+        options.AddAuthorizationCodeFlow(OpenApiSecurityScheme.IdportenSecurityScheme,
             authOptions => authOptions
                 .WithClientId(openApiSettings.IdportenClientId)
                 .WithAuthorizationUrl(openApiSettings.IdportenAuthorizationUrl + "?prompt=login")

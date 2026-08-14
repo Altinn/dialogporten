@@ -2814,7 +2814,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Authenticated end user is not authorized for the supplied instance reference."
@@ -3143,7 +3143,7 @@
             "description": "Successfully returned the dialog list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -3235,7 +3235,7 @@
             "description": "Successfully returned the dialog aggregate."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3330,7 +3330,7 @@
             "description": "Successfully returned the dialog activity list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3431,7 +3431,7 @@
             "description": "Successfully returned the dialog activity."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
@@ -3514,7 +3514,7 @@
             "description": "Successfully returned the dialog label assignment log list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3631,7 +3631,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -3740,7 +3740,7 @@
             "description": "Successfully returned the dialog seen log records."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -3829,7 +3829,7 @@
             "description": "Successfully returned the dialog seen log record."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -3924,7 +3924,7 @@
             "description": "Successfully returned the dialog transmission list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -4028,7 +4028,7 @@
             "description": "Successfully returned the dialog transmission."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
@@ -4114,7 +4114,7 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
@@ -4206,7 +4206,7 @@
             "description": "The list of authorized parties for the end user"
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires an ID-porten or Maskinporten token with the scope \u0022digdir:dialogporten\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -4293,7 +4293,7 @@
             "description": "Authorized service resource metadata."
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "403": {
             "description": "Forbidden"

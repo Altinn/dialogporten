@@ -1,18 +1,16 @@
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Microsoft.AspNetCore.Authorization;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using FastEndpoints;
 using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 using Serilog;
-using AuthorizationPolicy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Json;
 
 public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
 {
-    public const string IdportenSecurityScheme = "idporten";
-    public const string MaskinportenSecurityScheme = "maskinporten";
     public const string FastEndpointsSecurityScheme = "JWTBearerAuth";
 
     /// <summary>
@@ -32,26 +30,23 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
         if (!securityRequirement.TryGetValue(FastEndpointsSecurityScheme, out var existingScheme)) return true;
 
         var aspNetContext = (AspNetCoreOperationProcessorContext)context;
-        var policy = aspNetContext.ApiDescription.ActionDescriptor.EndpointMetadata
-            .OfType<IAuthorizeData>()
-            .Select(x => x.Policy)
-            .FirstOrDefault(x => !string.IsNullOrEmpty(x));
+        var additionalMetadata = aspNetContext.ApiDescription.ActionDescriptor.EndpointMetadata
+            .OfType<OpenApiExtrasAttribute>()
+            .Concat(aspNetContext.ApiDescription.ActionDescriptor.EndpointMetadata
+                .OfType<EndpointDefinition>()
+                .FirstOrDefault()?
+                .EndpointAttributes?
+                .OfType<OpenApiExtrasAttribute>() ?? [])
+            .FirstOrDefault();
 
-        if (policy is null)
-        {
-            securityRequirement[MaskinportenSecurityScheme] = existingScheme;
-            securityRequirement.Remove(FastEndpointsSecurityScheme);
-            return true;
-        }
-
-        if (!AuthorizationOptionsSetup.ScopeRulesByPolicy.TryGetValue(policy, out var scopes))
+        if (additionalMetadata is null)
         {
             var logger = Log.ForContext<SecurityRequirementsOperationProcessor>();
             logger.Error(
-                "Can't determine scope for endpoint {Method} {Endpoint}. Policy: {Policy}. Check the PolicyScopeMap",
+                "Missing metadata for endpoint {Method} {Endpoint}. Add {Attribute} to the endpoint",
                 aspNetContext.ApiDescription.HttpMethod,
                 aspNetContext.ApiDescription.RelativePath,
-                policy
+                nameof(OpenApiExtrasAttribute)
             );
             securityRequirement[MaskinportenSecurityScheme] = existingScheme;
             securityRequirement.Remove(FastEndpointsSecurityScheme);
@@ -62,10 +57,21 @@ public sealed class SecurityRequirementsOperationProcessor : IOperationProcessor
             .Where(x => !x.ContainsKey(FastEndpointsSecurityScheme))
             .ToList();
 
-        operationSecurity.Add(scopes, MaskinportenSecurityScheme);
-        if (policy == AuthorizationPolicy.EndUser)
+        var endpointSecuritySchemes = additionalMetadata.SecuritySchemes;
+        var endpointRequiredScopes = additionalMetadata.Scopes;
+
+        if (endpointSecuritySchemes.Contains(MaskinportenSecurityScheme))
         {
-            operationSecurity.Add(scopes, IdportenSecurityScheme);
+            operationSecurity.Add(endpointRequiredScopes, MaskinportenSecurityScheme);
+        }
+        if (endpointSecuritySchemes.Contains(IdportenSecurityScheme))
+        {
+            operationSecurity.Add(endpointRequiredScopes, IdportenSecurityScheme);
+        }
+
+        if (operationSecurity.Count == 0)
+        {
+            throw new ArgumentException($"Could not find any known security schemes in {endpointSecuritySchemes}");
         }
 
         context.OperationDescription.Operation.Security = operationSecurity;

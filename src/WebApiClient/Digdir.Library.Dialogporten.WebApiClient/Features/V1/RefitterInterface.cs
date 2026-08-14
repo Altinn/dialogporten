@@ -1965,6 +1965,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Null when the transmission uses the legacy "authorizationAttribute".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -2156,6 +2157,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>this context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -2232,6 +2234,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>this context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -2960,6 +2963,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Null when the transmission uses the legacy "authorizationAttribute".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -3089,6 +3093,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>this context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -3153,6 +3158,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>this context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -3625,6 +3631,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -3705,6 +3712,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Null when the transmission uses legacy authorization fields.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -3836,6 +3844,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -3908,6 +3917,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -4010,6 +4020,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Null when the action uses legacy authorization fields.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -4139,6 +4150,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Null when the action uses legacy authorization fields.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -4397,6 +4409,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Cannot be combined with "authorizationAttribute".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -4519,6 +4532,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>this context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -4582,6 +4596,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -4889,6 +4904,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -4963,6 +4979,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Cannot be combined with "authorizationAttribute".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -5082,6 +5099,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -5139,6 +5157,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -5183,6 +5202,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>"authorizationContext.action".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -5256,6 +5276,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>"authorizationContext.action".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -5428,6 +5449,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Cannot be combined with "authorizationAttribute".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -5547,6 +5569,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>this context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -5604,6 +5627,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -5966,6 +5990,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -6039,6 +6064,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Cannot be combined with "authorizationAttribute".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -6158,6 +6184,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -6215,6 +6242,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>context can only further restrict access, never widen it.
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
@@ -6259,6 +6287,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>"authorizationContext.action".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
@@ -6332,6 +6361,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>"authorizationContext.action".
         /// </summary>
         [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>

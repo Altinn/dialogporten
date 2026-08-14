@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Get;
 
@@ -42,6 +43,7 @@ public class DialogTransmission
     /// <br/>including front-channel embeds.
     /// </summary>
     [JsonPropertyName("contextToken")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public string? ContextToken { get; set; }
 
     /// <summary>

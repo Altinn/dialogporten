@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 
+[ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
 public sealed class AuthorizationContextDto
 {
     /// <summary>

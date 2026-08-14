@@ -77,8 +77,8 @@ jobs:
       hasWebApiServiceOwnerClientChanges: ${{ steps.filter-backend.outputs.web_api_serviceowner_client_any_modified == 'true'}}
       hasSchemaPackageChanges: ${{ steps.filter-backend.outputs.schema_package_any_modified == 'true'}}
       # Deliberately not OR'd with github_workflows_any_modified, unlike hasBackendChanges and
-      # hasInfraChanges: the two filters below already name the workflows that govern these
-      # jobs, so an unrelated workflow edit no longer rebuilds every image and rescans NuGet.
+      # hasInfraChanges: the dependencies and docker filters name the workflows that govern
+      # these jobs, so an unrelated workflow edit doesn't rebuild every image or rescan NuGet.
       hasDependencyChanges: ${{ steps.filter-backend.outputs.dependencies_any_modified == 'true' }}
       hasDockerChanges: ${{ steps.filter-backend.outputs.docker_any_modified == 'true' || steps.filter-backend.outputs.dependencies_any_modified == 'true' }}
     steps:
@@ -147,27 +147,34 @@ jobs:
             schema_package:
               - 'docs/schema/V*/**/*'
             # Anything that can change what NuGet resolves, and therefore what
-            # `dotnet list package --vulnerable` reports. The last two entries are the workflows
-            # that define and gate the scan, so a change to either still exercises it.
+            # `dotnet list package --vulnerable` reports. MSBuild/NuGet config files are
+            # matched at any depth: nested Directory.Build.props files shadow the root one.
+            # The last two entries are the workflows that define and gate the scan, so a
+            # change to either still exercises it.
             dependencies:
               - '**/packages.lock.json'
               - '**/*.csproj'
               - '**/*.slnx'
-              - 'Directory.Build.props'
+              - '**/Directory.Build.props'
+              - '**/Directory.Build.targets'
+              - '**/Directory.Packages.props'
               - 'global.json'
-              - 'nuget.config'
-              - 'NuGet.config'
+              - '**/nuget.config'
+              - '**/NuGet.config'
               - '.github/workflows/ci-cd-pull-request.yml'
               - '.github/workflows/workflow-check-for-changes.yml'
-            # Anything that can break an image build without also breaking `dotnet build`,
-            # plus the image-build pipeline, its call site, and this filter.
+            # Anything that can break an image build without also breaking `dotnet build`.
+            # The root .editorconfig is COPY'd into every image and, with
+            # EnforceCodeStyleInBuild + TreatWarningsAsErrors, can fail the in-container
+            # publish on a PR that skips build-and-test. The call site and this filter are
+            # already in the dependencies filter, which hasDockerChanges ORs in, so only the
+            # image-build pipeline itself is listed here.
             docker:
               - '**/Dockerfile'
               - '**/*.dockerfile'
               - '.dockerignore'
+              - '.editorconfig'
               - '.github/workflows/workflow-publish-docker-images.yml'
-              - '.github/workflows/ci-cd-pull-request.yml'
-              - '.github/workflows/workflow-check-for-changes.yml'
 
       - name: Log backend changes
         run: |

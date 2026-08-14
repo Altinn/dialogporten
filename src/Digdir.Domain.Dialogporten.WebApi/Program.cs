@@ -270,6 +270,11 @@ static void BuildAndRun(string[] args)
 
 static void ConfigureOpenApiV1Document(DocumentOptions options, string documentName, string title, string? audience = null)
 {
+    // Experimental-feature notices are only surfaced in the service owner document.
+    var experimentalProcessor = audience == "serviceowner"
+        ? new ExperimentalFeatureSchemaProcessor()
+        : null;
+
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;
     options.RemoveEmptyRequestSchema = true;
@@ -285,6 +290,7 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();
             document.RemoveRequiredPropertiesFromSchemas();
+            experimentalProcessor?.AddPropertyNotices(document);
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;
@@ -296,6 +302,11 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.EnsureJsonPatchConsumes();
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
+
+        if (experimentalProcessor is not null)
+        {
+            s.SchemaSettings.SchemaProcessors.Add(experimentalProcessor);
+        }
 
         if (audience is not null)
         {

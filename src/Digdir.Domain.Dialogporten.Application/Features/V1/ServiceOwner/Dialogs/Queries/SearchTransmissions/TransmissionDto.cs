@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -193,6 +194,7 @@ public sealed class NavigationalActionDto
     public AuthorizationContextDto? AuthorizationContext { get; set; }
 }
 
+[ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
 public sealed class AuthorizationContextDto
 {
     /// <summary>

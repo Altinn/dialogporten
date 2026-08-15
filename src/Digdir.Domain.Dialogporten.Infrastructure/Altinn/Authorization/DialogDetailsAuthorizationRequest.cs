@@ -32,7 +32,10 @@ internal static class DialogDetailsAuthorizationRequestExtensions
             .Select(c => c.CanonicalIdentity)
             .Order(StringComparer.Ordinal));
 
-        var rawKey = $"{request.InstanceRef.Value}||{claimsKey}|{checksKey}";
+        // CanonicalIdentity does not encode the dialog's main service resource for Main/Legacy checks
+        // (it's a fixed "M" / "L:{attribute}"), but the PDP resource category is built from it, so it
+        // must be included explicitly or differing service resources can share a cached decision.
+        var rawKey = $"{request.InstanceRef.Value}||{claimsKey}|{request.ServiceResource}|{checksKey}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
         var hashString = Convert.ToHexStringLower(hashBytes);

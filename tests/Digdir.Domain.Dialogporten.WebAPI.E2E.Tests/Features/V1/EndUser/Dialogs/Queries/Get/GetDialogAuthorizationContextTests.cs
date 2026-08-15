@@ -379,6 +379,11 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         // single request, so CreatedAt ties across siblings and Id decides — and UUIDv7s minted in the same
         // millisecond differ only in their random tail. Hand each collection pre-sorted ids so the snapshot
         // order matches the declaration order instead of being a coin flip.
+        //
+        // Exception: navigational actions. Their create contract has no Id property (the database mints one
+        // with gen_random_uuid()), so the two below cannot be pre-sorted and may swap order in the snapshot
+        // when CreatedAt ties. Non-snapshot tests elsewhere in this file are unaffected — they select
+        // navigational actions by name/property rather than by position.
         var attachmentIds = OrderedVersion7Ids(3);
         var guiActionIds = OrderedVersion7Ids(2);
         var apiActionIds = OrderedVersion7Ids(2);

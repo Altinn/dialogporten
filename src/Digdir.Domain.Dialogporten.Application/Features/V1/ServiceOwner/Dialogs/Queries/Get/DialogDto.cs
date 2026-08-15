@@ -312,7 +312,8 @@ public sealed class DialogTransmissionDto
 
     /// <summary>
     /// Describes the authorization inputs used when evaluating end user access to this transmission.
-    /// Null when the transmission uses legacy authorization fields.
+    /// Null when no authorization context is set, including when the transmission uses legacy
+    /// authorization fields.
     /// </summary>
     public AuthorizationContextDto? AuthorizationContext { get; set; }
 
@@ -556,7 +557,8 @@ public sealed class DialogApiActionDto
 
     /// <summary>
     /// Describes the authorization inputs used when evaluating end user access to this action.
-    /// Null when the action uses legacy authorization fields.
+    /// Null when no authorization context is set, including when the action uses legacy
+    /// authorization fields.
     /// </summary>
     public AuthorizationContextDto? AuthorizationContext { get; set; }
 
@@ -671,7 +673,8 @@ public sealed class DialogGuiActionDto
 
     /// <summary>
     /// Describes the authorization inputs used when evaluating end user access to this action.
-    /// Null when the action uses legacy authorization fields.
+    /// Null when no authorization context is set, including when the action uses legacy
+    /// authorization fields.
     /// </summary>
     public AuthorizationContextDto? AuthorizationContext { get; set; }
 

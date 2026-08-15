@@ -416,10 +416,9 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         var responseCount = xacmlJsonResponse?.Response?.Count ?? 0;
         if (responseCount != preparedRequest.ExpectedResults)
         {
-            _logger.LogError(
-                "PDP response contained {ActualCount} results, expected {ExpectedCount}; " +
-                "decisions cannot be correlated reliably, denying all.",
-                responseCount, preparedRequest.ExpectedResults);
+            throw new UpstreamServiceException(
+                $"PDP response contained {responseCount} results, expected {preparedRequest.ExpectedResults}; " +
+                "decisions cannot be correlated reliably.");
         }
 
         return DecisionRequestHelper.CreateDialogDetailsResponse(preparedRequest, xacmlJsonResponse);

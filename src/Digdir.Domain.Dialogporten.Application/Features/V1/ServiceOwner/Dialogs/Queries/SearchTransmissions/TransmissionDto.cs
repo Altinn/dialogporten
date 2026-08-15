@@ -33,7 +33,8 @@ public sealed class TransmissionDto
 
     /// <summary>
     /// Describes the authorization inputs used when evaluating end user access to this transmission.
-    /// Null when the transmission uses the legacy "authorizationAttribute".
+    /// Null when no authorization context is set, including when the transmission uses the legacy
+    /// "authorizationAttribute".
     /// </summary>
     public AuthorizationContextDto? AuthorizationContext { get; set; }
 

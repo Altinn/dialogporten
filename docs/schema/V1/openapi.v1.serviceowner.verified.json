@@ -1879,7 +1879,7 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when the action uses legacy authorization fields.",
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
             "nullable": true,
             "oneOf": [
               {
@@ -2174,7 +2174,7 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when the action uses legacy authorization fields.",
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
             "nullable": true,
             "oneOf": [
               {
@@ -2725,7 +2725,7 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when the transmission uses legacy authorization fields.",
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses legacy\nauthorization fields.",
             "nullable": true,
             "oneOf": [
               {
@@ -3055,7 +3055,7 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when the transmission uses the legacy \u0022authorizationAttribute\u0022.",
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {
@@ -3380,7 +3380,7 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when the transmission uses the legacy \u0022authorizationAttribute\u0022.",
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {

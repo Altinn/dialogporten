@@ -18,8 +18,6 @@ public class InfrastructureArchitectureTests
             nameof(InfrastructureExtensions),
             // Hosts must reference the meter name to subscribe it in their OpenTelemetry setup.
             nameof(FusionCacheFactoryTelemetry),
-            // Escapes through cache calls to any caller when a factory is rejected at its concurrency bound.
-            nameof(FusionCacheFactoryRejectedException),
 
             // These classes are currently public but should be internal, moved to another assembly, or deleted
             nameof(IUpstreamServiceError)

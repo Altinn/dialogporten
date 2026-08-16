@@ -21,6 +21,7 @@ public class DialogTokenValidatorTests
         new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
     private static readonly JsonSerializerOptions EscapingHeaderOptions =
         new() { Encoder = JavaScriptEncoder.Default };
+    private static readonly string[] NonObjectHeader = ["not", "an", "object"];
     private static readonly PublicKeyPair[] ValidPublicKeyPairs =
     [
         new("dp-staging-240322-o5ymn", ToPublicKey("zs9hR9oqgf53th2lTdrBq3C1TZ9UlR-HVJOiUpWV63o")),
@@ -342,6 +343,50 @@ public class DialogTokenValidatorTests
     }
 
     [Fact]
+    public void ShouldReturnError_GivenTokenTypeOnlyInNestedProperty()
+    {
+        // A header carrying a "typ" only inside a nested object must not satisfy top-level typ validation.
+        // Arrange
+        const string kid = "dp-testing-generated-key";
+        var header = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object>
+        {
+            ["alg"] = "EdDSA",
+            ["kid"] = kid,
+            ["nested"] = new Dictionary<string, object> { ["typ"] = DialogTokenTypes.DialogToken }
+        });
+        var (token, keyPair) = CreateSignedTokenWithHeaderBytes(kid, header);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act
+        var result = sut.Validate(token);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.ContainsKey("token"));
+        Assert.Contains("Invalid typ", result.Errors["token"]);
+        Assert.DoesNotContain("Invalid signature", result.Errors["token"]);
+    }
+
+    [Fact]
+    public void ShouldReturnError_GivenNonObjectHeader()
+    {
+        // A header whose root is not a JSON object can never carry a valid top-level "typ".
+        // Arrange
+        const string kid = "dp-testing-generated-key";
+        var header = JsonSerializer.SerializeToUtf8Bytes(NonObjectHeader);
+        var (token, keyPair) = CreateSignedTokenWithHeaderBytes(kid, header);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act
+        var result = sut.Validate(token);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.ContainsKey("token"));
+        Assert.Contains("Invalid typ", result.Errors["token"]);
+    }
+
+    [Fact]
     public void ShouldReturnError_GivenMissingTokenType()
     {
         // Arrange
@@ -405,14 +450,28 @@ public class DialogTokenValidatorTests
     private static (string Token, PublicKeyPair KeyPair) CreateSignedToken(string? tokenType, bool escapeHeader = false)
     {
         const string kid = "dp-testing-generated-key";
+        var header = tokenType is null
+            ? new Dictionary<string, object> { ["alg"] = "EdDSA", ["kid"] = kid }
+            : new Dictionary<string, object> { ["alg"] = "EdDSA", ["typ"] = tokenType, ["kid"] = kid };
+
+        // Dialogporten writes the header with the relaxed encoder, leaving a structured type's '+' literal;
+        // escapeHeader mints the equivalent header the default encoder would produce.
+        var headerOptions = escapeHeader ? EscapingHeaderOptions : RelaxedHeaderOptions;
+        return CreateSignedTokenWithHeaderBytes(kid, JsonSerializer.SerializeToUtf8Bytes(header, headerOptions));
+    }
+
+    /// <summary>
+    /// Mints a token whose header is exactly the given raw JSON bytes, for exercising header shapes
+    /// (nested properties, non-object roots) that can't be expressed via a flat header dictionary.
+    /// The "kid" property, if present anywhere in <paramref name="headerBytes"/>, is not otherwise
+    /// inspected here — the caller passes the matching <paramref name="kid"/> for key lookup.
+    /// </summary>
+    private static (string Token, PublicKeyPair KeyPair) CreateSignedTokenWithHeaderBytes(string kid, byte[] headerBytes)
+    {
         using var key = Key.Create(SignatureAlgorithm.Ed25519, new KeyCreationParameters
         {
             ExportPolicy = KeyExportPolicies.AllowPlaintextExport
         });
-
-        var header = tokenType is null
-            ? new Dictionary<string, object> { ["alg"] = "EdDSA", ["kid"] = kid }
-            : new Dictionary<string, object> { ["alg"] = "EdDSA", ["typ"] = tokenType, ["kid"] = kid };
 
         var claims = new Dictionary<string, object>
         {
@@ -429,12 +488,8 @@ public class DialogTokenValidatorTests
             ["exp"] = ValidTimeStamp.AddMinutes(10).ToUnixTimeSeconds()
         };
 
-        // Dialogporten writes the header with the relaxed encoder, leaving a structured type's '+' literal;
-        // escapeHeader mints the equivalent header the default encoder would produce.
-        var headerOptions = escapeHeader ? EscapingHeaderOptions : RelaxedHeaderOptions;
-
         var signedPart = string.Join('.',
-            Base64Url.EncodeToString(JsonSerializer.SerializeToUtf8Bytes(header, headerOptions)),
+            Base64Url.EncodeToString(headerBytes),
             Base64Url.EncodeToString(JsonSerializer.SerializeToUtf8Bytes(claims)));
         var signature = SignatureAlgorithm.Ed25519.Sign(key, Encoding.UTF8.GetBytes(signedPart));
 

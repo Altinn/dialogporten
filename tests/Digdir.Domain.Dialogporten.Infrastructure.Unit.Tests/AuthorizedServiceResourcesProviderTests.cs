@@ -219,6 +219,45 @@ public class AuthorizedServiceResourcesProviderTests
         authorization.ObservedPrincipals.Should().BeEquivalentTo([principalA, principalB]);
     }
 
+    [Fact]
+    public async Task Establishes_The_Ambient_Principal_Before_Resolving_Scoped_Services()
+    {
+        // Pins the ordering inside the factory delegate: the ambient principal must be established BEFORE
+        // scoped services are resolved from the runner's scope. No current service captures the principal
+        // at construction, so this guards against a future one that does; on this path the blast radius of
+        // an ordering regression is cross-user authorization data.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimsPrincipalExtensions.PidClaim, Pid)]));
+        var authorization = new CountingAltinnAuthorization(new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
+        });
+
+        ClaimsPrincipal? principalAtResolution = null;
+        var resolutions = 0;
+        var services = new ServiceCollection()
+            .AddScoped<IAltinnAuthorization>(_ =>
+            {
+                // Simulates a service that reads the ambient principal at construction time.
+                principalAtResolution = AmbientUserPrincipal.Current;
+                resolutions++;
+                return authorization;
+            })
+            .AddSingleton<IUserParties>(CreateUserParties(partyCount: 1))
+            .AddSingleton<IOptionsSnapshot<ApplicationSettings>>(CreateSettings())
+            .BuildServiceProvider();
+        var runner = new FusionCacheFactoryRunner(
+            services.GetRequiredService<IServiceScopeFactory>(),
+            new CollectingLogger<FusionCacheFactoryRunner>());
+        var provider = new AuthorizedServiceResourcesProvider(new StubUser(principal), CreateCacheProvider(), runner);
+
+        await provider.GetAuthorizedServiceResources(partyFilter: null, cancellationToken);
+
+        resolutions.Should().Be(1);
+        principalAtResolution.Should().BeSameAs(principal,
+            "the factory must establish the ambient principal before resolving scoped services");
+    }
+
     private static AuthorizedServiceResourcesProvider CreateProvider(
         IAltinnAuthorization authorization,
         IUser user,

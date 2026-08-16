@@ -21,6 +21,9 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
 
     private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
 
+    // The one deliberately request-scoped constructor dependency: the principal is resolved from it on the
+    // request thread before any cache access (see GetAuthorizedServiceResources), so it never crosses into
+    // the detached factory. Everything the factory needs comes from the runner's scope instead.
     private readonly IUser _user;
     private readonly IFusionCache _cache;
     private readonly FusionCacheFactoryRunner _factoryRunner;

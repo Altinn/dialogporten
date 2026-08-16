@@ -338,6 +338,9 @@ internal sealed partial class FusionCacheFactoryRunner
                 }
             }
 
+            // Deliberately outside the gate: measurement callbacks (MeterListener) run inline on Add and must
+            // not execute under the permit lock. The counter can transiently overshoot when a release and a
+            // re-acquire interleave; it is a running sum read at export resolution, so the skew self-corrects.
             FusionCacheFactoryTelemetry.ActiveExecutions.Add(-1, CacheTag(_policy));
         }
     }

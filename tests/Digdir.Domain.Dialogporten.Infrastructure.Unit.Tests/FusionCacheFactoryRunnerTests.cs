@@ -439,6 +439,26 @@ public class FusionCacheFactoryRunnerTests
     }
 
     [Fact]
+    public void Every_Declared_Policy_Is_Included_In_All()
+    {
+        // All is the hand-maintained inventory that drives both the invariant test above and the runner's
+        // startup metric registration; a policy declared on the type but missing from All silently escapes both.
+        var declared = typeof(FusionCacheFactoryPolicy)
+            .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+            .Where(x => x.FieldType == typeof(FusionCacheFactoryPolicy))
+            .ToList();
+
+        declared.Should().NotBeEmpty();
+        foreach (var field in declared)
+        {
+            var policy = (FusionCacheFactoryPolicy)field.GetValue(null)!;
+            FusionCacheFactoryPolicy.All.Should().Contain(policy, $"the declared policy '{field.Name}' must be part of the inventory");
+        }
+
+        FusionCacheFactoryPolicy.All.Should().HaveCount(declared.Count);
+    }
+
+    [Fact]
     public async Task A_Throwing_Scope_Disposal_Still_Releases_The_Execution_Permit()
     {
         var testToken = TestContext.Current.CancellationToken;

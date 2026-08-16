@@ -330,19 +330,43 @@ public class FusionCacheFactoryRunnerTests
 
             // Phase b: the abandoned orphan still holds the single execution permit, so a refresh attempt
             // is rejected without opening a scope; the caller gets stale data instead of queueing behind
-            // the (now released) per-key lock.
-            var rejectedPhaseResult = await cache.GetOrSetAsync<string>(
-                key,
-                (_, ct) => fixture.Runner.RunInScope<string>(policy, (services, _) =>
+            // the (now released) per-key lock. EventId 3 is logged just before the abandonment exception
+            // reaches FusionCache, so FusionCache's own lock release races this phase - and stale data with
+            // an untouched scope count is also what a still-held key lock would produce. Retry until
+            // FusionCache actually invokes the refresh delegate, which proves the key lock was acquired.
+            var refreshDelegateEntered = 0;
+            string? rejectedPhaseResult = null;
+            using (var retryTimeout = CancellationTokenSource.CreateLinkedTokenSource(testToken))
+            {
+                retryTimeout.CancelAfter(GuardTimeout);
+                while (Volatile.Read(ref refreshDelegateEntered) == 0)
                 {
-                    services.GetRequiredService<ScopedDependency>();
-                    Interlocked.Increment(ref scopesOpened);
-                    return Task.FromResult("never-produced-either");
-                }, ct),
-                options: options,
-                token: testToken).AsTask().WaitAsync(GuardTimeout, testToken);
+                    rejectedPhaseResult = await cache.GetOrSetAsync<string>(
+                        key,
+                        (_, ct) =>
+                        {
+                            Interlocked.Increment(ref refreshDelegateEntered);
+                            return fixture.Runner.RunInScope<string>(policy, (services, _) =>
+                            {
+                                services.GetRequiredService<ScopedDependency>();
+                                Interlocked.Increment(ref scopesOpened);
+                                return Task.FromResult("never-produced-either");
+                            }, ct);
+                        },
+                        options: options,
+                        token: testToken).AsTask().WaitAsync(GuardTimeout, testToken);
+
+                    if (Volatile.Read(ref refreshDelegateEntered) == 0)
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(10), retryTimeout.Token);
+                    }
+                }
+            }
+
             rejectedPhaseResult.Should().Be(staleValue);
             scopesOpened.Should().Be(1, "a rejected invocation must not open a scope");
+            fixture.Logger.Entries.Should().Contain(x => x.EventId.Id == 5,
+                "the refresh attempt must be a real capacity rejection, not stale data served behind a still-held key lock");
         }
         finally
         {

@@ -188,18 +188,24 @@ internal sealed partial class FusionCacheFactoryRunner
             static (_, maxConcurrentExecutions) => new BulkheadState(maxConcurrentExecutions),
             policy.MaxConcurrentExecutions);
 
-        if (!bulkhead.Permits.Wait(0))
+        lock (bulkhead.Gate)
         {
-            // Log the transition into the exhausted interval exactly once (on the first rejection), never
-            // per rejection.
-            if (Interlocked.CompareExchange(ref bulkhead.ExhaustionLogged, 1, 0) == 0)
+            if (bulkhead.AvailablePermits == 0)
             {
-                LogCapacityExhausted(policy.CacheName, policy.MaxConcurrentExecutions);
+                // Log the transition into the exhausted interval exactly once (on the first rejection),
+                // never per rejection.
+                if (!bulkhead.ExhaustionLogged)
+                {
+                    bulkhead.ExhaustionLogged = true;
+                    LogCapacityExhausted(policy.CacheName, policy.MaxConcurrentExecutions);
+                }
+
+                throw new FusionCacheFactoryRejectedException(
+                    $"The '{policy.CacheName}' cache factory was rejected: all {policy.MaxConcurrentExecutions} " +
+                    "execution permits are in use by running or abandoned factories.");
             }
 
-            throw new FusionCacheFactoryRejectedException(
-                $"The '{policy.CacheName}' cache factory was rejected: all {policy.MaxConcurrentExecutions} " +
-                "execution permits are in use by running or abandoned factories.");
+            bulkhead.AvailablePermits--;
         }
 
         FusionCacheFactoryTelemetry.ActiveExecutions.Add(1, CacheTag(policy));
@@ -275,13 +281,16 @@ internal sealed partial class FusionCacheFactoryRunner
     {
         public BulkheadState(int maxConcurrentExecutions)
         {
-            Permits = new SemaphoreSlim(maxConcurrentExecutions, maxConcurrentExecutions);
+            AvailablePermits = maxConcurrentExecutions;
         }
 
-        public SemaphoreSlim Permits { get; }
-
-        // 1 while an exhausted interval has been logged (EventId 5); reset (with EventId 6) when a permit frees.
-        public int ExhaustionLogged;
+        // Permit accounting and the exhausted-interval flag (EventId 5 logged / awaiting EventId 6) must
+        // transition together under the gate: releasing a permit before resetting the flag would let a
+        // re-acquire-then-reject interleaving observe a stale interval and swallow its EventId 5 while the
+        // original release still emits EventId 6.
+        public Lock Gate { get; } = new();
+        public int AvailablePermits;
+        public bool ExhaustionLogged;
     }
 
     /// <summary>
@@ -315,14 +324,21 @@ internal sealed partial class FusionCacheFactoryRunner
                 return;
             }
 
-            _bulkhead.Permits.Release();
-            FusionCacheFactoryTelemetry.ActiveExecutions.Add(-1, CacheTag(_policy));
-
-            // Close the exhausted interval (EventId 6) only if EventId 5 opened it.
-            if (Interlocked.CompareExchange(ref _bulkhead.ExhaustionLogged, 0, 1) == 1)
+            lock (_bulkhead.Gate)
             {
-                _runner.LogCapacityRestored(_policy.CacheName);
+                _bulkhead.AvailablePermits++;
+
+                // Close the exhausted interval (EventId 6) only if EventId 5 opened it, atomically with the
+                // permit release so the permit cannot be re-acquired and re-exhausted before the interval
+                // closes.
+                if (_bulkhead.ExhaustionLogged)
+                {
+                    _bulkhead.ExhaustionLogged = false;
+                    _runner.LogCapacityRestored(_policy.CacheName);
+                }
             }
+
+            FusionCacheFactoryTelemetry.ActiveExecutions.Add(-1, CacheTag(_policy));
         }
     }
 }

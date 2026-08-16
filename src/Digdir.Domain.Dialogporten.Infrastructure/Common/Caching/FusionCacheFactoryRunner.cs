@@ -22,6 +22,8 @@ internal sealed partial class FusionCacheFactoryRunner
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<FusionCacheFactoryRunner> _logger;
+    // One entry per policy: policies are static per cache, never per key, so this dictionary is bounded by
+    // FusionCacheFactoryPolicy.All and is deliberately never pruned. A per-key policy would leak here.
     private readonly ConcurrentDictionary<string, BulkheadState> _bulkheads = new(StringComparer.Ordinal);
 
     public FusionCacheFactoryRunner(IServiceScopeFactory scopeFactory, ILogger<FusionCacheFactoryRunner> logger)
@@ -194,24 +196,41 @@ internal sealed partial class FusionCacheFactoryRunner
             static (_, maxConcurrentExecutions) => new BulkheadState(maxConcurrentExecutions),
             policy.MaxConcurrentExecutions);
 
+        var rejected = false;
+        var logExhaustion = false;
         lock (bulkhead.Gate)
         {
             if (bulkhead.AvailablePermits == 0)
             {
-                // Log the transition into the exhausted interval exactly once (on the first rejection),
+                rejected = true;
+                // Mark the transition into the exhausted interval exactly once (on the first rejection),
                 // never per rejection.
                 if (!bulkhead.ExhaustionLogged)
                 {
                     bulkhead.ExhaustionLogged = true;
-                    LogCapacityExhausted(policy.CacheName, policy.MaxConcurrentExecutions);
+                    logExhaustion = true;
                 }
+            }
+            else
+            {
+                bulkhead.AvailablePermits--;
+            }
+        }
 
-                throw new FusionCacheFactoryRejectedException(
-                    $"The '{policy.CacheName}' cache factory was rejected: all {policy.MaxConcurrentExecutions} " +
-                    "execution permits are in use by running or abandoned factories.");
+        if (rejected)
+        {
+            // Logged outside the gate: logging providers are third-party code that must not run under the
+            // permit lock (same rule as the metric callbacks below). The transition decision is made under
+            // the gate, so each exhausted interval still logs exactly once; only the emission order against
+            // a concurrent restore can wobble.
+            if (logExhaustion)
+            {
+                LogCapacityExhausted(policy.CacheName, policy.MaxConcurrentExecutions);
             }
 
-            bulkhead.AvailablePermits--;
+            throw new FusionCacheFactoryRejectedException(
+                $"The '{policy.CacheName}' cache factory was rejected: all {policy.MaxConcurrentExecutions} " +
+                "execution permits are in use by running or abandoned factories.");
         }
 
         FusionCacheFactoryTelemetry.ActiveExecutions.Add(1, CacheTag(policy));
@@ -330,6 +349,7 @@ internal sealed partial class FusionCacheFactoryRunner
                 return;
             }
 
+            var logRestored = false;
             lock (_bulkhead.Gate)
             {
                 _bulkhead.AvailablePermits++;
@@ -340,8 +360,15 @@ internal sealed partial class FusionCacheFactoryRunner
                 if (_bulkhead.ExhaustionLogged)
                 {
                     _bulkhead.ExhaustionLogged = false;
-                    _runner.LogCapacityRestored(_policy.CacheName);
+                    logRestored = true;
                 }
+            }
+
+            // Logged outside the gate: a blocked logging provider must not stall permit release, least of
+            // all while the bulkhead is describing its own exhaustion.
+            if (logRestored)
+            {
+                _runner.LogCapacityRestored(_policy.CacheName);
             }
 
             // Deliberately outside the gate: measurement callbacks (MeterListener) run inline on Add and must

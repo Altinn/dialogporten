@@ -562,7 +562,6 @@ public class FusionCacheFactoryRunnerTests
     private sealed class ScopedDependency : IDisposable
     {
         public bool Disposed { get; private set; }
-        public bool DisposedDuringUse => Disposed;
         public void Dispose() => Disposed = true;
     }
 

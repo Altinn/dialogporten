@@ -75,9 +75,15 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     {
         const string typPropertyName = "typ";
         var reader = new Utf8JsonReader(header);
+
+        // Require a root JSON object, and only match "typ" at depth 1 — otherwise a header carrying an
+        // unrelated nested object with its own "typ" property (e.g. {"kid":"x","nested":{"typ":"JWT"}})
+        // would satisfy validation without a genuine top-level "typ".
+        if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject) return false;
+
         while (reader.Read())
         {
-            if (!IsPropertyName(reader, typPropertyName)) continue;
+            if (reader.CurrentDepth != 1 || !IsPropertyName(reader, typPropertyName)) continue;
             if (!reader.Read() || reader.TokenType != JsonTokenType.String) return false;
 
             foreach (var validTokenType in validTokenTypes)

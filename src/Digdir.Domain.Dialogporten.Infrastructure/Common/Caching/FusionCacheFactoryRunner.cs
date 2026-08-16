@@ -166,7 +166,7 @@ internal sealed partial class FusionCacheFactoryRunner
             // deliberately stays state-based: once the caller is gone, all cancellation fallout is noise.)
             // Token-less cancellations that were in fact responses to our token fall through to the failure
             // log below, which errs toward attribution.
-            lease.LogFactoryDeadlineCancelled(policy.CancellationAfter, ex);
+            lease.ReportFactoryDeadlineCancelled(policy.CancellationAfter, ex);
             throw;
         }
         catch (FusionCacheFactoryRejectedException)
@@ -179,7 +179,7 @@ internal sealed partial class FusionCacheFactoryRunner
         {
             // Includes OperationCanceledException carrying neither the caller's nor this runner's token: such
             // cancellation is an unexpected factory failure and must stay attributable.
-            lease.LogFactoryFailed(ex);
+            lease.ReportFactoryFailed(ex);
             throw;
         }
         finally
@@ -336,11 +336,11 @@ internal sealed partial class FusionCacheFactoryRunner
             _bulkhead = bulkhead;
         }
 
-        public void LogFactoryFailed(Exception exception) =>
-            FusionCacheFactoryRunner.LogFactoryFailed(_runner._logger, _policy.CacheName, exception);
+        public void ReportFactoryFailed(Exception exception) =>
+            LogFactoryFailed(_runner._logger, _policy.CacheName, exception);
 
-        public void LogFactoryDeadlineCancelled(TimeSpan cancellationAfter, Exception exception) =>
-            FusionCacheFactoryRunner.LogFactoryDeadlineCancelled(_runner._logger, _policy.CacheName, cancellationAfter, exception);
+        public void ReportFactoryDeadlineCancelled(TimeSpan cancellationAfter, Exception exception) =>
+            LogFactoryDeadlineCancelled(_runner._logger, _policy.CacheName, cancellationAfter, exception);
 
         public void Dispose()
         {

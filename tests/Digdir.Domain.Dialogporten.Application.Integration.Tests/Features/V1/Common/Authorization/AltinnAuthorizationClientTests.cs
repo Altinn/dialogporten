@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -220,10 +221,10 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             user,
             db,
             new ServiceResourceMinimumAuthenticationLevelResolver(
-                new ResourcePolicyInformationRepository(db, cacheProvider)),
+                new ResourcePolicyInformationRepository(db, cacheProvider, CreateFactoryRunner(db))),
             Substitute.For<IPartyResourceReferenceRepository>(),
             Substitute.For<ILogger<AltinnAuthorizationClient>>(),
-            Substitute.For<IServiceScopeFactory>(),
+            CreateFactoryRunner(db),
             Substitute.For<IOptionsMonitor<ApplicationSettings>>(),
             Substitute.For<IPartyNameRegistry>()
         );
@@ -256,10 +257,25 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             Substitute.For<IServiceResourceMinimumAuthenticationLevelResolver>(),
             Substitute.For<IPartyResourceReferenceRepository>(),
             Substitute.For<ILogger<AltinnAuthorizationClient>>(),
-            Substitute.For<IServiceScopeFactory>(),
+            CreateFactoryRunner(),
             applicationSettings,
             Substitute.For<IPartyNameRegistry>()
         );
+    }
+
+    // The runner's dedicated scope must resolve the same DbContext instance the test seeded, when one exists.
+    private static FusionCacheFactoryRunner CreateFactoryRunner(DialogDbContext? db = null)
+    {
+        var services = new ServiceCollection();
+        if (db is not null)
+        {
+            services.AddSingleton(db);
+        }
+
+        var serviceProvider = services.BuildServiceProvider();
+        return new FusionCacheFactoryRunner(
+            serviceProvider.GetRequiredService<IServiceScopeFactory>(),
+            Substitute.For<ILogger<FusionCacheFactoryRunner>>());
     }
 
     // A non-empty response is required for email users without party filters; an empty

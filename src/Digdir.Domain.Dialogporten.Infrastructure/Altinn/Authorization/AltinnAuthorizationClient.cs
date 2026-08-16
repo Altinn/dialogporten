@@ -13,6 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +39,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private readonly IServiceResourceMinimumAuthenticationLevelResolver _serviceResourceMinimumAuthenticationLevelResolver;
     private readonly IPartyResourceReferenceRepository _partyResourceReferenceRepository;
     private readonly ILogger _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly FusionCacheFactoryRunner _factoryRunner;
     private readonly IOptionsMonitor<ApplicationSettings> _applicationSettings;
     private readonly IPartyNameRegistry _partyNameRegistry;
 
@@ -56,7 +57,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         IServiceResourceMinimumAuthenticationLevelResolver serviceResourceMinimumAuthenticationLevelResolver,
         IPartyResourceReferenceRepository partyResourceReferenceRepository,
         ILogger<AltinnAuthorizationClient> logger,
-        IServiceScopeFactory serviceScopeFactory,
+        FusionCacheFactoryRunner factoryRunner,
         IOptionsMonitor<ApplicationSettings> applicationSettings,
         IPartyNameRegistry partyNameRegistry
     )
@@ -68,7 +69,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         ArgumentNullException.ThrowIfNull(serviceResourceMinimumAuthenticationLevelResolver);
         ArgumentNullException.ThrowIfNull(partyResourceReferenceRepository);
         ArgumentNullException.ThrowIfNull(logger);
-        ArgumentNullException.ThrowIfNull(serviceScopeFactory);
+        ArgumentNullException.ThrowIfNull(factoryRunner);
         ArgumentNullException.ThrowIfNull(applicationSettings);
         ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
@@ -90,7 +91,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         _serviceResourceMinimumAuthenticationLevelResolver = serviceResourceMinimumAuthenticationLevelResolver;
         _partyResourceReferenceRepository = partyResourceReferenceRepository;
         _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
+        _factoryRunner = factoryRunner;
         _applicationSettings = applicationSettings;
         _partyNameRegistry = partyNameRegistry;
     }
@@ -363,12 +364,12 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     }
 
     private async Task<List<SubjectResource>> GetAllSubjectResources(CancellationToken cancellationToken) =>
-        await _subjectResourcesCache.GetOrSetAsync(nameof(SubjectResource), async ct =>
-            {
-                using var scope = _serviceScopeFactory.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
-                return await dbContext.SubjectResources.AsNoTracking().ToListAsync(cancellationToken: ct);
-            },
+        await _subjectResourcesCache.GetOrSetAsync(nameof(SubjectResource),
+            token => _factoryRunner.RunInScope(
+                FusionCacheFactoryPolicy.SubjectResources,
+                static async (services, ct) => await services.GetRequiredService<DialogDbContext>()
+                    .SubjectResources.AsNoTracking().ToListAsync(cancellationToken: ct),
+                token),
             token: cancellationToken);
 
     private static List<AuthorizedPartyFilter> CreatePartyFilters(List<string> constraintParties)

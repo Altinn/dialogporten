@@ -14,6 +14,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
@@ -151,6 +152,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IOptionsSnapshot<ApplicationSettings>>(x => x.GetRequiredService<TestApplicationSettings>())
             .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<TestApplicationSettings>())
             .AddSingleton<IFusionCacheProvider>(_ => CreateNullFusionCacheProvider())
+            .AddSingleton<FusionCacheFactoryRunner>()
             .AddScoped<ITopicEventSender>(_ => Substitute.For<ITopicEventSender>())
             .AddScoped<IPublishEndpoint>(_ => publishEndpointSubstitute)
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))

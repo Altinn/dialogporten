@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -20,14 +21,16 @@ public class ServiceResourceMetadataCatalogueTests
     {
         var builder = new CountingItemBuilder();
         // The catalogue resolves its build dependencies from a fresh DI scope (so a background/eager refresh does
-        // not reuse a disposed request-scoped DbContext), so register the stubs in a real provider and hand it the
-        // scope factory.
+        // not reuse a disposed request-scoped DbContext), so register the stubs in a real provider and hand its
+        // scope factory to the runner.
         var serviceProvider = new ServiceCollection()
             .AddSingleton<IServiceResourceMetadataItemBuilder>(builder)
             .AddSingleton<IPartyResourceReferenceRepository>(new StubReferencedResourcesRepository([ResourceUrn]))
             .BuildServiceProvider();
-        var catalogue = new ServiceResourceMetadataCatalogue(
-            CreateCacheProvider(), serviceProvider.GetRequiredService<IServiceScopeFactory>());
+        var factoryRunner = new FusionCacheFactoryRunner(
+            serviceProvider.GetRequiredService<IServiceScopeFactory>(),
+            new CollectingLogger<FusionCacheFactoryRunner>());
+        var catalogue = new ServiceResourceMetadataCatalogue(CreateCacheProvider(), factoryRunner);
 
         var first = await catalogue.GetEntries(TestContext.Current.CancellationToken);
         var second = await catalogue.GetEntries(TestContext.Current.CancellationToken);

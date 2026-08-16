@@ -1,6 +1,8 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -14,29 +16,40 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
 
     private readonly DialogDbContext _dbContext;
     private readonly IFusionCache _minimumAuthenticationLevelsCache;
+    private readonly FusionCacheFactoryRunner _factoryRunner;
 
     public ResourcePolicyInformationRepository(
         DialogDbContext dbContext,
-        IFusionCacheProvider cacheProvider)
+        IFusionCacheProvider cacheProvider,
+        FusionCacheFactoryRunner factoryRunner)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(factoryRunner);
 
         var minimumAuthenticationLevelsCache = cacheProvider.GetCache(MinimumAuthenticationLevelsCacheName);
         ArgumentNullException.ThrowIfNull(minimumAuthenticationLevelsCache);
 
         _dbContext = dbContext;
         _minimumAuthenticationLevelsCache = minimumAuthenticationLevelsCache;
+        _factoryRunner = factoryRunner;
     }
 
     public async Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(CancellationToken cancellationToken) =>
         await _minimumAuthenticationLevelsCache.GetOrSetAsync<Dictionary<string, int>>(
             MinimumAuthenticationLevelsCacheKey,
-            FetchMinimumAuthenticationLevels,
+            token => _factoryRunner.RunInScope(
+                FusionCacheFactoryPolicy.MinimumAuthenticationLevels,
+                FetchMinimumAuthenticationLevels,
+                token),
             token: cancellationToken);
 
-    private async Task<Dictionary<string, int>> FetchMinimumAuthenticationLevels(CancellationToken cancellationToken) =>
-        await _dbContext.ResourcePolicyInformation
+    // Static and resolving its own DbContext: the factory can run detached from the request (see
+    // FusionCacheFactoryRunner), so it must not capture this instance's request-scoped context.
+    private static async Task<Dictionary<string, int>> FetchMinimumAuthenticationLevels(
+        IServiceProvider services,
+        CancellationToken cancellationToken) =>
+        await services.GetRequiredService<DialogDbContext>().ResourcePolicyInformation
             .AsNoTracking()
             .Select(x => new { x.Resource, x.MinimumAuthenticationLevel })
             .ToDictionaryAsync(

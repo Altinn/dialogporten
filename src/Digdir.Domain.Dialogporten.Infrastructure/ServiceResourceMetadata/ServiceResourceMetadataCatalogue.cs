@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -17,38 +18,40 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
     private const string CacheKey = "all";
 
     private readonly IFusionCache _cache;
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly FusionCacheFactoryRunner _factoryRunner;
 
     public ServiceResourceMetadataCatalogue(
         IFusionCacheProvider cacheProvider,
-        IServiceScopeFactory scopeFactory)
+        FusionCacheFactoryRunner factoryRunner)
     {
         ArgumentNullException.ThrowIfNull(cacheProvider);
-        ArgumentNullException.ThrowIfNull(scopeFactory);
+        ArgumentNullException.ThrowIfNull(factoryRunner);
 
         var cache = cacheProvider.GetCache(CacheName);
         ArgumentNullException.ThrowIfNull(cache);
 
         _cache = cache;
-        _scopeFactory = scopeFactory;
+        _factoryRunner = factoryRunner;
     }
 
     public async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken) =>
         await _cache.GetOrSetAsync<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
             CacheKey,
-            BuildCatalogue,
+            token => _factoryRunner.RunInScope(
+                FusionCacheFactoryPolicy.ServiceResourceMetadataCatalogue,
+                BuildCatalogue,
+                token),
             token: cancellationToken);
 
-    private async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> BuildCatalogue(CancellationToken cancellationToken)
+    // Runs in the runner's dedicated scope: this cache uses eager refresh, so the build can outlive the
+    // request that triggered it (see FusionCacheFactoryRunner). The inner caches this build resolves create
+    // their own scopes too, so a nested refresh that detaches from THIS build's scope is safe by construction.
+    private static async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> BuildCatalogue(
+        IServiceProvider services,
+        CancellationToken cancellationToken)
     {
-        // Build in a fresh DI scope rather than via injected (request-scoped) dependencies. This cache uses
-        // eager refresh, so the factory can run on a background task that outlives the request that triggered
-        // it; the item builder transitively resolves the request-scoped DialogDbContext (via
-        // SubjectResourceRepository), which would already be disposed by then -> ObjectDisposedException. A
-        // dedicated scope gives the (possibly background) build its own DbContext for its full lifetime.
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var itemBuilder = scope.ServiceProvider.GetRequiredService<IServiceResourceMetadataItemBuilder>();
-        var partyResourceReferenceRepository = scope.ServiceProvider.GetRequiredService<IPartyResourceReferenceRepository>();
+        var itemBuilder = services.GetRequiredService<IServiceResourceMetadataItemBuilder>();
+        var partyResourceReferenceRepository = services.GetRequiredService<IPartyResourceReferenceRepository>();
 
         var referencedResources = await partyResourceReferenceRepository.GetReferencedResources(cancellationToken);
 

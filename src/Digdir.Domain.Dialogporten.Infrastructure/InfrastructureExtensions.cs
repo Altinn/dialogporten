@@ -240,9 +240,12 @@ public static class InfrastructureExtensions
             FactoryHardTimeout = TimeSpan.FromSeconds(25)
         })
         // Subject -> resource (role / access-package) mappings used by dialog-search authorization.
+        // The factory work ceiling lives in FusionCacheFactoryPolicy.SubjectResources; the same policy
+        // supplies this waiter-facing hard timeout so the two cannot drift apart.
         .ConfigureFusionCache(nameof(SubjectResource), new()
         {
-            Duration = TimeSpan.FromMinutes(20)
+            Duration = TimeSpan.FromMinutes(20),
+            FactoryHardTimeout = FusionCacheFactoryPolicy.SubjectResources.HardTimeout
         })
         // dialog id -> service-resource lookup for feature-metric tagging; short-lived, no fail-safe.
         .ConfigureFusionCache(nameof(IFeatureMetricServiceResourceCache), new()
@@ -275,8 +278,8 @@ public static class InfrastructureExtensions
             // Substantial headroom over the factory's DB work (30s Npgsql CommandTimeout, plus connection
             // acquisition and result mapping, which the command timeout does not cover). A tight budget
             // cancels slow-but-succeeding rebuilds, so refreshes never complete and fail-safe silently
-            // becomes the only data source.
-            FactoryHardTimeout = TimeSpan.FromSeconds(60),
+            // becomes the only data source. The factory's own work ceiling lives in the same policy.
+            FactoryHardTimeout = FusionCacheFactoryPolicy.PartyResourceReferencedResources.HardTimeout,
             SkipDistributedCache = true
         })
         // Subjects (roles/access packages) per referenced party-resource; used by the metadata item builder.
@@ -286,14 +289,17 @@ public static class InfrastructureExtensions
             Duration = TimeSpan.FromMinutes(20),
             // See ReferencedResourcesCacheName above for the rationale behind both values.
             FailSafeMaxDuration = TimeSpan.FromHours(24),
-            FactoryHardTimeout = TimeSpan.FromSeconds(60)
+            FactoryHardTimeout = FusionCacheFactoryPolicy.SubjectResourceReferencedPartyResources.HardTimeout
         })
         .ConfigureFusionCache(ResourcePolicyInformationRepository.MinimumAuthenticationLevelsCacheName, new()
         {
             Duration = TimeSpan.FromHours(6),
             // Min auth level is on the authorization hot path; keep stale-but-known data usable well past
             // Duration so the cache can still serve if ResourcePolicyInformation queries start failing.
-            FailSafeMaxDuration = TimeSpan.FromHours(24)
+            FailSafeMaxDuration = TimeSpan.FromHours(24),
+            // The factory work ceiling lives in FusionCacheFactoryPolicy.MinimumAuthenticationLevels; the
+            // same policy supplies this waiter-facing hard timeout so the two cannot drift apart.
+            FactoryHardTimeout = FusionCacheFactoryPolicy.MinimumAuthenticationLevels.HardTimeout
         })
         .ConfigureFusionCache(AccessManagementMetadataClient.CacheName, new()
         {
@@ -327,8 +333,8 @@ public static class InfrastructureExtensions
             // cached lookups, each DB-bound step capped by the 30s CommandTimeout); sized operationally, not a
             // guaranteed worst-case bound. Rebuilds that cannot finish within this budget never succeed, and
             // fail-safe silently becomes the only data source. On a cold miss this hard timeout is the
-            // caller-facing wait ceiling.
-            FactoryHardTimeout = TimeSpan.FromSeconds(120),
+            // caller-facing wait ceiling. The factory's own work ceiling lives in the same policy.
+            FactoryHardTimeout = FusionCacheFactoryPolicy.ServiceResourceMetadataCatalogue.HardTimeout,
             SkipDistributedCache = true
         })
         .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()
@@ -350,8 +356,8 @@ public static class InfrastructureExtensions
             // Must be >= the hard timeouts of the caches this factory transitively awaits (AuthorizedPartiesResult
             // and Altinn.Authorization, both 25s). A smaller value would make this outer factory time out (and, on
             // a cold entry with no fail-safe data, throw) while the inner authorization call is still legitimately
-            // running within its own larger budget.
-            FactoryHardTimeout = TimeSpan.FromSeconds(25),
+            // running within its own larger budget. The factory's own work ceiling lives in the same policy.
+            FactoryHardTimeout = FusionCacheFactoryPolicy.AuthorizedServiceResources.HardTimeout,
             Duration = TimeSpan.FromMinutes(15),
             FailSafeMaxDuration = TimeSpan.FromMinutes(30)
         });

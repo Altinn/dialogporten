@@ -6,6 +6,7 @@ using Dapper;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
@@ -36,15 +37,18 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
     private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
     private readonly IFusionCache _cache;
     private readonly IFusionCache _referencedResourcesCache;
+    private readonly FusionCacheFactoryRunner _factoryRunner;
 
     public PartyResourceRepository(
         NpgsqlDataSource dataSource,
         IOptionsSnapshot<ApplicationSettings> applicationSettings,
-        IFusionCacheProvider cacheProvider)
+        IFusionCacheProvider cacheProvider,
+        FusionCacheFactoryRunner factoryRunner)
     {
         ArgumentNullException.ThrowIfNull(dataSource);
         ArgumentNullException.ThrowIfNull(applicationSettings);
         ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(factoryRunner);
 
         var cache = cacheProvider.GetCache(nameof(IPartyResourceReferenceRepository));
         ArgumentNullException.ThrowIfNull(cache);
@@ -55,12 +59,18 @@ internal sealed class PartyResourceRepository : IPartyResourceReferenceRepositor
         _applicationSettings = applicationSettings;
         _cache = cache;
         _referencedResourcesCache = referencedResourcesCache;
+        _factoryRunner = factoryRunner;
     }
 
     public async Task<IReadOnlyCollection<string>> GetReferencedResources(CancellationToken cancellationToken) =>
         await _referencedResourcesCache.GetOrSetAsync<List<string>>(
             ReferencedResourcesCacheKey,
-            FetchReferencedResources,
+            // Run (not RunInScope): the factory only touches the singleton NpgsqlDataSource, so it needs the
+            // deadline and permit but no dedicated DI scope.
+            token => _factoryRunner.Run(
+                FusionCacheFactoryPolicy.PartyResourceReferencedResources,
+                FetchReferencedResources,
+                token),
             token: cancellationToken);
 
     private async Task<List<string>> FetchReferencedResources(CancellationToken cancellationToken)

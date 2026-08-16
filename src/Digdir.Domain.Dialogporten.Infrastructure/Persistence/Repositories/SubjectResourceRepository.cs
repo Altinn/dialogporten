@@ -1,6 +1,8 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -14,19 +16,23 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
 
     private readonly DialogDbContext _dbContext;
     private readonly IFusionCache _referencedPartyResourcesCache;
+    private readonly FusionCacheFactoryRunner _factoryRunner;
 
     public SubjectResourceRepository(
         DialogDbContext dbContext,
-        IFusionCacheProvider cacheProvider)
+        IFusionCacheProvider cacheProvider,
+        FusionCacheFactoryRunner factoryRunner)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(factoryRunner);
 
         var referencedPartyResourcesCache = cacheProvider.GetCache(ReferencedPartyResourcesCacheName);
         ArgumentNullException.ThrowIfNull(referencedPartyResourcesCache);
 
         _dbContext = dbContext;
         _referencedPartyResourcesCache = referencedPartyResourcesCache;
+        _factoryRunner = factoryRunner;
     }
 
     public async Task<Dictionary<string, List<string>>> GetSubjectsByResource(
@@ -58,11 +64,17 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
         // Callers receive a read-only view, so the cached instance is protected from mutation.
         return await _referencedPartyResourcesCache.GetOrSetAsync<Dictionary<string, IReadOnlyList<string>>>(
             ReferencedPartyResourcesCacheKey,
-            FetchSubjectsForReferencedPartyResources,
+            token => _factoryRunner.RunInScope(
+                FusionCacheFactoryPolicy.SubjectResourceReferencedPartyResources,
+                FetchSubjectsForReferencedPartyResources,
+                token),
             token: cancellationToken);
     }
 
-    private async Task<Dictionary<string, IReadOnlyList<string>>> FetchSubjectsForReferencedPartyResources(
+    // Static and resolving its own DbContext: the factory can run detached from the request (see
+    // FusionCacheFactoryRunner), so it must not capture this instance's request-scoped context.
+    private static async Task<Dictionary<string, IReadOnlyList<string>>> FetchSubjectsForReferencedPartyResources(
+        IServiceProvider services,
         CancellationToken cancellationToken)
     {
         const string sql =
@@ -73,7 +85,7 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
               ON sr."Resource" = 'urn:altinn:resource:' || r."UnprefixedResourceIdentifier"
             """;
 
-        return (await _dbContext.Database
+        return (await services.GetRequiredService<DialogDbContext>().Database
                 .SqlQueryRaw<SubjectResourceRow>(sql)
                 .ToListAsync(cancellationToken))
             .GroupBy(x => x.Resource, StringComparer.OrdinalIgnoreCase)

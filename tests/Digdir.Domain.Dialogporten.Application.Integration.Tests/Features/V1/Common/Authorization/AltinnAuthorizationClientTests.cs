@@ -264,6 +264,8 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
     }
 
     // The runner's dedicated scope must resolve the same DbContext instance the test seeded, when one exists.
+    // Consequence: unlike production, every scope here yields the same context, so these tests exercise the
+    // call-site wiring but NOT scope isolation; that property is pinned by FusionCacheFactoryRunnerTests.
     private static FusionCacheFactoryRunner CreateFactoryRunner(DialogDbContext? db = null)
     {
         var services = new ServiceCollection();

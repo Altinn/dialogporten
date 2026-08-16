@@ -118,7 +118,7 @@ internal sealed partial class FusionCacheFactoryRunner
             RegisterOrphan(policy, factoryTask, start, deadlineAbandoned: true);
             var abandonment = new OperationCanceledException(
                 $"The '{policy.CacheName}' cache factory did not complete within its {policy.AbandonAfter} abandonment ceiling.");
-            LogFactoryAbandoned(policy.CacheName, policy.CancellationAfter, policy.AbandonAfter, abandonment);
+            LogFactoryAbandoned(_logger, policy.CacheName, policy.CancellationAfter, policy.AbandonAfter, abandonment);
             // FusionCache observes a cancelled factory and releases the per-key lock; waiters were already
             // released (or served stale) at FactoryHardTimeout.
             throw abandonment;
@@ -225,7 +225,7 @@ internal sealed partial class FusionCacheFactoryRunner
             // a concurrent restore can wobble.
             if (logExhaustion)
             {
-                LogCapacityExhausted(policy.CacheName, policy.MaxConcurrentExecutions);
+                LogCapacityExhausted(_logger, policy.CacheName, policy.MaxConcurrentExecutions);
             }
 
             throw new FusionCacheFactoryRejectedException(
@@ -263,11 +263,11 @@ internal sealed partial class FusionCacheFactoryRunner
         var elapsed = Stopwatch.GetElapsedTime(start);
         if (deadlineAbandoned)
         {
-            LogOrphanCompleted(policy.CacheName, elapsed, failure);
+            LogOrphanCompleted(_logger, policy.CacheName, elapsed, failure);
         }
         else
         {
-            LogCancelledOrphanCompleted(policy.CacheName, elapsed);
+            LogCancelledOrphanCompleted(_logger, policy.CacheName, elapsed);
         }
     }
 
@@ -276,31 +276,31 @@ internal sealed partial class FusionCacheFactoryRunner
 
     [LoggerMessage(EventId = 1, EventName = "FusionCacheFactoryFailed", Level = LogLevel.Error,
         Message = "The {CacheName} cache factory failed.")]
-    private partial void LogFactoryFailed(string cacheName, Exception exception);
+    private static partial void LogFactoryFailed(ILogger logger, string cacheName, Exception exception);
 
     [LoggerMessage(EventId = 2, EventName = "FusionCacheFactoryDeadlineCancelled", Level = LogLevel.Error,
         Message = "The {CacheName} cache factory was cancelled at its {CancellationAfter} cancellation deadline.")]
-    private partial void LogFactoryDeadlineCancelled(string cacheName, TimeSpan cancellationAfter, Exception exception);
+    private static partial void LogFactoryDeadlineCancelled(ILogger logger, string cacheName, TimeSpan cancellationAfter, Exception exception);
 
     [LoggerMessage(EventId = 3, EventName = "FusionCacheFactoryAbandoned", Level = LogLevel.Error,
         Message = "The {CacheName} cache factory ignored cancellation at {CancellationAfter} and was abandoned at its {AbandonAfter} ceiling; it keeps its execution permit until it completes.")]
-    private partial void LogFactoryAbandoned(string cacheName, TimeSpan cancellationAfter, TimeSpan abandonAfter, Exception exception);
+    private static partial void LogFactoryAbandoned(ILogger logger, string cacheName, TimeSpan cancellationAfter, TimeSpan abandonAfter, Exception exception);
 
     [LoggerMessage(EventId = 4, EventName = "FusionCacheFactoryOrphanCompleted", Level = LogLevel.Warning,
         Message = "An abandoned {CacheName} cache factory completed after {Elapsed}.")]
-    private partial void LogOrphanCompleted(string cacheName, TimeSpan elapsed, Exception? exception);
+    private static partial void LogOrphanCompleted(ILogger logger, string cacheName, TimeSpan elapsed, Exception? exception);
 
     [LoggerMessage(EventId = 5, EventName = "FusionCacheFactoryCapacityExhausted", Level = LogLevel.Error,
         Message = "All {MaxConcurrentExecutions} execution permits for the {CacheName} cache factory are in use; new factory invocations are rejected until one completes.")]
-    private partial void LogCapacityExhausted(string cacheName, int maxConcurrentExecutions);
+    private static partial void LogCapacityExhausted(ILogger logger, string cacheName, int maxConcurrentExecutions);
 
     [LoggerMessage(EventId = 6, EventName = "FusionCacheFactoryCapacityRestored", Level = LogLevel.Information,
         Message = "Execution permits for the {CacheName} cache factory are available again.")]
-    private partial void LogCapacityRestored(string cacheName);
+    private static partial void LogCapacityRestored(ILogger logger, string cacheName);
 
     [LoggerMessage(EventId = 7, EventName = "FusionCacheFactoryCancelledOrphanCompleted", Level = LogLevel.Debug,
         Message = "A caller-cancelled {CacheName} cache factory completed after {Elapsed}.")]
-    private partial void LogCancelledOrphanCompleted(string cacheName, TimeSpan elapsed);
+    private static partial void LogCancelledOrphanCompleted(ILogger logger, string cacheName, TimeSpan elapsed);
 
     private sealed class BulkheadState
     {
@@ -337,10 +337,10 @@ internal sealed partial class FusionCacheFactoryRunner
         }
 
         public void LogFactoryFailed(Exception exception) =>
-            _runner.LogFactoryFailed(_policy.CacheName, exception);
+            FusionCacheFactoryRunner.LogFactoryFailed(_runner._logger, _policy.CacheName, exception);
 
         public void LogFactoryDeadlineCancelled(TimeSpan cancellationAfter, Exception exception) =>
-            _runner.LogFactoryDeadlineCancelled(_policy.CacheName, cancellationAfter, exception);
+            FusionCacheFactoryRunner.LogFactoryDeadlineCancelled(_runner._logger, _policy.CacheName, cancellationAfter, exception);
 
         public void Dispose()
         {
@@ -368,7 +368,7 @@ internal sealed partial class FusionCacheFactoryRunner
             // all while the bulkhead is describing its own exhaustion.
             if (logRestored)
             {
-                _runner.LogCapacityRestored(_policy.CacheName);
+                LogCapacityRestored(_runner._logger, _policy.CacheName);
             }
 
             // Deliberately outside the gate: measurement callbacks (MeterListener) run inline on Add and must

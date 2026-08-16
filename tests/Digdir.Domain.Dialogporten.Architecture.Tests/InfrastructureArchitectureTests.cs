@@ -18,6 +18,9 @@ public class InfrastructureArchitectureTests
             nameof(InfrastructureExtensions),
             // Hosts must reference the meter name to subscribe it in their OpenTelemetry setup.
             nameof(FusionCacheFactoryTelemetry),
+            // Escapes assembly boundaries via cache calls on cold-miss rejections; public so callers can
+            // catch it by type (Sonar S3871).
+            nameof(FusionCacheFactoryRejectedException),
 
             // These classes are currently public but should be internal, moved to another assembly, or deleted
             nameof(IUpstreamServiceError)

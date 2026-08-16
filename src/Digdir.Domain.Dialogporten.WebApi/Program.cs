@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.WebApi;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
@@ -92,7 +93,8 @@ static void BuildAndRun(string[] args)
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalMetrics: x => x
                 .AddAspNetCoreInstrumentation()
-                .AddNpgsqlInstrumentation(),
+                .AddNpgsqlInstrumentation()
+                .AddMeter(FusionCacheFactoryTelemetry.MeterName),
             additionalTracing: x => x
                 .AddFusionCacheInstrumentation()
                 .AddAspNetCoreInstrumentationExcludingHealthPaths(),

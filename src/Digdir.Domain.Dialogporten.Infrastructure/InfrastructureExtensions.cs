@@ -17,6 +17,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.OrganizationRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Common;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
 using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
@@ -158,6 +159,7 @@ public static class InfrastructureExtensions
 
             // Singleton
             .AddSingleton<INotificationProcessingContextFactory, NotificationProcessingContextFactory>()
+            .AddSingleton<FusionCacheFactoryRunner>()
 
             // HttpClient
             .AddHttpClients(infrastructureSettings)

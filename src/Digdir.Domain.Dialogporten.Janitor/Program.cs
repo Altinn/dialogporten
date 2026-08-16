@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Infrastructure;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.Janitor;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
@@ -67,7 +68,9 @@ static void BuildAndRun(string[] args)
     builder.Services
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalTracing: x => x.AddFusionCacheInstrumentation(),
-            additionalMetrics: x => x.AddMeter(CustomMetrics.MeterName),
+            additionalMetrics: x => x
+                .AddMeter(CustomMetrics.MeterName)
+                .AddMeter(FusionCacheFactoryTelemetry.MeterName),
             httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
         .AddApplication(builder.Configuration, builder.Environment)
         .AddInfrastructure(builder.Configuration, builder.Environment)

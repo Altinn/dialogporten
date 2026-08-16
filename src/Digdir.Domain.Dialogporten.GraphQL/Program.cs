@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.GraphQL;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
 using Digdir.Domain.Dialogporten.GraphQL.Common;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Authentication;
 using Digdir.Domain.Dialogporten.GraphQL.Common.Authorization;
@@ -117,7 +118,8 @@ static void BuildAndRun(string[] args)
         .AddDialogportenTelemetry(builder.Configuration, builder.Environment,
             additionalMetrics: x => x
                 .AddAspNetCoreInstrumentation()
-                .AddNpgsqlInstrumentation(),
+                .AddNpgsqlInstrumentation()
+                .AddMeter(FusionCacheFactoryTelemetry.MeterName),
             additionalTracing: x => x
                 .AddSource("Dialogporten.GraphQL")
                 .AddFusionCacheInstrumentation()

@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -40,3 +42,23 @@ internal sealed class StubOptionsSnapshot<T>(T value) : IOptionsSnapshot<T> wher
     public T Value => value;
     public T Get(string? name) => value;
 }
+
+/// <summary>
+/// Captures log entries for assertions. Thread-safe: cache factories detached by the runner log concurrently
+/// with the test's own thread.
+/// </summary>
+internal sealed class CollectingLogger<T> : ILogger<T>
+{
+    private readonly ConcurrentQueue<CollectedLogEntry> _entries = new();
+
+    public IReadOnlyCollection<CollectedLogEntry> Entries => _entries;
+
+    IDisposable? ILogger.BeginScope<TState>(TState state) => null;
+
+    public bool IsEnabled(LogLevel logLevel) => true;
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+        _entries.Enqueue(new CollectedLogEntry(logLevel, eventId, exception, formatter(state, exception)));
+}
+
+internal sealed record CollectedLogEntry(LogLevel Level, EventId EventId, Exception? Exception, string Message);

@@ -156,8 +156,14 @@ internal sealed partial class FusionCacheFactoryRunner
             // Caller/shutdown cancellation is not a factory failure.
             throw;
         }
-        catch (OperationCanceledException ex) when (cancellationSource.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationSource.Token)
         {
+            // Matched by token identity, not source state: this event measures whether cooperative
+            // cancellation works, so a cancellation the factory produced independently after the deadline
+            // elapsed must not masquerade as a deadline cancellation. (The caller-cancellation clause above
+            // deliberately stays state-based: once the caller is gone, all cancellation fallout is noise.)
+            // Token-less cancellations that were in fact responses to our token fall through to the failure
+            // log below, which errs toward attribution.
             lease.LogFactoryDeadlineCancelled(policy.CancellationAfter, ex);
             throw;
         }
@@ -169,7 +175,7 @@ internal sealed partial class FusionCacheFactoryRunner
         }
         catch (Exception ex)
         {
-            // Includes OperationCanceledException that neither the caller nor this runner requested: such
+            // Includes OperationCanceledException carrying neither the caller's nor this runner's token: such
             // cancellation is an unexpected factory failure and must stay attributable.
             lease.LogFactoryFailed(ex);
             throw;

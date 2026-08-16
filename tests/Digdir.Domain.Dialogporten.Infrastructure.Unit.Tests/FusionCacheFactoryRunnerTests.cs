@@ -190,6 +190,38 @@ public class FusionCacheFactoryRunnerTests
     }
 
     [Fact]
+    public async Task An_Unrelated_Cancellation_After_The_Deadline_Is_A_Failure_Not_A_Deadline_Cancellation()
+    {
+        var testToken = TestContext.Current.CancellationToken;
+        using var fixture = new RunnerFixture();
+        var policy = RunnerFixture.CreatePolicy(cancellationAfter: TimeSpan.FromMilliseconds(50), abandonAfter: TimeSpan.FromSeconds(8));
+        using var foreignSource = new CancellationTokenSource();
+        await foreignSource.CancelAsync();
+
+        var act = async () => await fixture.Runner.RunInScope<int>(
+            policy,
+            async (_, ct) =>
+            {
+                // Outlive the deadline while ignoring the token, then fail with a cancellation that has
+                // nothing to do with the runner (an inner client's own timeout, for example). The deadline
+                // source being cancelled at catch time must not turn this into a deadline cancellation.
+                while (!ct.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(5), CancellationToken.None);
+                }
+
+                throw new OperationCanceledException("inner client timeout", foreignSource.Token);
+            },
+            testToken);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        fixture.Logger.Entries.Should().ContainSingle(x => x.EventId.Id == 1,
+            "a cancellation carrying a foreign token is an unexpected factory failure");
+        fixture.Logger.Entries.Should().NotContain(x => x.EventId.Id == 2,
+            "only cancellations carrying the runner's own token are deadline cancellations");
+    }
+
+    [Fact]
     public async Task Factory_Exception_Is_Logged_With_The_Exception_And_Rethrown()
     {
         var testToken = TestContext.Current.CancellationToken;

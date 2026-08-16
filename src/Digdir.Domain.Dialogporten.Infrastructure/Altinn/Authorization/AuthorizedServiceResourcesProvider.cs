@@ -3,6 +3,8 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -19,33 +21,25 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
 
     private static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
 
-    private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IUser _user;
-    private readonly IUserParties _userParties;
-    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
     private readonly IFusionCache _cache;
+    private readonly FusionCacheFactoryRunner _factoryRunner;
 
     public AuthorizedServiceResourcesProvider(
-        IAltinnAuthorization altinnAuthorization,
         IUser user,
-        IUserParties userParties,
-        IOptionsSnapshot<ApplicationSettings> applicationSettings,
-        IFusionCacheProvider cacheProvider)
+        IFusionCacheProvider cacheProvider,
+        FusionCacheFactoryRunner factoryRunner)
     {
-        ArgumentNullException.ThrowIfNull(altinnAuthorization);
         ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(userParties);
-        ArgumentNullException.ThrowIfNull(applicationSettings);
         ArgumentNullException.ThrowIfNull(cacheProvider);
+        ArgumentNullException.ThrowIfNull(factoryRunner);
 
         var cache = cacheProvider.GetCache(CacheName);
         ArgumentNullException.ThrowIfNull(cache);
 
-        _altinnAuthorization = altinnAuthorization;
         _user = user;
-        _userParties = userParties;
-        _applicationSettings = applicationSettings;
         _cache = cache;
+        _factoryRunner = factoryRunner;
     }
 
     public async Task<AuthorizedServiceResources> GetAuthorizedServiceResources(
@@ -65,19 +59,26 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
         // request it is the tiny "return the full catalogue" signal (the expensive per-party pruning is skipped).
         return await _cache.GetOrSetAsync<AuthorizedServiceResources>(
             GetCacheKey(partyIdentifier.FullId, normalizedFilter),
-            async ct =>
-            {
-                // The factory may run detached from the request (eager refresh / soft-timeout background
-                // completion), where HttpContext — and thus IUser.GetPrincipal() — is no longer available. The
-                // downstream resolution (IUserParties / IAltinnAuthorization) needs the principal, so flow the
-                // request-thread principal into the factory's execution context.
-                using var _ = AmbientUserPrincipal.Use(principal);
-                return await ResolveAuthorizedServiceResources(normalizedFilter, ct);
-            },
+            token => _factoryRunner.RunInScope(
+                FusionCacheFactoryPolicy.AuthorizedServiceResources,
+                async (services, ct) =>
+                {
+                    // The factory runs detached from the request (eager refresh / soft-timeout background
+                    // completion), where HttpContext — and thus IUser.GetPrincipal() — is no longer available.
+                    // The runner's fresh scope gives the resolution live dependencies; the ambient principal
+                    // gives its IUser the request-thread principal. Established BEFORE resolving scoped
+                    // services and disposed only after the resolution has been awaited.
+                    using var _ = AmbientUserPrincipal.Use(principal);
+                    return await ResolveAuthorizedServiceResources(services, normalizedFilter, ct);
+                },
+                token),
             token: cancellationToken);
     }
 
-    private async Task<AuthorizedServiceResources> ResolveAuthorizedServiceResources(
+    // Static and resolving its own dependencies: the factory can run detached from the request (see
+    // FusionCacheFactoryRunner), so it must not capture request-scoped services from this instance.
+    private static async Task<AuthorizedServiceResources> ResolveAuthorizedServiceResources(
+        IServiceProvider services,
         string[]? normalizedFilter,
         CancellationToken cancellationToken)
     {
@@ -85,7 +86,7 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
         // limit, return the full referenced catalogue and skip the expensive per-party resolution entirely. The
         // count uses the lightweight authorized-parties lookup (no resource/subject resolution, no pruning), so
         // we never do the heavy GetAuthorizedResourcesForSearch work just to discover the caller is over the limit.
-        var limits = _applicationSettings.Value.Limits;
+        var limits = services.GetRequiredService<IOptionsSnapshot<ApplicationSettings>>().Value.Limits;
         var maxPartiesBeforeFullCatalogue = limits.AuthorizedServiceResources.MaxAuthorizedPartiesBeforeFullCatalogue;
 
         // The fallback must trip no later than the per-party caching threshold: above that threshold the per-party
@@ -101,7 +102,7 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
 
         if (normalizedFilter is null && maxPartiesBeforeFullCatalogue > 0)
         {
-            var userParties = await _userParties.GetUserParties(cancellationToken);
+            var userParties = await services.GetRequiredService<IUserParties>().GetUserParties(cancellationToken);
             if (userParties.FlattenedCount() > maxPartiesBeforeFullCatalogue)
             {
                 return new AuthorizedServiceResources(IncludeFullCatalogue: true, ResourceUrns: []);
@@ -117,7 +118,7 @@ internal sealed class AuthorizedServiceResourcesProvider : IAuthorizedServiceRes
         // DialogIds are not needed for this endpoint, so skip resolving them. Pruning happens once inside the
         // search call (ForceReferencedCatalogueSubsetPruning), so the provider does not prune again.
         var constraintParties = normalizedFilter is null ? [] : normalizedFilter.ToList();
-        var result = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
+        var result = await services.GetRequiredService<IAltinnAuthorization>().GetAuthorizedResourcesForSearch(
             constraintParties, [], includeDialogIds: false,
             minResourcesPruningThreshold: ForceReferencedCatalogueSubsetPruning, cancellationToken: cancellationToken);
 

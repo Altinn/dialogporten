@@ -9,6 +9,9 @@ using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Caching;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Xunit;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -31,7 +34,7 @@ public class AuthorizedServiceResourcesProviderTests
         {
             ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
         });
-        var provider = new AuthorizedServiceResourcesProvider(
+        var provider = CreateProvider(
             authorization, CreateUserWithPid(Pid), CreateUserParties(partyCount: 1), CreateSettings(), CreateCacheProvider());
 
         var result = await provider.GetAuthorizedServiceResources(partyFilter: null, TestContext.Current.CancellationToken);
@@ -47,7 +50,7 @@ public class AuthorizedServiceResourcesProviderTests
     public async Task Returns_Full_Catalogue_Signal_When_Party_Count_Exceeds_Limit_On_Unfiltered_Request()
     {
         var authorization = new CountingAltinnAuthorization(new DialogSearchAuthorizationResult());
-        var provider = new AuthorizedServiceResourcesProvider(
+        var provider = CreateProvider(
             authorization, CreateUserWithPid(Pid), CreateUserParties(partyCount: 3),
             CreateSettings(maxAuthorizedParties: 2), CreateCacheProvider());
 
@@ -67,7 +70,7 @@ public class AuthorizedServiceResourcesProviderTests
         {
             ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
         });
-        var provider = new AuthorizedServiceResourcesProvider(
+        var provider = CreateProvider(
             authorization, CreateUserWithPid(Pid), CreateUserParties(partyCount: 1), CreateSettings(), CreateCacheProvider());
 
         var result = await provider.GetAuthorizedServiceResources([PartyA], TestContext.Current.CancellationToken);
@@ -86,7 +89,7 @@ public class AuthorizedServiceResourcesProviderTests
         {
             ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
         });
-        var provider = new AuthorizedServiceResourcesProvider(
+        var provider = CreateProvider(
             authorization, CreateUserWithPid(Pid), CreateUserParties(partyCount: 1), CreateSettings(), CreateCacheProvider());
 
         await provider.GetAuthorizedServiceResources(partyFilter: null, TestContext.Current.CancellationToken);
@@ -108,7 +111,7 @@ public class AuthorizedServiceResourcesProviderTests
         {
             ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
         });
-        var provider = new AuthorizedServiceResourcesProvider(
+        var provider = CreateProvider(
             authorization, new StubUser(principal), CreateUserParties(partyCount: 1), CreateSettings(), CreateCacheProvider());
 
         await provider.GetAuthorizedServiceResources(partyFilter: null, TestContext.Current.CancellationToken);
@@ -130,7 +133,7 @@ public class AuthorizedServiceResourcesProviderTests
 
         AuthorizedServiceResourcesProvider ProviderFor(string pid)
         {
-            return new AuthorizedServiceResourcesProvider(
+            return CreateProvider(
                 authorization, CreateUserWithPid(pid), CreateUserParties(partyCount: 1), CreateSettings(), cacheProvider);
         }
 
@@ -155,7 +158,7 @@ public class AuthorizedServiceResourcesProviderTests
     public async Task Throws_For_Principal_Without_End_User_Party_Identifier()
     {
         var authorization = new CountingAltinnAuthorization(new DialogSearchAuthorizationResult());
-        var provider = new AuthorizedServiceResourcesProvider(
+        var provider = CreateProvider(
             authorization,
             new StubUser(new ClaimsPrincipal(new ClaimsIdentity())),
             CreateUserParties(partyCount: 0),
@@ -167,6 +170,73 @@ public class AuthorizedServiceResourcesProviderTests
         await act.Should().ThrowAsync<UnreachableException>();
         // The throw happens before any cache access or upstream call.
         authorization.CallCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Concurrent_Factories_Each_Observe_Their_Own_Caller_Principal()
+    {
+        // Two callers' factories run concurrently through the SAME runner. Each must observe its own
+        // ambient principal: AsyncLocal flows per call path and must not leak between detached factories.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var principalA = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimsPrincipalExtensions.PidClaim, Pid)]));
+        var principalB = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimsPrincipalExtensions.PidClaim, OtherPid)]));
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var authorization = new BlockingAmbientRecordingAuthorization(gate, expectedCalls: 2, new DialogSearchAuthorizationResult
+        {
+            ResourcesByParties = new Dictionary<string, IReadOnlySet<string>> { [PartyA] = new HashSet<string> { ReferencedResource } }
+        });
+
+        var services = new ServiceCollection()
+            .AddSingleton<IAltinnAuthorization>(authorization)
+            .AddSingleton<IUserParties>(CreateUserParties(partyCount: 1))
+            .AddSingleton<IOptionsSnapshot<ApplicationSettings>>(CreateSettings())
+            .BuildServiceProvider();
+        var runner = new FusionCacheFactoryRunner(
+            services.GetRequiredService<IServiceScopeFactory>(),
+            new CollectingLogger<FusionCacheFactoryRunner>());
+        var cacheProvider = CreateCacheProvider();
+        var providerA = new AuthorizedServiceResourcesProvider(new StubUser(principalA), cacheProvider, runner);
+        var providerB = new AuthorizedServiceResourcesProvider(new StubUser(principalB), cacheProvider, runner);
+
+        try
+        {
+            var taskA = providerA.GetAuthorizedServiceResources(partyFilter: null, cancellationToken);
+            var taskB = providerB.GetAuthorizedServiceResources(partyFilter: null, cancellationToken);
+
+            // Both factories are in-flight simultaneously before either is released.
+            await authorization.AllCallsEntered.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+            gate.TrySetResult();
+
+            await taskA.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+            await taskB.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+        }
+        finally
+        {
+            gate.TrySetResult();
+        }
+
+        // Exactly the two distinct principals were observed; a leak would make both factories see the same one.
+        authorization.ObservedPrincipals.Should().BeEquivalentTo([principalA, principalB]);
+    }
+
+    private static AuthorizedServiceResourcesProvider CreateProvider(
+        IAltinnAuthorization authorization,
+        IUser user,
+        IUserParties userParties,
+        IOptionsSnapshot<ApplicationSettings> applicationSettings,
+        IFusionCacheProvider cacheProvider)
+    {
+        // The provider's factory resolves its dependencies from the runner's dedicated scope, so the stubs
+        // live in a real service collection rather than in the provider's constructor.
+        var services = new ServiceCollection()
+            .AddSingleton(authorization)
+            .AddSingleton(userParties)
+            .AddSingleton(applicationSettings)
+            .BuildServiceProvider();
+        var runner = new FusionCacheFactoryRunner(
+            services.GetRequiredService<IServiceScopeFactory>(),
+            new CollectingLogger<FusionCacheFactoryRunner>());
+        return new AuthorizedServiceResourcesProvider(user, cacheProvider, runner);
     }
 
     private static IFusionCacheProvider CreateCacheProvider() =>
@@ -217,6 +287,53 @@ public class AuthorizedServiceResourcesProviderTests
                     AuthorizedInstances = []
                 }).ToList()
             });
+    }
+
+    private sealed class BlockingAmbientRecordingAuthorization(
+        TaskCompletionSource gate,
+        int expectedCalls,
+        DialogSearchAuthorizationResult result) : IAltinnAuthorization
+    {
+        private readonly System.Collections.Concurrent.ConcurrentBag<ClaimsPrincipal?> _observedPrincipals = [];
+        private readonly TaskCompletionSource _allCallsEntered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private int _entered;
+
+        public IReadOnlyCollection<ClaimsPrincipal?> ObservedPrincipals => _observedPrincipals;
+        public Task AllCallsEntered => _allCallsEntered.Task;
+
+        public async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
+            List<string> constraintParties,
+            List<string> constraintServiceResources,
+            bool includeDialogIds = true,
+            int? minResourcesPruningThreshold = null,
+            CancellationToken cancellationToken = default)
+        {
+            _observedPrincipals.Add(AmbientUserPrincipal.Current);
+            if (Interlocked.Increment(ref _entered) == expectedCalls)
+            {
+                _allCallsEntered.TrySetResult();
+            }
+
+            await gate.Task.WaitAsync(cancellationToken);
+            return result;
+        }
+
+        public Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
+            DialogEntity dialogEntity, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<AuthorizedPartiesResult> GetAuthorizedParties(
+            IPartyIdentifier authenticatedParty, bool flatten = false, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<AuthorizedPartiesResult> GetAuthorizedPartiesForLookup(
+            IPartyIdentifier authenticatedParty, List<string> constraintParties, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task<bool> HasListAuthorizationForDialog(
+            DialogEntity dialog, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel) => throw new NotSupportedException();
+
+        public Task<bool> UserHasRequiredAuthLevel(
+            string serviceResource, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class CountingAltinnAuthorization(DialogSearchAuthorizationResult result) : IAltinnAuthorization

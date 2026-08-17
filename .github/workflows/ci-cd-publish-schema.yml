@@ -124,24 +124,53 @@ jobs:
 
           # The commit that the newest published npm version was built from.
           #
-          # Deriving the change-detection base from what is actually ON NPM -
-          # rather than from "a release was created" (previous_release_sha) or
-          # "a push happened" (github.event.before) - makes the gate
-          # self-healing. Those markers advance unconditionally, so a publish
-          # that failed, was skipped, or had its run evicted falls outside the
-          # next one-shot diff window and is never picked up again. A watermark
-          # taken from the registry cannot drift away from reality.
+          # $1 selects which published versions count, because the two triggers
+          # ask genuinely different questions:
+          #
+          #   any      Newest version of any kind, prereleases included. The
+          #            push path asks "did the schema change since the last
+          #            thing published from main?".
+          #
+          #   release  Newest FULL version only (no -<sha> suffix). The release
+          #            path asks "did the schema change since the last full
+          #            release?", and prereleases sit INSIDE that window - the
+          #            push path publishes one for the very commit that carried
+          #            the change. Counting them would diff against a commit
+          #            that already contains the change, find nothing, and
+          #            silently never publish the full version. Verified against
+          #            real history: v1.118.2..v1.118.3 changed all four schema
+          #            files at commits 0cd65dd and 16d6946, both of which were
+          #            published as 1.118.2-<sha> prereleases, so an "any" base
+          #            would have skipped the 1.118.3 release entirely.
+          #
+          # Deriving both from what is actually ON NPM - rather than from "a
+          # release was created" (previous_release_sha) or "a push happened"
+          # (github.event.before) - keeps them self-healing. Those markers
+          # advance unconditionally, so a publish that failed, was skipped, or
+          # had its run evicted falls outside the next diff window and is never
+          # picked up again. A base taken from the registry cannot drift away
+          # from what was actually published.
           last_published_base_sha() {
-            local pkg newest ref
+            local mode=$1 pkg times newest ref
             pkg=$(jq -er '.name' docs/schema/V1/package.json) || return 1
 
-            # Order by publish TIME, not by the registry's array order - the
+            # Ordered by publish TIME, not by the registry's array order - the
             # two are not guaranteed to agree.
-            newest=$(npm view "$pkg" time --json \
-              | jq -er 'to_entries
-                        | map(select(.key | test("^[0-9]+\\.[0-9]+\\.[0-9]+")))
-                        | sort_by(.value)
-                        | .[-1].key') || return 1
+            times=$(npm view "$pkg" time --json) || return 1
+
+            if [ "$mode" = release ]; then
+              newest=$(printf '%s' "$times" \
+                | jq -er 'to_entries
+                          | map(select(.key | test("^[0-9]+\\.[0-9]+\\.[0-9]+$")))
+                          | sort_by(.value)
+                          | .[-1].key') || return 1
+            else
+              newest=$(printf '%s' "$times" \
+                | jq -er 'to_entries
+                          | map(select(.key | test("^[0-9]+\\.[0-9]+\\.[0-9]+")))
+                          | sort_by(.value)
+                          | .[-1].key') || return 1
+            fi
 
             case "$newest" in
               *-*) ref=${newest##*-} ;;   # 1.118.10-baed70b -> embedded commit
@@ -153,16 +182,17 @@ jobs:
             gh api "repos/${REPO}/commits/${ref}" --jq '.sha' || return 1
           }
 
-          # Falls back to $1 (the previous behaviour) so a registry or API
-          # hiccup degrades to today's semantics instead of blocking a publish.
+          # $1 = mode (see above), $2 = fallback. Falls back to the previous
+          # behaviour so a registry or API hiccup degrades to today's semantics
+          # instead of blocking a publish.
           resolve_base_sha() {
-            local base
-            if base=$(last_published_base_sha) && [ -n "$base" ]; then
-              echo "Change-detection base: last published version -> $base" >&2
+            local mode=$1 fallback=$2 base
+            if base=$(last_published_base_sha "$mode") && [ -n "$base" ]; then
+              echo "Change-detection base (${mode}): last published -> $base" >&2
               printf '%s' "$base"
             else
-              echo "::warning::Could not resolve the last published version; falling back to '$1'" >&2
-              printf '%s' "$1"
+              echo "::warning::Could not resolve the last published ${mode} version; falling back to '${fallback}'" >&2
+              printf '%s' "$fallback"
             fi
           }
 
@@ -176,7 +206,9 @@ jobs:
               # npm versions are immutable. Also keeps change detection and the
               # published artifact on the same commit.
               echo "ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
-              echo "base_sha=$(resolve_base_sha "$EVENT_BEFORE")" >> "$GITHUB_OUTPUT"
+              # "any": prereleases track main, so the newest of them is the
+              # correct high-water mark for what main has already published.
+              echo "base_sha=$(resolve_base_sha any "$EVENT_BEFORE")" >> "$GITHUB_OUTPUT"
               echo "environment=test" >> "$GITHUB_OUTPUT"
               echo "force_publish=false" >> "$GITHUB_OUTPUT"
               ;;
@@ -191,7 +223,10 @@ jobs:
               fi
               version=$RELEASE_VERSION
               echo "ref=refs/tags/v${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
-              echo "base_sha=$(resolve_base_sha "$PREVIOUS_RELEASE_SHA")" >> "$GITHUB_OUTPUT"
+              # "release": compare against the last FULL release, ignoring the
+              # prereleases published from main in between - they live inside
+              # the window this question is about.
+              echo "base_sha=$(resolve_base_sha release "$PREVIOUS_RELEASE_SHA")" >> "$GITHUB_OUTPUT"
               echo "environment=staging" >> "$GITHUB_OUTPUT"
               echo "force_publish=false" >> "$GITHUB_OUTPUT"
               ;;

@@ -1,7 +1,7 @@
-using System.Diagnostics;
-using Altinn.Authorization.ABAC.Xacml.JsonProfile;
+﻿using System.Diagnostics;
 using System.Security.Claims;
-
+using Altinn.Authorization.ABAC.Xacml.JsonProfile;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Parties;
@@ -217,72 +217,64 @@ internal static class DecisionRequestHelper
         XacmlJsonAttribute? partyAttribute,
         AuthorizationResourceSpec spec)
     {
-        List<XacmlJsonAttribute> attributes;
-
-        if (spec is { Kind: AuthorizationResourceSpecKind.Context, ServiceResource: not null })
-        {
-            // A context resource override replaces the dialog's own resource, and the instance reference
-            // no longer applies (it belongs to the dialog's resource). This mirrors the legacy
-            // urn:altinn:resource/urn:altinn:app override semantics.
-            var (ns, value, org) = SplitNamespaceAndValue(spec.ServiceResource);
-            attributes = [new() { AttributeId = ns, Value = value }];
-
-            if (org is not null)
-            {
-                attributes.Add(new XacmlJsonAttribute { AttributeId = AttributeIdOrg, Value = org });
-            }
-
-            if (partyAttribute is not null)
-            {
-                attributes.Add(partyAttribute);
-            }
-        }
-        else
-        {
-            var (ns, value, org) = SplitNamespaceAndValue(serviceResource);
-            attributes = [new() { AttributeId = ns, Value = value }];
-
-            if (org is not null)
-            {
-                attributes.Add(new XacmlJsonAttribute { AttributeId = AttributeIdOrg, Value = org });
-            }
-
-            if (partyAttribute is not null)
-            {
-                attributes.Add(partyAttribute);
-            }
-
-            attributes.Add(new()
-            {
-                AttributeId = AttributeIdResourceInstance,
-                Value = instanceRef.Value
-            });
-        }
+        List<XacmlJsonAttribute> attributes = [];
 
         switch (spec.Kind)
         {
             case AuthorizationResourceSpecKind.Main:
+                attributes.AddRange(GetAttributesForServiceResource(serviceResource));
+                if (partyAttribute is not null) attributes.Add(partyAttribute);
+                attributes.Add(new()
+                {
+                    AttributeId = AttributeIdResourceInstance,
+                    Value = instanceRef.Value
+                });
                 // Preserve the legacy wire format: the "main" sentinel has always been rendered as an
                 // extra urn:altinn:subresource attribute on the dialog's own resource.
-                attributes.AddRange(GetResourceAttributesForAuthorizationAttribute(Application.Common.Authorization.Constants.MainResource));
+                attributes.Add(new XacmlJsonAttribute
+                {
+                    AttributeId = AttributeIdSubResource,
+                    Value = Constants.MainResource
+                });
                 break;
 
             case AuthorizationResourceSpecKind.Legacy:
-                var resourceAttributesFromAuthorizationAttribute =
-                    GetResourceAttributesForAuthorizationAttribute(spec.LegacyAuthorizationAttribute!);
+                attributes.AddRange(GetAttributesForServiceResource(serviceResource));
+                if (partyAttribute is not null) attributes.Add(partyAttribute);
+                attributes.Add(new()
+                {
+                    AttributeId = AttributeIdResourceInstance,
+                    Value = instanceRef.Value
+                });
+
+                var legacyAttributes = GetResourceAttributesForAuthorizationAttribute(spec.LegacyAuthorizationAttribute!);
 
                 // If we get either urn:altinn:app/urn:altinn:org or urn:altinn:resource attributes, this should
                 // be considered overrides that should be used instead of the default resource attributes.
-                if (resourceAttributesFromAuthorizationAttribute.Any(x => x.AttributeId is AttributeIdApp or AttributeIdOrg or AttributeIdResource))
+                if (legacyAttributes.Any(x => x.AttributeId is AttributeIdApp or AttributeIdOrg or AttributeIdResource))
                 {
-                    attributes.RemoveAll(x =>
-                        x.AttributeId is AttributeIdResource or AttributeIdResourceInstance or AttributeIdApp or AttributeIdOrg);
+                    attributes.RemoveAll(x => x.AttributeId is AttributeIdResource
+                        or AttributeIdResourceInstance
+                        or AttributeIdApp
+                        or AttributeIdOrg
+                    );
                 }
 
-                attributes.AddRange(resourceAttributesFromAuthorizationAttribute);
+                attributes.AddRange(legacyAttributes);
                 break;
 
             case AuthorizationResourceSpecKind.Context:
+                attributes.AddRange(GetAttributesForServiceResource(spec.ServiceResource ?? serviceResource));
+
+                if (partyAttribute is not null) attributes.Add(partyAttribute);
+                if (spec.ServiceResource is null)
+                {
+                    attributes.Add(new()
+                    {
+                        AttributeId = AttributeIdResourceInstance,
+                        Value = instanceRef.Value
+                    });
+                }
                 if (spec.AdditionalResourceAttribute is not null)
                 {
                     // Layered on top of the effective resource; unlike legacy attributes this never
@@ -301,6 +293,19 @@ internal static class DecisionRequestHelper
             Id = id,
             Attribute = attributes
         };
+    }
+
+    private static List<XacmlJsonAttribute> GetAttributesForServiceResource(string serviceResource)
+    {
+        var (ns, value, org) = SplitNamespaceAndValue(serviceResource);
+        List<XacmlJsonAttribute> attributes = [new() { AttributeId = ns, Value = value }];
+
+        if (org is not null)
+        {
+            attributes.Add(new XacmlJsonAttribute { AttributeId = AttributeIdOrg, Value = org });
+        }
+
+        return attributes;
     }
 
     private static List<XacmlJsonAttribute> GetResourceAttributesForAuthorizationAttribute(string subResource)

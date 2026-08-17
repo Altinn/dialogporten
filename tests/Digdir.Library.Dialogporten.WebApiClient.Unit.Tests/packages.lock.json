@@ -442,6 +442,16 @@
           "Refit.HttpClientFactory": "[10.2.0, )"
         }
       },
+      "Altinn.ApiClients.Dialogporten.EndUser": {
+        "type": "Project",
+        "dependencies": {
+          "Altinn.ApiClients.Maskinporten": "[10.1.0, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[10.0.10, )",
+          "NSec.Cryptography": "[25.4.0, )",
+          "Refit": "[10.2.0, )",
+          "Refit.HttpClientFactory": "[10.2.0, )"
+        }
+      },
       "Altinn.ApiClients.Dialogporten.ServiceOwner": {
         "type": "Project",
         "dependencies": {

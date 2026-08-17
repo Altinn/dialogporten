@@ -348,7 +348,12 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                 ];
             }));
 
-        var request = CreateComplexUpdateRequest(existingAttachmentId);
+        // Attachment urls are returned ordered by CreatedAt, then Id. Both urls below are created by the same
+        // update, so CreatedAt ties and Id decides — and the ids are minted while iterating the change tracker,
+        // whose order is unspecified. Hand them pre-sorted ids so the snapshot order matches the declaration
+        // order instead of being a coin flip.
+        var existingAttachmentUrlIds = OrderedVersion7Ids(2);
+        var request = CreateComplexUpdateRequest(existingAttachmentId, existingAttachmentUrlIds);
 
         // Act
         var updateResponse = await Fixture.ServiceownerApi
@@ -374,8 +379,15 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
             JsonSerializer.Serialize(getResponse.Content));
     }
 
+    private static Guid[] OrderedVersion7Ids(int count) =>
+        Enumerable.Range(0, count)
+            .Select(_ => DialogTestData.NewUuidV7())
+            .Order()
+            .ToArray();
+
     private static V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest CreateComplexUpdateRequest(
-        Guid existingAttachmentId)
+        Guid existingAttachmentId,
+        Guid[] existingAttachmentUrlIds)
     {
         var request = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest
         {
@@ -412,19 +424,22 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                     [
                         new()
                         {
+                            Id = existingAttachmentUrlIds[0],
                             Url = new Uri("https://digdir.com/updated-existing-attachment-gui-url"),
                             MediaType = "text/html",
                             ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                         },
                         new()
                         {
+                            Id = existingAttachmentUrlIds[1],
                             Url = new Uri("https://digdir.com/updated-existing-attachment-api-url"),
                             MediaType = "application/json",
                             ConsumerType = Attachments_AttachmentUrlConsumerType.Api
                         }
                     ]
                 },
-                // Attachment without id: created by the update.
+                // Attachment without id: created by the update. Its url omits the id as well, so the
+                // generated-id path stays covered alongside the explicit ids above.
                 new()
                 {
                     Name = "new-attachment",

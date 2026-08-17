@@ -56,9 +56,9 @@ internal static class Mappers
             ConsumerTypeId = source.ConsumerType
         };
 
+    // Only reached for urls matched on Id, so source.Id always equals destination.Id and is never null.
     internal static void UpdateFrom(this AttachmentUrl destination, TransmissionAttachmentUrlDto source)
     {
-        destination.Id = source.Id ?? destination.Id;
         destination.Url = source.Url;
         destination.MediaType = source.MediaType;
         destination.ConsumerTypeId = source.ConsumerType;

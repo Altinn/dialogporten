@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.119.0](https://github.com/Altinn/dialogporten/compare/v1.118.10...v1.119.0) (2026-08-17)
+
+
+### Features
+
+* Add dialog token validation sample for enduser and serviceowner sdk ([#4194](https://github.com/Altinn/dialogporten/issues/4194)) ([558c774](https://github.com/Altinn/dialogporten/commit/558c774259033e28288bbbb498aed80e47ca3dda))
+
+
+### Bug Fixes
+
+* Align system label authorization requirements across all apis. ([#4227](https://github.com/Altinn/dialogporten/issues/4227)) ([baed70b](https://github.com/Altinn/dialogporten/commit/baed70b3d78b7fd01124b422f472612cdf0c4efd))
+* **ci:** restrict dispatch ref inputs to named refs in this repository ([#4282](https://github.com/Altinn/dialogporten/issues/4282)) ([1703fa9](https://github.com/Altinn/dialogporten/commit/1703fa98e639a8934d8934bc090d6d477c1b2579))
+* deterministic localization ordering in search content query ([#4264](https://github.com/Altinn/dialogporten/issues/4264)) ([8e8f107](https://github.com/Altinn/dialogporten/commit/8e8f107f90adcc1e72154ac096e0f716e903aeb5))
+
+
+### Miscellaneous Chores
+
+* **ci:** upgrade azure cli to 2.89.0 ([#4262](https://github.com/Altinn/dialogporten/issues/4262)) ([049f7e2](https://github.com/Altinn/dialogporten/commit/049f7e295255950c97629dbced2d027f4de47d42))
+* **deps:** update actions/checkout action to v6.1.0 ([#4244](https://github.com/Altinn/dialogporten/issues/4244)) ([4f84d55](https://github.com/Altinn/dialogporten/commit/4f84d555aec431611a96ccb098cd2aec114f819e))
+* **deps:** update actions/setup-node action to v6.5.0 ([#4247](https://github.com/Altinn/dialogporten/issues/4247)) ([9eecd2d](https://github.com/Altinn/dialogporten/commit/9eecd2d04e556662033e1941c133590ff8d585ca))
+* **deps:** update azure/login action to v3.0.1 ([#4266](https://github.com/Altinn/dialogporten/issues/4266)) ([1f8fa39](https://github.com/Altinn/dialogporten/commit/1f8fa394f0a5595c0a809f669701ac76fa6c1940))
+* **deps:** update dependency scalar.aspnetcore to 2.16.17 ([#4238](https://github.com/Altinn/dialogporten/issues/4238)) ([cebe147](https://github.com/Altinn/dialogporten/commit/cebe14728e1f3a14e55416ec6c5bc069ad0f3c08))
+* **deps:** update dependency scalar.aspnetcore to 2.16.18 ([#4296](https://github.com/Altinn/dialogporten/issues/4296)) ([3d64727](https://github.com/Altinn/dialogporten/commit/3d647274b1ffb8b721556a81597843dcb5cdc111))
+* **deps:** update docker/login-action action to v4.6.0 ([#4248](https://github.com/Altinn/dialogporten/issues/4248)) ([ec326a1](https://github.com/Altinn/dialogporten/commit/ec326a1abf502df488ef106393a63395f6377bd2))
+* **deps:** update docker/setup-buildx-action action to v4.2.0 ([#4249](https://github.com/Altinn/dialogporten/issues/4249)) ([e98b9cb](https://github.com/Altinn/dialogporten/commit/e98b9cb8851a918c1a83d217429b3111049b233b))
+* **deps:** update grafana/grafana docker tag to v12.4.6 ([#4239](https://github.com/Altinn/dialogporten/issues/4239)) ([612e33b](https://github.com/Altinn/dialogporten/commit/612e33b4eb661689653ccce8468ebcc10392f946))
+* **deps:** update grafana/loki docker tag to v3.7.4 ([#4243](https://github.com/Altinn/dialogporten/issues/4243)) ([f311e3b](https://github.com/Altinn/dialogporten/commit/f311e3bfdb468e8888bcbb879b609748240c964d))
+* **deps:** update grafana/loki docker tag to v3.7.5 ([#4280](https://github.com/Altinn/dialogporten/issues/4280)) ([e8bc0f1](https://github.com/Altinn/dialogporten/commit/e8bc0f161e4896e224dda73025004ee0b7f0d720))
+* **deps:** update grafana/loki docker tag to v3.7.6 ([#4298](https://github.com/Altinn/dialogporten/issues/4298)) ([fa618d4](https://github.com/Altinn/dialogporten/commit/fa618d4c79e8c68f7617b73cf3851ef10b97a7a9))
+* **deps:** update hotchocolate dependencies to 16.5.1 ([#4250](https://github.com/Altinn/dialogporten/issues/4250)) ([cfe0bf3](https://github.com/Altinn/dialogporten/commit/cfe0bf3d758e18e6cf0e92b834a7c20e9f2b7ab6))
+* **deps:** update hotchocolate dependencies to 16.6.0 ([#4299](https://github.com/Altinn/dialogporten/issues/4299)) ([db7d760](https://github.com/Altinn/dialogporten/commit/db7d760ab8ebf30aa220a538cb895475fc1fd56a))
+* **deps:** update microsoft dependencies ([#4259](https://github.com/Altinn/dialogporten/issues/4259)) ([298d84a](https://github.com/Altinn/dialogporten/commit/298d84aebac7b003b114a3306881e5592a30dd37))
+* **deps:** update opentelemetry dependencies ([#4260](https://github.com/Altinn/dialogporten/issues/4260)) ([ecd65e6](https://github.com/Altinn/dialogporten/commit/ecd65e62d2d0d2b006d837ef929d1d10bfd99782))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.158.0 ([#4281](https://github.com/Altinn/dialogporten/issues/4281)) ([4316e14](https://github.com/Altinn/dialogporten/commit/4316e14e6f65cb5e0e3b0eec323f44c166efe5ed))
+
 ## [1.118.10](https://github.com/Altinn/dialogporten/compare/v1.118.9...v1.118.10) (2026-07-30)
 
 

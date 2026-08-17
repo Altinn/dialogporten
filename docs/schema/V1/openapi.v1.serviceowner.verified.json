@@ -77,6 +77,153 @@
           "Api"
         ]
       },
+      "AuthorizationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null on transmissions when the default derivation applies (\u0022read\u0022 when\n\u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022).",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "AuthorizationContextDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null on transmissions when the default derivation applies (\u0022read\u0022 when\n\u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022).",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "AuthorizationContextInput": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Required on API and GUI actions. Optional on transmissions; if not\nsupplied, \u0022read\u0022 is used when \u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "AuthorizationContextUnauthorizedPresentation": {
+        "description": "",
+        "enum": [
+          "Disabled",
+          "Redacted"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Disabled",
+          "Redacted"
+        ]
+      },
       "BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
@@ -122,6 +269,123 @@
             "nullable": true,
             "type": "array",
             "x-deprecatedMessage": "Use AddLabels instead. This property will be removed in a future version."
+          }
+        },
+        "type": "object"
+      },
+      "ChildAuthorizationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ChildAuthorizationContextDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ChildAuthorizationContextInput": {
+        "additionalProperties": false,
+        "properties": {
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
           }
         },
         "type": "object"
@@ -517,15 +781,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
             "example": "write",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -613,6 +891,15 @@
       "CreateDialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -763,14 +1050,28 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -871,10 +1172,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -949,6 +1261,15 @@
       "CreateDialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1047,6 +1368,15 @@
       "CreateDialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -1081,6 +1411,15 @@
       "CreateTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1179,6 +1518,15 @@
       "CreateTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -1213,10 +1561,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -1761,15 +2120,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
+            "deprecated": true,
+            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nNull when the action was supplied with an authorizationContext, in which case the action is found in\nauthorizationContext.action.",
             "example": "write",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when the action uses legacy authorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ]
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -1858,6 +2231,15 @@
       "DialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContext"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1876,6 +2258,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this attachment.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2029,14 +2416,28 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "deprecated": true,
+            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.\n            \nNull when the action was supplied with an authorizationContext, in which case the action is found in\nauthorizationContext.action.",
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when the action uses legacy authorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ]
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -2573,10 +2974,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when the transmission uses legacy authorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ]
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -2657,6 +3069,15 @@
       "DialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContext"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2675,6 +3096,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this attachment.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2696,6 +3122,15 @@
       "DialogTransmissionAttachmentDetails": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextDetails"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2870,9 +3305,20 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when the transmission uses the legacy \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextDetails"
+              }
+            ]
           },
           "content": {
             "description": "The content of the transmission.",
@@ -2944,11 +3390,25 @@
       "DialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action is always \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContext"
+              }
+            ]
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this navigational action.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -2970,6 +3430,15 @@
       "DialogTransmissionNavigationalActionDetails": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextDetails"
+              }
+            ]
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -2996,6 +3465,15 @@
       "DialogTransmissionSearchAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchChildAuthorizationContext"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -3063,6 +3541,90 @@
         },
         "type": "object"
       },
+      "DialogTransmissionSearchAuthorizationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null on transmissions when the default derivation applies (\u0022read\u0022 when\n\u0022serviceResource\u0022 is set, otherwise \u0022transmissionread\u0022).",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DialogTransmissionSearchChildAuthorizationContext": {
+        "additionalProperties": false,
+        "properties": {
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022redacted\u0022 additionally strips all content (titles, summaries, names, senders and children),\nleaving only the entity\u0027s existence and timestamps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "DialogTransmissionSearchContent": {
         "additionalProperties": false,
         "properties": {
@@ -3107,9 +3669,20 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when the transmission uses the legacy \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchAuthorizationContext"
+              }
+            ]
           },
           "content": {
             "description": "The content of the transmission.",
@@ -3181,6 +3754,15 @@
       "DialogTransmissionSearchNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchChildAuthorizationContext"
+              }
+            ]
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -3991,15 +4573,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
             "example": "write",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -4087,6 +4683,15 @@
       "UpdateDialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4238,14 +4843,28 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -4322,10 +4941,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -4400,6 +5030,15 @@
       "UpdateDialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4498,6 +5137,15 @@
       "UpdateDialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -4523,6 +5171,15 @@
       "UpdateTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4621,6 +5278,15 @@
       "UpdateTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action is always \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChildAuthorizationContextInput"
+              }
+            ]
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -4655,10 +5321,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ]
           },
           "content": {
             "description": "The transmission unstructured text content.",

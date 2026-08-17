@@ -42,7 +42,7 @@ public class CompactJwsGeneratorTests
         };
 
         // Act
-        var jws = generator.GetCompactJws(payload);
+        var jws = generator.GetCompactJws(payload, DialogTokenTypes.DialogToken);
 
         // Assert
         Assert.True(generator.VerifyCompactJws(jws));

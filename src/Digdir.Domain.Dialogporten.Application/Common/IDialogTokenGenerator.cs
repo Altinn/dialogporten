@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -13,6 +12,17 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 public interface IDialogTokenGenerator
 {
     string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult, string issuerVersion);
+
+    /// <summary>
+    /// Generates a token scoped to a single authorization-context-carrying entity, asserting the single
+    /// PDP-verified grant (action, effective resource) along with the parties it was permitted for.
+    /// </summary>
+    string GetDialogContextToken(
+        DialogEntity dialog,
+        AuthorizedCheck authorizedCheck,
+        Guid entityId,
+        string entityType,
+        string issuerVersion);
 }
 
 internal sealed class DialogTokenGenerator : IDialogTokenGenerator
@@ -53,8 +63,42 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
     public string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult,
         string issuerVersion)
     {
+        var claims = GetBaseClaims(dialog);
+        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+        AddIssuerAndLifetimeClaims(claims, issuerVersion);
+
+        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogToken);
+    }
+
+    public string GetDialogContextToken(
+        DialogEntity dialog,
+        AuthorizedCheck authorizedCheck,
+        Guid entityId,
+        string entityType,
+        string issuerVersion)
+    {
+        var claims = GetBaseClaims(dialog);
+        claims[DialogTokenClaimTypes.EntityId] = entityId;
+        claims[DialogTokenClaimTypes.EntityType] = entityType;
+        claims[DialogTokenClaimTypes.Actions] = authorizedCheck.Check.Action;
+
+        // The effective resource for the grant; absent when the check applies to the dialog's own resource.
+        var resource = authorizedCheck.Check.Resource.ServiceResource
+                       ?? authorizedCheck.Check.Resource.AdditionalResourceAttribute;
+        if (resource is not null)
+        {
+            claims[DialogTokenClaimTypes.EffectiveResource] = resource;
+        }
+
+        claims[DialogTokenClaimTypes.PermittedParties] = authorizedCheck.PermittedParties;
+        AddIssuerAndLifetimeClaims(claims, issuerVersion);
+
+        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogContextToken);
+    }
+
+    private Dictionary<string, object?> GetBaseClaims(DialogEntity dialog)
+    {
         var claimsPrincipal = _user.GetPrincipal();
-        var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
         var endUserPartyIdentifier = claimsPrincipal.GetEndUserPartyIdentifier();
 
         var claims = new Dictionary<string, object?>(15)
@@ -89,39 +133,78 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         claims[DialogTokenClaimTypes.DialogParty] = dialog.Party;
         claims[DialogTokenClaimTypes.ServiceResource] = dialog.ServiceResource;
         claims[DialogTokenClaimTypes.DialogId] = dialog.Id;
-        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+
+        return claims;
+    }
+
+    private void AddIssuerAndLifetimeClaims(Dictionary<string, object?> claims, string issuerVersion)
+    {
+        var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
         claims[DialogTokenClaimTypes.Issuer] = _applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + issuerVersion;
         claims[DialogTokenClaimTypes.IssuedAt] = now;
         claims[DialogTokenClaimTypes.NotBefore] = now;
         claims[DialogTokenClaimTypes.Expires] = now + (long)_tokenLifetime.TotalSeconds;
-
-        return _compactJwsGenerator.GetCompactJws(claims);
     }
 
     private static string GetAuthorizedActions(DialogDetailsAuthorizationResult authorizationResult)
     {
-        if (authorizationResult.AuthorizedAltinnActions.Count == 0)
+        var entries = new List<string>();
+        foreach (var authorizedCheck in authorizationResult.AuthorizedChecks)
         {
-            return string.Empty;
-        }
-
-        var actions = new StringBuilder();
-        foreach (var (action, resource) in authorizationResult.AuthorizedAltinnActions)
-        {
-            actions.Append(action);
-            if (resource != Authorization.Constants.MainResource)
+            var check = authorizedCheck.Check;
+            string entry;
+            switch (check.Resource.Kind)
             {
-                actions.Append(CultureInfo.InvariantCulture, $",{resource}");
+                case AuthorizationResourceSpecKind.Main:
+                    entry = check.Action;
+                    break;
+
+                case AuthorizationResourceSpecKind.Legacy:
+                    // Preserve the legacy wire format exactly: a literal "main" attribute is
+                    // indistinguishable from the main resource and serializes without a resource part.
+                    entry = check.Resource.LegacyAuthorizationAttribute == Authorization.Constants.MainResource
+                        ? check.Action
+                        : string.Create(CultureInfo.InvariantCulture, $"{check.Action},{check.Resource.LegacyAuthorizationAttribute}");
+                    break;
+
+                case AuthorizationResourceSpecKind.Context:
+                default:
+                    // The dialog token is frozen at legacy semantics: grants for authorization contexts
+                    // are expressed exclusively through per-entity context tokens.
+                    continue;
             }
 
-            actions.Append(';');
+            if (!entries.Contains(entry, StringComparer.Ordinal))
+            {
+                entries.Add(entry);
+            }
         }
 
-        // Remove trailing semicolon
-        actions.Remove(actions.Length - 1, 1);
-
-        return actions.ToString();
+        return string.Join(';', entries);
     }
+}
+
+/// <summary>
+/// JOSE "typ" header values distinguishing the token types issued by Dialogporten (RFC 8725 explicit typing;
+/// per RFC 7515 a value without '/' is shorthand for "application/&lt;value&gt;").
+/// </summary>
+public static class DialogTokenTypes
+{
+    public const string DialogToken = "dialogtoken+jwt";
+    public const string DialogContextToken = "dialogcontexttoken+jwt";
+}
+
+/// <summary>
+/// Entity type discriminators for the <see cref="DialogTokenClaimTypes.EntityType"/> claim in context tokens.
+/// </summary>
+public static class DialogContextTokenEntityTypes
+{
+    public const string ApiAction = "apiaction";
+    public const string GuiAction = "guiaction";
+    public const string Attachment = "attachment";
+    public const string Transmission = "transmission";
+    public const string TransmissionAttachment = "transmissionattachment";
+    public const string TransmissionNavigationalAction = "navigationalaction";
 }
 
 public static class DialogTokenClaimTypes
@@ -140,4 +223,10 @@ public static class DialogTokenClaimTypes
     public const string ServiceResource = "s";
     public const string DialogId = "i";
     public const string Actions = "a";
+
+    // Context-token-only claims
+    public const string EntityId = "e";
+    public const string EntityType = "t";
+    public const string EffectiveResource = "r";
+    public const string PermittedParties = "pp";
 }

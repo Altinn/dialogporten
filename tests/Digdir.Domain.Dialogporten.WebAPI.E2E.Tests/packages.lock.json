@@ -818,6 +818,7 @@
           "Microsoft.Extensions.Configuration.Json": "[10.0.10, )",
           "Microsoft.Extensions.Configuration.UserSecrets": "[10.0.10, )",
           "Microsoft.NET.Test.Sdk": "[18.8.1, )",
+          "NSec.Cryptography": "[25.4.0, )",
           "Polly": "[8.7.0, )",
           "Verify.XunitV3": "[31.20.0, )",
           "coverlet.collector": "[10.0.1, )",

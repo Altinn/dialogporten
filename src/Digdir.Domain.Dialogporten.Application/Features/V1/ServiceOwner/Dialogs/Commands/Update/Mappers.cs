@@ -1,3 +1,7 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
+using AuthorizationContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.AuthorizationContextDto;
+using ChildAuthorizationContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.ChildAuthorizationContextDto;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
@@ -7,6 +11,7 @@ using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 
@@ -78,6 +83,7 @@ public static class Mappers
             RelatedTransmissionId = source.RelatedTransmissionId,
             TypeId = source.Type,
             Sender = source.Sender.ToActor<DialogTransmissionSenderActor>(),
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<DialogTransmissionAuthorizationContext>(),
             Content = source.Content.ToDialogTransmissionContentList() ?? [],
             Attachments = source.Attachments.Select(x => x.ToDialogTransmissionAttachment()).ToList(),
             NavigationalActions = source.NavigationalActions.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList()
@@ -90,7 +96,8 @@ public static class Mappers
             Name = source.Name,
             ExpiresAt = source.ExpiresAt,
             DisplayName = source.DisplayName.ToLocalizationSet<AttachmentDisplayName>(),
-            Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList()
+            Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList(),
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<AttachmentAuthorizationContext>()
         };
 
     internal static void UpdateFrom(this DialogAttachment destination, AttachmentDto source)
@@ -99,6 +106,7 @@ public static class Mappers
         destination.Name = source.Name;
         destination.ExpiresAt = source.ExpiresAt;
         destination.DisplayName = source.DisplayName.ToLocalizationSet(destination.DisplayName);
+        destination.AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext(destination.AuthorizationContext);
     }
 
     internal static AttachmentUrl ToAttachmentUrl(this AttachmentUrlDto source) =>
@@ -129,7 +137,8 @@ public static class Mappers
             PriorityId = source.Priority,
             HttpMethodId = source.HttpMethod ?? HttpVerb.Values.GET,
             Title = source.Title.ToLocalizationSet<DialogGuiActionTitle>(),
-            Prompt = source.Prompt.ToLocalizationSet<DialogGuiActionPrompt>()
+            Prompt = source.Prompt.ToLocalizationSet<DialogGuiActionPrompt>(),
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<DialogGuiActionAuthorizationContext>()
         };
 
     internal static void UpdateFrom(this DialogGuiAction destination, GuiActionDto source)
@@ -143,6 +152,7 @@ public static class Mappers
         destination.HttpMethodId = source.HttpMethod ?? HttpVerb.Values.GET;
         destination.Title = source.Title.ToLocalizationSet(destination.Title);
         destination.Prompt = source.Prompt.ToLocalizationSet(destination.Prompt);
+        destination.AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext(destination.AuthorizationContext);
     }
 
     internal static DialogApiAction ToDialogApiAction(this ApiActionDto source) =>
@@ -152,7 +162,8 @@ public static class Mappers
             Action = source.Action,
             AuthorizationAttribute = source.AuthorizationAttribute,
             Name = source.Name,
-            Endpoints = source.Endpoints.Select(x => x.ToDialogApiActionEndpoint()).ToList()
+            Endpoints = source.Endpoints.Select(x => x.ToDialogApiActionEndpoint()).ToList(),
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<DialogApiActionAuthorizationContext>()
         };
 
     internal static void UpdateFrom(this DialogApiAction destination, ApiActionDto source)
@@ -161,6 +172,7 @@ public static class Mappers
         destination.Action = source.Action;
         destination.AuthorizationAttribute = source.AuthorizationAttribute;
         destination.Name = source.Name;
+        destination.AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext(destination.AuthorizationContext);
     }
 
     internal static DialogApiActionEndpoint ToDialogApiActionEndpoint(this ApiActionEndpointDto source) =>
@@ -197,7 +209,8 @@ public static class Mappers
             Name = source.Name,
             ExpiresAt = source.ExpiresAt,
             DisplayName = source.DisplayName.ToLocalizationSet<AttachmentDisplayName>(),
-            Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList()
+            Urls = source.Urls.Select(x => x.ToAttachmentUrl()).ToList(),
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<AttachmentAuthorizationContext>()
         };
 
     private static AttachmentUrl ToAttachmentUrl(this TransmissionAttachmentUrlDto source) =>
@@ -214,7 +227,8 @@ public static class Mappers
         {
             Url = source.Url,
             ExpiresAt = source.ExpiresAt,
-            Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!
+            Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!,
+            AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<DialogTransmissionNavigationalActionAuthorizationContext>()
         };
 
     private static ContentDto? ToUpdateContentDto(
@@ -262,7 +276,8 @@ public static class Mappers
                 MediaType = x.MediaType,
                 ConsumerType = x.ConsumerType
             }).ToList(),
-            ExpiresAt = source.ExpiresAt
+            ExpiresAt = source.ExpiresAt,
+            AuthorizationContext = source.AuthorizationContext.Copy()
         };
 
     private static AttachmentDto ToUpdateAttachmentDto(this Features.V1.EndUser.Dialogs.Queries.Get.DialogAttachmentDto source) =>
@@ -288,6 +303,7 @@ public static class Mappers
             Action = source.Action,
             Url = source.Url,
             AuthorizationAttribute = source.AuthorizationAttribute,
+            AuthorizationContext = source.AuthorizationContext.Copy(),
             IsDeleteDialogAction = source.IsDeleteDialogAction,
             HttpMethod = source.HttpMethod,
             Priority = source.Priority,
@@ -295,6 +311,9 @@ public static class Mappers
             Prompt = source.Prompt.CopyOptional()
         };
 
+    // Note: end user DTOs do not expose authorization contexts, so a PUT built from an end user GET
+    // converts a context-based action into a legacy one (the coalesced action + no context). This
+    // overload is only used by test flows; the production PATCH path uses the service owner DTO.
     private static GuiActionDto ToUpdateGuiActionDto(this Features.V1.EndUser.Dialogs.Queries.Get.DialogGuiActionDto source) =>
         new()
         {
@@ -315,6 +334,7 @@ public static class Mappers
             Id = source.Id,
             Action = source.Action,
             AuthorizationAttribute = source.AuthorizationAttribute,
+            AuthorizationContext = source.AuthorizationContext.Copy(),
             Name = source.Name,
             Endpoints = source.Endpoints.Select(x => x.ToUpdateApiActionEndpointDto()).ToList()
         };
@@ -377,4 +397,29 @@ public static class Mappers
 
     private static List<LocalizationDto>? CopyOptional(this IEnumerable<LocalizationDto>? source) =>
         source?.Select(x => new LocalizationDto { LanguageCode = x.LanguageCode, Value = x.Value }).ToList();
+
+    private static AuthorizationContextDto? Copy(this Queries.Get.AuthorizationContextDto? source) =>
+        source is null
+            ? null
+            : new AuthorizationContextDto
+            {
+                ServiceResource = source.ServiceResource,
+                AdditionalResourceAttribute = source.AdditionalResourceAttribute,
+                Parties = [.. source.Parties],
+                IncludeDialogParty = source.IncludeDialogParty,
+                Action = source.Action,
+                UnauthorizedPresentation = source.UnauthorizedPresentation
+            };
+
+    private static ChildAuthorizationContextDto? Copy(this Queries.Get.ChildAuthorizationContextDto? source) =>
+        source is null
+            ? null
+            : new ChildAuthorizationContextDto
+            {
+                ServiceResource = source.ServiceResource,
+                AdditionalResourceAttribute = source.AdditionalResourceAttribute,
+                Parties = [.. source.Parties],
+                IncludeDialogParty = source.IncludeDialogParty,
+                UnauthorizedPresentation = source.UnauthorizedPresentation
+            };
 }

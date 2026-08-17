@@ -7,9 +7,11 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
@@ -79,12 +81,6 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
-        if (authorizeResult.Value is Forbidden forbidden)
-        {
-            return forbidden;
-        }
-
         if (dialog.Deleted)
         {
             return new EntityDeleted<DialogEntity>(request.DialogId);
@@ -104,6 +100,8 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         }
 
         _mapper.Map(request.Dto, transmission);
+        transmission.AuthorizationContext = request.Dto.AuthorizationContext
+            .ToAuthorizationContext(transmission.AuthorizationContext);
 
         transmission.Attachments
             .Merge(request.Dto.Attachments,
@@ -112,6 +110,14 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                 create: CreateTransmissionAttachments,
                 update: UpdateTransmissionAttachments,
                 delete: DeleteDelegate.Default);
+
+        // Authorization of referenced service resources must happen after the incoming DTO has been
+        // mapped onto the aggregate, so that incoming authorization attributes/contexts are covered.
+        var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
+        if (authorizeResult.Value is Forbidden forbidden)
+        {
+            return forbidden;
+        }
 
         var conflict = ValidateIdempotentKeys(dialog, transmission);
         if (conflict is not null)
@@ -157,6 +163,8 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
             var attachment = _mapper.Map<DialogTransmissionAttachment>(dto);
             attachment.EnsureId();
             attachment.Urls = _mapper.Map<List<AttachmentUrl>>(dto.Urls);
+            attachment.AuthorizationContext = dto.AuthorizationContext
+                .ToAuthorizationContext<AttachmentAuthorizationContext>();
             _db.DialogTransmissionAttachments.Add(attachment);
             return attachment;
         });
@@ -167,6 +175,8 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         foreach (var (source, destination) in updateSets)
         {
             _mapper.Map(source, destination);
+            destination.AuthorizationContext = source.AuthorizationContext
+                .ToAuthorizationContext(destination.AuthorizationContext);
             destination.Urls = _mapper.Map<List<AttachmentUrl>>(source.Urls);
             foreach (var url in destination.Urls)
             {
@@ -202,6 +212,14 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                         .ThenInclude(x => x.Localizations)
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Sender)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.AuthorizationContext)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.AuthorizationContext)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.NavigationalActions)
+                    .ThenInclude(x => x.AuthorizationContext)
             .IgnoreQueryFilters()
             .WhereIf(!isAdmin, x => x.Org == org)
             .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);

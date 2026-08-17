@@ -1,8 +1,10 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
@@ -33,7 +35,14 @@ public class UpdateTransmissionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete($"Use '{nameof(AuthorizationContext)}' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this transmission.
+    /// Cannot be combined with "authorizationAttribute".
+    /// </summary>
+    public AuthorizationContextDto? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -124,6 +133,13 @@ public sealed class TransmissionAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+    /// The XACML action is always "read". Access to the parent transmission is always required in addition;
+    /// this context can only further restrict access, never widen it.
+    /// </summary>
+    public ChildAuthorizationContextDto? AuthorizationContext { get; set; }
 }
 
 public sealed class TransmissionAttachmentUrlDto
@@ -164,4 +180,11 @@ public sealed class TransmissionNavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+    /// The XACML action is always "read". Access to the parent transmission is always required in addition; this
+    /// context can only further restrict access, never widen it.
+    /// </summary>
+    public ChildAuthorizationContextDto? AuthorizationContext { get; set; }
 }

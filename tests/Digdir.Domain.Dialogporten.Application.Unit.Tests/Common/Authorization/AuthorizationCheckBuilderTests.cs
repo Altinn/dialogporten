@@ -12,8 +12,10 @@ public class AuthorizationCheckBuilderTests
     private const string DialogParty = "urn:altinn:organization:identifier-no:713330310";
     private const string OtherParty = "urn:altinn:organization:identifier-no:991825827";
 
-    // Ported 1:1 from the legacy DialogEntityExtensionsTests: legacy-only dialogs must produce
-    // exactly the same action/attribute set as GetAltinnActions did.
+    // Ported from the legacy DialogEntityExtensionsTests, with one deliberate change: legacy
+    // authorization attributes always derive the "read" action, regardless of attribute type.
+    // (Previously, subresource/task attributes derived "transmissionread" — an action no policy
+    // in any environment ever implemented.)
     [Fact]
     public void GetAuthorizationChecksShouldReturnCorrectChecksForLegacyAuthorizationAttributes()
     {
@@ -40,8 +42,6 @@ public class AuthorizationCheckBuilderTests
                 new() { AuthorizationAttribute = "bar" },
                 new() { AuthorizationAttribute = "urn:altinn:subresource:bar" },
                 new() { AuthorizationAttribute = "urn:altinn:task:Task_1" },
-                // Note the last-colon-split quirk: this is NOT a resource override, but the
-                // StartsWith-based action derivation still picks "read".
                 new() { AuthorizationAttribute = "urn:altinn:resource:some-service:element1" },
                 new() { AuthorizationAttribute = "urn:altinn:resource:app_ttd_some-app" }
             ]
@@ -52,15 +52,18 @@ public class AuthorizationCheckBuilderTests
 
         // Assert
         Assert.NotNull(checks);
-        Assert.Equal(9, checks.Count);
+        Assert.Equal(10, checks.Count);
         Assert.All(checks, c => Assert.Equal([DialogParty], c.Parties));
         Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.Kind: AuthorizationResourceSpecKind.Main });
         Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "foo" });
-        Assert.Contains(checks, c => c is { Action: Constants.TransmissionReadAction, Resource.LegacyAuthorizationAttribute: "bar" });
+        // Explicit legacy actions on api/gui actions are preserved verbatim...
+        Assert.Contains(checks, c => c is { Action: "transmissionread", Resource.LegacyAuthorizationAttribute: "bar" });
         Assert.Contains(checks, c => c is { Action: "apiread", Resource.Kind: AuthorizationResourceSpecKind.Main });
         Assert.Contains(checks, c => c is { Action: "guiread", Resource.Kind: AuthorizationResourceSpecKind.Main });
-        Assert.Contains(checks, c => c is { Action: Constants.TransmissionReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:subresource:bar" });
-        Assert.Contains(checks, c => c is { Action: Constants.TransmissionReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:task:Task_1" });
+        // ...while transmissions always derive "read", whatever the attribute type
+        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "bar" });
+        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:subresource:bar" });
+        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:task:Task_1" });
         Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:resource:some-service:element1" });
         Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:resource:app_ttd_some-app" });
     }

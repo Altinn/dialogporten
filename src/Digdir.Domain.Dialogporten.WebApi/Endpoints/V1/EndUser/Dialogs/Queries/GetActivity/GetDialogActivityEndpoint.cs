@@ -1,15 +1,22 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetActivity;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.GetActivity;
 
 [OpenApiOperationId("GetDialogActivity")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.EndUser],
+    securitySchemes: [OpenApiSecurityScheme.IdportenSecurityScheme, OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class GetDialogActivityEndpoint : Endpoint<GetActivityRequest, ActivityDto>
 {
     private readonly ISender _sender;

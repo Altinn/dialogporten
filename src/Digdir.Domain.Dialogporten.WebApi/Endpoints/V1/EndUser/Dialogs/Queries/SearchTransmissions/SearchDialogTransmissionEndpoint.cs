@@ -1,15 +1,22 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchTransmissions;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.SearchTransmissions;
 
 [OpenApiOperationId("SearchDialogTransmissions")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.EndUser],
+    securitySchemes: [OpenApiSecurityScheme.IdportenSecurityScheme, OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissionRequest, List<TransmissionDto>>
 {
     private readonly ISender _sender;

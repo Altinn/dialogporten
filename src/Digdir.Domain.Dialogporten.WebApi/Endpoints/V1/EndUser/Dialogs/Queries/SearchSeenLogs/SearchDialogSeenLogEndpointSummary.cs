@@ -1,6 +1,8 @@
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.SearchSeenLogs;
 
@@ -14,7 +16,7 @@ public sealed class SearchDialogSeenLogEndpointSummary : Summary<SearchDialogSee
                       {summary}.
                       """;
 
-        Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("seen log records");
-        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
+        Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("seen log records");
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<SearchDialogSeenLogEndpoint>();
     }
 }

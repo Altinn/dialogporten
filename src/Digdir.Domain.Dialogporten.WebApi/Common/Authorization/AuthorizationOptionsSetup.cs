@@ -13,39 +13,6 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
         _options = options.Value;
     }
 
-    /// <summary>
-    /// A map of AuthorizationPolicy to all required scopes.
-    /// Used to align the openapi-specification security requirements with the scope requirements of each policy.
-    /// Remember to update this when changing the policy configuration below.
-    /// You should also include any application level scope checks in this map.
-    ///
-    /// Exceptions:
-    /// - We ignore the scope <see cref="AuthorizationScope.EndUserNoConsent"/> scope. It is not for public use.
-    /// - We ignore the policy <see cref="AuthorizationPolicy.Testing"/>. Its endpoints are not public.
-    /// </summary>
-    internal static readonly Dictionary<string, string[]>
-        ScopeRulesByPolicy = new()
-        {
-            [AuthorizationPolicy.EndUser] = [AuthorizationScope.EndUser],
-            [AuthorizationPolicy.ServiceProvider] = [AuthorizationScope.ServiceProvider],
-            [AuthorizationPolicy.ServiceProviderSearch] =
-            [
-                AuthorizationScope.ServiceProvider,
-                AuthorizationScope.ServiceProviderSearch
-            ],
-            [AuthorizationPolicy.ServiceProviderChangeTransmissions] =
-            [
-                AuthorizationScope.ServiceProvider,
-                AuthorizationScope.ServiceProviderChangeTransmissions
-            ],
-            [AuthorizationPolicy.NotificationConditionCheck] = [AuthorizationScope.NotificationConditionCheck],
-            [AuthorizationPolicy.ServiceProviderAdmin] =
-            [
-                AuthorizationScope.ServiceProvider,
-                AuthorizationScope.ServiceOwnerAdminScope
-            ]
-        };
-
     public void Configure(AuthorizationOptions options)
     {
         var authenticationSchemas = _options
@@ -90,7 +57,7 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .RequireScope(AuthorizationScope.ServiceProviderChangeTransmissions));
 
         options.AddPolicy(AuthorizationPolicy.NotificationConditionCheck, builder => builder
-            .Combine(options.DefaultPolicy)
+            .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
             .RequireValidConsumerClaim()
             .RequireScope(AuthorizationScope.NotificationConditionCheck));
 

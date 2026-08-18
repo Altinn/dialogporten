@@ -1,6 +1,7 @@
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -16,12 +17,10 @@ public sealed class GetDialogEndpointSummary : Summary<GetDialogEndpoint>
                       Note that this operation may return deleted dialogs (see the field `DeletedAt`).
                       """;
 
-        Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("aggregate");
-        Responses[StatusCodes.Status401Unauthorized] =
-            Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope
-                .ServiceProvider);
-        Responses[StatusCodes.Status403Forbidden] =
+        Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("aggregate");
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<GetDialogEndpoint>();
+        Responses[Status403Forbidden] =
             Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get");
-        Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
     }
 }

@@ -1,6 +1,7 @@
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Purge;
@@ -16,14 +17,11 @@ public sealed class PurgeDialogEndpointSummary : Summary<PurgeDialogEndpoint>
                       Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not deleted by another request in the meantime.
                       """;
 
-        Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Deleted.FormatInvariant("aggregate");
-        Responses[StatusCodes.Status401Unauthorized] =
-            Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope
-                .ServiceProvider);
-        Responses[StatusCodes.Status403Forbidden] =
-            Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("delete");
-        Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
-        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
-        Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
+        Responses[Status204NoContent] = Constants.SwaggerSummary.Deleted.FormatInvariant("aggregate");
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<PurgeDialogEndpoint>();
+        Responses[Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("delete");
+        Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
     }
 }

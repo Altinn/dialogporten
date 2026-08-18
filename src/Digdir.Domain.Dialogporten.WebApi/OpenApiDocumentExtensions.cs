@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using NJsonSchema;
 using NSwag;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Json.SecurityRequirementsOperationProcessor;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 
 namespace Digdir.Domain.Dialogporten.WebApi;
 
@@ -67,6 +68,7 @@ public static class OpenApiDocumentExtensions
         var openApiSettings = builder.Configuration
             .GetSection(WebApiSettings.SectionName)
             .Get<WebApiSettings>()!.OpenApi;
+
         openApiDocument.Components.SecuritySchemes[IdportenSecurityScheme] = new OpenApiSecurityScheme
         {
             ExtensionData = null,
@@ -110,6 +112,7 @@ public static class OpenApiDocumentExtensions
         var openApiSettings = builder.Configuration
             .GetSection(WebApiSettings.SectionName)
             .Get<WebApiSettings>()!.OpenApi;
+
         openApiDocument.Components.SecuritySchemes[MaskinportenSecurityScheme] = new OpenApiSecurityScheme
         {
             ExtensionData = null,

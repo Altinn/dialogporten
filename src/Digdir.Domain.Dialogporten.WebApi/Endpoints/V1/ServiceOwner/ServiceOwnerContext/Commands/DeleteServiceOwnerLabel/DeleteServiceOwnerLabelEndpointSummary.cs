@@ -1,7 +1,7 @@
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
-using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.ServiceOwnerContext.Commands.DeleteServiceOwnerLabel;
@@ -12,13 +12,10 @@ public sealed class DeleteServiceOwnerLabelEndpointSummary : Summary<DeleteServi
     {
         Summary = "Delete a service owner label for a dialog";
         Description = "Removes a specific label from the service owner context of a dialog. If the label does not exist, a NotFound response is returned.";
-        ResponseHeaders = [HttpResponseHeaderExamples.NewServiceOwnerContextETagHeader(StatusCodes.Status204NoContent)];
-        Responses[StatusCodes.Status204NoContent] = "Successfully deleted the service owner label.";
-        Responses[StatusCodes.Status401Unauthorized] = Constants
-            .SwaggerSummary
-            .ServiceOwnerAuthenticationFailure
-            .FormatInvariant(AuthorizationScope.ServiceProvider);
-        Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.ServiceOwnerLabelNotFound;
-        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        ResponseHeaders = [HttpResponseHeaderExamples.NewServiceOwnerContextETagHeader(Status204NoContent)];
+        Responses[Status204NoContent] = "Successfully deleted the service owner label.";
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<DeleteServiceOwnerLabelEndpoint>();
+        Responses[Status404NotFound] = Constants.SwaggerSummary.ServiceOwnerLabelNotFound;
+        Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
     }
 }

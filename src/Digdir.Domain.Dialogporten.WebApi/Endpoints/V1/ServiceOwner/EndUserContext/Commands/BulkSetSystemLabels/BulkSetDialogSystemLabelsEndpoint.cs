@@ -1,7 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
@@ -9,6 +11,10 @@ using MediatR;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 
 [OpenApiOperationId("BulkSetDialogSystemLabels")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSystemLabelsRequest>
 {
     private readonly ISender _sender;

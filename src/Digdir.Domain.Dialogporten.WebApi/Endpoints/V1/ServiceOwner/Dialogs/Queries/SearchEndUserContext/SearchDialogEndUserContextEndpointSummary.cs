@@ -1,8 +1,9 @@
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.SearchEndUserContext;
@@ -21,12 +22,9 @@ public sealed class SearchDialogEndUserContextEndpointSummary : Summary<SearchDi
                       * hasNextPage will be set to true if there are more items to get.
                       """;
 
-        Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("list");
-        Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
-        Responses[StatusCodes.Status401Unauthorized] = Constants
-            .SwaggerSummary
-            .ServiceOwnerAuthenticationFailure
-            .FormatInvariant($"{AuthorizationScope.ServiceProvider} {AuthorizationScope.ServiceProviderSearch}");
+        Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("list");
+        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<SearchDialogEndUserContextEndpoint>();
 
         RequestParam(p => p.ContinuationToken,
             "Supply \"continuationToken\" for the response to get the next page of results, if hasNextPage is true");

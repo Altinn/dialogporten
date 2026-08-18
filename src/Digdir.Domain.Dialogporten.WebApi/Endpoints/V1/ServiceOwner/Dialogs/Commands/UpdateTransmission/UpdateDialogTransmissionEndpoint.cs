@@ -1,14 +1,21 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
+using AuthorizationPolicy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 
 [OpenApiOperationId("UpdateDialogTransmission")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider, AuthorizationScope.ServiceProviderChangeTransmissions],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class UpdateDialogTransmissionEndpoint : Endpoint<UpdateTransmissionRequest>
 {
     private readonly ISender _sender;

@@ -188,7 +188,6 @@ jobs:
     if: ${{ always() && needs.check-for-changes.outputs.hasInfraChanges == 'true' }}
     permissions:
       contents: read
-      pull-requests: read
       id-token: write
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -217,7 +216,6 @@ jobs:
     if: ${{ always() && !failure() && !cancelled() && (needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasMigrationChanges == 'true') }}
     permissions:
       contents: read
-      pull-requests: read
       id-token: write
     uses: ./.github/workflows/workflow-deploy-apps.yml
     secrets:

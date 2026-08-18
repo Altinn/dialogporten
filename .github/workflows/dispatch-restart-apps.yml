@@ -106,7 +106,10 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           ENVIRONMENT: ${{ inputs.environment }}
-          APP_INPUT: ${{ inputs.app || 'all' }}
+          # No fallback here: GitHub applies the 'all' default when the input is omitted, so an
+          # EMPTY value means a caller passed empty explicitly - that must fail the case statement
+          # below rather than silently widen to every app.
+          APP_INPUT: ${{ inputs.app }}
 
       - name: Logout from Azure
         if: ${{ failure() || success() }}

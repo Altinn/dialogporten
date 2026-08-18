@@ -102,11 +102,18 @@ jobs:
           ROLE_NAME=$(sanitize "$ROLE_NAME")
           REPLICA=$(sanitize "$REPLICA")
           VALUE=$(sanitize "$VALUE")
+          ALERT_STATUS=$(sanitize "$ALERT_STATUS")
 
           APP_SHORT=""
           APP_FULL=""
 
           verdict() {
+            # Only known verdicts may be emitted; anything else is a bug in this script, and
+            # failing here beats writing a record the downstream jobs would act on.
+            case "$1" in
+              off|ignore|stand_down|escalate|restart|shadow) ;;
+              *) echo "BUG: unknown verdict '$1'" >&2; exit 1 ;;
+            esac
             {
               echo "verdict=$1"
               echo "reason=$2"
@@ -195,7 +202,9 @@ jobs:
 
   restart:
     needs: decide
-    if: needs.decide.outputs.verdict == 'restart'
+    # Belt and braces beyond the verdict: the app must be non-empty (an empty app would fall
+    # back to restarting everything downstream) and the mode re-checked at the job boundary.
+    if: needs.decide.outputs.verdict == 'restart' && needs.decide.outputs.app_short != '' && needs.decide.outputs.mode == 'armed'
     permissions:
       id-token: write
       contents: read

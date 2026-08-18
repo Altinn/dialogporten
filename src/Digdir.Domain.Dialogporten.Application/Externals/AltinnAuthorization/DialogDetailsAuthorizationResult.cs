@@ -45,12 +45,9 @@ public sealed class DialogDetailsAuthorizationResult
 
     public bool HasReadAccessToDialogTransmission(string? authorizationAttribute)
     {
-        // Dialog transmissions are authorized by either the read or transmissionRead action, depending on the
-        // authorization attribute type. The infrastructure will ensure that the correct action is used, so here
-        // we just check for either.
         return authorizationAttribute is not null
             ? AuthorizedChecks.Any(x =>
-                x.Check.Action is Constants.TransmissionReadAction or Constants.ReadAction
+                x.Check.Action is Constants.ReadAction
                 && x.Check.Resource.Kind == AuthorizationResourceSpecKind.Legacy
                 && x.Check.Resource.LegacyAuthorizationAttribute == authorizationAttribute)
             : HasAccessToMainResource();

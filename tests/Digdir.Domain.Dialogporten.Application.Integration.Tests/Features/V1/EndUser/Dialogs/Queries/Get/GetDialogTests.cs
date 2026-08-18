@@ -380,7 +380,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
                     AuthorizedChecks = [
-                        TestAuthorizedChecks.Authorized(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-1"),
                         TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
                     ]
                 };

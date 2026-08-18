@@ -110,7 +110,7 @@ static void BuildAndRun(string[] args)
             .Build()
 
         // Asp infrastructure
-        .AddSingleton<IAuthorizationMiddlewareResultHandler, DialogportenAuthorizationMiddlewareResultHandler>()
+        //.AddSingleton<IAuthorizationMiddlewareResultHandler, DialogportenAuthorizationMiddlewareResultHandler>()
         .AddExceptionHandler<GlobalExceptionHandler>()
         .AddAutoMapper(WebApiAssemblyMarker.Assembly)
         .AddScoped<IUser, ApplicationUser>()
@@ -120,6 +120,7 @@ static void BuildAndRun(string[] args)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
         .AddDialogportenResponseCompression()
+        .AddProblemDetails()
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
@@ -190,6 +191,7 @@ static void BuildAndRun(string[] args)
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
     app.UseDefaultExceptionHandler()
+        .UseStatusCodePages(UseStatusCodePagesHandlers.FromFastEndpointResponses)
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()

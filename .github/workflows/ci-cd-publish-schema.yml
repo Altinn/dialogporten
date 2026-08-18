@@ -31,7 +31,7 @@ on:
         required: false
         type: string
       ref:
-        description: "Git ref to publish from. Leave empty for current default."
+        description: "Branch or tag to publish from, e.g. v1.2.3 (not a raw SHA). Leave empty for current default."
         required: false
         type: string
 
@@ -63,6 +63,37 @@ jobs:
       - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
+
+      # Runs before anything checks out the dispatched ref. Matches the guard in
+      # dispatch-deploy-branch-yt01.yml / dispatch-build-hotfix-prod.yml, and
+      # matters more here: this workflow publishes to a public registry with
+      # `npm publish --provenance`, so an unvalidated ref would let anyone with
+      # write access attach a signed Altinn attestation to fork-authored content.
+      - name: Validate dispatched ref
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ref != '' }}
+        env:
+          # Via env (not interpolated into the script) so a crafted ref can't inject shell commands.
+          INPUT_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          # Only named branches/tags in this repository are publishable. Creating a named ref
+          # requires write access, whereas a raw SHA can reference fork PR commits, which are
+          # fetchable from this repository without any write access.
+          # check-ref-format rejects glob characters, which ls-remote would treat as patterns.
+          if ! git check-ref-format "refs/heads/${INPUT_REF}"; then
+            echo "::error::'${INPUT_REF}' is not a valid ref name."
+            exit 1
+          fi
+          status=0
+          git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}" \
+            "refs/heads/${INPUT_REF}" "refs/tags/${INPUT_REF}" >/dev/null || status=$?
+          if [[ "$status" -eq 2 ]]; then
+            echo "::error::Ref '${INPUT_REF}' is not a branch or tag in ${GITHUB_REPOSITORY}."
+            exit 1
+          elif [[ "$status" -ne 0 ]]; then
+            echo "::error::Could not query refs in ${GITHUB_REPOSITORY} (git ls-remote exit ${status})."
+            exit 1
+          fi
 
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0

@@ -7,7 +7,17 @@
         "Logging__LogLevel__Default": "Warning"
       },
       "workingDirectory": "$(SolutionDir)",
-      "commandLineArgs": "-c 500000 -p ./src/Digdir.Tool.Dialogporten.GenerateFakeData/parties.txt -r ./src/Digdir.Tool.Dialogporten.GenerateFakeData/resources.txt -a"
+      "commandLineArgs": "-c 500000 -p ./src/Digdir.Tool.Dialogporten.GenerateFakeData/parties.txt -z -r ./src/Digdir.Tool.Dialogporten.GenerateFakeData/resources.txt -a"
+    },
+    "Post dialogs to all resources": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "Logging__LogLevel__Default": "Warning"
+      },
+      "workingDirectory": "$(SolutionDir)",
+      "commandLineArgs": "-e https://platform.tt02.altinn.no -c 4500 -p ./src/Digdir.Tool.Dialogporten.GenerateFakeData/parties.txt -a"
     }
   }
 }
+

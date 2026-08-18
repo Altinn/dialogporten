@@ -94,9 +94,14 @@ jobs:
           # not exist yet on the first push. Poll briefly; if it never appears,
           # skip the Slack message - the next push to this branch re-runs this
           # workflow and sends it then.
+          # The head filter is owner-qualified so a fork branch of the same name
+          # cannot match. gh pr list --head compares branch names only, which the
+          # REST head=<owner>:<ref> form avoids.
           NUMBER=""
           for _ in {1..6}; do
-            NUMBER=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --base main --state open --json number --jq '.[0].number // empty')
+            NUMBER=$(gh api --method GET \
+              "/repos/${GITHUB_REPOSITORY}/pulls?state=open&base=main&head=${GITHUB_REPOSITORY_OWNER}:${GITHUB_REF_NAME}&per_page=1" \
+              --jq '.[0].number // empty')
             if [ -n "$NUMBER" ]; then
               break
             fi

@@ -1,0 +1,105 @@
+﻿{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "idempotentKey": null,
+  "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "authorizationAttribute": null,
+  "extendedType": "https://digdir.com/updated-transmission-type",
+  "externalReference": "updated-external-reference",
+  "relatedTransmissionId": null,
+  "type": "Submission",
+  "sender": {
+    "actorType": "PartyRepresentative",
+    "actorName": "DIGITALISERINGSDIREKTORATET",
+    "actorId": "urn:altinn:organization:identifier-no:991825827"
+  },
+  "content": {
+    "title": {
+      "value": [
+        {
+          "value": "Oppdatert forsendelsestittel",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "summary": {
+      "value": [
+        {
+          "value": "Oppdatert oppsummering",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "contentReference": {
+      "value": [
+        {
+          "value": "https://digdir.com/updated-content-reference",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+      "isAuthorized": null
+    }
+  },
+  "attachments": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "displayName": [
+        {
+          "value": "Updated existing attachment",
+          "languageCode": "nb"
+        }
+      ],
+      "name": "updated-existing-attachment",
+      "urls": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "url": "https://digdir.com/updated-existing-attachment-gui-url",
+          "mediaType": "text/html",
+          "consumerType": "Gui"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "url": "https://digdir.com/updated-existing-attachment-api-url",
+          "mediaType": "application/json",
+          "consumerType": "Api"
+        }
+      ],
+      "expiresAt": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "displayName": [
+        {
+          "value": "New attachment",
+          "languageCode": "nb"
+        }
+      ],
+      "name": "new-attachment",
+      "urls": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "url": "https://digdir.com/new-attachment-url",
+          "mediaType": "application/pdf",
+          "consumerType": "Gui"
+        }
+      ],
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+    }
+  ],
+  "navigationalActions": [
+    {
+      "title": [
+        {
+          "value": "Updated action title",
+          "languageCode": "nb"
+        }
+      ],
+      "url": "https://digdir.com/updated-action-url",
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+    }
+  ]
+}

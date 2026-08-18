@@ -59,6 +59,12 @@ on:
       hasSchemaPackageChanges:
         description: "Schema package content or infrastructure has changed"
         value: ${{ jobs.check-for-changes.outputs.hasSchemaPackageChanges }}
+      hasDependencyChanges:
+        description: "NuGet resolution inputs, SDK pinning, or a workflow governing the dependency scan changed"
+        value: ${{ jobs.check-for-changes.outputs.hasDependencyChanges }}
+      hasDockerChanges:
+        description: "Docker build context, NuGet resolution inputs, or a workflow governing the image build changed"
+        value: ${{ jobs.check-for-changes.outputs.hasDockerChanges }}
 
 jobs:
   check-for-changes:
@@ -79,6 +85,11 @@ jobs:
       hasWebApiEndUserClientChanges: ${{ steps.filter-backend.outputs.web_api_enduser_client_any_modified == 'true'}}
       hasWebApiServiceOwnerClientChanges: ${{ steps.filter-backend.outputs.web_api_serviceowner_client_any_modified == 'true'}}
       hasSchemaPackageChanges: ${{ steps.filter-backend.outputs.schema_package_any_modified == 'true'}}
+      # Deliberately not OR'd with github_workflows_any_modified, unlike hasBackendChanges and
+      # hasInfraChanges: the dependencies and docker filters name the workflows that govern
+      # these jobs, so an unrelated workflow edit doesn't rebuild every image or rescan NuGet.
+      hasDependencyChanges: ${{ steps.filter-backend.outputs.dependencies_any_modified == 'true' }}
+      hasDockerChanges: ${{ steps.filter-backend.outputs.docker_any_modified == 'true' || steps.filter-backend.outputs.dependencies_any_modified == 'true' }}
     steps:
       - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
@@ -145,6 +156,35 @@ jobs:
               - 'src/Digdir.Domain.Dialogporten.Infrastructure/Persistence/Migrations/**/*'
             schema_package:
               - 'docs/schema/V*/**/*'
+            # Anything that can change what NuGet resolves, and therefore what
+            # `dotnet list package --vulnerable` reports. MSBuild/NuGet config files are
+            # matched at any depth: nested Directory.Build.props files shadow the root one.
+            # The last two entries are the workflows that define and gate the scan, so a
+            # change to either still exercises it.
+            dependencies:
+              - '**/packages.lock.json'
+              - '**/*.csproj'
+              - '**/*.slnx'
+              - '**/Directory.Build.props'
+              - '**/Directory.Build.targets'
+              - '**/Directory.Packages.props'
+              - 'global.json'
+              - '**/nuget.config'
+              - '**/NuGet.config'
+              - '.github/workflows/ci-cd-pull-request.yml'
+              - '.github/workflows/workflow-check-for-changes.yml'
+            # Anything that can break an image build without also breaking `dotnet build`.
+            # The root .editorconfig is COPY'd into every image and, with
+            # EnforceCodeStyleInBuild + TreatWarningsAsErrors, can fail the in-container
+            # publish on a PR that skips build-and-test. The call site and this filter are
+            # already in the dependencies filter, which hasDockerChanges ORs in, so only the
+            # image-build pipeline itself is listed here.
+            docker:
+              - '**/Dockerfile'
+              - '**/*.dockerfile'
+              - '.dockerignore'
+              - '.editorconfig'
+              - '.github/workflows/workflow-publish-docker-images.yml'
 
       - name: Log backend changes
         run: |
@@ -159,5 +199,8 @@ jobs:
           echo "GraphQL schema changes detected: ${{ steps.filter-backend.outputs.gql_schema_any_modified }}"
           echo "Migration changes detected: ${{ steps.filter-backend.outputs.migration_any_modified }}"
           echo "Schema package changes detected: ${{ steps.filter-backend.outputs.schema_package_any_modified }}"
+          echo "Dependency manifest changes detected: ${{ steps.filter-backend.outputs.dependencies_any_modified }}"
+          echo "Docker filter matched: ${{ steps.filter-backend.outputs.docker_any_modified }}"
+          echo "Docker image build triggered (docker || dependencies): ${{ steps.filter-backend.outputs.docker_any_modified == 'true' || steps.filter-backend.outputs.dependencies_any_modified == 'true' }}"
           echo "Changed backend files:"
           echo "${{ steps.filter-backend.outputs.backend_modified_files }}"

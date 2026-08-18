@@ -18,7 +18,8 @@ Naming conventions for GitHub Actions:
    - Merge to `main`
 
 2. **Main Branch Triggers**  
-When code is merged to `main`, two parallel workflows are triggered:
+When code is merged to `main`, two workflows always run in parallel, plus a
+third that only starts when the schema package is touched:
 
    a. **CI/CD Main** (`ci-cd-main.yml`)
    - Automatically deploys to Test environment
@@ -33,10 +34,19 @@ When code is merged to `main`, two parallel workflows are triggered:
      - Creates/updates release PR, or
      - Builds and publishes Docker images if release is complete
 
+   c. **Publish Schema NPM** (`ci-cd-publish-schema.yml`) — path-filtered
+   - Only starts when the push touches `docs/schema/V*/**`,
+     `.github/actions/build-schema/**`, or the workflow file itself
+   - Publishes `@digdir/dialogporten-schema@${version.txt}-${shortSha}` if the
+     schema package changed
+   - Runs independently of `ci-cd-main.yml`, so it is **not** gated on a
+     successful deployment to Test
+
 ### 2. Release & Deployment Flow
 
 #### When Release is Created/Published:
-Three parallel workflows are triggered:
+`ci-cd-release-please.yml` emits a `release_created` repository dispatch, which
+four parallel workflows consume:
 
 1. **Production Dry Run** (`ci-cd-prod-dry-run.yml`)
    - Validates production deployment configuration
@@ -49,13 +59,23 @@ Three parallel workflows are triggered:
      - Infrastructure updates
      - Application deployment
      - Database migrations
-     - SDK publishing
+     - SDK (NuGet) publishing
      - End-to-end testing
 
 3. **YT01 Deployment** (`ci-cd-yt01.yml`)
    - Deploys to YT01 environment
    - Performance testing environment
-   - Deployment similar to staging, but does not publish SDK or schema packages
+   - Deployment similar to staging, but does not publish the SDK
+
+4. **Publish Schema NPM** (`ci-cd-publish-schema.yml`)
+   - Publishes `@digdir/dialogporten-schema` at the release version
+   - Runs in parallel with the staging deployment, not after it
+
+> **Note:** `ci-cd-publish-schema.yml` is the sole publisher of the npm schema
+> package and is registered as the Trusted Publisher for it on npmjs.com. npm
+> binds that record to the exact workflow **filename**, so the file cannot be
+> renamed, and the publish step cannot be moved into a reusable `workflow-*.yml`,
+> without updating the npmjs.com configuration first.
 
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)
@@ -236,6 +256,38 @@ releases.
    - App deployment skipped if no application changes
    - Migrations run only when database changes exist
    - SDK published only on API/schema changes
+
+4. **Schema npm publishing uses a different base, and two of them**
+   `ci-cd-publish-schema.yml` does *not* diff against a deployment watermark or
+   against the triggering push/release. It resolves a base from what is actually
+   published on npm and maps it back to a commit (`1.118.6` → tag `v1.118.6`,
+   `1.118.10-baed70b` → that commit).
+
+   Every other candidate base advances unconditionally. If a publish fails, is
+   skipped, or has its run evicted from the concurrency queue, a marker like
+   `previous_release_sha` or `github.event.before` has already moved past the
+   schema change, so the next run's diff window never contains it and the change
+   is silently never published. A base taken from the registry cannot drift away
+   from what was actually published, so the next run always catches up.
+
+   The two triggers ask different questions, so they use different bases:
+
+   | Trigger | Publishes | Base = newest published… |
+   | --- | --- | --- |
+   | push to `main` | `X.Y.Z-<sha>` prerelease | …version of **any** kind |
+   | `release_created` | `X.Y.Z` full version | …**full** version only |
+
+   The release path must ignore prereleases. The push path publishes one for the
+   very commit that carried a schema change, so that prerelease sits *inside* the
+   window "has the schema changed since the last full release?". Using it as the
+   base makes the release diff against a commit that already contains the change,
+   find nothing, and silently never publish the full version — e.g. the real
+   `v1.118.2..v1.118.3` range changed all four schema files at commits `0cd65dd`
+   and `16d6946`, both already published as `1.118.2-<sha>` prereleases.
+
+   If npm or the GitHub API is unreachable, or no matching version has been
+   published yet, the workflow logs a warning and falls back to the triggering
+   push/release SHA.
 
 ### 3. Implementation Example
 

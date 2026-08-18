@@ -65,13 +65,12 @@ concurrency:
   group: auto-restart
   cancel-in-progress: false
 
-permissions:
-  contents: read
-  actions: read
-
 jobs:
   decide:
     runs-on: ubuntu-latest
+    # Reads workflow run history via gh api; does not check out the repo.
+    permissions:
+      actions: read
     outputs:
       verdict: ${{ steps.decide.outputs.verdict }}
       reason: ${{ steps.decide.outputs.reason }}
@@ -193,6 +192,9 @@ jobs:
     needs: [decide, restart]
     if: ${{ always() && needs.decide.outputs.verdict != 'ignore' && needs.decide.outputs.verdict != 'off' }}
     runs-on: ubuntu-latest
+    # Checks out the repo for the Slack payload template.
+    permissions:
+      contents: read
     steps:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0

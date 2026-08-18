@@ -18,7 +18,8 @@ Naming conventions for GitHub Actions:
    - Merge to `main`
 
 2. **Main Branch Triggers**  
-When code is merged to `main`, three parallel workflows are triggered:
+When code is merged to `main`, two workflows always run in parallel, plus a
+third that only starts when the schema package is touched:
 
    a. **CI/CD Main** (`ci-cd-main.yml`)
    - Automatically deploys to Test environment
@@ -33,8 +34,9 @@ When code is merged to `main`, three parallel workflows are triggered:
      - Creates/updates release PR, or
      - Builds and publishes Docker images if release is complete
 
-   c. **Publish Schema NPM** (`ci-cd-publish-schema.yml`)
-   - Only starts when the push touches `docs/schema/**` or the schema build itself
+   c. **Publish Schema NPM** (`ci-cd-publish-schema.yml`) — path-filtered
+   - Only starts when the push touches `docs/schema/V*/**`,
+     `.github/actions/build-schema/**`, or the workflow file itself
    - Publishes `@digdir/dialogporten-schema@${version.txt}-${shortSha}` if the
      schema package changed
    - Runs independently of `ci-cd-main.yml`, so it is **not** gated on a

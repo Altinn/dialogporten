@@ -84,6 +84,7 @@ jobs:
 
           echo "Restarting apps in environment: $ENVIRONMENT"
 
+          RESTARTED_COUNT=0
           for APP in "${APPS[@]}"; do
             echo "Finding latest revision for $APP..."
             REVISION=$(az containerapp revision list \
@@ -99,10 +100,19 @@ jobs:
                 --name "$APP" \
                 --resource-group "$RESOURCE_GROUP" \
                 --revision "$REVISION"
+              RESTARTED_COUNT=$((RESTARTED_COUNT + 1))
             else
               echo "⚠️ No active revision found for $APP"
             fi
           done
+
+          # A caller asking for one specific app must not get a green run when nothing was
+          # restarted; success here means a restart command actually executed. The all case
+          # keeps its best-effort behavior.
+          if [[ "$APP_INPUT" != "all" && "$RESTARTED_COUNT" -eq 0 ]]; then
+            echo "❌ $APP_INPUT had no active revision; nothing was restarted" >&2
+            exit 1
+          fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           ENVIRONMENT: ${{ inputs.environment }}

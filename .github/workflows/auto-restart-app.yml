@@ -160,17 +160,28 @@ jobs:
             fi
           fi
 
-          # Deploys and manual restarts produce the same symptom shape; stand down if any
-          # deploy-adjacent workflow ran recently.
-          # Every query below fails CLOSED: if the API cannot answer, we cannot prove a restart is
+          # Deploys and manual restarts produce the same symptom shape; stand down while one is
+          # IN PROGRESS (regardless of when it started - prod deploys have run for hours) or
+          # finished within the last 40 minutes. The dispatch workflows serve every environment
+          # and embed the environment in their run title, so only their prod runs count here:
+          # test or staging activity must not suppress prod recovery. Our own armed restarts use
+          # workflow_call and create no separate run, so they cannot self-suppress.
+          # Every query fails CLOSED: if the API cannot answer, we cannot prove a restart is
           # safe, so we stand down rather than treat an error as an all-clear.
           SINCE=$(date -u -d '40 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
-          for WF in ci-cd-prod.yml dispatch-apps.yml dispatch-restart-apps.yml; do
-            if ! COUNT=$(gh api "repos/$REPO/actions/workflows/$WF/runs?created=>=$SINCE&per_page=5" --jq '.total_count'); then
+          for SPEC in "ci-cd-prod.yml:" "dispatch-apps.yml:prod" "dispatch-restart-apps.yml:prod" "dispatch-infrastructure.yml:prod"; do
+            WF="${SPEC%%:*}"
+            TITLE_MATCH="${SPEC#*:}"
+            if ! RESP=$(gh api "repos/$REPO/actions/workflows/$WF/runs?per_page=30"); then
               verdict stand_down "could not check recent $WF runs (GitHub API error): failing closed"
             fi
+            COUNT=$(printf '%s' "$RESP" | jq --arg since "$SINCE" --arg match "$TITLE_MATCH" \
+              '[.workflow_runs[]
+                | select(($match == "") or ((.display_title // "") | contains($match)))
+                | select((.status != "completed") or (.updated_at >= $since))] | length') || \
+              verdict stand_down "could not parse $WF run history: failing closed"
             if [[ "${COUNT:-1}" -gt 0 ]]; then
-              verdict stand_down "$WF ran within the last 40 minutes: deploy or manual restart in progress"
+              verdict stand_down "$WF has a prod run in progress or finished within 40 minutes: deploy or restart activity"
             fi
           done
 

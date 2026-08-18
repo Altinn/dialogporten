@@ -12,8 +12,30 @@ on:
           - yt01
           - staging
           - prod
+      app:
+        description: "App to restart (all restarts every app)"
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - graphql
+          - webapi-eu
+          - webapi-so
+          - service
+  # Called by auto-restart-app.yml; workflow_call does not support choice inputs,
+  # so these are strings and the restart script validates the app value.
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      app:
+        required: false
+        default: all
+        type: string
 
-run-name: Restart Container Apps in ${{ inputs.environment }}
+run-name: Restart Container Apps in ${{ inputs.environment }} (${{ inputs.app || 'all' }})
 
 jobs:
   restart-container-apps:
@@ -38,12 +60,25 @@ jobs:
         run: |
           set -euo pipefail
 
-          APPS=(
-            "dp-be-${ENVIRONMENT}-webapi-so-ca"
-            "dp-be-${ENVIRONMENT}-webapi-eu-ca"
-            "dp-be-${ENVIRONMENT}-graphql-ca"
-            "dp-be-${ENVIRONMENT}-service"
-          )
+          # Explicit mapping: app names are not uniformly derivable ("service" has no -ca suffix).
+          case "$APP_INPUT" in
+            all)
+              APPS=(
+                "dp-be-${ENVIRONMENT}-webapi-so-ca"
+                "dp-be-${ENVIRONMENT}-webapi-eu-ca"
+                "dp-be-${ENVIRONMENT}-graphql-ca"
+                "dp-be-${ENVIRONMENT}-service"
+              )
+              ;;
+            webapi-so) APPS=("dp-be-${ENVIRONMENT}-webapi-so-ca") ;;
+            webapi-eu) APPS=("dp-be-${ENVIRONMENT}-webapi-eu-ca") ;;
+            graphql) APPS=("dp-be-${ENVIRONMENT}-graphql-ca") ;;
+            service) APPS=("dp-be-${ENVIRONMENT}-service") ;;
+            *)
+              echo "❌ Unknown app: $APP_INPUT" >&2
+              exit 1
+              ;;
+          esac
 
           az extension add --name containerapp --allow-preview --upgrade -y
 
@@ -71,6 +106,7 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           ENVIRONMENT: ${{ inputs.environment }}
+          APP_INPUT: ${{ inputs.app || 'all' }}
 
       - name: Logout from Azure
         if: ${{ failure() || success() }}

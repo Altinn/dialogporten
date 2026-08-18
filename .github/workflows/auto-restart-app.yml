@@ -1,7 +1,9 @@
 # Automated recovery for a replica that hangs its requests while health probes stay green.
+# Covers prod and staging (staging carries an SLA); the environment is derived from the
+# alert payload's role name through the explicit allowlist below.
 #
-# The "Dialogporten Replica Hanging Requests Prod" Grafana alert posts a repository_dispatch
-# event here. This workflow restarts the affected app's active revision - the same remedy a
+# The "Dialogporten Replica Hanging Requests" Grafana alerts (prod and staging) post
+# repository_dispatch events here. This workflow restarts the affected app's active revision - the same remedy a
 # human applies manually - after guardrails, around the clock. A hang during working hours
 # affects more users than one at night, and the remedy is identical either way.
 #
@@ -76,6 +78,7 @@ jobs:
       reason: ${{ steps.decide.outputs.reason }}
       app_short: ${{ steps.decide.outputs.app_short }}
       app_full: ${{ steps.decide.outputs.app_full }}
+      environment: ${{ steps.decide.outputs.environment }}
       replica: ${{ steps.decide.outputs.replica }}
       value: ${{ steps.decide.outputs.value }}
       mode: ${{ steps.decide.outputs.mode }}
@@ -106,6 +109,7 @@ jobs:
 
           APP_SHORT=""
           APP_FULL=""
+          ENV=""
 
           verdict() {
             # Only known verdicts may be emitted; anything else is a bug in this script, and
@@ -119,6 +123,7 @@ jobs:
               echo "reason=$2"
               echo "app_short=$APP_SHORT"
               echo "app_full=$APP_FULL"
+              echo "environment=$ENV"
               echo "replica=$REPLICA"
               echo "value=$VALUE"
               echo "mode=$MODE"
@@ -137,14 +142,19 @@ jobs:
             verdict ignore "alert status is '$ALERT_STATUS', not firing"
           fi
 
-          # cloud_RoleName format is <cae-name>.<container-app-name>. Explicit allowlist:
-          # an unmapped app must stand down, never guess.
+          # cloud_RoleName format is <cae-name>.<container-app-name>. Explicit allowlist mapping
+          # both app and environment: an unmapped app must stand down, never guess. Role names
+          # verified live in both environments.
           APP_FULL="${ROLE_NAME#*.}"
           case "$APP_FULL" in
-            dp-be-prod-graphql-ca) APP_SHORT=graphql ;;
-            dp-be-prod-webapi-eu-ca) APP_SHORT=webapi-eu ;;
-            dp-be-prod-webapi-so-ca) APP_SHORT=webapi-so ;;
-            dp-be-prod-service) APP_SHORT=service ;;
+            dp-be-prod-graphql-ca) ENV=prod; APP_SHORT=graphql ;;
+            dp-be-prod-webapi-eu-ca) ENV=prod; APP_SHORT=webapi-eu ;;
+            dp-be-prod-webapi-so-ca) ENV=prod; APP_SHORT=webapi-so ;;
+            dp-be-prod-service) ENV=prod; APP_SHORT=service ;;
+            dp-be-staging-graphql-ca) ENV=staging; APP_SHORT=graphql ;;
+            dp-be-staging-webapi-eu-ca) ENV=staging; APP_SHORT=webapi-eu ;;
+            dp-be-staging-webapi-so-ca) ENV=staging; APP_SHORT=webapi-so ;;
+            dp-be-staging-service) ENV=staging; APP_SHORT=service ;;
             *) verdict stand_down "unknown app '$APP_FULL' (from role '$ROLE_NAME')" ;;
           esac
 
@@ -163,13 +173,15 @@ jobs:
           # Deploys and manual restarts produce the same symptom shape; stand down while one is
           # IN PROGRESS (regardless of when it started - prod deploys have run for hours) or
           # finished within the last 40 minutes. The dispatch workflows serve every environment
-          # and embed the environment in their run title, so only their prod runs count here:
-          # test or staging activity must not suppress prod recovery. Our own armed restarts use
-          # workflow_call and create no separate run, so they cannot self-suppress.
+          # and embed the environment in their run title, so only runs for THIS event's
+          # environment count here: activity in other environments must not suppress recovery.
+          # Our own armed restarts use workflow_call and create no separate run, so they
+          # cannot self-suppress.
           # Every query fails CLOSED: if the API cannot answer, we cannot prove a restart is
           # safe, so we stand down rather than treat an error as an all-clear.
           SINCE=$(date -u -d '40 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
-          for SPEC in "ci-cd-prod.yml:" "dispatch-apps.yml:prod" "dispatch-restart-apps.yml:prod" "dispatch-infrastructure.yml:prod"; do
+          if [[ "$ENV" == "prod" ]]; then CICD_WF="ci-cd-prod.yml"; else CICD_WF="ci-cd-staging.yml"; fi
+          for SPEC in "$CICD_WF:" "dispatch-apps.yml:$ENV" "dispatch-restart-apps.yml:$ENV" "dispatch-infrastructure.yml:$ENV"; do
             WF="${SPEC%%:*}"
             TITLE_MATCH="${SPEC#*:}"
             if ! RESP=$(gh api "repos/$REPO/actions/workflows/$WF/runs?per_page=30"); then
@@ -181,19 +193,24 @@ jobs:
                 | select((.status != "completed") or (.updated_at >= $since))] | length') || \
               verdict stand_down "could not parse $WF run history: failing closed"
             if [[ "${COUNT:-1}" -gt 0 ]]; then
-              verdict stand_down "$WF has a prod run in progress or finished within 40 minutes: deploy or restart activity"
+              verdict stand_down "$WF has a $ENV run in progress or finished within 40 minutes: deploy or restart activity"
             fi
           done
 
-          # One auto-restart per 12 hours across all apps. A repeat firing after a restart
-          # means the restart did not cure it (or a second app is hanging): human needed.
+          # One auto-restart per 12 hours across all apps IN THIS ENVIRONMENT (the run title
+          # carries the role name, which carries the environment). A repeat firing after a
+          # restart means the restart did not cure it (or a second app is hanging): human
+          # needed. A staging restart must not block a later prod recovery, or vice versa.
           # per_page=100 rather than paginating: each run costs a further jobs lookup, so walking
           # every page would multiply API calls (and rate-limit risk) to guard against a run count
           # that would itself be pathological in a 12h window.
           SINCE12=$(date -u -d '12 hours ago' +%Y-%m-%dT%H:%M:%SZ)
-          if ! RUN_IDS=$(gh api "repos/$REPO/actions/workflows/auto-restart-app.yml/runs?created=>=$SINCE12&per_page=100" --jq '.workflow_runs[].id'); then
+          if ! RESP12=$(gh api "repos/$REPO/actions/workflows/auto-restart-app.yml/runs?created=>=$SINCE12&per_page=100"); then
             verdict stand_down "could not check this workflow's recent runs (GitHub API error): failing closed"
           fi
+          RUN_IDS=$(printf '%s' "$RESP12" | jq -r --arg envmark "dp-be-$ENV-" \
+            '.workflow_runs[] | select((.display_title // "") | contains($envmark)) | .id') || \
+            verdict stand_down "could not parse this workflow's run history: failing closed"
           for RUN_ID in $RUN_IDS; do
             [[ "$RUN_ID" == "$SELF_RUN_ID" ]] && continue
             if ! RESTARTED=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" \
@@ -213,15 +230,16 @@ jobs:
 
   restart:
     needs: decide
-    # Belt and braces beyond the verdict: the app must be non-empty (an empty app would fall
-    # back to restarting everything downstream) and the mode re-checked at the job boundary.
-    if: needs.decide.outputs.verdict == 'restart' && needs.decide.outputs.app_short != '' && needs.decide.outputs.mode == 'armed'
+    # Belt and braces beyond the verdict: app and environment must be non-empty (an empty app
+    # would previously fall back to restarting everything downstream) and the mode re-checked
+    # at the job boundary.
+    if: needs.decide.outputs.verdict == 'restart' && needs.decide.outputs.app_short != '' && needs.decide.outputs.environment != '' && needs.decide.outputs.mode == 'armed'
     permissions:
       id-token: write
       contents: read
     uses: ./.github/workflows/dispatch-restart-apps.yml
     with:
-      environment: prod
+      environment: ${{ needs.decide.outputs.environment }}
       app: ${{ needs.decide.outputs.app_short }}
     secrets: inherit
 

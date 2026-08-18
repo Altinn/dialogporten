@@ -95,6 +95,14 @@ jobs:
         run: |
           set -euo pipefail
 
+          # These come from the alert payload. Strip newlines and cap the length before any of
+          # them reach GITHUB_OUTPUT: an embedded newline could append a second "verdict=" record
+          # and override the decision this step just made.
+          sanitize() { printf '%s' "$1" | tr -d '\n\r' | cut -c1-200; }
+          ROLE_NAME=$(sanitize "$ROLE_NAME")
+          REPLICA=$(sanitize "$REPLICA")
+          VALUE=$(sanitize "$VALUE")
+
           APP_SHORT=""
           APP_FULL=""
 
@@ -147,25 +155,34 @@ jobs:
 
           # Deploys and manual restarts produce the same symptom shape; stand down if any
           # deploy-adjacent workflow ran recently.
+          # Every query below fails CLOSED: if the API cannot answer, we cannot prove a restart is
+          # safe, so we stand down rather than treat an error as an all-clear.
           SINCE=$(date -u -d '40 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
           for WF in ci-cd-prod.yml dispatch-apps.yml dispatch-restart-apps.yml; do
-            COUNT=$(gh api "repos/$REPO/actions/workflows/$WF/runs?created=>=$SINCE&per_page=5" \
-              --jq '.total_count' 2>/dev/null || echo 0)
-            if [[ "${COUNT:-0}" -gt 0 ]]; then
+            if ! COUNT=$(gh api "repos/$REPO/actions/workflows/$WF/runs?created=>=$SINCE&per_page=5" --jq '.total_count'); then
+              verdict stand_down "could not check recent $WF runs (GitHub API error): failing closed"
+            fi
+            if [[ "${COUNT:-1}" -gt 0 ]]; then
               verdict stand_down "$WF ran within the last 40 minutes: deploy or manual restart in progress"
             fi
           done
 
           # One auto-restart per 12 hours across all apps. A repeat firing after a restart
           # means the restart did not cure it (or a second app is hanging): human needed.
+          # per_page=100 rather than paginating: each run costs a further jobs lookup, so walking
+          # every page would multiply API calls (and rate-limit risk) to guard against a run count
+          # that would itself be pathological in a 12h window.
           SINCE12=$(date -u -d '12 hours ago' +%Y-%m-%dT%H:%M:%SZ)
-          RUN_IDS=$(gh api "repos/$REPO/actions/workflows/auto-restart-app.yml/runs?created=>=$SINCE12&per_page=20" \
-            --jq '.workflow_runs[].id' 2>/dev/null || true)
+          if ! RUN_IDS=$(gh api "repos/$REPO/actions/workflows/auto-restart-app.yml/runs?created=>=$SINCE12&per_page=100" --jq '.workflow_runs[].id'); then
+            verdict stand_down "could not check this workflow's recent runs (GitHub API error): failing closed"
+          fi
           for RUN_ID in $RUN_IDS; do
             [[ "$RUN_ID" == "$SELF_RUN_ID" ]] && continue
-            RESTARTED=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" \
-              --jq '[.jobs[] | select(.name | startswith("restart")) | select(.conclusion == "success")] | length' 2>/dev/null || echo 0)
-            if [[ "${RESTARTED:-0}" -gt 0 ]]; then
+            if ! RESTARTED=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" \
+              --jq '[.jobs[] | select(.name | startswith("restart")) | select(.conclusion == "success")] | length'); then
+              verdict stand_down "could not inspect run $RUN_ID for a prior restart (GitHub API error): failing closed"
+            fi
+            if [[ "${RESTARTED:-1}" -gt 0 ]]; then
               verdict escalate "an auto-restart already ran in the last 12h; the restart did not cure it or a second app is hanging - human needed"
             fi
           done

@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
@@ -32,7 +33,8 @@ internal sealed class DialogportenAuthorizationMiddlewareResultHandler : IAuthor
             context.Response.ContentType = ContentType.ApplicationJson.ToString();
 
             var error = GetForbiddenMessageFromEndpointSummary(context) ?? "Unauthorized Access";
-            await context.Response.WriteAsJsonAsync(new Forbidden(error).ToValidationResults(), context.RequestAborted);
+            var body = context.ResponseBuilder(new Forbidden(error).ToValidationResults());
+            await context.Response.WriteAsJsonAsync(body, context.RequestAborted);
             return;
         }
 

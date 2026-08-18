@@ -34,7 +34,7 @@ internal sealed class DialogportenAuthorizationMiddlewareResultHandler : IAuthor
 
             var error = GetForbiddenMessageFromEndpointSummary(context) ?? "Unauthorized Access";
             var body = context.ResponseBuilder(new Forbidden(error).ToValidationResults());
-            await context.Response.WriteAsJsonAsync(body, context.RequestAborted);
+            await context.Response.WriteAsJsonAsync(body, body!.GetType(), context.RequestAborted);
             return;
         }
 

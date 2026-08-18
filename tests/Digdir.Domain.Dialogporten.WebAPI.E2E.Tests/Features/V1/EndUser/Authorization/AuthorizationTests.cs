@@ -35,12 +35,17 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         problemDetails.Should().NotBeNull();
         problemDetails.Code.Should().BeNull();
         problemDetails.Detail.Should().BeNull();
-        problemDetails.Errors.Should().BeNull();
         problemDetails.Instance.Should().Be(requestPath);
         problemDetails.Status.Should().Be((int)HttpStatusCode.Forbidden);
         problemDetails.StatusDescription.Should().BeNull();
         problemDetails.Title.Should().Be("Forbidden.");
         problemDetails.TraceId.Should().NotBeNull();
         problemDetails.ValidationErrors.Should().BeNull();
+
+        problemDetails.Errors.Should().NotBeNull();
+        var validationFailure = problemDetails.Errors.Single();
+
+        validationFailure.Key.Should().Be("Forbidden");
+        validationFailure.Value.Should().NotBeNull();
     }
 }

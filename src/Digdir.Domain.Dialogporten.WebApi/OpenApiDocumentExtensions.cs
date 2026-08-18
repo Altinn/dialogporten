@@ -130,6 +130,36 @@ public static class OpenApiDocumentExtensions
     }
 
     /// <summary>
+    /// The "party" query parameter on GET /api/v1/serviceowner/dialogs/endusercontext is required, which
+    /// makes NSwag auto-generate a meaningless example containing a single empty string ([""]). Replace it
+    /// with a realistic party identifier so the contract is helpful for integrators and client generators.
+    /// </summary>
+    /// <param name="openApiDocument"></param>
+    public static void ChangeEndUserContextPartyExample(this OpenApiDocument openApiDocument)
+    {
+        const string partyExample = "urn:altinn:organization:identifier-no:912345678";
+
+        if (!openApiDocument.Paths.TryGetValue("/api/v1/serviceowner/dialogs/endusercontext", out var pathItem))
+        {
+            return;
+        }
+
+        if (!pathItem.TryGetValue(OpenApiOperationMethod.Get, out var getOp))
+        {
+            return;
+        }
+
+        foreach (var parameter in getOp.Parameters)
+        {
+            if (parameter.Kind == OpenApiParameterKind.Query
+                && parameter.Name.Equals("party", StringComparison.OrdinalIgnoreCase))
+            {
+                parameter.Example = new[] { partyExample };
+            }
+        }
+    }
+
+    /// <summary>
     /// NSwag generates empty schema definitions for the generic pagination types
     /// (ContinuationTokenSet, OrderSet) that are not useful in the OpenAPI spec.
     /// The parameters themselves are replaced with string schemas by <see cref="PaginatedListParametersProcessor"/>,

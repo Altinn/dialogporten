@@ -1,43 +1,38 @@
-﻿# Run dry-runs of staging deployment on release PRs
+# Runs dry-runs of the staging deployment for the release-please release PR, and
+# posts the release notes to Slack.
+#
+# Triggers on push to the release-please branch instead of pull_request on main:
+# the branch name is the only thing that identifies a release PR, and pull_request
+# triggers cannot filter on head branch, so a pull_request trigger would create a
+# skipped run for every ordinary PR. The branch is pushed with release-please's
+# PAT, so the push does trigger workflows.
 name: CI/CD Pull Request Release Please
 on:
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - "tests/k6/**"
+  push:
+    branches: ["release-please--branches--main"]
+
+# Supersede in-flight runs: release-please force-pushes this branch on every merge
+# to main, making the previous run's result irrelevant.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  verify-release-please-branch:
-    if: startsWith(github.head_ref, 'release-please-')
-    runs-on: ubuntu-latest
-    permissions: {}
-    steps:
-      - run: echo "Confirmed to be a release please branch"
-
   get-current-version:
     name: Get current version
-    needs: [verify-release-please-branch]
     permissions:
       contents: read
     uses: ./.github/workflows/workflow-get-current-version.yml
 
-  check-for-changes:
-    name: Check for changes
-    needs: [verify-release-please-branch]
-    permissions:
-      contents: read
-    uses: ./.github/workflows/workflow-check-for-changes.yml
-
   generate-git-short-sha:
     name: Generate git short sha
-    needs: [verify-release-please-branch]
     permissions:
       contents: read
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml
 
   dry-run-deploy-infra-staging:
     name: Deploy infra to staging (dry run)
-    needs: [generate-git-short-sha, get-current-version, check-for-changes]
+    needs: [generate-git-short-sha, get-current-version]
     permissions:
       contents: read
       id-token: write
@@ -58,7 +53,7 @@ jobs:
 
   dry-run-deploy-apps-staging:
     name: Deploy apps to staging (dry run)
-    needs: [generate-git-short-sha, get-current-version, check-for-changes]
+    needs: [generate-git-short-sha, get-current-version]
     permissions:
       contents: read
       id-token: write
@@ -83,20 +78,56 @@ jobs:
     name: Send Slack message
     needs: [dry-run-deploy-infra-staging, dry-run-deploy-apps-staging]
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      pull-requests: read
     steps:
       - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
+      - name: Find release pull request
+        id: find-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Release-please pushes the branch before opening its PR, so the PR may
+          # not exist yet on the first push. Poll briefly; if it never appears,
+          # skip the Slack message - the next push to this branch re-runs this
+          # workflow and sends it then.
+          NUMBER=""
+          for _ in {1..6}; do
+            NUMBER=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --base main --state open --json number --jq '.[0].number // empty')
+            if [ -n "$NUMBER" ]; then
+              break
+            fi
+            sleep 10
+          done
+
+          if [ -z "$NUMBER" ]; then
+            echo "No open release PR found for $GITHUB_REF_NAME; skipping Slack message"
+            exit 0
+          fi
+
+          BODY=$(gh pr view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json body --jq '.body')
+          DELIMITER="PR_BODY_$(openssl rand -hex 16)"
+          {
+            echo "number=$NUMBER"
+            echo "body<<$DELIMITER"
+            echo "$BODY"
+            echo "$DELIMITER"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Calculate max pull request body length
         id: calculate-max-length
+        if: steps.find-pr.outputs.number != ''
+        env:
+          PR_NUMBER: ${{ steps.find-pr.outputs.number }}
         run: |
           # Build the payload template using actual values where available
           # Channel ID is typically around 11 characters (C1234567890)
           ESTIMATED_CHANNEL_ID="C1234567890"
-          REPO_URL="https://github.com/${GITHUB_REPOSITORY}/pull/${{ github.event.pull_request.number }}"
-          
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
+
           PAYLOAD_TEMPLATE=$(cat <<EOF
           {
             "channel": "${ESTIMATED_CHANNEL_ID}",
@@ -126,32 +157,34 @@ jobs:
           }
           EOF
           )
-          
+
           # Calculate template length (without the placeholder content)
           PLACEHOLDER="PLACEHOLDER_CONTENT"
           TEMPLATE_LENGTH=$((${#PAYLOAD_TEMPLATE} - ${#PLACEHOLDER}))
-          
+
           # Slack payload limit with safety margin
           SLACK_PAYLOAD_LIMIT=3000
           SAFETY_MARGIN=100
-          
+
           # Calculate maximum allowable length for PR content
           MAX_BODY_LENGTH=$((SLACK_PAYLOAD_LIMIT - TEMPLATE_LENGTH - SAFETY_MARGIN))
-          
+
           echo "Template length: $TEMPLATE_LENGTH"
           echo "Max content length: $MAX_BODY_LENGTH"
           echo "MAX_BODY_LENGTH=$MAX_BODY_LENGTH" >> $GITHUB_ENV
 
       - name: Slackify markdown in pull request body
         id: slackify
+        if: steps.find-pr.outputs.number != ''
         uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         with:
           text: ${{ env.PR_BODY }}
         env:
-          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BODY: ${{ steps.find-pr.outputs.body }}
 
       - name: Trim slackified content if necessary
         id: trim-slackified
+        if: steps.find-pr.outputs.number != ''
         env:
           SLACKIFIED_CONTENT: ${{ steps.slackify.outputs.text }}
           MAX_LENGTH: ${{ env.MAX_BODY_LENGTH }}
@@ -172,6 +205,7 @@ jobs:
 
       - name: Send GitHub slack message
         id: slack
+        if: steps.find-pr.outputs.number != ''
         uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
         with:
           errors: true
@@ -198,7 +232,7 @@ jobs:
                           "type": "plain_text",
                           "text": "Open release PR"
                         },
-                        "url": "https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+                        "url": "https://github.com/${{ github.repository }}/pull/${{ steps.find-pr.outputs.number }}"
                       }
                     ]
                   }

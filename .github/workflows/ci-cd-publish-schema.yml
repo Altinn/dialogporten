@@ -1,10 +1,10 @@
 # Sole publisher of the @digdir/dialogporten-schema npm package.
-# Configured as the Trusted Publisher for the package on npmjs.com - npm binds
-# that record to this exact filename, so renaming this file breaks publishing.
-# Triggers:
-#   push: main                      → version: ${version.txt}-${shortSha} (test/at23 flow)
-#   repository_dispatch: release_created → version: ${client_payload.version}  (staging/tt02 flow)
-#   workflow_dispatch               → manual force-publish with optional inputs
+# npm binds the Trusted Publisher record to this exact filename, so renaming
+# this file - or moving the publish job into a reusable workflow - breaks it.
+#
+#   push: main            → ${version.txt}-${shortSha}   (test/at23)
+#   repository_dispatch   → ${client_payload.version}    (staging/tt02)
+#   workflow_dispatch     → manual force-publish
 name: CI/CD Publish Schema NPM
 run-name: >-
   CI/CD Publish Schema NPM
@@ -14,10 +14,7 @@ run-name: >-
 on:
   push:
     branches: [main]
-    # Change detection still runs (it decides *whether* to publish); this only
-    # avoids spinning up runners for the ~90% of pushes that cannot possibly
-    # affect the package. Keep in sync with the `schema_package` filter in
-    # workflow-check-for-changes.yml. Does not affect the dispatch triggers.
+    # Cheap pre-filter only; check-for-changes still decides whether to publish.
     paths:
       - 'docs/schema/V*/**'
       - '.github/actions/build-schema/**'
@@ -35,12 +32,10 @@ on:
         required: false
         type: string
 
-# One group per publish target. GitHub keeps a single *pending* run per group
-# and cancels the older one, so a shared group would let an ordinary push evict
-# a queued release publish - silently, since a run cancelled while pending never
-# starts a job and so never reaches notify-failure. Each run targets a distinct
-# immutable npm version and the version-exists check already guards duplicates,
-# so there is nothing to gain from serialising across targets.
+# One group per publish target. GitHub keeps a single *pending* run per group and
+# cancels the older one, so a shared group would let a push silently evict a queued
+# release publish. Each run targets a distinct immutable version, so serialising
+# across targets buys nothing.
 concurrency:
   group: >-
     ${{ github.workflow }}-${{ github.event_name }}-${{
@@ -64,11 +59,8 @@ jobs:
         with:
           egress-policy: audit
 
-      # Runs before anything checks out the dispatched ref. Matches the guard in
-      # dispatch-deploy-branch-yt01.yml / dispatch-build-hotfix-prod.yml, and
-      # matters more here: this workflow publishes to a public registry with
-      # `npm publish --provenance`, so an unvalidated ref would let anyone with
-      # write access attach a signed Altinn attestation to fork-authored content.
+      # Same guard as the other dispatch workflows, and it matters more here:
+      # this one signs what it publishes with `npm publish --provenance`.
       - name: Validate dispatched ref
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.ref != '' }}
         env:
@@ -98,12 +90,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
-          # Nothing in this workflow authenticates to git after checkout - the
-          # only git use is a local `rev-parse`, gh uses GH_TOKEN, and npm
-          # publishes over OIDC - so don't leave the token in .git/config.
           persist-credentials: false
-          # Only version.txt and the package name are read here; git metadata
-          # (for the short SHA) is fetched regardless of the sparse working tree.
           sparse-checkout: |
             version.txt
             docs/schema/V1/package.json
@@ -124,15 +111,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Sets RESOLVED_VERSION rather than echoing: `v=$(fn)` runs the body in
-          # a command substitution where a failing command does NOT trip set -e,
-          # so `cat`/`rev-parse` failures would silently yield "1.115.5-" or
-          # "-abc1234". Called directly, the explicit exits below actually abort.
-          #
-          # The short SHA length must match workflow-generate-git-short-sha.yml
-          # (`git rev-parse --short HEAD`, git's auto abbreviation) so the npm
-          # version lines up with the docker image tag and deployed app version
-          # for the same commit. Do not hard-code a width here.
+          # Sets a global rather than echoing: set -e does not fire through
+          # `v=$(fn)`, so failures here would silently yield "1.2.3-" or "-abc123".
+          # Short SHA width must match workflow-generate-git-short-sha.yml so the
+          # npm version lines up with the docker tag - don't hard-code a width.
           resolve_version_from_file() {
             local version short_sha
             version=$(cat version.txt) || {
@@ -148,8 +130,7 @@ jobs:
             RESOLVED_VERSION="${version}-${short_sha}"
           }
 
-          # npm versions are immutable, so refuse to publish anything that is
-          # not well-formed rather than discovering it at `npm publish`.
+          # npm versions are immutable - reject malformed ones before publishing.
           assert_semver() {
             if ! printf '%s' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
               echo "::error::Refusing to publish malformed version '$1'"
@@ -157,40 +138,21 @@ jobs:
             fi
           }
 
-          # The commit that the newest published npm version was built from.
+          # Commit behind the newest published version. Basing change detection on
+          # what is actually on npm keeps it self-healing: previous_release_sha and
+          # github.event.before advance even when a publish fails, so a missed change
+          # falls out of the next diff window forever.
           #
-          # $1 selects which published versions count, because the two triggers
-          # ask genuinely different questions:
-          #
-          #   any      Newest version of any kind, prereleases included. The
-          #            push path asks "did the schema change since the last
-          #            thing published from main?".
-          #
-          #   release  Newest FULL version only (no -<sha> suffix). The release
-          #            path asks "did the schema change since the last full
-          #            release?", and prereleases sit INSIDE that window - the
-          #            push path publishes one for the very commit that carried
-          #            the change. Counting them would diff against a commit
-          #            that already contains the change, find nothing, and
-          #            silently never publish the full version. Verified against
-          #            real history: v1.118.2..v1.118.3 changed all four schema
-          #            files at commits 0cd65dd and 16d6946, both of which were
-          #            published as 1.118.2-<sha> prereleases, so an "any" base
-          #            would have skipped the 1.118.3 release entirely.
-          #
-          # Deriving both from what is actually ON NPM - rather than from "a
-          # release was created" (previous_release_sha) or "a push happened"
-          # (github.event.before) - keeps them self-healing. Those markers
-          # advance unconditionally, so a publish that failed, was skipped, or
-          # had its run evicted falls outside the next diff window and is never
-          # picked up again. A base taken from the registry cannot drift away
-          # from what was actually published.
+          # $1 = any     newest of any kind; prereleases track main.
+          # $1 = release newest FULL version only. Prereleases sit inside the window
+          #              "changed since the last full release?" - counting them diffs
+          #              against a commit that already has the change, so the full
+          #              version would never publish.
           last_published_base_sha() {
             local mode=$1 pkg times newest ref
             pkg=$(jq -er '.name' docs/schema/V1/package.json) || return 1
 
-            # Ordered by publish TIME, not by the registry's array order - the
-            # two are not guaranteed to agree.
+            # By publish time, not the registry's array order - they can disagree.
             times=$(npm view "$pkg" time --json) || return 1
 
             if [ "$mode" = release ]; then
@@ -212,14 +174,11 @@ jobs:
               *)   ref="v$newest" ;;      # 1.118.6          -> release tag
             esac
 
-            # Resolved through the API rather than git: this job's checkout is
-            # shallow and sparse so it has no tags. Also expands short SHAs.
+            # Via the API, not git: this checkout is shallow and sparse so it has no tags.
             gh api "repos/${REPO}/commits/${ref}" --jq '.sha' || return 1
           }
 
-          # $1 = mode (see above), $2 = fallback. Falls back to the previous
-          # behaviour so a registry or API hiccup degrades to today's semantics
-          # instead of blocking a publish.
+          # $2 is the fallback, so a registry hiccup degrades instead of blocking.
           resolve_base_sha() {
             local mode=$1 fallback=$2 base
             if base=$(last_published_base_sha "$mode") && [ -n "$base" ]; then
@@ -235,14 +194,9 @@ jobs:
             push)
               resolve_version_from_file
               version=$RESOLVED_VERSION
-              # Pin to the commit, not refs/heads/main: the version embeds this
-              # commit's short SHA, so resolving a moving branch pointer later
-              # could package a different commit under it - permanently, since
-              # npm versions are immutable. Also keeps change detection and the
-              # published artifact on the same commit.
+              # The commit, not refs/heads/main: the version embeds this commit's
+              # short SHA, and a moving pointer could package a different one.
               echo "ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
-              # "any": prereleases track main, so the newest of them is the
-              # correct high-water mark for what main has already published.
               echo "base_sha=$(resolve_base_sha any "$EVENT_BEFORE")" >> "$GITHUB_OUTPUT"
               echo "environment=test" >> "$GITHUB_OUTPUT"
               echo "force_publish=false" >> "$GITHUB_OUTPUT"
@@ -258,18 +212,13 @@ jobs:
               fi
               version=$RELEASE_VERSION
               echo "ref=refs/tags/v${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
-              # "release": compare against the last FULL release, ignoring the
-              # prereleases published from main in between - they live inside
-              # the window this question is about.
               echo "base_sha=$(resolve_base_sha release "$PREVIOUS_RELEASE_SHA")" >> "$GITHUB_OUTPUT"
               echo "environment=staging" >> "$GITHUB_OUTPUT"
               echo "force_publish=false" >> "$GITHUB_OUTPUT"
               ;;
             workflow_dispatch)
-              # Deriving the default version reads version.txt and HEAD, which reflect
-              # the dispatched ref — not INPUT_REF. To avoid publishing one ref's content
-              # under another ref's auto-derived version (and npm versions are immutable),
-              # require an explicit version whenever ref is overridden.
+              # The derived version reads version.txt and HEAD of the dispatched ref,
+              # not INPUT_REF, so require an explicit version when ref is overridden.
               if [ -n "$INPUT_REF" ] && [ -z "$INPUT_VERSION" ]; then
                 echo "::error::workflow_dispatch with 'ref' set requires an explicit 'version' input"
                 exit 1
@@ -280,9 +229,8 @@ jobs:
                 resolve_version_from_file
                 version=$RESOLVED_VERSION
               fi
-              # Same reasoning as the push path: default to the immutable commit.
               echo "ref=${INPUT_REF:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-              # base_sha is unused: change detection is skipped when force_publish is true.
+              # No base_sha: change detection is skipped when force_publish is true.
               echo "environment=manual" >> "$GITHUB_OUTPUT"
               echo "force_publish=true" >> "$GITHUB_OUTPUT"
               ;;
@@ -305,17 +253,14 @@ jobs:
     uses: ./.github/workflows/workflow-check-for-changes.yml
     with:
       apps_base_sha: ${{ needs.resolve-context.outputs.base_sha }}
-      # Evaluate changes at the ref we will actually publish. Without this the
-      # release path would gate on the default branch tip while publishing the
-      # release tag, so commits landing after the tag could flip the decision.
+      # Gate on the ref we publish; otherwise the release path reads the branch tip.
       ref: ${{ needs.resolve-context.outputs.ref }}
 
   publish:
     name: Publish schema to npm
     needs: [resolve-context, check-for-changes]
-    # !cancelled() (rather than always()) lets this run when check-for-changes is
-    # skipped on the force path, while still stopping on cancellation. A failed or
-    # skipped check-for-changes yields empty outputs, so the gate below is false.
+    # !cancelled() so this still runs when check-for-changes is skipped on the
+    # force path; a skipped or failed job yields empty outputs, so the gate is false.
     if: >-
       ${{ !cancelled() && needs.resolve-context.result == 'success' &&
         (needs.resolve-context.outputs.force_publish == 'true' ||
@@ -340,11 +285,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
-          # >= 22.14.0 with npm >= 11.5.1 is required for Trusted Publishing.
+          # Trusted Publishing needs node >= 22.14.0 / npm >= 11.5.1.
           node-version: '24'
-          # Deliberately no registry-url - see the input docs on
-          # .github/actions/build-schema. setup-node would write an .npmrc
-          # auth line that breaks the OIDC exchange when no token is set.
+          # No registry-url on purpose: it writes an .npmrc auth line that breaks
+          # the OIDC exchange when no token is set. See .github/actions/build-schema.
 
       - name: Check if version exists on NPM
         id: check-version
@@ -357,10 +301,8 @@ jobs:
           package_name=$(jq -er '.name' package.json)
           echo "Checking ${package_name}@${VERSION}"
 
-          # Distinguish "not published" (E404) from a registry or network
-          # failure. Treating the latter as "not published" would run a full
-          # build and then fail at npm publish with E403, and would make the
-          # idempotency guard silently useless.
+          # Only E404 means "not published" - treating a registry error the same way
+          # would build, publish, and fail with E403.
           if output=$(npm view "${package_name}@${VERSION}" version 2>&1); then
             echo "version-exists=true" >> "$GITHUB_OUTPUT"
             echo "Version ${VERSION} already exists; skipping publish."
@@ -378,9 +320,7 @@ jobs:
         uses: ./.github/actions/build-schema
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
-          # This action runs setup-node last, so its version wins for the
-          # publish step below. Pin it to the Trusted Publishing floor rather
-          # than relying on the action's default.
+          # This action runs setup-node last, so its version is the one npm publish uses.
           node-version: '24'
 
       - name: Update package version
@@ -421,9 +361,8 @@ jobs:
         uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
         env:
           CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
-          # resolve-context is itself a failure path (it exits 1 on a malformed
-          # payload), and its outputs are empty when it fails - fall back to the
-          # raw event so the alert still identifies what was being published.
+          # resolve-context can be the failing job, and then its outputs are empty -
+          # fall back to the raw event so the alert still says what was publishing.
           ENVIRONMENT: ${{ needs.resolve-context.outputs.environment || github.event_name }}
           VERSION: >-
             ${{ needs.resolve-context.outputs.version

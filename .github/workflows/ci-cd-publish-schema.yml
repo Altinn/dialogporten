@@ -1,0 +1,378 @@
+# Sole publisher of the @digdir/dialogporten-schema npm package.
+# npm binds the Trusted Publisher record to this exact filename, so renaming
+# this file - or moving the publish job into a reusable workflow - breaks it.
+#
+#   push: main            → ${version.txt}-${shortSha}   (test/at23)
+#   repository_dispatch   → ${client_payload.version}    (staging/tt02)
+#   workflow_dispatch     → manual force-publish
+name: CI/CD Publish Schema NPM
+run-name: >-
+  CI/CD Publish Schema NPM
+  ${{ github.event.client_payload.version && format('(v{0})', github.event.client_payload.version)
+   || inputs.version && format('(v{0})', inputs.version) }}
+
+on:
+  push:
+    branches: [main]
+    # Cheap pre-filter only; check-for-changes still decides whether to publish.
+    paths:
+      - 'docs/schema/V*/**'
+      - '.github/actions/build-schema/**'
+      - '.github/workflows/ci-cd-publish-schema.yml'
+  repository_dispatch:
+    types: [release_created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override version to publish. Leave empty to use version.txt + short SHA."
+        required: false
+        type: string
+      ref:
+        description: "Branch or tag to publish from, e.g. v1.2.3 (not a raw SHA). Leave empty for current default."
+        required: false
+        type: string
+
+# One group per publish target. GitHub keeps a single *pending* run per group and
+# cancels the older one, so a shared group would let a push silently evict a queued
+# release publish. Each run targets a distinct immutable version, so serialising
+# across targets buys nothing.
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.event_name }}-${{
+      github.event.client_payload.version || inputs.version || github.sha }}
+
+permissions:
+  contents: read   # id-token: write is scoped to the publish job only
+
+jobs:
+  resolve-context:
+    name: Resolve trigger context
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.context.outputs.version }}
+      ref: ${{ steps.context.outputs.ref }}
+      base_sha: ${{ steps.context.outputs.base_sha }}
+      environment: ${{ steps.context.outputs.environment }}
+      force_publish: ${{ steps.context.outputs.force_publish }}
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      # Same guard as the other dispatch workflows, and it matters more here:
+      # this one signs what it publishes with `npm publish --provenance`.
+      - name: Validate dispatched ref
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.ref != '' }}
+        env:
+          # Via env (not interpolated into the script) so a crafted ref can't inject shell commands.
+          INPUT_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          # Only named branches/tags in this repository are publishable. Creating a named ref
+          # requires write access, whereas a raw SHA can reference fork PR commits, which are
+          # fetchable from this repository without any write access.
+          # check-ref-format rejects glob characters, which ls-remote would treat as patterns.
+          if ! git check-ref-format "refs/heads/${INPUT_REF}"; then
+            echo "::error::'${INPUT_REF}' is not a valid ref name."
+            exit 1
+          fi
+          status=0
+          git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}" \
+            "refs/heads/${INPUT_REF}" "refs/tags/${INPUT_REF}" >/dev/null || status=$?
+          if [[ "$status" -eq 2 ]]; then
+            echo "::error::Ref '${INPUT_REF}' is not a branch or tag in ${GITHUB_REPOSITORY}."
+            exit 1
+          elif [[ "$status" -ne 0 ]]; then
+            echo "::error::Could not query refs in ${GITHUB_REPOSITORY} (git ls-remote exit ${status})."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            version.txt
+            docs/schema/V1/package.json
+          sparse-checkout-cone-mode: false
+
+      - name: Resolve context
+        id: context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          GITHUB_SHA: ${{ github.sha }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          RELEASE_VERSION: ${{ github.event.client_payload.version }}
+          PREVIOUS_RELEASE_SHA: ${{ github.event.client_payload.previous_release_sha }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_REF: ${{ inputs.ref }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Sets a global rather than echoing: set -e does not fire through
+          # `v=$(fn)`, so failures here would silently yield "1.2.3-" or "-abc123".
+          # Short SHA width must match workflow-generate-git-short-sha.yml so the
+          # npm version lines up with the docker tag - don't hard-code a width.
+          resolve_version_from_file() {
+            local version short_sha
+            version=$(cat version.txt) || {
+              echo "::error::Could not read version.txt"; exit 1;
+            }
+            short_sha=$(git rev-parse --short HEAD) || {
+              echo "::error::Could not resolve HEAD to a short SHA"; exit 1;
+            }
+            if [ -z "$version" ] || [ -z "$short_sha" ]; then
+              echo "::error::Empty version ('$version') or short SHA ('$short_sha')"
+              exit 1
+            fi
+            RESOLVED_VERSION="${version}-${short_sha}"
+          }
+
+          # npm versions are immutable - reject malformed ones before publishing.
+          assert_semver() {
+            if ! printf '%s' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+              echo "::error::Refusing to publish malformed version '$1'"
+              exit 1
+            fi
+          }
+
+          # Commit behind the newest published version. Basing change detection on
+          # what is actually on npm keeps it self-healing: previous_release_sha and
+          # github.event.before advance even when a publish fails, so a missed change
+          # falls out of the next diff window forever.
+          #
+          # $1 = any     newest of any kind; prereleases track main.
+          # $1 = release newest FULL version only. Prereleases sit inside the window
+          #              "changed since the last full release?" - counting them diffs
+          #              against a commit that already has the change, so the full
+          #              version would never publish.
+          last_published_base_sha() {
+            local mode=$1 pkg times newest ref
+            pkg=$(jq -er '.name' docs/schema/V1/package.json) || return 1
+
+            # By publish time, not the registry's array order - they can disagree.
+            times=$(npm view "$pkg" time --json) || return 1
+
+            if [ "$mode" = release ]; then
+              newest=$(printf '%s' "$times" \
+                | jq -er 'to_entries
+                          | map(select(.key | test("^[0-9]+\\.[0-9]+\\.[0-9]+$")))
+                          | sort_by(.value)
+                          | .[-1].key') || return 1
+            else
+              newest=$(printf '%s' "$times" \
+                | jq -er 'to_entries
+                          | map(select(.key | test("^[0-9]+\\.[0-9]+\\.[0-9]+")))
+                          | sort_by(.value)
+                          | .[-1].key') || return 1
+            fi
+
+            case "$newest" in
+              *-*) ref=${newest##*-} ;;   # 1.118.10-baed70b -> embedded commit
+              *)   ref="v$newest" ;;      # 1.118.6          -> release tag
+            esac
+
+            # Via the API, not git: this checkout is shallow and sparse so it has no tags.
+            gh api "repos/${REPO}/commits/${ref}" --jq '.sha' || return 1
+          }
+
+          # $2 is the fallback, so a registry hiccup degrades instead of blocking.
+          resolve_base_sha() {
+            local mode=$1 fallback=$2 base
+            if base=$(last_published_base_sha "$mode") && [ -n "$base" ]; then
+              echo "Change-detection base (${mode}): last published -> $base" >&2
+              printf '%s' "$base"
+            else
+              echo "::warning::Could not resolve the last published ${mode} version; falling back to '${fallback}'" >&2
+              printf '%s' "$fallback"
+            fi
+          }
+
+          case "$EVENT_NAME" in
+            push)
+              resolve_version_from_file
+              version=$RESOLVED_VERSION
+              # The commit, not refs/heads/main: the version embeds this commit's
+              # short SHA, and a moving pointer could package a different one.
+              echo "ref=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+              echo "base_sha=$(resolve_base_sha any "$EVENT_BEFORE")" >> "$GITHUB_OUTPUT"
+              echo "environment=test" >> "$GITHUB_OUTPUT"
+              echo "force_publish=false" >> "$GITHUB_OUTPUT"
+              ;;
+            repository_dispatch)
+              if [ -z "$RELEASE_VERSION" ]; then
+                echo "::error::client_payload.version is required for release_created dispatch"
+                exit 1
+              fi
+              if [ -z "$PREVIOUS_RELEASE_SHA" ]; then
+                echo "::error::client_payload.previous_release_sha is required for release_created dispatch"
+                exit 1
+              fi
+              version=$RELEASE_VERSION
+              echo "ref=refs/tags/v${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
+              echo "base_sha=$(resolve_base_sha release "$PREVIOUS_RELEASE_SHA")" >> "$GITHUB_OUTPUT"
+              echo "environment=staging" >> "$GITHUB_OUTPUT"
+              echo "force_publish=false" >> "$GITHUB_OUTPUT"
+              ;;
+            workflow_dispatch)
+              # The derived version reads version.txt and HEAD of the dispatched ref,
+              # not INPUT_REF, so require an explicit version when ref is overridden.
+              if [ -n "$INPUT_REF" ] && [ -z "$INPUT_VERSION" ]; then
+                echo "::error::workflow_dispatch with 'ref' set requires an explicit 'version' input"
+                exit 1
+              fi
+              if [ -n "$INPUT_VERSION" ]; then
+                version=$INPUT_VERSION
+              else
+                resolve_version_from_file
+                version=$RESOLVED_VERSION
+              fi
+              echo "ref=${INPUT_REF:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+              # No base_sha: change detection is skipped when force_publish is true.
+              echo "environment=manual" >> "$GITHUB_OUTPUT"
+              echo "force_publish=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "::error::Unsupported event: $EVENT_NAME"
+              exit 1
+              ;;
+          esac
+
+          assert_semver "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $version"
+
+  check-for-changes:
+    name: Check for schema changes
+    needs: [resolve-context]
+    if: ${{ needs.resolve-context.outputs.force_publish == 'false' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/workflow-check-for-changes.yml
+    with:
+      apps_base_sha: ${{ needs.resolve-context.outputs.base_sha }}
+      # Gate on the ref we publish; otherwise the release path reads the branch tip.
+      ref: ${{ needs.resolve-context.outputs.ref }}
+
+  publish:
+    name: Publish schema to npm
+    needs: [resolve-context, check-for-changes]
+    # !cancelled() so this still runs when check-for-changes is skipped on the
+    # force path; a skipped or failed job yields empty outputs, so the gate is false.
+    if: >-
+      ${{ !cancelled() && needs.resolve-context.result == 'success' &&
+        (needs.resolve-context.outputs.force_publish == 'true' ||
+         needs.check-for-changes.outputs.hasSchemaPackageChanges == 'true') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      WORKING_DIRECTORY: docs/schema/V1
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          ref: ${{ needs.resolve-context.outputs.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          # Trusted Publishing needs node >= 22.14.0 / npm >= 11.5.1.
+          node-version: '24'
+          # No registry-url on purpose: it writes an .npmrc auth line that breaks
+          # the OIDC exchange when no token is set. See .github/actions/build-schema.
+
+      - name: Check if version exists on NPM
+        id: check-version
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          VERSION: ${{ needs.resolve-context.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          package_name=$(jq -er '.name' package.json)
+          echo "Checking ${package_name}@${VERSION}"
+
+          # Only E404 means "not published" - treating a registry error the same way
+          # would build, publish, and fail with E403.
+          if output=$(npm view "${package_name}@${VERSION}" version 2>&1); then
+            echo "version-exists=true" >> "$GITHUB_OUTPUT"
+            echo "Version ${VERSION} already exists; skipping publish."
+          elif printf '%s' "$output" | grep -q 'E404'; then
+            echo "version-exists=false" >> "$GITHUB_OUTPUT"
+            echo "Version ${VERSION} not yet published."
+          else
+            echo "::error::npm view failed for ${package_name}@${VERSION}"
+            printf '%s\n' "$output"
+            exit 1
+          fi
+
+      - name: Build and test schema
+        if: steps.check-version.outputs.version-exists == 'false'
+        uses: ./.github/actions/build-schema
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+          # This action runs setup-node last, so its version is the one npm publish uses.
+          node-version: '24'
+
+      - name: Update package version
+        if: steps.check-version.outputs.version-exists == 'false'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          VERSION: ${{ needs.resolve-context.outputs.version }}
+        run: |
+          set -euo pipefail
+          jq --arg version "$VERSION" '.version = $version' package.json > temp.json
+          mv temp.json package.json
+
+      - name: Publish package (Trusted Publishing via OIDC)
+        if: steps.check-version.outputs.version-exists == 'false'
+        run: npm publish --provenance --access public
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+  notify-failure:
+    name: Send Slack message on failure
+    needs: [resolve-context, check-for-changes, publish]
+    if: ${{ always() && failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/slack-templates
+          sparse-checkout-cone-mode: false
+
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
+        env:
+          CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
+          # resolve-context can be the failing job, and then its outputs are empty -
+          # fall back to the raw event so the alert still says what was publishing.
+          ENVIRONMENT: ${{ needs.resolve-context.outputs.environment || github.event_name }}
+          VERSION: >-
+            ${{ needs.resolve-context.outputs.version
+             || github.event.client_payload.version
+             || inputs.version
+             || 'unresolved' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          errors: true
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload-templated: true
+          payload-file-path: "./.github/slack-templates/schema-publish-failed.json"

@@ -3,6 +3,7 @@
   "idempotentKey": "idempotent-key",
   "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
   "authorizationAttribute": null,
+  "authorizationContext": null,
   "extendedType": "https://digdir.com/transmission-type",
   "externalReference": "second-transmission",
   "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
@@ -62,7 +63,8 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "authorizationContext": null
     }
   ],
   "navigationalActions": [
@@ -74,7 +76,8 @@
         }
       ],
       "url": "https://digdir.com/action-url",
-      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "authorizationContext": null
     }
   ]
 }

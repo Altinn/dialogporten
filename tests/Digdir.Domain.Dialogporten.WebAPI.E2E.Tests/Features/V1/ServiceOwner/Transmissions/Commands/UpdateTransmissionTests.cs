@@ -43,7 +43,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                         {
                             Url = new Uri("https://example.com/updated-attachment.pdf"),
                             MediaType = "application/pdf",
-                            ConsumerType = Altinn.ApiClients.Dialogporten.Features.V1.Attachments_AttachmentUrlConsumerType.Gui
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                         }
                     ]
                 }
@@ -178,6 +178,31 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     }
 
     [E2EFact]
+    public async Task Should_Return_Forbidden_Without_No_Scope()
+    {
+        // Arrange
+        var transmissionId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+            x.AddTransmission(x => x.Id = transmissionId));
+
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: "360-no-scope");
+        var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                request,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+
+    [E2EFact]
     public async Task Should_Return_Forbidden_Without_ChangeTransmission_Scope()
     {
         // Arrange
@@ -185,8 +210,34 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: E2EConstants.ServiceOwnerScopes);
         var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
 
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                request,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_Forbidden_Without_ServiceOwner_Scope()
+    {
+        // Arrange
+        var transmissionId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+            x.AddTransmission(x => x.Id = transmissionId));
+
+        var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(
+            scopes: AuthorizationScope.ServiceProviderChangeTransmissions
+        );
         // Act
         var response = await Fixture.ServiceownerApi
             .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
@@ -297,10 +348,10 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         {
             IsSilentUpdate = true,
             CreatedAt = DateTimeOffset.UtcNow.AddMinutes(-1),
-            Type = Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
             Sender = new V1ServiceOwnerCommonActors_Actor
             {
-                ActorType = Altinn.ApiClients.Dialogporten.Features.V1.Actors_ActorType.ServiceOwner
+                ActorType = Actors_ActorType.ServiceOwner
             },
             Content = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionContent
             {

@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
+﻿using Digdir.Domain.Dialogporten.Application;
+using Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 using Digdir.Library.Utils.AspNet;
 using FluentValidation;
 
@@ -10,12 +11,15 @@ public sealed class WebApiSettings
 
     public required AuthenticationOptions Authentication { get; init; }
     public HealthCheckSettings HealthCheckSettings { get; init; } = new();
+    public required OpenApiSettings OpenApi { get; init; }
 }
 
 internal sealed class WebApiOptionsValidator : AbstractValidator<WebApiSettings>
 {
     public WebApiOptionsValidator(
-               IValidator<AuthenticationOptions> authenticationOptionsValidator)
+               IValidator<AuthenticationOptions> authenticationOptionsValidator,
+               IValidator<OpenApiSettings> openApiSettingsValidator
+            )
     {
         RuleFor(x => x.Authentication)
             .SetValidator(authenticationOptionsValidator);
@@ -37,6 +41,9 @@ internal sealed class WebApiOptionsValidator : AbstractValidator<WebApiSettings>
                         .Must(path => !Uri.TryCreate(path, UriKind.Absolute, out _))
                         .WithMessage("'{PropertyName}' must be a relative path."));
             });
+        RuleFor(x => x.OpenApi)
+            .NotNull()
+            .SetValidator(openApiSettingsValidator);
     }
 
     private static bool HaveExactlyOneEndpointAddress(HttpGetEndpointToCheck endpoint) =>

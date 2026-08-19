@@ -451,6 +451,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>including front-channel embeds.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
         /// <summary>
@@ -693,6 +694,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
     }
@@ -777,6 +779,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>user is authorized. Should be used instead of the dialog token against this action's URL.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
     }
@@ -1313,6 +1316,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>including front-channel embeds.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
         /// <summary>
@@ -1447,6 +1451,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
     }
@@ -1519,6 +1524,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>user is authorized. Should be used instead of the dialog token against this action's URL.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
     }
@@ -1902,6 +1908,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
     }
@@ -1977,6 +1984,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>including front-channel embeds.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
         /// <summary>
@@ -2113,6 +2121,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
     }
@@ -2185,6 +2194,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>user is authorized. Should be used instead of the dialog token against this action's URL.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
     }
@@ -2234,6 +2244,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>Should be used instead of the dialog token against this action's URL.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
         /// <summary>
@@ -2361,6 +2372,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         /// <br/>Should be used instead of the dialog token against this action's endpoints.
         /// </summary>
         [JsonPropertyName("contextToken")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
         public string? ContextToken { get; set; } = default!;
 
         /// <summary>

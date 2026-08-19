@@ -18,5 +18,6 @@ public static class DialogTokenTypes
     /// The dialog context token, issued per authorization-context-carrying entity and asserting a single
     /// PDP-verified grant (action, effective resource) along with the parties it was permitted for.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public const string DialogContextToken = "dialogcontexttoken+jwt";
 }

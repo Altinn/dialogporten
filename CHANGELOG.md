@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.119.1](https://github.com/Altinn/dialogporten/compare/v1.119.0...v1.119.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **ci:** authenticate the schema publish with NPM_TOKEN ([#4317](https://github.com/Altinn/dialogporten/issues/4317)) ([991407c](https://github.com/Altinn/dialogporten/commit/991407cc1a129d65687f73971a6cda5951c996cb))
+* **ci:** publish schema prereleases under their own dist-tag ([#4316](https://github.com/Altinn/dialogporten/issues/4316)) ([28a537a](https://github.com/Altinn/dialogporten/commit/28a537a68eb67b88654cdb6831725ae238cffb58))
+
+
+### Miscellaneous Chores
+
+* **ci:** authenticate the schema publish with Trusted Publishing ([#4318](https://github.com/Altinn/dialogporten/issues/4318)) ([73d68b1](https://github.com/Altinn/dialogporten/commit/73d68b1b66920fba2089dc47c5aac58e720effb3))
+* **deps:** update dependency dotnet-sdk to v10.0.400 ([#4310](https://github.com/Altinn/dialogporten/issues/4310)) ([eb1a135](https://github.com/Altinn/dialogporten/commit/eb1a135d6d8522badebc356855a930dc5b2b8862))
+* **deps:** update dependency parquet.net to 6.1.0 ([#4312](https://github.com/Altinn/dialogporten/issues/4312)) ([7209468](https://github.com/Altinn/dialogporten/commit/7209468039053ca07cb1fcffa6346c7c799744cc))
+* **deps:** update microsoft dependencies ([#4311](https://github.com/Altinn/dialogporten/issues/4311)) ([ea462b4](https://github.com/Altinn/dialogporten/commit/ea462b4ec83e7dfdaa16ebbcff40352c34df1848))
+* **deps:** update prom/prometheus docker tag to v3.13.2 ([#4313](https://github.com/Altinn/dialogporten/issues/4313)) ([ce473ad](https://github.com/Altinn/dialogporten/commit/ce473ad2ad9b97c635fbed5f69282eb546e178ff))
+* **deps:** update step-security/harden-runner action to v2.20.1 ([#4314](https://github.com/Altinn/dialogporten/issues/4314)) ([93858e5](https://github.com/Altinn/dialogporten/commit/93858e5342be726878f5aa553f618aa4273a143b))
+* **deps:** update test dependencies ([#4315](https://github.com/Altinn/dialogporten/issues/4315)) ([4ea5e71](https://github.com/Altinn/dialogporten/commit/4ea5e71d4e53c2450ac00202bc9fed171a73b652))
+* remove AutoMapper from ServiceOwner UpdateTransmission ([#4206](https://github.com/Altinn/dialogporten/issues/4206)) ([d98a3d6](https://github.com/Altinn/dialogporten/commit/d98a3d65604ec19fab7cf91697f3570a3fe331db))
+
 ## [1.119.0](https://github.com/Altinn/dialogporten/compare/v1.118.10...v1.119.0) (2026-08-17)
 
 

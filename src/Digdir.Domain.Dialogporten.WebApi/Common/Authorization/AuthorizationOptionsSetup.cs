@@ -57,7 +57,7 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .RequireScope(AuthorizationScope.ServiceProviderChangeTransmissions));
 
         options.AddPolicy(AuthorizationPolicy.NotificationConditionCheck, builder => builder
-            .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
+            .Combine(options.DefaultPolicy)
             .RequireValidConsumerClaim()
             .RequireScope(AuthorizationScope.NotificationConditionCheck));
 

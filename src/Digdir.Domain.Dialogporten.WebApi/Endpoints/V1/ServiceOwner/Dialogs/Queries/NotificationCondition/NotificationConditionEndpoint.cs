@@ -11,7 +11,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Qu
 
 [OpenApiOperationId("CheckNotificationCondition")]
 [OpenApiExtras(
-    scopes: [AuthorizationScope.ServiceProvider, AuthorizationScope.NotificationConditionCheck],
+    scopes: [AuthorizationScope.NotificationConditionCheck],
     securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
 ]
 public sealed class NotificationConditionEndpoint : Endpoint<NotificationConditionQuery, NotificationConditionDto>

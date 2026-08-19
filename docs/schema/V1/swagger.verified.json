@@ -10143,7 +10143,7 @@
             "description": "Successfully returned the notification determination."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider altinn:system/notifications.condition.check\u0022."
+            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022altinn:system/notifications.condition.check\u0022."
           },
           "403": {
             "description": "Forbidden"
@@ -10171,7 +10171,6 @@
         "security": [
           {
             "maskinporten": [
-              "digdir:dialogporten.serviceprovider",
               "altinn:system/notifications.condition.check"
             ]
           }

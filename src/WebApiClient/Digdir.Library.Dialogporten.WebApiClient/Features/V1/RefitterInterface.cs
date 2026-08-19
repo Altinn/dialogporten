@@ -4222,6 +4222,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions and updates of attachment URLs. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The fully qualified URL of the attachment.
         /// </summary>
         [JsonPropertyName("url")]

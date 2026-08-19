@@ -197,11 +197,14 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
     {
-        var authorizedResourcesForSearch = await GetAuthorizedResourcesForSearch(
-            [dialog.Party], [dialog.ServiceResource], cancellationToken: cancellationToken);
+        var resources = await GetAuthorizedResourcesForSearch(
+            [dialog.Party],
+            [dialog.ServiceResource],
+            cancellationToken: cancellationToken
+        );
 
-        return authorizedResourcesForSearch.ResourcesByParties.Count > 0
-               || authorizedResourcesForSearch.DialogIds.Contains(dialog.Id);
+        var allowedResources = resources.ResourcesByParties.GetValueOrDefault(dialog.Party) ?? new HashSet<string>();
+        return allowedResources.Contains(dialog.ServiceResource) || resources.DialogIds.Contains(dialog.Id);
     }
 
     public bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel) =>

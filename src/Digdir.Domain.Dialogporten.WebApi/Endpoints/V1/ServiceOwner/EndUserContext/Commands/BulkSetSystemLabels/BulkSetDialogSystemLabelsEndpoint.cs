@@ -1,7 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
@@ -9,6 +11,10 @@ using MediatR;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
 
 [OpenApiOperationId("BulkSetDialogSystemLabels")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSystemLabelsRequest>
 {
     private readonly ISender _sender;
@@ -29,6 +35,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSy
         Description(b => b.ProducesOneOf(
             StatusCodes.Status204NoContent,
             StatusCodes.Status400BadRequest,
+            StatusCodes.Status404NotFound,
             StatusCodes.Status403Forbidden,
             StatusCodes.Status409Conflict,
             StatusCodes.Status412PreconditionFailed,
@@ -46,6 +53,7 @@ public sealed class BulkSetDialogSystemLabelsEndpoint : Endpoint<BulkSetDialogSy
         var result = await _sender.Send(command, ct);
         await result.Match(
             _ => Send.NoContentAsync(ct),
+            notFound => this.NotFoundAsync(notFound, ct),
             forbidden => this.ForbiddenAsync(forbidden, ct),
             domainError => this.UnprocessableEntityAsync(domainError, ct),
             validationError => this.BadRequestAsync(validationError, ct),

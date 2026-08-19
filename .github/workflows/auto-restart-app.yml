@@ -1,0 +1,324 @@
+# Automated recovery for a replica that hangs its requests while health probes stay green.
+# Covers prod and staging (staging carries an SLA); the environment is derived from the
+# alert payload's role name through the explicit allowlist below.
+#
+# The "Dialogporten Replica Hanging Requests" Grafana alerts (prod and staging) post
+# repository_dispatch events here. This workflow restarts the affected app's active revision - the same remedy a
+# human applies manually - after guardrails, around the clock. A hang during working hours
+# affects more users than one at night, and the remedy is identical either way.
+#
+# A hang can have several causes; the one behind the incidents that motivated this is #4252.
+# Restarting treats the symptom, so this never replaces fixing a root cause.
+#
+# Modes (repo variable AUTO_RESTART_MODE): "shadow" (default when unset) = evaluate and
+# report the verdict to Slack without acting; "armed" = actually restart; "off" = do nothing
+# at all, not even post to Slack, for stretches where the reporting itself is unwanted.
+#
+# Optional pause window (repo variable AUTO_RESTART_PAUSE_WINDOW, format "0800-1600"): stands
+# down inside that window on weekdays, for stretches where capturing a memory dump matters
+# more than a fast restart. Unset (the default) leaves the automation active around the clock.
+#
+# To arm: set AUTO_RESTART_MODE to "armed" AND repoint the SLACK_CHANNEL_ID_AUTO_RESTART
+# secret from the low-traffic alerts channel to the critical one, so real restarts are
+# announced where people are watching. Neither needs a deploy.
+#
+# Kill switches, in increasing order of finality: `gh variable set AUTO_RESTART_MODE --body
+# shadow` stops restarts but keeps reporting; `--body off` also stops the Slack posts;
+# `gh workflow disable auto-restart-app.yml` stops the workflow from running at all; and
+# silencing the alert in Grafana suppresses webhook delivery upstream of all of this.
+#
+# Deliberately omitted: re-verifying the alert is still firing (the rule requires 10
+# minutes of sustained breach before it fires; delivery lag is seconds) and post-restart
+# recovery checks (the alert's own RESOLVED notification reports recovery to Slack).
+#
+# Revisit once the known hang causes are fixed: if this stops firing entirely, decide whether
+# to keep it as a safety net or retire it along with the alert accommodations it relies on.
+
+name: Auto-restart hanging app
+
+on:
+  repository_dispatch:
+    types: [replica_hanging]
+  workflow_dispatch:
+    inputs:
+      role_name:
+        description: "cloud_RoleName from the alert (e.g. dp-be-prod-cae.dp-be-prod-graphql-ca)"
+        required: true
+        type: string
+      replica:
+        description: "cloud_RoleInstance from the alert"
+        required: false
+        default: "manual-test"
+        type: string
+      value:
+        description: "Observed average duration in ms"
+        required: false
+        default: "0"
+        type: string
+      status:
+        description: "Alert status (firing/resolved)"
+        required: false
+        default: "firing"
+        type: string
+
+run-name: "Auto-restart ${{ github.event.client_payload.alert.cloud_RoleName || inputs.role_name }} (${{ github.event_name }})"
+
+concurrency:
+  group: auto-restart
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    # Reads workflow run history via gh api; does not check out the repo.
+    permissions:
+      actions: read
+    outputs:
+      verdict: ${{ steps.decide.outputs.verdict }}
+      reason: ${{ steps.decide.outputs.reason }}
+      app_short: ${{ steps.decide.outputs.app_short }}
+      app_full: ${{ steps.decide.outputs.app_full }}
+      environment: ${{ steps.decide.outputs.environment }}
+      replica: ${{ steps.decide.outputs.replica }}
+      value: ${{ steps.decide.outputs.value }}
+      mode: ${{ steps.decide.outputs.mode }}
+    steps:
+      - name: Evaluate guardrails
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ROLE_NAME: ${{ github.event.client_payload.alert.cloud_RoleName || inputs.role_name }}
+          REPLICA: ${{ github.event.client_payload.alert.cloud_RoleInstance || inputs.replica }}
+          VALUE: ${{ github.event.client_payload.alert.value || inputs.value }}
+          ALERT_STATUS: ${{ github.event.client_payload.alert.status || inputs.status }}
+          MODE: ${{ vars.AUTO_RESTART_MODE || 'shadow' }}
+          PAUSE_WINDOW: ${{ vars.AUTO_RESTART_PAUSE_WINDOW }}
+          REPO: ${{ github.repository }}
+          SELF_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          # These come from the alert payload. Strip newlines and cap the length before any of
+          # them reach GITHUB_OUTPUT: an embedded newline could append a second "verdict=" record
+          # and override the decision this step just made.
+          sanitize() { printf '%s' "$1" | tr -d '\n\r' | cut -c1-200; }
+          ROLE_NAME=$(sanitize "$ROLE_NAME")
+          REPLICA=$(sanitize "$REPLICA")
+          VALUE=$(sanitize "$VALUE")
+          ALERT_STATUS=$(sanitize "$ALERT_STATUS")
+
+          APP_SHORT=""
+          APP_FULL=""
+          ENV=""
+
+          verdict() {
+            # Only known verdicts may be emitted; anything else is a bug in this script, and
+            # failing here beats writing a record the downstream jobs would act on.
+            case "$1" in
+              off|ignore|stand_down|escalate|restart|shadow) ;;
+              *) echo "BUG: unknown verdict '$1'" >&2; exit 1 ;;
+            esac
+            {
+              echo "verdict=$1"
+              echo "reason=$2"
+              echo "app_short=$APP_SHORT"
+              echo "app_full=$APP_FULL"
+              echo "environment=$ENV"
+              echo "replica=$REPLICA"
+              echo "value=$VALUE"
+              echo "mode=$MODE"
+            } >> "$GITHUB_OUTPUT"
+            echo "Verdict: $1 ($2)"
+            exit 0
+          }
+
+          # Fully disabled: no restart, no Slack post, no noise.
+          if [[ "$MODE" == "off" ]]; then
+            verdict off "AUTO_RESTART_MODE is off"
+          fi
+
+          # The webhook also delivers RESOLVED notifications; nothing to do for those.
+          if [[ "$ALERT_STATUS" != "firing" ]]; then
+            verdict ignore "alert status is '$ALERT_STATUS', not firing"
+          fi
+
+          # cloud_RoleName format is <cae-name>.<container-app-name>. Explicit allowlist mapping
+          # both app and environment: an unmapped app must stand down, never guess. Role names
+          # verified live in both environments.
+          APP_FULL="${ROLE_NAME#*.}"
+          case "$APP_FULL" in
+            dp-be-prod-graphql-ca) ENV=prod; APP_SHORT=graphql ;;
+            dp-be-prod-webapi-eu-ca) ENV=prod; APP_SHORT=webapi-eu ;;
+            dp-be-prod-webapi-so-ca) ENV=prod; APP_SHORT=webapi-so ;;
+            dp-be-prod-service) ENV=prod; APP_SHORT=service ;;
+            dp-be-staging-graphql-ca) ENV=staging; APP_SHORT=graphql ;;
+            dp-be-staging-webapi-eu-ca) ENV=staging; APP_SHORT=webapi-eu ;;
+            dp-be-staging-webapi-so-ca) ENV=staging; APP_SHORT=webapi-so ;;
+            dp-be-staging-service) ENV=staging; APP_SHORT=service ;;
+            *) verdict stand_down "unknown app '$APP_FULL' (from role '$ROLE_NAME')" ;;
+          esac
+
+          # Optional pause window (weekdays only, so weekends stay covered): set when a memory
+          # dump matters more than a fast restart. Unset means active around the clock.
+          if [[ -n "$PAUSE_WINDOW" ]]; then
+            DOW=$(TZ=Europe/Oslo date +%u)
+            HM=$(TZ=Europe/Oslo date +%H%M)
+            PAUSE_FROM="${PAUSE_WINDOW%%-*}"
+            PAUSE_TO="${PAUSE_WINDOW##*-}"
+            if [[ "$DOW" -lt 6 ]] && ((10#$HM >= 10#$PAUSE_FROM && 10#$HM < 10#$PAUSE_TO)); then
+              verdict stand_down "pause window $PAUSE_WINDOW is active ($HM Europe/Oslo): human decides"
+            fi
+          fi
+
+          # Deploys and manual restarts produce the same symptom shape; stand down while one is
+          # IN PROGRESS (regardless of when it started - prod deploys have run for hours) or
+          # finished within the last 40 minutes. The dispatch workflows serve every environment
+          # and embed the environment in their run title, so only runs for THIS event's
+          # environment count here: activity in other environments must not suppress recovery.
+          # Our own armed restarts use workflow_call and create no separate run, so they
+          # cannot self-suppress.
+          # Every query fails CLOSED: if the API cannot answer, we cannot prove a restart is
+          # safe, so we stand down rather than treat an error as an all-clear.
+          SINCE=$(date -u -d '40 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+          if [[ "$ENV" == "prod" ]]; then CICD_WF="ci-cd-prod.yml"; else CICD_WF="ci-cd-staging.yml"; fi
+          for SPEC in "$CICD_WF:" "dispatch-apps.yml:$ENV" "dispatch-restart-apps.yml:$ENV" "dispatch-infrastructure.yml:$ENV"; do
+            WF="${SPEC%%:*}"
+            TITLE_MATCH="${SPEC#*:}"
+            if ! RESP=$(gh api "repos/$REPO/actions/workflows/$WF/runs?per_page=30"); then
+              verdict stand_down "could not check recent $WF runs (GitHub API error): failing closed"
+            fi
+            COUNT=$(printf '%s' "$RESP" | jq --arg since "$SINCE" --arg match "$TITLE_MATCH" \
+              '[.workflow_runs[]
+                | select(($match == "") or ((.display_title // "") | contains($match)))
+                | select((.status != "completed") or (.updated_at >= $since))] | length') || \
+              verdict stand_down "could not parse $WF run history: failing closed"
+            if [[ "${COUNT:-1}" -gt 0 ]]; then
+              verdict stand_down "$WF has a $ENV run in progress or finished within 40 minutes: deploy or restart activity"
+            fi
+          done
+
+          # One auto-restart per 12 hours across all apps IN THIS ENVIRONMENT (the run title
+          # carries the role name, which carries the environment). A repeat firing after a
+          # restart means the restart did not cure it (or a second app is hanging): human
+          # needed. A staging restart must not block a later prod recovery, or vice versa.
+          # per_page=100 rather than paginating: each run costs a further jobs lookup, so walking
+          # every page would multiply API calls (and rate-limit risk) to guard against a run count
+          # that would itself be pathological in a 12h window.
+          SINCE12=$(date -u -d '12 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          if ! RESP12=$(gh api "repos/$REPO/actions/workflows/auto-restart-app.yml/runs?created=>=$SINCE12&per_page=100"); then
+            verdict stand_down "could not check this workflow's recent runs (GitHub API error): failing closed"
+          fi
+          RUN_IDS=$(printf '%s' "$RESP12" | jq -r --arg envmark "dp-be-$ENV-" \
+            '.workflow_runs[] | select((.display_title // "") | contains($envmark)) | .id') || \
+            verdict stand_down "could not parse this workflow's run history: failing closed"
+          for RUN_ID in $RUN_IDS; do
+            [[ "$RUN_ID" == "$SELF_RUN_ID" ]] && continue
+            if ! RESTARTED=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" \
+              --jq '[.jobs[] | select(.name | startswith("restart")) | select(.conclusion == "success")] | length'); then
+              verdict stand_down "could not inspect run $RUN_ID for a prior restart (GitHub API error): failing closed"
+            fi
+            if [[ "${RESTARTED:-1}" -gt 0 ]]; then
+              verdict escalate "an auto-restart already ran in the last 12h; the restart did not cure it or a second app is hanging - human needed"
+            fi
+          done
+
+          if [[ "$MODE" == "armed" ]]; then
+            verdict restart "hang on $APP_FULL (replica $REPLICA, avg ${VALUE} ms)"
+          else
+            verdict shadow "would restart $APP_FULL (replica $REPLICA, avg ${VALUE} ms)"
+          fi
+
+  restart:
+    needs: decide
+    # Belt and braces beyond the verdict: app and environment must be non-empty (an empty app
+    # would previously fall back to restarting everything downstream) and the mode re-checked
+    # at the job boundary.
+    if: needs.decide.outputs.verdict == 'restart' && needs.decide.outputs.app_short != '' && needs.decide.outputs.environment != '' && needs.decide.outputs.mode == 'armed'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/dispatch-restart-apps.yml
+    with:
+      environment: ${{ needs.decide.outputs.environment }}
+      app: ${{ needs.decide.outputs.app_short }}
+    secrets: inherit
+
+  report:
+    needs: [decide, restart]
+    if: ${{ always() && needs.decide.outputs.verdict != 'ignore' && needs.decide.outputs.verdict != 'off' }}
+    runs-on: ubuntu-latest
+    # Checks out the repo for the Slack payload template.
+    permissions:
+      contents: read
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Compose message
+        id: msg
+        env:
+          VERDICT: ${{ needs.decide.outputs.verdict }}
+          REASON: ${{ needs.decide.outputs.reason }}
+          APP: ${{ needs.decide.outputs.app_full }}
+          RESTART_RESULT: ${{ needs.restart.result }}
+          DECIDE_RESULT: ${{ needs.decide.result }}
+        run: |
+          set -euo pipefail
+          case "$VERDICT" in
+            restart)
+              if [[ "$RESTART_RESULT" == "success" ]]; then
+                SUMMARY="Auto-restart: restarted $APP"
+                VERDICT_TEXT="RESTARTED"
+                COLOR="#36A64F"
+              else
+                SUMMARY="Auto-restart: restart of $APP FAILED - human needed"
+                VERDICT_TEXT="RESTART FAILED"
+                COLOR="#FF0000"
+              fi
+              ;;
+            shadow)
+              SUMMARY="Auto-restart (shadow): would have restarted $APP"
+              VERDICT_TEXT="WOULD RESTART (shadow mode, no action taken)"
+              COLOR="#FFC107"
+              ;;
+            stand_down)
+              SUMMARY="Auto-restart: stood down for $APP"
+              VERDICT_TEXT="STOOD DOWN"
+              COLOR="#CCCCCC"
+              ;;
+            escalate)
+              SUMMARY="Auto-restart: HUMAN NEEDED - repeat hang after restart"
+              VERDICT_TEXT="ESCALATION - no action taken"
+              COLOR="#FF0000"
+              ;;
+            *)
+              SUMMARY="Auto-restart: workflow error (decide job: $DECIDE_RESULT)"
+              VERDICT_TEXT="WORKFLOW ERROR"
+              COLOR="#FF0000"
+              ;;
+          esac
+          {
+            echo "summary=$SUMMARY"
+            echo "verdict_text=$VERDICT_TEXT"
+            echo "color=$COLOR"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
+        env:
+          CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_AUTO_RESTART }}
+          SUMMARY: ${{ steps.msg.outputs.summary }}
+          VERDICT_TEXT: ${{ steps.msg.outputs.verdict_text }}
+          COLOR: ${{ steps.msg.outputs.color }}
+          MODE: ${{ needs.decide.outputs.mode || 'unknown' }}
+          APP: ${{ needs.decide.outputs.app_full || 'unknown' }}
+          REPLICA: ${{ needs.decide.outputs.replica || 'unknown' }}
+          VALUE: ${{ needs.decide.outputs.value || '0' }}
+          REASON: ${{ needs.decide.outputs.reason || 'decide job failed, see run' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          errors: true
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload-templated: true
+          payload-file-path: "./.github/slack-templates/auto-restart.json"

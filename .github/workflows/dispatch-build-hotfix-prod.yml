@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Hotfix branch or sha (branched from the current prod release tag)"
+        description: "Hotfix branch, hotfix/<name> (branched from the current prod release tag)"
         required: true
         type: string
 
@@ -46,14 +46,28 @@ jobs:
           INPUT_REF: ${{ inputs.ref }}
         run: |
           set -euo pipefail
-          # Allow only operator hotfix branches or an explicit full commit SHA.
-          if [[ ! "$INPUT_REF" =~ ^hotfix/[A-Za-z0-9._/-]+$ && ! "$INPUT_REF" =~ ^[0-9a-fA-F]{40}$ ]]; then
-            echo "::error::Invalid ref. Allowed formats: hotfix/<name> or 40-char commit SHA."
+          # Allow only operator hotfix branches that exist in this repository. Creating a
+          # branch requires write access, whereas a raw SHA can reference fork PR commits,
+          # which are fetchable from this repository without any write access.
+          # check-ref-format rejects names the regex allows but git does not (e.g. '..').
+          if [[ ! "$INPUT_REF" =~ ^hotfix/[A-Za-z0-9._/-]+$ ]] \
+              || ! git check-ref-format "refs/heads/${INPUT_REF}"; then
+            echo "::error::Invalid ref. Allowed format: hotfix/<name>."
+            exit 1
+          fi
+          status=0
+          git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}" \
+            "refs/heads/${INPUT_REF}" >/dev/null || status=$?
+          if [[ "$status" -eq 2 ]]; then
+            echo "::error::Branch '${INPUT_REF}' does not exist in ${GITHUB_REPOSITORY}."
+            exit 1
+          elif [[ "$status" -ne 0 ]]; then
+            echo "::error::Could not query refs in ${GITHUB_REPOSITORY} (git ls-remote exit ${status})."
             exit 1
           fi
 
       - name: "Checkout ref"
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -100,7 +114,7 @@ jobs:
       contents: write
     steps:
       - name: "Checkout ref"
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0

@@ -1,6 +1,8 @@
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.Get;
 
@@ -13,11 +15,11 @@ public sealed class GetDialogEndpointSummary : Summary<GetDialogEndpoint>
                       Gets a single dialog aggregate.
                       """;
 
-        Responses[StatusCodes.Status200OK] =
+        Responses[Status200OK] =
             Constants.SwaggerSummary.ReturnedResult.FormatInvariant("aggregate");
-        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
-        Responses[StatusCodes.Status403Forbidden] =
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<GetDialogEndpoint>();
+        Responses[Status403Forbidden] =
             Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get");
-        Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
     }
 }

@@ -8,17 +8,27 @@ inputs:
   node-version:
     description: 'Node.js version to use'
     required: false
-    default: '20'
+    # Matches "engines.node" in docs/schema/V1/package.json. Also the floor for
+    # npm Trusted Publishing (npm >= 11.5.1 / node >= 22.14.0), which callers
+    # that publish depend on - this action runs setup-node last, so its version
+    # is the one in effect for the rest of the job.
+    default: '24'
   registry-url:
-    description: 'Node package registry URL'
+    description: >-
+      Node package registry URL. Empty by default: when set, setup-node writes an
+      .npmrc containing //<registry>/:_authToken=${NODE_AUTH_TOKEN}, and with no
+      token in the environment npm sends the literal placeholder as a bearer
+      token. That 401s and can pre-empt the Trusted Publishing OIDC exchange
+      (actions/setup-node#1551). Nothing here installs or publishes, so leave it
+      unset unless a caller genuinely needs registry auth.
     required: false
-    default: 'https://registry.npmjs.org/'
+    default: ''
 
 runs:
   using: composite
   steps:
     - name: Set up Node.js
-      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
       with:
         node-version: ${{ inputs.node-version }}
         registry-url: ${{ inputs.registry-url }}

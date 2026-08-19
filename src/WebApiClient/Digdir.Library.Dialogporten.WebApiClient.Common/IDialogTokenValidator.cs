@@ -44,6 +44,25 @@ public class DialogTokenValidationParameters
     public bool ValidateLifetime { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets a value indicating whether to validate the token's JOSE "typ" header against
+    /// <see cref="ValidTokenTypes"/>.
+    /// </summary>
+    public bool ValidateTokenType { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the token types accepted by the validation. A token whose "typ" header is missing, or holds
+    /// a type not listed here, is rejected.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see cref="DialogTokenTypes.DialogToken"/> only. Dialogporten signs every token type with the
+    /// same keys, so a caller expecting a dialog token must not accept, say, a
+    /// <see cref="DialogTokenTypes.DialogContextToken"/> handed to it in place of one: the two assert different
+    /// things about what the holder was permitted. Set this to the type the receiving endpoint expects.
+    /// Comparison is ordinal; the types Dialogporten issues are listed in <see cref="DialogTokenTypes"/>.
+    /// </remarks>
+    public IReadOnlyCollection<string> ValidTokenTypes { get; set; } = [DialogTokenTypes.DialogToken];
+
+    /// <summary>
     /// Gets or sets the clock skew to apply when validating the token's lifetime.
     /// </summary>
     public TimeSpan ClockSkew { get; set; } = TimeSpan.FromSeconds(10);

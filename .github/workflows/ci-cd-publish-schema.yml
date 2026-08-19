@@ -54,6 +54,7 @@ jobs:
       base_sha: ${{ steps.context.outputs.base_sha }}
       environment: ${{ steps.context.outputs.environment }}
       force_publish: ${{ steps.context.outputs.force_publish }}
+      dist_tag: ${{ steps.context.outputs.dist_tag }}
     steps:
       - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
@@ -244,6 +245,16 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Resolved version: $version"
 
+          # npm >= 11 refuses a prerelease without an explicit --tag, and "latest"
+          # is what a bare `npm install` resolves to. Keyed on the version shape,
+          # not the trigger: workflow_dispatch can supply either kind.
+          case "${version%%+*}" in
+            *-*) dist_tag=prerelease ;;
+            *)   dist_tag=latest ;;
+          esac
+          echo "dist_tag=$dist_tag" >> "$GITHUB_OUTPUT"
+          echo "Dist-tag: $dist_tag"
+
   check-for-changes:
     name: Check for schema changes
     needs: [resolve-context]
@@ -335,7 +346,9 @@ jobs:
 
       - name: Publish package (Trusted Publishing via OIDC)
         if: steps.check-version.outputs.version-exists == 'false'
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag "$DIST_TAG"
+        env:
+          DIST_TAG: ${{ needs.resolve-context.outputs.dist_tag }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
   notify-failure:

@@ -1,6 +1,6 @@
-﻿using FluentValidation.Results;
+﻿using System.Diagnostics;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 
@@ -44,6 +44,14 @@ internal static class ErrorResponseBuilderExtensions
             StatusCodes.Status400BadRequest => new ValidationProblemDetails(errors)
             {
                 Title = "One or more validation errors occurred.",
+                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
+                Status = statusCode,
+                Instance = ctx.Request.Path,
+                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
+            },
+            StatusCodes.Status401Unauthorized => new ProblemDetails
+            {
+                Title = "Unauthorized.",
                 Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
                 Status = statusCode,
                 Instance = ctx.Request.Path,

@@ -110,7 +110,6 @@ static void BuildAndRun(string[] args)
             .Build()
 
         // Asp infrastructure
-        //.AddSingleton<IAuthorizationMiddlewareResultHandler, DialogportenAuthorizationMiddlewareResultHandler>()
         .AddExceptionHandler<GlobalExceptionHandler>()
         .AddAutoMapper(WebApiAssemblyMarker.Assembly)
         .AddScoped<IUser, ApplicationUser>()

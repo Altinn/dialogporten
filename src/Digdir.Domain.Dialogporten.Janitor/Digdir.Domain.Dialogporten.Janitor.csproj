@@ -17,7 +17,7 @@
         <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1"/>
         <PackageReference Include="Azure.Storage.Blobs" Version="12.29.1" />
-        <PackageReference Include="Parquet.Net" Version="6.0.3" />
+        <PackageReference Include="Parquet.Net" Version="6.1.0" />
     </ItemGroup>
 
     <ItemGroup>

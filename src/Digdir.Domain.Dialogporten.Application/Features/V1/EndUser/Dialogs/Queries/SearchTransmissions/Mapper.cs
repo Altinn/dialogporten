@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
@@ -21,7 +22,7 @@ internal static class TransmissionMapExtensions
             DeletedAt = source.Dialog.DeletedAt,
             Type = source.TypeId,
             Sender = source.Sender.ToDto(),
-            Content = source.Content.ToList().ToTransmissionContentDto<ContentDto>()!,
+            Content = source.Content.ToList().ToTransmissionContentDto<ContentDto>(),
             Attachments = source.Attachments.Select(a => a.ToDto()).ToList(),
             NavigationalActions = source.NavigationalActions.Select(n => n.ToDto()).ToList()
         };

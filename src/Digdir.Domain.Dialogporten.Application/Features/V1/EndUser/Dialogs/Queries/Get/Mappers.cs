@@ -164,7 +164,8 @@ internal static class DialogApiActionMapExtensions
         internal DialogApiActionDto ToDto() => new()
         {
             Id = source.Id,
-            Action = source.Action,
+            // Cannot be null yet: no write surface accepts a null Action until authorization contexts arrive
+            Action = source.Action!,
             AuthorizationAttribute = source.AuthorizationAttribute,
             Name = source.Name,
             Endpoints = source.Endpoints.Select(e => e.ToDto()).ToList()
@@ -198,7 +199,8 @@ internal static class DialogGuiActionMapExtensions
         internal DialogGuiActionDto ToDto() => new()
         {
             Id = source.Id,
-            Action = source.Action,
+            // Cannot be null yet: no write surface accepts a null Action until authorization contexts arrive
+            Action = source.Action!,
             Url = source.Url,
             AuthorizationAttribute = source.AuthorizationAttribute,
             IsDeleteDialogAction = source.IsDeleteDialogAction,

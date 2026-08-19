@@ -74,14 +74,14 @@ four parallel workflows consume:
    - Runs in parallel with the staging deployment, not after it
 
 > **Note:** `ci-cd-publish-schema.yml` is the sole publisher of the npm schema
-> package. It authenticates with `NPM_TOKEN`; no Trusted Publisher record exists
-> for this package on npmjs.com yet.
+> package and authenticates via npm Trusted Publishing over OIDC, so no npm token
+> is involved.
 >
-> Keep the publish step inline in this file. npm binds a Trusted Publisher record
-> to the exact workflow **filename**, and when `npm publish` runs inside a called
-> workflow npm validates the *calling* workflow's name instead, so moving the step
-> into a reusable `workflow-*.yml` or renaming this file would block adopting
-> Trusted Publishing later.
+> Keep the publish step inline in this file. npm binds the Trusted Publisher
+> record to the exact workflow **filename**, and when `npm publish` runs inside a
+> called workflow npm validates the *calling* workflow's name instead, so moving
+> the step into a reusable `workflow-*.yml` or renaming this file would break
+> publishing.
 
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)

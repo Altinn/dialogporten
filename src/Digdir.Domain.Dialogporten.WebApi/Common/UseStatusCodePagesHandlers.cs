@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Net;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Diagnostics;
 using Serilog;
+using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common;
 
@@ -14,6 +16,20 @@ public static class UseStatusCodePagesHandlers
     {
         var context = statusCodeContext.HttpContext;
         var status = context.Response.StatusCode;
+
+        if (status == (int)HttpStatusCode.NotFound)
+        {
+            await Results.Problem(new ProblemDetails
+            {
+                Title = "Endpoint not found.",
+                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4",
+                Status = (int)HttpStatusCode.NotFound,
+                Instance = context.Request.Path,
+                Extensions = { { "traceId", Activity.Current?.Id ?? context.TraceIdentifier } }
+            }).ExecuteAsync(context);
+            return;
+        }
+
         var message = GetMessageFromEndpointSummary(context, status);
         var failures = status switch
         {

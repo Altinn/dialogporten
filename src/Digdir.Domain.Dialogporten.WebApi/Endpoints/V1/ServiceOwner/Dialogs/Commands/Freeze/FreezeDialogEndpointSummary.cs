@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
@@ -19,8 +19,10 @@ public sealed class FreezeDialogEndpointSummary : Summary<FreezeDialogEndpoint>
         ResponseHeaders = [HttpResponseHeaderExamples.NewDialogETagHeader(Status204NoContent)];
         Responses[Status204NoContent] = Constants.SwaggerSummary.Frozen.FormatInvariant("aggregate");
         Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
-        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<FreezeDialogEndpoint>();
-        Responses[Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("freeze");
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<FreezeDialogEndpoint>()
+            .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("freeze"))
+            .Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
         Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;

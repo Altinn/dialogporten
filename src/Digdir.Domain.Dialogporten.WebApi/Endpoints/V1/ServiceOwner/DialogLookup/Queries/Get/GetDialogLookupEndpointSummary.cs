@@ -1,5 +1,5 @@
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
@@ -14,8 +14,10 @@ public sealed class GetDialogLookupEndpointSummary : Summary<GetDialogLookupEndp
 
         Responses[Status200OK] = "Successfully resolved instance reference lookup metadata.";
         Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
-        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<GetDialogLookupEndpoint>();
-        Responses[Status403Forbidden] = "Authenticated service owner does not own the resolved dialog.";
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<GetDialogLookupEndpoint>()
+            .Or("Authenticated service owner does not own the resolved dialog.")
+            .Build();
         Responses[Status404NotFound] = "No dialog match was found for the supplied instance reference.";
     }
 }

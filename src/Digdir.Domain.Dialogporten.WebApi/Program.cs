@@ -241,7 +241,7 @@ static void BuildAndRun(string[] args)
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
     app.UseDefaultExceptionHandler()
-        .UseStatusCodePages(UseStatusCodePagesHandlers.FromFastEndpointResponses)
+        .UseStatusCodePages(UseStatusCodePagesHandlers.CreateStatusCodePageProblemDetails)
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()

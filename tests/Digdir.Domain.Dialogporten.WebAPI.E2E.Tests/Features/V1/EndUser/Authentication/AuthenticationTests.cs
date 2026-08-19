@@ -45,12 +45,17 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         problemDetails.Should().NotBeNull();
         problemDetails.Code.Should().BeNull();
         problemDetails.Detail.Should().BeNull();
-        problemDetails.Errors.Should().BeNull();
         problemDetails.Instance.Should().Be(requestPath);
         problemDetails.Status.Should().Be((int)HttpStatusCode.Unauthorized);
         problemDetails.StatusDescription.Should().BeNull();
         problemDetails.Title.Should().Be("Unauthorized.");
         problemDetails.TraceId.Should().NotBeNull();
         problemDetails.ValidationErrors.Should().BeNull();
+
+        problemDetails.Errors.Should().NotBeNull();
+        var validationFailure = problemDetails.Errors.Single();
+
+        validationFailure.Key.Should().Be("Unauthorized");
+        validationFailure.Value.Should().NotBeNull();
     }
 }

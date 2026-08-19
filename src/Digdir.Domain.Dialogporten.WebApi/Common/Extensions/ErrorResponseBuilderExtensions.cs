@@ -49,14 +49,6 @@ internal static class ErrorResponseBuilderExtensions
                 Instance = ctx.Request.Path,
                 Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
             },
-            StatusCodes.Status401Unauthorized => new ProblemDetails
-            {
-                Title = "Unauthorized.",
-                Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
-                Status = statusCode,
-                Instance = ctx.Request.Path,
-                Extensions = { { "traceId", Activity.Current?.Id ?? ctx.TraceIdentifier } }
-            },
             StatusCodes.Status403Forbidden => new ValidationProblemDetails(errors)
             {
                 Title = "Forbidden.",

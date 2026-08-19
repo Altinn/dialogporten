@@ -23,7 +23,7 @@ public sealed class BulkSetSystemLabelCommand : IRequest<BulkSetSystemLabelResul
 public sealed record BulkSetSystemLabelSuccess;
 
 [GenerateOneOf]
-public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
+public sealed partial class BulkSetSystemLabelResult : OneOfBase<BulkSetSystemLabelSuccess, EntityNotFound, Forbidden, DomainError, ValidationError, ConcurrencyError, Conflict>;
 
 internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSetSystemLabelCommand, BulkSetSystemLabelResult>
 {
@@ -61,35 +61,18 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             return forbidden;
         }
 
-        List<DialogEntity> dialogs;
 
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
-        if (_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
-        {
-            dialogs = await _db.Dialogs
-                .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
-                .ToListAsync(cancellationToken);
-        }
-        else
-        {
-            var authorizedResources =
-                await _altinnAuthorization.GetAuthorizedResourcesForSearch([], [], cancellationToken: cancellationToken);
+        var dialogs = await GetDialogs(request, cancellationToken);
 
-            dialogs = await _db.Dialogs
-                .PrefilterAuthorizedDialogs(authorizedResources)
-                .Include(x => x.EndUserContext)
-                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
-                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
-                .ToListAsync(cancellationToken);
-        }
+        var notFound = request.Dto.Dialogs
+            .Select(x => x.DialogId)
+            .Except(dialogs.Select(d => d.Id))
+            .ToList();
 
-        if (dialogs.Count != request.Dto.Dialogs.Count)
+        if (notFound.Count > 0)
         {
-            var found = dialogs.Select(x => x.Id).ToHashSet();
-            var missing = request.Dto.Dialogs.Select(d => d.DialogId).Where(id => !found.Contains(id)).ToList();
-            return new Forbidden().WithInvalidDialogIds(missing);
+            return new EntityNotFound<DialogEntity>(notFound);
         }
 
         if (RevisionsHasMismatch(request, dialogs))
@@ -113,6 +96,35 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             domainError => domainError,
             concurrencyError => concurrencyError,
             conflict => conflict);
+    }
+
+    private async Task<List<DialogEntity>> GetDialogs(
+        BulkSetSystemLabelCommand request,
+        CancellationToken cancellationToken
+    )
+    {
+        if (_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
+        {
+            return await _db.Dialogs
+                .Include(x => x.EndUserContext)
+                .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+                .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id))
+                .ToListAsync(cancellationToken);
+        }
+
+        var authorizedResources = await _altinnAuthorization.GetAuthorizedResourcesForSearch(
+            constraintParties: [],
+            constraintServiceResources: [],
+            cancellationToken: cancellationToken
+        );
+        var org = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+
+        return await _db.Dialogs
+            .PrefilterAuthorizedDialogs(authorizedResources)
+            .Include(x => x.EndUserContext)
+            .ThenInclude(x => x.DialogEndUserContextSystemLabels)
+            .Where(x => request.Dto.Dialogs.Select(d => d.DialogId).Contains(x.Id) && x.Org == org)
+            .ToListAsync(cancellationToken);
     }
 
     private static bool RevisionsHasMismatch(BulkSetSystemLabelCommand request, List<DialogEntity> dialogs)

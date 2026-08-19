@@ -296,12 +296,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
+          # Trusted Publishing needs node >= 22.14.0 / npm >= 11.5.1.
           node-version: '24'
-          # Writes the .npmrc auth line that NODE_AUTH_TOKEN fills in. This and the
-          # token below must be removed together when switching to Trusted
-          # Publishing: an auth line with no token 401s and pre-empts the OIDC
-          # exchange. See .github/actions/build-schema.
-          registry-url: 'https://registry.npmjs.org/'
+          # No registry-url on purpose: setup-node would write an .npmrc auth line,
+          # and with no token in the environment npm sends the literal placeholder,
+          # which 401s and pre-empts the OIDC exchange (actions/setup-node#1551).
 
       - name: Check if version exists on NPM
         id: check-version
@@ -346,15 +345,13 @@ jobs:
           jq --arg version "$VERSION" '.version = $version' package.json > temp.json
           mv temp.json package.json
 
-      # Token auth, not Trusted Publishing: no Trusted Publisher record exists for
-      # this package on npmjs.com yet. --provenance still signs the tarball, which
-      # uses OIDC for attestation only and is unrelated to authentication.
-      - name: Publish package
+      # No NODE_AUTH_TOKEN: npm authenticates over OIDC via the Trusted Publisher
+      # record for this package, which is bound to this workflow's filename.
+      - name: Publish package (Trusted Publishing via OIDC)
         if: steps.check-version.outputs.version-exists == 'false'
         run: npm publish --provenance --access public --tag "$DIST_TAG"
         env:
           DIST_TAG: ${{ needs.resolve-context.outputs.dist_tag }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
   notify-failure:

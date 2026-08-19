@@ -43,7 +43,7 @@ LocalDevelopment__UseLocalDevelopmentNameRegister=false
 LocalDevelopment__UseLocalDevelopmentPartyNameRegistry=false
 LocalDevelopment__UseLocalDevelopmentAltinnAuthorization=false
 LocalDevelopment__UseLocalDevelopmentCloudEventBus=true
-LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator=true
+LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator=false
 LocalDevelopment__DisableCache=false
 LocalDevelopment__DisableAuth=false
 LocalDevelopment__UseInMemoryServiceBusTransport=true
@@ -51,6 +51,10 @@ LocalDevelopment__DisableSubjectResourceSyncOnStartup=true
 LocalDevelopment__DisablePolicyInformationSyncOnStartup=true
 LocalDevelopment__UseLocalMetricsAggregationStorage=true
 ```
+
+`UseLocalDevelopmentCompactJwsGenerator` must stay `false` here: the local decorator returns the
+literal string `local-development-jws`, while the E2E tests verify real dialog and context token
+signatures against the JWKS endpoint (`Expected a compact JWS with three parts, got 1`).
 
 Optional overrides (if set in `.env` or the shell):
 ```bash

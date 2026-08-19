@@ -81,4 +81,22 @@ public static class E2EConstants
     public const string AvailableExternalResource = "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence";
     public const string UnavailableExternalResource = "urn:altinn:resource:ttd-altinn-events-automated-tests";
     public const string UnavailableSubresource = "someunavailablesubresource";
+
+    /// <summary>
+    /// An organization the default end user (<see cref="DefaultEndUserSsn"/>) genuinely represents as
+    /// "daglig leder" in AT23/TT02. Used by the authorization context tests to obtain a grant via a party
+    /// other than the dialog party. See the verified snapshot of
+    /// <c>GetPartiesTests.Authorized_Parties_Verify_Snapshot</c> for the authoritative party list.
+    /// </summary>
+    public const string DefaultEndUserOrgNo = "310923044";
+
+    public static readonly string DefaultEndUserOrgUrn =
+        $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{DefaultEndUserOrgNo}";
+
+    /// <summary>
+    /// An organization the default end user does NOT represent — the service owner's own org. Used as the
+    /// negative half of multi-party authorization context assertions.
+    /// </summary>
+    public static readonly string UnrepresentedOrgUrn =
+        $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{DefaultServiceOwnerOrgNr}";
 }

@@ -52,5 +52,21 @@ public static class EnduserApiExtensions
             enduserApi.V1.SearchDialogLabelAssignmentLogs(
                 dialogId,
                 cancellationToken: cancellationToken ?? TestContext.Current.CancellationToken);
+
+        public Task<IApiResponse<DialogTransmissionDetails>> GetTransmission(
+            Guid dialogId,
+            Guid transmissionId,
+            CancellationToken? cancellationToken = null) =>
+            enduserApi.V1.GetDialogTransmission(
+                dialogId,
+                transmissionId,
+                cancellationToken: cancellationToken ?? TestContext.Current.CancellationToken);
+
+        public Task<IApiResponse<ICollection<DialogTransmissionSearchItem>>> SearchTransmissions(
+            Guid dialogId,
+            CancellationToken? cancellationToken = null) =>
+            enduserApi.V1.SearchDialogTransmissions(
+                dialogId,
+                cancellationToken: cancellationToken ?? TestContext.Current.CancellationToken);
     }
 }

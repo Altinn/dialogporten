@@ -249,7 +249,7 @@ jobs:
           # is what a bare `npm install` resolves to. Keyed on the version shape,
           # not the trigger: workflow_dispatch can supply either kind.
           case "${version%%+*}" in
-            *-*) dist_tag=dev ;;
+            *-*) dist_tag=prerelease ;;
             *)   dist_tag=latest ;;
           esac
           echo "dist_tag=$dist_tag" >> "$GITHUB_OUTPUT"

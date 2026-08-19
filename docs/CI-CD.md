@@ -38,8 +38,8 @@ third that only starts when the schema package is touched:
    - Only starts when the push touches `docs/schema/V*/**`,
      `.github/actions/build-schema/**`, or the workflow file itself
    - Publishes `@digdir/dialogporten-schema@${version.txt}-${shortSha}` if the
-     schema package changed, under the `dev` dist-tag - prereleases never take
-     `latest`, so a bare `npm install` still resolves to a real release
+     schema package changed, under the `prerelease` dist-tag, so a bare
+     `npm install` still resolves to a real release
    - Runs independently of `ci-cd-main.yml`, so it is **not** gated on a
      successful deployment to Test
 

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
@@ -47,4 +48,8 @@ public sealed class GetServiceResourceMetadataRequest
 {
     [FromHeader(Constants.AcceptLanguage, isRequired: false)]
     public AcceptedLanguages? AcceptedLanguages { get; set; } = null;
+
+    [JsonIgnore]
+    [FromHeader(Constants.AcceptEncoding, isRequired: false)]
+    public string? AcceptEncoding { get; set; } = null;
 }

@@ -55,7 +55,7 @@ public static class AuthorizationCheckBuilder
             ? FromContext(context, dialogEntity)
             : transmission.AuthorizationAttribute is { } authorizationAttribute
                 ? new AuthorizationCheck(
-                    GetReadActionForAuthorizationAttribute(authorizationAttribute),
+                    Constants.ReadAction,
                     AuthorizationResourceSpec.FromLegacyAuthorizationAttribute(authorizationAttribute),
                     [dialogEntity.Party])
                 // Transmissions without authorization data piggyback on the main resource read check
@@ -95,14 +95,4 @@ public static class AuthorizationCheckBuilder
         new(context.Action ?? Constants.ReadAction,
             AuthorizationResourceSpec.FromContext(context.ServiceResource, context.AdditionalResourceAttribute),
             context.IncludeDialogParty ? context.Parties.Append(dialogEntity.Party) : context.Parties);
-
-    // Resource attributes may refer to either sub-resources/tasks that should be considered just another
-    // attribute to be matched within the same policy file, or they may refer to separate resources (and policies).
-    // In the former case, we need to use "transmissionread" as the action, as having "read" on the main resource would
-    // also give access to the subresource/task. In the latter case, we should use "read", as the resource is a
-    // separate entity.
-    public static string GetReadActionForAuthorizationAttribute(string authorizationAttribute) =>
-        authorizationAttribute.StartsWith(Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
-            ? Constants.ReadAction
-            : Constants.TransmissionReadAction;
 }

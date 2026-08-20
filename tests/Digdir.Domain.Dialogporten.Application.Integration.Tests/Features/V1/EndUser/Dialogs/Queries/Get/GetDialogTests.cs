@@ -222,6 +222,43 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             });
 
     [Fact]
+    public Task Get_Dialog_Should_Mask_GuiAction_Url_When_Action_Only_Permitted_On_Subresource() =>
+        FlowBuilder.For(Application, services =>
+            {
+                // "write" is permitted on the draft subresource only — not on the main resource
+                var authorizationResult = new DialogDetailsAuthorizationResult
+                {
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("read", Constants.MainResource),
+                        TestAuthorizedChecks.Authorized("write", "urn:altinn:subresource:draft"),
+                    ]
+                };
+                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddApiAction(a =>
+                {
+                    a.Action = "write";
+                    a.AuthorizationAttribute = "urn:altinn:subresource:draft";
+                });
+                x.AddGuiAction(g =>
+                {
+                    g.Action = "write";
+                    g.AuthorizationAttribute = null;
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                // The subresource permit must not leak onto the unattributed gui action sharing the verb
+                x.ApiActions.Single().IsAuthorized.Should().BeTrue();
+                var guiAction = x.GuiActions.Single();
+                guiAction.IsAuthorized.Should().BeFalse();
+                guiAction.Url.Should().Be(Constants.UnauthorizedUri);
+            });
+
+    [Fact]
     public Task Get_Dialog_Should_Include_ApiAction_Url_When_Read_Access_To_Main_Resource() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
@@ -343,7 +380,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
                     AuthorizedChecks = [
-                        TestAuthorizedChecks.Authorized(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-1"),
                         TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
                     ]
                 };

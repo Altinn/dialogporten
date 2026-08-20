@@ -277,7 +277,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                         TestAuthorizedChecks.Authorized(Constants.ReadAction),
                         TestAuthorizedChecks.Authorized("ApiAction", "urn:altinn:resource:api-action"),
                         TestAuthorizedChecks.Authorized("GuiAction", "urn:altinn:resource:gui-action"),
-                        TestAuthorizedChecks.Authorized(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-1"),
                         TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
                     ]
                 };
@@ -329,7 +329,6 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                         TestAuthorizedChecks.Authorized("subscribe"),
                         TestAuthorizedChecks.Authorized("ApiAction", "urn:altinn:resource:restricted"),
                         TestAuthorizedChecks.Authorized("GuiAction", "urn:altinn:resource:restricted"),
-                        TestAuthorizedChecks.Authorized(Constants.TransmissionReadAction, "urn:altinn:resource:restricted"),
                         TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:restricted"),
                     ]
                 };

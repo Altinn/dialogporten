@@ -1,0 +1,434 @@
+﻿{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "revision": "00000000-0000-0000-0000-000000000000",
+  "org": "ttd",
+  "serviceResource": "urn:altinn:resource:ttd-dialogporten-automated-tests",
+  "serviceResourceType": "genericaccessresource",
+  "party": "urn:altinn:person:identifier-no:08844397713",
+  "progress": null,
+  "process": null,
+  "precedingProcess": null,
+  "extendedStatus": null,
+  "externalReference": null,
+  "dueAt": null,
+  "expiresAt": null,
+  "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "updatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "contentUpdatedAt": "0000-00-00T00:00:00.000000\u002B00:00",
+  "status": "NotApplicable",
+  "systemLabel": "Default",
+  "isApiOnly": false,
+  "hasUnopenedContent": true,
+  "content": {
+    "title": {
+      "value": [
+        {
+          "value": "Skjema for rapportering av et eller annet",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "summary": {
+      "value": [
+        {
+          "value": "Et sammendrag her. Maks 200 tegn, ingen HTML-st\u00F8tte. P\u00E5krevd. Vises i liste.",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "senderName": {
+      "value": [
+        {
+          "value": "Avsendernavn",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "additionalInfo": {
+      "value": [
+        {
+          "value": "Utvidet forklaring (enkel HTML-st\u00F8tte, inntil 1023 tegn). Ikke p\u00E5krevd. Vises kun i detaljvisning.",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "extendedStatus": {
+      "value": [
+        {
+          "value": "Utvidet status",
+          "languageCode": "nb"
+        }
+      ],
+      "mediaType": "text/plain",
+      "isAuthorized": null
+    },
+    "mainContentReference": null
+  },
+  "dialogToken": "***",
+  "fromServiceOwnerTransmissionsCount": 3,
+  "fromPartyTransmissionsCount": 0,
+  "attachments": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "displayName": [
+        {
+          "value": "granted-attachment",
+          "languageCode": "nb"
+        }
+      ],
+      "name": "granted-attachment",
+      "urls": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "url": "https://digdir.apps.tt02.altinn.no/some-attachment/granted-attachment",
+          "mediaType": null,
+          "consumerType": "Gui"
+        }
+      ],
+      "expiresAt": null,
+      "isAuthorized": true,
+      "contextToken": "***"
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "displayName": [
+        {
+          "value": "denied-disabled-attachment",
+          "languageCode": "nb"
+        }
+      ],
+      "name": "denied-disabled-attachment",
+      "urls": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "url": "urn:dialogporten:unauthorized",
+          "mediaType": null,
+          "consumerType": "Gui"
+        }
+      ],
+      "expiresAt": null,
+      "isAuthorized": false,
+      "contextToken": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "displayName": [],
+      "name": null,
+      "urls": [],
+      "expiresAt": null,
+      "isAuthorized": false,
+      "contextToken": null
+    }
+  ],
+  "transmissions": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "authorizationAttribute": null,
+      "isAuthorized": true,
+      "contextToken": "***",
+      "extendedType": null,
+      "externalReference": "granted-transmission",
+      "relatedTransmissionId": null,
+      "type": "Information",
+      "sender": {
+        "actorType": "ServiceOwner",
+        "actorName": null,
+        "actorId": null
+      },
+      "isOpened": false,
+      "content": {
+        "title": {
+          "value": [
+            {
+              "value": "Tittel",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "text/plain",
+          "isAuthorized": null
+        },
+        "summary": {
+          "value": [
+            {
+              "value": "Sammendrag",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "text/plain",
+          "isAuthorized": null
+        },
+        "contentReference": null
+      },
+      "attachments": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "displayName": [
+            {
+              "value": "granted-child-attachment",
+              "languageCode": "nb"
+            }
+          ],
+          "name": null,
+          "urls": [
+            {
+              "id": "00000000-0000-0000-0000-000000000000",
+              "url": "https://digdir.apps.tt02.altinn.no/some-attachment/granted-child-attachment",
+              "mediaType": null,
+              "consumerType": "Gui"
+            }
+          ],
+          "expiresAt": null,
+          "isAuthorized": true,
+          "contextToken": "***"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "displayName": [
+            {
+              "value": "denied-child-attachment",
+              "languageCode": "nb"
+            }
+          ],
+          "name": null,
+          "urls": [
+            {
+              "id": "00000000-0000-0000-0000-000000000000",
+              "url": "urn:dialogporten:unauthorized",
+              "mediaType": null,
+              "consumerType": "Gui"
+            }
+          ],
+          "expiresAt": null,
+          "isAuthorized": false,
+          "contextToken": null
+        }
+      ],
+      "navigationalActions": [
+        {
+          "title": [
+            {
+              "value": "granted-child-nav-action",
+              "languageCode": "nb"
+            }
+          ],
+          "url": "https://digdir.apps.tt02.altinn.no/some-nav-action/granted-child-nav-action",
+          "expiresAt": null,
+          "isAuthorized": true,
+          "contextToken": "***"
+        },
+        {
+          "title": [],
+          "url": "urn:dialogporten:unauthorized",
+          "expiresAt": null,
+          "isAuthorized": false,
+          "contextToken": null
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "authorizationAttribute": null,
+      "isAuthorized": false,
+      "contextToken": null,
+      "extendedType": null,
+      "externalReference": "denied-disabled-transmission",
+      "relatedTransmissionId": null,
+      "type": "Information",
+      "sender": {
+        "actorType": "ServiceOwner",
+        "actorName": null,
+        "actorId": null
+      },
+      "isOpened": false,
+      "content": {
+        "title": {
+          "value": [
+            {
+              "value": "Tittel",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "text/plain",
+          "isAuthorized": null
+        },
+        "summary": {
+          "value": [
+            {
+              "value": "Sammendrag",
+              "languageCode": "nb"
+            }
+          ],
+          "mediaType": "text/plain",
+          "isAuthorized": null
+        },
+        "contentReference": null
+      },
+      "attachments": [],
+      "navigationalActions": []
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "authorizationAttribute": null,
+      "isAuthorized": false,
+      "contextToken": null,
+      "extendedType": null,
+      "externalReference": null,
+      "relatedTransmissionId": null,
+      "type": "Information",
+      "sender": null,
+      "isOpened": false,
+      "content": null,
+      "attachments": [],
+      "navigationalActions": []
+    }
+  ],
+  "guiActions": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "action": "read",
+      "url": "https://digdir.apps.tt02.altinn.no/granted-gui-action",
+      "authorizationAttribute": null,
+      "isAuthorized": true,
+      "contextToken": "***",
+      "isDeleteDialogAction": false,
+      "priority": "Primary",
+      "httpMethod": "GET",
+      "title": [
+        {
+          "value": "granted-gui-action",
+          "languageCode": "nb"
+        }
+      ],
+      "prompt": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "action": "read",
+      "url": "urn:dialogporten:unauthorized",
+      "authorizationAttribute": null,
+      "isAuthorized": false,
+      "contextToken": null,
+      "isDeleteDialogAction": false,
+      "priority": "Secondary",
+      "httpMethod": "GET",
+      "title": [
+        {
+          "value": "denied-gui-action",
+          "languageCode": "nb"
+        }
+      ],
+      "prompt": null
+    }
+  ],
+  "apiActions": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "action": "read",
+      "authorizationAttribute": null,
+      "isAuthorized": true,
+      "contextToken": "***",
+      "name": "granted-api-action",
+      "endpoints": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "version": null,
+          "url": "https://digdir.apps.tt02.altinn.no/api/granted-api-action",
+          "httpMethod": "GET",
+          "documentationUrl": null,
+          "requestSchema": null,
+          "responseSchema": null,
+          "deprecated": false,
+          "sunsetAt": null
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "version": null,
+          "url": "https://digdir.apps.tt02.altinn.no/api/granted-api-action/deprecated",
+          "httpMethod": "GET",
+          "documentationUrl": null,
+          "requestSchema": null,
+          "responseSchema": null,
+          "deprecated": true,
+          "sunsetAt": null
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "action": "read",
+      "authorizationAttribute": null,
+      "isAuthorized": false,
+      "contextToken": null,
+      "name": "denied-api-action",
+      "endpoints": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "version": null,
+          "url": "urn:dialogporten:unauthorized",
+          "httpMethod": "GET",
+          "documentationUrl": null,
+          "requestSchema": null,
+          "responseSchema": null,
+          "deprecated": false,
+          "sunsetAt": null
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "version": null,
+          "url": "urn:dialogporten:unauthorized",
+          "httpMethod": "GET",
+          "documentationUrl": null,
+          "requestSchema": null,
+          "responseSchema": null,
+          "deprecated": true,
+          "sunsetAt": null
+        }
+      ]
+    }
+  ],
+  "activities": [],
+  "seenSinceLastUpdate": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "seenBy": {
+        "actorType": "PartyRepresentative",
+        "actorName": "LITTERATUR UROMANTISK",
+        "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+      },
+      "isViaServiceOwner": false,
+      "isCurrentEndUser": true
+    }
+  ],
+  "seenSinceLastContentUpdate": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "seenAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "seenBy": {
+        "actorType": "PartyRepresentative",
+        "actorName": "LITTERATUR UROMANTISK",
+        "actorId": "urn:altinn:person:identifier-ephemeral:**********"
+      },
+      "isViaServiceOwner": false,
+      "isCurrentEndUser": true
+    }
+  ],
+  "isContentSeen": true,
+  "endUserContext": {
+    "revision": "00000000-0000-0000-0000-000000000000",
+    "systemLabels": [
+      0
+    ]
+  }
+}

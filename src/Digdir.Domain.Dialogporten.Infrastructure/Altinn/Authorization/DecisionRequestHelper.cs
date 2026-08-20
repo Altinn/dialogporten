@@ -76,7 +76,9 @@ internal static class DecisionRequestHelper
             .Select(x => (
                 x.Check,
                 x.Party,
-                EffectiveParty: rewritablePartyId is not null && x.Party == endUserPartyIdentifier!.FullId
+                EffectiveParty: rewritablePartyId is not null
+                    && x.Party == (endUserPartyIdentifier ?? throw new UnreachableException(
+                        "rewritablePartyId is only ever set when an end-user party identifier is present")).FullId
                     ? rewritablePartyId
                     : x.Party))
             .OrderBy(x => x.Check.Action, StringComparer.Ordinal)

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.119.2](https://github.com/Altinn/dialogporten/compare/v1.119.1...v1.119.2) (2026-08-20)
+
+
+### Miscellaneous Chores
+
+* **infra:** ship Key Vault audit logs to the environment workspace ([#4320](https://github.com/Altinn/dialogporten/issues/4320)) ([743f07f](https://github.com/Altinn/dialogporten/commit/743f07fdebd887759d29f8a8bb4f1fe6e9fd664b))
+
 ## [1.119.1](https://github.com/Altinn/dialogporten/compare/v1.119.0...v1.119.1) (2026-08-19)
 
 

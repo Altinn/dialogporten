@@ -21,6 +21,10 @@ param appInsightWorkspaceName string
 
 var keyVaultName = take('${namePrefix}-kv-${uniqueString(resourceGroup().id)}', 24)
 
+resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {
+  name: appInsightWorkspaceName
+}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2026-02-01' = {
   name: keyVaultName
   location: location
@@ -35,18 +39,14 @@ resource keyVault 'Microsoft.KeyVault/vaults@2026-02-01' = {
   tags: tags
 }
 
-resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {
-  name: appInsightWorkspaceName
-}
-
 // Audit logging of vault access (SecretGet etc. with caller identity) to our own
 // workspace, resource-specific table AZKVAuditLogs. The security team ships the same
 // category to their Sentinel workspace through a separate diagnostic setting; Azure
 // allows both as long as no two settings send one category to the same destination.
 // Retention is governed by the workspace, not here.
 resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'KeyVaultDiagnosticSetting'
   scope: keyVault
+  name: 'KeyVaultDiagnosticSetting'
   properties: {
     workspaceId: appInsightsWorkspace.id
     logAnalyticsDestinationType: 'Dedicated'

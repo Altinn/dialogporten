@@ -205,6 +205,74 @@
         },
         "type": "object"
       },
+      "Conflict": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "int32",
+                "type": "integer"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ConflictProblemDetails": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/Conflict"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errors": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "instance": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Content": {
         "additionalProperties": false,
         "properties": {
@@ -3647,6 +3715,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
@@ -4130,6 +4205,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {

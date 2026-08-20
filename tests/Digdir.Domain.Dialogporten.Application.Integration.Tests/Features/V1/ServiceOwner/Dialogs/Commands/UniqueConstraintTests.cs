@@ -1,14 +1,15 @@
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionAttachmentDto;
 using TransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.TransmissionDto;
@@ -111,8 +112,14 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
         await FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.IdempotentKey = idempotentKey)
             .CreateSimpleDialog((x, _) => x.Dto.IdempotentKey = idempotentKey)
-            .ExecuteAndAssert<Conflict>(x =>
-                x.ErrorMessage.Should().Contain(idempotentKey));
+            .ExecuteAndAssert<Conflict>((x, ctx) =>
+            {
+                x.ErrorMessage.Should().Contain(idempotentKey);
+                x.AttemptedValues.Should().BeOfType<DialogIdByIdempotentKeyConflict>();
+                var attempt = x.AttemptedValues.As<DialogIdByIdempotentKeyConflict>();
+                attempt.ConflictingDialogId.Should().Be(ctx.State.CreatedDialogs.First().Command.Dto.Id!.Value);
+                attempt.SuppliedIdempotentKey.Should().Be(idempotentKey);
+            });
     }
 
     [Fact]
@@ -155,8 +162,14 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
                     x.IdempotentKey = idempotentKey2)
                 .AddTransmission(x =>
                     x.IdempotentKey = idempotentKey2))
-            .ExecuteAndAssert<Conflict>(x => x
-                .ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2));
+            .ExecuteAndAssert<Conflict>(x =>
+            {
+                x.ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2);
+                x.AttemptedValues.Should().BeOfType<IdempotentKeyConflict>();
+                var attempt = x.AttemptedValues.As<IdempotentKeyConflict>();
+                attempt.ConflictingIdempotentKeys.Count.Should().Be(2);
+                attempt.ConflictingIdempotentKeys.Should().Contain([idempotentKey1, idempotentKey2]);
+            });
     }
 
     [Fact]
@@ -229,8 +242,14 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .UpdateDialog(x =>
                 x.AddTransmission(x => x.IdempotentKey = idempotentKey1)
                     .AddTransmission(x => x.IdempotentKey = idempotentKey2))
-            .ExecuteAndAssert<Conflict>(x => x
-                .ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2));
+            .ExecuteAndAssert<Conflict>(x =>
+            {
+                x.ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2);
+                x.AttemptedValues.Should().BeOfType<IdempotentKeyConflict>();
+                var attempt = x.AttemptedValues.As<IdempotentKeyConflict>();
+                attempt.ConflictingIdempotentKeys.Count.Should().Be(2);
+                attempt.ConflictingIdempotentKeys.Should().Contain([idempotentKey1, idempotentKey2]);
+            });
     }
 
     [Fact]

@@ -1,17 +1,18 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Http;
+﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
+using Digdir.Domain.Dialogporten.Domain.Http;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Library.Entity.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 
-public sealed class DialogGuiAction : IEntity
+public sealed class DialogGuiAction : IEntity, IAuthorizationContextCarrier
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
-    public string Action { get; set; } = null!;
+    public string? Action { get; set; }
     public Uri Url { get; set; } = null!;
     public string? AuthorizationAttribute { get; set; }
 
@@ -33,6 +34,11 @@ public sealed class DialogGuiAction : IEntity
 
     [AggregateChild]
     public DialogGuiActionPrompt? Prompt { get; set; }
+
+    [AggregateChild]
+    public DialogGuiActionAuthorizationContext? AuthorizationContext { get; set; }
+
+    AuthorizationContext? IAuthorizationContextCarrier.AuthorizationContext => AuthorizationContext;
 }
 
 public sealed class DialogGuiActionPrompt : LocalizationSet

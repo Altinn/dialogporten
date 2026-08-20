@@ -12,9 +12,9 @@ internal static class DialogEntityExtensions
         // apiActions and guiActions, as well as dialog transmissions with authorization attributes (which
         // require authorization for the action "transmissionread" if not referring a separate resource).
         return dialogEntity.ApiActions
-            .Select(x => new AltinnAction(x.Action, x.AuthorizationAttribute))
+            .Select(x => new AltinnAction(x.Action!, x.AuthorizationAttribute))
             .Concat(dialogEntity.GuiActions
-                .Select(x => new AltinnAction(x.Action, x.AuthorizationAttribute)))
+                .Select(x => new AltinnAction(x.Action!, x.AuthorizationAttribute)))
             .Concat(dialogEntity.Transmissions
                 .Where(x => x.AuthorizationAttribute is not null)
                 .Select(x => new AltinnAction(GetReadActionForAuthorizationAttribute(x.AuthorizationAttribute!), x.AuthorizationAttribute)))

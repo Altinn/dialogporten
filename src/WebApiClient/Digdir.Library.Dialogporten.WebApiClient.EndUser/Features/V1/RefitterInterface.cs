@@ -213,6 +213,47 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/metadata/limits")]
         Task<IApiResponse<Limits>> GetLimits(CancellationToken cancellationToken = default);
+
+        /// <summary>Gets the curated search-term list used for client-side autocomplete.</summary>
+        /// <remarks>
+        /// Returns a curated list of search terms derived from dialog content, each linked to the
+        /// service resources the term appears in. A single language is returned per request: `nb`
+        /// (Bokmål) by default, or `nn`/`en` when requested via the `Accept-Language` header.
+        ///
+        /// The response includes the generation timestamp and supports conditional requests
+        /// (`If-None-Match` / `If-Modified-Since`), returning `304 Not Modified` when the client's
+        /// cached copy is current.
+        /// </remarks>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>The search-term list for the resolved language.</description>
+        /// </item>
+        /// <item>
+        /// <term>304</term>
+        /// <description>The cached search-term list is still current.</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>No search-term list has been generated yet.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/searchterms")]
+        Task<IApiResponse<GetSearchTermsResponse>> GetSearchTerms([Header("accept-Language")] AcceptedLanguages? accept_Language = default, CancellationToken cancellationToken = default);
     }
 
     /// <summary>Gets the service resources the authenticated end user is authorized to use.</summary>

@@ -344,6 +344,47 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Headers("Accept: application/json, text/plain")]
         [Get("/api/v1/metadata/limits")]
         Task<IApiResponse<V1MetadataLimitsQueriesGet_Limits>> V1MetadataLimitsGetLimits(CancellationToken cancellationToken = default);
+
+        /// <summary>Gets the curated search-term list used for client-side autocomplete.</summary>
+        /// <remarks>
+        /// Returns a curated list of search terms derived from dialog content, each linked to the
+        /// service resources the term appears in. A single language is returned per request: `nb`
+        /// (Bokmål) by default, or `nn`/`en` when requested via the `Accept-Language` header.
+        ///
+        /// The response includes the generation timestamp and supports conditional requests
+        /// (`If-None-Match` / `If-Modified-Since`), returning `304 Not Modified` when the client's
+        /// cached copy is current.
+        /// </remarks>
+        /// <param name="accept_Language">accept_Language parameter</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>The search-term list for the resolved language.</description>
+        /// </item>
+        /// <item>
+        /// <term>304</term>
+        /// <description>The cached search-term list is still current.</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>No search-term list has been generated yet.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, text/plain")]
+        [Get("/api/v1/metadata/searchterms")]
+        Task<IApiResponse<V1MetadataSearchTermsGet_SearchTermsResponse>> V1MetadataSearchTermsGetSearchTerms([Header("accept-Language")] V1EndUserCommon_AcceptedLanguages accept_Language, CancellationToken cancellationToken = default);
     }
 
     /// <summary>Retrieve service owner labels for a dialog.</summary>
@@ -6167,6 +6208,37 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [JsonPropertyName("serviceOwnerSearch")]
         public V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataSearchTermsGet_SearchTermsResponse
+    {
+
+        /// <summary>The resolved language of the returned list (e.g. "nb", "nn", "en").</summary>
+        [JsonPropertyName("l")]
+        public string Language { get; set; }
+
+        /// <summary>When the underlying generation run produced this list.</summary>
+        [JsonPropertyName("generatedAt")]
+        public System.DateTimeOffset GeneratedAt { get; set; }
+
+        [JsonPropertyName("words")]
+        public ICollection<V1MetadataSearchTermsGet_TermResponseItem> Words { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1MetadataSearchTermsGet_TermResponseItem
+    {
+
+        /// <summary>The search term (canonical surface form).</summary>
+        [JsonPropertyName("w")]
+        public string Word { get; set; }
+
+        /// <summary>The unprefixed service resource identifiers (without "urn:altinn:resource:") the term appears in.</summary>
+        [JsonPropertyName("s")]
+        public ICollection<string> Resources { get; set; }
 
     }
 

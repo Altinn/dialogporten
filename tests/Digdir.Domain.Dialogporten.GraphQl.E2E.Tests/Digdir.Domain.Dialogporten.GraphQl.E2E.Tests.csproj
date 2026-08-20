@@ -24,6 +24,12 @@
       <ProjectReference Include="..\Digdir.Library.Dialogporten.E2E.Common\Digdir.Library.Dialogporten.E2E.Common.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <GraphQL Update="GetServiceResources.graphql">
+        <Generator>MSBuild:GenerateGraphQLCode</Generator>
+      </GraphQL>
+    </ItemGroup>
+
     <!-- StrawberryShake.Server 15.1.16 ships its code-gen tool as a net9.0 DLL and the package's
          MSBuild targets invoke it without runtime roll-forward, so on a .NET 10-only machine the
          build fails with "framework version '9.0.0' not found". We require the .NET 10 SDK (see

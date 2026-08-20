@@ -1,0 +1,48 @@
+query GetServiceResources() {
+  serviceResources {
+    items {
+      serviceResource {
+        id
+        resourceType
+        status
+        isDelegable
+        minimumAuthenticationLevel
+        name {
+          languageCode
+          value
+        }
+        links {
+          metadata
+        }
+      }
+      roles {
+        urn
+        name {
+          languageCode
+          value
+        }
+        links {
+          metadata
+        }
+      }
+      accessPackages {
+        urn
+        name {
+          languageCode
+          value
+        }
+        links {
+          metadata
+        }
+      }
+      serviceOwner {
+        orgNumber
+        code
+        name {
+          languageCode
+          value
+        }
+      }
+    }
+  }
+}

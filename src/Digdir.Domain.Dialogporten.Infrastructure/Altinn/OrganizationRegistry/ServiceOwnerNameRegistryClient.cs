@@ -31,7 +31,7 @@ internal sealed class ServiceOwnerNameRegistryClient : IServiceOwnerNameRegistry
     }
 
     public async Task<IReadOnlyDictionary<string, ServiceOwnerInfo>> GetServiceOwnerInfo(
-        IReadOnlyCollection<string> orgNumbers,
+        IEnumerable<string> orgNumbers,
         CancellationToken cancellationToken)
     {
         var requestedOrgNumbers = orgNumbers

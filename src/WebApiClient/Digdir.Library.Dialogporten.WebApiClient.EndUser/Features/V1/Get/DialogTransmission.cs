@@ -65,7 +65,7 @@ public class DialogTransmission
     /// The actor that sent the transmission.
     /// </summary>
     [JsonPropertyName("sender")]
-    public Actor Sender { get; set; } = null!;
+    public required Actor Sender { get; set; }
 
     /// <summary>
     /// Indicates whether the dialog transmission has been opened.
@@ -77,7 +77,7 @@ public class DialogTransmission
     /// The transmission unstructured text content.
     /// </summary>
     [JsonPropertyName("content")]
-    public DialogTransmissionContent Content { get; set; } = null!;
+    public required DialogTransmissionContent Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

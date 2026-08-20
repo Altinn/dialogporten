@@ -6,11 +6,11 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.ServiceResource;
 public class ServiceResourceRole
 {
     [JsonPropertyName("urn")]
-    public string Urn { get; set; } = null!;
+    public required string Urn { get; set; }
 
     [JsonPropertyName("name")]
     public ICollection<Localization>? Name { get; set; } = [];
 
     [JsonPropertyName("links")]
-    public Links Links { get; set; } = null!;
+    public required Links Links { get; set; }
 }

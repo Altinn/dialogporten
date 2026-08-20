@@ -15,26 +15,26 @@ public class DialogListItem
     /// The service owner code representing the organization (service owner) related to this dialog.
     /// </summary>
     [JsonPropertyName("org")]
-    public string Org { get; set; } = null!;
+    public required string Org { get; set; }
 
     /// <summary>
     /// The service identifier for the service that the dialog is related to in URN-format.
     /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
     /// </summary>
     [JsonPropertyName("serviceResource")]
-    public string ServiceResource { get; set; } = null!;
+    public required string ServiceResource { get; set; }
 
     /// <summary>
     /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
     /// </summary>
     [JsonPropertyName("serviceResourceType")]
-    public string ServiceResourceType { get; set; } = null!;
+    public required string ServiceResourceType { get; set; }
 
     /// <summary>
     /// The party code representing the organization or person that the dialog belongs to in URN format.
     /// </summary>
     [JsonPropertyName("party")]
-    public string Party { get; set; } = null!;
+    public required string Party { get; set; }
 
     /// <summary>
     /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
@@ -191,7 +191,7 @@ public class DialogListItem
     /// Metadata about the dialog owned by end-users.
     /// </summary>
     [JsonPropertyName("endUserContext")]
-    public DialogEndUserContextListItem EndUserContext { get; set; } = null!;
+    public required DialogEndUserContextListItem EndUserContext { get; set; }
 
     /// <summary>
     /// The content of the dialog in search results. May be null for API-only dialogs, which are not required to have content.

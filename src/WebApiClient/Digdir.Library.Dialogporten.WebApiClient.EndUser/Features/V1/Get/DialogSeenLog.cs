@@ -21,7 +21,7 @@ public class DialogSeenLog
     /// The actor that saw the dialog revision.
     /// </summary>
     [JsonPropertyName("seenBy")]
-    public Actor SeenBy { get; set; } = null!;
+    public required Actor SeenBy { get; set; }
 
     /// <summary>
     /// Flag indicating whether the seen log entry was created via the service owner.

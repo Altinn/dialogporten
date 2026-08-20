@@ -15,7 +15,7 @@ public class DialogApiAction
     /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
     /// </summary>
     [JsonPropertyName("action")]
-    public string Action { get; set; } = null!;
+    public required string Action { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

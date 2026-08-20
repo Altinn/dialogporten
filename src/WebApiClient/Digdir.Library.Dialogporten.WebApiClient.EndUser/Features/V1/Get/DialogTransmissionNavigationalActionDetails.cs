@@ -16,7 +16,7 @@ public class DialogTransmissionNavigationalActionDetails
     /// <br/>not authorized to access the transmission, or \"urn:dialogporten:expired\" if the action has expired.
     /// </summary>
     [JsonPropertyName("url")]
-    public Uri Url { get; set; } = null!;
+    public required Uri Url { get; set; }
 
     /// <summary>
     /// The UTC timestamp when the navigational action expires and is no longer available.

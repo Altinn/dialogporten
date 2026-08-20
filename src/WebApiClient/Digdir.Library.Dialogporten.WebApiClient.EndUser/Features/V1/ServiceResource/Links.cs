@@ -5,5 +5,5 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.ServiceResource;
 public class Links
 {
     [JsonPropertyName("metadata")]
-    public string Metadata { get; set; } = null!;
+    public required string Metadata { get; set; }
 }

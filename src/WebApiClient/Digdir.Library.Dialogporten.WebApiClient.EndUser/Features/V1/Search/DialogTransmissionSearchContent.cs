@@ -9,7 +9,7 @@ public class DialogTransmissionSearchContent
     /// The title of the content.
     /// </summary>
     [JsonPropertyName("title")]
-    public ContentValue Title { get; set; } = null!;
+    public required ContentValue Title { get; set; }
 
     /// <summary>
     /// The summary of the content.

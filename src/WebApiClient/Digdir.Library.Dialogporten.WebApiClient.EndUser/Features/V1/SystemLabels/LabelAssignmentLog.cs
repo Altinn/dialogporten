@@ -9,11 +9,11 @@ public class LabelAssignmentLog
     public DateTimeOffset CreatedAt { get; set; }
 
     [JsonPropertyName("name")]
-    public string Name { get; set; } = null!;
+    public required string Name { get; set; }
 
     [JsonPropertyName("action")]
-    public string Action { get; set; } = null!;
+    public required string Action { get; set; }
 
     [JsonPropertyName("performedBy")]
-    public Actor PerformedBy { get; set; } = null!;
+    public required Actor PerformedBy { get; set; }
 }

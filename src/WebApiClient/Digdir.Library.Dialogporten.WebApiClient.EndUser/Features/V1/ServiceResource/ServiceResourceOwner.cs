@@ -6,10 +6,10 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.ServiceResource;
 public class ServiceResourceOwner
 {
     [JsonPropertyName("orgNumber")]
-    public string OrgNumber { get; set; } = null!;
+    public required string OrgNumber { get; set; }
 
     [JsonPropertyName("code")]
-    public string Code { get; set; } = null!;
+    public required string Code { get; set; }
 
     [JsonPropertyName("name")]
     public ICollection<Localization>? Name { get; set; } = [];

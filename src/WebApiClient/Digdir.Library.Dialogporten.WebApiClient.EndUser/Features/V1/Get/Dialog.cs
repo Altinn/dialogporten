@@ -22,26 +22,26 @@ public class Dialog
     /// The service owner code representing the organization (service owner) related to this dialog.
     /// </summary>
     [JsonPropertyName("org")]
-    public string Org { get; set; } = null!;
+    public required string Org { get; set; }
 
     /// <summary>
     /// The service identifier for the service that the dialog is related to in URN-format.
     /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
     /// </summary>
     [JsonPropertyName("serviceResource")]
-    public string ServiceResource { get; set; } = null!;
+    public required string ServiceResource { get; set; }
 
     /// <summary>
     /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
     /// </summary>
     [JsonPropertyName("serviceResourceType")]
-    public string ServiceResourceType { get; set; } = null!;
+    public required string ServiceResourceType { get; set; }
 
     /// <summary>
     /// The party code representing the organization or person that the dialog belongs to in URN format.
     /// </summary>
     [JsonPropertyName("party")]
-    public string Party { get; set; } = null!;
+    public required string Party { get; set; }
 
     /// <summary>
     /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
@@ -158,7 +158,7 @@ public class Dialog
     /// The dialog unstructured text content.
     /// </summary>
     [JsonPropertyName("content")]
-    public Content Content { get; set; } = null!;
+    public required Content Content { get; set; }
 
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,
@@ -238,5 +238,5 @@ public class Dialog
     /// Metadata about the dialog owned by end-users.
     /// </summary>
     [JsonPropertyName("endUserContext")]
-    public DialogEndUserContext EndUserContext { get; set; } = null!;
+    public required DialogEndUserContext EndUserContext { get; set; }
 }

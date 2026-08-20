@@ -9,20 +9,20 @@ public class EndUserIdentifierLookup
     public Guid DialogId { get; set; }
 
     [JsonPropertyName("instanceRef")]
-    public string InstanceRef { get; set; } = null!;
+    public required string InstanceRef { get; set; }
 
     [JsonPropertyName("party")]
-    public string Party { get; set; } = null!;
+    public required string Party { get; set; }
 
     [JsonPropertyName("serviceResource")]
-    public IdentifierLookupServiceResource ServiceResource { get; set; } = null!;
+    public required IdentifierLookupServiceResource ServiceResource { get; set; }
 
     [JsonPropertyName("serviceOwner")]
-    public IdentifierLookupServiceOwner ServiceOwner { get; set; } = null!;
+    public required IdentifierLookupServiceOwner ServiceOwner { get; set; }
 
     [JsonPropertyName("title")]
     public ICollection<Localization>? Title { get; set; } = [];
 
     [JsonPropertyName("authorizationEvidence")]
-    public IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; } = null!;
+    public required IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; }
 }

@@ -66,13 +66,13 @@ public class DialogTransmissionSearchItem
     /// The sender actor information for the transmission.
     /// </summary>
     [JsonPropertyName("sender")]
-    public Actor Sender { get; set; } = null!;
+    public required Actor Sender { get; set; }
 
     /// <summary>
     /// The content of the transmission.
     /// </summary>
     [JsonPropertyName("content")]
-    public DialogTransmissionSearchContent Content { get; set; } = null!;
+    public required DialogTransmissionSearchContent Content { get; set; }
 
     /// <summary>
     /// The attachments associated with the transmission.

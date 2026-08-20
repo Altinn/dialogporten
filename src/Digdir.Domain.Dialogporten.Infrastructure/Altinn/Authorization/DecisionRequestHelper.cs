@@ -1,12 +1,30 @@
-﻿using System.Diagnostics;
-using Altinn.Authorization.ABAC.Xacml.JsonProfile;
+using System.Diagnostics;
 using System.Security.Claims;
-
+using Altinn.Authorization.ABAC.Xacml.JsonProfile;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
+
+/// <summary>
+/// A single (check, party) evaluation unit. <paramref name="ReferenceIndex"/> points into the
+/// XACML MultiRequests reference list (and thereby the positionally-ordered PDP response).
+/// </summary>
+internal sealed record DecisionRequestTuple(AuthorizationCheck Check, string Party, int ReferenceIndex);
+
+/// <summary>
+/// The XACML request together with the tuple list it was built from. Request construction and
+/// response mapping share this single ordering; the PDP response is required to contain exactly
+/// one result per request reference, in order.
+/// </summary>
+internal sealed class PreparedDialogDetailsRequest
+{
+    public required XacmlJsonRequestRoot Request { get; init; }
+    public required IReadOnlyList<DecisionRequestTuple> Tuples { get; init; }
+    public required int ExpectedResults { get; init; }
+}
 
 internal static class DecisionRequestHelper
 {
@@ -36,58 +54,124 @@ internal static class DecisionRequestHelper
 
     private const string PermitResponse = "Permit";
 
-    public static XacmlJsonRequestRoot CreateDialogDetailsRequest(DialogDetailsAuthorizationRequest request)
+    public static PreparedDialogDetailsRequest CreateDialogDetailsRequest(DialogDetailsAuthorizationRequest request)
     {
-        var sortedActions = request.AltinnActions.SortForXacml();
-
         // The PDP does not support self-identified users as parties, so we need to use the party-id claim instead.
         // Eventually, the PDP should support all external party identifiers, but until then we need to special case this.
+        // The rewrite only ever applies to the authenticated user's own party; foreign context parties are passed
+        // through as-is (an SI user cannot represent anyone else, so the PDP will simply deny — which is correct).
         var endUserPartyIdentifier = request.ClaimsPrincipal.GetEndUserPartyIdentifier();
-        var resourceParty = endUserPartyIdentifier
-                is AltinnSelfIdentifiedUserIdentifier or IdportenEmailUserIdentifier or FeideUserIdentifier
-                    && endUserPartyIdentifier.FullId == request.Party
-                    && request.ClaimsPrincipal.TryGetPartyId(out var partyId)
-            ? $"{PartyIdClaimType}:{partyId}"
-            : request.Party;
+        string? rewritablePartyId = null;
+        if (endUserPartyIdentifier is AltinnSelfIdentifiedUserIdentifier or IdportenEmailUserIdentifier or FeideUserIdentifier
+            && request.ClaimsPrincipal.TryGetPartyId(out var partyId))
+        {
+            rewritablePartyId = $"{PartyIdClaimType}:{partyId}";
+        }
+
+        // Expand every check into one evaluation unit per party, deterministically ordered. This ordering
+        // defines the resource/action category numbering and the MultiRequests reference order, which the
+        // (positional) response mapping depends on.
+        var expandedTuples = request.Checks
+            .SelectMany(check => check.Parties.Select(party => (Check: check, Party: party)))
+            .Select(x => (
+                x.Check,
+                x.Party,
+                EffectiveParty: rewritablePartyId is not null
+                    && x.Party == (endUserPartyIdentifier ?? throw new UnreachableException(
+                        "rewritablePartyId is only ever set when an end-user party identifier is present")).FullId
+                    ? rewritablePartyId
+                    : x.Party))
+            .OrderBy(x => x.Check.Action, StringComparer.Ordinal)
+            .ThenBy(x => x.Check.Resource.CanonicalIdentity, StringComparer.Ordinal)
+            .ThenBy(x => x.EffectiveParty, StringComparer.Ordinal)
+            .ToList();
 
         var accessSubject = CreateAccessSubjectCategory(request.ClaimsPrincipal.Claims);
-        var actions = CreateActionCategories(sortedActions, out var actionIdByName);
-        var resources = CreateResourceCategories(request.ServiceResource, request.InstanceRef, resourceParty, sortedActions, out var resourceIdByName);
 
-        var multiRequests = CreateMultiRequests(sortedActions, actionIdByName, resourceIdByName);
+        var actionIdByName = new Dictionary<string, string>(StringComparer.Ordinal);
+        var actionCategories = new List<XacmlJsonCategory>();
+        var resourceIdByKey = new Dictionary<(AuthorizationResourceSpec Spec, string EffectiveParty), string>();
+        var resourceCategories = new List<XacmlJsonCategory>();
+        var referenceIndexByIds = new Dictionary<(string ResourceId, string ActionId), int>();
+        var references = new List<XacmlJsonRequestReference>();
+        var tuples = new List<DecisionRequestTuple>(expandedTuples.Count);
+
+        foreach (var (check, party, effectiveParty) in expandedTuples)
+        {
+            if (!actionIdByName.TryGetValue(check.Action, out var actionId))
+            {
+                actionId = $"a{actionIdByName.Count + 1}";
+                actionIdByName.Add(check.Action, actionId);
+                actionCategories.Add(new XacmlJsonCategory
+                {
+                    Id = actionId,
+                    Attribute = [new() { AttributeId = AttributeIdAction, Value = check.Action }]
+                });
+            }
+
+            var resourceKey = (check.Resource, effectiveParty);
+            if (!resourceIdByKey.TryGetValue(resourceKey, out var resourceId))
+            {
+                resourceId = $"r{resourceIdByKey.Count + 1}";
+                resourceIdByKey.Add(resourceKey, resourceId);
+                resourceCategories.Add(CreateResourceCategory(
+                    resourceId, request.ServiceResource, request.InstanceRef, GetPartyAttribute(effectiveParty), check.Resource));
+            }
+
+            // Identical (resource, action) pairs collapse to a single PDP request; all tuples sharing
+            // the pair map back to the same result.
+            if (!referenceIndexByIds.TryGetValue((resourceId, actionId), out var referenceIndex))
+            {
+                referenceIndex = references.Count;
+                referenceIndexByIds.Add((resourceId, actionId), referenceIndex);
+                references.Add(new XacmlJsonRequestReference
+                {
+                    ReferenceId = [SubjectId, resourceId, actionId]
+                });
+            }
+
+            tuples.Add(new DecisionRequestTuple(check, party, referenceIndex));
+        }
 
         var xacmlJsonRequest = new XacmlJsonRequest
         {
             AccessSubject = accessSubject,
-            Action = actions,
-            Resource = resources,
-            MultiRequests = multiRequests
+            Action = actionCategories,
+            Resource = resourceCategories,
+            MultiRequests = new XacmlJsonMultiRequests { RequestReference = references }
         };
 
-        return new XacmlJsonRequestRoot { Request = xacmlJsonRequest };
+        return new PreparedDialogDetailsRequest
+        {
+            Request = new XacmlJsonRequestRoot { Request = xacmlJsonRequest },
+            Tuples = tuples,
+            ExpectedResults = references.Count
+        };
     }
 
-    public static DialogDetailsAuthorizationResult CreateDialogDetailsResponse(List<AltinnAction> altinnActions, XacmlJsonResponse? xamlJsonResponse)
+    public static DialogDetailsAuthorizationResult CreateDialogDetailsResponse(
+        PreparedDialogDetailsRequest preparedRequest, XacmlJsonResponse? xacmlJsonResponse)
     {
-        var authorizedAltinnActions = new List<AltinnAction>();
+        var results = xacmlJsonResponse?.Response;
 
-        var sortedAltinnActions = altinnActions.SortForXacml();
-        var xacmlJsonResults = xamlJsonResponse?.Response ?? [];
-
-        var count = Math.Min(sortedAltinnActions.Count, xacmlJsonResults.Count);
-        for (var i = 0; i < count; i++)
+        // The XACML JSON profile guarantees one result per request reference, in request order.
+        // Anything else means we cannot correlate decisions reliably: fail closed and deny everything.
+        if (results is null || results.Count != preparedRequest.ExpectedResults)
         {
-            var action = sortedAltinnActions[i];
-            var response = xacmlJsonResults[i];
-            if (response.Decision == PermitResponse)
-            {
-                authorizedAltinnActions.Add(action);
-            }
+            return new DialogDetailsAuthorizationResult();
         }
+
+        var authorizedChecks = preparedRequest.Tuples
+            .Where(tuple => results[tuple.ReferenceIndex].Decision == PermitResponse)
+            .GroupBy(tuple => tuple.Check)
+            .Select(group => new AuthorizedCheck(
+                group.Key,
+                group.Select(tuple => tuple.Party).Distinct(StringComparer.Ordinal).ToList()))
+            .ToList();
 
         return new DialogDetailsAuthorizationResult
         {
-            AuthorizedAltinnActions = authorizedAltinnActions
+            AuthorizedChecks = authorizedChecks
         };
     }
 
@@ -128,85 +212,85 @@ internal static class DecisionRequestHelper
                 "Unable to find a suitable subject attribute for the authorization request. Having a known user type should be enforced during authentication (see UserTypeValidationMiddleware)."),
         };
 
-    private static List<XacmlJsonCategory> CreateActionCategories(
-        List<AltinnAction> altinnActions, out Dictionary<string, string> actionIdByName)
-    {
-        actionIdByName = altinnActions
-            .Select(x => x.Name)
-            .Distinct()
-            .Select((action, index) => (action, id: $"a{index + 1}"))
-            .ToDictionary(x =>
-                x.action,
-                x => x.id);
-
-        return actionIdByName
-            .Select(x => new XacmlJsonCategory
-            {
-                Id = x.Value,
-                Attribute = [new() { AttributeId = AttributeIdAction, Value = x.Key }]
-            })
-            .ToList();
-    }
-
-    private static List<XacmlJsonCategory> CreateResourceCategories(
+    private static XacmlJsonCategory CreateResourceCategory(
+        string id,
         string serviceResource,
         InstanceRef instanceRef,
-        string party,
-        List<AltinnAction> altinnActions, out Dictionary<string, string> resourceIdByName)
+        XacmlJsonAttribute? partyAttribute,
+        AuthorizationResourceSpec spec)
     {
-        resourceIdByName = altinnActions
-            .Select(x => x.AuthorizationAttribute)
-            .Distinct()
-            .Select((authorizationAttribute, index) => (authorizationAttribute, id: $"r{index + 1}"))
-            .ToDictionary(x =>
-                x.authorizationAttribute,
-                x => x.id);
+        List<XacmlJsonAttribute> attributes = [];
 
-
-        var partyAttribute = GetPartyAttribute(party);
-        return resourceIdByName
-            .Select(x =>
-                CreateResourceCategory(x.Value, serviceResource, instanceRef, partyAttribute, x.Key))
-            .ToList();
-    }
-
-    private static XacmlJsonCategory CreateResourceCategory(string id, string serviceResource, InstanceRef instanceRef, XacmlJsonAttribute? partyAttribute, string? authorizationAttribute = null)
-    {
-        var (ns, value, org) = SplitNamespaceAndValue(serviceResource);
-        var attributes = new List<XacmlJsonAttribute>
+        switch (spec.Kind)
         {
-            new() { AttributeId = ns, Value = value }
-        };
+            case AuthorizationResourceSpecKind.Main:
+                attributes.AddRange(GetAttributesForServiceResource(serviceResource));
+                if (partyAttribute is not null) attributes.Add(partyAttribute);
+                attributes.Add(new()
+                {
+                    AttributeId = AttributeIdResourceInstance,
+                    Value = instanceRef.Value
+                });
+                // Preserve the legacy wire format: the "main" sentinel has always been rendered as an
+                // extra urn:altinn:subresource attribute on the dialog's own resource.
+                attributes.Add(new XacmlJsonAttribute
+                {
+                    AttributeId = AttributeIdSubResource,
+                    Value = Constants.MainResource
+                });
+                break;
 
-        if (org is not null)
-        {
-            attributes.Add(new XacmlJsonAttribute { AttributeId = AttributeIdOrg, Value = org });
-        }
+            case AuthorizationResourceSpecKind.Legacy:
+                attributes.AddRange(GetAttributesForServiceResource(serviceResource));
+                if (partyAttribute is not null) attributes.Add(partyAttribute);
+                attributes.Add(new()
+                {
+                    AttributeId = AttributeIdResourceInstance,
+                    Value = instanceRef.Value
+                });
 
-        if (partyAttribute is not null)
-        {
-            attributes.Add(partyAttribute);
-        }
+                var legacyAttributes = GetResourceAttributesForAuthorizationAttribute(spec.LegacyAuthorizationAttribute!);
 
-        attributes.Add(new()
-        {
-            AttributeId = AttributeIdResourceInstance,
-            Value = instanceRef.Value
-        });
+                // If we get either urn:altinn:app/urn:altinn:org or urn:altinn:resource attributes, this should
+                // be considered overrides that should be used instead of the default resource attributes.
+                if (legacyAttributes.Any(x => x.AttributeId is AttributeIdApp or AttributeIdOrg or AttributeIdResource))
+                {
+                    attributes.RemoveAll(x => x.AttributeId is AttributeIdResource
+                        or AttributeIdResourceInstance
+                        or AttributeIdApp
+                        or AttributeIdOrg
+                    );
+                }
 
-        if (authorizationAttribute is not null)
-        {
-            var resourceAttributesFromAuthorizationAttribute = GetResourceAttributesForAuthorizationAttribute(authorizationAttribute);
+                attributes.AddRange(legacyAttributes);
+                break;
 
-            // If we get either urn:altinn:app/urn:altinn:org or urn:altinn:resource attributes, this should
-            // be considered overrides that should be used instead of the default resource attributes.
-            if (resourceAttributesFromAuthorizationAttribute.Any(x => x.AttributeId is AttributeIdApp or AttributeIdOrg or AttributeIdResource))
-            {
-                attributes.RemoveAll(x =>
-                    x.AttributeId is AttributeIdResource or AttributeIdResourceInstance or AttributeIdApp or AttributeIdOrg);
-            }
+            case AuthorizationResourceSpecKind.Context:
+                // A context resource override replaces the dialog's own resource, and the instance reference
+                // no longer applies (it belongs to the dialog's resource). This mirrors the legacy
+                // urn:altinn:resource/urn:altinn:app override semantics.
+                attributes.AddRange(GetAttributesForServiceResource(spec.ServiceResource ?? serviceResource));
 
-            attributes.AddRange(resourceAttributesFromAuthorizationAttribute);
+                if (partyAttribute is not null) attributes.Add(partyAttribute);
+                if (spec.ServiceResource is null)
+                {
+                    attributes.Add(new()
+                    {
+                        AttributeId = AttributeIdResourceInstance,
+                        Value = instanceRef.Value
+                    });
+                }
+                if (spec.AdditionalResourceAttribute is not null)
+                {
+                    // Layered on top of the effective resource; unlike legacy attributes this never
+                    // overrides the resource itself (write-side validation forbids resource references here).
+                    attributes.AddRange(GetResourceAttributesForAuthorizationAttribute(spec.AdditionalResourceAttribute));
+                }
+
+                break;
+
+            default:
+                break;
         }
 
         return new XacmlJsonCategory
@@ -214,6 +298,19 @@ internal static class DecisionRequestHelper
             Id = id,
             Attribute = attributes
         };
+    }
+
+    private static List<XacmlJsonAttribute> GetAttributesForServiceResource(string serviceResource)
+    {
+        var (ns, value, org) = SplitNamespaceAndValue(serviceResource);
+        List<XacmlJsonAttribute> attributes = [new() { AttributeId = ns, Value = value }];
+
+        if (org is not null)
+        {
+            attributes.Add(new XacmlJsonAttribute { AttributeId = AttributeIdOrg, Value = org });
+        }
+
+        return attributes;
     }
 
     private static List<XacmlJsonAttribute> GetResourceAttributesForAuthorizationAttribute(string subResource)
@@ -270,34 +367,6 @@ internal static class DecisionRequestHelper
             Value = party[(lastColonIndex + 1)..]
         };
     }
-
-    private static XacmlJsonMultiRequests CreateMultiRequests(
-        List<AltinnAction> altinnActions,
-        Dictionary<string, string> actionIdByName,
-        Dictionary<string, string> resourceIdByName)
-    {
-        var multiRequests = new XacmlJsonMultiRequests
-        {
-            RequestReference = []
-        };
-
-
-        foreach (var (actionName, actionId) in actionIdByName)
-        {
-            foreach (var resourceName in altinnActions.Where(x => x.Name == actionName).Select(x => x.AuthorizationAttribute))
-            {
-                multiRequests.RequestReference.Add(new XacmlJsonRequestReference
-                {
-                    ReferenceId = [SubjectId, resourceIdByName[resourceName], actionId]
-                });
-            }
-        }
-
-        return multiRequests;
-    }
-
-    private static List<AltinnAction> SortForXacml(this List<AltinnAction> altinnActions) =>
-        altinnActions.OrderBy(x => x.Name).ThenBy(x => x.AuthorizationAttribute).ToList();
 
     internal static void XacmlRequestRemoveSensitiveInfo(XacmlJsonRequest xacmlJsonRequest)
     {

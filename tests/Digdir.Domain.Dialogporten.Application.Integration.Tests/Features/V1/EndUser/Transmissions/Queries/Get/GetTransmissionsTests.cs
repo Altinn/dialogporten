@@ -138,7 +138,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
     {
         var authorizationResult = new DialogDetailsAuthorizationResult
         {
-            AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+            AuthorizedChecks = [TestAuthorizedChecks.Authorized(Constants.ReadAction)]
         };
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }

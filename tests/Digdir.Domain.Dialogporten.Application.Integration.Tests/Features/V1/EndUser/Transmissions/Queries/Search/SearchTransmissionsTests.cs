@@ -84,7 +84,7 @@ public class SearchTransmissionsTests(DialogApplication application) : Applicati
     {
         var authorizationResult = new DialogDetailsAuthorizationResult
         {
-            AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+            AuthorizedChecks = [TestAuthorizedChecks.Authorized(Constants.ReadAction)]
         };
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }

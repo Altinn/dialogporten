@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -25,8 +26,13 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
     public Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
         DialogEntity dialogEntity,
         CancellationToken __) =>
-        // Allow everything
-        Task.FromResult(new DialogDetailsAuthorizationResult { AuthorizedAltinnActions = dialogEntity.GetAltinnActions() });
+        // Allow everything, for every configured party
+        Task.FromResult(new DialogDetailsAuthorizationResult
+        {
+            AuthorizedChecks = dialogEntity.GetAuthorizationChecks()
+                .Select(AuthorizedCheck.FullyPermitted)
+                .ToList()
+        });
 
     public async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(List<string> constraintParties, List<string> serviceResources,
         bool includeDialogIds = true,

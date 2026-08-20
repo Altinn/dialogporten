@@ -102,6 +102,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         return ValueTask.CompletedTask;
     }
 
+    public IHttpClientFactory GetHttpClientFactory() => _serviceProvider!.GetRequiredService<IHttpClientFactory>();
+
     public IDisposable UseTokenOverrides(TokenOverrides overrides) =>
         _tokenOverridesAccessor is null
             ? throw new InvalidOperationException("Token override accessor not initialized.")

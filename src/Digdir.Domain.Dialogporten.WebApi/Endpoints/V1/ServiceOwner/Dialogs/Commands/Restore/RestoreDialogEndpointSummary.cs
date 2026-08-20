@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
@@ -16,7 +16,8 @@ public sealed class RestoreDialogEndpointSummary : Summary<RestoreDialogEndpoint
                       """;
 
         Responses[Status204NoContent] = Constants.SwaggerSummary.Restored.FormatInvariant("aggregate");
-        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<RestoreDialogEndpoint>();
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<RestoreDialogEndpoint>().Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
         Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;

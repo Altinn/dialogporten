@@ -122,6 +122,7 @@ static void BuildAndRun(string[] args)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
         .AddDialogportenResponseCompression()
+        .AddProblemDetails()
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
@@ -240,6 +241,7 @@ static void BuildAndRun(string[] args)
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
     app.UseDefaultExceptionHandler()
+        .UseStatusCodePages(UseStatusCodePagesHandlers.CreateStatusCodePageProblemDetails)
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()

@@ -2,8 +2,8 @@ using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.Search;
@@ -22,7 +22,8 @@ public sealed class SearchDialogEndpointSummary : Summary<SearchDialogEndpoint, 
                       """;
 
         Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("list");
-        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<SearchDialogEndpoint>();
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<SearchDialogEndpoint>().Build();
         Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
 
         RequestParam(p => p.ContinuationToken, "Supply \"continuationToken\" for the response to get the next page of results, if hasNextPage is true");

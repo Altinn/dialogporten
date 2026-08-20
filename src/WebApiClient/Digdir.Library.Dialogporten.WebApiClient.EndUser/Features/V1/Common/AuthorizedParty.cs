@@ -39,6 +39,7 @@ public class AuthorizedParty
     /// The type of the party, either "Organization" or "Person".
     /// </summary>
     [JsonPropertyName("partyType")]
+    [JsonConverter(typeof(JsonStringEnumConverter<AuthorizedPartyType>))]
     public required AuthorizedPartyType PartyType { get; set; }
 
     /// <summary>

@@ -329,6 +329,17 @@ public static class IFlowStepExtensions
                     IdempotentKey = transmission.IdempotentKey,
                     CreatedAt = transmission.CreatedAt,
                     AuthorizationAttribute = transmission.AuthorizationAttribute,
+                    AuthorizationContext = transmission.AuthorizationContext is null
+                        ? null
+                        : new()
+                        {
+                            ServiceResource = transmission.AuthorizationContext.ServiceResource,
+                            AdditionalResourceAttribute = transmission.AuthorizationContext.AdditionalResourceAttribute,
+                            Parties = [.. transmission.AuthorizationContext.Parties],
+                            IncludeDialogParty = transmission.AuthorizationContext.IncludeDialogParty,
+                            Action = transmission.AuthorizationContext.Action,
+                            UnauthorizedPresentation = transmission.AuthorizationContext.UnauthorizedPresentation
+                        },
                     ExtendedType = transmission.ExtendedType,
                     ExternalReference = transmission.ExternalReference,
                     RelatedTransmissionId = transmission.RelatedTransmissionId,
@@ -350,13 +361,15 @@ public static class IFlowStepExtensions
                             MediaType = x.MediaType,
                             ConsumerType = x.ConsumerType
                         }).ToList(),
-                        ExpiresAt = x.ExpiresAt
+                        ExpiresAt = x.ExpiresAt,
+                        AuthorizationContext = x.AuthorizationContext.ToUpdateTransmissionChildContext()
                     }).ToList(),
                     NavigationalActions = transmission.NavigationalActions.Select(x => new TransmissionNavigationalActionDto
                     {
                         Title = x.Title,
                         Url = x.Url,
                         ExpiresAt = x.ExpiresAt,
+                        AuthorizationContext = x.AuthorizationContext.ToUpdateTransmissionChildContext()
                     }).ToList(),
                 };
 
@@ -696,4 +709,19 @@ public static class IFlowStepExtensions
     }
 
     private static GetDialogQuerySO CreateGetServiceOwnerDialogQuery(Guid id) => new() { DialogId = id };
+
+    private static Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.AuthorizationContextDto? ToUpdateTransmissionChildContext(
+        this Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.AuthorizationContextDto? source) =>
+        source is null
+            ? null
+            : new()
+            {
+                ServiceResource = source.ServiceResource,
+                AdditionalResourceAttribute = source.AdditionalResourceAttribute,
+                Parties = [.. source.Parties],
+                IncludeDialogParty = source.IncludeDialogParty,
+                Action = source.Action,
+                UnauthorizedPresentation = source.UnauthorizedPresentation
+            };
+
 }

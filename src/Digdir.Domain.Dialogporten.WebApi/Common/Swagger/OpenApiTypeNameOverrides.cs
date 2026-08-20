@@ -23,6 +23,7 @@ internal static class OpenApiTypeNameOverrides
         ["DigdirDomainDialogportenApplicationCommon_Link"] = "Links",
         ["Http_HttpVerb"] = "HttpVerb",
         ["ProblemDetails_Error"] = "ProblemDetailsError",
+        ["V1CommonAuthorizationContexts_AuthorizationContext"] = "AuthorizationContextInput",
         ["V1CommonContent_ContentValue"] = "ContentValue",
         ["V1CommonLocalizations_Localization"] = "Localization",
         // The service resource metadata item types are shared by the public metadata endpoint and the

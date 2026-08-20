@@ -8,11 +8,11 @@ public class Localization
     /// The localized text (or URL if a front-channel embed).
     /// </summary>
     [JsonPropertyName("value")]
-    public string Value { get; set; } = default!;
+    public required string Value { get; set; }
 
     /// <summary>
     /// The language code of the localization in ISO 639-1 format.
     /// </summary>
     [JsonPropertyName("languageCode")]
-    public string LanguageCode { get; set; } = default!;
+    public required string LanguageCode { get; set; }
 }

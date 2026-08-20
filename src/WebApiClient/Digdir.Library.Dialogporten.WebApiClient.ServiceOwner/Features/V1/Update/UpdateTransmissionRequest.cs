@@ -58,7 +58,7 @@ public class UpdateTransmissionRequest
     /// The actor that sent the transmission.
     /// </summary>
     [JsonPropertyName("sender")]
-    public Actor Sender { get; set; } = default!;
+    public required Actor Sender { get; set; }
 
     /// <summary>
     /// The transmission unstructured text content.

@@ -9,7 +9,7 @@ public class CreateDialogTransmissionAttachmentUrl
     /// The fully qualified URL of the attachment.
     /// </summary>
     [JsonPropertyName("url")]
-    public Uri Url { get; set; } = default!;
+    public required Uri Url { get; set; }
 
     /// <summary>
     /// The media type of the attachment.

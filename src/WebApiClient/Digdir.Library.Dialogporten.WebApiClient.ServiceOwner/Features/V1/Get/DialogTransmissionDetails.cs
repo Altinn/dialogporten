@@ -59,13 +59,13 @@ public class DialogTransmissionDetails
     /// The sender actor information for the transmission.
     /// </summary>
     [JsonPropertyName("sender")]
-    public Actor Sender { get; set; } = default!;
+    public required Actor Sender { get; set; }
 
     /// <summary>
     /// The content of the transmission.
     /// </summary>
     [JsonPropertyName("content")]
-    public DialogTransmissionContentDetails Content { get; set; } = default!;
+    public required DialogTransmissionContentDetails Content { get; set; }
 
     /// <summary>
     /// The attachments associated with the transmission.

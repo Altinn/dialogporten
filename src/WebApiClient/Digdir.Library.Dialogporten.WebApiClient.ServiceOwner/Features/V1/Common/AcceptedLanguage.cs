@@ -8,7 +8,7 @@ public class AcceptedLanguage
     public override string ToString() =>
         AcceptedLanguagesHeaderFormatter.FormatAcceptedLanguage(LanguageCode, Weight);
     [JsonPropertyName("languageCode")]
-    public string LanguageCode { get; set; } = default!;
+    public required string LanguageCode { get; set; }
 
     [JsonPropertyName("weight")]
     public int Weight { get; set; }

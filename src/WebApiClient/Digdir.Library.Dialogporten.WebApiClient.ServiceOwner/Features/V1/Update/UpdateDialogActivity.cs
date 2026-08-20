@@ -44,7 +44,7 @@ public class UpdateDialogActivity
     /// The actor that performed the activity.
     /// </summary>
     [JsonPropertyName("performedBy")]
-    public Actor PerformedBy { get; set; } = default!;
+    public required Actor PerformedBy { get; set; }
 
     /// <summary>
     /// Unstructured text describing the activity. Only set if the activity type is "Information".

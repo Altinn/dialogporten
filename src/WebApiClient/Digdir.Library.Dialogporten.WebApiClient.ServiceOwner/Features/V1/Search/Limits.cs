@@ -5,8 +5,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
 public class Limits
 {
     [JsonPropertyName("endUserSearch")]
-    public EndUserSearchLimits EndUserSearch { get; set; } = default!;
+    public required EndUserSearchLimits EndUserSearch { get; set; }
 
     [JsonPropertyName("serviceOwnerSearch")]
-    public ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; } = default!;
+    public required ServiceOwnerSearchLimits ServiceOwnerSearch { get; set; }
 }

@@ -9,7 +9,7 @@ public class CreateDialogTransmissionContent
     /// The transmission title. Must be text/plain.
     /// </summary>
     [JsonPropertyName("title")]
-    public ContentValue Title { get; set; } = default!;
+    public required ContentValue Title { get; set; }
 
     /// <summary>
     /// The transmission summary.

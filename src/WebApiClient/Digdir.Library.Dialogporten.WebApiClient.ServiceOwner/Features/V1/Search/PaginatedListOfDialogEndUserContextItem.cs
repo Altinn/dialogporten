@@ -27,5 +27,5 @@ public class PaginatedListOfDialogEndUserContextItem
     /// The current sorting order of the items
     /// </summary>
     [JsonPropertyName("orderBy")]
-    public string OrderBy { get; set; } = default!;
+    public required string OrderBy { get; set; }
 }

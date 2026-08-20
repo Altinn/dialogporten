@@ -7,13 +7,13 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResourc
 public class ServiceResource
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = default!;
+    public required string Id { get; set; }
 
     [JsonPropertyName("resourceType")]
-    public string ResourceType { get; set; } = default!;
+    public required string ResourceType { get; set; }
 
     [JsonPropertyName("status")]
-    public string Status { get; set; } = default!;
+    public required string Status { get; set; }
 
     [JsonPropertyName("isDelegable")]
     public bool IsDelegable { get; set; }
@@ -25,5 +25,5 @@ public class ServiceResource
     public ICollection<Localization>? Name { get; set; } = [];
 
     [JsonPropertyName("links")]
-    public Links Links { get; set; } = default!;
+    public required Links Links { get; set; }
 }

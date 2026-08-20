@@ -16,7 +16,7 @@ public class DialogListItem
     /// The service owner code representing the organization (service owner) related to this dialog.
     /// </summary>
     [JsonPropertyName("org")]
-    public string Org { get; set; } = default!;
+    public required string Org { get; set; }
 
     /// <summary>
     /// The unique identifier for the revision in UUIDv4 format.
@@ -29,19 +29,19 @@ public class DialogListItem
     /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
     /// </summary>
     [JsonPropertyName("serviceResource")]
-    public string ServiceResource { get; set; } = default!;
+    public required string ServiceResource { get; set; }
 
     /// <summary>
     /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
     /// </summary>
     [JsonPropertyName("serviceResourceType")]
-    public string ServiceResourceType { get; set; } = default!;
+    public required string ServiceResourceType { get; set; }
 
     /// <summary>
     /// The party code representing the organization or person that the dialog belongs to in URN format.
     /// </summary>
     [JsonPropertyName("party")]
-    public string Party { get; set; } = default!;
+    public required string Party { get; set; }
 
     /// <summary>
     /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
@@ -199,13 +199,13 @@ public class DialogListItem
     /// Metadata about the dialog owned by the service owner.
     /// </summary>
     [JsonPropertyName("serviceOwnerContext")]
-    public DialogServiceOwnerContextListItem ServiceOwnerContext { get; set; } = default!;
+    public required DialogServiceOwnerContextListItem ServiceOwnerContext { get; set; }
 
     /// <summary>
     /// Metadata about the dialog owned by end-users.
     /// </summary>
     [JsonPropertyName("endUserContext")]
-    public DialogListItemEndUserContext EndUserContext { get; set; } = default!;
+    public required DialogListItemEndUserContext EndUserContext { get; set; }
 
     /// <summary>
     /// The content of the dialog in search results.

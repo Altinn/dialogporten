@@ -23,13 +23,13 @@ public class CreateDialog
     /// <br/>must own, i.e., be listed as the "competent authority" in the Resource Registry entry.
     /// </summary>
     [JsonPropertyName("serviceResource")]
-    public string ServiceResource { get; set; } = default!;
+    public required string ServiceResource { get; set; }
 
     /// <summary>
     /// The party code representing the organization or person that the dialog belongs to in URN format.
     /// </summary>
     [JsonPropertyName("party")]
-    public string Party { get; set; } = default!;
+    public required string Party { get; set; }
 
     /// <summary>
     /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come

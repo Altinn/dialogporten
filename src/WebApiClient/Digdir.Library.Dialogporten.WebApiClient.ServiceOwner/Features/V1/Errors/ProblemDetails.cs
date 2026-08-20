@@ -32,7 +32,7 @@ public class ProblemDetails
     public ICollection<ProblemDetailsError>? ValidationErrors { get; set; } = [];
 
     [JsonPropertyName("errors")]
-    public IDictionary<string, ICollection<string>> Errors { get; set; } = default!;
+    public required IDictionary<string, ICollection<string>> Errors { get; set; }
 
     [JsonExtensionData]
     public IDictionary<string, object> AdditionalProperties { get; set; } = new Dictionary<string, object>();

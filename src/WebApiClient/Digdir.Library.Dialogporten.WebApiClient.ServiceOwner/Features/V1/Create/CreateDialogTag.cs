@@ -8,5 +8,5 @@ public class CreateDialogTag
     /// A search tag value.
     /// </summary>
     [JsonPropertyName("value")]
-    public string Value { get; set; } = default!;
+    public required string Value { get; set; }
 }

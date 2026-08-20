@@ -113,6 +113,10 @@ public static class DialogMappingExtensions
     /// </summary>
     public static CreateDialog ToCreateDialog(this UpdateDialog source) => new()
     {
+        // ServiceResource and Party have no source on an update body; the caller must set these
+        // required fields on the result before it can be posted (see remarks above).
+        ServiceResource = null!,
+        Party = null!,
         Progress = source.Progress,
         ExtendedStatus = source.ExtendedStatus,
         ExternalReference = source.ExternalReference,

@@ -8,5 +8,5 @@ public class DialogServiceOwnerLabelListItem
     /// A label value.
     /// </summary>
     [JsonPropertyName("value")]
-    public string Value { get; set; } = default!;
+    public required string Value { get; set; }
 }

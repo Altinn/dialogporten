@@ -23,7 +23,7 @@ public class DialogApiActionEndpoint
     /// The fully qualified URL of the API endpoint.
     /// </summary>
     [JsonPropertyName("url")]
-    public Uri Url { get; set; } = default!;
+    public required Uri Url { get; set; }
 
     /// <summary>
     /// The HTTP method that the endpoint expects for this action.

@@ -9,16 +9,16 @@ public class ServiceOwnerIdentifierLookup
     public Guid DialogId { get; set; }
 
     [JsonPropertyName("instanceRef")]
-    public string InstanceRef { get; set; } = default!;
+    public required string InstanceRef { get; set; }
 
     [JsonPropertyName("party")]
-    public string Party { get; set; } = default!;
+    public required string Party { get; set; }
 
     [JsonPropertyName("serviceResource")]
-    public IdentifierLookupServiceResource ServiceResource { get; set; } = default!;
+    public required IdentifierLookupServiceResource ServiceResource { get; set; }
 
     [JsonPropertyName("serviceOwner")]
-    public IdentifierLookupServiceOwner ServiceOwner { get; set; } = default!;
+    public required IdentifierLookupServiceOwner ServiceOwner { get; set; }
 
     [JsonPropertyName("title")]
     public ICollection<Localization>? Title { get; set; } = [];

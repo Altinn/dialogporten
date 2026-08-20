@@ -16,14 +16,14 @@ public class CreateDialogGuiAction
     /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
     /// </summary>
     [JsonPropertyName("action")]
-    public string Action { get; set; } = default!;
+    public required string Action { get; set; }
 
     /// <summary>
     /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
     /// <br/>"urn:dialogporten:unauthorized" if the user is not authorized to perform the action.
     /// </summary>
     [JsonPropertyName("url")]
-    public Uri Url { get; set; } = default!;
+    public required Uri Url { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

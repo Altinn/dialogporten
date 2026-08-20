@@ -29,26 +29,26 @@ public class Dialog
     /// The service owner code representing the organization (service owner) related to this dialog.
     /// </summary>
     [JsonPropertyName("org")]
-    public string Org { get; set; } = default!;
+    public required string Org { get; set; }
 
     /// <summary>
     /// The service identifier for the service that the dialog is related to in URN-format.
     /// <br/>This corresponds to a service resource in the Altinn Resource Registry.
     /// </summary>
     [JsonPropertyName("serviceResource")]
-    public string ServiceResource { get; set; } = default!;
+    public required string ServiceResource { get; set; }
 
     /// <summary>
     /// The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).
     /// </summary>
     [JsonPropertyName("serviceResourceType")]
-    public string ServiceResourceType { get; set; } = default!;
+    public required string ServiceResourceType { get; set; }
 
     /// <summary>
     /// The party code representing the organization or person that the dialog belongs to in URN format.
     /// </summary>
     [JsonPropertyName("party")]
-    public string Party { get; set; } = default!;
+    public required string Party { get; set; }
 
     /// <summary>
     /// Advisory indicator of progress, represented as 1-100 percentage value. 100% representing a dialog that has come
@@ -246,11 +246,11 @@ public class Dialog
     /// Metadata about the dialog owned by the service owner.
     /// </summary>
     [JsonPropertyName("serviceOwnerContext")]
-    public DialogServiceOwnerContext ServiceOwnerContext { get; set; } = default!;
+    public required DialogServiceOwnerContext ServiceOwnerContext { get; set; }
 
     /// <summary>
     /// Metadata about the dialog owned by end-users.
     /// </summary>
     [JsonPropertyName("endUserContext")]
-    public DialogEndUserContext EndUserContext { get; set; } = default!;
+    public required DialogEndUserContext EndUserContext { get; set; }
 }

@@ -10,7 +10,7 @@ public class CreateDialogContent
     /// <br/>Supported media types: text/plain
     /// </summary>
     [JsonPropertyName("title")]
-    public ContentValue Title { get; set; } = default!;
+    public required ContentValue Title { get; set; }
 
     /// <summary>
     /// An optional non-sensitive title of the dialog.

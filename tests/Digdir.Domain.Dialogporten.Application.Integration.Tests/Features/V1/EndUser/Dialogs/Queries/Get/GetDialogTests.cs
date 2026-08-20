@@ -428,7 +428,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x.Transmissions.Should().AllSatisfy(x =>
                 {
                     x.IsAuthorized.Should().BeTrue();
-                    x.Content.ContentReference.Should().NotBeNull();
+                    x.Content!.ContentReference.Should().NotBeNull();
                     x.Content.ContentReference.Value.Should().NotBeEmpty();
                     x.Content.ContentReference.Value.Should().AllSatisfy(v =>
                     {
@@ -462,7 +462,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var transmission = x.Transmissions.Single();
                 transmission.IsAuthorized.Should().BeFalse();
-                transmission.Content.ContentReference.Should().NotBeNull();
+                transmission.Content!.ContentReference.Should().NotBeNull();
                 transmission.Content.ContentReference!.Value.Should().NotBeEmpty()
                     .And.AllSatisfy(localization =>
                         localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));

@@ -97,7 +97,7 @@ public sealed class Dialog
     [GraphQLDescription("The date and time when the dialog content was last updated. Example: 2022-12-31T23:59:59Z")]
     public DateTimeOffset ContentUpdatedAt { get; set; }
 
-    [GraphQLDescription("The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds.")]
+    [GraphQLDescription("The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds. Entities carrying an authorization context are the exception: they are issued their own, narrower 'contextToken' which must be used instead of this token, as the dialog token does not assert their grant.")]
     public string? DialogToken { get; set; }
 
     [GraphQLDescription("The aggregated status of the dialog.")]
@@ -172,10 +172,14 @@ public sealed class Transmission
     public DateTimeOffset CreatedAt { get; set; }
 
     [GraphQLDescription("Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies. Example: mycustomresource, urn:altinn:subresource:mycustomresource, urn:altinn:task:Task_1, urn:altinn:resource:some-other-service-identifier")]
+    [GraphQLDeprecated("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     [GraphQLDescription("Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and the attachments will not be available.")]
     public bool IsAuthorized { get; set; }
+
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific transmission, as determined by its authorization context. Only present when the transmission has an authorization context and the user is authorized. Should be used instead of the dialog token against URLs referred to by this transmission, including front-channel embeds.")]
+    public string? ContextToken { get; set; }
 
     [GraphQLDescription("Arbitrary URI/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use).")]
     public Uri? ExtendedType { get; set; }
@@ -189,14 +193,14 @@ public sealed class Transmission
     [GraphQLDescription("The type of transmission.")]
     public TransmissionType Type { get; set; }
 
-    [GraphQLDescription("The actor that sent the transmission.")]
-    public Actor Sender { get; set; } = null!;
+    [GraphQLDescription("The actor that sent the transmission. Null when the transmission is redacted for the authenticated user (see 'isAuthorized').")]
+    public Actor? Sender { get; set; }
 
     [GraphQLDescription("Indicates whether the dialog transmission has been opened.")]
     public bool IsOpened { get; set; }
 
-    [GraphQLDescription("The transmission unstructured text content.")]
-    public TransmissionContent Content { get; set; } = null!;
+    [GraphQLDescription("The transmission unstructured text content. Null when the transmission is redacted for the authenticated user (see 'isAuthorized').")]
+    public TransmissionContent? Content { get; set; }
 
     [GraphQLDescription("The transmission-level attachments.")]
     public List<Attachment> Attachments { get; set; } = [];
@@ -274,10 +278,14 @@ public sealed class ApiAction
     public string Action { get; set; } = null!;
 
     [GraphQLDescription("Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies.")]
+    [GraphQLDeprecated("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     [GraphQLDescription("True if the authenticated user is authorized for this action. If not, the action will not be available and all endpoints will be replaced with a fixed placeholder.")]
     public bool IsAuthorized { get; set; }
+
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's endpoints.")]
+    public string? ContextToken { get; set; }
 
     [GraphQLDescription("The logical name of the operation the API action refers to.")]
     public string? Name { get; set; }
@@ -342,10 +350,14 @@ public sealed class GuiAction
     public Uri Url { get; set; } = null!;
 
     [GraphQLDescription("Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies.")]
+    [GraphQLDeprecated("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     [GraphQLDescription("Whether the user is authorized to perform the action.")]
     public bool IsAuthorized { get; set; }
+
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL.")]
+    public string? ContextToken { get; set; }
 
     [GraphQLDescription("Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX for delete actions.")]
     public bool IsDeleteDialogAction { get; set; }
@@ -386,6 +398,12 @@ public sealed class Attachment
 
     [GraphQLDescription("The UTC timestamp when the attachment expires and is no longer available.")]
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    [GraphQLDescription("Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be replaced with 'urn:dialogporten:unauthorized'.")]
+    public bool IsAuthorized { get; set; }
+
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific attachment, as determined by its authorization context. Only present when the attachment has an authorization context and the user is authorized. Should be used instead of the dialog token against this attachment's URLs.")]
+    public string? ContextToken { get; set; }
 }
 
 public sealed class AttachmentUrl
@@ -413,6 +431,12 @@ public sealed class TransmissionNavigationalAction
 
     [GraphQLDescription("The UTC timestamp when the navigational action expires and is no longer available.")]
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    [GraphQLDescription("Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be replaced with 'urn:dialogporten:unauthorized'.")]
+    public bool IsAuthorized { get; set; }
+
+    [GraphQLDescription("A token asserting the authenticated user's authorization for this specific navigational action, as determined by its authorization context. Only present when the navigational action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL.")]
+    public string? ContextToken { get; set; }
 }
 
 public enum AttachmentUrlConsumer

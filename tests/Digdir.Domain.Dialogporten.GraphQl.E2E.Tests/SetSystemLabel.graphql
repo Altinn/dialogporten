@@ -1,0 +1,9 @@
+mutation SetSystemLabel($input: SetSystemLabelInput!) {
+  setSystemLabel(input: $input) {
+    success
+    errors {
+      __typename
+      message
+    }
+  }
+}

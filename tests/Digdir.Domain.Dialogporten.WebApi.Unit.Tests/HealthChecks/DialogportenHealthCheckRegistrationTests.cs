@@ -56,6 +56,37 @@ public class DialogportenHealthCheckRegistrationTests
     }
 
     [Fact]
+    public void AddDialogportenHealthChecks_Should_Register_Additional_Probes_Supplied_By_A_Repeated_Call()
+    {
+        // The section guard must not swallow additional probes: a first call may register the
+        // section alone, and a later call may bring the JWT metadata probes. Those must still
+        // land on /health/deep, while the section's own probes stay registered exactly once.
+        var services = BuildServices(ConfigurationWithProbes());
+        services.AddDialogportenHealthChecks(ConfigurationWithProbes(), ProbeSection,
+        [
+            new HealthProbe("Maskinporten", "https://test.maskinporten.no/.well-known")
+        ]);
+
+        // A third call repeating the same additional probe must stay harmless too.
+        services.AddDialogportenHealthChecks(ConfigurationWithProbes(), ProbeSection,
+        [
+            new HealthProbe("Maskinporten", "https://test.maskinporten.no/.well-known")
+        ]);
+
+        var registrations = Registrations(services);
+
+        Assert.Single(registrations, x => x.Name == "Maskinporten");
+        Assert.Single(registrations, x => x.Name == "Altinn CDN");
+        Assert.Equal(
+            registrations.Select(x => x.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+            registrations.Count);
+
+        // Resolving the service is what throws on duplicate names.
+        using var provider = services.BuildServiceProvider();
+        _ = provider.GetRequiredService<HealthCheckService>();
+    }
+
+    [Fact]
     public void AddDialogportenHealthChecks_Should_Resolve_RelativePath_Against_Altinn_BaseUri()
     {
         var services = BuildServices(ConfigurationWithProbes());

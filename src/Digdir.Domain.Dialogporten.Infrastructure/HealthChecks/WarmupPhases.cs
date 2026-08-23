@@ -90,20 +90,20 @@ internal static partial class WarmupPhases
 
         if (result.IsT0 && result.AsT0.Items.Count == 0)
         {
-            EndUserSearchReturnedNoRows(logger, settings.EndUserPid);
+            EndUserSearchReturnedNoRows(logger);
         }
         else if (!result.IsT0)
         {
-            EndUserSearchReturnedNonSuccess(logger, result.Value.GetType().Name, settings.EndUserPid);
+            EndUserSearchReturnedNonSuccess(logger, result.Value.GetType().Name);
         }
     }
 
     [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Skipping end-user search warmup because Infrastructure:Warmup:EndUserPid is not configured.")]
     private static partial void EndUserSearchSkippedMissingPid(ILogger logger);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Warning, Message = "End-user search warmup returned no rows for PID {EndUserPid}.")]
-    private static partial void EndUserSearchReturnedNoRows(ILogger logger, string endUserPid);
+    [LoggerMessage(EventId = 4, Level = LogLevel.Warning, Message = "End-user search warmup returned no rows.")]
+    private static partial void EndUserSearchReturnedNoRows(ILogger logger);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "End-user search warmup returned {ResultType} for PID {EndUserPid}.")]
-    private static partial void EndUserSearchReturnedNonSuccess(ILogger logger, string resultType, string endUserPid);
+    [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "End-user search warmup returned {ResultType}.")]
+    private static partial void EndUserSearchReturnedNonSuccess(ILogger logger, string resultType);
 }

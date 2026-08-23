@@ -53,29 +53,44 @@ public static class DialogportenHealthCheckExtensions
         // registration list, so neither needs to know about the other.
         var healthChecks = services.AddAltinnHealthChecks();
 
-        // Registering the same section twice would register duplicate probe names, which the probes
-        // package rejects at registration. Guard the way AddAltinnHealthChecks guards itself, so a
-        // repeated call stays harmless rather than failing startup.
-        var alreadyRegistered = services
+        // Registering the same section or probe twice would register duplicate probe names, which
+        // the probes package rejects at registration. Guard the way AddAltinnHealthChecks guards
+        // itself, so a repeated call stays harmless rather than failing startup. The section and
+        // the additional probes are guarded independently: a repeated call may legitimately bring
+        // additional probes the first call did not, and those must still register.
+        var sectionAlreadyRegistered = services
             .Select(x => x.ImplementationInstance)
             .OfType<OutboundProbeMarker>()
             .Any(x => string.Equals(x.SectionName, probeSectionPath, StringComparison.OrdinalIgnoreCase));
 
-        if (alreadyRegistered)
+        if (!sectionAlreadyRegistered)
         {
-            return services;
+            services.AddSingleton(new OutboundProbeMarker(probeSectionPath));
+
+            healthChecks.AddOutboundProbes(
+                configuration.GetSection(probeSectionPath),
+                // Only consulted by entries using RelativePath; the package names the offending
+                // configuration path if one needs it and it is missing.
+                probes => probes.BaseUri = ResolveAltinnBaseUri(configuration));
         }
 
-        services.AddSingleton(new OutboundProbeMarker(probeSectionPath));
-
-        healthChecks.AddOutboundProbes(
-            configuration.GetSection(probeSectionPath),
-            // Only consulted by entries using RelativePath; the package names the offending
-            // configuration path if one needs it and it is missing.
-            probes => probes.BaseUri = ResolveAltinnBaseUri(configuration));
+        // Only probes registered by earlier calls are skipped; the snapshot is taken up front so a
+        // duplicate name within a single call still reaches the package and fails loudly, exactly
+        // as a duplicate against a section-configured probe does.
+        var probesAlreadyRegistered = services
+            .Select(x => x.ImplementationInstance)
+            .OfType<AdditionalProbeMarker>()
+            .Select(x => x.ProbeName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var probe in additionalProbes ?? [])
         {
+            if (probesAlreadyRegistered.Contains(probe.Name))
+            {
+                continue;
+            }
+
+            services.AddSingleton(new AdditionalProbeMarker(probe.Name));
             healthChecks.AddOutboundProbe(probe.Name, ParseProbeUrl(probe), probe.Hard);
         }
 
@@ -171,4 +186,6 @@ public static class DialogportenHealthCheckExtensions
     }
 
     private sealed record OutboundProbeMarker(string SectionName);
+
+    private sealed record AdditionalProbeMarker(string ProbeName);
 }

@@ -186,8 +186,12 @@ The run budget must stay **larger than the sum of the per-phase budgets** (70s t
 `optional: true` only covers a phase *failing*; when the **run** budget fires it is recorded as a
 warmup failure regardless of which phase it interrupted, and that failure is terminal — the state
 never returns to Healthy, so `/health/readiness` stays 503 for the life of the process and the
-replica never joins rotation. Keeping the run budget above the phase budgets means only the
-per-phase budgets can ever fire, and an optional phase that overruns is skipped as intended.
+replica never joins rotation. Keeping the run budget above the phase budgets means that, for a
+phase observing cancellation, only its per-phase budget can ever fire, and an optional phase
+that overruns is skipped as intended. A phase that ignores its token forfeits that guarantee:
+it can burn through its own budget into the run budget — escalating an optional overrun into
+the terminal failure — or, if it never observes cancellation at all, hold readiness at Pending
+indefinitely. All four phases above pass their token through to the queries they run.
 
 `optional: true` means a phase failure is logged and warmup continues, so the phase cannot fail
 readiness. Optional phases therefore contain **no exception handling of their own** — catching

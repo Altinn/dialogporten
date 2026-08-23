@@ -125,7 +125,10 @@ internal sealed class WarmupSettingsValidator : AbstractValidator<WarmupSettings
     public WarmupSettingsValidator()
     {
         RuleFor(x => x.TimeoutSeconds)
-            .GreaterThan(0);
+            .GreaterThan(0)
+            // Altinn.AspNet.HealthChecks.Warmup rejects anything above an hour at host startup;
+            // bounding it here too reports it with the rest of the infrastructure settings.
+            .LessThanOrEqualTo(3600);
 
         RuleFor(x => x.DbConnectionsToOpen)
             .GreaterThanOrEqualTo(0);

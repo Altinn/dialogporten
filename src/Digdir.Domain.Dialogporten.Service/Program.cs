@@ -8,7 +8,6 @@ using Digdir.Domain.Dialogporten.Service.Common;
 using Digdir.Library.Utils.AspNet;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using Npgsql;
 using OpenTelemetry.Metrics;
 using Serilog;
@@ -86,17 +85,13 @@ static void BuildAndRun(string[] args)
             })
             .Build()
         .AddTransient<IUser, ServiceUser>()
-        .AddAspNetHealthChecks((x, y) =>
-        {
-            builder.Configuration.GetSection(nameof(HealthCheckSettings)).Bind(x.HealthCheckSettings);
-
-            x.HealthCheckSettings.HttpGetEndpointsToCheck = AspNetUtilitiesExtensions.ResolveHttpGetEndpointsToCheck(
-                x.HealthCheckSettings.HttpGetEndpointsToCheck,
-                y.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri);
-        });
+        // Top-level "HealthProbes", unlike WebApi/GraphQL which nest it under their own section.
+        // No Service appsettings file defines it, but Azure App Configuration can inject it at
+        // runtime, so the key is registered regardless.
+        .AddDialogportenHealthChecks(builder.Configuration, DialogportenHealthCheckExtensions.ProbeSectionName);
 
     var app = builder.Build();
-    app.MapAspNetHealthChecks();
+    app.MapDialogportenHealthChecks();
     app.UseHttpsRedirection()
         .UseAzureConfiguration();
     app.Run();

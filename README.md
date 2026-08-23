@@ -176,7 +176,9 @@ See [docs/RestoreDatabase.md](docs/RestoreDatabase.md)
 
 ## Health Checks
 
-The project includes integrated health checks that are exposed through standard endpoints:
+The project uses the [`Altinn.AspNet.HealthChecks`](https://www.nuget.org/packages/Altinn.AspNet.HealthChecks)
+packages for the endpoint convention, the config-driven outbound probes and the startup warmup.
+Health checks are exposed through standard endpoints:
 - `/health/startup` - Dependency checks
 - `/health/liveness` - Self checks
 - `/health/readiness` - Critical service checks

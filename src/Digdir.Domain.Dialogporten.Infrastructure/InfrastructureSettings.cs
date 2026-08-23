@@ -1,5 +1,6 @@
 ﻿using Altinn.ApiClients.Maskinporten.Config;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 using FluentValidation;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
@@ -129,6 +130,18 @@ internal sealed class WarmupSettingsValidator : AbstractValidator<WarmupSettings
             // Altinn.AspNet.HealthChecks.Warmup rejects anything above an hour at host startup;
             // bounding it here too reports it with the rest of the infrastructure settings.
             .LessThanOrEqualTo(3600);
+
+        // The run budget firing is recorded as a terminal warmup failure even when it interrupts
+        // an optional phase, permanently failing readiness. It must therefore strictly exceed the
+        // sum of the per-phase budgets that will actually be registered (see the phase
+        // registration in InfrastructureExtensions, which uses the same WarmupPhases constants).
+        RuleFor(x => x.TimeoutSeconds)
+            .GreaterThan(x => WarmupPhases.TotalPhaseBudgetSeconds(x.RunEndUserSearch))
+            .WithMessage(x =>
+                $"'{{PropertyName}}' must be greater than the sum of the registered warmup phase budgets " +
+                $"({WarmupPhases.TotalPhaseBudgetSeconds(x.RunEndUserSearch)}s with RunEndUserSearch={x.RunEndUserSearch}); " +
+                "otherwise the run timeout can interrupt a phase and permanently fail readiness.")
+            .When(x => x.Enabled);
 
         RuleFor(x => x.DbConnectionsToOpen)
             .GreaterThanOrEqualTo(0);

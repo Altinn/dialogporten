@@ -610,13 +610,13 @@ public static class InfrastructureExtensions
             // phase cannot spend the whole run and leave a later phase either unrun or blamed for
             // the timeout. The two optional phases go last and are the ones that talk to Altinn or
             // run a real search, so they get the tighter budgets.
-            options.AddPhase("db-pool", WarmupPhases.WarmupDbPoolAsync, timeoutSeconds: 20);
-            options.AddPhase("ef-model", WarmupPhases.WarmupEfModelAsync, timeoutSeconds: 20);
-            options.AddPhase("service-resource-metadata", WarmupPhases.WarmupServiceResourceMetadataAsync, optional: true, timeoutSeconds: 15);
+            options.AddPhase("db-pool", WarmupPhases.WarmupDbPoolAsync, timeoutSeconds: WarmupPhases.DbPoolBudgetSeconds);
+            options.AddPhase("ef-model", WarmupPhases.WarmupEfModelAsync, timeoutSeconds: WarmupPhases.EfModelBudgetSeconds);
+            options.AddPhase("service-resource-metadata", WarmupPhases.WarmupServiceResourceMetadataAsync, optional: true, timeoutSeconds: WarmupPhases.ServiceResourceMetadataBudgetSeconds);
 
             if (settings.Warmup.RunEndUserSearch)
             {
-                options.AddPhase("end-user-search", WarmupPhases.WarmupEndUserSearchAsync, optional: true, timeoutSeconds: 15);
+                options.AddPhase("end-user-search", WarmupPhases.WarmupEndUserSearchAsync, optional: true, timeoutSeconds: WarmupPhases.EndUserSearchBudgetSeconds);
             }
         });
 

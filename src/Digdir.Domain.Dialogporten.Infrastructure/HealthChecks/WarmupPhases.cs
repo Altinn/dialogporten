@@ -26,6 +26,25 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 /// </remarks>
 internal static partial class WarmupPhases
 {
+    // Per-phase budgets (seconds). The phase registration in InfrastructureExtensions and the
+    // run-budget rule in WarmupSettingsValidator both read these, so they cannot drift apart.
+    internal const int DbPoolBudgetSeconds = 20;
+    internal const int EfModelBudgetSeconds = 20;
+    internal const int ServiceResourceMetadataBudgetSeconds = 15;
+    internal const int EndUserSearchBudgetSeconds = 15;
+
+    /// <summary>
+    /// The sum of the per-phase budgets that will actually be registered for a given
+    /// configuration. The run budget (Infrastructure:Warmup:TimeoutSeconds) must strictly
+    /// exceed this: the run budget firing is a terminal warmup failure even when it interrupts
+    /// an optional phase.
+    /// </summary>
+    internal static int TotalPhaseBudgetSeconds(bool runEndUserSearch) =>
+        DbPoolBudgetSeconds
+        + EfModelBudgetSeconds
+        + ServiceResourceMetadataBudgetSeconds
+        + (runEndUserSearch ? EndUserSearchBudgetSeconds : 0);
+
     internal static async Task WarmupDbPoolAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
         var settings = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Warmup;

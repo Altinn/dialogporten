@@ -182,7 +182,9 @@ spending the whole run: without it a hung optional phase starves whatever comes 
 budgets work by cancelling the token handed to the phase, so they bound only work that observes
 cancellation.
 
-The run budget must stay **larger than the sum of the per-phase budgets** (70s today, hence 80s).
+The run budget must stay **larger than the sum of the per-phase budgets** (70s today with
+`RunEndUserSearch` on, 55s without, hence 80s) — `WarmupSettingsValidator` enforces this at
+startup against the same `WarmupPhases` budget constants the registration uses.
 `optional: true` only covers a phase *failing*; when the **run** budget fires it is recorded as a
 warmup failure regardless of which phase it interrupted, and that failure is terminal — the state
 never returns to Healthy, so `/health/readiness` stays 503 for the life of the process and the

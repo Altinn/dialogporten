@@ -165,7 +165,7 @@ instead of as one aggregate entry.
 
 This solves cold-start latency: a fresh pod should not take production traffic until its
 connection pool and EF model are primed. The library owns the machinery; Dialogporten supplies
-the phases in `Infrastructure/HealthChecks/WarmupPhases.cs`:
+the phases in `src/Digdir.Domain.Dialogporten.Infrastructure/HealthChecks/WarmupPhases.cs`:
 
 | Phase | Optional | What it primes |
 | --- | --- | --- |

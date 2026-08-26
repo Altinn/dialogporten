@@ -77,4 +77,41 @@ internal static class AttachmentMappingExtensions
         MediaType = source.MediaType,
         ConsumerType = source.ConsumerType,
     };
+
+    // Create/Update -> Get. Get requires a non-null Id; the input Id is optional (server-generated when omitted)
+    // and is defaulted to Guid.Empty when absent.
+
+    internal static DialogAttachment ToDialogAttachment(this CreateDialogAttachment source) => new()
+    {
+        Id = source.Id ?? default,
+        DisplayName = source.DisplayName,
+        Name = source.Name,
+        Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList(),
+        ExpiresAt = source.ExpiresAt,
+    };
+
+    internal static DialogAttachment ToDialogAttachment(this UpdateDialogAttachment source) => new()
+    {
+        Id = source.Id ?? default,
+        DisplayName = source.DisplayName,
+        Name = source.Name,
+        Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList(),
+        ExpiresAt = source.ExpiresAt,
+    };
+
+    private static DialogAttachmentUrl ToDialogAttachmentUrl(this CreateDialogAttachmentUrl source) => new()
+    {
+        Id = source.Id ?? default,
+        Url = source.Url,
+        MediaType = source.MediaType,
+        ConsumerType = source.ConsumerType,
+    };
+
+    private static DialogAttachmentUrl ToDialogAttachmentUrl(this UpdateDialogAttachmentUrl source) => new()
+    {
+        Id = source.Id ?? default,
+        Url = source.Url,
+        MediaType = source.MediaType,
+        ConsumerType = source.ConsumerType,
+    };
 }

@@ -65,6 +65,35 @@ internal static class ActionMappingExtensions
         Prompt = source.Prompt,
     };
 
+    // Create/Update -> Get. The Get-only IsAuthorized field has no source and is left null. Id and HttpMethod are
+    // optional on the input models and are defaulted (Guid.Empty / default HttpVerb) when absent.
+
+    internal static DialogGuiAction ToDialogGuiAction(this CreateDialogGuiAction source) => new()
+    {
+        Id = source.Id ?? default,
+        Action = source.Action,
+        Url = source.Url,
+        AuthorizationAttribute = source.AuthorizationAttribute,
+        IsDeleteDialogAction = source.IsDeleteDialogAction,
+        HttpMethod = source.HttpMethod ?? default,
+        Priority = source.Priority,
+        Title = source.Title,
+        Prompt = source.Prompt,
+    };
+
+    internal static DialogGuiAction ToDialogGuiAction(this UpdateDialogGuiAction source) => new()
+    {
+        Id = source.Id ?? default,
+        Action = source.Action,
+        Url = source.Url,
+        AuthorizationAttribute = source.AuthorizationAttribute,
+        IsDeleteDialogAction = source.IsDeleteDialogAction,
+        HttpMethod = source.HttpMethod ?? default,
+        Priority = source.Priority,
+        Title = source.Title,
+        Prompt = source.Prompt,
+    };
+
     // API actions
 
     internal static CreateDialogApiAction ToCreateDialogApiAction(this DialogApiAction source) => new()
@@ -101,6 +130,24 @@ internal static class ActionMappingExtensions
         AuthorizationAttribute = source.AuthorizationAttribute,
         Name = source.Name,
         Endpoints = source.Endpoints?.Select(x => x.ToCreateDialogApiActionEndpoint()).ToList(),
+    };
+
+    internal static DialogApiAction ToDialogApiAction(this CreateDialogApiAction source) => new()
+    {
+        Id = source.Id ?? default,
+        Action = source.Action,
+        AuthorizationAttribute = source.AuthorizationAttribute,
+        Name = source.Name,
+        Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList(),
+    };
+
+    internal static DialogApiAction ToDialogApiAction(this UpdateDialogApiAction source) => new()
+    {
+        Id = source.Id ?? default,
+        Action = source.Action,
+        AuthorizationAttribute = source.AuthorizationAttribute,
+        Name = source.Name,
+        Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList(),
     };
 
     // API action endpoints
@@ -147,6 +194,32 @@ internal static class ActionMappingExtensions
     private static CreateDialogApiActionEndpoint ToCreateDialogApiActionEndpoint(this UpdateDialogApiActionEndpoint source) => new()
     {
         Id = source.Id,
+        Version = source.Version,
+        Url = source.Url,
+        HttpMethod = source.HttpMethod,
+        DocumentationUrl = source.DocumentationUrl,
+        RequestSchema = source.RequestSchema,
+        ResponseSchema = source.ResponseSchema,
+        Deprecated = source.Deprecated,
+        SunsetAt = source.SunsetAt,
+    };
+
+    private static DialogApiActionEndpoint ToDialogApiActionEndpoint(this CreateDialogApiActionEndpoint source) => new()
+    {
+        Id = source.Id ?? default,
+        Version = source.Version,
+        Url = source.Url,
+        HttpMethod = source.HttpMethod,
+        DocumentationUrl = source.DocumentationUrl,
+        RequestSchema = source.RequestSchema,
+        ResponseSchema = source.ResponseSchema,
+        Deprecated = source.Deprecated,
+        SunsetAt = source.SunsetAt,
+    };
+
+    private static DialogApiActionEndpoint ToDialogApiActionEndpoint(this UpdateDialogApiActionEndpoint source) => new()
+    {
+        Id = source.Id ?? default,
         Version = source.Version,
         Url = source.Url,
         HttpMethod = source.HttpMethod,

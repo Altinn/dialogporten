@@ -53,4 +53,28 @@ internal static class ActivityMappingExtensions
         PerformedBy = source.PerformedBy,
         Description = source.Description,
     };
+
+    // Create/Update -> Get. The Get Id is non-null; the optional input Id is defaulted to Guid.Empty when absent.
+
+    internal static DialogActivity ToDialogActivity(this CreateDialogActivity source) => new()
+    {
+        Id = source.Id ?? default,
+        CreatedAt = source.CreatedAt,
+        ExtendedType = source.ExtendedType,
+        Type = source.Type,
+        TransmissionId = source.TransmissionId,
+        PerformedBy = source.PerformedBy,
+        Description = source.Description,
+    };
+
+    internal static DialogActivity ToDialogActivity(this UpdateDialogActivity source) => new()
+    {
+        Id = source.Id ?? default,
+        CreatedAt = source.CreatedAt,
+        ExtendedType = source.ExtendedType,
+        Type = source.Type,
+        TransmissionId = source.TransmissionId,
+        PerformedBy = source.PerformedBy,
+        Description = source.Description,
+    };
 }

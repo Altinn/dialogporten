@@ -57,4 +57,28 @@ internal static class ContentMappingExtensions
         ExtendedStatus = source.ExtendedStatus,
         MainContentReference = source.MainContentReference,
     };
+
+    internal static Content ToDialogContent(this CreateDialogContent source) => new()
+    {
+        Title = source.Title,
+        NonSensitiveTitle = source.NonSensitiveTitle,
+        Summary = source.Summary,
+        NonSensitiveSummary = source.NonSensitiveSummary,
+        SenderName = source.SenderName,
+        AdditionalInfo = source.AdditionalInfo,
+        ExtendedStatus = source.ExtendedStatus,
+        MainContentReference = source.MainContentReference,
+    };
+
+    internal static Content ToDialogContent(this UpdateDialogContent source) => new()
+    {
+        Title = source.Title,
+        NonSensitiveTitle = source.NonSensitiveTitle,
+        Summary = source.Summary,
+        NonSensitiveSummary = source.NonSensitiveSummary,
+        SenderName = source.SenderName,
+        AdditionalInfo = source.AdditionalInfo,
+        ExtendedStatus = source.ExtendedStatus,
+        MainContentReference = source.MainContentReference,
+    };
 }

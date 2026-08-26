@@ -135,6 +135,80 @@ public static class DialogMappingExtensions
         Activities = source.Activities?.Select(x => x.ToCreateDialogActivity()).ToList(),
     };
 
+    /// <summary>
+    /// Maps a <see cref="CreateDialog"/> to a <see cref="Dialog"/> response DTO, typically to reconstruct the
+    /// server view of a dialog locally (for example in tests or when round-tripping a create payload). Server-owned
+    /// fields that have no source on the create body are defaulted and must be set by the caller if needed:
+    /// <c>Org</c>, <c>ServiceResourceType</c> (both <see langword="null"/>), <c>Revision</c>, the created/updated/
+    /// content-updated timestamps, the transmission counts and the seen-log collections. The end-user context is
+    /// reconstructed from the create <c>SystemLabel</c> (defaulting to an empty label set), and a missing status
+    /// defaults to <see cref="DialogStatusInput.New"/> before conversion.
+    /// </summary>
+    public static Dialog ToDialog(this CreateDialog source) => new()
+    {
+        // Server-owned required fields with no source on a create body; the caller must set these on the result.
+        Org = null!,
+        ServiceResourceType = null!,
+        Id = source.Id ?? default,
+        IdempotentKey = source.IdempotentKey,
+        ServiceResource = source.ServiceResource,
+        Party = source.Party,
+        Progress = source.Progress,
+        ExtendedStatus = source.ExtendedStatus,
+        ExternalReference = source.ExternalReference,
+        VisibleFrom = source.VisibleFrom,
+        DueAt = source.DueAt,
+        Process = source.Process,
+        PrecedingProcess = source.PrecedingProcess,
+        ExpiresAt = source.ExpiresAt,
+        IsApiOnly = source.IsApiOnly,
+        CreatedAt = source.CreatedAt ?? default,
+        UpdatedAt = source.UpdatedAt ?? default,
+        Status = (source.Status ?? DialogStatusInput.New).ToDialogStatus(),
+        Content = source.Content?.ToDialogContent(),
+        SearchTags = source.SearchTags?.Select(x => x.ToDialogTag()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToDialogAttachment()).ToList(),
+        Transmissions = source.Transmissions?.Select(x => x.ToDialogTransmission()).ToList(),
+        GuiActions = source.GuiActions?.Select(x => x.ToDialogGuiAction()).ToList(),
+        ApiActions = source.ApiActions?.Select(x => x.ToDialogApiAction()).ToList(),
+        Activities = source.Activities?.Select(x => x.ToDialogActivity()).ToList(),
+        ServiceOwnerContext = source.ServiceOwnerContext?.ToDialogServiceOwnerContext() ?? new DialogServiceOwnerContext(),
+        EndUserContext = source.SystemLabel.ToDialogEndUserContext(),
+    };
+
+    /// <summary>
+    /// Maps an <see cref="UpdateDialog"/> to a <see cref="Dialog"/> response DTO. The update body carries none of the
+    /// identity, party, visibility, timestamp, service-owner-context or end-user-context fields, so <c>Org</c>,
+    /// <c>ServiceResource</c>, <c>ServiceResourceType</c> and <c>Party</c> are left <see langword="null"/> and the
+    /// contexts are created empty; the caller must populate anything it needs on the result.
+    /// </summary>
+    public static Dialog ToDialog(this UpdateDialog source) => new()
+    {
+        // Identity, party and service-owner fields have no source on an update body; the caller must set these.
+        Org = null!,
+        ServiceResource = null!,
+        ServiceResourceType = null!,
+        Party = null!,
+        Progress = source.Progress,
+        ExtendedStatus = source.ExtendedStatus,
+        ExternalReference = source.ExternalReference,
+        DueAt = source.DueAt,
+        Process = source.Process,
+        PrecedingProcess = source.PrecedingProcess,
+        ExpiresAt = source.ExpiresAt,
+        IsApiOnly = source.IsApiOnly,
+        Status = source.Status.ToDialogStatus(),
+        Content = source.Content?.ToDialogContent(),
+        SearchTags = source.SearchTags?.Select(x => x.ToDialogTag()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToDialogAttachment()).ToList(),
+        Transmissions = source.Transmissions?.Select(x => x.ToDialogTransmission()).ToList(),
+        GuiActions = source.GuiActions?.Select(x => x.ToDialogGuiAction()).ToList(),
+        ApiActions = source.ApiActions?.Select(x => x.ToDialogApiAction()).ToList(),
+        Activities = source.Activities?.Select(x => x.ToDialogActivity()).ToList(),
+        ServiceOwnerContext = new DialogServiceOwnerContext(),
+        EndUserContext = new DialogEndUserContext(),
+    };
+
     // Search tags
 
     private static CreateDialogTag ToCreateDialogTag(this DialogTag source) => new() { Value = source.Value };
@@ -145,11 +219,22 @@ public static class DialogMappingExtensions
 
     private static CreateDialogTag ToCreateDialogTag(this UpdateDialogTag source) => new() { Value = source.Value };
 
+    private static DialogTag ToDialogTag(this CreateDialogTag source) => new() { Value = source.Value };
+
+    private static DialogTag ToDialogTag(this UpdateDialogTag source) => new() { Value = source.Value };
+
     // System label: pick the category label (Default/Bin/Archive) from the end-user context, defaulting to
     // Default. The obsolete top-level Dialog.SystemLabel is intentionally not used.
     private static SystemLabel ToSystemLabel(this DialogEndUserContext source) =>
         source.SystemLabels?.FirstOrDefault(x => x is SystemLabel.Default or SystemLabel.Bin or SystemLabel.Archive)
      ?? SystemLabel.Default;
+
+    // Reconstruct the end-user context from the create system label. A missing label yields an empty label set
+    // (the server would default it to Default on creation).
+    private static DialogEndUserContext ToDialogEndUserContext(this SystemLabel? source) => new()
+    {
+        SystemLabels = source is null ? [] : [source.Value],
+    };
 
     // Service owner context / labels (create-only; the update body has no service-owner context)
 
@@ -159,6 +244,16 @@ public static class DialogMappingExtensions
     };
 
     private static CreateDialogServiceOwnerLabel ToCreateDialogServiceOwnerLabel(this DialogServiceOwnerLabel source) => new()
+    {
+        Value = source.Value,
+    };
+
+    private static DialogServiceOwnerContext ToDialogServiceOwnerContext(this CreateDialogServiceOwnerContext source) => new()
+    {
+        ServiceOwnerLabels = source.ServiceOwnerLabels?.Select(x => x.ToDialogServiceOwnerLabel()).ToList(),
+    };
+
+    private static DialogServiceOwnerLabel ToDialogServiceOwnerLabel(this CreateDialogServiceOwnerLabel source) => new()
     {
         Value = source.Value,
     };

@@ -16,3 +16,17 @@ services:
         condition: service_healthy
       dialogporten-migrations:
         condition: service_completed_successfully
+
+  dialogporten-generate-searchterms-job:
+    build:
+      context: .
+      dockerfile: src/Digdir.Domain.Dialogporten.Janitor/Dockerfile
+    environment:
+      - Infrastructure:DialogDbConnectionString=${DB_CONNECTION_STRING}
+      - DOTNET_ENVIRONMENT=Development
+    command: [ "generate-searchterms" ]
+    depends_on:
+      dialogporten-postgres:
+        condition: service_healthy
+      dialogporten-migrations:
+        condition: service_completed_successfully

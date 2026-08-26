@@ -4514,6 +4514,37 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GetSearchTermsResponse
+    {
+
+        /// <summary>The resolved language of the returned list (e.g. "nb", "nn", "en").</summary>
+        [JsonPropertyName("l")]
+        public string Language { get; set; } = default!;
+
+        /// <summary>When the underlying generation run produced this list.</summary>
+        [JsonPropertyName("generatedAt")]
+        public System.DateTimeOffset GeneratedAt { get; set; } = default!;
+
+        [JsonPropertyName("words")]
+        public ICollection<SearchTermResponseItem>? Words { get; set; } = default!;
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class SearchTermResponseItem
+    {
+
+        /// <summary>The search term (canonical surface form).</summary>
+        [JsonPropertyName("w")]
+        public string Word { get; set; } = default!;
+
+        /// <summary>The unprefixed service resource identifiers (without "urn:altinn:resource:") the term appears in.</summary>
+        [JsonPropertyName("s")]
+        public ICollection<string>? Resources { get; set; } = default!;
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class EndUserSearchLimits
     {
 

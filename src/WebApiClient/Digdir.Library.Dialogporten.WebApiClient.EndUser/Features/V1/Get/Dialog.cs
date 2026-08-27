@@ -183,43 +183,43 @@ public class Dialog
     /// The attachments associated with the dialog (on an aggregate level).
     /// </summary>
     [JsonPropertyName("attachments")]
-    public ICollection<DialogAttachment>? Attachments { get; set; } = [];
+    public ICollection<DialogAttachment> Attachments { get; set; } = [];
 
     /// <summary>
     /// The immutable list of transmissions associated with the dialog.
     /// </summary>
     [JsonPropertyName("transmissions")]
-    public ICollection<DialogTransmission>? Transmissions { get; set; } = [];
+    public ICollection<DialogTransmission> Transmissions { get; set; } = [];
 
     /// <summary>
     /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
     /// </summary>
     [JsonPropertyName("guiActions")]
-    public ICollection<DialogGuiAction>? GuiActions { get; set; } = [];
+    public ICollection<DialogGuiAction> GuiActions { get; set; } = [];
 
     /// <summary>
     /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
     /// </summary>
     [JsonPropertyName("apiActions")]
-    public ICollection<DialogApiAction>? ApiActions { get; set; } = [];
+    public ICollection<DialogApiAction> ApiActions { get; set; } = [];
 
     /// <summary>
     /// An immutable list of activities associated with the dialog.
     /// </summary>
     [JsonPropertyName("activities")]
-    public ICollection<DialogActivity>? Activities { get; set; } = [];
+    public ICollection<DialogActivity> Activities { get; set; } = [];
 
     /// <summary>
     /// The list of seen log entries for the dialog newer than the dialog UpdatedAt date.
     /// </summary>
     [JsonPropertyName("seenSinceLastUpdate")]
-    public ICollection<DialogSeenLog>? SeenSinceLastUpdate { get; set; } = [];
+    public ICollection<DialogSeenLog> SeenSinceLastUpdate { get; set; } = [];
 
     /// <summary>
     /// The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date.
     /// </summary>
     [JsonPropertyName("seenSinceLastContentUpdate")]
-    public ICollection<DialogSeenLog>? SeenSinceLastContentUpdate { get; set; } = [];
+    public ICollection<DialogSeenLog> SeenSinceLastContentUpdate { get; set; } = [];
 
     /// <summary>
     /// Indicates whether a dialog has been seen since its last content update.

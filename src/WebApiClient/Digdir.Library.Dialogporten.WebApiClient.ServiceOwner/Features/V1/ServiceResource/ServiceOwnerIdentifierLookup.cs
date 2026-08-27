@@ -21,8 +21,8 @@ public class ServiceOwnerIdentifierLookup
     public required IdentifierLookupServiceOwner ServiceOwner { get; set; }
 
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; } = [];
+    public ICollection<Localization> Title { get; set; } = [];
 
     [JsonPropertyName("nonSensitiveTitle")]
-    public ICollection<Localization>? NonSensitiveTitle { get; set; } = [];
+    public ICollection<Localization> NonSensitiveTitle { get; set; } = [];
 }

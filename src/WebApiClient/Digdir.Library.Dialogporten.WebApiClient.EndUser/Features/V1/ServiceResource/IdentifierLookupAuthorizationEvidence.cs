@@ -20,5 +20,5 @@ public class IdentifierLookupAuthorizationEvidence
     public bool ViaInstanceDelegation { get; set; }
 
     [JsonPropertyName("evidence")]
-    public ICollection<IdentifierLookupAuthorizationEvidenceItem>? Evidence { get; set; } = [];
+    public ICollection<IdentifierLookupAuthorizationEvidenceItem> Evidence { get; set; } = [];
 }

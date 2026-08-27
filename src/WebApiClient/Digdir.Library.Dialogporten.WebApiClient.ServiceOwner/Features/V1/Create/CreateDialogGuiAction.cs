@@ -60,12 +60,12 @@ public class CreateDialogGuiAction
     /// The title of the action, this should be short and in verb form. Must be text/plain.
     /// </summary>
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; } = [];
+    public ICollection<Localization> Title { get; set; } = [];
 
     /// <summary>
     /// If there should be a prompt asking the user for confirmation before the action is executed,
     /// <br/>this field should contain the prompt text.
     /// </summary>
     [JsonPropertyName("prompt")]
-    public ICollection<Localization>? Prompt { get; set; } = [];
+    public ICollection<Localization> Prompt { get; set; } = [];
 }

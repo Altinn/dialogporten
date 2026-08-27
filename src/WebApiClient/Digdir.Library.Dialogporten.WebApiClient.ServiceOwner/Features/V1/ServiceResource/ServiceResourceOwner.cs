@@ -12,5 +12,5 @@ public class ServiceResourceOwner
     public required string Code { get; set; }
 
     [JsonPropertyName("name")]
-    public ICollection<Localization>? Name { get; set; } = [];
+    public ICollection<Localization> Name { get; set; } = [];
 }

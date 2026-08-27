@@ -31,10 +31,10 @@ public class EndUserTransmissionMappingExtensionsTests
         Assert.Same(source.Sender, result.Sender);
         Assert.Same(source.Content.Title, result.Content.Title);
 
-        var attachment = Assert.Single(result.Attachments!);
-        var url = Assert.Single(attachment.Urls!);
-        Assert.Equal(source.Attachments!.Single().Urls!.Single().Url, url.Url);
-        Assert.Single(result.NavigationalActions!);
+        var attachment = Assert.Single(result.Attachments);
+        var url = Assert.Single(attachment.Urls);
+        Assert.Equal(source.Attachments.Single().Urls.Single().Url, url.Url);
+        Assert.Single(result.NavigationalActions);
     }
 
     [Fact]
@@ -50,21 +50,23 @@ public class EndUserTransmissionMappingExtensionsTests
         Assert.False(result.IsOpened);
         Assert.Same(source.Sender, result.Sender);
         Assert.Same(source.Content.Title, result.Content.Title);
-        Assert.Single(result.Attachments!.Single().Urls!);
-        Assert.Single(result.NavigationalActions!);
+        Assert.Single(result.Attachments.Single().Urls);
+        Assert.Single(result.NavigationalActions);
     }
 
     [Fact]
-    public void ToDialogTransmission_FromDetails_NullCollectionsStayNull()
+    public void ToDialogTransmission_FromDetails_NullCollectionsBecomeEmpty()
     {
         var source = FullDetails();
-        source.Attachments = null;
-        source.NavigationalActions = null;
+        source.Attachments = null!;
+        source.NavigationalActions = null!;
 
         var result = source.ToDialogTransmission();
 
-        Assert.Null(result.Attachments);
-        Assert.Null(result.NavigationalActions);
+        // The target collections are non-nullable and default to empty, so a null source
+        // is normalized to an empty collection rather than propagating null.
+        Assert.Empty(result.Attachments);
+        Assert.Empty(result.NavigationalActions);
     }
 
     [Fact]
@@ -76,8 +78,8 @@ public class EndUserTransmissionMappingExtensionsTests
 
         var result = source.ToDialogTransmission();
 
-        Assert.Empty(result.Attachments!);
-        Assert.Empty(result.NavigationalActions!);
+        Assert.Empty(result.Attachments);
+        Assert.Empty(result.NavigationalActions);
     }
 
     private static ContentValue ContentValueOf(string value) => new()

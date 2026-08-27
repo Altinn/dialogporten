@@ -46,9 +46,9 @@ public static class DialogMappingExtensions
         FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
         FromPartyTransmissionsCount = source.FromPartyTransmissionsCount,
         Content = source.Content?.ToContent()!,
-        Activities = source.LatestActivity is null ? null : [source.LatestActivity.ToDialogActivity()],
-        SeenSinceLastUpdate = source.SeenSinceLastUpdate?.Select(x => x.ToDialogSeenLog()).ToList(),
-        SeenSinceLastContentUpdate = source.SeenSinceLastContentUpdate?.Select(x => x.ToDialogSeenLog()).ToList(),
+        Activities = source.LatestActivity is null ? [] : [source.LatestActivity.ToDialogActivity()],
+        SeenSinceLastUpdate = source.SeenSinceLastUpdate?.Select(x => x.ToDialogSeenLog()).ToList() ?? [],
+        SeenSinceLastContentUpdate = source.SeenSinceLastContentUpdate?.Select(x => x.ToDialogSeenLog()).ToList() ?? [],
         EndUserContext = source.EndUserContext.ToDialogEndUserContext(),
     };
 

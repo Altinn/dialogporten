@@ -16,5 +16,5 @@ public class DialogListItemEndUserContext
     /// </summary>
     [JsonPropertyName("systemLabels")]
     // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-    public ICollection<SystemLabel>? SystemLabels { get; set; } = [];
+    public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 }

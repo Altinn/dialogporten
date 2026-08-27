@@ -102,7 +102,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
         Name = source.Name,
-        Endpoints = source.Endpoints?.Select(x => x.ToCreateDialogApiActionEndpoint()).ToList(),
+        Endpoints = source.Endpoints?.Select(x => x.ToCreateDialogApiActionEndpoint()).ToList() ?? [],
     };
 
     internal static UpdateDialogApiAction ToUpdateDialogApiAction(this DialogApiAction source) => new()
@@ -111,7 +111,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
         Name = source.Name,
-        Endpoints = source.Endpoints?.Select(x => x.ToUpdateDialogApiActionEndpoint()).ToList(),
+        Endpoints = source.Endpoints?.Select(x => x.ToUpdateDialogApiActionEndpoint()).ToList() ?? [],
     };
 
     internal static UpdateDialogApiAction ToUpdateDialogApiAction(this CreateDialogApiAction source) => new()
@@ -120,7 +120,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
         Name = source.Name,
-        Endpoints = source.Endpoints?.Select(x => x.ToUpdateDialogApiActionEndpoint()).ToList(),
+        Endpoints = source.Endpoints?.Select(x => x.ToUpdateDialogApiActionEndpoint()).ToList() ?? [],
     };
 
     internal static CreateDialogApiAction ToCreateDialogApiAction(this UpdateDialogApiAction source) => new()
@@ -129,7 +129,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
         Name = source.Name,
-        Endpoints = source.Endpoints?.Select(x => x.ToCreateDialogApiActionEndpoint()).ToList(),
+        Endpoints = source.Endpoints?.Select(x => x.ToCreateDialogApiActionEndpoint()).ToList() ?? [],
     };
 
     internal static DialogApiAction ToDialogApiAction(this CreateDialogApiAction source) => new()
@@ -138,7 +138,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
         Name = source.Name,
-        Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList(),
+        Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList() ?? [],
     };
 
     internal static DialogApiAction ToDialogApiAction(this UpdateDialogApiAction source) => new()
@@ -147,7 +147,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
         Name = source.Name,
-        Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList(),
+        Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList() ?? [],
     };
 
     // API action endpoints

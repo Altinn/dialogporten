@@ -34,12 +34,12 @@ public static class DialogMappingExtensions
         IsApiOnly = source.IsApiOnly,
         Status = source.Status.ToDialogStatusInput(),
         Content = source.Content?.ToUpdateDialogContent(),
-        SearchTags = source.SearchTags?.Select(x => x.ToUpdateDialogTag()).ToList(),
-        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogAttachment()).ToList(),
-        Transmissions = source.Transmissions?.Select(x => x.ToUpdateDialogTransmission()).ToList(),
-        GuiActions = source.GuiActions?.Select(x => x.ToUpdateDialogGuiAction()).ToList(),
-        ApiActions = source.ApiActions?.Select(x => x.ToUpdateDialogApiAction()).ToList(),
-        Activities = source.Activities?.Select(x => x.ToUpdateDialogActivity()).ToList(),
+        SearchTags = source.SearchTags?.Select(x => x.ToUpdateDialogTag()).ToList() ?? [],
+        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogAttachment()).ToList() ?? [],
+        Transmissions = source.Transmissions?.Select(x => x.ToUpdateDialogTransmission()).ToList() ?? [],
+        GuiActions = source.GuiActions?.Select(x => x.ToUpdateDialogGuiAction()).ToList() ?? [],
+        ApiActions = source.ApiActions?.Select(x => x.ToUpdateDialogApiAction()).ToList() ?? [],
+        Activities = source.Activities?.Select(x => x.ToUpdateDialogActivity()).ToList() ?? [],
     };
 
     /// <summary>
@@ -73,12 +73,12 @@ public static class DialogMappingExtensions
         SystemLabel = source.EndUserContext.ToSystemLabel(),
         ServiceOwnerContext = source.ServiceOwnerContext.ToCreateDialogServiceOwnerContext(),
         Content = source.Content?.ToCreateDialogContent(),
-        SearchTags = source.SearchTags?.Select(x => x.ToCreateDialogTag()).ToList(),
-        Attachments = source.Attachments?.Select(x => x.ToCreateDialogAttachment()).ToList(),
-        Transmissions = source.Transmissions?.Select(x => x.ToCreateDialogTransmission()).ToList(),
-        GuiActions = source.GuiActions?.Select(x => x.ToCreateDialogGuiAction()).ToList(),
-        ApiActions = source.ApiActions?.Select(x => x.ToCreateDialogApiAction()).ToList(),
-        Activities = source.Activities?.Select(x => x.ToCreateDialogActivity()).ToList(),
+        SearchTags = source.SearchTags?.Select(x => x.ToCreateDialogTag()).ToList() ?? [],
+        Attachments = source.Attachments?.Select(x => x.ToCreateDialogAttachment()).ToList() ?? [],
+        Transmissions = source.Transmissions?.Select(x => x.ToCreateDialogTransmission()).ToList() ?? [],
+        GuiActions = source.GuiActions?.Select(x => x.ToCreateDialogGuiAction()).ToList() ?? [],
+        ApiActions = source.ApiActions?.Select(x => x.ToCreateDialogApiAction()).ToList() ?? [],
+        Activities = source.Activities?.Select(x => x.ToCreateDialogActivity()).ToList() ?? [],
     };
 
     /// <summary>
@@ -98,12 +98,12 @@ public static class DialogMappingExtensions
         IsApiOnly = source.IsApiOnly,
         Status = source.Status ?? DialogStatusInput.New,
         Content = source.Content?.ToUpdateDialogContent(),
-        SearchTags = source.SearchTags?.Select(x => x.ToUpdateDialogTag()).ToList(),
-        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogAttachment()).ToList(),
-        Transmissions = source.Transmissions?.Select(x => x.ToUpdateDialogTransmission()).ToList(),
-        GuiActions = source.GuiActions?.Select(x => x.ToUpdateDialogGuiAction()).ToList(),
-        ApiActions = source.ApiActions?.Select(x => x.ToUpdateDialogApiAction()).ToList(),
-        Activities = source.Activities?.Select(x => x.ToUpdateDialogActivity()).ToList(),
+        SearchTags = source.SearchTags?.Select(x => x.ToUpdateDialogTag()).ToList() ?? [],
+        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogAttachment()).ToList() ?? [],
+        Transmissions = source.Transmissions?.Select(x => x.ToUpdateDialogTransmission()).ToList() ?? [],
+        GuiActions = source.GuiActions?.Select(x => x.ToUpdateDialogGuiAction()).ToList() ?? [],
+        ApiActions = source.ApiActions?.Select(x => x.ToUpdateDialogApiAction()).ToList() ?? [],
+        Activities = source.Activities?.Select(x => x.ToUpdateDialogActivity()).ToList() ?? [],
     };
 
     /// <summary>
@@ -127,12 +127,12 @@ public static class DialogMappingExtensions
         IsApiOnly = source.IsApiOnly,
         Status = source.Status,
         Content = source.Content?.ToCreateDialogContent(),
-        SearchTags = source.SearchTags?.Select(x => x.ToCreateDialogTag()).ToList(),
-        Attachments = source.Attachments?.Select(x => x.ToCreateDialogAttachment()).ToList(),
-        Transmissions = source.Transmissions?.Select(x => x.ToCreateDialogTransmission()).ToList(),
-        GuiActions = source.GuiActions?.Select(x => x.ToCreateDialogGuiAction()).ToList(),
-        ApiActions = source.ApiActions?.Select(x => x.ToCreateDialogApiAction()).ToList(),
-        Activities = source.Activities?.Select(x => x.ToCreateDialogActivity()).ToList(),
+        SearchTags = source.SearchTags?.Select(x => x.ToCreateDialogTag()).ToList() ?? [],
+        Attachments = source.Attachments?.Select(x => x.ToCreateDialogAttachment()).ToList() ?? [],
+        Transmissions = source.Transmissions?.Select(x => x.ToCreateDialogTransmission()).ToList() ?? [],
+        GuiActions = source.GuiActions?.Select(x => x.ToCreateDialogGuiAction()).ToList() ?? [],
+        ApiActions = source.ApiActions?.Select(x => x.ToCreateDialogApiAction()).ToList() ?? [],
+        Activities = source.Activities?.Select(x => x.ToCreateDialogActivity()).ToList() ?? [],
     };
 
     /// <summary>
@@ -166,12 +166,12 @@ public static class DialogMappingExtensions
         UpdatedAt = source.UpdatedAt ?? default,
         Status = (source.Status ?? DialogStatusInput.New).ToDialogStatus(),
         Content = source.Content?.ToDialogContent(),
-        SearchTags = source.SearchTags?.Select(x => x.ToDialogTag()).ToList(),
-        Attachments = source.Attachments?.Select(x => x.ToDialogAttachment()).ToList(),
-        Transmissions = source.Transmissions?.Select(x => x.ToDialogTransmission()).ToList(),
-        GuiActions = source.GuiActions?.Select(x => x.ToDialogGuiAction()).ToList(),
-        ApiActions = source.ApiActions?.Select(x => x.ToDialogApiAction()).ToList(),
-        Activities = source.Activities?.Select(x => x.ToDialogActivity()).ToList(),
+        SearchTags = source.SearchTags?.Select(x => x.ToDialogTag()).ToList() ?? [],
+        Attachments = source.Attachments?.Select(x => x.ToDialogAttachment()).ToList() ?? [],
+        Transmissions = source.Transmissions?.Select(x => x.ToDialogTransmission()).ToList() ?? [],
+        GuiActions = source.GuiActions?.Select(x => x.ToDialogGuiAction()).ToList() ?? [],
+        ApiActions = source.ApiActions?.Select(x => x.ToDialogApiAction()).ToList() ?? [],
+        Activities = source.Activities?.Select(x => x.ToDialogActivity()).ToList() ?? [],
         ServiceOwnerContext = source.ServiceOwnerContext?.ToDialogServiceOwnerContext() ?? new DialogServiceOwnerContext(),
         EndUserContext = source.SystemLabel.ToDialogEndUserContext(),
     };
@@ -199,12 +199,12 @@ public static class DialogMappingExtensions
         IsApiOnly = source.IsApiOnly,
         Status = source.Status.ToDialogStatus(),
         Content = source.Content?.ToDialogContent(),
-        SearchTags = source.SearchTags?.Select(x => x.ToDialogTag()).ToList(),
-        Attachments = source.Attachments?.Select(x => x.ToDialogAttachment()).ToList(),
-        Transmissions = source.Transmissions?.Select(x => x.ToDialogTransmission()).ToList(),
-        GuiActions = source.GuiActions?.Select(x => x.ToDialogGuiAction()).ToList(),
-        ApiActions = source.ApiActions?.Select(x => x.ToDialogApiAction()).ToList(),
-        Activities = source.Activities?.Select(x => x.ToDialogActivity()).ToList(),
+        SearchTags = source.SearchTags?.Select(x => x.ToDialogTag()).ToList() ?? [],
+        Attachments = source.Attachments?.Select(x => x.ToDialogAttachment()).ToList() ?? [],
+        Transmissions = source.Transmissions?.Select(x => x.ToDialogTransmission()).ToList() ?? [],
+        GuiActions = source.GuiActions?.Select(x => x.ToDialogGuiAction()).ToList() ?? [],
+        ApiActions = source.ApiActions?.Select(x => x.ToDialogApiAction()).ToList() ?? [],
+        Activities = source.Activities?.Select(x => x.ToDialogActivity()).ToList() ?? [],
         ServiceOwnerContext = new DialogServiceOwnerContext(),
         EndUserContext = new DialogEndUserContext(),
     };
@@ -240,7 +240,7 @@ public static class DialogMappingExtensions
 
     private static CreateDialogServiceOwnerContext ToCreateDialogServiceOwnerContext(this DialogServiceOwnerContext source) => new()
     {
-        ServiceOwnerLabels = source.ServiceOwnerLabels?.Select(x => x.ToCreateDialogServiceOwnerLabel()).ToList(),
+        ServiceOwnerLabels = source.ServiceOwnerLabels?.Select(x => x.ToCreateDialogServiceOwnerLabel()).ToList() ?? [],
     };
 
     private static CreateDialogServiceOwnerLabel ToCreateDialogServiceOwnerLabel(this DialogServiceOwnerLabel source) => new()
@@ -250,7 +250,7 @@ public static class DialogMappingExtensions
 
     private static DialogServiceOwnerContext ToDialogServiceOwnerContext(this CreateDialogServiceOwnerContext source) => new()
     {
-        ServiceOwnerLabels = source.ServiceOwnerLabels?.Select(x => x.ToDialogServiceOwnerLabel()).ToList(),
+        ServiceOwnerLabels = source.ServiceOwnerLabels?.Select(x => x.ToDialogServiceOwnerLabel()).ToList() ?? [],
     };
 
     private static DialogServiceOwnerLabel ToDialogServiceOwnerLabel(this CreateDialogServiceOwnerLabel source) => new()

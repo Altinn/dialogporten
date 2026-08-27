@@ -9,7 +9,7 @@ public class ServiceResourceAccessPackage
     public required string Urn { get; set; }
 
     [JsonPropertyName("name")]
-    public ICollection<Localization>? Name { get; set; } = [];
+    public ICollection<Localization> Name { get; set; } = [];
 
     [JsonPropertyName("links")]
     public required Links Links { get; set; }

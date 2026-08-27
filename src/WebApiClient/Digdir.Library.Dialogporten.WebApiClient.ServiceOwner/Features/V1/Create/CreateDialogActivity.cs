@@ -49,5 +49,5 @@ public class CreateDialogActivity
     /// Unstructured text describing the activity. Only set if the activity type is "Information".
     /// </summary>
     [JsonPropertyName("description")]
-    public ICollection<Localization>? Description { get; set; } = [];
+    public ICollection<Localization> Description { get; set; } = [];
 }

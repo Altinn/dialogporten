@@ -27,17 +27,17 @@ public class DialogMappingExtensionsTests
         // Shared ContentValue is reused by reference.
         Assert.Same(source.Content!.Title, result.Content!.Title);
 
-        Assert.Single(result.SearchTags!);
-        Assert.Single(result.Attachments!);
-        Assert.Single(result.Transmissions!);
-        Assert.Single(result.GuiActions!);
-        Assert.Single(result.ApiActions!);
-        Assert.Single(result.Activities!);
+        Assert.Single(result.SearchTags);
+        Assert.Single(result.Attachments);
+        Assert.Single(result.Transmissions);
+        Assert.Single(result.GuiActions);
+        Assert.Single(result.ApiActions);
+        Assert.Single(result.Activities);
 
         // The deep transmission tree is carried across, and the shared Sender actor is reused by reference.
-        var transmission = result.Transmissions!.Single();
-        Assert.Same(source.Transmissions!.Single().Sender, transmission.Sender);
-        Assert.Single(transmission.Attachments!.Single().Urls!);
+        var transmission = result.Transmissions.Single();
+        Assert.Same(source.Transmissions.Single().Sender, transmission.Sender);
+        Assert.Single(transmission.Attachments.Single().Urls);
     }
 
     [Fact]
@@ -56,8 +56,8 @@ public class DialogMappingExtensionsTests
         Assert.Equal(DialogStatusInput.InProgress, result.Status);
         // The system label is taken from EndUserContext (the category label), not the obsolete top-level one.
         Assert.Equal(SystemLabel.Archive, result.SystemLabel);
-        Assert.Single(result.ServiceOwnerContext!.ServiceOwnerLabels!);
-        Assert.Equal("label", result.ServiceOwnerContext!.ServiceOwnerLabels!.Single().Value);
+        Assert.Single(result.ServiceOwnerContext!.ServiceOwnerLabels);
+        Assert.Equal("label", result.ServiceOwnerContext!.ServiceOwnerLabels.Single().Value);
     }
 
     [Theory]
@@ -133,18 +133,20 @@ public class DialogMappingExtensionsTests
     }
 
     [Fact]
-    public void ToUpdateDialog_FromGet_NullCollectionsStayNull()
+    public void ToUpdateDialog_FromGet_NullCollectionsBecomeEmpty()
     {
         var source = FullDialog();
-        source.SearchTags = null;
-        source.Attachments = null;
-        source.Transmissions = null;
+        source.SearchTags = null!;
+        source.Attachments = null!;
+        source.Transmissions = null!;
 
         var result = source.ToUpdateDialog();
 
-        Assert.Null(result.SearchTags);
-        Assert.Null(result.Attachments);
-        Assert.Null(result.Transmissions);
+        // The target collections are non-nullable and default to empty, so a null source
+        // is normalized to an empty collection rather than propagating null.
+        Assert.Empty(result.SearchTags);
+        Assert.Empty(result.Attachments);
+        Assert.Empty(result.Transmissions);
     }
 
     [Fact]
@@ -156,8 +158,8 @@ public class DialogMappingExtensionsTests
 
         var result = source.ToUpdateDialog();
 
-        Assert.Empty(result.SearchTags!);
-        Assert.Empty(result.Attachments!);
+        Assert.Empty(result.SearchTags);
+        Assert.Empty(result.Attachments);
     }
 
     private static ContentValue ContentValueOf(string value) => new()

@@ -14,7 +14,7 @@ public class ProblemDetailsError
     public string? Detail { get; set; }
 
     [JsonPropertyName("paths")]
-    public ICollection<string>? Paths { get; set; } = [];
+    public ICollection<string> Paths { get; set; } = [];
 
     [JsonExtensionData]
     public IDictionary<string, object> AdditionalProperties { get; set; } = new Dictionary<string, object>();

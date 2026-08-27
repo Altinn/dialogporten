@@ -13,5 +13,5 @@ public class AuthorizedServiceResourceList
     public bool? IsFullCatalogueFallback { get; set; }
 
     [JsonPropertyName("items")]
-    public ICollection<ServiceResourceMetadata>? Items { get; set; } = [];
+    public ICollection<ServiceResourceMetadata> Items { get; set; } = [];
 }

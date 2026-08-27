@@ -42,6 +42,17 @@ param postgresConfiguration = {
   // Enabling index tuning will practically also enable query performance insight
   enableIndexTuning: true
   enableQueryPerformanceInsight: true
+  // Azure enhanced metrics: per-database activity counters and autovacuum diagnostics
+  additionalServerConfigurations: [
+    {
+      name: 'metrics.autovacuum_diagnostics'
+      value: 'on'
+    }
+    {
+      name: 'metrics.collector_database_activity'
+      value: 'on'
+    }
+  ]
   backupRetentionDays: 7
   availabilityZone: '2'
   enableBackupVault: false

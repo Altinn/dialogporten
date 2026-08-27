@@ -373,6 +373,7 @@ static void ConfigureOpenApiV1Document(
             document.RemoveUnusedPaginationSchemas();
             document.RemoveRequiredPropertiesFromSchemas();
             postProcess.Invoke(document);
+            document.ChangeEndUserContextPartyExample();
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;

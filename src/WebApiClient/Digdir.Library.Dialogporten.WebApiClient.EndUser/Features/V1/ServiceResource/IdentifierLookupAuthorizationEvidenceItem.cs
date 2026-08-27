@@ -14,7 +14,7 @@ public class IdentifierLookupAuthorizationEvidenceItem
     public required string Subject { get; set; }
 
     [JsonPropertyName("name")]
-    public ICollection<Localization>? Name { get; set; } = [];
+    public ICollection<Localization> Name { get; set; } = [];
 
     [JsonPropertyName("links")]
     public Links? Links { get; set; }

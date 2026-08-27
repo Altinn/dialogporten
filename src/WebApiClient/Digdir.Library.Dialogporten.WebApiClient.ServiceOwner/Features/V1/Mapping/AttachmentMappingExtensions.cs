@@ -15,7 +15,7 @@ internal static class AttachmentMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -24,7 +24,7 @@ internal static class AttachmentMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -33,7 +33,7 @@ internal static class AttachmentMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -42,7 +42,7 @@ internal static class AttachmentMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -86,7 +86,7 @@ internal static class AttachmentMappingExtensions
         Id = source.Id ?? default,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -95,7 +95,7 @@ internal static class AttachmentMappingExtensions
         Id = source.Id ?? default,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 

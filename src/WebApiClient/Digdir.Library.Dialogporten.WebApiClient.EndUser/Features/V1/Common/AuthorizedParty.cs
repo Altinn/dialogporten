@@ -88,5 +88,5 @@ public class AuthorizedParty
     /// The sub parties of this party, if any. The sub party uses the same data model.
     /// </summary>
     [JsonPropertyName("subParties")]
-    public ICollection<AuthorizedParty>? SubParties { get; set; } = [];
+    public ICollection<AuthorizedParty> SubParties { get; set; } = [];
 }

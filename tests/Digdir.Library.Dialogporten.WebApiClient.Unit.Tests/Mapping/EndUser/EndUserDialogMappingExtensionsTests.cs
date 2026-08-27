@@ -44,9 +44,9 @@ public class EndUserDialogMappingExtensionsTests
         Assert.Null(result.Content.MainContentReference);
 
         // Seen-log entries are normalized and the shared SeenBy actor is reused by reference.
-        var seen = Assert.Single(result.SeenSinceLastUpdate!);
-        Assert.Same(source.SeenSinceLastUpdate!.Single().SeenBy, seen.SeenBy);
-        Assert.Single(result.SeenSinceLastContentUpdate!);
+        var seen = Assert.Single(result.SeenSinceLastUpdate);
+        Assert.Same(source.SeenSinceLastUpdate.Single().SeenBy, seen.SeenBy);
+        Assert.Single(result.SeenSinceLastContentUpdate);
 
         // The end-user context (and its SystemLabels collection) is carried across.
         Assert.Equal(source.EndUserContext.Revision, result.EndUserContext.Revision);
@@ -60,7 +60,7 @@ public class EndUserDialogMappingExtensionsTests
 
         var result = source.ToDialog();
 
-        var activity = Assert.Single(result.Activities!);
+        var activity = Assert.Single(result.Activities);
         Assert.Equal(source.LatestActivity!.Id, activity.Id);
         Assert.Same(source.LatestActivity!.PerformedBy, activity.PerformedBy);
     }
@@ -74,24 +74,26 @@ public class EndUserDialogMappingExtensionsTests
 
         // DialogListItem carries none of these, so they keep their model defaults (empty collections for the
         // child collections, null/default for the scalar server fields).
-        Assert.Empty(result.Transmissions!);
-        Assert.Empty(result.ApiActions!);
-        Assert.Empty(result.GuiActions!);
-        Assert.Empty(result.Attachments!);
+        Assert.Empty(result.Transmissions);
+        Assert.Empty(result.ApiActions);
+        Assert.Empty(result.GuiActions);
+        Assert.Empty(result.Attachments);
         Assert.Null(result.DialogToken);
         Assert.Null(result.ExpiresAt);
         Assert.Equal(Guid.Empty, result.Revision);
     }
 
     [Fact]
-    public void ToDialog_FromListItem_WithoutLatestActivity_LeavesActivitiesNull()
+    public void ToDialog_FromListItem_WithoutLatestActivity_LeavesActivitiesEmpty()
     {
         var source = FullListItem();
         source.LatestActivity = null;
 
         var result = source.ToDialog();
 
-        Assert.Null(result.Activities);
+        // Activities is non-nullable and defaults to empty, so a missing LatestActivity
+        // yields an empty collection rather than null.
+        Assert.Empty(result.Activities);
     }
 
     [Fact]

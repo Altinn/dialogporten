@@ -10,7 +10,7 @@ public class BulkSetSystemLabel
     /// List of target dialog ids with optional revision ids
     /// </summary>
     [JsonPropertyName("dialogs")]
-    public ICollection<DialogRevision>? Dialogs { get; set; } = [];
+    public ICollection<DialogRevision> Dialogs { get; set; } = [];
 
     /// <summary>
     /// List of system labels to set on target dialogs
@@ -18,19 +18,19 @@ public class BulkSetSystemLabel
     [JsonPropertyName("systemLabels")]
     // TODO(system.text.json): Add ItemConverterType with enum converter when supported
     [Obsolete("Use AddLabels instead. This property will be removed in a future version.")]
-    public ICollection<SystemLabel>? SystemLabels { get; set; } = [];
+    public ICollection<SystemLabel> SystemLabels { get; set; } = [];
 
     /// <summary>
     /// List of system labels to add to the target dialogs. If multiple instances of 'bin', 'archive', or 'default' are provided, the last one will be used.
     /// </summary>
     [JsonPropertyName("addLabels")]
     // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-    public ICollection<SystemLabel>? AddLabels { get; set; } = [];
+    public ICollection<SystemLabel> AddLabels { get; set; } = [];
 
     /// <summary>
     /// List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list.
     /// </summary>
     [JsonPropertyName("removeLabels")]
     // TODO(system.text.json): Add ItemConverterType with enum converter when supported
-    public ICollection<SystemLabel>? RemoveLabels { get; set; } = [];
+    public ICollection<SystemLabel> RemoveLabels { get; set; } = [];
 }

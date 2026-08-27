@@ -14,5 +14,5 @@ public class DialogServiceOwnerContextListItem
     /// A list of labels, not visible in end-user APIs.
     /// </summary>
     [JsonPropertyName("serviceOwnerLabels")]
-    public ICollection<DialogServiceOwnerLabelListItem>? ServiceOwnerLabels { get; set; } = [];
+    public ICollection<DialogServiceOwnerLabelListItem> ServiceOwnerLabels { get; set; } = [];
 }

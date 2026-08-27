@@ -9,7 +9,7 @@ public class DialogTransmissionSearchNavigationalAction
     /// The title of the navigational action.
     /// </summary>
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; } = [];
+    public ICollection<Localization> Title { get; set; } = [];
 
     /// <summary>
     /// The fully qualified URL of the navigational action. Will be set to \"urn:dialogporten:unauthorized\" if the user is

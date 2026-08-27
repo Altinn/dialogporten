@@ -34,8 +34,8 @@ public static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content.ToDialogTransmissionContent(),
-        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     /// <summary>
@@ -55,8 +55,8 @@ public static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content.ToDialogTransmissionContent(),
-        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     // Transmission content
@@ -82,7 +82,7 @@ public static class TransmissionMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -91,7 +91,7 @@ public static class TransmissionMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 

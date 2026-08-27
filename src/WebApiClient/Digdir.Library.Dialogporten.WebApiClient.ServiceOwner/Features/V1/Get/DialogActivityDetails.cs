@@ -26,5 +26,5 @@ public class DialogActivityDetails
     public required Actor PerformedBy { get; set; }
 
     [JsonPropertyName("description")]
-    public ICollection<Localization>? Description { get; set; } = [];
+    public ICollection<Localization> Description { get; set; } = [];
 }

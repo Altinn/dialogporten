@@ -27,8 +27,8 @@ internal static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content.ToCreateDialogTransmissionContent(),
-        Attachments = source.Attachments?.Select(x => x.ToCreateDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToCreateDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToCreateDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToCreateDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     internal static UpdateDialogTransmission ToUpdateDialogTransmission(this DialogTransmission source) => new()
@@ -43,8 +43,8 @@ internal static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content.ToUpdateDialogTransmissionContent(),
-        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToUpdateDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToUpdateDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     internal static UpdateDialogTransmission ToUpdateDialogTransmission(this CreateDialogTransmission source) => new()
@@ -59,8 +59,8 @@ internal static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content?.ToUpdateDialogTransmissionContent(),
-        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToUpdateDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToUpdateDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToUpdateDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     internal static CreateDialogTransmission ToCreateDialogTransmission(this UpdateDialogTransmission source) => new()
@@ -75,8 +75,8 @@ internal static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content?.ToCreateDialogTransmissionContent(),
-        Attachments = source.Attachments?.Select(x => x.ToCreateDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToCreateDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToCreateDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToCreateDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     // Create/Update -> Get. Get-only server fields (IsAuthorized, IsOpened) have no source and keep their defaults.
@@ -95,8 +95,8 @@ internal static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content?.ToDialogTransmissionContent()!,
-        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     internal static DialogTransmission ToDialogTransmission(this UpdateDialogTransmission source) => new()
@@ -111,8 +111,8 @@ internal static class TransmissionMappingExtensions
         Type = source.Type,
         Sender = source.Sender,
         Content = source.Content?.ToDialogTransmissionContent()!,
-        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList(),
-        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList(),
+        Attachments = source.Attachments?.Select(x => x.ToDialogTransmissionAttachment()).ToList() ?? [],
+        NavigationalActions = source.NavigationalActions?.Select(x => x.ToDialogTransmissionNavigationalAction()).ToList() ?? [],
     };
 
     // Transmission content
@@ -166,7 +166,7 @@ internal static class TransmissionMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToCreateDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToCreateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -175,7 +175,7 @@ internal static class TransmissionMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToUpdateDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToUpdateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -184,7 +184,7 @@ internal static class TransmissionMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToUpdateDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToUpdateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -193,7 +193,7 @@ internal static class TransmissionMappingExtensions
         Id = source.Id,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToCreateDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToCreateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -202,7 +202,7 @@ internal static class TransmissionMappingExtensions
         Id = source.Id ?? default,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 
@@ -211,7 +211,7 @@ internal static class TransmissionMappingExtensions
         Id = source.Id ?? default,
         DisplayName = source.DisplayName,
         Name = source.Name,
-        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList(),
+        Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
     };
 

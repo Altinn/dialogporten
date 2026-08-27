@@ -15,5 +15,5 @@ public class IdentifierLookupServiceResource
     public int MinimumAuthenticationLevel { get; set; }
 
     [JsonPropertyName("name")]
-    public ICollection<Localization>? Name { get; set; } = [];
+    public ICollection<Localization> Name { get; set; } = [];
 }

@@ -21,7 +21,7 @@ public class EndUserIdentifierLookup
     public required IdentifierLookupServiceOwner ServiceOwner { get; set; }
 
     [JsonPropertyName("title")]
-    public ICollection<Localization>? Title { get; set; } = [];
+    public ICollection<Localization> Title { get; set; } = [];
 
     [JsonPropertyName("authorizationEvidence")]
     public required IdentifierLookupAuthorizationEvidence AuthorizationEvidence { get; set; }

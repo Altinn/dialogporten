@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.120.0](https://github.com/Altinn/dialogporten/compare/v1.119.1...v1.120.0) (2026-08-27)
+
+
+### Features
+
+* **graphql:** add labelAssignmentLog query to end-user GraphQL API ([#4322](https://github.com/Altinn/dialogporten/issues/4322)) ([e12a482](https://github.com/Altinn/dialogporten/commit/e12a4826873907efeb3d9885002cf607bc74b1f5))
+
+
+### Miscellaneous Chores
+
+* cleanup old refitter autogen ([#4255](https://github.com/Altinn/dialogporten/issues/4255)) ([7ff0e74](https://github.com/Altinn/dialogporten/commit/7ff0e742052f161a5f4ad8c5bd3f77ce2864044b))
+* **deps:** update dependency microsoft.net.test.sdk to 18.9.0 ([#4329](https://github.com/Altinn/dialogporten/issues/4329)) ([4d0be94](https://github.com/Altinn/dialogporten/commit/4d0be948cfaf1b3f87324bf4209e48ecf4157833))
+* **deps:** update dependency microsoft.openapi to 2.12.0 ([#4330](https://github.com/Altinn/dialogporten/issues/4330)) ([18385eb](https://github.com/Altinn/dialogporten/commit/18385eb5d372e30d88dc8bed0656c92badbb0ab9))
+* **deps:** update dependency scalar.aspnetcore to 2.16.20 ([#4324](https://github.com/Altinn/dialogporten/issues/4324)) ([f4c0855](https://github.com/Altinn/dialogporten/commit/f4c0855c2425211b3d5879dce1cb220ff7a04e60))
+* **deps:** update dependency testcontainers.postgresql to 4.14.0 ([#4331](https://github.com/Altinn/dialogporten/issues/4331)) ([5ec2ec0](https://github.com/Altinn/dialogporten/commit/5ec2ec0add32b21f848d72ab5c8e0b4f710fb610))
+* **deps:** update hotchocolate dependencies to 16.6.1 ([#4325](https://github.com/Altinn/dialogporten/issues/4325)) ([967d806](https://github.com/Altinn/dialogporten/commit/967d8066d420880f048a7f5a5c178f5f3080c44c))
+* **docs:** update instructions for running Arbeidsflate locally with a couple of pointers ([#4323](https://github.com/Altinn/dialogporten/issues/4323)) ([26f6c35](https://github.com/Altinn/dialogporten/commit/26f6c35de4b1c18ba5db463985c8f277496a890d))
+* **infra:** ship Key Vault audit logs to the environment workspace ([#4320](https://github.com/Altinn/dialogporten/issues/4320)) ([743f07f](https://github.com/Altinn/dialogporten/commit/743f07fdebd887759d29f8a8bb4f1fe6e9fd664b))
+
 ## [1.119.1](https://github.com/Altinn/dialogporten/compare/v1.119.0...v1.119.1) (2026-08-19)
 
 

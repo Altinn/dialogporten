@@ -87,9 +87,13 @@ Both port numbers are increased by 10000 (inside the Docker containers, default 
 
 ## Setup Arbeidsflate
 
+### Prerequisites
+
+- Node 24.x (cf. [.node-version](https://github.com/Altinn/dialogporten-frontend/blob/main/.node-version)) - tip: use [fnm](https://github.com/schniz/fnm) for managing versions
+
 ### Make .env file
 - In root folder for Arbeidsflate make a .env file.
-- See Readme.md -> Running Docker locally for the fields needed
+- See [Readme.md](https://github.com/Altinn/dialogporten-frontend/blob/main/Readme.md#running-docker-locally) -> Running Docker locally for the fields needed
 - Talk to Arbeidsflate team to get values for these environment variables
 - **DIALOGPORTEN_URL** must be set to: http://host.docker.internal:5181
 
@@ -110,23 +114,6 @@ Update: `compose.yml` with this diff:
      restart: always
      build:
        context: .
-```
-
-### If using newer version of docker
-This step might be removed, but currently Arbeidsflate runs with old version of podman/docker.
-Thus update: `compose.yml` with the diff below:
-```diff
---- a/compose.yml
-+++ b/compose.yml
-@@ -1,7 +1,7 @@
- services:
-   reverse-proxy:
-     container_name: reverse-proxy
--    image: traefik:v2.10
-+    image: traefik:v3.6.2
-     command:
-       - "--api.dashboard=true"
-       - "--providers.docker"
 ```
 
 ### Start services

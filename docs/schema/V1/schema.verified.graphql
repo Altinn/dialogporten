@@ -8,6 +8,7 @@ type Queries @authorize(policy: "enduser") {
   dialogLookup(instanceRef: String!): DialogLookupPayload!
   dialogById(dialogId: UUID!): DialogByIdPayload!
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
+  labelAssignmentLog(dialogId: UUID!): LabelAssignmentLogPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
   serviceResources(parties: [String!], includeUnauthorized: Boolean! = false): ServiceResourceMetadata!
@@ -391,6 +392,35 @@ type GuiAction {
   prompt: [Localization!]
 }
 
+type LabelAssignmentLog {
+  "The date and time when the label assignment log entry was created."
+  createdAt: DateTime!
+  "The name of the system label that was changed."
+  name: String!
+  "The action that was performed on the label, e.g. 'set' or 'removed'."
+  action: String!
+  "The actor that performed the label assignment."
+  performedBy: Actor!
+}
+
+type LabelAssignmentLogDeleted implements LabelAssignmentLogError {
+  message: String!
+}
+
+type LabelAssignmentLogForbidden implements LabelAssignmentLogError {
+  message: String!
+}
+
+type LabelAssignmentLogNotFound implements LabelAssignmentLogError {
+  message: String!
+}
+
+type LabelAssignmentLogPayload {
+  "The immutable list of label assignment log entries for the dialog's end-user context."
+  labelAssignmentLog: [LabelAssignmentLog!]!
+  errors: [LabelAssignmentLogError!]!
+}
+
 type Limits {
   endUserSearch: EndUserSearchLimits!
   serviceOwnerSearch: ServiceOwnerSearchLimits!
@@ -668,6 +698,10 @@ interface DialogByIdError {
 }
 
 interface DialogLookupError {
+  message: String!
+}
+
+interface LabelAssignmentLogError {
   message: String!
 }
 

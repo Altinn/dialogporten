@@ -199,6 +199,33 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                     .Which.CreatedAt.Should().Be(expectedCreatedAt);
             });
 
+    private const string AttachmentUrlIdKey = "attachment-url-id";
+    private const string UpdatedAttachmentUrlMediaType = "application/zip";
+
+    [Fact]
+    public Task UpdateTransmission_Should_Preserve_AttachmentUrl_Id_When_Provided()
+        => FlowBuilder.For(Application)
+            .AsChangeTransmissionUser()
+            .CreateSimpleDialog()
+            .CreateTransmission((x, _) =>
+                x.AddAttachment())
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+                ctx.Bag[AttachmentUrlIdKey] = dialog.Transmissions.Single()
+                    .Attachments.Single().Urls.Single().Id)
+            .UpdateTransmission((x, ctx) =>
+            {
+                x.Dto.Attachments[0].Urls[0].Id = ctx.GetGuidByKey(AttachmentUrlIdKey);
+                x.Dto.Attachments[0].Urls[0].MediaType = UpdatedAttachmentUrlMediaType;
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
+            {
+                var url = dialog.Transmissions.Single().Attachments.Single().Urls.Single();
+                url.Id.Should().Be(ctx.GetGuidByKey(AttachmentUrlIdKey));
+                url.MediaType.Should().Be(UpdatedAttachmentUrlMediaType);
+            });
+
     [Theory]
     [ClassData(typeof(UpdateTransmissionBasicFieldTestData))]
     public Task UpdateTransmission_Persists_Changes_When_Silent_Update_And_Scope_Are_Present(
@@ -319,6 +346,14 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                 Assert: transmission => transmission.Attachments.Should().ContainSingle()
                     .Which.DisplayName.Should().ContainSingle()
                     .Which.Value.Should().Be(updatedAttachmentDisplayName)));
+
+            var updatedAttachmentUrlId = NewUuidV7();
+            Add(new UpdateTransmissionSuccessScenario(
+                Name: "Attachment url id",
+                ModifyUpdateCommand: (command, _) => command.Dto.Attachments[0].Urls[0].Id = updatedAttachmentUrlId,
+                Assert: transmission => transmission.Attachments.Should().ContainSingle()
+                    .Which.Urls.Should().ContainSingle()
+                    .Which.Id.Should().Be(updatedAttachmentUrlId)));
 
             var updatedAttachmentUrl = new Uri("https://digdir.no/updated-attachment.pdf");
             Add(new UpdateTransmissionSuccessScenario(

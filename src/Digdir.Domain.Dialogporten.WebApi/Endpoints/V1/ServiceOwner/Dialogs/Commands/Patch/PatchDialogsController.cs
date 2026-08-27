@@ -1,12 +1,15 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 using DialogportenAuthorizationPolicy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
 using ProblemDetails = Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.ProblemDetails;
 
@@ -54,6 +57,10 @@ public sealed class PatchDialogsController : ControllerBase
     [Consumes("application/json", "application/json-patch+json")]
     [OpenApiOperationId("PatchDialog")]
     [OpenApiOperation("V1ServiceOwnerDialogsPatchDialog")]
+    [OpenApiExtras(
+        scopes: [AuthorizationScope.ServiceProvider],
+        securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+    ]
     [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]

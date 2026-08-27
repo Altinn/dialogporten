@@ -1,6 +1,7 @@
-using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.EndUserContext.Commands.BulkSetSystemLabels;
@@ -14,13 +15,13 @@ public sealed class BulkSetDialogSystemLabelsEndpointSummary : Summary<BulkSetDi
                       Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.
                       """;
 
-        Responses[StatusCodes.Status204NoContent] = Constants.SwaggerSummary.Updated.FormatInvariant("system labels");
-        Responses[StatusCodes.Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
-        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.ServiceOwnerAuthenticationFailure.FormatInvariant(AuthorizationScope.ServiceProvider);
-        Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("update");
-        Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
-        Responses[StatusCodes.Status409Conflict] = Constants.SwaggerSummary.Conflict;
-        Responses[StatusCodes.Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
-        Responses[StatusCodes.Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
+        Responses[Status204NoContent] = Constants.SwaggerSummary.Updated.FormatInvariant("system labels");
+        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<BulkSetDialogSystemLabelsEndpoint>();
+        Responses[Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("update");
+        Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
+        Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }
 }

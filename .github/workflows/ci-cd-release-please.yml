@@ -22,17 +22,39 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
       - name: Get previous release SHA
         id: get-previous-release
         run: |
-          sha=$(gh api repos/${{ github.repository }}/releases/latest --jq '.target_commitish')
-          echo "sha=${sha}" >> $GITHUB_OUTPUT
+          set -euo pipefail
+
+          release=$(gh api "repos/${REPO}/releases/latest")
+          sha=$(printf '%s' "$release" | jq -r '.target_commitish')
+          tag=$(printf '%s' "$release" | jq -r '.tag_name')
+
+          # target_commitish is whatever was supplied when the release was
+          # created: a commit SHA for API-created releases, but a branch name
+          # for ones cut from the UI. Consumers use this as a diff base, and a
+          # branch name resolves to current HEAD - an empty diff that silently
+          # suppresses change detection - so resolve it via the tag instead.
+          if ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "target_commitish '${sha}' is not a commit SHA; resolving tag ${tag}"
+            sha=$(gh api "repos/${REPO}/commits/${tag}" --jq '.sha')
+          fi
+
+          if ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::Could not resolve previous release SHA (got '${sha}')"
+            exit 1
+          fi
+
+          echo "Previous release ${tag} -> ${sha}"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
 
       - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: release
@@ -70,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: {}
     steps:
-      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
         with:
           egress-policy: audit
 
@@ -79,7 +101,7 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_PLEASE_PAT }}
           event-type: release_created
-          client-payload: '{"version": "${{ needs.release-please.outputs.version }}"}'
+          client-payload: '{"version": "${{ needs.release-please.outputs.version }}", "previous_release_sha": "${{ needs.release-please.outputs.previous_release_sha }}"}'
 
   send-slack-message-on-failure:
     name: Send Slack message on failure

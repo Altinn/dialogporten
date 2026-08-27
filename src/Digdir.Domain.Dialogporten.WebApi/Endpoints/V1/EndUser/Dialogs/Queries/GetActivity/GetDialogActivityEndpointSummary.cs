@@ -1,6 +1,8 @@
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.GetActivity;
 
@@ -12,9 +14,9 @@ public sealed class GetDialogActivityEndpointSummary : Summary<GetDialogActivity
         Description = """
                       Gets a single activity belonging to a dialog.
                       """;
-        Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("activity");
-        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
-        Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("get");
-        Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogActivityNotFound;
+        Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("activity");
+        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<GetDialogActivityEndpoint>();
+        Responses[Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("get");
+        Responses[Status404NotFound] = Constants.SwaggerSummary.DialogActivityNotFound;
     }
 }

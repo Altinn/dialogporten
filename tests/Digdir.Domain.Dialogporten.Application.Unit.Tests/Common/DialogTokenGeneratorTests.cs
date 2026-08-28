@@ -80,7 +80,8 @@ public class DialogTokenGeneratorTests
         Assert.Equal(entityId, _capturedClaims[DialogTokenClaimTypes.EntityId]);
         Assert.Equal(DialogContextTokenEntityTypes.GuiAction, _capturedClaims[DialogTokenClaimTypes.EntityType]);
         Assert.Equal("sign", _capturedClaims[DialogTokenClaimTypes.Actions]);
-        Assert.Equal("urn:altinn:task:Task_1", _capturedClaims[DialogTokenClaimTypes.EffectiveResource]);
+        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.EffectiveResource));
+        Assert.Equal("urn:altinn:task:Task_1", _capturedClaims[DialogTokenClaimTypes.AdditionalResourceAttribute]);
         Assert.Equal(dialog.Party, _capturedClaims[DialogTokenClaimTypes.DialogParty]);
         Assert.Equal(dialog.ServiceResource, _capturedClaims[DialogTokenClaimTypes.ServiceResource]);
         Assert.Equal(dialog.Id, _capturedClaims[DialogTokenClaimTypes.DialogId]);
@@ -91,7 +92,7 @@ public class DialogTokenGeneratorTests
     }
 
     [Fact]
-    public void ContextTokenShouldPreferServiceResourceAsEffectiveResource()
+    public void ContextTokenShouldCarryServiceResourceAsEffectiveResource()
     {
         // Arrange
         var generator = CreateGenerator();
@@ -107,10 +108,33 @@ public class DialogTokenGeneratorTests
         // Assert
         Assert.NotNull(_capturedClaims);
         Assert.Equal("urn:altinn:resource:other-service", _capturedClaims[DialogTokenClaimTypes.EffectiveResource]);
+        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.AdditionalResourceAttribute));
     }
 
     [Fact]
-    public void ContextTokenShouldOmitResourceClaimWhenCheckTargetsDialogResource()
+    public void ContextTokenShouldCarryBothResourceOverrideAndAdditionalAttributeWhenBothPresent()
+    {
+        // A recipient must be able to reconstruct the exact same PDP request from the token alone, so
+        // neither field may be dropped when both are set on the same check.
+        // Arrange
+        var generator = CreateGenerator();
+        var check = new AuthorizationCheck(
+            "sign",
+            AuthorizationResourceSpec.FromContext("urn:altinn:resource:other-service", "urn:altinn:task:Task_1"),
+            [OtherParty]);
+
+        // Act
+        generator.GetDialogContextToken(CreateDialog(), AuthorizedCheck.FullyPermitted(check),
+            Guid.NewGuid(), DialogContextTokenEntityTypes.Transmission, IssuerVersion);
+
+        // Assert
+        Assert.NotNull(_capturedClaims);
+        Assert.Equal("urn:altinn:resource:other-service", _capturedClaims[DialogTokenClaimTypes.EffectiveResource]);
+        Assert.Equal("urn:altinn:task:Task_1", _capturedClaims[DialogTokenClaimTypes.AdditionalResourceAttribute]);
+    }
+
+    [Fact]
+    public void ContextTokenShouldOmitResourceClaimsWhenCheckTargetsDialogResource()
     {
         // Arrange
         var generator = CreateGenerator();
@@ -126,6 +150,7 @@ public class DialogTokenGeneratorTests
         // Assert
         Assert.NotNull(_capturedClaims);
         Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.EffectiveResource));
+        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.AdditionalResourceAttribute));
     }
 
     private static DialogEntity CreateDialog() => new()

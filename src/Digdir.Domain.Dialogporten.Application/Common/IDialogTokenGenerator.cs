@@ -15,7 +15,8 @@ public interface IDialogTokenGenerator
 
     /// <summary>
     /// Generates a token scoped to a single authorization-context-carrying entity, asserting the single
-    /// PDP-verified grant (action, effective resource) along with the parties it was permitted for.
+    /// PDP-verified grant (action, resource override and/or additional resource attribute) along with the
+    /// parties it was permitted for.
     /// </summary>
     string GetDialogContextToken(
         DialogEntity dialog,
@@ -82,12 +83,19 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         claims[DialogTokenClaimTypes.EntityType] = entityType;
         claims[DialogTokenClaimTypes.Actions] = authorizedCheck.Check.Action;
 
-        // The effective resource for the grant; absent when the check applies to the dialog's own resource.
-        var resource = authorizedCheck.Check.Resource.ServiceResource
-                       ?? authorizedCheck.Check.Resource.AdditionalResourceAttribute;
-        if (resource is not null)
+        // Both are emitted independently, exactly mirroring the resource attributes the PDP request carried
+        // for this check: the resource override (falling back to the dialog's own resource, already carried
+        // in "s", when absent) with the additional attribute layered on top, if any. A recipient can
+        // reconstruct the same PDP request from "s"/"r"/"ra" alone.
+        var resourceSpec = authorizedCheck.Check.Resource;
+        if (resourceSpec.ServiceResource is not null)
         {
-            claims[DialogTokenClaimTypes.EffectiveResource] = resource;
+            claims[DialogTokenClaimTypes.EffectiveResource] = resourceSpec.ServiceResource;
+        }
+
+        if (resourceSpec.AdditionalResourceAttribute is not null)
+        {
+            claims[DialogTokenClaimTypes.AdditionalResourceAttribute] = resourceSpec.AdditionalResourceAttribute;
         }
 
         claims[DialogTokenClaimTypes.PermittedParties] = authorizedCheck.PermittedParties;
@@ -241,5 +249,6 @@ public static class DialogTokenClaimTypes
     public const string EntityId = "e";
     public const string EntityType = "t";
     public const string EffectiveResource = "r";
+    public const string AdditionalResourceAttribute = "ra";
     public const string PermittedParties = "pp";
 }

@@ -65,6 +65,21 @@ internal sealed class ServiceResourceAuthorizer : IServiceResourceAuthorizer
             return new Forbidden($"Not allowed to reference the following unowned resources: [{string.Join(", ", notOwnedResources)}].");
         }
 
+        var appReferences = GetAdditionalResourceAppReferences(dialog).ToList();
+        if (appReferences.Count != 0)
+        {
+            var currentUserOrg = await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+            var notOwnedApps = appReferences
+                .Where(x => !string.Equals(x.Org, currentUserOrg, StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Reference)
+                .ToList();
+
+            if (notOwnedApps.Count != 0)
+            {
+                return new Forbidden($"Not allowed to reference the following unowned apps: [{string.Join(", ", notOwnedApps)}].");
+            }
+        }
+
         if (!_userResourceRegistry.UserCanModifyResourceType(dialog.ServiceResourceType))
         {
             return new Forbidden($"User cannot create or modify a dialog with resource type {dialog.ServiceResourceType}.");
@@ -123,4 +138,30 @@ internal sealed class ServiceResourceAuthorizer : IServiceResourceAuthorizer
     private static bool IsPrimaryResource(string? resource) =>
         resource is not null
         && resource.StartsWith(Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase);
+
+    // Defense-in-depth, mirroring the resource-prefix sweep above: AuthorizationContextDtoValidator already
+    // rejects the app namespace (and any value that would implicitly expand into an app identity) outright,
+    // so nothing should reach this in practice. Apps aren't resource-registry entries, so ownership is
+    // org-based rather than an id lookup; a reference whose org can't be parsed out (a malformed
+    // 'app_{org}_{appId}' value) is treated as not owned.
+    private static IEnumerable<(string Reference, string? Org)> GetAdditionalResourceAppReferences(DialogEntity dialog) =>
+        GetAuthorizationContexts(dialog)
+            .Select(context => context.AdditionalResourceAttribute)
+            .Where(x => x is not null)
+            .Select(x => x!)
+            .Where(x => x.StartsWith(Domain.Common.Constants.AppResourcePrefix, StringComparison.OrdinalIgnoreCase))
+            .Select(x => (Reference: x, Org: ExtractAppOrg(x)));
+
+    private static string? ExtractAppOrg(string value)
+    {
+        var lastColonIndex = value.LastIndexOf(':');
+        var tail = lastColonIndex == -1 ? value : value[(lastColonIndex + 1)..];
+        if (!tail.StartsWith(Domain.Common.Constants.AppResourceIdPrefix, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var parts = tail.Split('_');
+        return parts.Length >= 3 ? parts[1] : null;
+    }
 }

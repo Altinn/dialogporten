@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -17,6 +18,12 @@ public sealed class DialogDetailsAuthorizationResult
     // decoration quadratic. Index the checks once on first use instead. Instances may be shared between
     // concurrent requests via the PDP cache; the benign race of building the index twice is acceptable as
     // each builder publishes a fully constructed, thereafter immutable structure.
+    //
+    // Excluded from the PDP cache's MessagePack serialization (ContractlessStandardResolverAllowPrivate
+    // includes private fields): LookupIndex has no constructor parameter matching its members, which makes
+    // the dynamic formatter throw on every write — even when this field is null — silently disabling the
+    // cache. The index is cheap to rebuild lazily from AuthorizedChecks after deserialization.
+    [IgnoreDataMember]
     private LookupIndex? _lookupIndex;
 
     private LookupIndex GetIndex() => _lookupIndex ??= new LookupIndex(AuthorizedChecks);

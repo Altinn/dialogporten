@@ -105,7 +105,7 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         var signature = token[start..end];
 
         tokenParts = new JwksTokenParts<char>(token, header, body, signature);
-        return token[start..].IndexOf('.') != -1;
+        return token[start..].IndexOf('.') == -1;
 #else
         tokenParts = default;
         var enumerator = token.Split('.');

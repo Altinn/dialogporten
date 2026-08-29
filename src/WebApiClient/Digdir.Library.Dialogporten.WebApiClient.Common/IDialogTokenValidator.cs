@@ -59,6 +59,9 @@ public class DialogTokenValidationParameters
     /// <see cref="DialogTokenTypes.DialogContextToken"/> handed to it in place of one: the two assert different
     /// things about what the holder was permitted. Set this to the type the receiving endpoint expects.
     /// Comparison is ordinal; the types Dialogporten issues are listed in <see cref="DialogTokenTypes"/>.
+    /// Selecting <see cref="DialogTokenTypes.DialogContextToken"/> here only confirms the token is a context
+    /// token; it does not validate the context-specific claims (entity id, entity type, effective resource) -
+    /// the receiver must still check those separately against the entity being accessed.
     /// </remarks>
     public IReadOnlyCollection<string> ValidTokenTypes { get; set; } = [DialogTokenTypes.DialogToken];
 

@@ -330,6 +330,37 @@ public class DecisionRequestHelperTests
         Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:organization:identifier-no" && a.Value == "991825827");
     }
 
+    [Theory]
+    [InlineData("urn:altinn:task:app_other_sensitive-app", "urn:altinn:task", "app_other_sensitive-app")]
+    [InlineData("urn:altinn:app:app_other_sensitive-app", "urn:altinn:app", "app_other_sensitive-app")]
+    [InlineData("urn:altinn:app:foo_bar", "urn:altinn:app", "foo_bar")]
+    public void CreateDialogDetailsRequestShouldNeverExpandAdditionalResourceAttributeIntoAppOrOrg(
+        string additionalResourceAttribute, string expectedAttributeId, string expectedValue)
+    {
+        // Unlike the service resource and legacy authorization attribute, additionalResourceAttribute is
+        // rendered as a single literal attribute - split on the last colon only, never reinterpreted as an
+        // app/org attribute pair, whatever its namespace or value look like.
+        // Arrange
+        var request = CreateDialogDetailsAuthorizationRequest(
+            GetAsClaims(("pid", "12345678901")),
+            $"{NorwegianPersonIdentifier.PrefixWithSeparator}16073422888");
+
+        request.Checks.Add(new AuthorizationCheck(
+            "read",
+            AuthorizationResourceSpec.FromContext(null, additionalResourceAttribute),
+            [OtherOrgParty]));
+
+        // Act
+        var result = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+
+        // Assert: the literal (namespace, value) split is present verbatim, and - the definitive sign that no
+        // app/org expansion occurred - no separate org attribute was derived from the value.
+        var resource = result.Request.Request.Resource.FirstOrDefault(
+            r => r.Attribute.Any(a => a.AttributeId == expectedAttributeId && a.Value == expectedValue));
+        Assert.NotNull(resource);
+        Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == "urn:altinn:org");
+    }
+
     [Fact]
     public void CreateDialogDetailsRequestShouldFanOutOneResourceCategoryPerParty()
     {

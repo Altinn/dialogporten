@@ -282,9 +282,12 @@ internal static class DecisionRequestHelper
                 }
                 if (spec.AdditionalResourceAttribute is not null)
                 {
-                    // Layered on top of the effective resource; unlike legacy attributes this never
-                    // overrides the resource itself (write-side validation forbids resource references here).
-                    attributes.AddRange(GetResourceAttributesForAuthorizationAttribute(spec.AdditionalResourceAttribute));
+                    // Layered on top of the effective resource; unlike legacy attributes this never overrides
+                    // the resource itself (write-side validation forbids resource references here), and unlike
+                    // both legacy attributes and the service resource, it is never expanded into an app/org
+                    // attribute pair - it is rendered as a single literal attribute using whatever namespace
+                    // the caller supplied, split on the last colon only.
+                    attributes.Add(GetLiteralResourceAttribute(spec.AdditionalResourceAttribute));
                 }
 
                 break;
@@ -324,6 +327,14 @@ internal static class DecisionRequestHelper
         }
 
         return result;
+    }
+
+    private static XacmlJsonAttribute GetLiteralResourceAttribute(string value)
+    {
+        var lastColonIndex = value.LastIndexOf(':');
+        return lastColonIndex == -1 || lastColonIndex == value.Length - 1
+            ? new XacmlJsonAttribute { AttributeId = AttributeIdSubResource, Value = value }
+            : new XacmlJsonAttribute { AttributeId = value[..lastColonIndex], Value = value[(lastColonIndex + 1)..] };
     }
 
     private static (string, string, string?) SplitNamespaceAndValue(string serviceResource, string defaultNamespace = AttributeIdResource)

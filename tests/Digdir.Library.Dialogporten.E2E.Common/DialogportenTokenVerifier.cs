@@ -55,8 +55,10 @@ public static class DialogportenTokenVerifier
 
     private static async Task<PublicKey> GetPublicKeyAsync(Uri webApiUri, string keyId, CancellationToken cancellationToken)
     {
-        using var httpClient = new HttpClient { BaseAddress = webApiUri };
-        using var response = await httpClient.GetAsync(JwksPath, cancellationToken);
+        var jwksUri = BuildJwksUri(webApiUri);
+
+        using var httpClient = new HttpClient();
+        using var response = await httpClient.GetAsync(jwksUri, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var jwks = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -75,8 +77,16 @@ public static class DialogportenTokenVerifier
             return PublicKey.Import(SignatureAlgorithm.Ed25519, Base64UrlDecode(x), KeyBlobFormat.RawPublicKey);
         }
 
-        throw new InvalidOperationException($"JWKS at {webApiUri}{JwksPath} has no key with kid '{keyId}'.");
+        throw new InvalidOperationException($"JWKS at {jwksUri} has no key with kid '{keyId}'.");
     }
+
+    // A BaseAddress without a trailing slash treats its last path segment as replaceable when combined with a
+    // relative request URI (RFC 3986 merge) - e.g. "https://host/dialogporten" + "api/v1/x" resolves to
+    // "https://host/api/v1/x", silently dropping "/dialogporten". Remote environments configure the base URI
+    // with exactly that shape, so build the full URI directly instead of relying on HttpClient.BaseAddress
+    // combination (public for direct unit-test coverage of the URI arithmetic).
+    public static Uri BuildJwksUri(Uri webApiUri) =>
+        new(new Uri(webApiUri.AbsoluteUri.TrimEnd('/') + "/"), JwksPath);
 
     private static byte[] Base64UrlDecode(string value) => Base64Url.DecodeFromChars(value);
 }

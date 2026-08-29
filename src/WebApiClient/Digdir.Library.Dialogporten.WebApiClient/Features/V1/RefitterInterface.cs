@@ -2289,11 +2289,14 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     public enum DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation
     {
 
+        // Numbered to match the server's domain enum (Disabled = 1, Excluded = 2), not the schema-generator's
+        // default 0-based numbering: an unset value must serialize as an unnamed number and fail the server's
+        // IsInEnum() check, rather than silently deserializing as a named (and less restrictive) "Disabled".
         [System.Runtime.Serialization.EnumMember(Value = @"Disabled")]
-        Disabled = 0,
+        Disabled = 1,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Excluded")]
-        Excluded = 1,
+        Excluded = 2,
 
     }
 

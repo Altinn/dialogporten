@@ -28,7 +28,14 @@ public sealed class AuthorizationContextDto
     /// "includeDialogParty" is true.
     /// </summary>
     /// <example>urn:altinn:organization:identifier-no:912345678</example>
-    public List<string> Parties { get; set; } = [];
+    public List<string> Parties
+    {
+        get;
+        // Nullable in the OpenAPI schema (and reachable as an explicit JSON null via the JsonPatch-based
+        // update endpoint, which binds through Newtonsoft rather than the STJ pipeline's null-annotation
+        // enforcement); normalize here so every consumer - validator, mapper - can assume a non-null list.
+        set => field = value ?? [];
+    } = [];
 
     /// <summary>
     /// Whether the dialog's own party is included in the evaluation in addition to "parties".

@@ -242,6 +242,42 @@ public class CreateDialogAuthorizationContextTests(DialogApplication application
             .ExecuteAndAssert<CreateDialogSuccess>();
 
     [Fact]
+    public Task Create_Should_Fail_When_Context_Parties_Is_Explicit_Null_And_No_DialogParty() =>
+        // An explicit JSON "parties": null replaces the DTO's [] initializer, reaching the validator and
+        // mapper as an actual null; the DTO normalizes it to [] so this fails validation cleanly instead of
+        // throwing (a NullReferenceException surfaced as a 500).
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = null;
+                    transmission.AuthorizationContext = CreateContext(c =>
+                    {
+                        c.Action = null;
+                        c.Parties = null!;
+                        c.IncludeDialogParty = false;
+                    });
+                }))
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.Errors.Should().Contain(e => e.ErrorMessage.Contains("at least one party")));
+
+    [Fact]
+    public Task Create_Should_Succeed_When_Context_Parties_Is_Explicit_Null_But_Includes_DialogParty() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = null;
+                    transmission.AuthorizationContext = CreateContext(c =>
+                    {
+                        c.Action = null;
+                        c.Parties = null!;
+                        c.IncludeDialogParty = true;
+                    });
+                }))
+            .ExecuteAndAssert<CreateDialogSuccess>();
+
+    [Fact]
     public Task Create_Should_Fail_When_Context_Party_Is_Invalid() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>

@@ -47,7 +47,7 @@ jobs:
       release_count_diff: ${{ steps.calculate-lag.outputs.release_count_diff }}
       compare_url: ${{ steps.generate-compare-url.outputs.url }}
     steps:
-      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -190,7 +190,7 @@ jobs:
       commits_json: ${{ steps.get-commits.outputs.commits_json }}
       commit_authors: ${{ steps.get-commits.outputs.commit_authors }}
     steps:
-      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 

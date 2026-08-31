@@ -115,9 +115,19 @@ jobs:
           # Sets a global rather than echoing: set -e does not fire through
           # `v=$(fn)`, so failures here would silently yield "1.2.3-" or "-abc123".
           # Short SHA width must match workflow-generate-git-short-sha.yml so the
-          # npm version lines up with the docker tag - don't hard-code a width.
+          # npm version carries the same commit id as the docker tag for the same
+          # build - don't hard-code a width.
+          #
+          # version.txt holds the version that was last released, so appending a
+          # prerelease suffix to it yields a version semver sorts BELOW that
+          # release: 1.2.3-abc123 < 1.2.3. Consumers cannot then reach it through
+          # any range that also matches the release, and the `^` range npm writes
+          # on install resolves straight back to the release. Bumping the patch
+          # first keeps main builds sorted above the release they follow. The
+          # number only establishes ordering - the eventual release may bump the
+          # minor or major instead, and will still sort above these prereleases.
           resolve_version_from_file() {
-            local version short_sha
+            local version short_sha major minor patch
             version=$(cat version.txt) || {
               echo "::error::Could not read version.txt"; exit 1;
             }
@@ -128,7 +138,12 @@ jobs:
               echo "::error::Empty version ('$version') or short SHA ('$short_sha')"
               exit 1
             fi
-            RESOLVED_VERSION="${version}-${short_sha}"
+            IFS=. read -r major minor patch <<<"$version"
+            if ! printf '%s' "${major}.${minor}.${patch}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::version.txt must hold a plain semver version, got '$version'"
+              exit 1
+            fi
+            RESOLVED_VERSION="${major}.${minor}.$((patch + 1))-${short_sha}"
           }
 
           # npm versions are immutable - reject malformed ones before publishing.

@@ -167,7 +167,7 @@ public class Dialog
     /// The dialog unstructured text content.
     /// </summary>
     [JsonPropertyName("content")]
-    public Content? Content { get; set; }
+    public required Content Content { get; set; }
 
     /// <summary>
     /// The number of transmissions sent by the service owner.

@@ -25,7 +25,7 @@ public class DialogMappingExtensionsTests
 
         Assert.NotNull(result.Content);
         // Shared ContentValue is reused by reference.
-        Assert.Same(source.Content!.Title, result.Content!.Title);
+        Assert.Same(source.Content.Title, result.Content.Title);
 
         Assert.Single(result.SearchTags);
         Assert.Single(result.Attachments);
@@ -114,7 +114,7 @@ public class DialogMappingExtensionsTests
         Assert.Equal(original.ExpiresAt, roundTripped.ExpiresAt);
         Assert.Equal(original.IsApiOnly, roundTripped.IsApiOnly);
         Assert.Equal(original.Status, roundTripped.Status);
-        Assert.Same(original.Content!.Title, roundTripped.Content!.Title);
+        Assert.Same(original.Content.Title, roundTripped.Content.Title);
     }
 
     [Fact]
@@ -125,6 +125,21 @@ public class DialogMappingExtensionsTests
             ServiceResource = "urn:altinn:resource:test",
             Party = "urn:altinn:organization:identifier-no:123456789",
             Status = null,
+            Content = new CreateDialogContent
+            {
+                Title = new ContentValue
+                {
+                    Value =
+                    [
+                        new Localization
+                        {
+                            Value = "Title",
+                            LanguageCode = "en"
+                        }
+                    ],
+                    MediaType = "text/plain",
+                }
+            },
         };
 
         var result = source.ToUpdateDialog();

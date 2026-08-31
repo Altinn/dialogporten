@@ -71,7 +71,7 @@ public class UpdateDialog
     /// The dialog unstructured text content.
     /// </summary>
     [JsonPropertyName("content")]
-    public UpdateDialogContent? Content { get; set; }
+    public required UpdateDialogContent Content { get; set; }
 
     /// <summary>
     /// A list of words (tags) that will be used in dialog search queries. Not visible in end-user DTO.

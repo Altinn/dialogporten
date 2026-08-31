@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.120.1](https://github.com/Altinn/dialogporten/compare/v1.120.0...v1.120.1) (2026-08-31)
+
+
+### Bug Fixes
+
+* **ci:** base schema prereleases on the next patch version ([#4336](https://github.com/Altinn/dialogporten/issues/4336)) ([cd15ebb](https://github.com/Altinn/dialogporten/commit/cd15ebbb6735813fa3cf25ac0b69b2e405b64bd9))
+* inverted token format check in net8.0 build of DialogTokenValidator ([#4342](https://github.com/Altinn/dialogporten/issues/4342)) ([2084ee1](https://github.com/Altinn/dialogporten/commit/2084ee1206b6a430be2c6b64b1f019f51bf18a4a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v7 ([#4346](https://github.com/Altinn/dialogporten/issues/4346)) ([d72a40e](https://github.com/Altinn/dialogporten/commit/d72a40ea718e1b7e1e4981f01e40dbb8b80d96a4))
+* **deps:** update actions/setup-dotnet action to v6 ([#4347](https://github.com/Altinn/dialogporten/issues/4347)) ([df5df7e](https://github.com/Altinn/dialogporten/commit/df5df7e8da36ac571e04c3ce40e19eaf05417b86))
+* **deps:** update actions/setup-node action to v7 ([#4348](https://github.com/Altinn/dialogporten/issues/4348)) ([5d0ae1f](https://github.com/Altinn/dialogporten/commit/5d0ae1f91c3fc5257bf04c6a546f1c1b172ed2fb))
+* **deps:** update dependency awesomeassertions to 9.6.0 ([#4344](https://github.com/Altinn/dialogporten/issues/4344)) ([e1ab346](https://github.com/Altinn/dialogporten/commit/e1ab3462e8d65ed9ec9c27174d482ac781e2ca85))
+* **deps:** update dependency microsoft.openapi to 2.12.2 ([#4343](https://github.com/Altinn/dialogporten/issues/4343)) ([bf34a06](https://github.com/Altinn/dialogporten/commit/bf34a0621b456773f9b16cdbe390da72eabb46b1))
+* **deps:** update step-security/harden-runner action to v2.21.0 ([#4345](https://github.com/Altinn/dialogporten/issues/4345)) ([a8718b7](https://github.com/Altinn/dialogporten/commit/a8718b7392ef8a8189e02e461be7ef1a89c76853))
+* made collections non-nullable in webapi SDK ([#4337](https://github.com/Altinn/dialogporten/issues/4337)) ([9aff3be](https://github.com/Altinn/dialogporten/commit/9aff3bebdaba7980e9a8d569ffe16f59bd5ce75b))
+* persist PostgreSQL enhanced metrics server parameters in IaC ([#4335](https://github.com/Altinn/dialogporten/issues/4335)) ([bd3481a](https://github.com/Altinn/dialogporten/commit/bd3481a4cf54198713ebf8935b8de8127e3e6776))
+* **SDK:** Make Content not nullable, and require value in localization ([#4353](https://github.com/Altinn/dialogporten/issues/4353)) ([d83da71](https://github.com/Altinn/dialogporten/commit/d83da71a0311fb1ec6ab361e453380eaeb1f00ce))
+
 ## [1.120.0](https://github.com/Altinn/dialogporten/compare/v1.119.1...v1.120.0) (2026-08-27)
 
 

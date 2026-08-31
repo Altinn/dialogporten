@@ -32,6 +32,7 @@ public static class TransmissionMappingExtensions
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
         IsAuthorized = source.IsAuthorized,
+        ContextToken = source.ContextToken,
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -55,6 +56,7 @@ public static class TransmissionMappingExtensions
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
         IsAuthorized = source.IsAuthorized,
+        ContextToken = source.ContextToken,
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -92,6 +94,8 @@ public static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        IsAuthorized = source.IsAuthorized,
+        ContextToken = source.ContextToken,
     };
 
     private static DialogTransmissionAttachment ToDialogTransmissionAttachment(this DialogTransmissionSearchAttachment source) => new()
@@ -101,6 +105,8 @@ public static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        IsAuthorized = source.IsAuthorized,
+        ContextToken = source.ContextToken,
     };
 
     // Transmission attachment URLs
@@ -128,6 +134,8 @@ public static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        IsAuthorized = source.IsAuthorized,
+        ContextToken = source.ContextToken,
     };
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this DialogTransmissionSearchNavigationalAction source) => new()
@@ -135,6 +143,8 @@ public static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        IsAuthorized = source.IsAuthorized,
+        ContextToken = source.ContextToken,
     };
 }
 

@@ -2,6 +2,11 @@ using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
+// The legacy authorizationAttribute/action members carried by these maps are [Obsolete] in favour of
+// authorizationContext, but a mapping layer has to keep round-tripping them for as long as the server
+// still returns and accepts them.
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 
 /// <summary>
@@ -305,3 +310,5 @@ internal static class TransmissionMappingExtensions
         ExpiresAt = source.ExpiresAt,
     };
 }
+
+#pragma warning restore CS0618

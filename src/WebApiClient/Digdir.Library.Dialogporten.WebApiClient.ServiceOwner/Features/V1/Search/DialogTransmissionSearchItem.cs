@@ -28,7 +28,15 @@ public class DialogTransmissionSearchItem
     /// The authorization attribute associated with the transmission.
     /// </summary>
     [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use 'AuthorizationContext' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this transmission.
+    /// <br/>Null when the transmission uses the legacy "authorizationAttribute".
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    public DialogTransmissionSearchAuthorizationContext? AuthorizationContext { get; set; }
 
     /// <summary>
     /// The extended type URI for the transmission.

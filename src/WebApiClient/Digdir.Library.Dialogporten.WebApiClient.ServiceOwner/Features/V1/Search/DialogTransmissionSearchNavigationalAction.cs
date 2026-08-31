@@ -22,4 +22,12 @@ public class DialogTransmissionSearchNavigationalAction
     /// </summary>
     [JsonPropertyName("expiresAt")]
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+    /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition;
+    /// <br/>this context can only further restrict access, never widen it.
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    public DialogTransmissionSearchAuthorizationContext? AuthorizationContext { get; set; }
 }

@@ -32,6 +32,7 @@ public class DialogGuiAction
     /// <br/>Can also be used to refer to other service policies.
     /// </summary>
     [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -39,6 +40,14 @@ public class DialogGuiAction
     /// </summary>
     [JsonPropertyName("isAuthorized")]
     public bool IsAuthorized { get; set; }
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific action, as determined by its
+    /// <br/>authorization context. Only present when the action has an authorization context and the user is authorized.
+    /// <br/>Should be used instead of the dialog token against this action's URL.
+    /// </summary>
+    [JsonPropertyName("contextToken")]
+    public string? ContextToken { get; set; }
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX

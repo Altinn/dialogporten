@@ -11,9 +11,10 @@ public static class Constants
     /// <summary>
     /// Persisted in <c>DialogTransmission.AuthorizationAttribute</c> for transmissions that carry an
     /// authorization context, so that code predating authorization contexts keeps such transmissions
-    /// hidden if this feature is rolled back. A bare, colon-free attribute is routed to the
+    /// hidden if this feature is rolled back: that code routes a bare, colon-free attribute to the
     /// "transmissionread" action, which no XACML policy defines anywhere, so the transmission is denied
-    /// rather than falling through to the dialog's main resource.
+    /// rather than falling through to the dialog's main resource. (Current code derives "read" for every
+    /// legacy attribute, so the sentinel only protects a rollback that also restores that behaviour.)
     ///
     /// Never consulted when deciding access — <see cref="AuthorizationCheckBuilder"/> reads the context —
     /// and suppressed to null on every read surface, so it neither reaches a client nor breaks a

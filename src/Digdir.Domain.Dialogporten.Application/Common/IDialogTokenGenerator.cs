@@ -81,6 +81,11 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         var claims = GetBaseClaims(dialog);
         claims[DialogTokenClaimTypes.EntityId] = entityId;
         claims[DialogTokenClaimTypes.EntityType] = entityType;
+
+        // A context token asserts exactly one check, so "a" carries that single action verbatim. Note that
+        // this is a different shape from the dialog token's "a", which is a ';'-separated list of
+        // "action[,attribute]" entries - a recipient sharing parsing code between the two must switch on the
+        // JOSE "typ" header rather than assume the list format.
         claims[DialogTokenClaimTypes.Actions] = authorizedCheck.Check.Action;
 
         // Both are emitted independently, exactly mirroring the resource attributes the PDP request carried

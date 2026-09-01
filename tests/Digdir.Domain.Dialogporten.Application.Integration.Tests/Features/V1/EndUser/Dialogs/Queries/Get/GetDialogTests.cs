@@ -223,17 +223,22 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
 
     [Fact]
     public Task Get_Dialog_Should_Mask_GuiAction_Url_When_Action_Only_Permitted_On_Subresource() =>
-        FlowBuilder.For(Application, services =>
+        FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
             {
                 // "write" is permitted on the draft subresource only — not on the main resource
-                var authorizationResult = new DialogDetailsAuthorizationResult
-                {
-                    AuthorizedChecks = [
-                        TestAuthorizedChecks.Authorized("read", Constants.MainResource),
-                        TestAuthorizedChecks.Authorized("write", "urn:altinn:subresource:draft"),
-                    ]
-                };
-                services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
+                altinnAuthorization
+                    .GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(new DialogDetailsAuthorizationResult
+                    {
+                        AuthorizedChecks = [
+                            TestAuthorizedChecks.Authorized("read", Constants.MainResource),
+                            TestAuthorizedChecks.Authorized("write", "urn:altinn:subresource:draft"),
+                        ]
+                    });
+                altinnAuthorization
+                    .UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(true);
             })
             .CreateSimpleDialog((x, _) =>
             {

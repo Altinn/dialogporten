@@ -41,8 +41,8 @@ public class AuthorizationContextDetails
     /// <summary>
     /// Controls how the entity is presented to end users that fail the authorization check:
     /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
-    /// <br/>"redacted" additionally strips all content (titles, summaries, names, senders and children),
-    /// <br/>leaving only the entity's existence and timestamps.
+    /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+    /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
     /// </summary>
     [JsonPropertyName("unauthorizedPresentation")]
     [JsonConverter(typeof(JsonStringEnumConverter<AuthorizationContextUnauthorizedPresentation>))]

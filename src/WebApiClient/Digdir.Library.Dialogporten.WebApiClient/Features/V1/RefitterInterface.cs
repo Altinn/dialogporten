@@ -2276,8 +2276,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// Controls how the entity is presented to end users that fail the authorization check:
         /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
-        /// <br/>"redacted" additionally strips all content (titles, summaries, names, senders and children),
-        /// <br/>leaving only the entity's existence and timestamps.
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
         /// </summary>
         [JsonPropertyName("unauthorizedPresentation")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
@@ -3197,8 +3197,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// Controls how the entity is presented to end users that fail the authorization check:
         /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
-        /// <br/>"redacted" additionally strips all content (titles, summaries, names, senders and children),
-        /// <br/>leaving only the entity's existence and timestamps.
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
         /// </summary>
         [JsonPropertyName("unauthorizedPresentation")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
@@ -3960,8 +3960,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// Controls how the entity is presented to end users that fail the authorization check:
         /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
-        /// <br/>"redacted" additionally strips all content (titles, summaries, names, senders and children),
-        /// <br/>leaving only the entity's existence and timestamps.
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
         /// </summary>
         [JsonPropertyName("unauthorizedPresentation")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
@@ -4601,6 +4601,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
         /// <br/>subresource. Cannot contain a service resource reference; use "serviceResource" for that.
+        /// <br/>References to an app ("urn:altinn:app") or an organization ("urn:altinn:org") are not allowed
+        /// <br/>either; both are derived from the effective service resource.
         /// </summary>
         [JsonPropertyName("additionalResourceAttribute")]
         public string AdditionalResourceAttribute { get; set; }
@@ -4628,8 +4630,8 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// Required. Controls how the entity is presented to end users that fail the authorization check:
         /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
-        /// <br/>"redacted" additionally strips all content (titles, summaries, names, senders and children),
-        /// <br/>leaving only the entity's existence and timestamps.
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
         /// </summary>
         [JsonPropertyName("unauthorizedPresentation")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]

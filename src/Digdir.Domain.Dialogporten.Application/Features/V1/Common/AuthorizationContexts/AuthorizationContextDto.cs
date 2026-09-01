@@ -14,7 +14,9 @@ public sealed class AuthorizationContextDto
 
     /// <summary>
     /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
-    /// subresource. Cannot contain a service resource reference; use "serviceResource" for that.
+    /// subresource. Cannot contain a service resource reference; use "serviceResource" for that. References
+    /// to an app ("urn:altinn:app") or an organization ("urn:altinn:org") are not allowed either; both are
+    /// derived from the effective service resource.
     /// </summary>
     /// <example>
     /// urn:altinn:task:Task_1

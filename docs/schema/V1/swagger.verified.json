@@ -489,7 +489,7 @@
             "type": "string"
           },
           "additionalResourceAttribute": {
-            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that.",
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that. References\nto an app (\u0022urn:altinn:app\u0022) or an organization (\u0022urn:altinn:org\u0022) are not allowed either; both are\nderived from the effective service resource.",
             "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
             "nullable": true,
             "type": "string"

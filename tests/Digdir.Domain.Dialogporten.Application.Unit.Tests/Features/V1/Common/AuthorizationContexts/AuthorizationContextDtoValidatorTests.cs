@@ -32,6 +32,19 @@ public class AuthorizationContextDtoValidatorTests
         Assert.False(result.IsValid);
     }
 
+    [Theory]
+    [InlineData("urn:altinn:org:brg")]
+    [InlineData("URN:ALTINN:ORG:brg")]
+    public void Should_Reject_AdditionalResourceAttribute_That_References_An_Organization(string additionalResourceAttribute)
+    {
+        // The org namespace is the other half of an app identity: an app-backed service resource already
+        // renders as an app/org pair, so a caller-supplied org lands as a second org value in the same
+        // resource category and can satisfy another organization's policy target.
+        var result = _validator.Validate(CreateDto(additionalResourceAttribute));
+
+        Assert.False(result.IsValid);
+    }
+
     private static AuthorizationContextDto CreateDto(string? additionalResourceAttribute) => new()
     {
         AdditionalResourceAttribute = additionalResourceAttribute,

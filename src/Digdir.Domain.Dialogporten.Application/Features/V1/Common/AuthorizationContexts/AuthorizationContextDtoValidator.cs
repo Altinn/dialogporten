@@ -21,7 +21,15 @@ internal sealed class AuthorizationContextDtoValidator : AbstractValidator<Autho
             .Must(x => x is null || (!ExpandsToAppIdentity(x) && !HasAppPrefix(x)))
             .WithMessage($"'{{PropertyName}}' cannot reference an app (the '{Constants.AppResourcePrefix}' namespace, or a value " +
                          $"expanding into an '{Constants.AppResourceIdPrefix}{{org}}_{{appId}}' identifier); 'ServiceResource' already " +
-                         "carries the resource-registry entry for an app, and there is no equivalent per-app override for this field.");
+                         "carries the resource-registry entry for an app, and there is no equivalent per-app override for this field.")
+            // The org namespace is rejected for the same reason as the app namespace above: it is the other
+            // half of an app identity. An app-backed service resource already renders as an urn:altinn:app +
+            // urn:altinn:org pair, so a caller-supplied org would put a second, caller-chosen org value in the
+            // same resource category, where any-of attribute matching lets it satisfy a policy target
+            // belonging to another organization.
+            .Must(x => x is null || !x.StartsWith(Constants.OrgResourcePrefix, StringComparison.OrdinalIgnoreCase))
+            .WithMessage($"'{{PropertyName}}' cannot reference an organization (the '{Constants.OrgResourcePrefix}' namespace); " +
+                         "the organization owning the effective resource is derived from the resource itself.");
 
         RuleFor(x => x.Parties)
             .Must(x => x.Count <= AuthorizationContext.MaxNumberOfParties)

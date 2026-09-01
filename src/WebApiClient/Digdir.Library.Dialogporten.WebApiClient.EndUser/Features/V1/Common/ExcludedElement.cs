@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
@@ -8,6 +9,7 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
 /// <br/>belongs to and recorded here instead, so that a client can tell "this existed and you cannot see it"
 /// <br/>apart from "this does not exist" without being shown anything about it.
 /// </summary>
+[Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
 public class ExcludedElement
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 /// belongs to and recorded here instead, so that a client can tell "this existed and you cannot see it"
 /// apart from "this does not exist" without being shown anything about it.
 /// </summary>
+[ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
 public sealed class ExcludedElementDto
 {
     /// <summary>

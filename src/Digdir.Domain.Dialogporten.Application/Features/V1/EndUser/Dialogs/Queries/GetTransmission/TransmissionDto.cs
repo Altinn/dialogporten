@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
@@ -38,6 +39,7 @@ public sealed class TransmissionDto
     /// authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
     /// including front-channel embeds.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 
     /// <summary>
@@ -160,6 +162,7 @@ public sealed class AttachmentDto
     /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public bool IsAuthorized { get; set; } = true;
 
     /// <summary>
@@ -167,6 +170,7 @@ public sealed class AttachmentDto
     /// authorization context. Only present when the attachment has an authorization context and the user is
     /// authorized. Should be used instead of the dialog token against this attachment's URLs.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 }
 
@@ -229,6 +233,7 @@ public sealed class NavigationalActionDto
     /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public bool IsAuthorized { get; set; } = true;
 
     /// <summary>
@@ -236,5 +241,6 @@ public sealed class NavigationalActionDto
     /// by its authorization context. Only present when the navigational action has an authorization context and the
     /// user is authorized. Should be used instead of the dialog token against this action's URL.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 }

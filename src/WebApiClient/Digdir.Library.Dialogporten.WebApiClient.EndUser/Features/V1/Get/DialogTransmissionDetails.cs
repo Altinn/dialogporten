@@ -102,6 +102,7 @@ public class DialogTransmissionDetails
     /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
     /// </summary>
     [JsonPropertyName("excludedAttachments")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public ICollection<ExcludedElement> ExcludedAttachments { get; set; } = [];
 
     /// <summary>
@@ -120,5 +121,6 @@ public class DialogTransmissionDetails
     /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
     /// </summary>
     [JsonPropertyName("excludedNavigationalActions")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public ICollection<ExcludedElement> ExcludedNavigationalActions { get; set; } = [];
 }

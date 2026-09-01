@@ -357,10 +357,10 @@ static void ConfigureOpenApiV1Document(
     string? audience = null
 )
 {
-    // Experimental-feature notices are only surfaced in the service owner document.
-    var experimentalProcessor = audience == "serviceowner"
-        ? new ExperimentalFeatureSchemaProcessor()
-        : null;
+    // Every document surfaces experimental-feature notices: a feature can reach the contract on either
+    // side of the API (authorizationContext on the service owner side, contextToken and the excluded*
+    // collections on the end user side), and the combined legacy document carries both.
+    var experimentalProcessor = new ExperimentalFeatureSchemaProcessor();
 
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;
@@ -379,7 +379,7 @@ static void ConfigureOpenApiV1Document(
             document.RemoveRequiredPropertiesFromSchemas();
             postProcess.Invoke(document);
             document.ChangeEndUserContextPartyExample();
-            experimentalProcessor?.AddPropertyNotices(document);
+            experimentalProcessor.AddPropertyNotices(document);
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;
@@ -392,10 +392,7 @@ static void ConfigureOpenApiV1Document(
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
 
-        if (experimentalProcessor is not null)
-        {
-            s.SchemaSettings.SchemaProcessors.Add(experimentalProcessor);
-        }
+        s.SchemaSettings.SchemaProcessors.Add(experimentalProcessor);
 
         if (audience is not null)
         {

@@ -1,12 +1,13 @@
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 
 /// <summary>
-/// Marks an API contract type as belonging to an experimental feature that is subject to breaking
-/// changes without a major version bump. The service owner OpenAPI document flags the schema for a
-/// marked type - and every property referencing it - with an experimental notice; see
-/// ExperimentalFeatureSchemaProcessor in the WebApi project.
+/// Marks an API contract type or property as belonging to an experimental feature that is subject to
+/// breaking changes without a major version bump. Every OpenAPI document flags the schema for a marked
+/// type - and every property referencing it - with an experimental notice; a marked property is flagged
+/// directly, which is how members with no contract type of their own (a token string, a boolean flag)
+/// are covered. See ExperimentalFeatureSchemaProcessor in the WebApi project.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property)]
 public sealed class ExperimentalFeatureAttribute(string documentationUrl) : Attribute
 {
     /// <summary>

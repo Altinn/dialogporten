@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
@@ -335,6 +336,7 @@ public sealed class DialogTransmissionDto
     /// authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
     /// including front-channel embeds.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 
     /// <summary>
@@ -573,6 +575,7 @@ public sealed class DialogApiActionDto
     /// authorization context. Only present when the action has an authorization context and the user is authorized.
     /// Should be used instead of the dialog token against this action's endpoints.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 
     /// <summary>
@@ -695,6 +698,7 @@ public sealed class DialogGuiActionDto
     /// authorization context. Only present when the action has an authorization context and the user is authorized.
     /// Should be used instead of the dialog token against this action's URL.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 
     /// <summary>
@@ -758,6 +762,7 @@ public sealed class DialogAttachmentDto
     /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public bool IsAuthorized { get; set; } = true;
 
     /// <summary>
@@ -765,6 +770,7 @@ public sealed class DialogAttachmentDto
     /// authorization context. Only present when the attachment has an authorization context and the user is
     /// authorized. Should be used instead of the dialog token against this attachment's URLs.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 }
 
@@ -830,6 +836,7 @@ public sealed class DialogTransmissionAttachmentDto
     /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public bool IsAuthorized { get; set; } = true;
 
     /// <summary>
@@ -837,6 +844,7 @@ public sealed class DialogTransmissionAttachmentDto
     /// authorization context. Only present when the attachment has an authorization context and the user is
     /// authorized. Should be used instead of the dialog token against this attachment's URLs.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 }
 
@@ -899,6 +907,7 @@ public sealed class DialogTransmissionNavigationalActionDto
     /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
     /// replaced with "urn:dialogporten:unauthorized".
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public bool IsAuthorized { get; set; } = true;
 
     /// <summary>
@@ -906,5 +915,6 @@ public sealed class DialogTransmissionNavigationalActionDto
     /// by its authorization context. Only present when the navigational action has an authorization context and the
     /// user is authorized. Should be used instead of the dialog token against this action's URL.
     /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public string? ContextToken { get; set; }
 }

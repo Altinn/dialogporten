@@ -41,6 +41,7 @@ public class DialogAttachment
     /// <br/>replaced with "urn:dialogporten:unauthorized".
     /// </summary>
     [JsonPropertyName("isAuthorized")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public bool IsAuthorized { get; set; }
 
     /// <summary>

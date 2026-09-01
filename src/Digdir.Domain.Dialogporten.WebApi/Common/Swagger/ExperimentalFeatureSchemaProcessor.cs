@@ -20,19 +20,48 @@ internal sealed class ExperimentalFeatureSchemaProcessor : ISchemaProcessor
 
     public void Process(SchemaProcessorContext context)
     {
-        var attribute = context.ContextualType.Type.GetCustomAttribute<ExperimentalFeatureAttribute>();
-        if (attribute is null)
+        var type = context.ContextualType.Type;
+
+        if (type.GetCustomAttribute<ExperimentalFeatureAttribute>() is { } typeAttribute)
         {
-            return;
+            var notice = BuildNotice(typeAttribute);
+            MarkExperimental(context.Schema, notice);
+            _noticesBySchema[context.Schema] = notice;
         }
 
-        var notice =
-            "**Experimental:** This is part of an experimental feature that may change or be removed " +
-            $"without a major version bump. See {attribute.DocumentationUrl} for details.";
-
-        MarkExperimental(context.Schema, notice);
-        _noticesBySchema[context.Schema] = notice;
+        MarkExperimentalProperties(type, context.Schema);
     }
+
+    /// <summary>
+    /// Flags the schema properties generated from marked CLR properties. Needed for members that carry no
+    /// contract type of their own - a token string, a boolean flag - which <see cref="AddPropertyNotices"/>
+    /// cannot reach, as it works off the schema a property references.
+    /// </summary>
+    private static void MarkExperimentalProperties(Type type, JsonSchema schema)
+    {
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (property.GetCustomAttribute<ExperimentalFeatureAttribute>() is not { } attribute)
+            {
+                continue;
+            }
+
+            // The schema property is keyed by its serialized name; the contract uses camel casing
+            // throughout, so a case-insensitive lookup is enough to pair the two.
+            var schemaProperty = schema.ActualProperties
+                .FirstOrDefault(x => string.Equals(x.Key, property.Name, StringComparison.OrdinalIgnoreCase))
+                .Value;
+
+            if (schemaProperty is not null)
+            {
+                MarkExperimental(schemaProperty, BuildNotice(attribute));
+            }
+        }
+    }
+
+    private static string BuildNotice(ExperimentalFeatureAttribute attribute) =>
+        "**Experimental:** This is part of an experimental feature that may change or be removed " +
+        $"without a major version bump. See {attribute.DocumentationUrl} for details.";
 
     /// <summary>
     /// Document post-process step: prepends the experimental notice to every property whose type
@@ -68,6 +97,13 @@ internal sealed class ExperimentalFeatureSchemaProcessor : ISchemaProcessor
 
     private static void MarkExperimental(JsonSchema schema, string notice)
     {
+        // A property can be reached twice - marked directly and again through the flagged schema it
+        // references - and the notice must not be prepended twice.
+        if (schema.ExtensionData?.ContainsKey(ExtensionName) == true)
+        {
+            return;
+        }
+
         schema.Description = string.IsNullOrEmpty(schema.Description)
             ? notice
             : $"{notice}\n\n{schema.Description}";

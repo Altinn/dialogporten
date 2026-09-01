@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -225,6 +226,41 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         log.PerformedBy.ActorNameEntity.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
         log.PerformedBy.ActorNameEntity.Name.Should().Be("Mock system user name");
     }
+
+    [Fact]
+    public Task Search_Handles_Legacy_Log_Entry_Missing_Actor_Row() =>
+        // Finding A in issue #4340: LabelAssignmentLog rows written before the
+        // shared-actor fix in #3553 can lack their Actor row entirely. The search
+        // must tolerate such rows instead of dereferencing the missing PerformedBy.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .Do(async ctx =>
+            {
+                // Simulate the legacy data state by deleting a single log entry's actor row.
+                using var scope = Application.GetServiceProvider().CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+                var dialogId = ctx.GetDialogId();
+                var logId = await db.LabelAssignmentLogs
+                    .Where(l => l.Context.DialogId == dialogId)
+                    .Select(l => l.Id)
+                    .FirstAsync(TestContext.Current.CancellationToken);
+                var deleted = await db.Database.ExecuteSqlAsync($"""
+                                                                 DELETE FROM "Actor"
+                                                                 WHERE "LabelAssignmentLogId" = {logId}
+                                                                 """);
+                deleted.Should().Be(1);
+            })
+            .SendCommand(ctx => new SearchLabelAssignmentLogQuery
+            {
+                DialogId = ctx.GetDialogId(),
+            }).ExecuteAndAssert<List<LabelAssignmentLogDto>>(dtoList =>
+            {
+                dtoList.Should().ContainSingle(dto =>
+                    dto.PerformedBy.ActorName == "" &&
+                    dto.PerformedBy.ActorId == "" &&
+                    dto.PerformedBy.ActorType == ActorType.Values.PartyRepresentative);
+            });
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

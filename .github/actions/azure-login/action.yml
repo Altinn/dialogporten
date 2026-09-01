@@ -21,8 +21,44 @@ env:
 
 runs:
   using: "composite"
+  # The Entra token endpoint intermittently returns an empty body to a single runner,
+  # which surfaces as "JSON is invalid: Expecting value: line 1 column 1 (char 0)".
+  # Peer logins in the same run keep succeeding, so retrying on a fresh connection
+  # clears it. The final attempt is not marked continue-on-error and fails the job.
   steps:
     - name: OIDC Login to Azure Public Cloud
+      id: login-attempt-1
+      continue-on-error: true
+      uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
+      with:
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.allow-no-subscriptions == 'true' && '' || inputs.subscription-id }}
+        allow-no-subscriptions: ${{ inputs.allow-no-subscriptions }}
+
+    - name: Back off before login attempt 2
+      if: steps.login-attempt-1.outcome == 'failure'
+      shell: bash
+      run: sleep 5
+
+    - name: OIDC Login to Azure Public Cloud (attempt 2)
+      id: login-attempt-2
+      if: steps.login-attempt-1.outcome == 'failure'
+      continue-on-error: true
+      uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
+      with:
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.allow-no-subscriptions == 'true' && '' || inputs.subscription-id }}
+        allow-no-subscriptions: ${{ inputs.allow-no-subscriptions }}
+
+    - name: Back off before login attempt 3
+      if: steps.login-attempt-1.outcome == 'failure' && steps.login-attempt-2.outcome == 'failure'
+      shell: bash
+      run: sleep 15
+
+    - name: OIDC Login to Azure Public Cloud (attempt 3)
+      if: steps.login-attempt-1.outcome == 'failure' && steps.login-attempt-2.outcome == 'failure'
       uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
       with:
         client-id: ${{ inputs.client-id }}

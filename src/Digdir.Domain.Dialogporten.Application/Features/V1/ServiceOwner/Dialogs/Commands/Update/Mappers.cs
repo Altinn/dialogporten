@@ -246,22 +246,6 @@ public static class Mappers
                 MainContentReference = source.MainContentReference.Copy()
             };
 
-    private static ContentDto? ToUpdateContentDto(
-        this Features.V1.EndUser.Dialogs.Queries.Get.ContentDto? source) =>
-        source is null
-            ? null
-            : new ContentDto
-            {
-                Title = source.Title.Copy()!,
-                NonSensitiveTitle = null,
-                Summary = source.Summary.Copy(),
-                NonSensitiveSummary = null,
-                SenderName = source.SenderName.Copy(),
-                AdditionalInfo = source.AdditionalInfo.Copy(),
-                ExtendedStatus = source.ExtendedStatus.Copy(),
-                MainContentReference = source.MainContentReference.Copy()
-            };
-
     private static AttachmentDto ToUpdateAttachmentDto(this DialogAttachmentDto source) =>
         new()
         {
@@ -279,22 +263,6 @@ public static class Mappers
             AuthorizationContext = source.AuthorizationContext.Copy()
         };
 
-    private static AttachmentDto ToUpdateAttachmentDto(this Features.V1.EndUser.Dialogs.Queries.Get.DialogAttachmentDto source) =>
-        new()
-        {
-            Id = source.Id,
-            DisplayName = source.DisplayName.CopyRequired(),
-            Name = source.Name,
-            Urls = source.Urls.Select(x => new AttachmentUrlDto
-            {
-                Id = x.Id,
-                Url = x.Url,
-                MediaType = x.MediaType,
-                ConsumerType = x.ConsumerType
-            }).ToList(),
-            ExpiresAt = source.ExpiresAt
-        };
-
     private static GuiActionDto ToUpdateGuiActionDto(this DialogGuiActionDto source) =>
         new()
         {
@@ -303,23 +271,6 @@ public static class Mappers
             Url = source.Url,
             AuthorizationAttribute = source.AuthorizationAttribute,
             AuthorizationContext = source.AuthorizationContext.Copy(),
-            IsDeleteDialogAction = source.IsDeleteDialogAction,
-            HttpMethod = source.HttpMethod,
-            Priority = source.Priority,
-            Title = source.Title.CopyRequired(),
-            Prompt = source.Prompt.CopyOptional()
-        };
-
-    // Note: end user DTOs do not expose authorization contexts, so a PUT built from an end user GET
-    // converts a context-based action into a legacy one (the coalesced action + no context). This
-    // overload is only used by test flows; the production PATCH path uses the service owner DTO.
-    private static GuiActionDto ToUpdateGuiActionDto(this Features.V1.EndUser.Dialogs.Queries.Get.DialogGuiActionDto source) =>
-        new()
-        {
-            Id = source.Id,
-            Action = source.Action,
-            Url = source.Url,
-            AuthorizationAttribute = source.AuthorizationAttribute,
             IsDeleteDialogAction = source.IsDeleteDialogAction,
             HttpMethod = source.HttpMethod,
             Priority = source.Priority,
@@ -338,33 +289,8 @@ public static class Mappers
             Endpoints = source.Endpoints.Select(x => x.ToUpdateApiActionEndpointDto()).ToList()
         };
 
-    private static ApiActionDto ToUpdateApiActionDto(this Features.V1.EndUser.Dialogs.Queries.Get.DialogApiActionDto source) =>
-        new()
-        {
-            Id = source.Id,
-            Action = source.Action,
-            AuthorizationAttribute = source.AuthorizationAttribute,
-            Name = source.Name,
-            Endpoints = source.Endpoints.Select(x => x.ToUpdateApiActionEndpointDto()).ToList()
-        };
-
     private static ApiActionEndpointDto ToUpdateApiActionEndpointDto(
         this DialogApiActionEndpointDto source) =>
-        new()
-        {
-            Id = source.Id,
-            Version = source.Version,
-            Url = source.Url,
-            HttpMethod = source.HttpMethod,
-            DocumentationUrl = source.DocumentationUrl,
-            RequestSchema = source.RequestSchema,
-            ResponseSchema = source.ResponseSchema,
-            Deprecated = source.Deprecated,
-            SunsetAt = source.SunsetAt
-        };
-
-    private static ApiActionEndpointDto ToUpdateApiActionEndpointDto(
-        this Features.V1.EndUser.Dialogs.Queries.Get.DialogApiActionEndpointDto source) =>
         new()
         {
             Id = source.Id,

@@ -98,7 +98,9 @@ internal sealed class ExperimentalFeatureSchemaProcessor : ISchemaProcessor
     private static void MarkExperimental(JsonSchema schema, string notice)
     {
         // A property can be reached twice - marked directly and again through the flagged schema it
-        // references - and the notice must not be prepended twice.
+        // references - and the notice must not be prepended twice. Note this keys on the presence of the
+        // extension, not on which notice: once a second experimental feature exists, a property belonging
+        // to both would carry only the notice that landed first.
         if (schema.ExtensionData?.ContainsKey(ExtensionName) == true)
         {
             return;

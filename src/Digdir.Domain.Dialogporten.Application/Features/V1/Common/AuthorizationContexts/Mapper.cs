@@ -35,8 +35,14 @@ internal static class LegacyAuthorizationFieldMapExtensions
         /// The legacy action in the form it is persisted in: the empty-string sentinel when the caller
         /// supplied none, because the entity carries an authorization context instead. See
         /// <see cref="DialogGuiAction.Action"/> for why the column stays NOT NULL.
+        ///
+        /// Whitespace normalizes to the sentinel too. The rule that the legacy action must be empty when a
+        /// context is supplied is expressed with FluentValidation's Empty(), which counts a whitespace-only
+        /// string as empty — so storing it verbatim would leave a value that
+        /// <see cref="DialogGuiAction.EffectiveLegacyAction"/> reports as a real legacy action.
         /// </summary>
-        internal string ToStoredLegacyAction() => action ?? string.Empty;
+        internal string ToStoredLegacyAction() =>
+            string.IsNullOrWhiteSpace(action) ? string.Empty : action;
     }
 
     extension(string? authorizationAttribute)

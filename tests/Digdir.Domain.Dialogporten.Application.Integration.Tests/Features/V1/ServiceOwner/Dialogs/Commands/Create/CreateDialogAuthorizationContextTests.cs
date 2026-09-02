@@ -135,6 +135,26 @@ public class CreateDialogAuthorizationContextTests(DialogApplication application
     }
 
     [Fact]
+    public async Task Create_Should_Normalize_A_Whitespace_Legacy_Action_To_The_Sentinel()
+    {
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.AddGuiAction(guiAction =>
+                {
+                    // Passes the exclusivity rule, which is expressed with FluentValidation's Empty() and
+                    // therefore counts a whitespace-only string as empty. Persisted verbatim it would read
+                    // back through EffectiveLegacyAction as a legacy action that shadows the context's.
+                    guiAction.Action = " ";
+                    guiAction.AuthorizationContext = CreateContext();
+                }))
+            .ExecuteAndAssert<CreateDialogSuccess>();
+
+        var guiAction = (await Application.GetDbEntities<DialogGuiAction>()).Should().ContainSingle().Subject;
+        guiAction.Action.Should().BeEmpty();
+        guiAction.EffectiveLegacyAction.Should().BeNull();
+    }
+
+    [Fact]
     public Task Create_Should_Fail_When_Transmission_Combines_AuthorizationAttribute_And_Context() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>

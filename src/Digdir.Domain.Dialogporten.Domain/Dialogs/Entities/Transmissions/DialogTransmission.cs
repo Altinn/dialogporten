@@ -23,7 +23,25 @@ public sealed class DialogTransmission :
     public Guid Id { get; set; }
     public string? IdempotentKey { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+
+    /// <summary>
+    /// The legacy authorization attribute this transmission is authorized by. A transmission governed by an
+    /// <see cref="AuthorizationContext"/> stores a rollback sentinel here instead of anything the service
+    /// owner supplied, so that code predating authorization contexts keeps the transmission hidden. Read it
+    /// through <see cref="EffectiveLegacyAuthorizationAttribute"/> rather than comparing to the sentinel.
+    /// </summary>
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// <see cref="AuthorizationAttribute"/> as API consumers should see it, i.e. the legacy attribute to
+    /// authorize by, or null when this transmission is governed by an <see cref="AuthorizationContext"/> and
+    /// the stored value is therefore the rollback sentinel. Keyed on the context rather than on the
+    /// sentinel's value, because that value is also a well-formed attribute a service owner may supply on
+    /// its own: suppressing it there would hide a real restriction and drop it on a GET → PUT round trip.
+    /// </summary>
+    public string? EffectiveLegacyAuthorizationAttribute =>
+        AuthorizationContext is null ? AuthorizationAttribute : null;
+
     public Uri? ExtendedType { get; set; }
     public string? ExternalReference { get; set; }
 

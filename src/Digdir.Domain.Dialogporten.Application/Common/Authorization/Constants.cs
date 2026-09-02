@@ -18,7 +18,10 @@ public static class Constants
     ///
     /// Never consulted when deciding access — <see cref="AuthorizationCheckBuilder"/> reads the context —
     /// and suppressed to null on every read surface, so it neither reaches a client nor breaks a
-    /// GET → PUT round trip against the write model's context/attribute exclusivity rule.
+    /// GET → PUT round trip against the write model's context/attribute exclusivity rule. That suppression
+    /// keys on the presence of a context, not on this value: it is also a well-formed attribute a service
+    /// owner may supply on its own, and such an attribute must still round-trip. See
+    /// <c>DialogTransmission.EffectiveLegacyAuthorizationAttribute</c>.
     /// </summary>
     public const string ExcludedTransmissionAttribute = "dp-excluded";
     public static readonly Uri UnauthorizedUri = new("urn:dialogporten:unauthorized");

@@ -298,7 +298,7 @@ internal static class DialogTransmissionMapExtensions
             Id = source.Id,
             IdempotentKey = source.IdempotentKey,
             CreatedAt = source.CreatedAt,
-            AuthorizationAttribute = source.AuthorizationAttribute.WithoutExclusionSentinel,
+            AuthorizationAttribute = source.EffectiveLegacyAuthorizationAttribute,
             AuthorizationContext = source.AuthorizationContext.ToDto(),
             ExtendedType = source.ExtendedType,
             ExternalReference = source.ExternalReference,

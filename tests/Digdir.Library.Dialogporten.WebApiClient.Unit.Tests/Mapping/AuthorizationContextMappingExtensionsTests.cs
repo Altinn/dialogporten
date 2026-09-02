@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Reflection;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
@@ -90,6 +91,36 @@ public class AuthorizationContextMappingExtensionsTests
         var result = source.ToUpdateDialog();
 
         Assert.Null(result.Attachments.Single().AuthorizationContext);
+    }
+
+    [Fact]
+    public void ToDialog_FromCreate_MapsAnAbsentLegacyActionToTheEmptySentinel()
+    {
+        var source = DialogWithContexts().ToCreateDialog();
+        source.GuiActions.Single().Action = null;
+        source.ApiActions.Single().Action = null;
+
+        var result = source.ToDialog();
+
+        // Omitting the legacy action is valid on the write models when a context is supplied, but the read
+        // contract's action is a non-nullable string: the server returns it empty, never absent.
+        Assert.Equal(string.Empty, result.GuiActions.Single().Action);
+        Assert.Equal(string.Empty, result.ApiActions.Single().Action);
+    }
+
+    [Theory]
+    [InlineData(typeof(DialogGuiAction))]
+    [InlineData(typeof(DialogApiAction))]
+    public void GetContract_LegacyAction_StaysNonNullable(Type type)
+    {
+        var property = type.GetProperty(nameof(DialogGuiAction.Action))!;
+
+        var nullability = new NullabilityInfoContext().Create(property);
+
+        // The deprecated action is omitted from a request when a context supplies it, but a response always
+        // carries it - empty for a context-governed action. Making it nullable here would misstate the
+        // contract and push a spurious null check onto every consumer that still reads it.
+        Assert.Equal(NullabilityState.NotNull, nullability.ReadState);
     }
 
     private static AuthorizationContext Context() => new()

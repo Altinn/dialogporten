@@ -14,12 +14,12 @@ public class DialogApiAction
     /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
     /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
     /// <br/>
-    /// <br/>Null when the action was supplied with an authorizationContext, in which case the action is found in
-    /// <br/>authorizationContext.action.
+    /// <br/>Empty when the action was supplied with an authorizationContext, in which case the action is found
+    /// <br/>in authorizationContext.action.
     /// </summary>
     [JsonPropertyName("action")]
     [Obsolete("Use 'AuthorizationContext.Action' instead.")]
-    public string? Action { get; set; }
+    public string Action { get; set; } = null!;
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service

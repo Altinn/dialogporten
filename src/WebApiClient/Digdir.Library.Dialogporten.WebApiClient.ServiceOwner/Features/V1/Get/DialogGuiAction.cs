@@ -15,12 +15,12 @@ public class DialogGuiAction
     /// <summary>
     /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
     /// <br/>
-    /// <br/>Null when the action was supplied with an authorizationContext, in which case the action is found in
-    /// <br/>authorizationContext.action.
+    /// <br/>Empty when the action was supplied with an authorizationContext, in which case the action is found
+    /// <br/>in authorizationContext.action.
     /// </summary>
     [JsonPropertyName("action")]
     [Obsolete("Use 'AuthorizationContext.Action' instead.")]
-    public string? Action { get; set; }
+    public string Action { get; set; } = null!;
 
     /// <summary>
     /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered.

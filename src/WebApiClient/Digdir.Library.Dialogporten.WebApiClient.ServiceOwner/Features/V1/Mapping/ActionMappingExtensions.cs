@@ -80,7 +80,8 @@ internal static class ActionMappingExtensions
     internal static DialogGuiAction ToDialogGuiAction(this CreateDialogGuiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
         AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
@@ -94,7 +95,8 @@ internal static class ActionMappingExtensions
     internal static DialogGuiAction ToDialogGuiAction(this UpdateDialogGuiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
         AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
@@ -150,7 +152,8 @@ internal static class ActionMappingExtensions
     internal static DialogApiAction ToDialogApiAction(this CreateDialogApiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         AuthorizationAttribute = source.AuthorizationAttribute,
         AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         Name = source.Name,
@@ -160,7 +163,8 @@ internal static class ActionMappingExtensions
     internal static DialogApiAction ToDialogApiAction(this UpdateDialogApiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         AuthorizationAttribute = source.AuthorizationAttribute,
         AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         Name = source.Name,

@@ -24,11 +24,8 @@ internal sealed class GetServiceResourceMetadataQueryHandler : IRequestHandler<G
         GetServiceResourceMetadataQuery request,
         CancellationToken cancellationToken)
     {
-        // Full public catalogue: every referenced resource, from the shared cached catalogue, with localizations
-        // pruned into fresh per-request copies and re-sorted by the pruned (requested-language) name
-        // (see ToSortedPrunedItems).
-        var entries = await _catalogue.GetEntries(cancellationToken);
-        var items = entries.ToSortedPrunedItems(request.AcceptedLanguages);
+        var items = await _catalogue.GetCatalogueDtos(request.AcceptedLanguages, cancellationToken);
+
         return new GetServiceResourceMetadataDto { Items = items };
     }
 }

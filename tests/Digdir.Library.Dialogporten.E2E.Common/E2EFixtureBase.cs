@@ -21,6 +21,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
     public E2ESettings Settings { get; private set; } = null!;
 
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
+    public IMetadataApi MetadataApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -69,6 +70,12 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         services.Decorate<IServiceownerApi, EphemeralDialogDecorator>();
 
+        services.AddRefitClient<IMetadataApi>(new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
+        })
+            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri);
+
         var graphQlPath = DotnetEnvironment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
         var graphQlUriBuilder = new UriBuilder(settings.DialogportenBaseUri)
         {
@@ -88,6 +95,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         _serviceProvider = services.BuildServiceProvider();
 
         ServiceownerApi = _serviceProvider.GetRequiredService<IServiceownerApi>();
+        MetadataApi = _serviceProvider.GetRequiredService<IMetadataApi>();
         _tokenOverridesAccessor = _serviceProvider.GetRequiredService<ITokenOverridesAccessor>();
 
         AfterServiceProviderBuilt(_serviceProvider);
@@ -144,12 +152,14 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         if (IncludeGraphQlPreflight && PreflightState.GraphQlError is not null)
         {
-            preFlightIssues.Add($"GraphQL not reachable at {PreflightState.GraphQlUri}. Error: {PreflightState.GraphQlError}");
+            preFlightIssues.Add(
+                $"GraphQL not reachable at {PreflightState.GraphQlUri}. Error: {PreflightState.GraphQlError}");
         }
 
         if (PreflightState.WebApiError is not null)
         {
-            preFlightIssues.Add($"WebAPI not reachable at {PreflightState.WebApiUri}. Error: {PreflightState.WebApiError}");
+            preFlightIssues.Add(
+                $"WebAPI not reachable at {PreflightState.WebApiUri}. Error: {PreflightState.WebApiError}");
         }
 
         preFlightIssues.Should()
@@ -162,9 +172,12 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         E2ESettings settings,
         Uri webApiUri,
         Uri graphQlUri)
-    { }
+    {
+    }
 
-    protected virtual void AfterServiceProviderBuilt(ServiceProvider serviceProvider) { }
+    protected virtual void AfterServiceProviderBuilt(ServiceProvider serviceProvider)
+    {
+    }
 
     protected virtual bool IncludeGraphQlPreflight => true;
 

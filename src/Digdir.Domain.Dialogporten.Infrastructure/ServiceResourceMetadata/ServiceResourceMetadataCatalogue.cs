@@ -1,5 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.Extensions.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -14,7 +16,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadataCatalogue
 {
     internal const string CacheName = "ServiceResourceMetadataCatalogue";
-    private const string CacheKey = "all";
+    private const string CacheKeyKnownLanguages = "sr-catalogue-known-languages";
+    private const string CacheKeyCatalogue = "sr-catalogue";
+
+    private static readonly Func<List<AcceptedLanguage>, string> CacheKeyCatalogueByLang =
+        lng => $"sr-catalogue-by-lang-{ToCacheString(lng)}";
+
+    private static string ToCacheString(List<AcceptedLanguage> lng) =>
+        string.Join(',', lng.OrderByDescending(x => x.Weight).Select(x => x.LanguageCode));
+
 
     private readonly IFusionCache _cache;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -33,13 +43,54 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
         _scopeFactory = scopeFactory;
     }
 
-    public async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken) =>
-        await _cache.GetOrSetAsync<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
-            CacheKey,
-            BuildCatalogue,
-            token: cancellationToken);
+    public async Task<IReadOnlyList<ServiceResourceMetadataItemDto>> GetCatalogueDtos(
+        List<AcceptedLanguage>? languages,
+        CancellationToken cancellationToken
+    )
+    {
+        if (languages == null)
+        {
+            return await _cache.GetOrSetAsync<IReadOnlyList<ServiceResourceMetadataItemDto>>(
+                CacheKeyCatalogue,
+                (_, ct) => BuildCatalogue(languages, ct),
+                token: cancellationToken);
+        }
 
-    private async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> BuildCatalogue(CancellationToken cancellationToken)
+        var knownLanguages = await GetKnownLanguages(cancellationToken);
+        languages = languages
+            .Where(l => knownLanguages.Contains(l.LanguageCode))
+            .OrderByDescending(l => l.Weight)
+            .Take(2) // We ignore more than 2 languages to limit cardinality in the cache
+            .ToList();
+
+        return await _cache.GetOrSetAsync<IReadOnlyList<ServiceResourceMetadataItemDto>>(
+                CacheKeyCatalogueByLang(languages),
+                (_, ct) => BuildCatalogue(languages, ct),
+                token: cancellationToken);
+    }
+
+    private async Task<HashSet<string>> GetKnownLanguages(CancellationToken ct)
+    {
+        return await _cache.GetOrSetAsync<HashSet<string>>(
+            CacheKeyKnownLanguages,
+            async (_, cancellationToken) =>
+            {
+                var dtos = await GetCatalogueDtos(null, cancellationToken);
+                return dtos
+                    .SelectMany(d => d.ServiceResource.Name
+                        .Concat(d.ServiceOwner.Name)
+                        .Concat(d.AccessPackages.SelectMany(a => a.Name))
+                        .Concat(d.Roles.SelectMany(r => r.Name))
+                        .Select(x => x.LanguageCode))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            },
+            token: ct);
+    }
+
+    private async Task<IReadOnlyList<ServiceResourceMetadataItemDto>> BuildCatalogue(
+        List<AcceptedLanguage>? languages,
+        CancellationToken cancellationToken
+    )
     {
         // Build in a fresh DI scope rather than via injected (request-scoped) dependencies. This cache uses
         // eager refresh, so the factory can run on a background task that outlives the request that triggered
@@ -48,7 +99,8 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
         // dedicated scope gives the (possibly background) build its own DbContext for its full lifetime.
         await using var scope = _scopeFactory.CreateAsyncScope();
         var itemBuilder = scope.ServiceProvider.GetRequiredService<IServiceResourceMetadataItemBuilder>();
-        var partyResourceReferenceRepository = scope.ServiceProvider.GetRequiredService<IPartyResourceReferenceRepository>();
+        var partyResourceReferenceRepository = scope.ServiceProvider
+            .GetRequiredService<IPartyResourceReferenceRepository>();
 
         var referencedResources = await partyResourceReferenceRepository.GetReferencedResources(cancellationToken);
 
@@ -58,8 +110,10 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
 
         return items
             .Select(item => new ServiceResourceMetadataCatalogueEntry(
-                Domain.Common.Constants.ServiceResourcePrefix + item.ServiceResource.Id,
-                item))
+                Constants.ServiceResourcePrefix + item.ServiceResource.Id,
+                item)
+            )
+            .ToSortedPrunedItems(languages)
             .ToList();
     }
 }

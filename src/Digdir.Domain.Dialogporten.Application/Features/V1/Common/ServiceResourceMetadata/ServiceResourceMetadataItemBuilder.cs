@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 
@@ -20,7 +21,7 @@ public interface IServiceResourceMetadataItemBuilder
     Task<List<ServiceResourceMetadataItemDto>> BuildItems(
         IReadOnlyCollection<string> serviceResources,
         List<AcceptedLanguage>? acceptedLanguages,
-        CancellationToken cancellationToken);
+        CancellationToken ct);
 }
 
 internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetadataItemBuilder
@@ -58,7 +59,7 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
     public async Task<List<ServiceResourceMetadataItemDto>> BuildItems(
         IReadOnlyCollection<string> serviceResources,
         List<AcceptedLanguage>? acceptedLanguages,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
         if (serviceResources.Count == 0)
         {
@@ -69,24 +70,26 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
         // the same scoped DbContext, which is not thread-safe. Running them concurrently throws
         // "A second operation was started on this context instance". The underlying calls are cached, so
         // the sequential cost is negligible.
-        var subjectsByResource = await _subjectResourceRepository.GetSubjectsForReferencedPartyResources(cancellationToken);
-        var metadata = await _accessManagementMetadata.GetMetadata(cancellationToken);
-        var resourceInformationByResource = await _resourceRegistry.GetResourceInformation(serviceResources, cancellationToken);
-        var minimumAuthenticationLevels = await _minimumAuthenticationLevelResolver
-            .GetMinimumAuthenticationLevels(serviceResources, cancellationToken);
+        var subjectsByResource = await _subjectResourceRepository.GetSubjectsForReferencedPartyResources(ct);
+        var rolesAndAccessPackages = await _accessManagementMetadata.GetMetadata(ct);
+        var resourceInformationByResource = await _resourceRegistry.GetResourceInformation(serviceResources, ct);
+        var minimumAuthenticationLevels = await _minimumAuthenticationLevelResolver.GetMinimumAuthenticationLevels(
+            serviceResources,
+            ct
+        );
 
         var ownerOrgNumbers = resourceInformationByResource.Values
             .Select(x => x.OwnerOrgNumber)
             .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-        var ownerInfoByOrgNumber = await _serviceOwnerNameRegistry.GetServiceOwnerInfo(ownerOrgNumbers, cancellationToken);
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        var ownerInfoByOrgNumber = await _serviceOwnerNameRegistry.GetServiceOwnerInfo(ownerOrgNumbers, ct);
 
         return serviceResources
             .Select(resource => CreateItem(
                 resource,
                 subjectsByResource,
-                metadata,
+                rolesAndAccessPackages,
                 resourceInformationByResource,
                 ownerInfoByOrgNumber,
                 minimumAuthenticationLevels,
@@ -128,17 +131,11 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
             .Select(x => metadata.RolesBySubject.GetValueOrDefault(x))
             .OfType<AccessManagementRoleMetadata>()
             .DistinctBy(x => x.Urn, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new
-            {
-                x.Urn,
-                Name = x.Name.Pruned(acceptedLanguages),
-                x.Links
-            })
             // Roles/access packages are (re)ordered per request by PrunedCopy, so no ordering here.
             .Select(x => new ServiceResourceMetadataRoleDto
             {
                 Urn = x.Urn,
-                Name = x.Name,
+                Name = x.Name.Pruned(acceptedLanguages),
                 Links = x.Links
             })
             .ToList();
@@ -148,16 +145,10 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
             .Select(x => metadata.AccessPackagesBySubject.GetValueOrDefault(x))
             .OfType<AccessManagementAccessPackageMetadata>()
             .DistinctBy(x => x.Urn, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new
-            {
-                x.Urn,
-                Name = x.Name.Pruned(acceptedLanguages),
-                x.Links
-            })
             .Select(x => new ServiceResourceMetadataAccessPackageDto
             {
                 Urn = x.Urn,
-                Name = x.Name,
+                Name = x.Name.Pruned(acceptedLanguages),
                 Links = x.Links
             })
             .ToList();
@@ -186,8 +177,8 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
     }
 
     private static string StripResourcePrefix(string serviceResource)
-        => serviceResource.StartsWith(Domain.Common.Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
-            ? serviceResource[Domain.Common.Constants.ServiceResourcePrefix.Length..]
+        => serviceResource.StartsWith(Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase)
+            ? serviceResource[Constants.ServiceResourcePrefix.Length..]
             : serviceResource;
 
     private static List<LocalizationDto> ToLocalizationDtos(

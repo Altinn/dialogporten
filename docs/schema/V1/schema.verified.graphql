@@ -11,7 +11,8 @@ type Queries @authorize(policy: "enduser") {
   labelAssignmentLog(dialogId: UUID!): LabelAssignmentLogPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
-  serviceResources(parties: [String!], includeUnauthorized: Boolean! = false): ServiceResourceMetadata!
+  serviceResources: GetServiceResourceMetadataDto!
+  searchServiceResources(parties: [String!]): SearchAuthorizedServiceResourcesDto!
 }
 
 type Mutations @authorize(policy: "enduser") {
@@ -369,6 +370,10 @@ type EndUserSearchLimits {
   maxExtendedStatusFilterValues: Int!
 }
 
+type GetServiceResourceMetadataDto {
+  items: [ServiceResourceMetadataItemDto!]!
+}
+
 type GuiAction {
   "The unique identifier for the action in UUIDv7 format."
   id: UUID!
@@ -426,9 +431,31 @@ type Limits {
   serviceOwnerSearch: ServiceOwnerSearchLimits!
 }
 
+type LinkDto {
+  metadata: String!
+}
+
 type Localization {
   value: String!
   languageCode: String!
+}
+
+type LocalizationDto {
+  "The localized text (or URL if a front-channel embed)."
+  value: String!
+  "The language code of the localization in ISO 639-1 format."
+  languageCode: String!
+}
+
+type SearchAuthorizedServiceResourcesDto {
+  """
+  Set to true only when Items is the full referenced catalogue returned as a fallback
+  instead of the caller's authorized subset: this happens when the caller is authorized to a very large
+  number of parties on an unfiltered request, so the authorized union is not computed. Absent/null for a
+  normal authorization-scoped result — supply a party filter to always get an authorization-scoped result.
+  """
+  isFullCatalogueFallback: Boolean
+  items: [ServiceResourceMetadataItemDto!]!
 }
 
 type SearchContent {
@@ -565,48 +592,39 @@ type ServiceOwnerSearchLimits {
   maxExtendedStatusFilterValues: Int!
 }
 
-type ServiceResourceMetadata {
-  isFullCatalogueFallback: Boolean
-  items: [ServiceResourceMetadataItem!]!
-}
-
-type ServiceResourceMetadataAccessPackage {
+type ServiceResourceMetadataAccessPackageDto {
   urn: String!
-  name: [Localization!]!
-  links: ServiceResourceMetadataLinks!
+  name: [LocalizationDto!]!
+  links: LinkDto!
 }
 
-type ServiceResourceMetadataItem {
-  serviceResource: ServiceResourceMetadataServiceResource!
-  roles: [ServiceResourceMetadataRole!]!
-  accessPackages: [ServiceResourceMetadataAccessPackage!]!
-  serviceOwner: ServiceResourceMetadataServiceOwner!
+type ServiceResourceMetadataItemDto {
+  serviceResource: ServiceResourceMetadataServiceResourceDto!
+  roles: [ServiceResourceMetadataRoleDto!]!
+  accessPackages: [ServiceResourceMetadataAccessPackageDto!]!
+  serviceOwner: ServiceResourceMetadataServiceOwnerDto!
 }
 
-type ServiceResourceMetadataLinks {
-  metadata: String!
-}
-
-type ServiceResourceMetadataRole {
+type ServiceResourceMetadataRoleDto {
   urn: String!
-  name: [Localization!]!
-  links: ServiceResourceMetadataLinks!
+  name: [LocalizationDto!]!
+  links: LinkDto!
 }
 
-type ServiceResourceMetadataServiceOwner {
+type ServiceResourceMetadataServiceOwnerDto {
   orgNumber: String!
   code: String!
-  name: [Localization!]!
+  name: [LocalizationDto!]!
 }
 
-type ServiceResourceMetadataServiceResource {
+type ServiceResourceMetadataServiceResourceDto {
   id: String!
   resourceType: String!
   status: String!
   isDelegable: Boolean!
   minimumAuthenticationLevel: Int!
-  name: [Localization!]!
-  links: ServiceResourceMetadataLinks!
+  name: [LocalizationDto!]!
+  links: LinkDto!
 }
 
 type SetSystemLabelConcurrencyError implements SetSystemLabelError {

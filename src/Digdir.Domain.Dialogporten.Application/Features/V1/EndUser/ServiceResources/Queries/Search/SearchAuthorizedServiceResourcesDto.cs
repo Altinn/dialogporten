@@ -14,5 +14,5 @@ public sealed class SearchAuthorizedServiceResourcesDto
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? IsFullCatalogueFallback { get; set; }
 
-    public List<ServiceResourceMetadataItemDto> Items { get; set; } = [];
+    public IReadOnlyList<ServiceResourceMetadataItemDto> Items { get; set; } = [];
 }

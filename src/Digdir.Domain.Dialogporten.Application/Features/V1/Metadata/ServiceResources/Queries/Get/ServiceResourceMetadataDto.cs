@@ -4,5 +4,5 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceRes
 
 public sealed class GetServiceResourceMetadataDto
 {
-    public List<ServiceResourceMetadataItemDto> Items { get; set; } = [];
+    public IReadOnlyList<ServiceResourceMetadataItemDto> Items { get; set; } = [];
 }

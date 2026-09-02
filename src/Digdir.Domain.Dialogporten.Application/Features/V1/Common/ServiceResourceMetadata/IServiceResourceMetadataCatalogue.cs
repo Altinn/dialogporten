@@ -1,3 +1,5 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 
 /// <summary>
@@ -16,5 +18,5 @@ public sealed record ServiceResourceMetadataCatalogueEntry(string ResourceUrn, S
 /// </summary>
 public interface IServiceResourceMetadataCatalogue
 {
-    Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken);
+    Task<IReadOnlyList<ServiceResourceMetadataItemDto>> GetCatalogueDtos(List<AcceptedLanguage>? languages, CancellationToken cancellationToken);
 }

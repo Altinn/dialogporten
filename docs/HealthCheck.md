@@ -143,7 +143,9 @@ deployed environment would land on `Diagnostic`.
 ## Warmup
 
 A booting pod reports 503 on `/health/readiness` until warmup completes, so it does not receive
-traffic before its connection pool and EF model are primed. See
+traffic before its connection pool and EF model are primed. A failed warmup is retried with
+backoff until it succeeds, so a transient failure at boot costs a pod seconds rather than its
+whole life. See
 [`HealthCheckImplementation.md`](./HealthCheckImplementation.md#the-warmup-subsystem) for the
 phases and their configuration.
 

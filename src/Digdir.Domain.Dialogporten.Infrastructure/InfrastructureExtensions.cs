@@ -598,18 +598,27 @@ public static class InfrastructureExtensions
         services.AddWarmup(options =>
         {
             options.Enabled = settings.Warmup.Enabled;
-            // Budget for the whole run, layered above the per-phase budgets below. The library
+            // Budget for a single attempt, layered above the per-phase budgets below. The library
             // validates it (1-3600s) at host startup. It must stay LARGER than the sum of the
-            // per-phase budgets: the run budget firing is recorded as a warmup *failure* even when
-            // the phase it interrupts is optional, and that failure is terminal - readiness stays
-            // 503 for the lifetime of the process. Keep Infrastructure:Warmup:TimeoutSeconds above
-            // the phase budgets so only the per-phase budgets can ever fire.
+            // per-phase budgets: the attempt budget firing is recorded as a warmup *failure* even
+            // when the phase it interrupts is optional, which turns a skippable overrun into a
+            // failed attempt that has to be retried from the top. Keep
+            // Infrastructure:Warmup:TimeoutSeconds above the phase budgets so only the per-phase
+            // budgets can ever fire.
             options.TimeoutSeconds = settings.Warmup.TimeoutSeconds;
 
-            // Sequential, sharing one DI scope. Each phase also gets its own budget, so one slow
-            // phase cannot spend the whole run and leave a later phase either unrun or blamed for
-            // the timeout. The two optional phases go last and are the ones that talk to Altinn or
-            // run a real search, so they get the tighter budgets.
+            // Retry is left at the library defaults: retry for as long as the pod runs, backing
+            // off from 2s to 60s with jitter. A failure here is nearly always transient - the
+            // incident that prompted it was a DNS blip during db-pool - and a readiness failure is
+            // not a restart signal, so a replica that gives up sits unready until someone notices.
+            // See Altinn/dialogporten#4285.
+
+            // Sequential, sharing one DI scope per attempt. Each phase also gets its own budget, so
+            // one slow phase cannot spend the whole attempt and leave a later phase either unrun or
+            // blamed for the timeout. The two optional phases go last and are the ones that talk to
+            // Altinn or run a real search, so they get the tighter budgets.
+            // A retry re-runs every phase, so each must stay idempotent - they are all read-only
+            // queries today.
             options.AddPhase("db-pool", WarmupPhases.WarmupDbPoolAsync, timeoutSeconds: WarmupPhases.DbPoolBudgetSeconds);
             options.AddPhase("ef-model", WarmupPhases.WarmupEfModelAsync, timeoutSeconds: WarmupPhases.EfModelBudgetSeconds);
             options.AddPhase("service-resource-metadata", WarmupPhases.WarmupServiceResourceMetadataAsync, optional: true, timeoutSeconds: WarmupPhases.ServiceResourceMetadataBudgetSeconds);

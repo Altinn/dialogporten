@@ -174,26 +174,47 @@ the phases in `src/Digdir.Domain.Dialogporten.Infrastructure/HealthChecks/Warmup
 | `service-resource-metadata` | yes | populates the service-resource catalogue cache |
 | `end-user-search` | yes | a real search under a synthetic principal |
 
-Phases run **sequentially in registration order, sharing one DI scope**, under a **run budget**
-(`Infrastructure:Warmup:TimeoutSeconds`, 80 in the shipped appsettings, validated 1–3600 at host
-startup) covering all of them, with a **per-phase budget** layered underneath (20s for the two
-required phases, 15s for the optional ones). The per-phase budget is what keeps one slow phase from
-spending the whole run: without it a hung optional phase starves whatever comes after it. Both
-budgets work by cancelling the token handed to the phase, so they bound only work that observes
-cancellation.
+Phases run **sequentially in registration order, sharing one DI scope per attempt**, under an
+**attempt budget** (`Infrastructure:Warmup:TimeoutSeconds`, 80 in the shipped appsettings, validated
+1–3600 at host startup) covering all of them, with a **per-phase budget** layered underneath (20s for
+the two required phases, 15s for the optional ones). The per-phase budget is what keeps one slow
+phase from spending the whole attempt: without it a hung optional phase starves whatever comes after
+it. Both budgets work by cancelling the token handed to the phase, so they bound only work that
+observes cancellation.
 
-The run budget must stay **larger than the sum of the per-phase budgets** (70s today with
+The attempt budget must stay **larger than the sum of the per-phase budgets** (70s today with
 `RunEndUserSearch` on, 55s without, hence 80s) — `WarmupSettingsValidator` enforces this at
 startup against the same `WarmupPhases` budget constants the registration uses.
-`optional: true` only covers a phase *failing*; when the **run** budget fires it is recorded as a
-warmup failure regardless of which phase it interrupted, and that failure is terminal — the state
-never returns to Healthy, so `/health/readiness` stays 503 for the life of the process and the
-replica never joins rotation. Keeping the run budget above the phase budgets means that, for a
-phase observing cancellation, only its per-phase budget can ever fire, and an optional phase
+`optional: true` only covers a phase *failing*; when the **attempt** budget fires it is recorded as a
+warmup failure regardless of which phase it interrupted, which turns a skippable overrun into a
+failed attempt retried from the top. Keeping the attempt budget above the phase budgets means that,
+for a phase observing cancellation, only its per-phase budget can ever fire, and an optional phase
 that overruns is skipped as intended. A phase that ignores its token forfeits that guarantee:
-it can burn through its own budget into the run budget — escalating an optional overrun into
-the terminal failure — or, if it never observes cancellation at all, hold readiness at Pending
-indefinitely. All four phases above pass their token through to the queries they run.
+it can burn through its own budget into the attempt budget — escalating an optional overrun into a
+failed attempt — or, if it never observes cancellation at all, hold readiness at Pending
+indefinitely, since no timeout can interrupt it and no retry can start behind it. All four phases
+above pass their token through to the queries they run.
+
+### Retrying
+
+A failed attempt is retried, indefinitely by default, backing off from 2s to 60s with jitter
+(`Altinn.AspNet.HealthChecks.Warmup` 0.4.0 defaults; Dialogporten does not override them).
+`/health/readiness` reports 503 throughout, so the replica stays out of rotation until it is
+genuinely warm.
+
+This matters because a failed readiness probe is **not** a restart signal. Container Apps takes the
+replica out of load balancing and leaves it running, and it still counts toward `minReplicas`, so
+nothing replaces it either. The startup probe would restart it, but only inside its own window — its
+first sample is 10s in and it needs three consecutive failures, so a blip shorter than ~30s leaves
+the startup probe green. Before retrying existed, a DNS hiccup lasting seconds during `db-pool` cost
+the replica for as long as it lived; this happened, and two replicas sat unready for 3.5 and 4 days
+(Altinn/dialogporten#4285).
+
+Each attempt gets a **fresh DI scope**, so nothing the failed attempt left faulted — a broken
+connection, a `DbContext` holding the error — is handed to the retry. A retry re-runs **every**
+phase, including those that already succeeded, so **phases must be idempotent**. All four are:
+each is a read-only query, and the ambient principal `end-user-search` installs is scoped to a
+`using` block.
 
 `optional: true` means a phase failure is logged and warmup continues, so the phase cannot fail
 readiness. Optional phases therefore contain **no exception handling of their own** — catching

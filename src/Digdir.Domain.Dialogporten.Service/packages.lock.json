@@ -37,33 +37,33 @@
       },
       "Altinn.AspNet.HealthChecks": {
         "type": "Transitive",
-        "resolved": "0.3.0",
-        "contentHash": "IlMYSLkVA6loc+681Qks2VNaQTphZl7MTMdF2CdLfhyA94xwrB1xP1JCNFwAE02n+Zr+Tkn6rIvSuuADfyPN4w=="
+        "resolved": "0.4.0",
+        "contentHash": "HU1o9CDumgaBkUprBYPE3Asq8lxVJsO+bjCkUA0OyftFwyWF/9wxPsdgDijekhZROQkDvR8XtDS6eTplTzvGSg=="
       },
       "Altinn.AspNet.HealthChecks.OpenTelemetry": {
         "type": "Transitive",
-        "resolved": "0.3.0",
-        "contentHash": "hYzeusgG1tpJTP0bAHkJ/rvagYmcvh5ujoX7q+SlSi4WDQ1JUbTNGYOtyIh6FB2RyHLyl5hFXbnr36dQzbcZyQ==",
+        "resolved": "0.4.0",
+        "contentHash": "nSf4Rj6LjzXhFK0TJwo1oMzOYAosz2PyZLt2KB9phkPMzlyxpD63z2KR2rxgNthZL+mlcM2fbKLlUVw2ftVRbQ==",
         "dependencies": {
-          "Altinn.AspNet.HealthChecks": "0.3.0",
+          "Altinn.AspNet.HealthChecks": "0.4.0",
           "OpenTelemetry": "1.17.0"
         }
       },
       "Altinn.AspNet.HealthChecks.Probes": {
         "type": "Transitive",
-        "resolved": "0.3.0",
-        "contentHash": "jkLHwtiA93Y6l73WrRt+J68JNwMVo8Hs8xVq+BxRh/DWtUso4b7/2HeQ/sWt85RyEI5eR4QQxp1m7XjCY06mOA==",
+        "resolved": "0.4.0",
+        "contentHash": "zs4AxhuLUW4PXKVe1uNxT6Br/Fb8yhCuB6e3zrapo41bL64hPdfb2qJeNb3+j82GgS7kj7MXZZnXzuLGkek2Fg==",
         "dependencies": {
-          "Altinn.AspNet.HealthChecks": "0.3.0",
+          "Altinn.AspNet.HealthChecks": "0.4.0",
           "AspNetCore.HealthChecks.Uris": "9.0.0"
         }
       },
       "Altinn.AspNet.HealthChecks.Warmup": {
         "type": "Transitive",
-        "resolved": "0.3.0",
-        "contentHash": "TS32kjkeQmPpHYCj/F/OvIqOnFePi4Q49/GseF/2/WzjgZJC2cvBro0iPzd83OpXzLLbN6oU31uc998mIL0mog==",
+        "resolved": "0.4.0",
+        "contentHash": "kufYRerSdsJjUJovD62ze1evOgH33TtMaZLUVNAgC7T80K8AFpiy/MTgSc+KLHcomxGFH2VAkouLdfElXli+Ng==",
         "dependencies": {
-          "Altinn.AspNet.HealthChecks": "0.3.0"
+          "Altinn.AspNet.HealthChecks": "0.4.0"
         }
       },
       "Altinn.Authorization.ABAC": {
@@ -1327,8 +1327,8 @@
         "type": "Project",
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.1.0, )",
-          "Altinn.AspNet.HealthChecks": "[0.3.0, )",
-          "Altinn.AspNet.HealthChecks.Warmup": "[0.3.0, )",
+          "Altinn.AspNet.HealthChecks": "[0.4.0, )",
+          "Altinn.AspNet.HealthChecks.Warmup": "[0.4.0, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
           "AspNetCore.HealthChecks.NpgSql": "[9.0.0, )",
           "AspNetCore.HealthChecks.Redis": "[9.0.0, )",
@@ -1367,9 +1367,9 @@
       "digdir.library.utils.aspnet": {
         "type": "Project",
         "dependencies": {
-          "Altinn.AspNet.HealthChecks": "[0.3.0, )",
-          "Altinn.AspNet.HealthChecks.OpenTelemetry": "[0.3.0, )",
-          "Altinn.AspNet.HealthChecks.Probes": "[0.3.0, )",
+          "Altinn.AspNet.HealthChecks": "[0.4.0, )",
+          "Altinn.AspNet.HealthChecks.OpenTelemetry": "[0.4.0, )",
+          "Altinn.AspNet.HealthChecks.Probes": "[0.4.0, )",
           "Azure.Identity": "[1.21.0, )",
           "Azure.Monitor.OpenTelemetry.AspNetCore": "[1.6.0, )",
           "Digdir.Domain.Dialogporten.Infrastructure": "[1.0.0, )",

@@ -131,16 +131,17 @@ internal sealed class WarmupSettingsValidator : AbstractValidator<WarmupSettings
             // bounding it here too reports it with the rest of the infrastructure settings.
             .LessThanOrEqualTo(3600);
 
-        // The run budget firing is recorded as a terminal warmup failure even when it interrupts
-        // an optional phase, permanently failing readiness. It must therefore strictly exceed the
-        // sum of the per-phase budgets that will actually be registered (see the phase
-        // registration in InfrastructureExtensions, which uses the same WarmupPhases constants).
+        // The attempt budget firing is recorded as a warmup failure even when it interrupts an
+        // optional phase, which turns a skippable overrun into a failed attempt retried from the
+        // top. It must therefore strictly exceed the sum of the per-phase budgets that will
+        // actually be registered (see the phase registration in InfrastructureExtensions, which
+        // uses the same WarmupPhases constants).
         RuleFor(x => x.TimeoutSeconds)
             .GreaterThan(x => WarmupPhases.TotalPhaseBudgetSeconds(x.RunEndUserSearch))
             .WithMessage(x =>
                 $"'{{PropertyName}}' must be greater than the sum of the registered warmup phase budgets " +
                 $"({WarmupPhases.TotalPhaseBudgetSeconds(x.RunEndUserSearch)}s with RunEndUserSearch={x.RunEndUserSearch}); " +
-                "otherwise the run timeout can interrupt a phase and permanently fail readiness.")
+                "otherwise the attempt timeout can interrupt an optional phase and fail the whole attempt.")
             .When(x => x.Enabled);
 
         RuleFor(x => x.DbConnectionsToOpen)

@@ -17,12 +17,19 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.HealthChecks;
 
 /// <summary>
 /// The readiness warmup phases. Registered with Altinn.AspNet.HealthChecks.Warmup, which owns the
-/// hosted service, the phase sequencing and timeout budget, the warmup state and the readiness
-/// health check. Each phase receives the scoped service provider shared by the whole warmup run.
+/// hosted service, the phase sequencing and timeout budget, the retry loop, the warmup state and the
+/// readiness health check. Each phase receives the scoped service provider shared by one attempt.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Optional phases deliberately contain no exception handling: the library logs and continues past a
 /// failing optional phase, so catching here would only hide the failure.
+/// </para>
+/// <para>
+/// A failed attempt is retried by re-running every phase in a fresh scope, so each phase must be
+/// idempotent. They all are: every one is a read-only query, and the ambient principal the end-user
+/// search installs is scoped to a using block.
+/// </para>
 /// </remarks>
 internal static partial class WarmupPhases
 {
@@ -35,9 +42,9 @@ internal static partial class WarmupPhases
 
     /// <summary>
     /// The sum of the per-phase budgets that will actually be registered for a given
-    /// configuration. The run budget (Infrastructure:Warmup:TimeoutSeconds) must strictly
-    /// exceed this: the run budget firing is a terminal warmup failure even when it interrupts
-    /// an optional phase.
+    /// configuration. The attempt budget (Infrastructure:Warmup:TimeoutSeconds) must strictly
+    /// exceed this: the attempt budget firing is a warmup failure even when it interrupts an
+    /// optional phase, turning a skippable overrun into an attempt that has to be retried.
     /// </summary>
     internal static int TotalPhaseBudgetSeconds(bool runEndUserSearch) =>
         DbPoolBudgetSeconds

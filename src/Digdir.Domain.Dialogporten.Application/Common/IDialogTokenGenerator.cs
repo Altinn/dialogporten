@@ -95,7 +95,7 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         claims[DialogTokenClaimTypes.NotBefore] = now;
         claims[DialogTokenClaimTypes.Expires] = now + (long)_tokenLifetime.TotalSeconds;
 
-        return _compactJwsGenerator.GetCompactJws(claims);
+        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogToken);
     }
 
     private static string GetAuthorizedActions(DialogDetailsAuthorizationResult authorizationResult)
@@ -122,6 +122,27 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
 
         return actions.ToString();
     }
+}
+
+/// <summary>
+/// JOSE "typ" header values distinguishing the token types issued by Dialogporten (RFC 8725 explicit typing;
+/// per RFC 7515 a value without '/' is shorthand for "application/&lt;value&gt;").
+/// </summary>
+public static class DialogTokenTypes
+{
+    /// <summary>
+    /// The dialog token deliberately keeps the generic "JWT" type in v1. Explicit typing per RFC 8725 would
+    /// suggest "dialogtoken+jwt", but changing an already-issued token's type is a silent breaking change for
+    /// receivers that assert typ == "JWT" (a JWT library configured with an explicit valid-types list, or
+    /// Nimbus' DefaultJWTProcessor, which permits only "JWT" or an absent type by default), and there is no
+    /// transition window available: the type is issued, not negotiated. Since the value only has to
+    /// <em>differ</em> between the token types signed by this key to keep them apart, retyping the dialog
+    /// token would break such receivers without protecting anyone: those asserting "JWT" already reject the
+    /// other types, and those ignoring "typ" cannot be protected retroactively either way.
+    /// Switching to "dialogtoken+jwt" belongs to a future major version, where it can ride the issuer version
+    /// already carried in the "iss" claim.
+    /// </summary>
+    public const string DialogToken = "JWT";
 }
 
 public static class DialogTokenClaimTypes

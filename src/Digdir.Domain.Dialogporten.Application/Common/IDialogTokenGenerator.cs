@@ -100,27 +100,39 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
 
     private static string GetAuthorizedActions(DialogDetailsAuthorizationResult authorizationResult)
     {
-        if (authorizationResult.AuthorizedAltinnActions.Count == 0)
+        var entries = new List<string>();
+        foreach (var authorizedCheck in authorizationResult.AuthorizedChecks)
         {
-            return string.Empty;
-        }
-
-        var actions = new StringBuilder();
-        foreach (var (action, resource) in authorizationResult.AuthorizedAltinnActions)
-        {
-            actions.Append(action);
-            if (resource != Authorization.Constants.MainResource)
+            var check = authorizedCheck.Check;
+            string entry;
+            switch (check.Resource.Kind)
             {
-                actions.Append(CultureInfo.InvariantCulture, $",{resource}");
+                case AuthorizationResourceSpecKind.Main:
+                    entry = check.Action;
+                    break;
+
+                case AuthorizationResourceSpecKind.Legacy:
+                    // Preserve the legacy wire format exactly: a literal "main" attribute is
+                    // indistinguishable from the main resource and serializes without a resource part.
+                    entry = check.Resource.LegacyAuthorizationAttribute == Authorization.Constants.MainResource
+                        ? check.Action
+                        : string.Create(CultureInfo.InvariantCulture, $"{check.Action},{check.Resource.LegacyAuthorizationAttribute}");
+                    break;
+
+                case AuthorizationResourceSpecKind.Context:
+                default:
+                    // The dialog token is frozen at legacy semantics: grants for authorization contexts
+                    // are expressed exclusively through per-entity context tokens.
+                    continue;
             }
 
-            actions.Append(';');
+            if (!entries.Contains(entry, StringComparer.Ordinal))
+            {
+                entries.Add(entry);
+            }
         }
 
-        // Remove trailing semicolon
-        actions.Remove(actions.Length - 1, 1);
-
-        return actions.ToString();
+        return string.Join(';', entries);
     }
 }
 

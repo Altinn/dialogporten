@@ -442,6 +442,27 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .UpdateTransmission((x, _) => x.Dto.AuthorizationAttribute = DeniedResource)
             .ExecuteAndAssert<Forbidden>(x =>
                 x.Reasons.Should().ContainSingle(reason => reason.Contains(DeniedResource)));
+
+    [Fact]
+    public Task UpdateTransmission_Should_Preserve_An_AuthorizationAttribute_Equal_To_The_Exclusion_Sentinel() =>
+        FlowBuilder.For(Application)
+            .AsChangeTransmissionUser()
+            .CreateSimpleDialog()
+            // The sentinel value is a well-formed authorization attribute in its own right, so a service
+            // owner may supply it on a transmission that has no authorization context. Suppressing it on
+            // read would drop the restriction here: this flow round-trips the GET response straight back
+            // through UpdateTransmission, which is how a suppressed attribute would be persisted as null.
+            .CreateTransmission((x, _) => x.AuthorizationAttribute = Constants.ExcludedTransmissionAttribute)
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+                dialog.Transmissions.Should().ContainSingle(x => x.Id == ctx.GetTransmissionId())
+                    .Which.AuthorizationAttribute.Should().Be(Constants.ExcludedTransmissionAttribute))
+            .UpdateTransmission((_, _) => { })
+            .AssertSuccess()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
+                dialog.Transmissions.Should().ContainSingle(x => x.Id == ctx.GetTransmissionId())
+                    .Which.AuthorizationAttribute.Should().Be(Constants.ExcludedTransmissionAttribute));
 }
 
 

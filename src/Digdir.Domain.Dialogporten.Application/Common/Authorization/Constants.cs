@@ -7,6 +7,23 @@ public static class Constants
 {
     public const string MainResource = "main";
     public const string ReadAction = "read";
+
+    /// <summary>
+    /// Persisted in <c>DialogTransmission.AuthorizationAttribute</c> for transmissions that carry an
+    /// authorization context, so that code predating authorization contexts keeps such transmissions
+    /// hidden if this feature is rolled back: that code routes a bare, colon-free attribute to the
+    /// "transmissionread" action, which no XACML policy defines anywhere, so the transmission is denied
+    /// rather than falling through to the dialog's main resource. (Current code derives "read" for every
+    /// legacy attribute, so the sentinel only protects a rollback that also restores that behaviour.)
+    ///
+    /// Never consulted when deciding access — <see cref="AuthorizationCheckBuilder"/> reads the context —
+    /// and suppressed to null on every read surface, so it neither reaches a client nor breaks a
+    /// GET → PUT round trip against the write model's context/attribute exclusivity rule. That suppression
+    /// keys on the presence of a context, not on this value: it is also a well-formed attribute a service
+    /// owner may supply on its own, and such an attribute must still round-trip. See
+    /// <c>DialogTransmission.EffectiveLegacyAuthorizationAttribute</c>.
+    /// </summary>
+    public const string ExcludedTransmissionAttribute = "dp-excluded";
     public static readonly Uri UnauthorizedUri = new("urn:dialogporten:unauthorized");
     public static readonly Uri ExpiredUri = new("urn:dialogporten:expired");
 

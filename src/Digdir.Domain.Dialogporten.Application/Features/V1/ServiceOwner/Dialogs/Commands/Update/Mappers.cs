@@ -224,6 +224,7 @@ public static class Mappers
         this TransmissionNavigationalActionDto source) =>
         new()
         {
+            Id = source.Id ?? Guid.Empty,
             Url = source.Url,
             ExpiresAt = source.ExpiresAt,
             Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!,
@@ -333,6 +334,7 @@ public static class Mappers
                 Parties = [.. source.Parties],
                 IncludeDialogParty = source.IncludeDialogParty,
                 Action = source.Action,
+                TokenRef = source.TokenRef,
                 UnauthorizedPresentation = source.UnauthorizedPresentation
             };
 }

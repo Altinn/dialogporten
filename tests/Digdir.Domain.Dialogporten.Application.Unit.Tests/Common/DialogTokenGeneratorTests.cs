@@ -17,7 +17,7 @@ public class DialogTokenGeneratorTests
     private string? _capturedTokenType;
 
     [Fact]
-    public void DialogTokenShouldOmitContextGrantsAndUseDialogTokenType()
+    public void DialogTokenShouldKeepActionsAtLegacySemanticsAndUseDialogTokenType()
     {
         // Arrange
         var generator = CreateGenerator();
@@ -44,113 +44,46 @@ public class DialogTokenGeneratorTests
         };
 
         // Act
-        generator.GetDialogToken(dialog, authorizationResult, IssuerVersion);
+        generator.GetDialogToken(dialog, authorizationResult, [], IssuerVersion);
 
         // Assert
         Assert.Equal(DialogTokenTypes.DialogToken, _capturedTokenType);
         Assert.NotNull(_capturedClaims);
         Assert.Equal("read;write,urn:altinn:task:Task_1", _capturedClaims[DialogTokenClaimTypes.Actions]);
-        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.EntityId));
-        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.PermittedParties));
     }
 
     [Fact]
-    public void ContextTokenShouldCarryEntityGrantAndPermittedParties()
+    public void DialogTokenShouldOmitAuthorizedEntitiesClaimWhenThereAreNone()
     {
         // Arrange
         var generator = CreateGenerator();
-        var dialog = CreateDialog();
-        var entityId = Guid.NewGuid();
-
-        var check = new AuthorizationCheck(
-            "sign",
-            AuthorizationResourceSpec.FromContext(null, "urn:altinn:task:Task_1"),
-            [DialogParty, OtherParty]);
-
-        // Only a subset of the parties was permitted by the PDP
-        var authorizedCheck = new AuthorizedCheck(check, [OtherParty]);
 
         // Act
-        generator.GetDialogContextToken(dialog, authorizedCheck, entityId,
-            DialogContextTokenEntityTypes.GuiAction, IssuerVersion);
+        generator.GetDialogToken(CreateDialog(), new DialogDetailsAuthorizationResult(), [], IssuerVersion);
 
         // Assert
-        Assert.Equal(DialogTokenTypes.DialogContextToken, _capturedTokenType);
         Assert.NotNull(_capturedClaims);
-        Assert.Equal(entityId, _capturedClaims[DialogTokenClaimTypes.EntityId]);
-        Assert.Equal(DialogContextTokenEntityTypes.GuiAction, _capturedClaims[DialogTokenClaimTypes.EntityType]);
-        Assert.Equal("sign", _capturedClaims[DialogTokenClaimTypes.Actions]);
-        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.EffectiveResource));
-        Assert.Equal("urn:altinn:task:Task_1", _capturedClaims[DialogTokenClaimTypes.AdditionalResourceAttribute]);
-        Assert.Equal(dialog.Party, _capturedClaims[DialogTokenClaimTypes.DialogParty]);
-        Assert.Equal(dialog.ServiceResource, _capturedClaims[DialogTokenClaimTypes.ServiceResource]);
-        Assert.Equal(dialog.Id, _capturedClaims[DialogTokenClaimTypes.DialogId]);
-
-        var permittedParties = Assert.IsAssignableFrom<IReadOnlyList<string>>(
-            _capturedClaims[DialogTokenClaimTypes.PermittedParties]);
-        Assert.Equal([OtherParty], permittedParties);
+        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.AuthorizedEntities));
     }
 
     [Fact]
-    public void ContextTokenShouldCarryServiceResourceAsEffectiveResource()
+    public void DialogTokenShouldCarryDistinctAuthorizedEntityReferencesInOrder()
     {
         // Arrange
         var generator = CreateGenerator();
-        var check = new AuthorizationCheck(
-            "read",
-            AuthorizationResourceSpec.FromContext("urn:altinn:resource:other-service", null),
-            [OtherParty]);
+        var transmissionId = Guid.NewGuid().ToString();
 
-        // Act
-        generator.GetDialogContextToken(CreateDialog(), AuthorizedCheck.FullyPermitted(check),
-            Guid.NewGuid(), DialogContextTokenEntityTypes.Transmission, IssuerVersion);
-
-        // Assert
-        Assert.NotNull(_capturedClaims);
-        Assert.Equal("urn:altinn:resource:other-service", _capturedClaims[DialogTokenClaimTypes.EffectiveResource]);
-        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.AdditionalResourceAttribute));
-    }
-
-    [Fact]
-    public void ContextTokenShouldCarryBothResourceOverrideAndAdditionalAttributeWhenBothPresent()
-    {
-        // A recipient must be able to reconstruct the exact same PDP request from the token alone, so
-        // neither field may be dropped when both are set on the same check.
-        // Arrange
-        var generator = CreateGenerator();
-        var check = new AuthorizationCheck(
-            "sign",
-            AuthorizationResourceSpec.FromContext("urn:altinn:resource:other-service", "urn:altinn:task:Task_1"),
-            [OtherParty]);
-
-        // Act
-        generator.GetDialogContextToken(CreateDialog(), AuthorizedCheck.FullyPermitted(check),
-            Guid.NewGuid(), DialogContextTokenEntityTypes.Transmission, IssuerVersion);
+        // Act: two contexts sharing a service owner supplied reference collapse into one entry
+        generator.GetDialogToken(
+            CreateDialog(),
+            new DialogDetailsAuthorizationResult(),
+            [transmissionId, "my-own-reference", "my-own-reference"],
+            IssuerVersion);
 
         // Assert
         Assert.NotNull(_capturedClaims);
-        Assert.Equal("urn:altinn:resource:other-service", _capturedClaims[DialogTokenClaimTypes.EffectiveResource]);
-        Assert.Equal("urn:altinn:task:Task_1", _capturedClaims[DialogTokenClaimTypes.AdditionalResourceAttribute]);
-    }
-
-    [Fact]
-    public void ContextTokenShouldOmitResourceClaimsWhenCheckTargetsDialogResource()
-    {
-        // Arrange
-        var generator = CreateGenerator();
-        var check = new AuthorizationCheck(
-            "read",
-            AuthorizationResourceSpec.FromContext(null, null),
-            [OtherParty]);
-
-        // Act
-        generator.GetDialogContextToken(CreateDialog(), AuthorizedCheck.FullyPermitted(check),
-            Guid.NewGuid(), DialogContextTokenEntityTypes.Attachment, IssuerVersion);
-
-        // Assert
-        Assert.NotNull(_capturedClaims);
-        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.EffectiveResource));
-        Assert.False(_capturedClaims.ContainsKey(DialogTokenClaimTypes.AdditionalResourceAttribute));
+        var authorizedEntities = Assert.IsType<string[]>(_capturedClaims[DialogTokenClaimTypes.AuthorizedEntities]);
+        Assert.Equal([transmissionId, "my-own-reference"], authorizedEntities);
     }
 
     private static DialogEntity CreateDialog() => new()

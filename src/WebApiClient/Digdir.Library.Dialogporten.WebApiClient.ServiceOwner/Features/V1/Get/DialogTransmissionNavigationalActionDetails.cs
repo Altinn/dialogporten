@@ -7,6 +7,12 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 public class DialogTransmissionNavigationalActionDetails
 {
     /// <summary>
+    /// The unique identifier for the navigational action in UUIDv7 format.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     [JsonPropertyName("title")]

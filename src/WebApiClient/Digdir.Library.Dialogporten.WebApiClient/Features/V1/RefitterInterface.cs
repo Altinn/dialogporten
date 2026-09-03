@@ -2211,6 +2211,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -2275,6 +2281,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("action")]
         public string Action { get; set; }
+
+        /// <summary>
+        /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
 
         /// <summary>
         /// Controls how the entity is presented to end users that fail the authorization check:
@@ -3135,6 +3150,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -3199,6 +3220,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("action")]
         public string Action { get; set; }
+
+        /// <summary>
+        /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
 
         /// <summary>
         /// Controls how the entity is presented to end users that fail the authorization check:
@@ -3894,6 +3924,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -3966,6 +4002,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("action")]
         public string Action { get; set; }
+
+        /// <summary>
+        /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
 
         /// <summary>
         /// Controls how the entity is presented to end users that fail the authorization check:
@@ -4573,6 +4618,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -4641,6 +4692,18 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("action")]
         public string Action { get; set; }
+
+        /// <summary>
+        /// An optional reference identifying this context in the dialog token. When the end user is authorized for
+        /// <br/>this context, the dialog token's "e" claim lists this value instead of the id of the entity carrying the
+        /// <br/>context, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.
+        /// <br/>Sharing a value between entities in one dialog forms an OR-group: authorization for any group member
+        /// <br/>adds the shared value to "e", so only group entities that intentionally share access semantics.
+        /// <br/>Recipients must validate the token's dialog id ("i") together with the reference.
+        /// <br/>Maximum 50 characters.
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
 
         /// <summary>
         /// Required. Controls how the entity is presented to end users that fail the authorization check:
@@ -5134,6 +5197,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -5602,6 +5671,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// The title of the navigational action.
@@ -6217,6 +6292,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// The title of the navigational action.

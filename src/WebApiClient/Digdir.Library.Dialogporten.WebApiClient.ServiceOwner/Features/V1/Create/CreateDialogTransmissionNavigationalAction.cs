@@ -7,6 +7,12 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 public class CreateDialogTransmissionNavigationalAction
 {
     /// <summary>
+    /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public Guid? Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     [JsonPropertyName("title")]

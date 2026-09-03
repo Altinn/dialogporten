@@ -23,6 +23,7 @@ internal static class AuthorizationContextMappingExtensions
         Parties = [.. source.Parties],
         IncludeDialogParty = source.IncludeDialogParty,
         Action = source.Action,
+        TokenRef = source.TokenRef,
         UnauthorizedPresentation = source.UnauthorizedPresentation,
     };
 
@@ -33,6 +34,7 @@ internal static class AuthorizationContextMappingExtensions
         Parties = [.. source.Parties],
         IncludeDialogParty = source.IncludeDialogParty,
         Action = source.Action,
+        TokenRef = source.TokenRef,
         UnauthorizedPresentation = source.UnauthorizedPresentation,
     };
 }

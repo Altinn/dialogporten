@@ -38,6 +38,25 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
     }
 
     [Fact]
+    public async Task Cannot_Use_Existing_NavigationalAction_Id_In_Update()
+    {
+        var existingNavigationalActionId = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.AddTransmission(x =>
+                    x.AddNavigationalAction(x => x.Id = existingNavigationalActionId)))
+            .AssertSuccessAndUpdateDialog(x =>
+                x.AddTransmission(x =>
+                    x.AddNavigationalAction(x => x.Id = existingNavigationalActionId)))
+            .ExecuteAndAssert<DomainError>(error =>
+            {
+                error.ShouldHaveErrorWithText(nameof(DialogTransmissionNavigationalAction));
+                error.ShouldHaveErrorWithText(existingNavigationalActionId.ToString());
+            });
+    }
+
+    [Fact]
     public Task Cannot_Update_Transmission_Url_With_Media_Type_Exceeding_Max_Length() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

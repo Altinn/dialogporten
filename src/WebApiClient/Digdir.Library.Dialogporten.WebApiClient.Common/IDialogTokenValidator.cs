@@ -12,14 +12,26 @@ public interface IDialogTokenValidator
     /// Validates a dialog token.
     /// </summary>
     /// <param name="token">The token to validate.</param>
-    /// <param name="dialogId">The optional dialog ID associated with the token. If the token does not represent this ID, the validation will fail.</param>
+    /// <param name="dialogId">
+    /// The optional dialog ID associated with the token. If the token does not represent this ID, the validation
+    /// fails. Required when <paramref name="requiredEntityReference"/> is supplied, because entity references are
+    /// scoped to a dialog.
+    /// </param>
     /// <param name="requiredActions">The optional list of required actions for the token.</param>
     /// <param name="options">The optional validation parameters.</param>
+    /// <param name="requiredEntityReference">
+    /// The optional entity reference the request is made for: the id of an entity carrying an authorization
+    /// context (a transmission, attachment, action or navigational action), or the "tokenRef" the service owner
+    /// supplied on that context. If given, the validation fails unless the token's authorized entities ("e") claim
+    /// contains it. Use this for requests scoped to an entity with an authorization context, where the actions
+    /// claim does not express the grant. <paramref name="dialogId"/> must also be supplied.
+    /// </param>
     /// <returns>The result of the validation.</returns>
     IValidationResult Validate(ReadOnlySpan<char> token,
         Guid? dialogId = null,
         string[]? requiredActions = null,
-        DialogTokenValidationParameters? options = null);
+        DialogTokenValidationParameters? options = null,
+        string? requiredEntityReference = null);
 }
 
 /// <summary>
@@ -42,28 +54,6 @@ public class DialogTokenValidationParameters
     /// Gets or sets a value indicating whether to validate the token's lifetime.
     /// </summary>
     public bool ValidateLifetime { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to validate the token's JOSE "typ" header against
-    /// <see cref="ValidTokenTypes"/>.
-    /// </summary>
-    public bool ValidateTokenType { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets the token types accepted by the validation. A token whose "typ" header is missing, or holds
-    /// a type not listed here, is rejected.
-    /// </summary>
-    /// <remarks>
-    /// Defaults to <see cref="DialogTokenTypes.DialogToken"/> only. Dialogporten signs every token type with the
-    /// same keys, so a caller expecting a dialog token must not accept, say, a
-    /// <see cref="DialogTokenTypes.DialogContextToken"/> handed to it in place of one: the two assert different
-    /// things about what the holder was permitted. Set this to the type the receiving endpoint expects.
-    /// Comparison is ordinal; the types Dialogporten issues are listed in <see cref="DialogTokenTypes"/>.
-    /// Selecting <see cref="DialogTokenTypes.DialogContextToken"/> here only confirms the token is a context
-    /// token; it does not validate the context-specific claims (entity id, entity type, effective resource) -
-    /// the receiver must still check those separately against the entity being accessed.
-    /// </remarks>
-    public IReadOnlyCollection<string> ValidTokenTypes { get; set; } = [DialogTokenTypes.DialogToken];
 
     /// <summary>
     /// Gets or sets the clock skew to apply when validating the token's lifetime.

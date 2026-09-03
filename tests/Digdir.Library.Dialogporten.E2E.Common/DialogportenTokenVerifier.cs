@@ -5,7 +5,7 @@ using NSec.Cryptography;
 namespace Digdir.Library.Dialogporten.E2E.Common;
 
 /// <summary>
-/// Verifies dialog tokens and context tokens the way a receiving service must: fetch the published JWKS,
+/// Verifies dialog tokens the way a receiving service must: fetch the published JWKS,
 /// match the token's "kid", and check the Ed25519 signature over the signed part. Nothing here trusts the
 /// token's own contents before the signature has been verified.
 /// </summary>
@@ -103,7 +103,7 @@ public sealed class VerifiedToken
         Claims = claims;
     }
 
-    /// <summary>The JOSE "typ" header, distinguishing the dialog token ("JWT") from "dialogcontexttoken+jwt".</summary>
+    /// <summary>The JOSE "typ" header; "JWT" for the dialog token.</summary>
     public string? TokenType { get; }
 
     public string KeyId { get; }

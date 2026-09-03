@@ -39,6 +39,15 @@ public class DialogTransmissionSearchAuthorizationContext
     public string? Action { get; set; }
 
     /// <summary>
+    /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+    /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+    /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+    /// <br/>also validate the token's dialog id ("i").
+    /// </summary>
+    [JsonPropertyName("tokenRef")]
+    public string? TokenRef { get; set; }
+
+    /// <summary>
     /// Controls how the entity is presented to end users that fail the authorization check:
     /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
     /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and

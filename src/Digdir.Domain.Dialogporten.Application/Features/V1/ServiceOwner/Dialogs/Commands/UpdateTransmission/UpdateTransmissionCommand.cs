@@ -102,6 +102,14 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                 update: UpdateTransmissionAttachments,
                 delete: DeleteDelegate.Default);
 
+        transmission.NavigationalActions
+            .Merge(request.Dto.NavigationalActions,
+                destinationKeySelector: x => x.Id,
+                sourceKeySelector: x => x.Id,
+                create: CreateTransmissionNavigationalActions,
+                update: UpdateTransmissionNavigationalActions,
+                delete: DeleteDelegate.Default);
+
         // Authorization of referenced service resources must happen after the incoming DTO has been
         // mapped onto the aggregate, so that incoming authorization attributes/contexts are covered.
         var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
@@ -170,6 +178,27 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                     create: CreateAttachmentUrls,
                     update: UpdateAttachmentUrls,
                     delete: DeleteDelegate.Default);
+        }
+    }
+
+    private IEnumerable<DialogTransmissionNavigationalAction> CreateTransmissionNavigationalActions(
+        IEnumerable<TransmissionNavigationalActionDto> creatables)
+    {
+        return creatables.Select(dto =>
+        {
+            var navigationalAction = dto.ToDialogTransmissionNavigationalAction();
+            navigationalAction.EnsureId();
+            _db.DialogTransmissionNavigationalActions.Add(navigationalAction);
+            return navigationalAction;
+        });
+    }
+
+    private static void UpdateTransmissionNavigationalActions(
+        IEnumerable<UpdateSet<DialogTransmissionNavigationalAction, TransmissionNavigationalActionDto>> updateSets)
+    {
+        foreach (var (source, destination) in updateSets)
+        {
+            destination.UpdateFrom(source);
         }
     }
 

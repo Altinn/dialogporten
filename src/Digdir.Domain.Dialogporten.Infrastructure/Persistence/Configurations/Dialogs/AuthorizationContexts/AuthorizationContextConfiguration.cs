@@ -16,6 +16,9 @@ internal sealed class AuthorizationContextConfiguration : IEntityTypeConfigurati
         // (see AuthorizationContextUnauthorizedPresentation).
         builder.Property(x => x.UnauthorizedPresentation).HasConversion<short>();
 
+        // Emitted verbatim into the dialog token, so kept deliberately shorter than the default string length.
+        builder.Property(x => x.TokenReference).HasMaxLength(AuthorizationContext.MaxTokenReferenceLength);
+
         // String conventions (max length) do not apply to primitive collection elements.
         builder.PrimitiveCollection(x => x.Parties)
             .ElementType(e => e.HasMaxLength(Domain.Common.Constants.DefaultMaxStringLength));

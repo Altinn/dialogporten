@@ -6,7 +6,7 @@ using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 // authorizationContext, but a mapping layer has to keep round-tripping them for as long as the server
 // still returns and accepts them.
 #pragma warning disable CS0618 // Type or member is obsolete
-#pragma warning disable DPEXP001 // authorizationContext/contextToken are experimental
+#pragma warning disable DPEXP001 // authorizationContext is experimental
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 
@@ -283,6 +283,7 @@ internal static class TransmissionMappingExtensions
 
     private static CreateDialogTransmissionNavigationalAction ToCreateDialogTransmissionNavigationalAction(this DialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -291,6 +292,7 @@ internal static class TransmissionMappingExtensions
 
     private static UpdateDialogTransmissionNavigationalAction ToUpdateDialogTransmissionNavigationalAction(this DialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -299,6 +301,7 @@ internal static class TransmissionMappingExtensions
 
     private static UpdateDialogTransmissionNavigationalAction ToUpdateDialogTransmissionNavigationalAction(this CreateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -307,6 +310,7 @@ internal static class TransmissionMappingExtensions
 
     private static CreateDialogTransmissionNavigationalAction ToCreateDialogTransmissionNavigationalAction(this UpdateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -315,6 +319,7 @@ internal static class TransmissionMappingExtensions
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this CreateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id ?? default,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -323,6 +328,7 @@ internal static class TransmissionMappingExtensions
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this UpdateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id ?? default,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,

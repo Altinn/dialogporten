@@ -254,6 +254,7 @@ internal static class DialogTransmissionNavigationalActionMapExtensions
     {
         internal DialogTransmissionNavigationalActionDto ToDto() => new()
         {
+            Id = source.Id,
             Title = source.Title.ToDtoList()!,
             Url = source.Url,
             ExpiresAt = source.ExpiresAt

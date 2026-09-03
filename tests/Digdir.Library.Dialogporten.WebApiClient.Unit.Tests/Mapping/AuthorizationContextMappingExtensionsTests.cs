@@ -79,6 +79,7 @@ public class AuthorizationContextMappingExtensionsTests
         Assert.Equal(expected.Parties, actual.Parties);
         Assert.Equal(expected.IncludeDialogParty, actual.IncludeDialogParty);
         Assert.Equal(expected.Action, actual.Action);
+        Assert.Equal(expected.TokenRef, actual.TokenRef);
         Assert.Equal(expected.UnauthorizedPresentation, actual.UnauthorizedPresentation);
     }
 
@@ -130,6 +131,7 @@ public class AuthorizationContextMappingExtensionsTests
         Parties = ["urn:altinn:organization:identifier-no:123456789"],
         IncludeDialogParty = true,
         Action = "sign",
+        TokenRef = "my-own-reference",
         UnauthorizedPresentation = AuthorizationContextUnauthorizedPresentation.Excluded,
     };
 
@@ -202,6 +204,7 @@ public class AuthorizationContextMappingExtensionsTests
         Assert.Equal(expected.Parties, actual.Parties);
         Assert.Equal(expected.IncludeDialogParty, actual.IncludeDialogParty);
         Assert.Equal(expected.Action, actual.Action);
+        Assert.Equal(expected.TokenRef, actual.TokenRef);
         Assert.Equal(expected.UnauthorizedPresentation, actual.UnauthorizedPresentation);
     }
 }

@@ -11,7 +11,7 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialog
 
 internal static class Mappers
 {
-    // Attachments are merged separately by the handler.
+    // Attachments and navigational actions are merged separately by the handler.
     internal static void UpdateFrom(this DialogTransmission destination, UpdateTransmissionDto source)
     {
         if (source.CreatedAt.HasValue)
@@ -29,9 +29,6 @@ internal static class Mappers
         destination.AuthorizationContext = source.AuthorizationContext
             .ToAuthorizationContext(destination.AuthorizationContext);
         destination.Content = source.Content.ToDialogTransmissionContentList(destination.Content) ?? [];
-        destination.NavigationalActions = source.NavigationalActions
-            .Select(x => x.ToDialogTransmissionNavigationalAction())
-            .ToList();
     }
 
     internal static DialogTransmissionAttachment ToDialogTransmissionAttachment(this TransmissionAttachmentDto source) =>
@@ -72,13 +69,25 @@ internal static class Mappers
         destination.ConsumerTypeId = source.ConsumerType;
     }
 
-    private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(
+    internal static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(
         this TransmissionNavigationalActionDto source) =>
         new()
         {
+            Id = source.Id ?? Guid.Empty,
             Url = source.Url,
             ExpiresAt = source.ExpiresAt,
             Title = source.Title.ToLocalizationSet<DialogTransmissionNavigationalActionTitle>()!,
             AuthorizationContext = source.AuthorizationContext.ToAuthorizationContext<DialogTransmissionNavigationalActionAuthorizationContext>()
         };
+
+    // Only reached for navigational actions matched on Id. Updating in place keeps the id stable, which
+    // matters because it is emitted in the dialog token's authorized-entities claim.
+    internal static void UpdateFrom(this DialogTransmissionNavigationalAction destination, TransmissionNavigationalActionDto source)
+    {
+        destination.Url = source.Url;
+        destination.ExpiresAt = source.ExpiresAt;
+        destination.Title = source.Title.ToLocalizationSet(destination.Title)!;
+        destination.AuthorizationContext = source.AuthorizationContext
+            .ToAuthorizationContext(destination.AuthorizationContext);
+    }
 }

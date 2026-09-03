@@ -1,5 +1,8 @@
+using System.Text;
+using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Unit.Tests.Common;
+using Base64Url = System.Buffers.Text.Base64Url;
 
 namespace Digdir.Domain.Dialogporten.Application.Unit.Tests;
 
@@ -9,7 +12,45 @@ public class CompactJwsGeneratorTests
     public void ValidJwsIsGenerated()
     {
         // Arrange
-        var settings = new ApplicationSettings
+        var generator = new Ed25519Generator(new OptionsMock<ApplicationSettings>(GetSettings()));
+
+        var payload = new Dictionary<string, object?>
+        {
+            { "sub", "1234567890" },
+            { "name", "John Doe" },
+            { "iat", 1516239022 }
+        };
+
+        // Act
+        var jws = generator.GetCompactJws(payload, DialogTokenTypes.DialogToken);
+
+        // Assert
+        Assert.True(generator.VerifyCompactJws(jws));
+    }
+
+    [Theory]
+    [InlineData(DialogTokenTypes.DialogToken)]
+    [InlineData(DialogTokenTypes.DialogContextToken)]
+    public void HeaderCarriesTheTokenTypeUnescaped(string tokenType)
+    {
+        // Arrange
+        var generator = new Ed25519Generator(new OptionsMock<ApplicationSettings>(GetSettings()));
+
+        // Act
+        var jws = generator.GetCompactJws([], tokenType);
+
+        // Assert
+        var header = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(jws.Split('.')[0]));
+
+        // Literal, not the "+" escape the default JSON encoder would emit: a receiver comparing the raw
+        // header bytes must see the type exactly as it is documented.
+        Assert.Contains($"\"typ\":\"{tokenType}\"", header, StringComparison.Ordinal);
+        Assert.Equal(tokenType, JsonDocument.Parse(header).RootElement.GetProperty("typ").GetString());
+    }
+
+    private static ApplicationSettings GetSettings()
+    {
+        return new ApplicationSettings
         {
             Dialogporten = new DialogportenSettings
             {
@@ -31,20 +72,5 @@ public class CompactJwsGeneratorTests
                 }
             }
         };
-        var options = new OptionsMock<ApplicationSettings>(settings);
-        var generator = new Ed25519Generator(options);
-
-        var payload = new Dictionary<string, object?>
-        {
-            { "sub", "1234567890" },
-            { "name", "John Doe" },
-            { "iat", 1516239022 }
-        };
-
-        // Act
-        var jws = generator.GetCompactJws(payload);
-
-        // Assert
-        Assert.True(generator.VerifyCompactJws(jws));
     }
 }

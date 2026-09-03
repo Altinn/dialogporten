@@ -74,12 +74,6 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
-        if (authorizeResult.Value is Forbidden forbidden)
-        {
-            return forbidden;
-        }
-
         if (dialog.Deleted)
         {
             return new EntityDeleted<DialogEntity>(request.DialogId);
@@ -107,6 +101,14 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                 create: CreateTransmissionAttachments,
                 update: UpdateTransmissionAttachments,
                 delete: DeleteDelegate.Default);
+
+        // Authorization of referenced service resources must happen after the incoming DTO has been
+        // mapped onto the aggregate, so that incoming authorization attributes/contexts are covered.
+        var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
+        if (authorizeResult.Value is Forbidden forbidden)
+        {
+            return forbidden;
+        }
 
         var conflict = ValidateIdempotentKeys(dialog, transmission);
         if (conflict is not null)
@@ -216,6 +218,14 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                         .ThenInclude(x => x.Localizations)
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Sender)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.AuthorizationContext)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.AuthorizationContext)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.NavigationalActions)
+                    .ThenInclude(x => x.AuthorizationContext)
             .IgnoreQueryFilters()
             .WhereIf(!isAdmin, x => x.Org == org)
             .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);

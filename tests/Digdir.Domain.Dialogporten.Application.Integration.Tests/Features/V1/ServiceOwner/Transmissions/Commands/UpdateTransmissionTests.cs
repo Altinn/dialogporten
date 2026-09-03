@@ -13,6 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using OneOf.Types;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
@@ -422,6 +423,46 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                 Assert: transmission => transmission.NavigationalActions.Should().BeEmpty()));
         }
     }
+
+    private const string DeniedResource = "urn:altinn:resource:some-unauthorized-service";
+
+    [Fact]
+    public Task UpdateTransmission_Returns_Forbidden_When_Incoming_AuthorizationAttribute_Is_Not_Authorized() =>
+        FlowBuilder.For(Application)
+            .AsChangeTransmissionUser()
+            .CreateSimpleDialog()
+            .CreateTransmission()
+            // Emulates a PDP that does not grant the service owner access to DeniedResource. The command
+            // must therefore authorize service resources against the aggregate *after* the incoming DTO has
+            // been mapped onto it — authorizing the pre-update state would let the denied reference through.
+            .OverrideServiceResourceAuthorization(dialog =>
+                dialog.Transmissions.Any(x => x.AuthorizationAttribute == DeniedResource)
+                    ? new Forbidden($"Unauthorized service resource: {DeniedResource}")
+                    : new Success())
+            .UpdateTransmission((x, _) => x.Dto.AuthorizationAttribute = DeniedResource)
+            .ExecuteAndAssert<Forbidden>(x =>
+                x.Reasons.Should().ContainSingle(reason => reason.Contains(DeniedResource)));
+
+    [Fact]
+    public Task UpdateTransmission_Should_Preserve_An_AuthorizationAttribute_Equal_To_The_Exclusion_Sentinel() =>
+        FlowBuilder.For(Application)
+            .AsChangeTransmissionUser()
+            .CreateSimpleDialog()
+            // The sentinel value is a well-formed authorization attribute in its own right, so a service
+            // owner may supply it on a transmission that has no authorization context. Suppressing it on
+            // read would drop the restriction here: this flow round-trips the GET response straight back
+            // through UpdateTransmission, which is how a suppressed attribute would be persisted as null.
+            .CreateTransmission((x, _) => x.AuthorizationAttribute = Constants.ExcludedTransmissionAttribute)
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+                dialog.Transmissions.Should().ContainSingle(x => x.Id == ctx.GetTransmissionId())
+                    .Which.AuthorizationAttribute.Should().Be(Constants.ExcludedTransmissionAttribute))
+            .UpdateTransmission((_, _) => { })
+            .AssertSuccess()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
+                dialog.Transmissions.Should().ContainSingle(x => x.Id == ctx.GetTransmissionId())
+                    .Which.AuthorizationAttribute.Should().Be(Constants.ExcludedTransmissionAttribute));
 }
 
 

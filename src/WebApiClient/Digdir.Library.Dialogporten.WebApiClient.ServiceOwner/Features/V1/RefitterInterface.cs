@@ -8,6 +8,14 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Search;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.ServiceResource;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.SystemLabels;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
 #nullable enable annotations
 

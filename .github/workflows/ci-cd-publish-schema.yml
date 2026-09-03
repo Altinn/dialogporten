@@ -54,8 +54,9 @@ jobs:
       base_sha: ${{ steps.context.outputs.base_sha }}
       environment: ${{ steps.context.outputs.environment }}
       force_publish: ${{ steps.context.outputs.force_publish }}
+      dist_tag: ${{ steps.context.outputs.dist_tag }}
     steps:
-      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+      - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
@@ -88,7 +89,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           sparse-checkout: |
@@ -114,9 +115,19 @@ jobs:
           # Sets a global rather than echoing: set -e does not fire through
           # `v=$(fn)`, so failures here would silently yield "1.2.3-" or "-abc123".
           # Short SHA width must match workflow-generate-git-short-sha.yml so the
-          # npm version lines up with the docker tag - don't hard-code a width.
+          # npm version carries the same commit id as the docker tag for the same
+          # build - don't hard-code a width.
+          #
+          # version.txt holds the version that was last released, so appending a
+          # prerelease suffix to it yields a version semver sorts BELOW that
+          # release: 1.2.3-abc123 < 1.2.3. Consumers cannot then reach it through
+          # any range that also matches the release, and the `^` range npm writes
+          # on install resolves straight back to the release. Bumping the patch
+          # first keeps main builds sorted above the release they follow. The
+          # number only establishes ordering - the eventual release may bump the
+          # minor or major instead, and will still sort above these prereleases.
           resolve_version_from_file() {
-            local version short_sha
+            local version short_sha major minor patch
             version=$(cat version.txt) || {
               echo "::error::Could not read version.txt"; exit 1;
             }
@@ -127,7 +138,12 @@ jobs:
               echo "::error::Empty version ('$version') or short SHA ('$short_sha')"
               exit 1
             fi
-            RESOLVED_VERSION="${version}-${short_sha}"
+            IFS=. read -r major minor patch <<<"$version"
+            if ! printf '%s' "${major}.${minor}.${patch}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::version.txt must hold a plain semver version, got '$version'"
+              exit 1
+            fi
+            RESOLVED_VERSION="${major}.${minor}.$((patch + 1))-${short_sha}"
           }
 
           # npm versions are immutable - reject malformed ones before publishing.
@@ -244,6 +260,16 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Resolved version: $version"
 
+          # npm >= 11 refuses a prerelease without an explicit --tag, and "latest"
+          # is what a bare `npm install` resolves to. Keyed on the version shape,
+          # not the trigger: workflow_dispatch can supply either kind.
+          case "${version%%+*}" in
+            *-*) dist_tag=prerelease ;;
+            *)   dist_tag=latest ;;
+          esac
+          echo "dist_tag=$dist_tag" >> "$GITHUB_OUTPUT"
+          echo "Dist-tag: $dist_tag"
+
   check-for-changes:
     name: Check for schema changes
     needs: [resolve-context]
@@ -272,23 +298,24 @@ jobs:
     env:
       WORKING_DIRECTORY: docs/schema/V1
     steps:
-      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+      - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           ref: ${{ needs.resolve-context.outputs.ref }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           # Trusted Publishing needs node >= 22.14.0 / npm >= 11.5.1.
           node-version: '24'
-          # No registry-url on purpose: it writes an .npmrc auth line that breaks
-          # the OIDC exchange when no token is set. See .github/actions/build-schema.
+          # No registry-url on purpose: setup-node would write an .npmrc auth line,
+          # and with no token in the environment npm sends the literal placeholder,
+          # which 401s and pre-empts the OIDC exchange (actions/setup-node#1551).
 
       - name: Check if version exists on NPM
         id: check-version
@@ -333,9 +360,13 @@ jobs:
           jq --arg version "$VERSION" '.version = $version' package.json > temp.json
           mv temp.json package.json
 
+      # No NODE_AUTH_TOKEN: npm authenticates over OIDC via the Trusted Publisher
+      # record for this package, which is bound to this workflow's filename.
       - name: Publish package (Trusted Publishing via OIDC)
         if: steps.check-version.outputs.version-exists == 'false'
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag "$DIST_TAG"
+        env:
+          DIST_TAG: ${{ needs.resolve-context.outputs.dist_tag }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
   notify-failure:
@@ -346,12 +377,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+      - uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           sparse-checkout: .github/slack-templates

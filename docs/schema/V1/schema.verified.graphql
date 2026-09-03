@@ -8,6 +8,7 @@ type Queries @authorize(policy: "enduser") {
   dialogLookup(instanceRef: String!): DialogLookupPayload!
   dialogById(dialogId: UUID!): DialogByIdPayload!
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
+  labelAssignmentLog(dialogId: UUID!): LabelAssignmentLogPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
   serviceResources(parties: [String!], includeUnauthorized: Boolean! = false): ServiceResourceMetadata!
@@ -47,8 +48,13 @@ type ApiAction {
   action: String!
   "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies."
   authorizationAttribute: String
+    @deprecated(
+      reason: "Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute."
+    )
   "True if the authenticated user is authorized for this action. If not, the action will not be available and all endpoints will be replaced with a fixed placeholder."
   isAuthorized: Boolean!
+  "A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's endpoints."
+  contextToken: String
   "The logical name of the operation the API action refers to."
   name: String
   "The endpoints associated with the action."
@@ -87,6 +93,10 @@ type Attachment {
   urls: [AttachmentUrl!]!
   "The UTC timestamp when the attachment expires and is no longer available."
   expiresAt: DateTime
+  "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be replaced with 'urn:dialogporten:unauthorized'."
+  isAuthorized: Boolean!
+  "A token asserting the authenticated user's authorization for this specific attachment, as determined by its authorization context. Only present when the attachment has an authorization context and the user is authorized. Should be used instead of the dialog token against this attachment's URLs."
+  contextToken: String
 }
 
 type AttachmentUrl {
@@ -209,7 +219,7 @@ type Dialog {
   updatedAt: DateTime!
   "The date and time when the dialog content was last updated. Example: 2022-12-31T23:59:59Z"
   contentUpdatedAt: DateTime!
-  "The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds."
+  "The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds. Entities carrying an authorization context are the exception: they are issued their own, narrower 'contextToken' which must be used instead of this token, as the dialog token does not assert their grant."
   dialogToken: String
   "The aggregated status of the dialog."
   status: DialogStatus!
@@ -235,10 +245,16 @@ type Dialog {
   content: Content!
   "The attachments associated with the dialog (on an aggregate level)."
   attachments: [Attachment!]!
+  "Dialog-level attachments that exist but are withheld from the authenticated user, listed by id and creation time only. An attachment is excluded rather than shown with masked URLs when its authorization context sets unauthorizedPresentation to 'excluded'. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."
+  excludedAttachments: [ExcludedElement!]
   "The GUI actions associated with the dialog. Should be used in browser-based interactive frontends."
   guiActions: [GuiAction!]!
+  "GUI actions that exist but are withheld from the authenticated user, listed by id and creation time only. A GUI action is excluded rather than returned with isAuthorized=false when its authorization context sets unauthorizedPresentation to 'excluded'. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."
+  excludedGuiActions: [ExcludedElement!]
   "The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations."
   apiActions: [ApiAction!]!
+  "API actions that exist but are withheld from the authenticated user, listed by id and creation time only. An API action is excluded rather than returned with isAuthorized=false when its authorization context sets unauthorizedPresentation to 'excluded'. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."
+  excludedApiActions: [ExcludedElement!]
   "An immutable list of activities associated with the dialog."
   activities: [Activity!]!
   "The list of seen log entries for the dialog newer than the dialog UpdatedAt date."
@@ -256,6 +272,8 @@ type Dialog {
   isContentSeen: Boolean!
   "The immutable list of transmissions associated with the dialog."
   transmissions: [Transmission!]!
+  "Transmissions that exist but are withheld from the authenticated user, listed by id and creation time only. A transmission is excluded rather than returned with isAuthorized=false when its authorization context sets unauthorizedPresentation to 'excluded'; its children go with it. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."
+  excludedTransmissions: [ExcludedElement!]
   "Metadata about the dialog owned by end-users."
   endUserContext: EndUserContext!
 }
@@ -368,6 +386,13 @@ type EndUserSearchLimits {
   maxExtendedStatusFilterValues: Int!
 }
 
+type ExcludedElement {
+  "The identifier of the excluded element, matching the id it would have had in its own collection."
+  id: UUID!
+  "The date and time when the excluded element was created. Lets a client order exclusions against the elements it can see, e.g. to tell where in a transmission thread something is missing."
+  createdAt: DateTime!
+}
+
 type GuiAction {
   "The unique identifier for the action in UUIDv7 format."
   id: UUID!
@@ -377,8 +402,13 @@ type GuiAction {
   url: URL!
   "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies."
   authorizationAttribute: String
+    @deprecated(
+      reason: "Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute."
+    )
   "Whether the user is authorized to perform the action."
   isAuthorized: Boolean!
+  "A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL."
+  contextToken: String
   "Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX for delete actions."
   isDeleteDialogAction: Boolean!
   "Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action priority."
@@ -389,6 +419,35 @@ type GuiAction {
   title: [Localization!]!
   "If there should be a prompt asking the user for confirmation before the action is executed, this field should contain the prompt text."
   prompt: [Localization!]
+}
+
+type LabelAssignmentLog {
+  "The date and time when the label assignment log entry was created."
+  createdAt: DateTime!
+  "The name of the system label that was changed."
+  name: String!
+  "The action that was performed on the label, e.g. 'set' or 'removed'."
+  action: String!
+  "The actor that performed the label assignment."
+  performedBy: Actor!
+}
+
+type LabelAssignmentLogDeleted implements LabelAssignmentLogError {
+  message: String!
+}
+
+type LabelAssignmentLogForbidden implements LabelAssignmentLogError {
+  message: String!
+}
+
+type LabelAssignmentLogNotFound implements LabelAssignmentLogError {
+  message: String!
+}
+
+type LabelAssignmentLogPayload {
+  "The immutable list of label assignment log entries for the dialog's end-user context."
+  labelAssignmentLog: [LabelAssignmentLog!]!
+  errors: [LabelAssignmentLogError!]!
 }
 
 type Limits {
@@ -619,8 +678,13 @@ type Transmission {
   createdAt: DateTime!
   "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service policy, which by default is the policy belonging to the service referred to by 'serviceResource' in the dialog. Can also be used to refer to other service policies. Example: mycustomresource, urn:altinn:subresource:mycustomresource, urn:altinn:task:Task_1, urn:altinn:resource:some-other-service-identifier"
   authorizationAttribute: String
+    @deprecated(
+      reason: "Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute."
+    )
   "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and the attachments will not be available."
   isAuthorized: Boolean!
+  "A token asserting the authenticated user's authorization for this specific transmission, as determined by its authorization context. Only present when the transmission has an authorization context and the user is authorized. Should be used instead of the dialog token against URLs referred to by this transmission, including front-channel embeds."
+  contextToken: String
   "Arbitrary URI/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   extendedType: URL
   "Arbitrary string with a service-specific reference to an external system or service."
@@ -637,8 +701,12 @@ type Transmission {
   content: TransmissionContent!
   "The transmission-level attachments."
   attachments: [Attachment!]!
+  "Attachments on this transmission that exist but are withheld from the authenticated user, listed by id and creation time only. An attachment is excluded rather than shown with masked URLs when its authorization context sets unauthorizedPresentation to 'excluded'. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."
+  excludedAttachments: [ExcludedElement!]
   "The transmission-level navigational actions."
   navigationalActions: [TransmissionNavigationalAction!]!
+  "Navigational actions on this transmission that exist but are withheld from the authenticated user, listed by id and creation time only. A navigational action is excluded rather than returned with isAuthorized=false when its authorization context sets unauthorizedPresentation to 'excluded'. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."
+  excludedNavigationalActions: [ExcludedElement!]
 }
 
 type TransmissionContent {
@@ -657,6 +725,10 @@ type TransmissionNavigationalAction {
   url: URL!
   "The UTC timestamp when the navigational action expires and is no longer available."
   expiresAt: DateTime
+  "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be replaced with 'urn:dialogporten:unauthorized'."
+  isAuthorized: Boolean!
+  "A token asserting the authenticated user's authorization for this specific navigational action, as determined by its authorization context. Only present when the navigational action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL."
+  contextToken: String
 }
 
 interface BulkSetSystemLabelError {
@@ -668,6 +740,10 @@ interface DialogByIdError {
 }
 
 interface DialogLookupError {
+  message: String!
+}
+
+interface LabelAssignmentLogError {
   message: String!
 }
 

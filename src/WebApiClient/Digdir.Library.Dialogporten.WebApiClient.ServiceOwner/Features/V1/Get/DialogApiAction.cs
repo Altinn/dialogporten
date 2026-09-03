@@ -1,0 +1,60 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
+
+namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
+
+public class DialogApiAction
+{
+    /// <summary>
+    /// The unique identifier for the action in UUIDv7 format.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    /// <summary>
+    /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
+    /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+    /// <br/>
+    /// <br/>Empty when the action was supplied with an authorizationContext, in which case the action is found
+    /// <br/>in authorizationContext.action.
+    /// </summary>
+    [JsonPropertyName("action")]
+    [Obsolete("Use 'AuthorizationContext.Action' instead.")]
+    public string Action { get; set; } = null!;
+
+    /// <summary>
+    /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
+    /// <br/>policy, which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+    /// <br/>            
+    /// <br/>Can also be used to refer to other service policies.
+    /// </summary>
+    [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use 'AuthorizationContext' instead.")]
+    public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// <br/>Null when the action uses legacy authorization fields.
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+    public AuthorizationContext? AuthorizationContext { get; set; }
+
+    /// <summary>
+    /// True if the authenticated user (set in the query) is authorized for this action.
+    /// </summary>
+    [JsonPropertyName("isAuthorized")]
+    public bool? IsAuthorized { get; set; }
+
+    /// <summary>
+    /// The logical name of the operation the API action refers to.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// The endpoints associated with the action.
+    /// </summary>
+    [JsonPropertyName("endpoints")]
+    public ICollection<DialogApiActionEndpoint> Endpoints { get; set; } = [];
+}

@@ -134,6 +134,7 @@ module environmentKeyVault '../modules/keyvault/create.bicep' = {
     location: location
     sku: keyVaultSku
     tags: tags
+    appInsightWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
   }
 }
 

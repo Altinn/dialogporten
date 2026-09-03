@@ -4,6 +4,7 @@
     "idempotentKey": null,
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
     "authorizationAttribute": null,
+    "authorizationContext": null,
     "extendedType": "https://digdir.com/transmission-type",
     "externalReference": "second-transmission",
     "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
@@ -45,7 +46,8 @@
             "consumerType": "Gui"
           }
         ],
-        "expiresAt": null
+        "expiresAt": null,
+        "authorizationContext": null
       }
     ],
     "navigationalActions": [
@@ -57,7 +59,8 @@
           }
         ],
         "url": "https://digdir.com/second-action-url",
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "authorizationContext": null
       }
     ]
   },
@@ -66,6 +69,7 @@
     "idempotentKey": null,
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
     "authorizationAttribute": null,
+    "authorizationContext": null,
     "extendedType": null,
     "externalReference": "first-transmission",
     "relatedTransmissionId": null,
@@ -125,7 +129,8 @@
             "consumerType": "Gui"
           }
         ],
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "authorizationContext": null
       }
     ],
     "navigationalActions": [
@@ -137,7 +142,8 @@
           }
         ],
         "url": "https://digdir.com/first-action-url",
-        "expiresAt": null
+        "expiresAt": null,
+        "authorizationContext": null
       }
     ]
   }

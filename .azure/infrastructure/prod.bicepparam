@@ -82,6 +82,14 @@ param postgresConfiguration = {
       value: '2097151'
     }
     {
+      name: 'metrics.autovacuum_diagnostics'
+      value: 'on'
+    }
+    {
+      name: 'metrics.collector_database_activity'
+      value: 'on'
+    }
+    {
       name: 'track_cost_delay_timing'
       value: 'on'
     }

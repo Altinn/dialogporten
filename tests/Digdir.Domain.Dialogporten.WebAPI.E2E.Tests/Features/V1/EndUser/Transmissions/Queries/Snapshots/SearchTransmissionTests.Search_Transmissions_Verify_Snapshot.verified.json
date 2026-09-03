@@ -4,6 +4,7 @@
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
     "authorizationAttribute": null,
     "isAuthorized": true,
+    "contextToken": null,
     "extendedType": null,
     "externalReference": "first-transmission",
     "relatedTransmissionId": null,
@@ -29,13 +30,16 @@
       "contentReference": null
     },
     "attachments": [],
-    "navigationalActions": []
+    "excludedAttachments": [],
+    "navigationalActions": [],
+    "excludedNavigationalActions": []
   },
   {
     "id": "00000000-0000-0000-0000-000000000000",
     "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
     "authorizationAttribute": null,
     "isAuthorized": true,
+    "contextToken": null,
     "extendedType": "https://digdir.com/transmission-type",
     "externalReference": "second-transmission",
     "relatedTransmissionId": "00000000-0000-0000-0000-000000000000",
@@ -96,9 +100,12 @@
             "consumerType": "Gui"
           }
         ],
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "isAuthorized": true,
+        "contextToken": null
       }
     ],
+    "excludedAttachments": [],
     "navigationalActions": [
       {
         "title": [
@@ -108,8 +115,11 @@
           }
         ],
         "url": "https://digdir.com/action-url",
-        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+        "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+        "isAuthorized": true,
+        "contextToken": null
       }
-    ]
+    ],
+    "excludedNavigationalActions": []
   }
 ]

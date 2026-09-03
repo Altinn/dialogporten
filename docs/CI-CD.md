@@ -38,7 +38,8 @@ third that only starts when the schema package is touched:
    - Only starts when the push touches `docs/schema/V*/**`,
      `.github/actions/build-schema/**`, or the workflow file itself
    - Publishes `@digdir/dialogporten-schema@${version.txt}-${shortSha}` if the
-     schema package changed
+     schema package changed, under the `prerelease` dist-tag, so a bare
+     `npm install` still resolves to a real release
    - Runs independently of `ci-cd-main.yml`, so it is **not** gated on a
      successful deployment to Test
 
@@ -68,14 +69,19 @@ four parallel workflows consume:
    - Deployment similar to staging, but does not publish the SDK
 
 4. **Publish Schema NPM** (`ci-cd-publish-schema.yml`)
-   - Publishes `@digdir/dialogporten-schema` at the release version
+   - Publishes `@digdir/dialogporten-schema` at the release version, under the
+     `latest` dist-tag
    - Runs in parallel with the staging deployment, not after it
 
 > **Note:** `ci-cd-publish-schema.yml` is the sole publisher of the npm schema
-> package and is registered as the Trusted Publisher for it on npmjs.com. npm
-> binds that record to the exact workflow **filename**, so the file cannot be
-> renamed, and the publish step cannot be moved into a reusable `workflow-*.yml`,
-> without updating the npmjs.com configuration first.
+> package and authenticates via npm Trusted Publishing over OIDC, so no npm token
+> is involved.
+>
+> Keep the publish step inline in this file. npm binds the Trusted Publisher
+> record to the exact workflow **filename**, and when `npm publish` runs inside a
+> called workflow npm validates the *calling* workflow's name instead, so moving
+> the step into a reusable `workflow-*.yml` or renaming this file would break
+> publishing.
 
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)

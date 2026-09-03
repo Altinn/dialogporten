@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
@@ -8,7 +9,7 @@ using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
-using EndUserSystemLabel = Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabel;
+using EndUserSystemLabel = Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialogs.Queries.Get;
 
@@ -59,7 +60,7 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
 
         var secondAction = content.GuiActions.Last();
         secondAction.Prompt.Should().NotBeEmpty();
-        secondAction.HttpMethod.Should().Be(HttpVerb.POST);
+        secondAction.HttpMethod.Should().Be(HttpVerb.Post);
     }
 
     [E2EFact]
@@ -108,9 +109,12 @@ public class GetDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFix
             .Single(t => t.AuthorizationAttribute == "urn:altinn:resource:ttd-altinn-events-automated-tests");
         unavailableExternalResource.IsAuthorized.Should().BeFalse();
 
+        // Subresource/task-type attributes derive the "read" action, and XACML target matching ignores
+        // additional request attributes — so main-resource read access authorizes this transmission.
+        // (Narrowing requires an authorizationContext with an explicit action and a matching policy rule.)
         var unavailableSubresource = content.Transmissions
             .Single(t => t.AuthorizationAttribute == "someunavailablesubresource");
-        unavailableSubresource.IsAuthorized.Should().BeFalse();
+        unavailableSubresource.IsAuthorized.Should().BeTrue();
     }
 
     [E2EFact]

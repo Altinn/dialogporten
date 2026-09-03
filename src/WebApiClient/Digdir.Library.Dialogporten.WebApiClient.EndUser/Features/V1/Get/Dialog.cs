@@ -164,6 +164,9 @@ public class Dialog
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,
     /// <br/>transmissions or attachments. It should also be used for front-channel embeds.
+    /// <br/>
+    /// <br/>The token's authorized entities ("e") claim lists, for every entity carrying an authorization context that
+    /// <br/>the end user is authorized for, the entity's id or the "tokenRef" the service owner supplied on the context.
     /// </summary>
     [JsonPropertyName("dialogToken")]
     public string? DialogToken { get; set; }

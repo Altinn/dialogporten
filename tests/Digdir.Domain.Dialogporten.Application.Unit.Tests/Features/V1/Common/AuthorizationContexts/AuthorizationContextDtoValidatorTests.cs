@@ -45,10 +45,42 @@ public class AuthorizationContextDtoValidatorTests
         Assert.False(result.IsValid);
     }
 
-    private static AuthorizationContextDto CreateDto(string? additionalResourceAttribute) => new()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("my-own-reference")]
+    public void Should_Allow_Absent_Or_Non_Empty_TokenRef(string? tokenRef)
+    {
+        var result = _validator.Validate(CreateDto(null, tokenRef));
+
+        Assert.True(result.IsValid, string.Join(", ", result.Errors));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Should_Reject_Empty_Or_Whitespace_TokenRef(string tokenRef)
+    {
+        // A token reference is emitted verbatim in the dialog token's "e" claim; a blank one is unusable there.
+        var result = _validator.Validate(CreateDto(null, tokenRef));
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, x => x.PropertyName == nameof(AuthorizationContextDto.TokenRef));
+    }
+
+    [Fact]
+    public void Should_Reject_TokenRef_Longer_Than_Max_Token_Reference_Length()
+    {
+        var result = _validator.Validate(CreateDto(null, new string('x', AuthorizationContext.MaxTokenReferenceLength + 1)));
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, x => x.PropertyName == nameof(AuthorizationContextDto.TokenRef));
+    }
+
+    private static AuthorizationContextDto CreateDto(string? additionalResourceAttribute, string? tokenRef = null) => new()
     {
         AdditionalResourceAttribute = additionalResourceAttribute,
         IncludeDialogParty = true,
+        TokenRef = tokenRef,
         UnauthorizedPresentation = AuthorizationContextUnauthorizedPresentation.Values.Disabled
     };
 }

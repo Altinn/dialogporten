@@ -33,15 +33,6 @@ public class DialogTransmissionDetails
     [JsonPropertyName("isAuthorized")]
     public bool IsAuthorized { get; set; }
 
-    /// <summary>
-    /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
-    /// <br/>its authorization context. Only present when the transmission has an authorization context and the user is
-    /// <br/>authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
-    /// <br/>including front-channel embeds.
-    /// </summary>
-    [JsonPropertyName("contextToken")]
-    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
-    public string? ContextToken { get; set; }
 
     /// <summary>
     /// The extended type URI for the transmission.

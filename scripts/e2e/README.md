@@ -53,7 +53,7 @@ LocalDevelopment__UseLocalMetricsAggregationStorage=true
 ```
 
 `UseLocalDevelopmentCompactJwsGenerator` must stay `false` here: the local decorator returns the
-literal string `local-development-jws`, while the E2E tests verify real dialog and context token
+literal string `local-development-jws`, while the E2E tests verify real dialog token
 signatures against the JWKS endpoint (`Expected a compact JWS with three parts, got 1`).
 
 Optional overrides (if set in `.env` or the shell):

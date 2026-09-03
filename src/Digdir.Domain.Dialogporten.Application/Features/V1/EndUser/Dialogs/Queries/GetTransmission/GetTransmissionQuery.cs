@@ -36,23 +36,19 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
     private readonly IDialogDbContext _dbContext;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IClock _clock;
-    private readonly IDialogTokenGenerator _dialogTokenGenerator;
 
     public GetTransmissionQueryHandler(
         IDialogDbContext dbContext,
         IAltinnAuthorization altinnAuthorization,
-        IClock clock,
-        IDialogTokenGenerator dialogTokenGenerator)
+        IClock clock)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
         ArgumentNullException.ThrowIfNull(clock);
-        ArgumentNullException.ThrowIfNull(dialogTokenGenerator);
 
         _dbContext = dbContext;
         _altinnAuthorization = altinnAuthorization;
         _clock = clock;
-        _dialogTokenGenerator = dialogTokenGenerator;
     }
 
     public async Task<GetTransmissionResult> Handle(GetTransmissionQuery request,
@@ -127,9 +123,6 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
 
         var transmissionCheck = transmission.GetAuthorizationCheck(dialog);
         dto.IsAuthorized = authorizationResult.HasAccess(transmission, transmissionCheck);
-        dto.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorizationResult, dto.IsAuthorized,
-            transmission.AuthorizationContext, transmissionCheck,
-            transmission.Id, DialogContextTokenEntityTypes.Transmission);
 
         if (!dto.IsAuthorized && transmission.ShouldExcludeWhenUnauthorized())
         {
@@ -146,18 +139,12 @@ internal sealed class GetTransmissionQueryHandler : IRequestHandler<GetTransmiss
         {
             var check = attachment.GetAuthorizationCheck(dialog);
             attachmentDto.IsAuthorized = authorizationResult.HasAccess(attachment, dto.IsAuthorized, check);
-            attachmentDto.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorizationResult,
-                attachmentDto.IsAuthorized, attachment.AuthorizationContext, check,
-                attachment.Id, DialogContextTokenEntityTypes.TransmissionAttachment);
         }
 
         foreach (var (navigationalActionDto, navigationalAction) in dto.NavigationalActions.Zip(transmission.NavigationalActions))
         {
             var check = navigationalAction.GetAuthorizationCheck(dialog);
             navigationalActionDto.IsAuthorized = authorizationResult.HasAccess(navigationalAction, dto.IsAuthorized, check);
-            navigationalActionDto.ContextToken = _dialogTokenGenerator.GetContextTokenOrNull(dialog, authorizationResult,
-                navigationalActionDto.IsAuthorized, navigationalAction.AuthorizationContext, check,
-                navigationalAction.Id, DialogContextTokenEntityTypes.TransmissionNavigationalAction);
         }
 
         // After the loops, so each DTO could still be paired with its entity by position above.

@@ -22,6 +22,7 @@ internal static class AuthorizationContextMapExtensions
         context.Parties = [.. source.Parties];
         context.IncludeDialogParty = source.IncludeDialogParty;
         context.Action = source.Action;
+        context.TokenReference = source.TokenRef;
         context.UnauthorizedPresentation = source.UnauthorizedPresentation;
         return context;
     }

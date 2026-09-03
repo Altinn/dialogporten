@@ -24,7 +24,8 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     public IValidationResult Validate(ReadOnlySpan<char> token,
         Guid? dialogId = null,
         string[]? requiredActions = null,
-        DialogTokenValidationParameters? options = null)
+        DialogTokenValidationParameters? options = null,
+        string? requiredEntityReference = null)
     {
         const string tokenPropertyName = "token";
         options ??= DialogTokenValidationParameters.Default;
@@ -41,11 +42,6 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         if (!VerifySignature(tokenParts, decodedTokenParts))
         {
             validationResult.AddError(tokenPropertyName, "Invalid signature");
-        }
-
-        if (options.ValidateTokenType && !VerifyTokenType(decodedTokenParts.Header, options.ValidTokenTypes))
-        {
-            validationResult.AddError(tokenPropertyName, "Invalid typ");
         }
 
         if (options.ValidateLifetime && !claimsPrincipal.VerifyNotValidBefore(_clock, options.ClockSkew))
@@ -68,36 +64,12 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             validationResult.AddError(tokenPropertyName, "Invalid actions");
         }
 
-        return validationResult;
-    }
-
-    private static bool VerifyTokenType(ReadOnlySpan<byte> header, IReadOnlyCollection<string> validTokenTypes)
-    {
-        const string typPropertyName = "typ";
-        var reader = new Utf8JsonReader(header);
-
-        // Require a root JSON object, and only match "typ" at depth 1 — otherwise a header carrying an
-        // unrelated nested object with its own "typ" property (e.g. {"kid":"x","nested":{"typ":"JWT"}})
-        // would satisfy validation without a genuine top-level "typ".
-        if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject) return false;
-
-        while (reader.Read())
+        if (requiredEntityReference is not null && !validationResult.ClaimsPrincipal.VerifyEntityReference(requiredEntityReference))
         {
-            if (reader.CurrentDepth != 1 || !IsPropertyName(reader, typPropertyName)) continue;
-            if (!reader.Read() || reader.TokenType != JsonTokenType.String) return false;
-
-            foreach (var validTokenType in validTokenTypes)
-            {
-                // ValueTextEquals compares the unescaped value, so a header writing the '+' of a structured
-                // type as the JSON escape u002B still matches.
-                if (reader.ValueTextEquals(validTokenType)) return true;
-            }
-
-            return false;
+            validationResult.AddError(tokenPropertyName, "Invalid entity reference");
         }
 
-        // A token without a "typ" header is not one of ours.
-        return false;
+        return validationResult;
     }
 
     private static bool TryDecodeToken(

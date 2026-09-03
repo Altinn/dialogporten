@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using Altinn.ApiClients.Dialogporten;
 using Altinn.ApiClients.Dialogporten.Common;
@@ -17,11 +16,9 @@ public class DialogTokenValidatorTests
     private static readonly DateTimeOffset ValidTimeStamp = DateTimeOffset.Parse("2025-02-14T09:00:00Z", CultureInfo.InvariantCulture);
     private const string DialogToken =
         "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6ImRwLXN0YWdpbmctMjQwMzIyLW81eW1uIn0.eyJqdGkiOiIzOGNmZGNiOS0zODhiLTQ3YjgtYTFiZi05ZjE1YjI4MTk4OTQiLCJjIjoidXJuOmFsdGlubjpwZXJzb246aWRlbnRpZmllci1ubzoxNDg4NjQ5ODIyNiIsImwiOjMsInAiOiJ1cm46YWx0aW5uOnBlcnNvbjppZGVudGlmaWVyLW5vOjE0ODg2NDk4MjI2IiwicyI6InVybjphbHRpbm46cmVzb3VyY2U6ZGFnbC1jb3JyZXNwb25kZW5jZSIsImkiOiIwMTk0ZmU4Mi05MjgwLTc3YTUtYTdjZC01ZmYwZTZhNmZhMDciLCJhIjoicmVhZCIsImlzcyI6Imh0dHBzOi8vcGxhdGZvcm0udHQwMi5hbHRpbm4ubm8vZGlhbG9ncG9ydGVuL2FwaS92MSIsImlhdCI6MTczOTUyMzM2NywibmJmIjoxNzM5NTIzMzY3LCJleHAiOjE3Mzk1MjM5Njd9.O_f-RJhRPT7B76S7aOGw6jfxKDki3uJQLLC8nVlcNVJWFIOQUsy6gU4bG1ZdqoMBZPvb2K2X4I5fGpHW9dQMAA";
-    private static readonly JsonSerializerOptions RelaxedHeaderOptions =
-        new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-    private static readonly JsonSerializerOptions EscapingHeaderOptions =
-        new() { Encoder = JavaScriptEncoder.Default };
-    private static readonly string[] NonObjectHeader = ["not", "an", "object"];
+    private static readonly string[] AuthorizedEntities = ["01a06678-d287-7308-a200-056009739c3f", "my-own-reference"];
+    private static readonly string[] OtherAuthorizedEntities = ["some-other-reference"];
+    private static readonly string[] TokenRefOnlyAuthorizedEntities = ["my-own-reference"];
     private static readonly PublicKeyPair[] ValidPublicKeyPairs =
     [
         new("dp-staging-240322-o5ymn", ToPublicKey("zs9hR9oqgf53th2lTdrBq3C1TZ9UlR-HVJOiUpWV63o")),
@@ -308,171 +305,83 @@ public class DialogTokenValidatorTests
     }
 
     [Fact]
-    public void ShouldReturnError_GivenContextTokenType()
+    public void ShouldReturnIsValid_GivenRequiredEntityReferenceListedInAuthorizedEntities()
     {
         // Arrange
-        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken);
+        var (token, keyPair) = CreateSignedToken(claims => claims["e"] = AuthorizedEntities);
         var sut = GetSut(ValidTimeStamp, keyPair);
 
         // Act
-        var result = sut.Validate(token);
+        var byEntityId = sut.Validate(token, requiredEntityReference: "01a06678-d287-7308-a200-056009739c3f");
+        var byTokenRef = sut.Validate(token, requiredEntityReference: "my-own-reference");
+
+        // Assert
+        Assert.True(byEntityId.IsValid);
+        Assert.True(byTokenRef.IsValid);
+        Assert.Equal(AuthorizedEntities, byEntityId.ClaimsPrincipal.GetAuthorizedEntityReferences());
+    }
+
+    [Fact]
+    public void ShouldReturnError_GivenRequiredEntityReferenceNotListedInAuthorizedEntities()
+    {
+        // Arrange
+        var (token, keyPair) = CreateSignedToken(claims => claims["e"] = OtherAuthorizedEntities);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act: the comparison is ordinal - a reference differing only in case is a different reference
+        var result = sut.Validate(token, requiredEntityReference: "Some-Other-Reference");
 
         // Assert
         Assert.False(result.IsValid);
         Assert.True(result.Errors.ContainsKey("token"));
-        Assert.Contains("Invalid typ", result.Errors["token"]);
+        Assert.Contains("Invalid entity reference", result.Errors["token"]);
         Assert.DoesNotContain("Invalid signature", result.Errors["token"]);
     }
 
     [Fact]
-    public void ShouldReturnIsValid_GivenContextTokenTypeWhenAccepted()
+    public void ShouldReturnError_GivenRequiredEntityReferenceAndNoAuthorizedEntitiesClaim()
     {
+        // A token without "e" asserts no context grants at all, so any entity-scoped request must fail.
         // Arrange
-        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken);
-        var sut = GetSut(ValidTimeStamp, keyPair);
+        var sut = GetSut(ValidTimeStamp, ValidPublicKeyPairs);
 
         // Act
-        var result = sut.Validate(token, options: new DialogTokenValidationParameters
-        {
-            ClockSkew = TimeSpan.Zero,
-            ValidTokenTypes = [DialogTokenTypes.DialogContextToken]
-        });
+        var result = sut.Validate(DialogToken, requiredEntityReference: "01a06678-d287-7308-a200-056009739c3f");
 
         // Assert
-        Assert.True(result.IsValid);
+        Assert.False(result.IsValid);
+        Assert.Contains("Invalid entity reference", result.Errors["token"]);
+        Assert.Empty(result.ClaimsPrincipal!.GetAuthorizedEntityReferences());
     }
 
     [Fact]
-    public void ShouldReturnError_GivenTokenTypeOnlyInNestedProperty()
+    public void ShouldIgnoreAuthorizedEntitiesClaim_GivenNoRequiredEntityReference()
     {
-        // A header carrying a "typ" only inside a nested object must not satisfy top-level typ validation.
         // Arrange
-        const string kid = "dp-testing-generated-key";
-        var header = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object>
-        {
-            ["alg"] = "EdDSA",
-            ["kid"] = kid,
-            ["nested"] = new Dictionary<string, object> { ["typ"] = DialogTokenTypes.DialogToken }
-        });
-        var (token, keyPair) = CreateSignedTokenWithHeaderBytes(kid, header);
+        var (token, keyPair) = CreateSignedToken(claims => claims["e"] = TokenRefOnlyAuthorizedEntities);
         var sut = GetSut(ValidTimeStamp, keyPair);
 
         // Act
         var result = sut.Validate(token);
-
-        // Assert
-        Assert.False(result.IsValid);
-        Assert.True(result.Errors.ContainsKey("token"));
-        Assert.Contains("Invalid typ", result.Errors["token"]);
-        Assert.DoesNotContain("Invalid signature", result.Errors["token"]);
-    }
-
-    [Fact]
-    public void ShouldReturnError_GivenNonObjectHeader()
-    {
-        // A header whose root is not a JSON object can never carry a valid top-level "typ".
-        // Arrange
-        const string kid = "dp-testing-generated-key";
-        var header = JsonSerializer.SerializeToUtf8Bytes(NonObjectHeader);
-        var (token, keyPair) = CreateSignedTokenWithHeaderBytes(kid, header);
-        var sut = GetSut(ValidTimeStamp, keyPair);
-
-        // Act
-        var result = sut.Validate(token);
-
-        // Assert
-        Assert.False(result.IsValid);
-        Assert.True(result.Errors.ContainsKey("token"));
-        Assert.Contains("Invalid typ", result.Errors["token"]);
-    }
-
-    [Fact]
-    public void ShouldReturnError_GivenMissingTokenType()
-    {
-        // Arrange
-        var (token, keyPair) = CreateSignedToken(tokenType: null);
-        var sut = GetSut(ValidTimeStamp, keyPair);
-
-        // Act
-        var result = sut.Validate(token);
-
-        // Assert
-        Assert.False(result.IsValid);
-        Assert.True(result.Errors.ContainsKey("token"));
-        Assert.Contains("Invalid typ", result.Errors["token"]);
-    }
-
-    [Fact]
-    public void ShouldReturnIsValid_GivenContextTokenTypeWhenTypeValidationIsDisabled()
-    {
-        // Arrange
-        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken);
-        var sut = GetSut(ValidTimeStamp, keyPair);
-
-        // Act
-        var result = sut.Validate(token, options: new DialogTokenValidationParameters
-        {
-            ClockSkew = TimeSpan.Zero,
-            ValidateTokenType = false
-        });
-
-        // Assert
-        Assert.True(result.IsValid);
-    }
-
-    [Fact]
-    public void ShouldReturnIsValid_GivenTokenTypeEscapedInHeader()
-    {
-        // A JSON header may escape the '+' of a structured type as u002B. That is the same type.
-        // Arrange
-        var (token, keyPair) = CreateSignedToken(DialogTokenTypes.DialogContextToken, escapeHeader: true);
-        var sut = GetSut(ValidTimeStamp, keyPair);
-        Assert.Contains(@"dialogcontexttoken\u002Bjwt",
-            Encoding.UTF8.GetString(Base64Url.DecodeFromChars(token.Split('.')[0])),
-            StringComparison.Ordinal);
-
-        // Act
-        var result = sut.Validate(token, options: new DialogTokenValidationParameters
-        {
-            ClockSkew = TimeSpan.Zero,
-            ValidTokenTypes = [DialogTokenTypes.DialogContextToken]
-        });
 
         // Assert
         Assert.True(result.IsValid);
     }
 
     /// <summary>
-    /// Mints a token signed with a throwaway key, so the type assertions are made against a token that is
-    /// valid in every other respect. Tampering with the header of <see cref="DialogToken"/> would invalidate
-    /// its signature, which cannot be re-created without Dialogporten's private key.
+    /// Mints a token signed with a throwaway key, so claim assertions are made against a token that is valid
+    /// in every other respect. Tampering with the payload of <see cref="DialogToken"/> would invalidate its
+    /// signature, which cannot be re-created without Dialogporten's private key.
     /// </summary>
-    private static (string Token, PublicKeyPair KeyPair) CreateSignedToken(string? tokenType, bool escapeHeader = false)
+    private static (string Token, PublicKeyPair KeyPair) CreateSignedToken(Action<Dictionary<string, object>>? configureClaims = null)
     {
         const string kid = "dp-testing-generated-key";
-        var header = tokenType is null
-            ? new Dictionary<string, object> { ["alg"] = "EdDSA", ["kid"] = kid }
-            : new Dictionary<string, object> { ["alg"] = "EdDSA", ["typ"] = tokenType, ["kid"] = kid };
-
-        // Dialogporten writes the header with the relaxed encoder, leaving a structured type's '+' literal;
-        // escapeHeader mints the equivalent header the default encoder would produce.
-        var headerOptions = escapeHeader ? EscapingHeaderOptions : RelaxedHeaderOptions;
-        return CreateSignedTokenWithHeaderBytes(kid, JsonSerializer.SerializeToUtf8Bytes(header, headerOptions));
-    }
-
-    /// <summary>
-    /// Mints a token whose header is exactly the given raw JSON bytes, for exercising header shapes
-    /// (nested properties, non-object roots) that can't be expressed via a flat header dictionary.
-    /// The "kid" property, if present anywhere in <paramref name="headerBytes"/>, is not otherwise
-    /// inspected here — the caller passes the matching <paramref name="kid"/> for key lookup.
-    /// </summary>
-    private static (string Token, PublicKeyPair KeyPair) CreateSignedTokenWithHeaderBytes(string kid, byte[] headerBytes)
-    {
         using var key = Key.Create(SignatureAlgorithm.Ed25519, new KeyCreationParameters
         {
             ExportPolicy = KeyExportPolicies.AllowPlaintextExport
         });
 
+        var header = new Dictionary<string, object> { ["alg"] = "EdDSA", ["typ"] = "JWT", ["kid"] = kid };
         var claims = new Dictionary<string, object>
         {
             ["jti"] = "38cfdcb9-388b-47b8-a1bf-9f15b2819894",
@@ -487,9 +396,10 @@ public class DialogTokenValidatorTests
             ["nbf"] = ValidTimeStamp.ToUnixTimeSeconds(),
             ["exp"] = ValidTimeStamp.AddMinutes(10).ToUnixTimeSeconds()
         };
+        configureClaims?.Invoke(claims);
 
         var signedPart = string.Join('.',
-            Base64Url.EncodeToString(headerBytes),
+            Base64Url.EncodeToString(JsonSerializer.SerializeToUtf8Bytes(header)),
             Base64Url.EncodeToString(JsonSerializer.SerializeToUtf8Bytes(claims)));
         var signature = SignatureAlgorithm.Ed25519.Sign(key, Encoding.UTF8.GetBytes(signedPart));
 

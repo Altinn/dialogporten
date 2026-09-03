@@ -18,7 +18,7 @@ namespace Digdir.Domain.Dialogporten.GraphQl.E2E.Tests.Features.DialogById;
 public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2ETestBase<GraphQlE2EFixture>(fixture)
 {
     [E2EFact]
-    public async Task Should_Expose_IsAuthorized_And_ContextToken_On_Every_Context_Carrying_Surface()
+    public async Task Should_Expose_IsAuthorized_On_Every_Context_Carrying_Surface()
     {
         // Arrange: one granted and one denied entity on each of the six surfaces.
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
@@ -59,54 +59,42 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
         // Dialog attachments
         var grantedAttachment = dialog.Attachments.Single(a => a.Name == "granted-attachment");
         grantedAttachment.IsAuthorized.Should().BeTrue();
-        grantedAttachment.ContextToken.Should().NotBeNullOrEmpty();
 
         var deniedAttachment = dialog.Attachments.Single(a => a.Name == "denied-attachment");
         deniedAttachment.IsAuthorized.Should().BeFalse();
-        deniedAttachment.ContextToken.Should().BeNull();
 
         // Gui actions
         var grantedGuiAction = dialog.GuiActions.Single(a => a.Url.ToString().EndsWith("granted-gui-action", StringComparison.Ordinal));
         grantedGuiAction.IsAuthorized.Should().BeTrue();
-        grantedGuiAction.ContextToken.Should().NotBeNullOrEmpty();
         grantedGuiAction.Action.Should().Be(Constants.ReadAction, "the action is surfaced from the context");
 
         var deniedGuiAction = dialog.GuiActions.Single(a => a.Url.ToString() == Constants.UnauthorizedUri.ToString());
         deniedGuiAction.IsAuthorized.Should().BeFalse();
-        deniedGuiAction.ContextToken.Should().BeNull();
 
         // Api actions
         var grantedApiAction = dialog.ApiActions.Single(a => a.Name == "granted-api-action");
         grantedApiAction.IsAuthorized.Should().BeTrue();
-        grantedApiAction.ContextToken.Should().NotBeNullOrEmpty();
 
         var deniedApiAction = dialog.ApiActions.Single(a => a.Name == "denied-api-action");
         deniedApiAction.IsAuthorized.Should().BeFalse();
-        deniedApiAction.ContextToken.Should().BeNull();
 
         // Transmissions, and their attachments and navigational actions
         var grantedTransmission = dialog.Transmissions.Single(t => t.ExternalReference == "granted");
         grantedTransmission.IsAuthorized.Should().BeTrue();
-        grantedTransmission.ContextToken.Should().NotBeNullOrEmpty();
         grantedTransmission.Attachments.Single().IsAuthorized.Should().BeTrue();
-        grantedTransmission.Attachments.Single().ContextToken.Should().NotBeNullOrEmpty();
         grantedTransmission.NavigationalActions.Single().IsAuthorized.Should().BeTrue();
-        grantedTransmission.NavigationalActions.Single().ContextToken.Should().NotBeNullOrEmpty();
 
         var deniedTransmission = dialog.Transmissions.Single(t => t.ExternalReference == "denied");
         deniedTransmission.IsAuthorized.Should().BeFalse();
-        deniedTransmission.ContextToken.Should().BeNull();
 
         // Parent-first narrowing holds on the GraphQL surface too: the children's own contexts refer the
-        // available resource, yet they are denied and tokenless because their parent is denied.
+        // available resource, yet they are denied because their parent is denied.
         deniedTransmission.Attachments.Single().IsAuthorized.Should().BeFalse();
-        deniedTransmission.Attachments.Single().ContextToken.Should().BeNull();
         deniedTransmission.NavigationalActions.Single().IsAuthorized.Should().BeFalse();
-        deniedTransmission.NavigationalActions.Single().ContextToken.Should().BeNull();
     }
 
     [E2EFact]
-    public async Task Entities_Without_An_Authorization_Context_Should_Have_A_Null_ContextToken()
+    public async Task Dialog_Without_Authorization_Contexts_Should_Still_Issue_A_Dialog_Token()
     {
         // Arrange: the complex dialog uses legacy authorization attributes throughout, no contexts.
         var dialogId = await Fixture.ServiceownerApi.CreateComplexDialogAsync();
@@ -122,16 +110,6 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
         dialog.Should().NotBeNull();
 
         dialog.DialogToken.Should().NotBeNullOrEmpty("legacy grants are still expressed through the dialog token");
-
-        dialog.Attachments.Should().AllSatisfy(a => a.ContextToken.Should().BeNull());
-        dialog.GuiActions.Should().AllSatisfy(a => a.ContextToken.Should().BeNull());
-        dialog.ApiActions.Should().AllSatisfy(a => a.ContextToken.Should().BeNull());
-        dialog.Transmissions.Should().AllSatisfy(t =>
-        {
-            t.ContextToken.Should().BeNull();
-            t.Attachments.Should().AllSatisfy(a => a.ContextToken.Should().BeNull());
-            t.NavigationalActions.Should().AllSatisfy(n => n.ContextToken.Should().BeNull());
-        });
     }
 
     private static V1ServiceOwnerDialogsCommandsCreate_Attachment CreateAttachment(string name, string serviceResource) =>

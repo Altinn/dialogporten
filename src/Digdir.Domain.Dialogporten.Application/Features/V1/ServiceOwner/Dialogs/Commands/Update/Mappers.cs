@@ -333,6 +333,7 @@ public static class Mappers
                 Parties = [.. source.Parties],
                 IncludeDialogParty = source.IncludeDialogParty,
                 Action = source.Action,
+                TokenRef = source.TokenRef,
                 UnauthorizedPresentation = source.UnauthorizedPresentation
             };
 }

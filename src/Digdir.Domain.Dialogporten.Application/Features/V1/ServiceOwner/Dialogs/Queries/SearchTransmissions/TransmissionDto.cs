@@ -233,6 +233,13 @@ public sealed class AuthorizationContextDto
     public string? Action { get; set; }
 
     /// <summary>
+    /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+    /// Null when the carrying entity's id is used instead.
+    /// </summary>
+    /// <example>my-own-reference</example>
+    public string? TokenRef { get; set; }
+
+    /// <summary>
     /// Controls how the entity is presented to end users that fail the authorization check:
     /// "disabled" keeps the entity visible but masks its URLs and embedded content references, while
     /// "excluded" removes it from the collection it belongs to entirely, leaving only its id and

@@ -358,7 +358,7 @@ static void ConfigureOpenApiV1Document(
 )
 {
     // Every document surfaces experimental-feature notices: a feature can reach the contract on either
-    // side of the API (authorizationContext on the service owner side, contextToken and the excluded*
+    // side of the API (authorizationContext on the service owner side, isAuthorized and the excluded*
     // collections on the end user side), and the combined legacy document carries both.
     var experimentalProcessor = new ExperimentalFeatureSchemaProcessor();
 

@@ -53,8 +53,6 @@ type ApiAction {
     )
   "True if the authenticated user is authorized for this action. If not, the action will not be available and all endpoints will be replaced with a fixed placeholder."
   isAuthorized: Boolean!
-  "A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's endpoints."
-  contextToken: String
   "The logical name of the operation the API action refers to."
   name: String
   "The endpoints associated with the action."
@@ -95,8 +93,6 @@ type Attachment {
   expiresAt: DateTime
   "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be replaced with 'urn:dialogporten:unauthorized'."
   isAuthorized: Boolean!
-  "A token asserting the authenticated user's authorization for this specific attachment, as determined by its authorization context. Only present when the attachment has an authorization context and the user is authorized. Should be used instead of the dialog token against this attachment's URLs."
-  contextToken: String
 }
 
 type AttachmentUrl {
@@ -219,7 +215,7 @@ type Dialog {
   updatedAt: DateTime!
   "The date and time when the dialog content was last updated. Example: 2022-12-31T23:59:59Z"
   contentUpdatedAt: DateTime!
-  "The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds. Entities carrying an authorization context are the exception: they are issued their own, narrower 'contextToken' which must be used instead of this token, as the dialog token does not assert their grant."
+  "The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds. The token's authorized entities ('e') claim lists, for every entity carrying an authorization context that the end user is authorized for, the entity's id or the 'tokenRef' the service owner supplied on the context."
   dialogToken: String
   "The aggregated status of the dialog."
   status: DialogStatus!
@@ -407,8 +403,6 @@ type GuiAction {
     )
   "Whether the user is authorized to perform the action."
   isAuthorized: Boolean!
-  "A token asserting the authenticated user's authorization for this specific action, as determined by its authorization context. Only present when the action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL."
-  contextToken: String
   "Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX for delete actions."
   isDeleteDialogAction: Boolean!
   "Indicates a priority for the action, making it possible for frontends to adapt GUI elements based on action priority."
@@ -683,8 +677,6 @@ type Transmission {
     )
   "Flag indicating if the authenticated user is authorized for this transmission. If not, embedded content and the attachments will not be available."
   isAuthorized: Boolean!
-  "A token asserting the authenticated user's authorization for this specific transmission, as determined by its authorization context. Only present when the transmission has an authorization context and the user is authorized. Should be used instead of the dialog token against URLs referred to by this transmission, including front-channel embeds."
-  contextToken: String
   "Arbitrary URI/URN describing a service-specific transmission type. Refer to the service-specific documentation provided by the service owner for details (if in use)."
   extendedType: URL
   "Arbitrary string with a service-specific reference to an external system or service."
@@ -727,8 +719,6 @@ type TransmissionNavigationalAction {
   expiresAt: DateTime
   "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be replaced with 'urn:dialogporten:unauthorized'."
   isAuthorized: Boolean!
-  "A token asserting the authenticated user's authorization for this specific navigational action, as determined by its authorization context. Only present when the navigational action has an authorization context and the user is authorized. Should be used instead of the dialog token against this action's URL."
-  contextToken: String
 }
 
 interface BulkSetSystemLabelError {

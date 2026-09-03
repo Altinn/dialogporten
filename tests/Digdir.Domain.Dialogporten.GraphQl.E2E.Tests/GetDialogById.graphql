@@ -24,7 +24,6 @@ query GetDialogById($dialogId: UUID!) {
         authorizationAttribute
         id
         isAuthorized
-        contextToken
         name
         endpoints {
           deprecated
@@ -43,7 +42,6 @@ query GetDialogById($dialogId: UUID!) {
         id
         name
         isAuthorized
-        contextToken
         displayName {
           languageCode
           value
@@ -105,7 +103,6 @@ query GetDialogById($dialogId: UUID!) {
         httpMethod
         id
         isAuthorized
-        contextToken
         isDeleteDialogAction
         priority
         url
@@ -150,7 +147,6 @@ query GetDialogById($dialogId: UUID!) {
         externalReference
         id
         isAuthorized
-        contextToken
         isOpened
         relatedTransmissionId
         type
@@ -159,7 +155,6 @@ query GetDialogById($dialogId: UUID!) {
           id
           name
           isAuthorized
-          contextToken
           displayName {
             languageCode
             value
@@ -198,7 +193,6 @@ query GetDialogById($dialogId: UUID!) {
           expiresAt
           url
           isAuthorized
-          contextToken
           title {
             languageCode
             value

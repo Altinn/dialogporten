@@ -10,6 +10,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContex
 public abstract class AuthorizationContext : IIdentifiableEntity, ICreatableEntity
 {
     public const int MaxNumberOfParties = 3;
+    public const int MaxTokenReferenceLength = 50;
 
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
@@ -39,6 +40,12 @@ public abstract class AuthorizationContext : IIdentifiableEntity, ICreatableEnti
     /// The XACML action to evaluate. Optional; null means "read".
     /// </summary>
     public string? Action { get; set; }
+
+    /// <summary>
+    /// An optional service owner supplied reference that identifies this context in the dialog token's
+    /// authorized entities ("e") claim in place of the carrying entity's id.
+    /// </summary>
+    public string? TokenReference { get; set; }
 
     /// <summary>
     /// How the carrying entity is presented to end users that are not authorized for this context.

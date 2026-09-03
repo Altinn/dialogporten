@@ -14,6 +14,10 @@ internal sealed class UpdateDialogTransmissionNavigationalActionDtoValidator : A
         IValidator<AuthorizationContextDto> authorizationContextValidator,
         IClock clock)
     {
+        RuleFor(x => x.Id)
+            .IsValidUuidV7()
+            .UuidV7TimestampIsInPast(clock);
+
         RuleFor(x => x.Title)
             .NotEmpty()
             .SetValidator(localizationsValidator);

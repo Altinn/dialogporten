@@ -358,17 +358,14 @@ public class GetDialogAuthorizationContextTests(DialogApplication application) :
 
                 // Every authorized context-carrying entity, in document order, by id; nothing else
                 var payload = GetTokenPayload(x.DialogToken!);
-                var authorizedEntities = payload.GetProperty(DialogTokenClaimTypes.AuthorizedEntities).EnumerateArray()
+                payload.GetProperty(DialogTokenClaimTypes.AuthorizedEntities).EnumerateArray()
                     .Select(e => e.GetString())
-                    .ToList();
-                authorizedEntities.Should().HaveCount(5);
-                authorizedEntities.Take(4).Should().Equal(
-                    contextGuiAction.Id.ToString(),
-                    x.Attachments.Single().Id.ToString(),
-                    transmission.Id.ToString(),
-                    transmission.Attachments.Single().Id.ToString());
-                // Navigational actions expose no id on the wire, so theirs is only recognizable via "tokenRef"
-                Guid.TryParse(authorizedEntities[4], out _).Should().BeTrue();
+                    .Should().Equal(
+                        contextGuiAction.Id.ToString(),
+                        x.Attachments.Single().Id.ToString(),
+                        transmission.Id.ToString(),
+                        transmission.Attachments.Single().Id.ToString(),
+                        transmission.NavigationalActions.Single().Id.ToString());
                 payload.GetProperty(DialogTokenClaimTypes.DialogId).GetGuid().Should().Be(x.Id);
             });
 

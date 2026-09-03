@@ -219,7 +219,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.",
+            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.\nMaximum 50 characters.",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -1296,6 +1296,13 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
           "title": {
             "description": "The title of the navigational action.",
             "items": {
@@ -1445,6 +1452,13 @@
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
             "nullable": true,
             "type": "string"
           },
@@ -3327,6 +3341,11 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "isAuthorized": {
             "description": "Indicates whether the end user is authorized for this navigational action.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
             "nullable": true,
@@ -3366,6 +3385,11 @@
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "title": {
@@ -3662,6 +3686,11 @@
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "title": {
@@ -5053,6 +5082,13 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
           "title": {
             "description": "The title of the navigational action.",
             "items": {
@@ -5200,6 +5236,13 @@
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
             "nullable": true,
             "type": "string"
           },

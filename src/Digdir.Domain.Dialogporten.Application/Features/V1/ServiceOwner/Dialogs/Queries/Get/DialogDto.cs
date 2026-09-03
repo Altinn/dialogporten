@@ -864,6 +864,11 @@ public sealed class DialogTransmissionAttachmentUrlDto
 public sealed class DialogTransmissionNavigationalActionDto
 {
     /// <summary>
+    /// The unique identifier for the navigational action in UUIDv7 format.
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     public List<LocalizationDto> Title { get; set; } = [];

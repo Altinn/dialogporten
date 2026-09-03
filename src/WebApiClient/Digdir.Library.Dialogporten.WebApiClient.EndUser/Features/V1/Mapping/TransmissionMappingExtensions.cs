@@ -128,6 +128,7 @@ public static class TransmissionMappingExtensions
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this DialogTransmissionNavigationalActionDetails source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -136,6 +137,7 @@ public static class TransmissionMappingExtensions
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this DialogTransmissionSearchNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,

@@ -65,6 +65,7 @@ internal static class NavigationalActionMapExtensions
     {
         internal NavigationalActionDto ToDto() => new()
         {
+            Id = source.Id,
             Title = source.Title.ToDtoList() ?? [],
             Url = source.Url,
             ExpiresAt = source.ExpiresAt

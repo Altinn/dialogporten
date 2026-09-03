@@ -433,6 +433,9 @@ public sealed class AttachmentUrl
 
 public sealed class TransmissionNavigationalAction
 {
+    [GraphQLDescription("The unique identifier for the navigational action in UUIDv7 format.")]
+    public Guid Id { get; set; }
+
     [GraphQLDescription("The title of the navigational action.")]
     public List<Localization> Title { get; set; } = [];
 

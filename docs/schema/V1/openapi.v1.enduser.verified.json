@@ -1851,6 +1851,11 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "isAuthorized": {
             "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
             "type": "boolean",
@@ -1880,6 +1885,11 @@
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {
@@ -2126,6 +2136,11 @@
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {

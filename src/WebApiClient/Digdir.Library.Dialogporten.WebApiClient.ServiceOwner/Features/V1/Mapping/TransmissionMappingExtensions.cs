@@ -283,6 +283,7 @@ internal static class TransmissionMappingExtensions
 
     private static CreateDialogTransmissionNavigationalAction ToCreateDialogTransmissionNavigationalAction(this DialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -291,6 +292,7 @@ internal static class TransmissionMappingExtensions
 
     private static UpdateDialogTransmissionNavigationalAction ToUpdateDialogTransmissionNavigationalAction(this DialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -299,6 +301,7 @@ internal static class TransmissionMappingExtensions
 
     private static UpdateDialogTransmissionNavigationalAction ToUpdateDialogTransmissionNavigationalAction(this CreateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -307,6 +310,7 @@ internal static class TransmissionMappingExtensions
 
     private static CreateDialogTransmissionNavigationalAction ToCreateDialogTransmissionNavigationalAction(this UpdateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -315,6 +319,7 @@ internal static class TransmissionMappingExtensions
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this CreateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id ?? default,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
@@ -323,6 +328,7 @@ internal static class TransmissionMappingExtensions
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this UpdateDialogTransmissionNavigationalAction source) => new()
     {
+        Id = source.Id ?? default,
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,

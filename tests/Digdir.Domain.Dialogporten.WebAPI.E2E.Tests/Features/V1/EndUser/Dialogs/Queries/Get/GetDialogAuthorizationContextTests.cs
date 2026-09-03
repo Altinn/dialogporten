@@ -345,7 +345,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         }
 
         // The single dialog token lists all three authorized entities, in document order; the navigational
-        // action has no id on the wire, so its context's tokenRef is what identifies it.
+        // action's context carries a tokenRef, which stands in for its id.
         var dialogToken = await VerifyDialogToken(dialog.DialogToken);
         dialogToken.GetStringList(DialogTokenClaimTypes.AuthorizedEntities)
             .Should().Equal([transmissionId.ToString(), attachmentId.ToString(), "parity-nav-action-ref"]);
@@ -365,16 +365,12 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         // single request, so CreatedAt ties across siblings and Id decides — and UUIDv7s minted in the same
         // millisecond differ only in their random tail. Hand each collection pre-sorted ids so the snapshot
         // order matches the declaration order instead of being a coin flip.
-        //
-        // Exception: navigational actions. Their create contract has no Id property (the database mints one
-        // with gen_random_uuid()), so the two below cannot be pre-sorted and may swap order in the snapshot
-        // when CreatedAt ties. Non-snapshot tests elsewhere in this file are unaffected — they select
-        // navigational actions by name/property rather than by position.
         var attachmentIds = OrderedVersion7Ids(3);
         var guiActionIds = OrderedVersion7Ids(2);
         var apiActionIds = OrderedVersion7Ids(2);
         var transmissionIds = OrderedVersion7Ids(3);
         var childAttachmentIds = OrderedVersion7Ids(2);
+        var childNavigationalActionIds = OrderedVersion7Ids(2);
 
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
@@ -428,10 +424,12 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                         [
                             CreateNavigationalAction("granted-child-nav-action",
                                 ChildContext(E2EConstants.AvailableExternalResource,
-                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled)),
+                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled),
+                                childNavigationalActionIds[0]),
                             CreateNavigationalAction("denied-child-nav-action",
                                 ChildContext(E2EConstants.UnavailableExternalResource,
-                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Excluded))
+                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Excluded),
+                                childNavigationalActionIds[1])
                         ];
                     },
                     transmissionIds[0]),
@@ -572,9 +570,11 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
 
     private static V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction CreateNavigationalAction(
         string name,
-        V1CommonAuthorizationContexts_AuthorizationContext authorizationContext) =>
+        V1CommonAuthorizationContexts_AuthorizationContext authorizationContext,
+        Guid? id = null) =>
         new()
         {
+            Id = id ?? Guid.CreateVersion7(),
             Title = [DialogTestData.CreateLocalization(name)],
             Url = new Uri($"https://digdir.apps.tt02.altinn.no/some-nav-action/{name}"),
             AuthorizationContext = authorizationContext

@@ -711,6 +711,8 @@ type TransmissionContent {
 }
 
 type TransmissionNavigationalAction {
+  "The unique identifier for the navigational action in UUIDv7 format."
+  id: UUID!
   "The title of the navigational action."
   title: [Localization!]!
   "The fully qualified URL of the navigational action. Will be set to 'urn:dialogporten:unauthorized' if the user is not authorized to access the transmission, or 'urn:dialogporten:expired' if the action has expired."

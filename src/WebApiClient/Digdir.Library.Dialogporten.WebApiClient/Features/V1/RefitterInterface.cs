@@ -2211,6 +2211,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -3142,6 +3148,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -3908,6 +3920,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -4594,6 +4612,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -5164,6 +5188,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -5632,6 +5662,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreateTransmission_TransmissionNavigationalAction
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// The title of the navigational action.
@@ -6247,6 +6283,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// The title of the navigational action.

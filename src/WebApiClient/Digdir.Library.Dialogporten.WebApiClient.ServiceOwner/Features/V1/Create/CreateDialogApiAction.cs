@@ -1,3 +1,5 @@
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
@@ -15,7 +17,8 @@ public class CreateDialogApiAction
     /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
     /// </summary>
     [JsonPropertyName("action")]
-    public required string Action { get; set; }
+    [Obsolete("Use 'AuthorizationContext.Action' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service
@@ -24,7 +27,17 @@ public class CreateDialogApiAction
     /// <br/>Can also be used to refer to other service policies.
     /// </summary>
     [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use 'AuthorizationContext' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// <br/>Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+    /// <br/>"authorizationContext.action".
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+    public AuthorizationContextInput? AuthorizationContext { get; set; }
 
     /// <summary>
     /// The logical name of the operation the API action refers to.

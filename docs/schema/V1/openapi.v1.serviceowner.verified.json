@@ -77,6 +77,159 @@
           "Api"
         ]
       },
+      "AuthorizationContext": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "AuthorizationContextDetails": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "AuthorizationContextInput": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Optional; defaults to \u0022read\u0022 if not supplied.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that. References\nto an app (\u0022urn:altinn:app\u0022) or an organization (\u0022urn:altinn:org\u0022) are not allowed either; both are\nderived from the effective service resource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "AuthorizationContextUnauthorizedPresentation": {
+        "description": "",
+        "enum": [
+          "Disabled",
+          "Excluded"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Disabled",
+          "Excluded"
+        ]
+      },
       "BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
@@ -517,15 +670,30 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
             "example": "write",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -613,6 +781,16 @@
       "CreateDialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -763,14 +941,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -871,10 +1064,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -949,6 +1154,16 @@
       "CreateDialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1047,6 +1262,16 @@
       "CreateDialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -1081,6 +1306,16 @@
       "CreateTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1179,6 +1414,16 @@
       "CreateTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -1213,10 +1458,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -1761,15 +2018,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
+            "deprecated": true,
+            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nEmpty when the action was supplied with an authorizationContext, in which case the action is found in\nauthorizationContext.action.",
             "example": "write",
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -1858,6 +2129,16 @@
       "DialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1876,6 +2157,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this attachment.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2029,14 +2315,28 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "deprecated": true,
+            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.\n            \nEmpty when the action was supplied with an authorizationContext, in which case the action is found in\nauthorizationContext.action.",
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -2573,10 +2873,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses legacy\nauthorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -2657,6 +2969,16 @@
       "DialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2675,6 +2997,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this attachment.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2696,6 +3023,16 @@
       "DialogTransmissionAttachmentDetails": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextDetails"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2870,9 +3207,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextDetails"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The content of the transmission.",
@@ -2944,11 +3293,26 @@
       "DialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this navigational action.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -2970,6 +3334,16 @@
       "DialogTransmissionNavigationalActionDetails": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextDetails"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -2996,6 +3370,16 @@
       "DialogTransmissionSearchAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchAuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -3063,6 +3447,53 @@
         },
         "type": "object"
       },
+      "DialogTransmissionSearchAuthorizationContext": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
       "DialogTransmissionSearchContent": {
         "additionalProperties": false,
         "properties": {
@@ -3107,9 +3538,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchAuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The content of the transmission.",
@@ -3181,6 +3624,16 @@
       "DialogTransmissionSearchNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchAuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -3991,15 +4444,30 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
             "example": "write",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -4087,6 +4555,16 @@
       "UpdateDialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4238,14 +4716,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -4322,10 +4815,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -4400,6 +4905,16 @@
       "UpdateDialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4498,6 +5013,16 @@
       "UpdateDialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -4523,6 +5048,16 @@
       "UpdateTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4628,6 +5163,16 @@
       "UpdateTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
@@ -4662,10 +5207,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",

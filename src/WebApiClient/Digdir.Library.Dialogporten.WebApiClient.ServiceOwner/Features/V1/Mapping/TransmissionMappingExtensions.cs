@@ -2,6 +2,12 @@ using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
+// The legacy authorizationAttribute/action members carried by these maps are [Obsolete] in favour of
+// authorizationContext, but a mapping layer has to keep round-tripping them for as long as the server
+// still returns and accepts them.
+#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable DPEXP001 // authorizationContext/contextToken are experimental
+
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 
 /// <summary>
@@ -21,6 +27,7 @@ internal static class TransmissionMappingExtensions
         IdempotentKey = source.IdempotentKey,
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -37,6 +44,7 @@ internal static class TransmissionMappingExtensions
         IdempotentKey = source.IdempotentKey,
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -53,6 +61,7 @@ internal static class TransmissionMappingExtensions
         IdempotentKey = source.IdempotentKey,
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext,
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -69,6 +78,7 @@ internal static class TransmissionMappingExtensions
         IdempotentKey = source.IdempotentKey,
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext,
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -89,6 +99,7 @@ internal static class TransmissionMappingExtensions
         IdempotentKey = source.IdempotentKey,
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -105,6 +116,7 @@ internal static class TransmissionMappingExtensions
         IdempotentKey = source.IdempotentKey,
         CreatedAt = source.CreatedAt,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
@@ -168,6 +180,7 @@ internal static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToCreateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     private static UpdateDialogTransmissionAttachment ToUpdateDialogTransmissionAttachment(this DialogTransmissionAttachment source) => new()
@@ -177,6 +190,7 @@ internal static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToUpdateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     private static UpdateDialogTransmissionAttachment ToUpdateDialogTransmissionAttachment(this CreateDialogTransmissionAttachment source) => new()
@@ -186,6 +200,7 @@ internal static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToUpdateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     private static CreateDialogTransmissionAttachment ToCreateDialogTransmissionAttachment(this UpdateDialogTransmissionAttachment source) => new()
@@ -195,6 +210,7 @@ internal static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToCreateDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     private static DialogTransmissionAttachment ToDialogTransmissionAttachment(this CreateDialogTransmissionAttachment source) => new()
@@ -204,6 +220,7 @@ internal static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 
     private static DialogTransmissionAttachment ToDialogTransmissionAttachment(this UpdateDialogTransmissionAttachment source) => new()
@@ -213,6 +230,7 @@ internal static class TransmissionMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogTransmissionAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 
     // Transmission attachment URLs (no Id on the input models)
@@ -268,6 +286,7 @@ internal static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     private static UpdateDialogTransmissionNavigationalAction ToUpdateDialogTransmissionNavigationalAction(this DialogTransmissionNavigationalAction source) => new()
@@ -275,6 +294,7 @@ internal static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     private static UpdateDialogTransmissionNavigationalAction ToUpdateDialogTransmissionNavigationalAction(this CreateDialogTransmissionNavigationalAction source) => new()
@@ -282,6 +302,7 @@ internal static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     private static CreateDialogTransmissionNavigationalAction ToCreateDialogTransmissionNavigationalAction(this UpdateDialogTransmissionNavigationalAction source) => new()
@@ -289,6 +310,7 @@ internal static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this CreateDialogTransmissionNavigationalAction source) => new()
@@ -296,6 +318,7 @@ internal static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 
     private static DialogTransmissionNavigationalAction ToDialogTransmissionNavigationalAction(this UpdateDialogTransmissionNavigationalAction source) => new()
@@ -303,5 +326,9 @@ internal static class TransmissionMappingExtensions
         Title = source.Title,
         Url = source.Url,
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 }
+
+#pragma warning restore DPEXP001
+#pragma warning restore CS0618

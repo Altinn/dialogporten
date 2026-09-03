@@ -357,6 +357,11 @@ static void ConfigureOpenApiV1Document(
     string? audience = null
 )
 {
+    // Every document surfaces experimental-feature notices: a feature can reach the contract on either
+    // side of the API (authorizationContext on the service owner side, contextToken and the excluded*
+    // collections on the end user side), and the combined legacy document carries both.
+    var experimentalProcessor = new ExperimentalFeatureSchemaProcessor();
+
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;
     options.RemoveEmptyRequestSchema = true;
@@ -374,6 +379,7 @@ static void ConfigureOpenApiV1Document(
             document.RemoveRequiredPropertiesFromSchemas();
             postProcess.Invoke(document);
             document.ChangeEndUserContextPartyExample();
+            experimentalProcessor.AddPropertyNotices(document);
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;
@@ -385,6 +391,8 @@ static void ConfigureOpenApiV1Document(
         s.EnsureJsonPatchConsumes();
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
+
+        s.SchemaSettings.SchemaProcessors.Add(experimentalProcessor);
 
         if (audience is not null)
         {

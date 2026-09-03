@@ -58,6 +58,15 @@
           "Microsoft.TestPlatform.TestHost": "18.9.0"
         }
       },
+      "NSec.Cryptography": {
+        "type": "Direct",
+        "requested": "[25.4.0, )",
+        "resolved": "25.4.0",
+        "contentHash": "Z3wPpG0xefMLmhn9T+Ka/EzAmMQPT0THL/5E4lf9cXI/N9rbGH0G23ZFpRcPnD0ast2k7ieG6QSVNIjmfPCXBQ==",
+        "dependencies": {
+          "libsodium": "[1.0.20.1, 1.0.21)"
+        }
+      },
       "Polly": {
         "type": "Direct",
         "requested": "[8.7.0, )",
@@ -618,14 +627,6 @@
           "Microsoft.EntityFrameworkCore": "[10.0.4, 11.0.0)",
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.4, 11.0.0)",
           "Npgsql": "10.0.3"
-        }
-      },
-      "NSec.Cryptography": {
-        "type": "Transitive",
-        "resolved": "25.4.0",
-        "contentHash": "Z3wPpG0xefMLmhn9T+Ka/EzAmMQPT0THL/5E4lf9cXI/N9rbGH0G23ZFpRcPnD0ast2k7ieG6QSVNIjmfPCXBQ==",
-        "dependencies": {
-          "libsodium": "[1.0.20.1, 1.0.21)"
         }
       },
       "OneOf": {

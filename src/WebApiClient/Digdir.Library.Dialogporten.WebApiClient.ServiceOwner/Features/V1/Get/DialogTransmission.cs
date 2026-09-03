@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
@@ -31,7 +32,16 @@ public class DialogTransmission
     /// <br/>Can also be used to refer to other service policies.
     /// </summary>
     [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use 'AuthorizationContext' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this transmission.
+    /// <br/>Null when the transmission uses legacy authorization fields.
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+    public AuthorizationContext? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Flag indicating if the authenticated user supplied in the query is authorized for this transmission.

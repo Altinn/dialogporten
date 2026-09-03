@@ -2,6 +2,12 @@ using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
+// The legacy authorizationAttribute/action members carried by these maps are [Obsolete] in favour of
+// authorizationContext, but a mapping layer has to keep round-tripping them for as long as the server
+// still returns and accepts them.
+#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable DPEXP001 // authorizationContext/contextToken are experimental
+
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 
 /// <summary>
@@ -19,6 +25,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
         IsDeleteDialogAction = source.IsDeleteDialogAction,
         HttpMethod = source.HttpMethod,
         Priority = source.Priority,
@@ -32,6 +39,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
         IsDeleteDialogAction = source.IsDeleteDialogAction,
         HttpMethod = source.HttpMethod,
         Priority = source.Priority,
@@ -45,6 +53,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext,
         IsDeleteDialogAction = source.IsDeleteDialogAction,
         HttpMethod = source.HttpMethod,
         Priority = source.Priority,
@@ -58,6 +67,7 @@ internal static class ActionMappingExtensions
         Action = source.Action,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext,
         IsDeleteDialogAction = source.IsDeleteDialogAction,
         HttpMethod = source.HttpMethod,
         Priority = source.Priority,
@@ -71,9 +81,11 @@ internal static class ActionMappingExtensions
     internal static DialogGuiAction ToDialogGuiAction(this CreateDialogGuiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         IsDeleteDialogAction = source.IsDeleteDialogAction,
         HttpMethod = source.HttpMethod ?? default,
         Priority = source.Priority,
@@ -84,9 +96,11 @@ internal static class ActionMappingExtensions
     internal static DialogGuiAction ToDialogGuiAction(this UpdateDialogGuiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         Url = source.Url,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         IsDeleteDialogAction = source.IsDeleteDialogAction,
         HttpMethod = source.HttpMethod ?? default,
         Priority = source.Priority,
@@ -101,6 +115,7 @@ internal static class ActionMappingExtensions
         Id = source.Id,
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
         Name = source.Name,
         Endpoints = source.Endpoints?.Select(x => x.ToCreateDialogApiActionEndpoint()).ToList() ?? [],
     };
@@ -110,6 +125,7 @@ internal static class ActionMappingExtensions
         Id = source.Id,
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
         Name = source.Name,
         Endpoints = source.Endpoints?.Select(x => x.ToUpdateDialogApiActionEndpoint()).ToList() ?? [],
     };
@@ -119,6 +135,7 @@ internal static class ActionMappingExtensions
         Id = source.Id,
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext,
         Name = source.Name,
         Endpoints = source.Endpoints?.Select(x => x.ToUpdateDialogApiActionEndpoint()).ToList() ?? [],
     };
@@ -128,6 +145,7 @@ internal static class ActionMappingExtensions
         Id = source.Id,
         Action = source.Action,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext,
         Name = source.Name,
         Endpoints = source.Endpoints?.Select(x => x.ToCreateDialogApiActionEndpoint()).ToList() ?? [],
     };
@@ -135,8 +153,10 @@ internal static class ActionMappingExtensions
     internal static DialogApiAction ToDialogApiAction(this CreateDialogApiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         Name = source.Name,
         Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList() ?? [],
     };
@@ -144,8 +164,10 @@ internal static class ActionMappingExtensions
     internal static DialogApiAction ToDialogApiAction(this UpdateDialogApiAction source) => new()
     {
         Id = source.Id ?? default,
-        Action = source.Action,
+        // The server returns the empty-string sentinel, not null, when the action came from a context.
+        Action = source.Action ?? string.Empty,
         AuthorizationAttribute = source.AuthorizationAttribute,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         Name = source.Name,
         Endpoints = source.Endpoints?.Select(x => x.ToDialogApiActionEndpoint()).ToList() ?? [],
     };
@@ -230,3 +252,6 @@ internal static class ActionMappingExtensions
         SunsetAt = source.SunsetAt,
     };
 }
+
+#pragma warning restore DPEXP001
+#pragma warning restore CS0618

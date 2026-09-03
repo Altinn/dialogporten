@@ -1,3 +1,5 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
@@ -14,7 +16,7 @@ internal static class TransmissionMapExtensions
         {
             Id = source.Id,
             CreatedAt = source.CreatedAt,
-            AuthorizationAttribute = source.AuthorizationAttribute,
+            AuthorizationAttribute = source.EffectiveLegacyAuthorizationAttribute,
             ExtendedType = source.ExtendedType,
             ExternalReference = source.ExternalReference,
             RelatedTransmissionId = source.RelatedTransmissionId,

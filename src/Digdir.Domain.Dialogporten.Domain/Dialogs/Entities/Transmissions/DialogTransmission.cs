@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
@@ -16,7 +17,8 @@ public sealed class DialogTransmission :
     IIdentifiableEntity,
     ICreatableEntity,
     IAggregateCreatedHandler,
-    IEventPublisher
+    IEventPublisher,
+    IAuthorizationContextCarrier
 {
     public Guid Id { get; set; }
     public string? IdempotentKey { get; set; }
@@ -37,6 +39,11 @@ public sealed class DialogTransmission :
 
     [AggregateChild]
     public DialogTransmissionSenderActor Sender { get; set; } = null!;
+
+    [AggregateChild]
+    public DialogTransmissionAuthorizationContext? AuthorizationContext { get; set; }
+
+    AuthorizationContext? IAuthorizationContextCarrier.AuthorizationContext => AuthorizationContext;
 
     public List<DialogTransmission> RelatedTransmissions { get; set; } = [];
 

@@ -367,6 +367,7 @@ public static class IFlowStepExtensions
                     }).ToList(),
                     NavigationalActions = transmission.NavigationalActions.Select(x => new TransmissionNavigationalActionDto
                     {
+                        Id = x.Id,
                         Title = x.Title,
                         Url = x.Url,
                         ExpiresAt = x.ExpiresAt,

@@ -515,7 +515,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.\nMaximum 50 characters.",
+            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.\nThe same value may be shared by multiple entities in one dialog to form an OR-group: authorization for any\nentity in the group adds the shared value to \u0022e\u0022, so a recipient validating that value cannot distinguish\nwhich individual entity was authorized. Only group entities that intentionally share access semantics.\nToken references are scoped to a dialog; recipients must also validate the token\u0027s dialog id (\u0022i\u0022).\nMaximum 50 characters.",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -1058,7 +1058,7 @@
             "type": "string"
           },
           "dialogToken": {
-            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nThe token\u0027s authorized entities (\u0022e\u0022) claim lists, for every entity carrying an authorization context that\nthe end user is authorized for, the entity\u0027s id or the \u0022tokenRef\u0022 the service owner supplied on the context.",
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nThe token\u0027s authorized entities (\u0022e\u0022) claim lists, for every entity carrying an authorization context that\nthe end user is authorized for, the entity\u0027s id or the \u0022tokenRef\u0022 the service owner supplied on the context.\nA tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the\nshared value. Recipients must validate the dialog id (\u0022i\u0022) together with an entity reference.",
             "nullable": true,
             "type": "string"
           },
@@ -5431,7 +5431,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead.",
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -6634,7 +6634,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead.",
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -7416,7 +7416,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead.",
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -7826,7 +7826,7 @@
   "paths": {
     "/api/v1/.well-known/jwks.json": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues a single token type, the dialog token, signed with these keys and carrying the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Besides the action grants in the \u0022a\u0022 claim, the token\u0027s \u0022e\u0022 claim lists the entities carrying an authorization context that the end user is authorized for, by entity id or by the \u0022tokenRef\u0022 the service owner supplied on the context; a receiving service handling a request scoped to such an entity must check that the entity is listed there.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues a single token type, the dialog token, signed with these keys and carrying the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Besides the action grants in the \u0022a\u0022 claim, the token\u0027s \u0022e\u0022 claim lists the entities carrying an authorization context that the end user is authorized for, by entity id or by the \u0022tokenRef\u0022 the service owner supplied on the context; a receiving service handling a request scoped to such an entity must check both that the entity is listed there and that \u0022i\u0022 identifies the dialog being accessed. A tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the shared value.",
         "operationId": "V1WellKnownJwksGet_Jwks",
         "responses": {
           "200": {
@@ -7867,7 +7867,7 @@
     },
     "/api/v1/.well-known/oauth-authorization-server": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues a single token type, the dialog token, signed with the published keys and carrying the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Besides the action grants in the \u0022a\u0022 claim, the token\u0027s \u0022e\u0022 claim lists the entities carrying an authorization context that the end user is authorized for, by entity id or by the \u0022tokenRef\u0022 the service owner supplied on the context; a receiving service handling a request scoped to such an entity must check that the entity is listed there.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues a single token type, the dialog token, signed with the published keys and carrying the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Besides the action grants in the \u0022a\u0022 claim, the token\u0027s \u0022e\u0022 claim lists the entities carrying an authorization context that the end user is authorized for, by entity id or by the \u0022tokenRef\u0022 the service owner supplied on the context; a receiving service handling a request scoped to such an entity must check both that the entity is listed there and that \u0022i\u0022 identifies the dialog being accessed. A tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the shared value.",
         "operationId": "V1WellKnownOauthAuthorizationServerGet_OauthAuthorizationServer",
         "responses": {
           "200": {

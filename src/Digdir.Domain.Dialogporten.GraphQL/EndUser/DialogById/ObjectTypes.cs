@@ -97,7 +97,7 @@ public sealed class Dialog
     [GraphQLDescription("The date and time when the dialog content was last updated. Example: 2022-12-31T23:59:59Z")]
     public DateTimeOffset ContentUpdatedAt { get; set; }
 
-    [GraphQLDescription("The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds. The token's authorized entities ('e') claim lists, for every entity carrying an authorization context that the end user is authorized for, the entity's id or the 'tokenRef' the service owner supplied on the context.")]
+    [GraphQLDescription("The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions, transmissions or attachments. It should also be used for front-channel embeds. The token's authorized entities ('e') claim lists, for every entity carrying an authorization context that the end user is authorized for, the entity's id or the 'tokenRef' the service owner supplied on the context. A tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the shared value. Recipients must validate the dialog id ('i') together with an entity reference.")]
     public string? DialogToken { get; set; }
 
     [GraphQLDescription("The aggregated status of the dialog.")]

@@ -14,6 +14,7 @@ namespace Digdir.Library.Dialogporten.WebApiClient.Unit.Tests;
 public class DialogTokenValidatorTests
 {
     private static readonly DateTimeOffset ValidTimeStamp = DateTimeOffset.Parse("2025-02-14T09:00:00Z", CultureInfo.InvariantCulture);
+    private static readonly Guid ValidDialogId = new("0194fe82-9280-77a5-a7cd-5ff0e6a6fa07");
     private const string DialogToken =
         "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCIsImtpZCI6ImRwLXN0YWdpbmctMjQwMzIyLW81eW1uIn0.eyJqdGkiOiIzOGNmZGNiOS0zODhiLTQ3YjgtYTFiZi05ZjE1YjI4MTk4OTQiLCJjIjoidXJuOmFsdGlubjpwZXJzb246aWRlbnRpZmllci1ubzoxNDg4NjQ5ODIyNiIsImwiOjMsInAiOiJ1cm46YWx0aW5uOnBlcnNvbjppZGVudGlmaWVyLW5vOjE0ODg2NDk4MjI2IiwicyI6InVybjphbHRpbm46cmVzb3VyY2U6ZGFnbC1jb3JyZXNwb25kZW5jZSIsImkiOiIwMTk0ZmU4Mi05MjgwLTc3YTUtYTdjZC01ZmYwZTZhNmZhMDciLCJhIjoicmVhZCIsImlzcyI6Imh0dHBzOi8vcGxhdGZvcm0udHQwMi5hbHRpbm4ubm8vZGlhbG9ncG9ydGVuL2FwaS92MSIsImlhdCI6MTczOTUyMzM2NywibmJmIjoxNzM5NTIzMzY3LCJleHAiOjE3Mzk1MjM5Njd9.O_f-RJhRPT7B76S7aOGw6jfxKDki3uJQLLC8nVlcNVJWFIOQUsy6gU4bG1ZdqoMBZPvb2K2X4I5fGpHW9dQMAA";
     private static readonly string[] AuthorizedEntities = ["01a06678-d287-7308-a200-056009739c3f", "my-own-reference"];
@@ -312,13 +313,31 @@ public class DialogTokenValidatorTests
         var sut = GetSut(ValidTimeStamp, keyPair);
 
         // Act
-        var byEntityId = sut.Validate(token, requiredEntityReference: "01a06678-d287-7308-a200-056009739c3f");
-        var byTokenRef = sut.Validate(token, requiredEntityReference: "my-own-reference");
+        var byEntityId = sut.Validate(token, dialogId: ValidDialogId,
+            requiredEntityReference: "01a06678-d287-7308-a200-056009739c3f");
+        var byTokenRef = sut.Validate(token, dialogId: ValidDialogId,
+            requiredEntityReference: "my-own-reference");
 
         // Assert
         Assert.True(byEntityId.IsValid);
         Assert.True(byTokenRef.IsValid);
         Assert.Equal(AuthorizedEntities, byEntityId.ClaimsPrincipal.GetAuthorizedEntityReferences());
+    }
+
+    [Fact]
+    public void Should_Return_Error_Given_Required_Entity_Reference_Without_Dialog_Id()
+    {
+        // Arrange
+        var (token, keyPair) = CreateSignedToken(claims => claims["e"] = AuthorizedEntities);
+        var sut = GetSut(ValidTimeStamp, keyPair);
+
+        // Act
+        var result = sut.Validate(token, requiredEntityReference: "my-own-reference");
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("Dialog ID is required when validating an entity reference", result.Errors["token"]);
+        Assert.DoesNotContain("Invalid entity reference", result.Errors["token"]);
     }
 
     [Fact]
@@ -329,7 +348,8 @@ public class DialogTokenValidatorTests
         var sut = GetSut(ValidTimeStamp, keyPair);
 
         // Act: the comparison is ordinal - a reference differing only in case is a different reference
-        var result = sut.Validate(token, requiredEntityReference: "Some-Other-Reference");
+        var result = sut.Validate(token, dialogId: ValidDialogId,
+            requiredEntityReference: "Some-Other-Reference");
 
         // Assert
         Assert.False(result.IsValid);
@@ -346,7 +366,8 @@ public class DialogTokenValidatorTests
         var sut = GetSut(ValidTimeStamp, ValidPublicKeyPairs);
 
         // Act
-        var result = sut.Validate(DialogToken, requiredEntityReference: "01a06678-d287-7308-a200-056009739c3f");
+        var result = sut.Validate(DialogToken, dialogId: ValidDialogId,
+            requiredEntityReference: "01a06678-d287-7308-a200-056009739c3f");
 
         // Assert
         Assert.False(result.IsValid);

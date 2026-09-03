@@ -215,7 +215,9 @@ public static class DialogTokenClaimTypes
     /// Flat array of entity references, one per authorization context the user is authorized for: the id of the
     /// entity carrying the context (api action, gui action, attachment, transmission, transmission attachment or
     /// navigational action), or the service owner supplied token reference when the context has one. Omitted
-    /// when there are none. A receiver checks that the entity a request targets is listed here.
+    /// when there are none. Shared token references represent OR-groups: authorization for any group member adds
+    /// the shared value. A receiver checks both that the target reference is listed here and that "i" identifies
+    /// the dialog being accessed.
     /// </summary>
     public const string AuthorizedEntities = "e";
 }

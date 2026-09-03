@@ -64,7 +64,11 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
             validationResult.AddError(tokenPropertyName, "Invalid actions");
         }
 
-        if (requiredEntityReference is not null && !validationResult.ClaimsPrincipal.VerifyEntityReference(requiredEntityReference))
+        if (requiredEntityReference is not null && !dialogId.HasValue)
+        {
+            validationResult.AddError(tokenPropertyName, "Dialog ID is required when validating an entity reference");
+        }
+        else if (requiredEntityReference is not null && !validationResult.ClaimsPrincipal.VerifyEntityReference(requiredEntityReference))
         {
             validationResult.AddError(tokenPropertyName, "Invalid entity reference");
         }

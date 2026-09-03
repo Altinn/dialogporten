@@ -402,6 +402,37 @@ public class GetDialogAuthorizationContextTests(DialogApplication application) :
             });
 
     [Fact]
+    public Task Shared_TokenRef_Should_Represent_An_Or_Group() =>
+        FlowBuilder.For(Application, ConfigureMainReadAndContextAuthorization)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddAttachment(attachment =>
+                {
+                    attachment.AuthorizationContext = ChildContextDto(
+                        AuthorizationContextUnauthorizedPresentation.Values.Disabled);
+                    attachment.AuthorizationContext.TokenRef = "shared-reference";
+                });
+                x.AddAttachment(attachment =>
+                {
+                    attachment.AuthorizationContext = ContextDto(
+                        AuthorizationContextUnauthorizedPresentation.Values.Disabled,
+                        action: "sign");
+                    attachment.AuthorizationContext.TokenRef = "shared-reference";
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Attachments.Should().ContainSingle(attachment => attachment.IsAuthorized);
+                x.Attachments.Should().ContainSingle(attachment => !attachment.IsAuthorized);
+
+                GetTokenPayload(x.DialogToken!).GetProperty(DialogTokenClaimTypes.AuthorizedEntities)
+                    .EnumerateArray()
+                    .Select(e => e.GetString())
+                    .Should().Equal("shared-reference");
+            });
+
+    [Fact]
     public Task Dialog_Token_Should_Not_List_Unauthorized_Context_Entities() =>
         FlowBuilder.For(Application, ConfigureMainReadAndContextAuthorization)
             .CreateSimpleDialog((x, _) =>

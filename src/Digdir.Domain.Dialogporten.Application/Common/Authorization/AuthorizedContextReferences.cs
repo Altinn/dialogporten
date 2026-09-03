@@ -7,7 +7,9 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Authorization;
 /// Collects the entity references for the dialog token's authorized entities claim
 /// (<see cref="DialogTokenClaimTypes.AuthorizedEntities"/>): for every authorization-context-carrying entity the
 /// user is authorized for, the service owner supplied token reference when the context has one, otherwise the
-/// carrying entity's id. Entities without a context are governed by the action claim and never appear here.
+/// carrying entity's id. Entities sharing a token reference form an OR-group because an authorized member adds
+/// the shared value and duplicate values collapse in the token. Entities without a context are governed by the
+/// action claim and never appear here.
 /// </summary>
 public static class AuthorizedContextReferences
 {

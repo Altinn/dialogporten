@@ -40,7 +40,9 @@ public class AuthorizationContextDetails
 
     /// <summary>
     /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
-    /// <br/>Null when the carrying entity's id is used instead.
+    /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+    /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+    /// <br/>also validate the token's dialog id ("i").
     /// </summary>
     [JsonPropertyName("tokenRef")]
     public string? TokenRef { get; set; }

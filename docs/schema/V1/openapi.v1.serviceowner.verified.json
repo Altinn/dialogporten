@@ -113,7 +113,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead.",
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -166,7 +166,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead.",
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -219,7 +219,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.\nMaximum 50 characters.",
+            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.\nThe same value may be shared by multiple entities in one dialog to form an OR-group: authorization for any\nentity in the group adds the shared value to \u0022e\u0022, so a recipient validating that value cannot distinguish\nwhich individual entity was authorized. Only group entities that intentionally share access semantics.\nToken references are scoped to a dialog; recipients must also validate the token\u0027s dialog id (\u0022i\u0022).\nMaximum 50 characters.",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"
@@ -3525,7 +3525,7 @@
             "type": "string"
           },
           "tokenRef": {
-            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead.",
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
             "example": "my-own-reference",
             "nullable": true,
             "type": "string"

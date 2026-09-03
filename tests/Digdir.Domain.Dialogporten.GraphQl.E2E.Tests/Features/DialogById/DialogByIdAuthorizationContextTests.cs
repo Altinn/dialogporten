@@ -21,6 +21,8 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
     public async Task Should_Expose_IsAuthorized_On_Every_Context_Carrying_Surface()
     {
         // Arrange: one granted and one denied entity on each of the six surfaces.
+        var grantedNavigationalActionId = Guid.CreateVersion7();
+        var deniedNavigationalActionId = Guid.CreateVersion7();
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
             dialog.Attachments =
@@ -41,8 +43,10 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
             ];
             dialog.Transmissions =
             [
-                CreateTransmission("granted", E2EConstants.AvailableExternalResource),
-                CreateTransmission("denied", E2EConstants.UnavailableExternalResource)
+                CreateTransmission("granted", E2EConstants.AvailableExternalResource,
+                    grantedNavigationalActionId),
+                CreateTransmission("denied", E2EConstants.UnavailableExternalResource,
+                    deniedNavigationalActionId)
             ];
         });
 
@@ -82,7 +86,9 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
         var grantedTransmission = dialog.Transmissions.Single(t => t.ExternalReference == "granted");
         grantedTransmission.IsAuthorized.Should().BeTrue();
         grantedTransmission.Attachments.Single().IsAuthorized.Should().BeTrue();
-        grantedTransmission.NavigationalActions.Single().IsAuthorized.Should().BeTrue();
+        var grantedNavigationalAction = grantedTransmission.NavigationalActions.Single();
+        grantedNavigationalAction.Id.Should().Be(grantedNavigationalActionId);
+        grantedNavigationalAction.IsAuthorized.Should().BeTrue();
 
         var deniedTransmission = dialog.Transmissions.Single(t => t.ExternalReference == "denied");
         deniedTransmission.IsAuthorized.Should().BeFalse();
@@ -90,7 +96,9 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
         // Parent-first narrowing holds on the GraphQL surface too: the children's own contexts refer the
         // available resource, yet they are denied because their parent is denied.
         deniedTransmission.Attachments.Single().IsAuthorized.Should().BeFalse();
-        deniedTransmission.NavigationalActions.Single().IsAuthorized.Should().BeFalse();
+        var deniedNavigationalAction = deniedTransmission.NavigationalActions.Single();
+        deniedNavigationalAction.Id.Should().Be(deniedNavigationalActionId);
+        deniedNavigationalAction.IsAuthorized.Should().BeFalse();
     }
 
     [E2EFact]
@@ -156,7 +164,10 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
             AuthorizationContext = Context(serviceResource)
         };
 
-    private static V1ServiceOwnerDialogsCommandsCreate_Transmission CreateTransmission(string externalReference, string serviceResource) =>
+    private static V1ServiceOwnerDialogsCommandsCreate_Transmission CreateTransmission(
+        string externalReference,
+        string serviceResource,
+        Guid navigationalActionId) =>
         new()
         {
             Id = Guid.CreateVersion7(),
@@ -191,6 +202,7 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
             [
                 new V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction
                 {
+                    Id = navigationalActionId,
                     Title = [DialogTestData.CreateLocalization($"{externalReference}-nav-action")],
                     Url = new Uri($"https://digdir.apps.tt02.altinn.no/nav/{externalReference}"),
                     AuthorizationContext = ChildContext(E2EConstants.AvailableExternalResource)

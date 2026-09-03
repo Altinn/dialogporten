@@ -13,7 +13,8 @@ public static class DialogTokenClaimsPrincipalExtensions
     /// <summary>
     /// Whether the token's authorized entities ("e") claim contains the given entity reference: the id of an
     /// entity carrying an authorization context, or the "tokenRef" the service owner supplied on that context.
-    /// The comparison is ordinal.
+    /// Token references are scoped to a dialog, so validate the token's dialog id as well. The comparison is
+    /// ordinal.
     /// </summary>
     public static bool VerifyEntityReference(this ClaimsPrincipal claimsPrincipal, string entityReference)
     {
@@ -26,6 +27,7 @@ public static class DialogTokenClaimsPrincipalExtensions
     /// The entity references listed in the token's authorized entities ("e") claim: for every authorization
     /// context the end user was authorized for, the id of the carrying entity or the service owner supplied
     /// "tokenRef". Empty when the claim is absent, i.e. the user is authorized for no context-carrying entity.
+    /// A shared tokenRef represents an OR-group: authorization for any group member adds the shared value.
     /// </summary>
     public static IReadOnlyList<string> GetAuthorizedEntityReferences(this ClaimsPrincipal claimsPrincipal)
     {

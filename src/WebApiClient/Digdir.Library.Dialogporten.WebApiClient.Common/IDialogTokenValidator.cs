@@ -12,7 +12,11 @@ public interface IDialogTokenValidator
     /// Validates a dialog token.
     /// </summary>
     /// <param name="token">The token to validate.</param>
-    /// <param name="dialogId">The optional dialog ID associated with the token. If the token does not represent this ID, the validation will fail.</param>
+    /// <param name="dialogId">
+    /// The optional dialog ID associated with the token. If the token does not represent this ID, the validation
+    /// fails. Required when <paramref name="requiredEntityReference"/> is supplied, because entity references are
+    /// scoped to a dialog.
+    /// </param>
     /// <param name="requiredActions">The optional list of required actions for the token.</param>
     /// <param name="options">The optional validation parameters.</param>
     /// <param name="requiredEntityReference">
@@ -20,7 +24,7 @@ public interface IDialogTokenValidator
     /// context (a transmission, attachment, action or navigational action), or the "tokenRef" the service owner
     /// supplied on that context. If given, the validation fails unless the token's authorized entities ("e") claim
     /// contains it. Use this for requests scoped to an entity with an authorization context, where the actions
-    /// claim does not express the grant.
+    /// claim does not express the grant. <paramref name="dialogId"/> must also be supplied.
     /// </param>
     /// <returns>The result of the validation.</returns>
     IValidationResult Validate(ReadOnlySpan<char> token,

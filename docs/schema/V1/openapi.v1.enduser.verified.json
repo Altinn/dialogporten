@@ -335,7 +335,7 @@
             "type": "string"
           },
           "dialogToken": {
-            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nThe token\u0027s authorized entities (\u0022e\u0022) claim lists, for every entity carrying an authorization context that\nthe end user is authorized for, the entity\u0027s id or the \u0022tokenRef\u0022 the service owner supplied on the context.",
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nThe token\u0027s authorized entities (\u0022e\u0022) claim lists, for every entity carrying an authorization context that\nthe end user is authorized for, the entity\u0027s id or the \u0022tokenRef\u0022 the service owner supplied on the context.\nA tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the\nshared value. Recipients must validate the dialog id (\u0022i\u0022) together with an entity reference.",
             "nullable": true,
             "type": "string"
           },

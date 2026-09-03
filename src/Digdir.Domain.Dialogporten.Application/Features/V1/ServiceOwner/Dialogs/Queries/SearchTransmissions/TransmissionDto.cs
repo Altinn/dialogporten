@@ -239,7 +239,9 @@ public sealed class AuthorizationContextDto
 
     /// <summary>
     /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
-    /// Null when the carrying entity's id is used instead.
+    /// Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog forms
+    /// an OR-group: authorization for any group member adds the shared value to "e". Recipients must also validate
+    /// the token's dialog id ("i").
     /// </summary>
     /// <example>my-own-reference</example>
     public string? TokenRef { get; set; }

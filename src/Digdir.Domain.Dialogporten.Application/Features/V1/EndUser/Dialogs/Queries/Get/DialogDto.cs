@@ -166,6 +166,8 @@ public sealed class DialogDto
     ///
     /// The token's authorized entities ("e") claim lists, for every entity carrying an authorization context that
     /// the end user is authorized for, the entity's id or the "tokenRef" the service owner supplied on the context.
+    /// A tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the
+    /// shared value. Recipients must validate the dialog id ("i") together with an entity reference.
     /// </summary>
     public string? DialogToken { get; set; }
 

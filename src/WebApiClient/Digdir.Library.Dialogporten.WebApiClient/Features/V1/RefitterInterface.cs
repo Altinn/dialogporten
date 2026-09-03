@@ -2284,7 +2284,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
-        /// <br/>Null when the carrying entity's id is used instead.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
         /// </summary>
         [JsonPropertyName("tokenRef")]
         public string TokenRef { get; set; }
@@ -3221,7 +3223,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
-        /// <br/>Null when the carrying entity's id is used instead.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
         /// </summary>
         [JsonPropertyName("tokenRef")]
         public string TokenRef { get; set; }
@@ -4001,7 +4005,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
-        /// <br/>Null when the carrying entity's id is used instead.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
         /// </summary>
         [JsonPropertyName("tokenRef")]
         public string TokenRef { get; set; }
@@ -4691,6 +4697,9 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// An optional reference identifying this context in the dialog token. When the end user is authorized for
         /// <br/>this context, the dialog token's "e" claim lists this value instead of the id of the entity carrying the
         /// <br/>context, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.
+        /// <br/>Sharing a value between entities in one dialog forms an OR-group: authorization for any group member
+        /// <br/>adds the shared value to "e", so only group entities that intentionally share access semantics.
+        /// <br/>Recipients must validate the token's dialog id ("i") together with the reference.
         /// <br/>Maximum 50 characters.
         /// </summary>
         [JsonPropertyName("tokenRef")]

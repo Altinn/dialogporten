@@ -43,7 +43,8 @@ public abstract class AuthorizationContext : IIdentifiableEntity, ICreatableEnti
 
     /// <summary>
     /// An optional service owner supplied reference that identifies this context in the dialog token's
-    /// authorized entities ("e") claim in place of the carrying entity's id.
+    /// authorized entities ("e") claim in place of the carrying entity's id. Sharing a value between entities
+    /// forms an OR-group: authorization for any member adds the shared value to the claim.
     /// </summary>
     public string? TokenReference { get; set; }
 

@@ -198,6 +198,8 @@ var result = validator.Validate(dialogToken, dialogId: dialogId, requiredEntityR
 var authorizedEntities = result.ClaimsPrincipal?.GetAuthorizedEntityReferences();
 ```
 
+Always supply `dialogId` when validating an entity reference; token references are scoped to one dialog. A service owner may intentionally assign the same `tokenRef` to several entities in a dialog. This creates an OR-group: authorization for any member adds the shared reference to `e`, and a recipient validating that reference cannot distinguish which member was authorized. Only group entities that deliberately share access semantics.
+
 ## Settings reference
 
 ```json

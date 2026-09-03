@@ -190,6 +190,7 @@ query GetDialogById($dialogId: UUID!) {
           }
         }
         navigationalActions {
+          id
           expiresAt
           url
           isAuthorized

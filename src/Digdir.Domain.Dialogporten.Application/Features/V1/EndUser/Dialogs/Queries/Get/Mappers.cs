@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -164,7 +165,7 @@ internal static class DialogApiActionMapExtensions
         internal DialogApiActionDto ToDto() => new()
         {
             Id = source.Id,
-            Action = source.Action,
+            Action = source.EffectiveLegacyAction ?? source.AuthorizationContext?.Action ?? Constants.ReadAction,
             AuthorizationAttribute = source.AuthorizationAttribute,
             Name = source.Name,
             Endpoints = source.Endpoints.Select(e => e.ToDto()).ToList()
@@ -198,7 +199,7 @@ internal static class DialogGuiActionMapExtensions
         internal DialogGuiActionDto ToDto() => new()
         {
             Id = source.Id,
-            Action = source.Action,
+            Action = source.EffectiveLegacyAction ?? source.AuthorizationContext?.Action ?? Constants.ReadAction,
             Url = source.Url,
             AuthorizationAttribute = source.AuthorizationAttribute,
             IsDeleteDialogAction = source.IsDeleteDialogAction,
@@ -218,7 +219,7 @@ internal static class DialogTransmissionMapExtensions
         {
             Id = source.Id,
             CreatedAt = source.CreatedAt,
-            AuthorizationAttribute = source.AuthorizationAttribute,
+            AuthorizationAttribute = source.EffectiveLegacyAuthorizationAttribute,
             ExtendedType = source.ExtendedType,
             ExternalReference = source.ExternalReference,
             RelatedTransmissionId = source.RelatedTransmissionId,

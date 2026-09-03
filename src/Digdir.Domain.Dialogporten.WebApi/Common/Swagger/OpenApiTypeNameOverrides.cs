@@ -35,6 +35,7 @@ internal static class OpenApiTypeNameOverrides
         ["V1CommonServiceResourceMetadata_ServiceResourceMetadataServiceResource"] = "ServiceResource",
         ["V1EndUserCommon_AcceptedLanguage"] = "AcceptedLanguage",
         ["V1EndUserCommon_AcceptedLanguages"] = "AcceptedLanguages",
+        ["V1EndUserCommon_ExcludedElement"] = "ExcludedElement",
         ["V1MetadataLimitsQueriesGet_EndUserSearchLimits"] = "EndUserSearchLimits",
         ["V1MetadataLimitsQueriesGet_Limits"] = "Limits",
         ["V1MetadataLimitsQueriesGet_ServiceOwnerSearchLimits"] = "ServiceOwnerSearchLimits",

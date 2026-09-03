@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -22,6 +23,7 @@ public sealed class TransmissionDto
     /// <summary>
     /// The authorization attribute associated with the transmission.
     /// </summary>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -29,6 +31,14 @@ public sealed class TransmissionDto
     /// the attachments will not be available.
     /// </summary>
     public bool IsAuthorized { get; set; }
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
+    /// its authorization context. Only present when the transmission has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
+    /// including front-channel embeds.
+    /// </summary>
+    public string? ContextToken { get; set; }
 
     /// <summary>
     /// The extended type URI for the transmission.
@@ -71,9 +81,33 @@ public sealed class TransmissionDto
     public List<AttachmentDto> Attachments { get; set; } = [];
 
     /// <summary>
+    /// Attachments on this transmission that exist but are withheld from the authenticated user, listed by
+    /// id and creation time only. An attachment is excluded rather than shown with masked URLs when its
+    /// authorization context sets unauthorizedPresentation to "excluded".
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog itself, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedAttachments { get; set; }
+
+    /// <summary>
     /// The navigational actions associated with the transmission.
     /// </summary>
     public List<NavigationalActionDto> NavigationalActions { get; set; } = [];
+
+    /// <summary>
+    /// Navigational actions on this transmission that exist but are withheld from the authenticated user,
+    /// listed by id and creation time only. A navigational action is excluded rather than returned with
+    /// isAuthorized=false when its authorization context sets unauthorizedPresentation to "excluded".
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog itself, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedNavigationalActions { get; set; }
 }
 
 public sealed class ContentDto : ITransmissionContentDto
@@ -121,6 +155,19 @@ public sealed class AttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
+    /// authorization context. Only present when the attachment has an authorization context and the user is
+    /// authorized. Should be used instead of the dialog token against this attachment's URLs.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }
 
 public sealed class AttachmentUrlDto
@@ -177,4 +224,17 @@ public sealed class NavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    public bool IsAuthorized { get; set; } = true;
+
+    /// <summary>
+    /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
+    /// by its authorization context. Only present when the navigational action has an authorization context and the
+    /// user is authorized. Should be used instead of the dialog token against this action's URL.
+    /// </summary>
+    public string? ContextToken { get; set; }
 }

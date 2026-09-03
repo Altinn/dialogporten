@@ -33,7 +33,15 @@ public class UpdateDialogTransmission
     /// <br/>Can also be used to refer to other service policies.
     /// </summary>
     [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use 'AuthorizationContext' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this transmission.
+    /// <br/>Cannot be combined with "authorizationAttribute".
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    public AuthorizationContextInput? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Arbitrary URI/URN describing a service-specific transmission type.

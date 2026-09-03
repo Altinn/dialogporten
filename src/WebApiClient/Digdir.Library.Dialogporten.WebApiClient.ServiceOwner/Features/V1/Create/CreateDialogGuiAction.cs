@@ -16,7 +16,8 @@ public class CreateDialogGuiAction
     /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
     /// </summary>
     [JsonPropertyName("action")]
-    public required string Action { get; set; }
+    [Obsolete("Use 'AuthorizationContext.Action' instead.")]
+    public string? Action { get; set; }
 
     /// <summary>
     /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered. Will be set to
@@ -32,7 +33,16 @@ public class CreateDialogGuiAction
     /// <br/>Can also be used to refer to other service policies.
     /// </summary>
     [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use 'AuthorizationContext' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// <br/>Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+    /// <br/>"authorizationContext.action".
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    public AuthorizationContextInput? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX

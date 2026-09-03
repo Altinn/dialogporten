@@ -186,10 +186,34 @@ public class Dialog
     public ICollection<DialogAttachment> Attachments { get; set; } = [];
 
     /// <summary>
+    /// Dialog-level attachments that exist but are withheld from the authenticated user, listed by id and
+    /// <br/>creation time only. An attachment is excluded rather than shown with masked URLs when its
+    /// <br/>authorization context sets unauthorizedPresentation to "excluded".
+    /// <br/>
+    /// <br/>Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// <br/>"excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
+    /// </summary>
+    [JsonPropertyName("excludedAttachments")]
+    public ICollection<ExcludedElement> ExcludedAttachments { get; set; } = [];
+
+    /// <summary>
     /// The immutable list of transmissions associated with the dialog.
     /// </summary>
     [JsonPropertyName("transmissions")]
     public ICollection<DialogTransmission> Transmissions { get; set; } = [];
+
+    /// <summary>
+    /// Transmissions that exist but are withheld from the authenticated user, listed by id and creation
+    /// <br/>time only. A transmission is excluded rather than returned with isAuthorized=false when its
+    /// <br/>authorization context sets unauthorizedPresentation to "excluded"; its children go with it.
+    /// <br/>
+    /// <br/>Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// <br/>"excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
+    /// </summary>
+    [JsonPropertyName("excludedTransmissions")]
+    public ICollection<ExcludedElement> ExcludedTransmissions { get; set; } = [];
 
     /// <summary>
     /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
@@ -198,10 +222,34 @@ public class Dialog
     public ICollection<DialogGuiAction> GuiActions { get; set; } = [];
 
     /// <summary>
+    /// GUI actions that exist but are withheld from the authenticated user, listed by id and creation time
+    /// <br/>only. A GUI action is excluded rather than returned with isAuthorized=false when its authorization
+    /// <br/>context sets unauthorizedPresentation to "excluded".
+    /// <br/>
+    /// <br/>Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// <br/>"excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
+    /// </summary>
+    [JsonPropertyName("excludedGuiActions")]
+    public ICollection<ExcludedElement> ExcludedGuiActions { get; set; } = [];
+
+    /// <summary>
     /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
     /// </summary>
     [JsonPropertyName("apiActions")]
     public ICollection<DialogApiAction> ApiActions { get; set; } = [];
+
+    /// <summary>
+    /// API actions that exist but are withheld from the authenticated user, listed by id and creation time
+    /// <br/>only. An API action is excluded rather than returned with isAuthorized=false when its authorization
+    /// <br/>context sets unauthorizedPresentation to "excluded".
+    /// <br/>
+    /// <br/>Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// <br/>"excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
+    /// </summary>
+    [JsonPropertyName("excludedApiActions")]
+    public ICollection<ExcludedElement> ExcludedApiActions { get; set; } = [];
 
     /// <summary>
     /// An immutable list of activities associated with the dialog.

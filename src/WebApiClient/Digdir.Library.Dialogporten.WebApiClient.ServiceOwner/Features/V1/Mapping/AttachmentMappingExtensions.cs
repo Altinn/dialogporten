@@ -17,6 +17,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     internal static UpdateDialogAttachment ToUpdateDialogAttachment(this DialogAttachment source) => new()
@@ -26,6 +27,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     internal static UpdateDialogAttachment ToUpdateDialogAttachment(this CreateDialogAttachment source) => new()
@@ -35,6 +37,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     internal static CreateDialogAttachment ToCreateDialogAttachment(this UpdateDialogAttachment source) => new()
@@ -44,6 +47,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     private static CreateDialogAttachmentUrl ToCreateDialogAttachmentUrl(this DialogAttachmentUrl source) => new()
@@ -88,6 +92,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 
     internal static DialogAttachment ToDialogAttachment(this UpdateDialogAttachment source) => new()
@@ -97,6 +102,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 
     private static DialogAttachmentUrl ToDialogAttachmentUrl(this CreateDialogAttachmentUrl source) => new()

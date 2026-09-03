@@ -17,9 +17,9 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
         };
 
         ctx.Response.ContentType = "application/problem+json";
-        var response = ctx.ResponseBuilder();
+        var problemDetails = ctx.TryCreateApplicationProblemDetails([]);
 
-        if (ctx.Response.StatusCode >= 500 || response is null)
+        if (ctx.Response.StatusCode >= 500 || problemDetails is null)
         {
             var http = $"{ctx.Request.Scheme}: {ctx.Request.Method} {ctx.Request.Path}";
             var type = exception.GetType().Name;
@@ -28,7 +28,7 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             logger.LogError(exception, "{@Http} {@Type} {@Reason}", http, type, error);
         }
 
-        await ctx.Response.WriteAsJsonAsync(response ?? ctx.DefaultResponse(), cancellationToken);
+        await ctx.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
         return true;
     }
 }

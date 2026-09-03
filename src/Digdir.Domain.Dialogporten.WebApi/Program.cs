@@ -286,7 +286,7 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
-            x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
+            x.Errors.ResponseBuilder = (failures, ctx, _) => ctx.CreateApplicationProblemDetailsOrDefault(failures);
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>

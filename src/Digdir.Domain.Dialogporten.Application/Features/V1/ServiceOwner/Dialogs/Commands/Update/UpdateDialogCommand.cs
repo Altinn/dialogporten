@@ -324,10 +324,11 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             .Select(x => x.ToDialogTransmission())
             .ToList();
 
-        // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
-        // and to guarantee deterministic order of input to output dtos.
+        // Ensure transmissions, attachments and navigational actions have a UUIDv7 ID, needed for the
+        // transmission hierarchy validation and to guarantee deterministic order of input to output dtos.
         newDialogTransmissions.Cast<IIdentifiableEntity>()
             .Concat(newDialogTransmissions.SelectMany(x => x.Attachments))
+            .Concat(newDialogTransmissions.SelectMany(x => x.NavigationalActions))
             .EnsureIds();
 
         var existingIds = _db.DialogTransmissions
@@ -359,6 +360,23 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         if (existingAttachmentIds.Length != 0)
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogAttachment>(existingAttachmentIds));
+            return;
+        }
+
+        var newNavigationalActionIds = newDialogTransmissions
+            .SelectMany(x => x.NavigationalActions)
+            .Select(x => x.Id);
+
+        var existingNavigationalActionIds = _db.DialogTransmissions
+            .Local
+            .SelectMany(x => x.NavigationalActions)
+            .Select(x => x.Id)
+            .Intersect(newNavigationalActionIds)
+            .ToArray();
+
+        if (existingNavigationalActionIds.Length != 0)
+        {
+            _domainContext.AddError(DomainFailure.EntityExists<DialogTransmissionNavigationalAction>(existingNavigationalActionIds));
             return;
         }
 

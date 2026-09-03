@@ -58,9 +58,7 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
             .SetValidator(attachmentValidator);
 
         RuleFor(x => x.NavigationalActions)
-
             .UniqueBy(x => x.Id);
-
 
         RuleForEach(x => x.NavigationalActions)
             .SetValidator(navigationalActionValidator);

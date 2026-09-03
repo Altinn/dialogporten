@@ -134,9 +134,10 @@ public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixtu
         var attachment = content.Attachments.Single();
         attachment.IsAuthorized.Should().BeTrue();
 
+        content.DialogToken.Should().NotBeNull();
         var token = await DialogportenTokenVerifier.VerifyAsync(
             Fixture.WebApiUri,
-            content.DialogToken ?? throw new InvalidOperationException("Dialog token was null."),
+            content.DialogToken,
             TestContext.Current.CancellationToken);
 
         token.TokenType.Should().Be(DialogTokenTypes.DialogToken);

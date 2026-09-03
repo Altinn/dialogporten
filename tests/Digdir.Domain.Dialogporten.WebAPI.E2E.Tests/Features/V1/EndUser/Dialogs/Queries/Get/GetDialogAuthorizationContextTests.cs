@@ -458,9 +458,10 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
 
     private async Task<VerifiedToken> VerifyDialogToken(string? dialogToken)
     {
+        dialogToken.Should().NotBeNull();
         var token = await DialogportenTokenVerifier.VerifyAsync(
             Fixture.WebApiUri,
-            dialogToken ?? throw new InvalidOperationException("Dialog token was null."),
+            dialogToken,
             TestContext.Current.CancellationToken);
 
         token.TokenType.Should().Be(DialogTokenTypes.DialogToken);

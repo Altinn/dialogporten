@@ -109,18 +109,19 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
 
         // Assert
         dialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = dialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        dialogResponse.Content.Should().NotBeNull();
 
-        var granted = content.Attachments.Single(a => a.Id == grantedAttachmentId);
+        var granted = dialogResponse.Content.Attachments.Single(a => a.Id == grantedAttachmentId);
         granted.IsAuthorized.Should().BeTrue("the end user holds write on the external resource");
 
-        var denied = content.Attachments.Single(a => a.Id == deniedAttachmentId);
+        var denied = dialogResponse.Content.Attachments.Single(a => a.Id == deniedAttachmentId);
         denied.IsAuthorized.Should().BeFalse(
             "an action no policy rule matches must deny — the explicit action must not fall back to read");
 
+        dialogResponse.Content.DialogToken.Should().NotBeNull();
         var token = await DialogportenTokenVerifier.VerifyAsync(
             Fixture.WebApiUri,
-            content.DialogToken ?? throw new InvalidOperationException("Dialog token was null."),
+            dialogResponse.Content.DialogToken,
             TestContext.Current.CancellationToken);
         token.GetStringList(DialogTokenClaimTypes.AuthorizedEntities).Should().Equal([grantedAttachmentId.ToString()],
             "only the entity whose explicit action the PDP permitted is listed");
@@ -169,12 +170,13 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
         serviceOwnerResponse.Content.Attachments.Single().AuthorizationContext!.TokenRef.Should().Be("e2e-token-ref");
 
         endUserResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var content = endUserResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
-        content.Attachments.Single(a => a.Id == attachmentId).IsAuthorized.Should().BeTrue();
+        endUserResponse.Content.Should().NotBeNull();
+        endUserResponse.Content.Attachments.Single(a => a.Id == attachmentId).IsAuthorized.Should().BeTrue();
 
+        endUserResponse.Content.DialogToken.Should().NotBeNull();
         var token = await DialogportenTokenVerifier.VerifyAsync(
             Fixture.WebApiUri,
-            content.DialogToken ?? throw new InvalidOperationException("Dialog token was null."),
+            endUserResponse.Content.DialogToken,
             TestContext.Current.CancellationToken);
         token.GetStringList(DialogTokenClaimTypes.AuthorizedEntities).Should().Equal(["e2e-token-ref"],
             "the token reference stands in for the attachment id");

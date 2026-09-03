@@ -16,6 +16,7 @@ public class ServiceResourceAuthorizerTests
 {
     private const string OwnedResource = "urn:altinn:resource:owned-service";
     private const string UnownedResource = "urn:altinn:resource:unowned-service";
+    private const string CurrentUserOrg = "ownerorg";
 
     [Fact]
     public async Task AuthorizeServiceResources_Should_Allow_Owned_Context_Resources()
@@ -85,6 +86,61 @@ public class ServiceResourceAuthorizerTests
     }
 
     [Fact]
+    public async Task AuthorizeServiceResources_Should_Allow_App_Reference_Owned_By_Current_Org()
+    {
+        var dialog = CreateDialog();
+        dialog.Transmissions.Add(new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext
+            {
+                AdditionalResourceAttribute = $"urn:altinn:app:app_{CurrentUserOrg}_myapp"
+            }
+        });
+
+        var result = await CreateSut().AuthorizeServiceResources(dialog, CancellationToken.None);
+
+        Assert.IsType<Success>(result.Value);
+    }
+
+    [Fact]
+    public async Task AuthorizeServiceResources_Should_Forbid_App_Reference_Owned_By_Another_Org()
+    {
+        const string appReference = "urn:altinn:app:app_otherorg_myapp";
+        var dialog = CreateDialog();
+        dialog.Transmissions.Add(new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext
+            {
+                AdditionalResourceAttribute = appReference
+            }
+        });
+
+        var result = await CreateSut().AuthorizeServiceResources(dialog, CancellationToken.None);
+
+        var forbidden = Assert.IsType<Forbidden>(result.Value);
+        Assert.Contains(appReference, forbidden.Reasons.Single());
+    }
+
+    [Fact]
+    public async Task AuthorizeServiceResources_Should_Forbid_App_Reference_With_Unparsable_Org()
+    {
+        // "app_onlytwoparts" has too few '_'-separated segments to yield an org; treated as not owned.
+        const string appReference = "urn:altinn:app:app_onlytwoparts";
+        var dialog = CreateDialog();
+        dialog.Transmissions.Add(new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext
+            {
+                AdditionalResourceAttribute = appReference
+            }
+        });
+
+        var result = await CreateSut().AuthorizeServiceResources(dialog, CancellationToken.None);
+
+        Assert.IsType<Forbidden>(result.Value);
+    }
+
+    [Fact]
     public async Task AuthorizeServiceResources_Should_Forbid_Unowned_Legacy_AuthorizationAttribute()
     {
         var dialog = CreateDialog();
@@ -117,6 +173,8 @@ public class ServiceResourceAuthorizerTests
         userResourceRegistry.IsCurrentUserServiceOwnerAdmin().Returns(false);
         userResourceRegistry.GetCurrentUserResourceIds(Arg.Any<CancellationToken>())
             .Returns([OwnedResource]);
+        userResourceRegistry.GetCurrentUserOrgShortName(Arg.Any<CancellationToken>())
+            .Returns(CurrentUserOrg);
         userResourceRegistry.UserCanModifyResourceType(Arg.Any<string>()).Returns(true);
 
         return new ServiceResourceAuthorizer(

@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -13,6 +12,18 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 public interface IDialogTokenGenerator
 {
     string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult, string issuerVersion);
+
+    /// <summary>
+    /// Generates a token scoped to a single authorization-context-carrying entity, asserting the single
+    /// PDP-verified grant (action, resource override and/or additional resource attribute) along with the
+    /// parties it was permitted for.
+    /// </summary>
+    string GetDialogContextToken(
+        DialogEntity dialog,
+        AuthorizedCheck authorizedCheck,
+        Guid entityId,
+        string entityType,
+        string issuerVersion);
 }
 
 internal sealed class DialogTokenGenerator : IDialogTokenGenerator
@@ -53,8 +64,54 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
     public string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult,
         string issuerVersion)
     {
+        var claims = GetBaseClaims(dialog);
+        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+        AddIssuerAndLifetimeClaims(claims, issuerVersion);
+
+        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogToken);
+    }
+
+    public string GetDialogContextToken(
+        DialogEntity dialog,
+        AuthorizedCheck authorizedCheck,
+        Guid entityId,
+        string entityType,
+        string issuerVersion)
+    {
+        var claims = GetBaseClaims(dialog);
+        claims[DialogTokenClaimTypes.EntityId] = entityId;
+        claims[DialogTokenClaimTypes.EntityType] = entityType;
+
+        // A context token asserts exactly one check, so "a" carries that single action verbatim. Note that
+        // this is a different shape from the dialog token's "a", which is a ';'-separated list of
+        // "action[,attribute]" entries - a recipient sharing parsing code between the two must switch on the
+        // JOSE "typ" header rather than assume the list format.
+        claims[DialogTokenClaimTypes.Actions] = authorizedCheck.Check.Action;
+
+        // Both are emitted independently, exactly mirroring the resource attributes the PDP request carried
+        // for this check: the resource override (falling back to the dialog's own resource, already carried
+        // in "s", when absent) with the additional attribute layered on top, if any. A recipient can
+        // reconstruct the same PDP request from "s"/"r"/"ra" alone.
+        var resourceSpec = authorizedCheck.Check.Resource;
+        if (resourceSpec.ServiceResource is not null)
+        {
+            claims[DialogTokenClaimTypes.EffectiveResource] = resourceSpec.ServiceResource;
+        }
+
+        if (resourceSpec.AdditionalResourceAttribute is not null)
+        {
+            claims[DialogTokenClaimTypes.AdditionalResourceAttribute] = resourceSpec.AdditionalResourceAttribute;
+        }
+
+        claims[DialogTokenClaimTypes.PermittedParties] = authorizedCheck.PermittedParties;
+        AddIssuerAndLifetimeClaims(claims, issuerVersion);
+
+        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogContextToken);
+    }
+
+    private Dictionary<string, object?> GetBaseClaims(DialogEntity dialog)
+    {
         var claimsPrincipal = _user.GetPrincipal();
-        var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
         var endUserPartyIdentifier = claimsPrincipal.GetEndUserPartyIdentifier();
 
         var claims = new Dictionary<string, object?>(15)
@@ -89,13 +146,17 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         claims[DialogTokenClaimTypes.DialogParty] = dialog.Party;
         claims[DialogTokenClaimTypes.ServiceResource] = dialog.ServiceResource;
         claims[DialogTokenClaimTypes.DialogId] = dialog.Id;
-        claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+
+        return claims;
+    }
+
+    private void AddIssuerAndLifetimeClaims(Dictionary<string, object?> claims, string issuerVersion)
+    {
+        var now = _clock.UtcNowOffset.ToUnixTimeSeconds();
         claims[DialogTokenClaimTypes.Issuer] = _applicationSettings.Dialogporten.BaseUri.AbsoluteUri.TrimEnd('/') + issuerVersion;
         claims[DialogTokenClaimTypes.IssuedAt] = now;
         claims[DialogTokenClaimTypes.NotBefore] = now;
         claims[DialogTokenClaimTypes.Expires] = now + (long)_tokenLifetime.TotalSeconds;
-
-        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogToken);
     }
 
     private static string GetAuthorizedActions(DialogDetailsAuthorizationResult authorizationResult)
@@ -155,6 +216,21 @@ public static class DialogTokenTypes
     /// already carried in the "iss" claim.
     /// </summary>
     public const string DialogToken = "JWT";
+
+    public const string DialogContextToken = "dialogcontexttoken+jwt";
+}
+
+/// <summary>
+/// Entity type discriminators for the <see cref="DialogTokenClaimTypes.EntityType"/> claim in context tokens.
+/// </summary>
+public static class DialogContextTokenEntityTypes
+{
+    public const string ApiAction = "apiaction";
+    public const string GuiAction = "guiaction";
+    public const string Attachment = "attachment";
+    public const string Transmission = "transmission";
+    public const string TransmissionAttachment = "transmissionattachment";
+    public const string TransmissionNavigationalAction = "navigationalaction";
 }
 
 public static class DialogTokenClaimTypes
@@ -173,4 +249,11 @@ public static class DialogTokenClaimTypes
     public const string ServiceResource = "s";
     public const string DialogId = "i";
     public const string Actions = "a";
+
+    // Context-token-only claims
+    public const string EntityId = "e";
+    public const string EntityType = "t";
+    public const string EffectiveResource = "r";
+    public const string AdditionalResourceAttribute = "ra";
+    public const string PermittedParties = "pp";
 }

@@ -12,7 +12,9 @@ public static class Constants
     public const int MinIdempotentKeyLength = 3;
 
     public const string ServiceResourcePrefix = "urn:altinn:resource:";
+    public const string AppResourcePrefix = "urn:altinn:app:";
     public const string AppResourceIdPrefix = "app_";
+    public const string OrgResourcePrefix = "urn:altinn:org:";
     public const string ServiceContextInstanceIdPrefix = "urn:altinn:integration:storage:";
 
     public const string IsSilentUpdate = "IsSilentUpdate";

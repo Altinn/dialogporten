@@ -51,7 +51,7 @@ jobs:
 
           if [[ -n "$FROM_SHA" && -n "$TO_SHA" ]]; then
             pr_numbers="$(
-              gh api "repos/${REPOSITORY}/compare/${FROM_SHA}...${TO_SHA}" --jq '.commits[].commit.message | split("\n")[0]' | extract_pull_request_numbers
+              gh api --paginate "repos/${REPOSITORY}/compare/${FROM_SHA}...${TO_SHA}" --jq '.commits[].commit.message | split("\n")[0]' | extract_pull_request_numbers
             )"
           elif [[ -n "$VERSION" ]]; then
             pr_numbers="$(

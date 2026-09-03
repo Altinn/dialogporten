@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 
@@ -41,6 +42,7 @@ public class CreateTransmissionRequest
     /// <br/>Cannot be combined with "authorizationAttribute".
     /// </summary>
     [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public AuthorizationContextInput? AuthorizationContext { get; set; }
 
     /// <summary>

@@ -4,6 +4,7 @@ using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Search;
 // The end user contracts mark authorizationAttribute [Obsolete] in favour of the service owner API's
 // authorizationContext, but this layer has to keep carrying it for as long as the server returns it.
 #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable DPEXP001 // authorizationContext/contextToken are experimental
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Mapping;
 
@@ -148,4 +149,5 @@ public static class TransmissionMappingExtensions
     };
 }
 
+#pragma warning restore DPEXP001
 #pragma warning restore CS0618

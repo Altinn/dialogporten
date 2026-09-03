@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
@@ -895,6 +896,7 @@ public sealed class DialogTransmissionNavigationalActionDto
     public bool? IsAuthorized { get; set; }
 }
 
+[ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
 public sealed class AuthorizationContextDto
 {
     /// <summary>

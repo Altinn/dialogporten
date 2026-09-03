@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
@@ -41,5 +42,6 @@ public class DialogTransmissionAttachmentDetails
     /// <br/>this context can only further restrict access, never widen it.
     /// </summary>
     [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public AuthorizationContextDetails? AuthorizationContext { get; set; }
 }

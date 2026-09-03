@@ -1,4 +1,5 @@
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
@@ -35,6 +36,7 @@ public class CreateDialogApiAction
     /// <br/>"authorizationContext.action".
     /// </summary>
     [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public AuthorizationContextInput? AuthorizationContext { get; set; }
 
     /// <summary>

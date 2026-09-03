@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
@@ -195,6 +196,7 @@ public class Dialog
     /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
     /// </summary>
     [JsonPropertyName("excludedAttachments")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public ICollection<ExcludedElement> ExcludedAttachments { get; set; } = [];
 
     /// <summary>
@@ -213,6 +215,7 @@ public class Dialog
     /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
     /// </summary>
     [JsonPropertyName("excludedTransmissions")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public ICollection<ExcludedElement> ExcludedTransmissions { get; set; } = [];
 
     /// <summary>
@@ -231,6 +234,7 @@ public class Dialog
     /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
     /// </summary>
     [JsonPropertyName("excludedGuiActions")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public ICollection<ExcludedElement> ExcludedGuiActions { get; set; } = [];
 
     /// <summary>
@@ -249,6 +253,7 @@ public class Dialog
     /// <br/>"excludedAttachments" and "excludedNavigationalActions" on each transmission.
     /// </summary>
     [JsonPropertyName("excludedApiActions")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public ICollection<ExcludedElement> ExcludedApiActions { get; set; } = [];
 
     /// <summary>

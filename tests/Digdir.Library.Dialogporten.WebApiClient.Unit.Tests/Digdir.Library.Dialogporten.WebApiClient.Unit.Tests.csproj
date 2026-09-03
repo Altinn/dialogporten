@@ -9,6 +9,8 @@
         <!-- The NET8_0-conditional code paths are fixed at compile time, so the net8.0 test
              assembly may run on a newer runtime on machines without the .NET 8 runtime installed. -->
         <RollForward Condition="'$(TargetFramework)' == 'net8.0'">Major</RollForward>
+        <!-- Tests exercise the experimental authorizationContext SDK surface on purpose. -->
+        <NoWarn>$(NoWarn);DPEXP001</NoWarn>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>

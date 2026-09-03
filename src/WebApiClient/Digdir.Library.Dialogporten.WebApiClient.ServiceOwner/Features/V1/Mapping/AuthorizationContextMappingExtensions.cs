@@ -1,6 +1,10 @@
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
+// The authorizationContext members these maps carry are flagged experimental for consumers; the SDK's
+// own mapping layer is part of the feature, so it opts in rather than warning about itself.
+#pragma warning disable DPEXP001
+
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 
 /// <summary>
@@ -32,3 +36,5 @@ internal static class AuthorizationContextMappingExtensions
         UnauthorizedPresentation = source.UnauthorizedPresentation,
     };
 }
+
+#pragma warning restore DPEXP001

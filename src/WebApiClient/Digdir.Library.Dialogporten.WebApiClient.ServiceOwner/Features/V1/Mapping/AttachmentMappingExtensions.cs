@@ -2,6 +2,10 @@ using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
+// The authorizationContext members these maps carry are flagged experimental for consumers; the SDK's
+// own mapping layer is part of the feature, so it opts in rather than warning about itself.
+#pragma warning disable DPEXP001
+
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 
 /// <summary>
@@ -121,3 +125,5 @@ internal static class AttachmentMappingExtensions
         ConsumerType = source.ConsumerType,
     };
 }
+
+#pragma warning restore DPEXP001

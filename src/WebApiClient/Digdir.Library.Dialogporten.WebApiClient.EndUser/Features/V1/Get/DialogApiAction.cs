@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Get;
@@ -40,6 +41,7 @@ public class DialogApiAction
     /// <br/>Should be used instead of the dialog token against this action's endpoints.
     /// </summary>
     [JsonPropertyName("contextToken")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public string? ContextToken { get; set; }
 
     /// <summary>

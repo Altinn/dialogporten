@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
@@ -36,6 +37,7 @@ public class DialogApiAction
     /// <br/>Null when the action uses legacy authorization fields.
     /// </summary>
     [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public AuthorizationContext? AuthorizationContext { get; set; }
 
     /// <summary>

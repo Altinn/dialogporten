@@ -481,6 +481,7 @@
       },
       "V1CommonAuthorizationContexts_AuthorizationContext": {
         "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
         "properties": {
           "action": {
             "description": "The XACML action to evaluate. Optional; defaults to \u0022read\u0022 if not supplied.",
@@ -522,7 +523,8 @@
             ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-experimental": true
       },
       "V1CommonContent_ContentValue": {
         "additionalProperties": false,
@@ -887,7 +889,7 @@
       },
       "V1EndUserCommon_ExcludedElement": {
         "additionalProperties": false,
-        "description": "A stub standing in for an element the authenticated user is not authorized for, and whose authorization\ncontext asks for it to be excluded rather than disabled. The element is removed from the collection it\nbelongs to and recorded here instead, so that a client can tell \u0022this existed and you cannot see it\u0022\napart from \u0022this does not exist\u0022 without being shown anything about it.",
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA stub standing in for an element the authenticated user is not authorized for, and whose authorization\ncontext asks for it to be excluded rather than disabled. The element is removed from the collection it\nbelongs to and recorded here instead, so that a client can tell \u0022this existed and you cannot see it\u0022\napart from \u0022this does not exist\u0022 without being shown anything about it.",
         "properties": {
           "createdAt": {
             "description": "The UTC timestamp when the excluded element was created. Lets a client order exclusions against the\nelements it can see, e.g. to tell where in a transmission thread something is missing.",
@@ -900,7 +902,8 @@
             "type": "string"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-experimental": true
       },
       "V1EndUserCommonActors_Actor": {
         "additionalProperties": false,
@@ -1069,36 +1072,40 @@
             ]
           },
           "excludedApiActions": {
-            "description": "API actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. An API action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nAPI actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. An API action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "excludedAttachments": {
-            "description": "Dialog-level attachments that exist but are withheld from the authenticated user, listed by id and\ncreation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDialog-level attachments that exist but are withheld from the authenticated user, listed by id and\ncreation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "excludedGuiActions": {
-            "description": "GUI actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. A GUI action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nGUI actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. A GUI action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "excludedTransmissions": {
-            "description": "Transmissions that exist but are withheld from the authenticated user, listed by id and creation\ntime only. A transmission is excluded rather than returned with isAuthorized=false when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022; its children go with it.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nTransmissions that exist but are withheld from the authenticated user, listed by id and creation\ntime only. A transmission is excluded rather than returned with isAuthorized=false when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022; its children go with it.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
@@ -1315,9 +1322,10 @@
             "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s endpoints.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s endpoints.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -1407,9 +1415,10 @@
         "additionalProperties": false,
         "properties": {
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -1431,8 +1440,9 @@
             "type": "string"
           },
           "isAuthorized": {
-            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
-            "type": "boolean"
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -1518,9 +1528,10 @@
             "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s URL.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s URL.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -1651,9 +1662,10 @@
             ]
           },
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
@@ -1661,20 +1673,22 @@
             "type": "string"
           },
           "excludedAttachments": {
-            "description": "Transmission-level attachments that exist but are withheld from the authenticated user, listed by id\nand creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nTransmission-level attachments that exist but are withheld from the authenticated user, listed by id\nand creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "excludedNavigationalActions": {
-            "description": "Navigational actions that exist but are withheld from the authenticated user, listed by id and\ncreation time only. A navigational action is excluded rather than returned with isAuthorized=false\nwhen its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nNavigational actions that exist but are withheld from the authenticated user, listed by id and\ncreation time only. A navigational action is excluded rather than returned with isAuthorized=false\nwhen its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "extendedType": {
             "description": "Arbitrary URI/URN describing a service-specific transmission type.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
@@ -1737,9 +1751,10 @@
         "additionalProperties": false,
         "properties": {
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -1761,8 +1776,9 @@
             "type": "string"
           },
           "isAuthorized": {
-            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
-            "type": "boolean"
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -1848,9 +1864,10 @@
         "additionalProperties": false,
         "properties": {
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -1859,8 +1876,9 @@
             "type": "string"
           },
           "isAuthorized": {
-            "description": "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
-            "type": "boolean"
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -1958,9 +1976,10 @@
         "additionalProperties": false,
         "properties": {
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -1982,8 +2001,9 @@
             "type": "string"
           },
           "isAuthorized": {
-            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
-            "type": "boolean"
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2069,9 +2089,10 @@
         "additionalProperties": false,
         "properties": {
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -2080,8 +2101,9 @@
             "type": "string"
           },
           "isAuthorized": {
-            "description": "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
-            "type": "boolean"
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -2127,9 +2149,10 @@
             ]
           },
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
@@ -2143,20 +2166,22 @@
             "type": "string"
           },
           "excludedAttachments": {
-            "description": "Attachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nAttachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "excludedNavigationalActions": {
-            "description": "Navigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nNavigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "extendedType": {
             "description": "The extended type URI for the transmission.",
@@ -2631,9 +2656,10 @@
         "additionalProperties": false,
         "properties": {
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -2655,8 +2681,9 @@
             "type": "string"
           },
           "isAuthorized": {
-            "description": "Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
-            "type": "boolean"
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2742,9 +2769,10 @@
         "additionalProperties": false,
         "properties": {
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -2753,8 +2781,9 @@
             "type": "string"
           },
           "isAuthorized": {
-            "description": "Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
-            "type": "boolean"
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -2800,9 +2829,10 @@
             ]
           },
           "contextToken": {
-            "description": "A token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-experimental": true
           },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
@@ -2816,20 +2846,22 @@
             "type": "string"
           },
           "excludedAttachments": {
-            "description": "Attachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nAttachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "excludedNavigationalActions": {
-            "description": "Navigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nNavigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
             "items": {
               "$ref": "#/components/schemas/V1EndUserCommon_ExcludedElement"
             },
             "nullable": true,
-            "type": "array"
+            "type": "array",
+            "x-experimental": true
           },
           "extendedType": {
             "description": "The extended type URI for the transmission.",
@@ -3265,13 +3297,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -3360,13 +3393,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -3733,13 +3767,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -3834,13 +3869,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -3916,13 +3952,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -4023,13 +4060,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -4112,13 +4150,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -4219,13 +4258,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -4269,13 +4309,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -4422,13 +4463,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -4517,13 +4559,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -4815,13 +4858,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -4906,13 +4950,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -4988,13 +5033,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -5095,13 +5141,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -5129,13 +5176,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -5243,13 +5291,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -5293,13 +5342,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1CommonAuthorizationContexts_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -5370,6 +5420,7 @@
       },
       "V1ServiceOwnerDialogsQueriesGet_AuthorizationContext": {
         "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
         "properties": {
           "action": {
             "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
@@ -5411,7 +5462,8 @@
             ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-experimental": true
       },
       "V1ServiceOwnerDialogsQueriesGet_Content": {
         "additionalProperties": false,
@@ -5804,13 +5856,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -5900,13 +5953,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -6018,13 +6072,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -6163,13 +6218,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses legacy\nauthorization fields.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses legacy\nauthorization fields.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -6251,13 +6307,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -6367,13 +6424,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGet_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -6476,13 +6534,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -6553,6 +6612,7 @@
       },
       "V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext": {
         "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
         "properties": {
           "action": {
             "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
@@ -6594,7 +6654,8 @@
             ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-experimental": true
       },
       "V1ServiceOwnerDialogsQueriesGetTransmission_Content": {
         "additionalProperties": false,
@@ -6632,13 +6693,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -6682,13 +6744,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The content of the transmission.",
@@ -7242,13 +7305,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
@@ -7319,6 +7383,7 @@
       },
       "V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext": {
         "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
         "properties": {
           "action": {
             "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
@@ -7360,7 +7425,8 @@
             ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-experimental": true
       },
       "V1ServiceOwnerDialogsQueriesSearchTransmissions_Content": {
         "additionalProperties": false,
@@ -7398,13 +7464,14 @@
         "additionalProperties": false,
         "properties": {
           "authorizationContext": {
-            "description": "Describes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
@@ -7448,13 +7515,14 @@
             "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
           },
           "authorizationContext": {
-            "description": "Describes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
             "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext"
               }
-            ]
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The content of the transmission.",

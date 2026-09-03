@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Get;
 
@@ -40,6 +41,7 @@ public class DialogTransmissionAttachment
     /// <br/>replaced with "urn:dialogporten:unauthorized".
     /// </summary>
     [JsonPropertyName("isAuthorized")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public bool IsAuthorized { get; set; }
 
     /// <summary>
@@ -48,5 +50,6 @@ public class DialogTransmissionAttachment
     /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
     /// </summary>
     [JsonPropertyName("contextToken")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public string? ContextToken { get; set; }
 }

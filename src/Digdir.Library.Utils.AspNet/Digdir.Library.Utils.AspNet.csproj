@@ -15,7 +15,10 @@
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
         <PackageReference Include="HotChocolate.Diagnostics" Version="16.6.1" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.1.2" />
-        <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0"/>
+        <PackageReference Include="Altinn.AspNet.HealthChecks" Version="0.4.0" />
+        <PackageReference Include="Altinn.AspNet.HealthChecks.OpenTelemetry" Version="0.4.0" />
+        <!-- Brings AspNetCore.HealthChecks.Uris with it; the probes are registered through this package. -->
+        <PackageReference Include="Altinn.AspNet.HealthChecks.Probes" Version="0.4.0" />
         <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.6.0" />
         <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
         <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />

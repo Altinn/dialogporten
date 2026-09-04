@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using Altinn.AspNet.HealthChecks;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,7 +57,10 @@ public static class OpenTelemetryExtensions
 
                 tracing.AddProcessor<PostgresFilter>();
                 tracing.AddProcessor<GraphQLFilter>();
-                tracing.AddProcessor<HealthCheckFilter>();
+                // The same layout the endpoints are mapped from, so pinning the liveness path cannot
+                // leave its probe spans unsuppressed.
+                tracing.AddHealthCheckActivityFilter(
+                    DialogportenHealthCheckExtensions.CreateEndpointOptions());
                 tracing.AddProcessor<FusionCacheFilter>();
 
                 tracing

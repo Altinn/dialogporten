@@ -1,22 +1,16 @@
 namespace Digdir.Library.Utils.AspNet;
 
-public sealed class AspNetUtilitiesSettings
-{
-    public HealthCheckSettings HealthCheckSettings { get; set; } = new();
-}
-
-public sealed class HealthCheckSettings
-{
-    public List<HttpGetEndpointToCheck> HttpGetEndpointsToCheck { get; set; } = [];
-}
-
-public sealed record HttpGetEndpointToCheck
-{
-    public required string Name { get; init; }
-    public string? Url { get; init; }
-    public string? AltinnPlatformRelativePath { get; init; }
-    public bool HardDependency { get; init; }
-}
+/// <summary>
+/// An outbound health probe registered from code, for upstreams that live in another settings
+/// section than the probe list - the JWT bearer well-known metadata endpoints. Configuration-driven
+/// probes bind to the probes package's own type instead.
+/// </summary>
+/// <param name="Name">The health check name. Must be unique across the application.</param>
+/// <param name="Url">Absolute URL to probe with HTTP GET.</param>
+/// <param name="Hard">
+/// Whether a failure makes /health/deep fail (Unhealthy) rather than only degrade it.
+/// </param>
+public sealed record HealthProbe(string Name, string Url, bool Hard = false);
 
 public sealed class TelemetrySettings
 {

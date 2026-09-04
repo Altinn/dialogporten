@@ -22,23 +22,35 @@ window.open = function (...args) {
 }
 
 /**
- * Attack a global click listener that scans for logout button clicks
+ * Attach a global click listener that scans for logout button clicks
  * If we clicked a logout button, navigate to the OIDC logout endpoint.
  */
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
     if (!(/logout/i.test(btn.textContent))) return;
-    if (!ui.getState().hasIn(['auth', 'authorized', 'AuthorizationCode', 'clientId'])) return;
+    const securityScheme = ui.getConfigs().SWAGGER_IDPORTEN_SECURITY_SCHEME?.replace(/\+$/, "");
+    if (!securityScheme) {
+        console.error("SWAGGER_IDPORTEN_SECURITY_SCHEME is missing, can't log out properly")
+        return;
+    }
+
+    if (!ui.getState().hasIn(['auth', 'authorized', securityScheme, 'clientId'])) return;
 
     const logoutUrl = ui.getConfigs().SWAGGER_IDPORTEN_LOGOUT_URL?.replace(/\+$/, "");
     if (!logoutUrl) {
         console.error("SWAGGER_IDPORTEN_LOGOUT_URL is missing, can't log out properly")
         return;
     }
+    const logoutRedirectPath = ui.getConfigs().SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH?.replace(/\+$/, "");
 
-    const clientId = ui.getState().getIn(['auth', 'authorized', 'AuthorizationCode', 'clientId']);
-    const logoutRedirectUri = `${encodeURIComponent(window.location.origin)}/swagger/index.html`;
+    if (!logoutRedirectPath) {
+        console.error("SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH is missing, can't log out properly")
+        return;
+    }
+
+    const clientId = ui.getState().getIn(['auth', 'authorized', securityScheme, 'clientId']);
+    const logoutRedirectUri = `${encodeURIComponent(window.location.origin)}${logoutRedirectPath}`;
     const params = {
         "client_id": clientId,
         "post_logout_redirect_uri": logoutRedirectUri,

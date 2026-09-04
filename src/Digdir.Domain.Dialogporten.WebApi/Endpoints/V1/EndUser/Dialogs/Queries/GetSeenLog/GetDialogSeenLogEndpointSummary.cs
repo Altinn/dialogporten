@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.GetSeenLog;
@@ -16,6 +16,7 @@ public sealed class GetDialogSeenLogEndpointSummary : Summary<GetDialogSeenLogEn
                       """;
 
         Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("seen log record");
-        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<GetDialogSeenLogEndpoint>();
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<GetDialogSeenLogEndpoint>().Build();
     }
 }

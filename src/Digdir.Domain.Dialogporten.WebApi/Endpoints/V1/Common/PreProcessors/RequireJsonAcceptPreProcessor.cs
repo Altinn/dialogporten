@@ -1,4 +1,3 @@
-using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.Extensions.Primitives;
@@ -20,10 +19,11 @@ internal sealed class RequireJsonAcceptPreProcessor : IPreProcessor<EmptyRequest
             new("Accept", "The request must accept application/json responses.")
         };
 
-        context.HttpContext.Response.StatusCode = StatusCodes.Status406NotAcceptable;
-        var response = context.HttpContext.GetResponseOrDefault(context.HttpContext.Response.StatusCode, failures);
-        await context.HttpContext.Response.WriteAsJsonAsync(response, response.GetType(), cancellationToken: ct);
-        context.HttpContext.MarkResponseStart();
+        await context.HttpContext.Response.SendErrorsAsync(
+            failures,
+            StatusCodes.Status406NotAcceptable,
+            cancellation: ct
+        );
     }
 }
 

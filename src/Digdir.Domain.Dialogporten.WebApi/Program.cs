@@ -122,6 +122,7 @@ static void BuildAndRun(string[] args)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
         .AddDialogportenResponseCompression()
+        .AddProblemDetails()
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
@@ -240,6 +241,7 @@ static void BuildAndRun(string[] args)
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
     app.UseDefaultExceptionHandler()
+        .UseStatusCodePages(UseStatusCodePagesHandlers.CreateStatusCodePageProblemDetails)
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
@@ -284,7 +286,7 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
-            x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
+            x.Errors.ResponseBuilder = (failures, ctx, _) => ctx.CreateApplicationProblemDetailsOrDefault(failures);
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>

@@ -2,7 +2,8 @@ using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using FastEndpoints;
+using FluentValidation.Results;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Authentication;
 
@@ -36,17 +37,17 @@ public sealed class ServiceOwnerOnBehalfOfPersonMiddleware
 
         if (!NorwegianPersonIdentifier.TryParse(endUserIdQuery.First(), out var endUserId))
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            var response = context.GetResponseOrDefault(
-                context.Response.StatusCode,
-                [
-                    new("EndUserId",
-                        "EndUserId must be a valid end user identifier. It must match the format " +
-                        $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}'."
-                    )
-                ]
+            List<ValidationFailure> failures =
+            [
+                new("EndUserId",
+                    "EndUserId must be a valid end user identifier. It must match the format " +
+                    $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}'."
+                )
+            ];
+            return context.Response.SendErrorsAsync(
+                failures,
+                StatusCodes.Status400BadRequest
             );
-            return context.Response.WriteAsJsonAsync(response, response.GetType());
         }
 
         OverrideClaim(context.User, PidClaim, endUserId.Id);

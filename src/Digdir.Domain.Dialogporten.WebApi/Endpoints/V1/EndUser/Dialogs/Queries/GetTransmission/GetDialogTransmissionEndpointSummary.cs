@@ -1,6 +1,6 @@
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
@@ -15,8 +15,10 @@ public sealed class GetDialogTransmissionEndpointSummary : Summary<GetDialogTran
                       Gets a single transmission belonging to a dialog.
                       """;
         Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("transmission");
-        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<GetDialogTransmissionEndpoint>();
-        Responses[Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("get");
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<GetDialogTransmissionEndpoint>()
+            .Or(Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("get"))
+            .Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogTransmissionNotFound;
         Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }

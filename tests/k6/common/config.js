@@ -64,10 +64,12 @@ export const otherOrg = (() => {
             };
         case 'staging':
         case 'prod':
+            // Owned by digdir (same org number as ttd), so the test tokens can create dialogs
+            // on it while Dialogporten still records a different org than the default ttd resource.
             return {
-                orgNo: '889640782',
-                name: 'nav',
-                serviceResource: 'app_nav_barnehagelister'
+                orgNo: '991825827',
+                name: 'digdir',
+                serviceResource: 'digdir-dialogporten-automated-tests'
             };
         default:
             throw new Error(`Invalid API environment: ${__ENV.API_ENVIRONMENT}. Please ensure it's set correctly in your environment variables.`);

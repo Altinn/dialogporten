@@ -64,8 +64,10 @@ export const otherOrg = (() => {
             };
         case 'staging':
         case 'prod':
-            // Owned by digdir (same org number as ttd), so the test tokens can create dialogs
-            // on it while Dialogporten still records a different org than the default ttd resource.
+            // Owned by digdir, which shares org number 991825827 with ttd. The test tokens can therefore
+            // create dialogs on it, while Dialogporten records a different org code than for the default
+            // ttd resource. Registered in TT02 only: the functional suite never runs against prod, and
+            // the default ttd resource is not registered there either.
             return {
                 orgNo: '991825827',
                 name: 'digdir',

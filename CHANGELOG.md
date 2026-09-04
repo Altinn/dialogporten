@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.121.0](https://github.com/Altinn/dialogporten/compare/v1.120.1...v1.121.0) (2026-09-03)
+
+
+### Features
+
+* add authorizationContext as replacement for authorizationAttribute ([#4362](https://github.com/Altinn/dialogporten/issues/4362)) ([886c23a](https://github.com/Altinn/dialogporten/commit/886c23ad00b5f58ad7ac0c4781ee1330f4d99512))
+* replace context tokens with an authorized entities claim on the dialog token ([#4364](https://github.com/Altinn/dialogporten/issues/4364)) ([909cacd](https://github.com/Altinn/dialogporten/commit/909cacdcb4c15a8870ddfedf4cdd86ce5648ee13))
+
+
+### Bug Fixes
+
+* add dummy data to labelAssignmentLogs where database is missing PerformedBy  ([#4354](https://github.com/Altinn/dialogporten/issues/4354)) ([7b6c723](https://github.com/Altinn/dialogporten/commit/7b6c7234fb7e99353fb5d8ee062922c44aae68ab))
+
+
+### Miscellaneous Chores
+
+* **deps:** update azure/login action to v3.0.2 ([#4357](https://github.com/Altinn/dialogporten/issues/4357)) ([5ac12fa](https://github.com/Altinn/dialogporten/commit/5ac12fa93245197a7f23071cc8b29d620c1b5880))
+* **deps:** update dependency azure.storage.blobs to 12.29.2 ([#4358](https://github.com/Altinn/dialogporten/issues/4358)) ([3befa2c](https://github.com/Altinn/dialogporten/commit/3befa2c3337c416d663bb9c75bb5d6152a94853d))
+
 ## [1.120.1](https://github.com/Altinn/dialogporten/compare/v1.120.0...v1.120.1) (2026-08-31)
 
 

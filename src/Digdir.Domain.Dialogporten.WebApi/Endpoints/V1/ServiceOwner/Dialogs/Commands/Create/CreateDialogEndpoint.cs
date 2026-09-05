@@ -38,8 +38,10 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
         Description(b => b.ProducesOneOf(
             StatusCodes.Status201Created,
             StatusCodes.Status400BadRequest,
-            StatusCodes.Status422UnprocessableEntity,
-            StatusCodes.Status409Conflict));
+            StatusCodes.Status409Conflict,
+            StatusCodes.Status422UnprocessableEntity
+            )
+        );
     }
 
     public override async Task HandleAsync(CreateDialogRequest req, CancellationToken ct)

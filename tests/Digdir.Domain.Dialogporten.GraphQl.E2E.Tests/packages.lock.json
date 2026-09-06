@@ -54,13 +54,13 @@
       },
       "StrawberryShake.Server": {
         "type": "Direct",
-        "requested": "[16.6.1, )",
-        "resolved": "16.6.1",
-        "contentHash": "nX/eXaQqwXEIwyeW679W53Hh+ULbOtB1OINSyZQaiyW/xKEqT2H0uOjhDE5JYNVd+5qiEWz106nUdFbjh3uM/Q==",
+        "requested": "[16.6.2, )",
+        "resolved": "16.6.2",
+        "contentHash": "TwT3/Fqk6t1nWQy6zsqF04msgQ/fBi4rwSJrqflTSOPvEXIgMSAwHxOy26ydOyb+AZPVPOy2EOiqH7VJnjoHkA==",
         "dependencies": {
-          "StrawberryShake.Core": "16.6.1",
-          "StrawberryShake.Transport.Http": "16.6.1",
-          "StrawberryShake.Transport.WebSockets": "16.6.1"
+          "StrawberryShake.Core": "16.6.2",
+          "StrawberryShake.Transport.Http": "16.6.2",
+          "StrawberryShake.Transport.WebSockets": "16.6.2"
         }
       },
       "xunit.runner.visualstudio": {
@@ -151,80 +151,80 @@
       },
       "HotChocolate.Language.SyntaxTree": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "lImykMum1gdNoNXKt+NlcwZsFtyw++vei4wemmMN+hHdVanAeGwGpOY3wwoN0Vk2N4Wzyaz2FqZw5450EJyeiw==",
+        "resolved": "16.6.2",
+        "contentHash": "2j/S3JVqvzyQa4z2BtkparMEkptdV+DEUSj4i8QR1zV8n/Aplvk4polFEpuxquXt+hwgwztmh2z75nOmnOvzXw==",
         "dependencies": {
-          "HotChocolate.Utilities.Buffers": "16.6.1",
+          "HotChocolate.Utilities.Buffers": "16.6.2",
           "Microsoft.Extensions.ObjectPool": "10.0.0"
         }
       },
       "HotChocolate.Language.Utf8": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "XVKz2bO4+hucnvqGbUKX+RThipBoH4bfhTMJHtTrxNh7FPHEPETJZwqZpSkTJHOKNCqLYlcVkFctQu+IYoedfQ==",
+        "resolved": "16.6.2",
+        "contentHash": "gVQU/LD2YGB6ar8jrJQ69zKlvIBtZch1LULPH+1dWSAIVmepqyGTNqTk86GASCgEExT2OkUJPLBBYgo62ZvR4w==",
         "dependencies": {
-          "HotChocolate.Language.SyntaxTree": "16.6.1",
-          "HotChocolate.Language.Utf8.SyntaxTree": "16.6.1",
-          "HotChocolate.Utilities.Buffers": "16.6.1"
+          "HotChocolate.Language.SyntaxTree": "16.6.2",
+          "HotChocolate.Language.Utf8.SyntaxTree": "16.6.2",
+          "HotChocolate.Utilities.Buffers": "16.6.2"
         }
       },
       "HotChocolate.Language.Utf8.SyntaxTree": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "FxMvELX2w2cSTbD4rXvk+ydvbfDOvLNRCT9ClTbcCDz+hwaNHGdktSBZFi3tu2wpocVzKhvQ7tWkWniDWVqHxQ==",
+        "resolved": "16.6.2",
+        "contentHash": "EnPQIYUej6xpZfDrA+EBCjB4PySZ/1OId05n5I6PJ3ApZROh+dikIl1H97CL9IAT1R1m9HCIwDYTnOciPLKj2A==",
         "dependencies": {
-          "HotChocolate.Language.SyntaxTree": "16.6.1",
-          "HotChocolate.Utilities.Buffers": "16.6.1"
+          "HotChocolate.Language.SyntaxTree": "16.6.2",
+          "HotChocolate.Utilities.Buffers": "16.6.2"
         }
       },
       "HotChocolate.Language.Visitors": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "2oozxeUexThb6BqhzgC+2jiijbXqSTBxqWY7gJIACn3ysKFgquE8QFw8oQCvszowxp8UBPgnFifOhWQ5iw11zA==",
+        "resolved": "16.6.2",
+        "contentHash": "AWYLpsrhH372AUY2Z1ggloh3AiCG+ppRClSYid9O7IWvLk0NEMCnH0yoHRR+fvtjiTyduCGRkh4QkxAaQi3EZg==",
         "dependencies": {
-          "HotChocolate.Language.SyntaxTree": "16.6.1"
+          "HotChocolate.Language.SyntaxTree": "16.6.2"
         }
       },
       "HotChocolate.Language.Web": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "q8jhJyPdKlMHEk4oaqDWZPpTYyyhc7wGlhoRx2N4dV/ysFj+QJXs//dC69+fmVn/N6eWuThkAJ6dfZTFuAhFrw==",
+        "resolved": "16.6.2",
+        "contentHash": "gepIvjgHEUuS9CPB2o7uo6Q9ci4YAS7LX+y9ZgVxs+azAdVP8kQAVcCkSHp640TPgmi2jcMt5PhYyZtVn2WHcQ==",
         "dependencies": {
-          "HotChocolate.Language.Utf8": "16.6.1",
-          "HotChocolate.Language.Visitors": "16.6.1"
+          "HotChocolate.Language.Utf8": "16.6.2",
+          "HotChocolate.Language.Visitors": "16.6.2"
         }
       },
       "HotChocolate.Transport.Abstractions": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "kwijoEs5Hmj90wKi8+0qv9Snldhwns5vk/gyE3x6PqlMBtYeb/5vRC+37SwmSItIFGjwKgsxgtqLCeIRIKTbzQ==",
+        "resolved": "16.6.2",
+        "contentHash": "bF+JUFvkUFnzrOmPWbCVy0I1bi9lhdizwMGxLde3gNM0MkgIVE4b3uXXlKrJ40DXEkFkoPwA6lRc931P6LphNQ==",
         "dependencies": {
-          "HotChocolate.Language.SyntaxTree": "16.6.1",
-          "HotChocolate.Language.Web": "16.6.1",
-          "HotChocolate.Utilities.Buffers": "16.6.1"
+          "HotChocolate.Language.SyntaxTree": "16.6.2",
+          "HotChocolate.Language.Web": "16.6.2",
+          "HotChocolate.Utilities.Buffers": "16.6.2"
         }
       },
       "HotChocolate.Transport.Http": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "HulBS2jQDhSFelJSZnR9n2hJ0OEW52t/RPJhqR6o+6MS9ewMgBngVuhRaBXvS5wUVyO/ASSRZhIGAwm5gip1fQ==",
+        "resolved": "16.6.2",
+        "contentHash": "yiYyMSJ+Ubx/j1zmo1AfkiRVsenjQuv6ZxN73/9JAfWMXlVLTZLu9+R65Wvxd1jhQt9+ltxLFc20cqlmbKCLpg==",
         "dependencies": {
-          "HotChocolate.Transport.Abstractions": "16.6.1",
-          "HotChocolate.Utilities.Buffers": "16.6.1",
-          "HotChocolate.Utilities.Tasks": "16.6.1",
+          "HotChocolate.Transport.Abstractions": "16.6.2",
+          "HotChocolate.Utilities.Buffers": "16.6.2",
+          "HotChocolate.Utilities.Tasks": "16.6.2",
           "Microsoft.Extensions.Http": "10.0.0",
           "System.IO.Hashing": "10.0.0"
         }
       },
       "HotChocolate.Utilities.Buffers": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "ZMxAooGfreKtLoVcqEyTT0zgcWVH1/5HdsbrQrlLLtKwMV/30S9rOVf+EQP2LgecjQczmT7ePQ9tzgN2OG09JA=="
+        "resolved": "16.6.2",
+        "contentHash": "uHBYJ+Qwj4iYxcBGj0bchm/93rZznPUExRAkL4okXzdJJwIndEKx+nD732/K36BFwxhM48zt+9CO8LAvifhO4g=="
       },
       "HotChocolate.Utilities.Tasks": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "kLoNsqxEA4/Lckos689y4HOtDMVVso5UqeWVP6WJftYZSIt+IOep6Cr1smoHwbDlWXW1ByYlC+GlV052w/a8ww=="
+        "resolved": "16.6.2",
+        "contentHash": "RzSzuVdUvpzpV9qEyFB+BBCH3fBRhCTSlQF2er3LMF32X5nf56a/UslEc4150HCmuOK1pgXETc2S0Q4zpJld7A=="
       },
       "HtmlAgilityPack": {
         "type": "Transitive",
@@ -766,38 +766,38 @@
       },
       "StrawberryShake.Core": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "5t7pqh5rlPv5br+z7LBuO9bxWjWBkulIlG+Zsn2mHZMpnhAbvQGoUtur/DjF7nY57p5JiTM33aZtbfN6dYmMZw==",
+        "resolved": "16.6.2",
+        "contentHash": "eLqG4zFcPy6aGEHpSR9aD6xdKYOd/Tdu1k1CAC/tKjpt06VwDm70Hah6xsGCrQ5J9jBOVs6YvP95f++MPrMlkg==",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
-          "StrawberryShake.Resources": "16.6.1"
+          "StrawberryShake.Resources": "16.6.2"
         }
       },
       "StrawberryShake.Resources": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "2fdY2FXXIYESwBQf31ZMY9elGAs9Y+7hUWlXEDuq1Rqsw6BR2GVj4+o7Fe6sd2fcoLZK+8CoqHxw/LCcP6/ERw=="
+        "resolved": "16.6.2",
+        "contentHash": "+WKjuSWkHeF8Vc09TJXwhCeSJ6EmksJrIFbCi7qsQ32/Vbd4b6LtF27SxcprvYvt73QSlX9DEVMaPCillxM/Hw=="
       },
       "StrawberryShake.Transport.Http": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "WkVPWnAfRDbMYmi+rOcCe5oSVyWjDUzTZDxs2zrrfIz+GCinsBuyRu4ab8nEr8QwV5IKmcOUiKZTZqr8P/Mo+A==",
+        "resolved": "16.6.2",
+        "contentHash": "YL42Z59m9T8yuvbr2mMbLanQGJyAN3Ye+3XcwshlGLJiPR0H+eJ2rGDSWtGBNfQ//wcs8OKWtsGatbd2K8FAnw==",
         "dependencies": {
-          "HotChocolate.Transport.Http": "16.6.1",
+          "HotChocolate.Transport.Http": "16.6.2",
           "Microsoft.AspNetCore.WebUtilities": "10.0.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
           "Microsoft.Extensions.Http": "10.0.0",
-          "StrawberryShake.Core": "16.6.1"
+          "StrawberryShake.Core": "16.6.2"
         }
       },
       "StrawberryShake.Transport.WebSockets": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "94h3f2a8Ct2WG3qSjE2lVQEBS3rOIdE5PRt4Y4YcD7hbTikfBemNgWKO+qX9zi24jO4mMm49SC19WjqmrybN5g==",
+        "resolved": "16.6.2",
+        "contentHash": "kECtCl69n5ooXfIopEu6M64ta2s+M9SoTqnvXWTLirFDw/GSUb72qbXRxvPHky0apuCFrdJ1NtOksHDWLDHI+A==",
         "dependencies": {
           "Microsoft.Extensions.Options": "10.0.0",
-          "StrawberryShake.Core": "16.6.1",
-          "StrawberryShake.Resources": "16.6.1"
+          "StrawberryShake.Core": "16.6.2",
+          "StrawberryShake.Resources": "16.6.2"
         }
       },
       "System.Diagnostics.EventLog": {

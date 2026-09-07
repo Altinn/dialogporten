@@ -38,11 +38,11 @@
       },
       "HotChocolate.AspNetCore.Authorization": {
         "type": "Direct",
-        "requested": "[16.6.1, )",
-        "resolved": "16.6.1",
-        "contentHash": "Q076mwtL24C+UlM7TZ2JMJS5s5ntrfHem5LRp6tkrkBXaeA2WC2+Tj9KJGvQ/ODp1BVRqHXYAZX2typp5MhV2Q==",
+        "requested": "[16.6.2, )",
+        "resolved": "16.6.2",
+        "contentHash": "z1eKcIj2sssB/SmOeHv7SSOcyVA4sNImUCcKZHRd+1oisPJMCMC/PFyGQdVVA0bHAAfzyMSBWOaWYxzPuXUleQ==",
         "dependencies": {
-          "HotChocolate": "16.6.1"
+          "HotChocolate": "16.6.2"
         }
       },
       "HotChocolate.Data.EntityFramework": {

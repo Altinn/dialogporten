@@ -512,10 +512,10 @@
       },
       "HotChocolate.AspNetCore.Authorization": {
         "type": "Transitive",
-        "resolved": "16.6.1",
-        "contentHash": "Q076mwtL24C+UlM7TZ2JMJS5s5ntrfHem5LRp6tkrkBXaeA2WC2+Tj9KJGvQ/ODp1BVRqHXYAZX2typp5MhV2Q==",
+        "resolved": "16.6.2",
+        "contentHash": "z1eKcIj2sssB/SmOeHv7SSOcyVA4sNImUCcKZHRd+1oisPJMCMC/PFyGQdVVA0bHAAfzyMSBWOaWYxzPuXUleQ==",
         "dependencies": {
-          "HotChocolate": "16.6.1"
+          "HotChocolate": "16.6.2"
         }
       },
       "HotChocolate.AspNetCore.Pipeline": {
@@ -2485,7 +2485,7 @@
           "Digdir.Library.Utils.AspNet": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.1.1, )",
           "HotChocolate.AspNetCore": "[16.6.2, )",
-          "HotChocolate.AspNetCore.Authorization": "[16.6.1, )",
+          "HotChocolate.AspNetCore.Authorization": "[16.6.2, )",
           "HotChocolate.Data.EntityFramework": "[16.6.2, )",
           "HotChocolate.Diagnostics": "[16.6.2, )",
           "Microsoft.ApplicationInsights.AspNetCore": "[3.1.2, )",

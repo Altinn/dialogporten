@@ -9,7 +9,7 @@ using ProblemDetailsBuilderFactory =
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
 
-public class ProblemDetailsRules
+public sealed class ProblemDetailsRules
 {
     public static IDialogportenProblemDetails CreateProblemDetailsOrDefault(
         HttpContext ctx,

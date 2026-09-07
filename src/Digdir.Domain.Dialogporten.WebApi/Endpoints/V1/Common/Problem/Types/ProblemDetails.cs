@@ -24,7 +24,7 @@ public interface IDialogportenProblemDetails
 }
 
 [OpenApiTypeName("ProblemDetails")]
-public class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails, IDialogportenProblemDetails
+public sealed class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails, IDialogportenProblemDetails
 {
     public string? TraceId { get; set; }
     public string? StatusDescription { get; set; }

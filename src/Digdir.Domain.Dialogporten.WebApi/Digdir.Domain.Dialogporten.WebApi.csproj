@@ -42,10 +42,6 @@
         </OpenApiDocument>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Common\Problem\" />
-    </ItemGroup>
-
     <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">
         <Exec
             WorkingDirectory="$(ProjectDir)"

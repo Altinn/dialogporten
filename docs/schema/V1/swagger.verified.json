@@ -298,7 +298,7 @@
         },
         "type": "object"
       },
-      "ProblemTypes_ProblemDetails": {
+      "ProblemDetails": {
         "additionalProperties": {
           "nullable": true
         },
@@ -347,7 +347,7 @@
           },
           "validationErrors": {
             "items": {
-              "$ref": "#/components/schemas/ProblemTypes_ProblemDetails_Error"
+              "$ref": "#/components/schemas/ProblemDetails_Error"
             },
             "nullable": true,
             "type": "array"
@@ -355,7 +355,7 @@
         },
         "type": "object"
       },
-      "ProblemTypes_ProblemDetails_Error": {
+      "ProblemDetails_Error": {
         "additionalProperties": {
           "nullable": true
         },
@@ -7947,7 +7947,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -7957,7 +7957,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -7967,7 +7967,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -7977,7 +7977,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8300,7 +8300,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8310,7 +8310,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8320,7 +8320,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8330,7 +8330,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8416,7 +8416,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8426,7 +8426,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8436,7 +8436,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8446,7 +8446,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8456,7 +8456,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8545,7 +8545,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8555,7 +8555,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8565,7 +8565,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8575,7 +8575,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8670,7 +8670,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8680,7 +8680,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8690,7 +8690,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8700,7 +8700,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8777,7 +8777,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8787,7 +8787,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8797,7 +8797,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8807,7 +8807,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8905,7 +8905,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8915,7 +8915,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8925,7 +8925,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8935,7 +8935,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8945,7 +8945,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8955,7 +8955,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8965,7 +8965,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -8975,7 +8975,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9052,7 +9052,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9062,7 +9062,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9072,7 +9072,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9082,7 +9082,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9165,7 +9165,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9175,7 +9175,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9185,7 +9185,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9195,7 +9195,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9284,7 +9284,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9294,7 +9294,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9304,7 +9304,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9314,7 +9314,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9409,7 +9409,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9419,7 +9419,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9429,7 +9429,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9439,7 +9439,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9506,7 +9506,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9516,7 +9516,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9526,7 +9526,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9536,7 +9536,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9546,7 +9546,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9556,7 +9556,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9566,7 +9566,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9629,7 +9629,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9639,7 +9639,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9730,7 +9730,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9740,7 +9740,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9921,7 +9921,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9931,7 +9931,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9941,7 +9941,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -9951,7 +9951,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10298,7 +10298,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10308,7 +10308,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10318,7 +10318,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10396,7 +10396,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10406,7 +10406,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10416,7 +10416,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10426,7 +10426,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10436,7 +10436,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10516,7 +10516,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10526,7 +10526,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10536,7 +10536,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10546,7 +10546,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10556,7 +10556,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10566,7 +10566,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10642,7 +10642,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10652,7 +10652,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10662,7 +10662,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10672,7 +10672,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10776,7 +10776,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10792,7 +10792,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10802,7 +10802,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10812,7 +10812,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10822,7 +10822,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10832,7 +10832,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10921,7 +10921,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10931,7 +10931,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10941,7 +10941,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10951,7 +10951,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10961,7 +10961,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10971,7 +10971,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10981,7 +10981,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -10991,7 +10991,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11071,7 +11071,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11081,7 +11081,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11091,7 +11091,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11101,7 +11101,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11111,7 +11111,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11121,7 +11121,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11192,7 +11192,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11202,7 +11202,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11212,7 +11212,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11222,7 +11222,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11232,7 +11232,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11242,7 +11242,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11313,7 +11313,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11323,7 +11323,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11333,7 +11333,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11343,7 +11343,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11353,7 +11353,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11455,7 +11455,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11465,7 +11465,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11475,7 +11475,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11485,7 +11485,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11495,7 +11495,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11567,7 +11567,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11577,7 +11577,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11587,7 +11587,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11597,7 +11597,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11696,7 +11696,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11706,7 +11706,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11716,7 +11716,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11726,7 +11726,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11736,7 +11736,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11746,7 +11746,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11756,7 +11756,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11766,7 +11766,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11844,7 +11844,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11854,7 +11854,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11864,7 +11864,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11874,7 +11874,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11955,7 +11955,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11965,7 +11965,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -11975,7 +11975,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12064,7 +12064,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12074,7 +12074,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12084,7 +12084,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12094,7 +12094,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12104,7 +12104,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12114,7 +12114,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12124,7 +12124,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12213,7 +12213,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12223,7 +12223,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12233,7 +12233,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12243,7 +12243,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12253,7 +12253,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12263,7 +12263,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12364,7 +12364,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12374,7 +12374,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12384,7 +12384,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12394,7 +12394,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12404,7 +12404,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12414,7 +12414,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12424,7 +12424,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12434,7 +12434,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12506,7 +12506,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12516,7 +12516,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12526,7 +12526,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12536,7 +12536,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12614,7 +12614,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12624,7 +12624,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12634,7 +12634,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12644,7 +12644,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12716,7 +12716,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12726,7 +12726,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12736,7 +12736,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12746,7 +12746,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12845,7 +12845,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12855,7 +12855,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12865,7 +12865,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12875,7 +12875,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12885,7 +12885,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12895,7 +12895,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12905,7 +12905,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12915,7 +12915,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -12993,7 +12993,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13003,7 +13003,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13013,7 +13013,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13023,7 +13023,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13123,7 +13123,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13133,7 +13133,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13143,7 +13143,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13153,7 +13153,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13163,7 +13163,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13173,7 +13173,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13183,7 +13183,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13193,7 +13193,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13314,7 +13314,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13324,7 +13324,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13334,7 +13334,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13407,7 +13407,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13417,7 +13417,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13427,7 +13427,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13437,7 +13437,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13447,7 +13447,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13457,7 +13457,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13467,7 +13467,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },
@@ -13477,7 +13477,7 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemTypes_ProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             },

@@ -6,7 +6,7 @@ using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 // authorizationContext, but a mapping layer has to keep round-tripping them for as long as the server
 // still returns and accepts them.
 #pragma warning disable CS0618 // Type or member is obsolete
-#pragma warning disable DPEXP001 // authorizationContext/contextToken are experimental
+#pragma warning disable DPEXP001 // authorizationContext is experimental
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 

@@ -514,6 +514,12 @@
             "nullable": true,
             "type": "string"
           },
+          "tokenRef": {
+            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.\nThe same value may be shared by multiple entities in one dialog to form an OR-group: authorization for any\nentity in the group adds the shared value to \u0022e\u0022, so a recipient validating that value cannot distinguish\nwhich individual entity was authorized. Only group entities that intentionally share access semantics.\nToken references are scoped to a dialog; recipients must also validate the token\u0027s dialog id (\u0022i\u0022).\nMaximum 50 characters.",
+            "example": "my-own-reference",
+            "nullable": true,
+            "type": "string"
+          },
           "unauthorizedPresentation": {
             "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
             "oneOf": [
@@ -1052,7 +1058,7 @@
             "type": "string"
           },
           "dialogToken": {
-            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nEntities carrying an authorization context are the exception: they are issued their own, narrower\n\u0022contextToken\u0022 which must be used instead of this token, as the dialog token does not assert their grant.\nSee the \u0022contextToken\u0022 property on the individual entities.",
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nThe token\u0027s authorized entities (\u0022e\u0022) claim lists, for every entity carrying an authorization context that\nthe end user is authorized for, the entity\u0027s id or the \u0022tokenRef\u0022 the service owner supplied on the context.\nA tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the\nshared value. Recipients must validate the dialog id (\u0022i\u0022) together with an entity reference.",
             "nullable": true,
             "type": "string"
           },
@@ -1321,12 +1327,6 @@
             "type": "string",
             "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s endpoints.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "endpoints": {
             "description": "The endpoints associated with the action.",
             "items": {
@@ -1414,12 +1414,6 @@
       "V1EndUserDialogsQueriesGet_DialogAttachment": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1526,12 +1520,6 @@
             "nullable": true,
             "type": "string",
             "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
-          },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -1661,12 +1649,6 @@
               }
             ]
           },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
@@ -1750,12 +1732,6 @@
       "V1EndUserDialogsQueriesGet_DialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1863,16 +1839,15 @@
       "V1EndUserDialogsQueriesGet_DialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {
@@ -1975,12 +1950,6 @@
       "V1EndUserDialogsQueriesGetTransmission_Attachment": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2088,16 +2057,15 @@
       "V1EndUserDialogsQueriesGetTransmission_NavigationalAction": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {
@@ -2147,12 +2115,6 @@
                 "$ref": "#/components/schemas/V1EndUserDialogsQueriesGetTransmission_Content"
               }
             ]
-          },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
           },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
@@ -2655,12 +2617,6 @@
       "V1EndUserDialogsQueriesSearchTransmissions_Attachment": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2768,16 +2724,15 @@
       "V1EndUserDialogsQueriesSearchTransmissions_NavigationalAction": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {
@@ -2827,12 +2782,6 @@
                 "$ref": "#/components/schemas/V1EndUserDialogsQueriesSearchTransmissions_Content"
               }
             ]
-          },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
           },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
@@ -4075,6 +4024,13 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
           "title": {
             "description": "The title of the navigational action.",
             "items": {
@@ -4270,6 +4226,13 @@
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
             "nullable": true,
             "type": "string"
           },
@@ -5156,6 +5119,13 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
           "title": {
             "description": "The title of the navigational action.",
             "items": {
@@ -5306,6 +5276,13 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
+          },
           "title": {
             "description": "The title of the navigational action.",
             "items": {
@@ -5450,6 +5427,12 @@
           "serviceResource": {
             "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
             "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "tokenRef": {
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
+            "example": "my-own-reference",
             "nullable": true,
             "type": "string"
           },
@@ -6439,6 +6422,11 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
           "isAuthorized": {
             "description": "Indicates whether the end user is authorized for this navigational action.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
             "nullable": true,
@@ -6645,6 +6633,12 @@
             "nullable": true,
             "type": "string"
           },
+          "tokenRef": {
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
+            "example": "my-own-reference",
+            "nullable": true,
+            "type": "string"
+          },
           "unauthorizedPresentation": {
             "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
             "oneOf": [
@@ -6706,6 +6700,11 @@
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "title": {
@@ -7416,6 +7415,12 @@
             "nullable": true,
             "type": "string"
           },
+          "tokenRef": {
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
+            "example": "my-own-reference",
+            "nullable": true,
+            "type": "string"
+          },
           "unauthorizedPresentation": {
             "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
             "oneOf": [
@@ -7477,6 +7482,11 @@
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "title": {
@@ -7816,7 +7826,7 @@
   "paths": {
     "/api/v1/.well-known/jwks.json": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues two token types, both signed with these keys and distinguished by the JOSE \u0022typ\u0022 header: the dialog token, which carries \u0022JWT\u0022, and \u0022dialogcontexttoken\u002Bjwt\u0022, a narrower token scoped to a single authorization-context-carrying entity. Receiving services must validate the \u0022typ\u0022 header and reject a token whose type they do not expect; in particular, a service expecting a dialog token must reject \u0022dialogcontexttoken\u002Bjwt\u0022.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues a single token type, the dialog token, signed with these keys and carrying the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Besides the action grants in the \u0022a\u0022 claim, the token\u0027s \u0022e\u0022 claim lists the entities carrying an authorization context that the end user is authorized for, by entity id or by the \u0022tokenRef\u0022 the service owner supplied on the context; a receiving service handling a request scoped to such an entity must check both that the entity is listed there and that \u0022i\u0022 identifies the dialog being accessed. A tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the shared value.",
         "operationId": "V1WellKnownJwksGet_Jwks",
         "responses": {
           "200": {
@@ -7857,7 +7867,7 @@
     },
     "/api/v1/.well-known/oauth-authorization-server": {
       "get": {
-        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues two token types, both signed with the same keys and distinguished by the JOSE \u0022typ\u0022 header: the dialog token, which carries \u0022JWT\u0022, and \u0022dialogcontexttoken\u002Bjwt\u0022, a narrower token scoped to a single authorization-context-carrying entity. Receiving services must validate the \u0022typ\u0022 header and reject a token whose type they do not expect; in particular, a service expecting a dialog token must reject \u0022dialogcontexttoken\u002Bjwt\u0022.",
+        "description": "This endpoint can be used by client integrations supporting automatic discovery of \u0022OAuth 2.0 Authorization Server\u0022 metadata, enabling verification of dialog tokens issued by Dialogporten.\n\nDialogporten issues a single token type, the dialog token, signed with the published keys and carrying the JOSE \u0022typ\u0022 header \u0022JWT\u0022. Besides the action grants in the \u0022a\u0022 claim, the token\u0027s \u0022e\u0022 claim lists the entities carrying an authorization context that the end user is authorized for, by entity id or by the \u0022tokenRef\u0022 the service owner supplied on the context; a receiving service handling a request scoped to such an entity must check both that the entity is listed there and that \u0022i\u0022 identifies the dialog being accessed. A tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the shared value.",
         "operationId": "V1WellKnownOauthAuthorizationServerGet_OauthAuthorizationServer",
         "responses": {
           "200": {

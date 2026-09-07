@@ -57,21 +57,19 @@ public class EndUserTransmissionMappingExtensionsTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void ToDialogTransmission_CarriesContextTokensAndAuthorizationFlags(bool fromDetails)
+    public void ToDialogTransmission_CarriesAuthorizationFlags(bool fromDetails)
     {
-        // A context token is what the caller has to present against the URLs of the entity it belongs to, so
-        // losing one while normalizing the endpoint families would silently downgrade the caller to the dialog token.
+        // Losing an authorization flag while normalizing the endpoint families would silently misreport
+        // what the caller may access.
         var result = fromDetails ? FullDetails().ToDialogTransmission() : FullSearchItem().ToDialogTransmission();
 
-        Assert.Equal("transmission-context-token", result.ContextToken);
+        Assert.True(result.IsAuthorized);
 
         var attachment = Assert.Single(result.Attachments);
         Assert.True(attachment.IsAuthorized);
-        Assert.Equal("attachment-context-token", attachment.ContextToken);
 
         var navigationalAction = Assert.Single(result.NavigationalActions);
         Assert.True(navigationalAction.IsAuthorized);
-        Assert.Equal("nav-context-token", navigationalAction.ContextToken);
     }
 
     [Fact]
@@ -116,7 +114,6 @@ public class EndUserTransmissionMappingExtensionsTests
         CreatedAt = At("2024-02-01T00:00:00Z"),
         AuthorizationAttribute = "attr",
         IsAuthorized = true,
-        ContextToken = "transmission-context-token",
         ExtendedType = new Uri("urn:example:type"),
         ExternalReference = "ext",
         RelatedTransmissionId = Guid.NewGuid(),
@@ -131,7 +128,6 @@ public class EndUserTransmissionMappingExtensionsTests
                 Id = Guid.NewGuid(),
                 Name = "a",
                 IsAuthorized = true,
-                ContextToken = "attachment-context-token",
                 Urls = [new DialogTransmissionAttachmentUrlDetails { Id = Guid.NewGuid(), Url = new Uri("https://example.com/t"), ConsumerType = AttachmentUrlConsumerType.Api }],
             },
         ],
@@ -141,7 +137,6 @@ public class EndUserTransmissionMappingExtensionsTests
             {
                 Url = new Uri("https://example.com/nav"),
                 IsAuthorized = true,
-                ContextToken = "nav-context-token",
             },
         ],
     };
@@ -152,7 +147,6 @@ public class EndUserTransmissionMappingExtensionsTests
         CreatedAt = At("2024-02-01T00:00:00Z"),
         AuthorizationAttribute = "attr",
         IsAuthorized = true,
-        ContextToken = "transmission-context-token",
         ExtendedType = new Uri("urn:example:type"),
         ExternalReference = "ext",
         RelatedTransmissionId = Guid.NewGuid(),
@@ -167,7 +161,6 @@ public class EndUserTransmissionMappingExtensionsTests
                 Id = Guid.NewGuid(),
                 Name = "a",
                 IsAuthorized = true,
-                ContextToken = "attachment-context-token",
                 Urls = [new DialogTransmissionSearchAttachmentUrl { Id = Guid.NewGuid(), Url = new Uri("https://example.com/t"), ConsumerType = AttachmentUrlConsumerType.Api }],
             },
         ],
@@ -177,7 +170,6 @@ public class EndUserTransmissionMappingExtensionsTests
             {
                 Url = new Uri("https://example.com/nav"),
                 IsAuthorized = true,
-                ContextToken = "nav-context-token",
             },
         ],
     };

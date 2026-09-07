@@ -52,6 +52,19 @@ public sealed class AuthorizationContextDto
     public string? Action { get; set; }
 
     /// <summary>
+    /// An optional reference identifying this context in the dialog token. When the end user is authorized for
+    /// this context, the dialog token's "e" claim lists this value instead of the id of the entity carrying the
+    /// context, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.
+    /// The same value may be shared by multiple entities in one dialog to form an OR-group: authorization for any
+    /// entity in the group adds the shared value to "e", so a recipient validating that value cannot distinguish
+    /// which individual entity was authorized. Only group entities that intentionally share access semantics.
+    /// Token references are scoped to a dialog; recipients must also validate the token's dialog id ("i").
+    /// Maximum 50 characters.
+    /// </summary>
+    /// <example>my-own-reference</example>
+    public string? TokenRef { get; set; }
+
+    /// <summary>
     /// Required. Controls how the entity is presented to end users that fail the authorization check:
     /// "disabled" keeps the entity visible but masks its URLs and embedded content references, while
     /// "excluded" removes it from the collection it belongs to entirely, leaving only its id and

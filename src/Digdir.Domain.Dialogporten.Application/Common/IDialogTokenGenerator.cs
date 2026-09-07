@@ -11,18 +11,21 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 
 public interface IDialogTokenGenerator
 {
-    string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult, string issuerVersion);
-
     /// <summary>
-    /// Generates a token scoped to a single authorization-context-carrying entity, asserting the single
-    /// PDP-verified grant (action, resource override and/or additional resource attribute) along with the
-    /// parties it was permitted for.
+    /// Generates the dialog token: the legacy action grants in "a", and the references of every
+    /// authorization-context-carrying entity the user is authorized for in "e" (omitted when empty).
     /// </summary>
-    string GetDialogContextToken(
+    /// <param name="dialog">The dialog the token is issued for.</param>
+    /// <param name="authorizationResult">The PDP result the action grants are derived from.</param>
+    /// <param name="authorizedContextReferences">
+    /// For each authorization context the user is authorized for, the carrying entity's id or the service
+    /// owner supplied token reference. See <see cref="Authorization.AuthorizedContextReferences"/>.
+    /// </param>
+    /// <param name="issuerVersion">The API version suffix appended to the issuer.</param>
+    string GetDialogToken(
         DialogEntity dialog,
-        AuthorizedCheck authorizedCheck,
-        Guid entityId,
-        string entityType,
+        DialogDetailsAuthorizationResult authorizationResult,
+        IReadOnlyCollection<string> authorizedContextReferences,
         string issuerVersion);
 }
 
@@ -61,52 +64,29 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
         _compactJwsGenerator = compactJwsGenerator;
     }
 
-    public string GetDialogToken(DialogEntity dialog, DialogDetailsAuthorizationResult authorizationResult,
+    public string GetDialogToken(
+        DialogEntity dialog,
+        DialogDetailsAuthorizationResult authorizationResult,
+        IReadOnlyCollection<string> authorizedContextReferences,
         string issuerVersion)
     {
+        ArgumentNullException.ThrowIfNull(authorizedContextReferences);
+
         var claims = GetBaseClaims(dialog);
         claims[DialogTokenClaimTypes.Actions] = GetAuthorizedActions(authorizationResult);
+
+        // Omitted rather than emitted empty, so dialogs that do not use authorization contexts issue a
+        // token of exactly the pre-existing shape.
+        if (authorizedContextReferences.Count > 0)
+        {
+            claims[DialogTokenClaimTypes.AuthorizedEntities] = authorizedContextReferences
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+        }
+
         AddIssuerAndLifetimeClaims(claims, issuerVersion);
 
         return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogToken);
-    }
-
-    public string GetDialogContextToken(
-        DialogEntity dialog,
-        AuthorizedCheck authorizedCheck,
-        Guid entityId,
-        string entityType,
-        string issuerVersion)
-    {
-        var claims = GetBaseClaims(dialog);
-        claims[DialogTokenClaimTypes.EntityId] = entityId;
-        claims[DialogTokenClaimTypes.EntityType] = entityType;
-
-        // A context token asserts exactly one check, so "a" carries that single action verbatim. Note that
-        // this is a different shape from the dialog token's "a", which is a ';'-separated list of
-        // "action[,attribute]" entries - a recipient sharing parsing code between the two must switch on the
-        // JOSE "typ" header rather than assume the list format.
-        claims[DialogTokenClaimTypes.Actions] = authorizedCheck.Check.Action;
-
-        // Both are emitted independently, exactly mirroring the resource attributes the PDP request carried
-        // for this check: the resource override (falling back to the dialog's own resource, already carried
-        // in "s", when absent) with the additional attribute layered on top, if any. A recipient can
-        // reconstruct the same PDP request from "s"/"r"/"ra" alone.
-        var resourceSpec = authorizedCheck.Check.Resource;
-        if (resourceSpec.ServiceResource is not null)
-        {
-            claims[DialogTokenClaimTypes.EffectiveResource] = resourceSpec.ServiceResource;
-        }
-
-        if (resourceSpec.AdditionalResourceAttribute is not null)
-        {
-            claims[DialogTokenClaimTypes.AdditionalResourceAttribute] = resourceSpec.AdditionalResourceAttribute;
-        }
-
-        claims[DialogTokenClaimTypes.PermittedParties] = authorizedCheck.PermittedParties;
-        AddIssuerAndLifetimeClaims(claims, issuerVersion);
-
-        return _compactJwsGenerator.GetCompactJws(claims, DialogTokenTypes.DialogContextToken);
     }
 
     private Dictionary<string, object?> GetBaseClaims(DialogEntity dialog)
@@ -182,8 +162,9 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
 
                 case AuthorizationResourceSpecKind.Context:
                 default:
-                    // The dialog token is frozen at legacy semantics: grants for authorization contexts
-                    // are expressed exclusively through per-entity context tokens.
+                    // "a" is frozen at legacy semantics. A context may grant via another party or resource than
+                    // the dialog's own, which an action name alone cannot express safely; context grants are
+                    // instead listed per entity in "e".
                     continue;
             }
 
@@ -198,8 +179,7 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
 }
 
 /// <summary>
-/// JOSE "typ" header values distinguishing the token types issued by Dialogporten (RFC 8725 explicit typing;
-/// per RFC 7515 a value without '/' is shorthand for "application/&lt;value&gt;").
+/// JOSE "typ" header value of the token issued by Dialogporten.
 /// </summary>
 public static class DialogTokenTypes
 {
@@ -208,29 +188,10 @@ public static class DialogTokenTypes
     /// suggest "dialogtoken+jwt", but changing an already-issued token's type is a silent breaking change for
     /// receivers that assert typ == "JWT" (a JWT library configured with an explicit valid-types list, or
     /// Nimbus' DefaultJWTProcessor, which permits only "JWT" or an absent type by default), and there is no
-    /// transition window available: the type is issued, not negotiated. Since the value only has to
-    /// <em>differ</em> between the token types signed by this key to keep them apart, retyping the dialog
-    /// token would break such receivers without protecting anyone: those asserting "JWT" already reject the
-    /// other types, and those ignoring "typ" cannot be protected retroactively either way.
-    /// Switching to "dialogtoken+jwt" belongs to a future major version, where it can ride the issuer version
-    /// already carried in the "iss" claim.
+    /// transition window available: the type is issued, not negotiated. Switching to "dialogtoken+jwt" belongs
+    /// to a future major version, where it can ride the issuer version already carried in the "iss" claim.
     /// </summary>
     public const string DialogToken = "JWT";
-
-    public const string DialogContextToken = "dialogcontexttoken+jwt";
-}
-
-/// <summary>
-/// Entity type discriminators for the <see cref="DialogTokenClaimTypes.EntityType"/> claim in context tokens.
-/// </summary>
-public static class DialogContextTokenEntityTypes
-{
-    public const string ApiAction = "apiaction";
-    public const string GuiAction = "guiaction";
-    public const string Attachment = "attachment";
-    public const string Transmission = "transmission";
-    public const string TransmissionAttachment = "transmissionattachment";
-    public const string TransmissionNavigationalAction = "navigationalaction";
 }
 
 public static class DialogTokenClaimTypes
@@ -250,10 +211,13 @@ public static class DialogTokenClaimTypes
     public const string DialogId = "i";
     public const string Actions = "a";
 
-    // Context-token-only claims
-    public const string EntityId = "e";
-    public const string EntityType = "t";
-    public const string EffectiveResource = "r";
-    public const string AdditionalResourceAttribute = "ra";
-    public const string PermittedParties = "pp";
+    /// <summary>
+    /// Flat array of entity references, one per authorization context the user is authorized for: the id of the
+    /// entity carrying the context (api action, gui action, attachment, transmission, transmission attachment or
+    /// navigational action), or the service owner supplied token reference when the context has one. Omitted
+    /// when there are none. Shared token references represent OR-groups: authorization for any group member adds
+    /// the shared value. A receiver checks both that the target reference is listed here and that "i" identifies
+    /// the dialog being accessed.
+    /// </summary>
+    public const string AuthorizedEntities = "e";
 }

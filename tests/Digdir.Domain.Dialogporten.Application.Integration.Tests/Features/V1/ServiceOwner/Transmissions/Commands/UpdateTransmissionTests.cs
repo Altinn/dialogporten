@@ -227,6 +227,53 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
                 url.MediaType.Should().Be(UpdatedAttachmentUrlMediaType);
             });
 
+    private const string NavigationalActionIdKey = "navigational-action-id";
+    private static readonly Uri UpdatedNavigationalActionUrl = new("https://digdir.no/updated-navigation");
+
+    // Navigational action ids are emitted in the dialog token's authorized-entities claim, so a
+    // service owner may reference them from its own endpoint. Echoing the id on PUT must therefore
+    // update the existing row in place rather than replace it under a fresh id.
+    [Fact]
+    public Task UpdateTransmission_Should_Preserve_NavigationalAction_Id_When_Provided()
+        => FlowBuilder.For(Application)
+            .AsChangeTransmissionUser()
+            .CreateSimpleDialog()
+            .CreateTransmission((x, _) =>
+                x.AddNavigationalAction())
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+                ctx.Bag[NavigationalActionIdKey] = dialog.Transmissions.Single()
+                    .NavigationalActions.Single().Id)
+            .UpdateTransmission((x, ctx) =>
+            {
+                x.Dto.NavigationalActions[0].Id = ctx.GetGuidByKey(NavigationalActionIdKey);
+                x.Dto.NavigationalActions[0].Url = UpdatedNavigationalActionUrl;
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
+            {
+                var navigationalAction = dialog.Transmissions.Single().NavigationalActions.Single();
+                navigationalAction.Id.Should().Be(ctx.GetGuidByKey(NavigationalActionIdKey));
+                navigationalAction.Url.Should().Be(UpdatedNavigationalActionUrl);
+            });
+
+    [Fact]
+    public Task UpdateTransmission_Should_Replace_NavigationalAction_When_Id_Is_Omitted()
+        => FlowBuilder.For(Application)
+            .AsChangeTransmissionUser()
+            .CreateSimpleDialog()
+            .CreateTransmission((x, _) =>
+                x.AddNavigationalAction())
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>((dialog, ctx) =>
+                ctx.Bag[NavigationalActionIdKey] = dialog.Transmissions.Single()
+                    .NavigationalActions.Single().Id)
+            .UpdateTransmission((x, _) => x.Dto.NavigationalActions[0].Id = null)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
+                dialog.Transmissions.Single().NavigationalActions.Should().ContainSingle()
+                    .Which.Id.Should().NotBe(ctx.GetGuidByKey(NavigationalActionIdKey)));
+
     [Theory]
     [ClassData(typeof(UpdateTransmissionBasicFieldTestData))]
     public Task UpdateTransmission_Persists_Changes_When_Silent_Update_And_Scope_Are_Present(

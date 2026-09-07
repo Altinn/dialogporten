@@ -690,6 +690,12 @@ public sealed class TransmissionAttachmentUrlDto
 public sealed class TransmissionNavigationalActionDto
 {
     /// <summary>
+    /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+    /// </summary>
+    /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
+    public Guid? Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     public List<LocalizationDto> Title { get; set; } = [];

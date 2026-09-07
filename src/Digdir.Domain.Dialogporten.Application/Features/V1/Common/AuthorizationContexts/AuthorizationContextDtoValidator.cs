@@ -53,6 +53,11 @@ internal sealed class AuthorizationContextDtoValidator : AbstractValidator<Autho
             .MaximumLength(Constants.DefaultMaxStringLength)
             .When(x => x.Action is not null);
 
+        RuleFor(x => x.TokenRef)
+            .NotEmpty()
+            .MaximumLength(AuthorizationContext.MaxTokenReferenceLength)
+            .When(x => x.TokenRef is not null);
+
         RuleFor(x => x.UnauthorizedPresentation)
             .IsInEnum()
             .WithMessage($"'{{PropertyName}}' is required and must be either " +

@@ -42,14 +42,6 @@ public class DialogGuiAction
     [JsonPropertyName("isAuthorized")]
     public bool IsAuthorized { get; set; }
 
-    /// <summary>
-    /// A token asserting the authenticated user's authorization for this specific action, as determined by its
-    /// <br/>authorization context. Only present when the action has an authorization context and the user is authorized.
-    /// <br/>Should be used instead of the dialog token against this action's URL.
-    /// </summary>
-    [JsonPropertyName("contextToken")]
-    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
-    public string? ContextToken { get; set; }
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX

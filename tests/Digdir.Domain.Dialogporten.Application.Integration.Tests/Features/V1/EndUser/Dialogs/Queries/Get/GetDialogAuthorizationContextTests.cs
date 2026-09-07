@@ -320,7 +320,7 @@ public class GetDialogAuthorizationContextTests(DialogApplication application) :
             });
 
     [Fact]
-    public Task Authorized_Context_Entities_Should_Get_Context_Tokens() =>
+    public Task Dialog_Token_Should_List_Authorized_Context_Entities() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
             {
@@ -329,7 +329,7 @@ public class GetDialogAuthorizationContextTests(DialogApplication application) :
                     guiAction.Action = null;
                     guiAction.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled);
                 });
-                // Legacy gui action without a context must not get a context token
+                // Legacy gui action without a context is governed by the action claim, not the entity list
                 x.AddGuiAction(guiAction => guiAction.Priority = DialogGuiActionPriority.Values.Secondary);
                 x.AddAttachment(attachment =>
                     attachment.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled));
@@ -346,43 +346,131 @@ public class GetDialogAuthorizationContextTests(DialogApplication application) :
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                // The dialog token itself is typed and carries no context grants
                 GetTokenHeader(x.DialogToken!).GetProperty("typ").GetString().Should().Be(DialogTokenTypes.DialogToken);
 
                 var contextGuiAction = x.GuiActions.Single(g => g.Action == "read");
                 contextGuiAction.IsAuthorized.Should().BeTrue();
-                contextGuiAction.ContextToken.Should().NotBeNullOrEmpty();
-
                 var legacyGuiAction = x.GuiActions.Single(g => g.Action != "read");
                 legacyGuiAction.IsAuthorized.Should().BeTrue();
-                legacyGuiAction.ContextToken.Should().BeNull();
-
-                x.Attachments.Single().ContextToken.Should().NotBeNullOrEmpty();
-
                 var transmission = x.Transmissions.Single();
-                transmission.ContextToken.Should().NotBeNullOrEmpty();
                 // The "dp-excluded" rollback sentinel is persisted on the transmission but never echoed
                 transmission.AuthorizationAttribute.Should().BeNull();
-                transmission.Attachments.Single().ContextToken.Should().NotBeNullOrEmpty();
-                transmission.NavigationalActions.Single().ContextToken.Should().NotBeNullOrEmpty();
 
-                // The context token asserts exactly the entity, the grant and the permitted parties
-                GetTokenHeader(contextGuiAction.ContextToken!).GetProperty("typ").GetString()
-                    .Should().Be(DialogTokenTypes.DialogContextToken);
-
-                var payload = GetTokenPayload(contextGuiAction.ContextToken!);
-                payload.GetProperty(DialogTokenClaimTypes.EntityId).GetGuid().Should().Be(contextGuiAction.Id);
-                payload.GetProperty(DialogTokenClaimTypes.EntityType).GetString()
-                    .Should().Be(DialogContextTokenEntityTypes.GuiAction);
-                payload.GetProperty(DialogTokenClaimTypes.Actions).GetString().Should().Be("read");
-                payload.GetProperty(DialogTokenClaimTypes.EffectiveResource).GetString().Should().Be(ContextResource);
-                payload.GetProperty(DialogTokenClaimTypes.PermittedParties).EnumerateArray()
-                    .Select(p => p.GetString()).Should().BeEquivalentTo([OtherParty]);
+                // Every authorized context-carrying entity, in document order, by id; nothing else
+                var payload = GetTokenPayload(x.DialogToken!);
+                payload.GetProperty(DialogTokenClaimTypes.AuthorizedEntities).EnumerateArray()
+                    .Select(e => e.GetString())
+                    .Should().Equal(
+                        contextGuiAction.Id.ToString(),
+                        x.Attachments.Single().Id.ToString(),
+                        transmission.Id.ToString(),
+                        transmission.Attachments.Single().Id.ToString(),
+                        transmission.NavigationalActions.Single().Id.ToString());
                 payload.GetProperty(DialogTokenClaimTypes.DialogId).GetGuid().Should().Be(x.Id);
             });
 
     [Fact]
-    public Task Unauthorized_Context_Entities_Should_Not_Get_Context_Tokens() =>
+    public Task Dialog_Token_Should_List_TokenRef_Instead_Of_Entity_Id_When_Supplied() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddGuiAction(guiAction =>
+                {
+                    guiAction.Action = null;
+                    guiAction.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled);
+                    guiAction.AuthorizationContext.TokenRef = "my-own-reference";
+                });
+                x.AddAttachment(attachment =>
+                    attachment.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled));
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = null;
+                    transmission.AddNavigationalAction(navigationalAction =>
+                    {
+                        navigationalAction.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled);
+                        navigationalAction.AuthorizationContext.TokenRef = "nav-action-reference";
+                    });
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var payload = GetTokenPayload(x.DialogToken!);
+                payload.GetProperty(DialogTokenClaimTypes.AuthorizedEntities).EnumerateArray()
+                    .Select(e => e.GetString())
+                    .Should().Equal("my-own-reference", x.Attachments.Single().Id.ToString(), "nav-action-reference");
+            });
+
+    [Fact]
+    public Task Shared_TokenRef_Should_Represent_An_Or_Group() =>
+        FlowBuilder.For(Application, ConfigureMainReadAndContextAuthorization)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddAttachment(attachment =>
+                {
+                    attachment.AuthorizationContext = ChildContextDto(
+                        AuthorizationContextUnauthorizedPresentation.Values.Disabled);
+                    attachment.AuthorizationContext.TokenRef = "shared-reference";
+                });
+                x.AddAttachment(attachment =>
+                {
+                    attachment.AuthorizationContext = ContextDto(
+                        AuthorizationContextUnauthorizedPresentation.Values.Disabled,
+                        action: "sign");
+                    attachment.AuthorizationContext.TokenRef = "shared-reference";
+                });
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Attachments.Should().ContainSingle(attachment => attachment.IsAuthorized);
+                x.Attachments.Should().ContainSingle(attachment => !attachment.IsAuthorized);
+
+                GetTokenPayload(x.DialogToken!).GetProperty(DialogTokenClaimTypes.AuthorizedEntities)
+                    .EnumerateArray()
+                    .Select(e => e.GetString())
+                    .Should().Equal("shared-reference");
+            });
+
+    [Fact]
+    public Task Dialog_Token_Should_Not_List_Unauthorized_Context_Entities() =>
+        FlowBuilder.For(Application, ConfigureMainReadAndContextAuthorization)
+            .CreateSimpleDialog((x, _) =>
+            {
+                // Denied: the context asks for "sign", which is not among the authorized checks
+                x.AddGuiAction(guiAction =>
+                {
+                    guiAction.Action = null;
+                    guiAction.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled, action: "sign");
+                });
+                // Denied transmission whose children would be authorized on their own: parent-first narrowing
+                // must keep them out of the list too, or the token would grant access past the denied parent.
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = null;
+                    transmission.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled, action: "sign");
+                    transmission.AddAttachment(attachment =>
+                        attachment.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled));
+                });
+                // Authorized: read on the context resource is among the authorized checks
+                x.AddAttachment(attachment =>
+                    attachment.AuthorizationContext = ChildContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled));
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.GuiActions.Single().IsAuthorized.Should().BeFalse();
+                x.Transmissions.Single().IsAuthorized.Should().BeFalse();
+                x.Transmissions.Single().Attachments.Single().IsAuthorized.Should().BeFalse();
+                x.Attachments.Single().IsAuthorized.Should().BeTrue();
+
+                GetTokenPayload(x.DialogToken!).GetProperty(DialogTokenClaimTypes.AuthorizedEntities).EnumerateArray()
+                    .Select(e => e.GetString())
+                    .Should().Equal(x.Attachments.Single().Id.ToString());
+            });
+
+    [Fact]
+    public Task Dialog_Token_Should_Omit_Authorized_Entities_Claim_When_No_Context_Entity_Is_Authorized() =>
         FlowBuilder.For(Application, ConfigureMainReadOnlyAuthorization)
             .CreateSimpleDialog((x, _) =>
             {
@@ -391,22 +479,18 @@ public class GetDialogAuthorizationContextTests(DialogApplication application) :
                     guiAction.Action = null;
                     guiAction.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled);
                 });
-                x.AddTransmission(transmission =>
-                {
-                    transmission.AuthorizationAttribute = null;
-                    transmission.AuthorizationContext = ContextDto(AuthorizationContextUnauthorizedPresentation.Values.Disabled, action: null);
-                });
+                x.AddGuiAction(guiAction => guiAction.Priority = DialogGuiActionPriority.Values.Secondary);
             })
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                var guiAction = x.GuiActions.Single();
-                guiAction.IsAuthorized.Should().BeFalse();
-                guiAction.ContextToken.Should().BeNull();
+                x.GuiActions.Single(g => g.Action == "read").IsAuthorized.Should().BeFalse();
 
-                var transmission = x.Transmissions.Single();
-                transmission.IsAuthorized.Should().BeFalse();
-                transmission.ContextToken.Should().BeNull();
+                var payload = GetTokenPayload(x.DialogToken!);
+                payload.TryGetProperty(DialogTokenClaimTypes.AuthorizedEntities, out _).Should().BeFalse(
+                    "a token without context grants keeps the pre-existing claim set");
+                payload.GetProperty(DialogTokenClaimTypes.Actions).GetString().Should().Be("read",
+                    "only the main-resource read grant is authorized here");
             });
 
     private static JsonElement GetTokenHeader(string token) => DecodeTokenPart(token, 0);

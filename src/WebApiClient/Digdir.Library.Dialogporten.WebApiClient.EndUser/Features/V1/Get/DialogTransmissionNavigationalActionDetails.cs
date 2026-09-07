@@ -7,6 +7,12 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Get;
 public class DialogTransmissionNavigationalActionDetails
 {
     /// <summary>
+    /// The unique identifier for the navigational action in UUIDv7 format.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     [JsonPropertyName("title")]
@@ -33,12 +39,4 @@ public class DialogTransmissionNavigationalActionDetails
     [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public bool IsAuthorized { get; set; }
 
-    /// <summary>
-    /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
-    /// <br/>by its authorization context. Only present when the navigational action has an authorization context and the
-    /// <br/>user is authorized. Should be used instead of the dialog token against this action's URL.
-    /// </summary>
-    [JsonPropertyName("contextToken")]
-    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
-    public string? ContextToken { get; set; }
 }

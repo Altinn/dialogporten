@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
@@ -345,6 +346,33 @@ public class CreateDialogAuthorizationContextTests(DialogApplication application
                 }))
             .ExecuteAndAssert<ValidationError>(x =>
                 x.Errors.Should().Contain(e => e.ErrorMessage.Contains("ServiceResource")));
+
+    [Fact]
+    public Task Create_With_TokenRef_Should_RoundTrip_And_Survive_The_Patch_Mapping() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.AddGuiAction(guiAction =>
+                {
+                    guiAction.Action = null;
+                    guiAction.AuthorizationContext = CreateContext(c => c.TokenRef = "my-own-reference");
+                });
+                x.AddTransmission(transmission =>
+                {
+                    transmission.AuthorizationAttribute = null;
+                    transmission.AuthorizationContext = CreateContext(c => c.TokenRef = "transmission-reference");
+                });
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDtoSO>(x =>
+            {
+                x.GuiActions.Single().AuthorizationContext!.TokenRef.Should().Be("my-own-reference");
+                x.Transmissions.Single().AuthorizationContext!.TokenRef.Should().Be("transmission-reference");
+
+                // The PATCH endpoint maps the read model to the update model before applying the patch document;
+                // a reference dropped here would silently be removed by every PATCH.
+                x.ToUpdateDialogDto().GuiActions.Single().AuthorizationContext!.TokenRef.Should().Be("my-own-reference");
+            });
 
     [Fact]
     public Task Update_Should_Replace_Context_On_GuiAction() =>

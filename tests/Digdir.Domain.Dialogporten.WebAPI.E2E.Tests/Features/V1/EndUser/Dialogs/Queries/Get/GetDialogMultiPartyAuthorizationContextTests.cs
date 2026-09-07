@@ -13,7 +13,8 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialog
 /// The headline capability of authorization contexts: a grant obtained via a party other than the dialog's own
 /// party. The default end user represents <see cref="E2EConstants.DefaultEndUserOrgUrn"/> but the dialogs below
 /// are owned by the person party, so any access granted here can only have come from the context's party list.
-/// This is what the dialog token cannot express, and therefore what context tokens exist for.
+/// This is what the dialog token's action claim cannot express, and therefore what its authorized entities
+/// claim exists for.
 /// </summary>
 [Collection(nameof(WebApiTestCollectionFixture))]
 public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
@@ -103,12 +104,13 @@ public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixtu
     }
 
     /// <summary>
-    /// The security-critical assertion for context tokens: the permitted-parties claim must name only the party
-    /// the PDP actually permitted, and must never be inflated to the dialog party. Verified the way a receiving
-    /// service must verify it — Ed25519 signature against the published JWKS, then the claims.
+    /// The security-critical assertion: a grant obtained via a non-dialog party is expressed only by listing the
+    /// entity in the authorized entities claim; the dialog party and action claims must not be inflated by it.
+    /// Verified the way a receiving service must verify it — Ed25519 signature against the published JWKS, then
+    /// the claims.
     /// </summary>
     [E2EFact(SkipOnEnvironments = ["yt01"])]
-    public async Task Should_Issue_Verifiable_Context_Token_Asserting_Only_The_Permitted_Party()
+    public async Task Dialog_Token_Should_List_An_Entity_Granted_Via_A_Non_Dialog_Party()
     {
         // Arrange
         var attachmentId = Guid.CreateVersion7();
@@ -131,43 +133,30 @@ public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixtu
 
         var attachment = content.Attachments.Single();
         attachment.IsAuthorized.Should().BeTrue();
-        attachment.ContextToken.Should().NotBeNullOrEmpty(
-            "an authorized context-carrying entity must be issued a context token");
 
+        content.DialogToken.Should().NotBeNull();
         var token = await DialogportenTokenVerifier.VerifyAsync(
             Fixture.WebApiUri,
-            attachment.ContextToken,
+            content.DialogToken,
             TestContext.Current.CancellationToken);
 
-        token.TokenType.Should().Be(DialogTokenTypes.DialogContextToken,
-            "the typ header is what lets a receiving service tell the two token types apart");
-
-        // Bound to this entity, action and dialog, so it cannot be replayed against anything else.
-        token.GetString(DialogTokenClaimTypes.EntityId).Should().Be(attachmentId.ToString());
-        token.GetString(DialogTokenClaimTypes.EntityType).Should().Be(DialogContextTokenEntityTypes.Attachment);
-        token.GetString(DialogTokenClaimTypes.Actions).Should().Be(Constants.ReadAction,
-            "attachments are always evaluated with the read action");
+        token.TokenType.Should().Be(DialogTokenTypes.DialogToken);
         token.GetString(DialogTokenClaimTypes.DialogId).Should().Be(dialogId.ToString());
 
-        // The context does not override the resource, so no effective-resource claim is emitted.
-        token.HasClaim(DialogTokenClaimTypes.EffectiveResource).Should().BeFalse(
-            "the effective resource claim is omitted when the grant applies to the dialog's own resource");
-
-        // The crux: pp is the PDP's answer, p is the dialog party. They must not be conflated.
-        token.GetStringList(DialogTokenClaimTypes.PermittedParties)
-            .Should().Equal([E2EConstants.DefaultEndUserOrgUrn],
-                "the permitted-parties claim must name only the party the PDP actually permitted");
+        // The crux: the grant is bound to this entity, and the dialog party claim still describes the dialog.
+        token.GetStringList(DialogTokenClaimTypes.AuthorizedEntities).Should().Equal([attachmentId.ToString()],
+            "the authorized entities claim names exactly the entity the context grant applies to");
         token.GetString(DialogTokenClaimTypes.DialogParty).Should().Be(E2EConstants.DefaultParty,
             "the dialog party claim still describes the dialog, not the grant");
     }
 
     /// <summary>
-    /// The dialog token is frozen at legacy semantics. A dialog carrying both a legacy gui action and a
-    /// context-based one must encode only the legacy grant in the dialog token's action claim; the context
-    /// grant lives exclusively in that entity's context token.
+    /// The dialog token's action claim is frozen at legacy semantics. A dialog carrying both a legacy gui action
+    /// and a context-based one must encode only the legacy grant in the action claim; the context grant lives
+    /// exclusively in the authorized entities claim.
     /// </summary>
     [E2EFact(SkipOnEnvironments = ["yt01"])]
-    public async Task Dialog_Token_Should_Not_Encode_Context_Derived_Grants()
+    public async Task Dialog_Token_Should_Keep_Context_Grants_Out_Of_The_Action_Claim()
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
@@ -211,10 +200,7 @@ public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixtu
         var contextAction = content.GuiActions!.Single(a => a.Url.ToString().EndsWith("context-gui-action", StringComparison.Ordinal));
 
         legacyAction.IsAuthorized.Should().BeTrue();
-        legacyAction.ContextToken.Should().BeNull("an entity without an authorization context gets no context token");
-
         contextAction.IsAuthorized.Should().BeTrue();
-        contextAction.ContextToken.Should().NotBeNullOrEmpty();
 
         var dialogToken = await DialogportenTokenVerifier.VerifyAsync(
             Fixture.WebApiUri,
@@ -222,8 +208,8 @@ public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixtu
             TestContext.Current.CancellationToken);
 
         dialogToken.TokenType.Should().Be(DialogTokenTypes.DialogToken);
-        dialogToken.HasClaim(DialogTokenClaimTypes.EntityId).Should().BeFalse();
-        dialogToken.HasClaim(DialogTokenClaimTypes.PermittedParties).Should().BeFalse();
+        dialogToken.GetStringList(DialogTokenClaimTypes.AuthorizedEntities).Should().Equal([contextAction.Id.ToString()],
+            "the context-based action is listed by id; the legacy action is governed by the action claim");
 
         // The legacy read grant is present exactly once; nothing was contributed by the context entity. Both
         // actions happen to be "read", so the claim would be indistinguishable if contexts were folded in —

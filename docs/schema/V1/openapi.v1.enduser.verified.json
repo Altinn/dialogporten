@@ -335,7 +335,7 @@
             "type": "string"
           },
           "dialogToken": {
-            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nEntities carrying an authorization context are the exception: they are issued their own, narrower\n\u0022contextToken\u0022 which must be used instead of this token, as the dialog token does not assert their grant.\nSee the \u0022contextToken\u0022 property on the individual entities.",
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nThe token\u0027s authorized entities (\u0022e\u0022) claim lists, for every entity carrying an authorization context that\nthe end user is authorized for, the entity\u0027s id or the \u0022tokenRef\u0022 the service owner supplied on the context.\nA tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the\nshared value. Recipients must validate the dialog id (\u0022i\u0022) together with an entity reference.",
             "nullable": true,
             "type": "string"
           },
@@ -771,12 +771,6 @@
             "type": "string",
             "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s endpoints.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "endpoints": {
             "description": "The endpoints associated with the action.",
             "items": {
@@ -864,12 +858,6 @@
       "DialogAttachment": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1037,12 +1025,6 @@
             "nullable": true,
             "type": "string",
             "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
-          },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific action, as determined by its\nauthorization context. Only present when the action has an authorization context and the user is authorized.\nShould be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -1458,12 +1440,6 @@
               }
             ]
           },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
@@ -1547,12 +1523,6 @@
       "DialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1597,12 +1567,6 @@
       "DialogTransmissionAttachmentDetails": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1796,12 +1760,6 @@
               }
             ]
           },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
@@ -1887,16 +1845,15 @@
       "DialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {
@@ -1924,16 +1881,15 @@
       "DialogTransmissionNavigationalActionDetails": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {
@@ -1961,12 +1917,6 @@
       "DialogTransmissionSearchAttachment": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific attachment, as determined by its\nauthorization context. Only present when the attachment has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against this attachment\u0027s URLs.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2097,12 +2047,6 @@
               }
             ]
           },
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific transmission, as determined by\nits authorization context. Only present when the transmission has an authorization context and the user is\nauthorized. Should be used instead of the dialog token against URLs referred to by this transmission,\nincluding front-channel embeds.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "createdAt": {
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
@@ -2188,16 +2132,15 @@
       "DialogTransmissionSearchNavigationalAction": {
         "additionalProperties": false,
         "properties": {
-          "contextToken": {
-            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA token asserting the authenticated user\u0027s authorization for this specific navigational action, as determined\nby its authorization context. Only present when the navigational action has an authorization context and the\nuser is authorized. Should be used instead of the dialog token against this action\u0027s URL.",
-            "nullable": true,
-            "type": "string",
-            "x-experimental": true
-          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "isAuthorized": {

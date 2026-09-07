@@ -44,12 +44,4 @@ public class DialogTransmissionAttachment
     [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
     public bool IsAuthorized { get; set; }
 
-    /// <summary>
-    /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
-    /// <br/>authorization context. Only present when the attachment has an authorization context and the user is
-    /// <br/>authorized. Should be used instead of the dialog token against this attachment's URLs.
-    /// </summary>
-    [JsonPropertyName("contextToken")]
-    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
-    public string? ContextToken { get; set; }
 }

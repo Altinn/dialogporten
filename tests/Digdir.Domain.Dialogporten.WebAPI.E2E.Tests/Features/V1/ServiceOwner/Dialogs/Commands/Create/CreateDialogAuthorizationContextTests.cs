@@ -52,7 +52,7 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
 
     /// <summary>
     /// The context action is optional everywhere and defaults to "read", but an explicit action must take
-    /// effect on child contexts too — both when the policy grants it (the issued context token names it)
+    /// effect on child contexts too — both when the policy grants it (the dialog token lists the entity)
     /// and when no policy rule matches it (denied, rather than silently evaluated as "read").
     /// </summary>
     [E2EFact]
@@ -109,22 +109,77 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
 
         // Assert
         dialogResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
-        var attachments = (dialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null."))
-            .Attachments;
+        dialogResponse.Content.Should().NotBeNull();
 
-        var granted = attachments.Single(a => a.Id == grantedAttachmentId);
+        var granted = dialogResponse.Content.Attachments.Single(a => a.Id == grantedAttachmentId);
         granted.IsAuthorized.Should().BeTrue("the end user holds write on the external resource");
-        granted.ContextToken.Should().NotBeNullOrEmpty();
 
-        var token = await DialogportenTokenVerifier.VerifyAsync(
-            Fixture.WebApiUri, granted.ContextToken, TestContext.Current.CancellationToken);
-        token.GetString(DialogTokenClaimTypes.Actions).Should().Be("write",
-            "the explicit action on a child context is what the PDP was asked about and what the token grants");
-
-        var denied = attachments.Single(a => a.Id == deniedAttachmentId);
+        var denied = dialogResponse.Content.Attachments.Single(a => a.Id == deniedAttachmentId);
         denied.IsAuthorized.Should().BeFalse(
             "an action no policy rule matches must deny — the explicit action must not fall back to read");
-        denied.ContextToken.Should().BeNull();
+
+        dialogResponse.Content.DialogToken.Should().NotBeNull();
+        var token = await DialogportenTokenVerifier.VerifyAsync(
+            Fixture.WebApiUri,
+            dialogResponse.Content.DialogToken,
+            TestContext.Current.CancellationToken);
+        token.GetStringList(DialogTokenClaimTypes.AuthorizedEntities).Should().Equal([grantedAttachmentId.ToString()],
+            "only the entity whose explicit action the PDP permitted is listed");
+    }
+
+    /// <summary>
+    /// A service owner supplied token reference replaces the entity id in the dialog token, so the service owner
+    /// can recognize the grant by a reference of its own choosing, and it is echoed back on the read surface.
+    /// </summary>
+    [E2EFact]
+    public async Task TokenRef_Should_Replace_The_Entity_Id_In_The_Dialog_Token()
+    {
+        // Arrange
+        var attachmentId = Guid.CreateVersion7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+        {
+            dialog.Attachments =
+            [
+                new V1ServiceOwnerDialogsCommandsCreate_Attachment
+                {
+                    Id = attachmentId,
+                    DisplayName = [DialogTestData.CreateLocalization("Vedlegg med tokenRef")],
+                    Urls = [new V1ServiceOwnerDialogsCommandsCreate_AttachmentUrl
+                    {
+                        Url = new Uri("https://digdir.apps.tt02.altinn.no/attachment-token-ref"),
+                        ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                    }],
+                    AuthorizationContext = new V1CommonAuthorizationContexts_AuthorizationContext
+                    {
+                        ServiceResource = E2EConstants.AvailableExternalResource,
+                        IncludeDialogParty = true,
+                        TokenRef = "e2e-token-ref",
+                        UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
+                    }
+                }
+            ];
+        });
+
+        // Act
+        var serviceOwnerResponse = await Fixture.ServiceownerApi.GetDialog(dialogId);
+        var endUserResponse = await Fixture.EndUserApi.GetDialog(dialogId);
+
+        // Assert
+        serviceOwnerResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        serviceOwnerResponse.Content.Should().NotBeNull();
+        serviceOwnerResponse.Content.Attachments.Single().AuthorizationContext!.TokenRef.Should().Be("e2e-token-ref");
+
+        endUserResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        endUserResponse.Content.Should().NotBeNull();
+        endUserResponse.Content.Attachments.Single(a => a.Id == attachmentId).IsAuthorized.Should().BeTrue();
+
+        endUserResponse.Content.DialogToken.Should().NotBeNull();
+        var token = await DialogportenTokenVerifier.VerifyAsync(
+            Fixture.WebApiUri,
+            endUserResponse.Content.DialogToken,
+            TestContext.Current.CancellationToken);
+        token.GetStringList(DialogTokenClaimTypes.AuthorizedEntities).Should().Equal(["e2e-token-ref"],
+            "the token reference stands in for the attachment id");
     }
 
     /// <summary>

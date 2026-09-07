@@ -338,6 +338,7 @@ public static class IFlowStepExtensions
                             Parties = [.. transmission.AuthorizationContext.Parties],
                             IncludeDialogParty = transmission.AuthorizationContext.IncludeDialogParty,
                             Action = transmission.AuthorizationContext.Action,
+                            TokenRef = transmission.AuthorizationContext.TokenRef,
                             UnauthorizedPresentation = transmission.AuthorizationContext.UnauthorizedPresentation
                         },
                     ExtendedType = transmission.ExtendedType,
@@ -366,6 +367,7 @@ public static class IFlowStepExtensions
                     }).ToList(),
                     NavigationalActions = transmission.NavigationalActions.Select(x => new TransmissionNavigationalActionDto
                     {
+                        Id = x.Id,
                         Title = x.Title,
                         Url = x.Url,
                         ExpiresAt = x.ExpiresAt,
@@ -721,6 +723,7 @@ public static class IFlowStepExtensions
                 Parties = [.. source.Parties],
                 IncludeDialogParty = source.IncludeDialogParty,
                 Action = source.Action,
+                TokenRef = source.TokenRef,
                 UnauthorizedPresentation = source.UnauthorizedPresentation
             };
 

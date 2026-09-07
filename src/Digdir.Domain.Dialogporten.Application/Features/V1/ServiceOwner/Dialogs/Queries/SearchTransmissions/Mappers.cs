@@ -67,6 +67,7 @@ internal static class NavigationalActionMapExtensions
     {
         internal NavigationalActionDto ToDto() => new()
         {
+            Id = source.Id,
             AuthorizationContext = source.AuthorizationContext.ToDto(),
             Title = source.Title.ToDtoList()!,
             Url = source.Url,
@@ -88,6 +89,7 @@ internal static class AuthorizationContextMapExtensions
                 Parties = [.. source.Parties],
                 IncludeDialogParty = source.IncludeDialogParty,
                 Action = source.Action,
+                TokenRef = source.TokenReference,
                 UnauthorizedPresentation = source.UnauthorizedPresentation
             };
     }

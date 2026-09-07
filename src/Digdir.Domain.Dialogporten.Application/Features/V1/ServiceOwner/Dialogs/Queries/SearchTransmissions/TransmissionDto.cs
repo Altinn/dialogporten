@@ -169,6 +169,11 @@ public sealed class AttachmentUrlDto
 public sealed class NavigationalActionDto
 {
     /// <summary>
+    /// The unique identifier for the navigational action in UUIDv7 format.
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     public List<LocalizationDto> Title { get; set; } = [];
@@ -231,6 +236,15 @@ public sealed class AuthorizationContextDto
     /// </summary>
     /// <example>read</example>
     public string? Action { get; set; }
+
+    /// <summary>
+    /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+    /// Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog forms
+    /// an OR-group: authorization for any group member adds the shared value to "e". Recipients must also validate
+    /// the token's dialog id ("i").
+    /// </summary>
+    /// <example>my-own-reference</example>
+    public string? TokenRef { get; set; }
 
     /// <summary>
     /// Controls how the entity is presented to end users that fail the authorization check:

@@ -118,7 +118,5 @@ public sealed record AuthorizationCheck
 /// </summary>
 public sealed record AuthorizedCheck(AuthorizationCheck Check, IReadOnlyList<string> PermittedParties)
 {
-    public bool PermitsParty(string party) => PermittedParties.Contains(party, StringComparer.Ordinal);
-
     public static AuthorizedCheck FullyPermitted(AuthorizationCheck check) => new(check, check.Parties);
 }

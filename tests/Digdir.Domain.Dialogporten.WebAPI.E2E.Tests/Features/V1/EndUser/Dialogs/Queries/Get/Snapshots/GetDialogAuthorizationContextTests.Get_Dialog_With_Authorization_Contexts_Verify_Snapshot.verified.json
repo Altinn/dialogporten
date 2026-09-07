@@ -94,8 +94,7 @@
         }
       ],
       "expiresAt": null,
-      "isAuthorized": true,
-      "contextToken": "***"
+      "isAuthorized": true
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -115,8 +114,7 @@
         }
       ],
       "expiresAt": null,
-      "isAuthorized": false,
-      "contextToken": null
+      "isAuthorized": false
     }
   ],
   "excludedAttachments": [
@@ -131,7 +129,6 @@
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": null,
       "isAuthorized": true,
-      "contextToken": "***",
       "extendedType": null,
       "externalReference": "granted-transmission",
       "relatedTransmissionId": null,
@@ -184,8 +181,7 @@
             }
           ],
           "expiresAt": null,
-          "isAuthorized": true,
-          "contextToken": "***"
+          "isAuthorized": true
         },
         {
           "id": "00000000-0000-0000-0000-000000000000",
@@ -205,13 +201,13 @@
             }
           ],
           "expiresAt": null,
-          "isAuthorized": false,
-          "contextToken": null
+          "isAuthorized": false
         }
       ],
       "excludedAttachments": [],
       "navigationalActions": [
         {
+          "id": "00000000-0000-0000-0000-000000000000",
           "title": [
             {
               "value": "granted-child-nav-action",
@@ -220,8 +216,7 @@
           ],
           "url": "https://digdir.apps.tt02.altinn.no/some-nav-action/granted-child-nav-action",
           "expiresAt": null,
-          "isAuthorized": true,
-          "contextToken": "***"
+          "isAuthorized": true
         }
       ],
       "excludedNavigationalActions": [
@@ -236,7 +231,6 @@
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": null,
       "isAuthorized": false,
-      "contextToken": null,
       "extendedType": null,
       "externalReference": "denied-disabled-transmission",
       "relatedTransmissionId": null,
@@ -289,7 +283,6 @@
       "url": "https://digdir.apps.tt02.altinn.no/granted-gui-action",
       "authorizationAttribute": null,
       "isAuthorized": true,
-      "contextToken": "***",
       "isDeleteDialogAction": false,
       "priority": "Primary",
       "httpMethod": "Get",
@@ -307,7 +300,6 @@
       "url": "urn:dialogporten:unauthorized",
       "authorizationAttribute": null,
       "isAuthorized": false,
-      "contextToken": null,
       "isDeleteDialogAction": false,
       "priority": "Secondary",
       "httpMethod": "Get",
@@ -327,7 +319,6 @@
       "action": "read",
       "authorizationAttribute": null,
       "isAuthorized": true,
-      "contextToken": "***",
       "name": "granted-api-action",
       "endpoints": [
         {
@@ -359,7 +350,6 @@
       "action": "read",
       "authorizationAttribute": null,
       "isAuthorized": false,
-      "contextToken": null,
       "name": "denied-api-action",
       "endpoints": [
         {

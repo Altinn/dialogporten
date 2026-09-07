@@ -35,13 +35,6 @@ public sealed class DialogDetailsAuthorizationResult
     public bool HasAccess(AuthorizationCheck check) =>
         GetIndex().AuthorizedByCheck.ContainsKey(check);
 
-    /// <summary>
-    /// The authorized check matching the given check, carrying the subset of parties the PDP permitted,
-    /// or null if the check was not authorized for any party.
-    /// </summary>
-    public AuthorizedCheck? GetAuthorizedCheck(AuthorizationCheck check) =>
-        GetIndex().AuthorizedByCheck.GetValueOrDefault(check);
-
     public bool HasAccessToMainResource() =>
         GetIndex().MainResourceActions.Count > 0;
 

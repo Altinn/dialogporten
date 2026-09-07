@@ -28,24 +28,18 @@ public class CompactJwsGeneratorTests
         Assert.True(generator.VerifyCompactJws(jws));
     }
 
-    [Theory]
-    [InlineData(DialogTokenTypes.DialogToken)]
-    [InlineData(DialogTokenTypes.DialogContextToken)]
-    public void HeaderCarriesTheTokenTypeUnescaped(string tokenType)
+    [Fact]
+    public void HeaderCarriesTheDialogTokenType()
     {
         // Arrange
         var generator = new Ed25519Generator(new OptionsMock<ApplicationSettings>(GetSettings()));
 
         // Act
-        var jws = generator.GetCompactJws([], tokenType);
+        var jws = generator.GetCompactJws([], DialogTokenTypes.DialogToken);
 
         // Assert
         var header = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(jws.Split('.')[0]));
-
-        // Literal, not the "+" escape the default JSON encoder would emit: a receiver comparing the raw
-        // header bytes must see the type exactly as it is documented.
-        Assert.Contains($"\"typ\":\"{tokenType}\"", header, StringComparison.Ordinal);
-        Assert.Equal(tokenType, JsonDocument.Parse(header).RootElement.GetProperty("typ").GetString());
+        Assert.Equal(DialogTokenTypes.DialogToken, JsonDocument.Parse(header).RootElement.GetProperty("typ").GetString());
     }
 
     private static ApplicationSettings GetSettings()

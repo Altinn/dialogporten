@@ -22,7 +22,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
     /// <summary>
     /// The WebAPI base URI, for tests that need to reach unauthenticated endpoints outside the generated
-    /// clients (e.g. the JWKS document used to verify dialog and context token signatures).
+    /// clients (e.g. the JWKS document used to verify dialog token signatures).
     /// </summary>
     public Uri WebApiUri { get; private set; } = null!;
 

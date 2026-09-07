@@ -33,14 +33,6 @@ public sealed class TransmissionDto
     /// </summary>
     public bool IsAuthorized { get; set; }
 
-    /// <summary>
-    /// A token asserting the authenticated user's authorization for this specific transmission, as determined by
-    /// its authorization context. Only present when the transmission has an authorization context and the user is
-    /// authorized. Should be used instead of the dialog token against URLs referred to by this transmission,
-    /// including front-channel embeds.
-    /// </summary>
-    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
-    public string? ContextToken { get; set; }
 
     /// <summary>
     /// The extended type URI for the transmission.
@@ -165,13 +157,6 @@ public sealed class AttachmentDto
     [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public bool IsAuthorized { get; set; } = true;
 
-    /// <summary>
-    /// A token asserting the authenticated user's authorization for this specific attachment, as determined by its
-    /// authorization context. Only present when the attachment has an authorization context and the user is
-    /// authorized. Should be used instead of the dialog token against this attachment's URLs.
-    /// </summary>
-    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
-    public string? ContextToken { get; set; }
 }
 
 public sealed class AttachmentUrlDto
@@ -209,6 +194,11 @@ public sealed class AttachmentUrlDto
 public sealed class NavigationalActionDto
 {
     /// <summary>
+    /// The unique identifier for the navigational action in UUIDv7 format.
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     public List<LocalizationDto> Title { get; set; } = [];
@@ -236,11 +226,4 @@ public sealed class NavigationalActionDto
     [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
     public bool IsAuthorized { get; set; } = true;
 
-    /// <summary>
-    /// A token asserting the authenticated user's authorization for this specific navigational action, as determined
-    /// by its authorization context. Only present when the navigational action has an authorization context and the
-    /// user is authorized. Should be used instead of the dialog token against this action's URL.
-    /// </summary>
-    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
-    public string? ContextToken { get; set; }
 }

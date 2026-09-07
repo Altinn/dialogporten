@@ -147,11 +147,11 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
 
     /// <summary>
     /// Parent-first narrowing for every child surface at once, including the security-relevant consequence: a
-    /// child whose parent is denied must not be issued a context token either, or the holder could use it against
-    /// the child's endpoint despite having no access to the transmission it belongs to.
+    /// child whose parent is denied must not be listed in the dialog token's authorized entities either, or the
+    /// holder could use the token against the child's endpoint despite having no access to the transmission.
     /// </summary>
     [E2EFact]
-    public async Task Denied_Transmission_Should_Deny_All_Children_And_Issue_No_Context_Tokens()
+    public async Task Denied_Transmission_Should_Deny_All_Children_And_List_None_In_The_Dialog_Token()
     {
         // Arrange: the transmission refers an unavailable resource; both of its children refer an available one.
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
@@ -184,20 +184,19 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
 
         var transmission = content.Transmissions.Single();
         transmission.IsAuthorized.Should().BeFalse();
-        transmission.ContextToken.Should().BeNull("an unauthorized entity is never issued a context token");
 
         var attachment = transmission.Attachments.Single();
         attachment.IsAuthorized.Should().BeFalse("a child context can never widen access beyond its parent");
-        attachment.ContextToken.Should().BeNull(
-            "issuing a token here would let the holder bypass the denied parent transmission");
         attachment.Urls.Should().NotBeEmpty()
             .And.AllSatisfy(url => url.Url.ToString().Should().Be(Constants.UnauthorizedUri.ToString()));
 
         var navigationalAction = transmission.NavigationalActions.Single();
         navigationalAction.IsAuthorized.Should().BeFalse("a child context can never widen access beyond its parent");
-        navigationalAction.ContextToken.Should().BeNull(
-            "issuing a token here would let the holder bypass the denied parent transmission");
         navigationalAction.Url.ToString().Should().Be(Constants.UnauthorizedUri.ToString());
+
+        var dialogToken = await VerifyDialogToken(content.DialogToken);
+        dialogToken.HasClaim(DialogTokenClaimTypes.AuthorizedEntities).Should().BeFalse(
+            "listing a denied entity, or a child of one, would let the holder bypass the denied parent transmission");
     }
 
     /// <summary>
@@ -226,16 +225,18 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
 
         var granted = content.ApiActions.Single(a => a.Name == "granted-api-action");
         granted.IsAuthorized.Should().BeTrue();
-        granted.ContextToken.Should().NotBeNullOrEmpty();
         granted.Endpoints.Should().NotBeEmpty()
             .And.AllSatisfy(e => e.Url.ToString().Should().NotBe(Constants.UnauthorizedUri.ToString()));
 
         var denied = content.ApiActions.Single(a => a.Name == "denied-api-action");
         denied.IsAuthorized.Should().BeFalse();
-        denied.ContextToken.Should().BeNull();
         denied.Endpoints.Should().NotBeEmpty()
             .And.AllSatisfy(e => e.Url.ToString().Should().Be(Constants.UnauthorizedUri.ToString()),
                 "every endpoint of a denied api action must be masked, including deprecated ones");
+
+        var dialogToken = await VerifyDialogToken(content.DialogToken);
+        dialogToken.GetStringList(DialogTokenClaimTypes.AuthorizedEntities).Should().Equal([granted.Id.ToString()],
+            "the dialog token lists exactly the authorized context-carrying entities");
     }
 
     /// <summary>
@@ -270,7 +271,6 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         var disabled = content.Transmissions.Should().ContainSingle(
             "the excluded transmission left the list, the disabled one did not").Subject;
         disabled.IsAuthorized.Should().BeFalse();
-        disabled.ContextToken.Should().BeNull();
         disabled.Content.Title.Should().NotBeNull("disabled keeps the transmission legible");
         disabled.Sender.Should().NotBeNull();
 
@@ -280,15 +280,16 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
     }
 
     /// <summary>
-    /// The standalone transmission endpoints must expose the same authorization outcome and the same context
-    /// token as get-dialog. Without this, a consumer fetching a transmission directly would be told it is
-    /// authorized but given no token to act on it.
+    /// The standalone transmission endpoints must expose the same authorization outcome as get-dialog, and the
+    /// dialog token issued by get-dialog must list exactly those authorized entities. Without this, a consumer
+    /// fetching a transmission directly would be told it is authorized while the token said otherwise.
     /// </summary>
     [E2EFact]
-    public async Task Standalone_Transmission_Endpoints_Should_Expose_The_Same_Context_Tokens_As_Get_Dialog()
+    public async Task Standalone_Transmission_Endpoints_Should_Agree_With_Get_Dialog_And_Its_Token()
     {
         // Arrange
         var transmissionId = Guid.CreateVersion7();
+        var attachmentId = Guid.CreateVersion7();
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
             dialog.Transmissions =
@@ -301,11 +302,11 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                         transmission.Id = transmissionId;
                         transmission.Attachments =
                         [
-                            CreateTransmissionAttachment("parity-attachment", PermissiveChildContext())
+                            CreateTransmissionAttachment("parity-attachment", PermissiveChildContext(), attachmentId)
                         ];
                         transmission.NavigationalActions =
                         [
-                            CreateNavigationalAction("parity-nav-action", PermissiveChildContext())
+                            CreateNavigationalAction("parity-nav-action", PermissiveChildContext("parity-nav-action-ref"))
                         ];
                     })
             ];
@@ -321,51 +322,40 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         transmissionResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
         searchResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
 
-        var fromDialog = (dialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null."))
-            .Transmissions!.Single();
+        var dialog = dialogResponse.Content ?? throw new InvalidOperationException("Dialog content was null.");
+        var fromDialog = dialog.Transmissions!.Single();
         var fromGet = transmissionResponse.Content ?? throw new InvalidOperationException("Transmission was null.");
         var fromSearch = (searchResponse.Content ?? throw new InvalidOperationException("Search result was null."))
             .Single();
 
-        // Every surface must be authorized and carry a token. Tokens are per-request (they embed jti/iat), so
-        // assert presence and equivalent claims rather than string equality across responses.
-        foreach (var (label, isAuthorized, contextToken) in new[]
+        foreach (var (label, isAuthorized) in new[]
                  {
-                     ("get-dialog transmission", fromDialog.IsAuthorized, fromDialog.ContextToken),
-                     ("get-transmission", fromGet.IsAuthorized, fromGet.ContextToken),
-                     ("search-transmissions", fromSearch.IsAuthorized, fromSearch.ContextToken),
-                     ("get-dialog attachment", fromDialog.Attachments!.Single().IsAuthorized, fromDialog.Attachments!.Single().ContextToken),
-                     ("get-transmission attachment", fromGet.Attachments!.Single().IsAuthorized, fromGet.Attachments!.Single().ContextToken),
-                     ("search attachment", fromSearch.Attachments!.Single().IsAuthorized, fromSearch.Attachments!.Single().ContextToken),
-                     ("get-dialog nav action", fromDialog.NavigationalActions!.Single().IsAuthorized, fromDialog.NavigationalActions!.Single().ContextToken),
-                     ("get-transmission nav action", fromGet.NavigationalActions!.Single().IsAuthorized, fromGet.NavigationalActions!.Single().ContextToken),
-                     ("search nav action", fromSearch.NavigationalActions!.Single().IsAuthorized, fromSearch.NavigationalActions!.Single().ContextToken)
+                     ("get-dialog transmission", fromDialog.IsAuthorized),
+                     ("get-transmission", fromGet.IsAuthorized),
+                     ("search-transmissions", fromSearch.IsAuthorized),
+                     ("get-dialog attachment", fromDialog.Attachments!.Single().IsAuthorized),
+                     ("get-transmission attachment", fromGet.Attachments!.Single().IsAuthorized),
+                     ("search attachment", fromSearch.Attachments!.Single().IsAuthorized),
+                     ("get-dialog nav action", fromDialog.NavigationalActions!.Single().IsAuthorized),
+                     ("get-transmission nav action", fromGet.NavigationalActions!.Single().IsAuthorized),
+                     ("search nav action", fromSearch.NavigationalActions!.Single().IsAuthorized)
                  })
         {
             isAuthorized.Should().BeTrue($"{label} should be authorized");
-            contextToken.Should().NotBeNullOrEmpty($"{label} should carry a context token");
         }
 
-        // The transmission's token asserts the same grant on all three surfaces.
-        var expected = await VerifyContextToken(fromDialog.ContextToken!);
-        foreach (var token in new[] { fromGet.ContextToken!, fromSearch.ContextToken! })
-        {
-            var actual = await VerifyContextToken(token);
-            actual.GetString(DialogTokenClaimTypes.EntityId).Should().Be(expected.GetString(DialogTokenClaimTypes.EntityId));
-            actual.GetString(DialogTokenClaimTypes.EntityType).Should().Be(DialogContextTokenEntityTypes.Transmission);
-            actual.GetString(DialogTokenClaimTypes.Actions).Should().Be(expected.GetString(DialogTokenClaimTypes.Actions));
-            actual.GetStringOrNull(DialogTokenClaimTypes.EffectiveResource)
-                .Should().Be(expected.GetStringOrNull(DialogTokenClaimTypes.EffectiveResource));
-            actual.GetStringList(DialogTokenClaimTypes.PermittedParties)
-                .Should().Equal(expected.GetStringList(DialogTokenClaimTypes.PermittedParties));
-        }
+        // The single dialog token lists all three authorized entities, in document order; the navigational
+        // action's context carries a tokenRef, which stands in for its id.
+        var dialogToken = await VerifyDialogToken(dialog.DialogToken);
+        dialogToken.GetStringList(DialogTokenClaimTypes.AuthorizedEntities)
+            .Should().Equal([transmissionId.ToString(), attachmentId.ToString(), "parity-nav-action-ref"]);
     }
 
     /// <summary>
     /// Pins the whole wire shape of a context-heavy dialog: every context-carrying surface, once granted and once
     /// denied under each unauthorized presentation. Exclusion removes elements from their collections, so a
     /// snapshot is the only assertion that catches an accidental leak of a field nobody thought to check.
-    /// Tokens are scrubbed by <see cref="JsonSnapshotVerifier"/>; their claims are asserted in the tests above.
+    /// The dialog token is scrubbed by <see cref="JsonSnapshotVerifier"/>; its claims are asserted in the tests above.
     /// </summary>
     [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Get_Dialog_With_Authorization_Contexts_Verify_Snapshot()
@@ -375,16 +365,12 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         // single request, so CreatedAt ties across siblings and Id decides — and UUIDv7s minted in the same
         // millisecond differ only in their random tail. Hand each collection pre-sorted ids so the snapshot
         // order matches the declaration order instead of being a coin flip.
-        //
-        // Exception: navigational actions. Their create contract has no Id property (the database mints one
-        // with gen_random_uuid()), so the two below cannot be pre-sorted and may swap order in the snapshot
-        // when CreatedAt ties. Non-snapshot tests elsewhere in this file are unaffected — they select
-        // navigational actions by name/property rather than by position.
         var attachmentIds = OrderedVersion7Ids(3);
         var guiActionIds = OrderedVersion7Ids(2);
         var apiActionIds = OrderedVersion7Ids(2);
         var transmissionIds = OrderedVersion7Ids(3);
         var childAttachmentIds = OrderedVersion7Ids(2);
+        var childNavigationalActionIds = OrderedVersion7Ids(2);
 
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
         {
@@ -438,10 +424,12 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                         [
                             CreateNavigationalAction("granted-child-nav-action",
                                 ChildContext(E2EConstants.AvailableExternalResource,
-                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled)),
+                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled),
+                                childNavigationalActionIds[0]),
                             CreateNavigationalAction("denied-child-nav-action",
                                 ChildContext(E2EConstants.UnavailableExternalResource,
-                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Excluded))
+                                    DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Excluded),
+                                childNavigationalActionIds[1])
                         ];
                     },
                     transmissionIds[0]),
@@ -468,20 +456,31 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         await JsonSnapshotVerifier.VerifyJsonSnapshot(JsonSerializer.Serialize(response.Content));
     }
 
-    private async Task<VerifiedToken> VerifyContextToken(string contextToken)
+    private async Task<VerifiedToken> VerifyDialogToken(string? dialogToken)
     {
+        dialogToken.Should().NotBeNull();
         var token = await DialogportenTokenVerifier.VerifyAsync(
-            Fixture.WebApiUri, contextToken, TestContext.Current.CancellationToken);
+            Fixture.WebApiUri,
+            dialogToken,
+            TestContext.Current.CancellationToken);
 
-        token.TokenType.Should().Be(DialogTokenTypes.DialogContextToken);
+        token.TokenType.Should().Be(DialogTokenTypes.DialogToken);
         return token;
     }
 
     // A context that would grant access on its own, used to prove a child cannot widen its parent's access.
-    private static V1CommonAuthorizationContexts_AuthorizationContext PermissiveChildContext() =>
-        ChildContext(
+    private static V1CommonAuthorizationContexts_AuthorizationContext PermissiveChildContext(string? tokenRef = null)
+    {
+        var context = ChildContext(
             E2EConstants.AvailableExternalResource,
             DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled);
+        if (tokenRef is not null)
+        {
+            context.TokenRef = tokenRef;
+        }
+
+        return context;
+    }
 
     private static V1CommonAuthorizationContexts_AuthorizationContext ChildContext(
         string serviceResource,
@@ -572,9 +571,11 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
 
     private static V1ServiceOwnerDialogsCommandsCreate_TransmissionNavigationalAction CreateNavigationalAction(
         string name,
-        V1CommonAuthorizationContexts_AuthorizationContext authorizationContext) =>
+        V1CommonAuthorizationContexts_AuthorizationContext authorizationContext,
+        Guid? id = null) =>
         new()
         {
+            Id = id ?? Guid.CreateVersion7(),
             Title = [DialogTestData.CreateLocalization(name)],
             Url = new Uri($"https://digdir.apps.tt02.altinn.no/some-nav-action/{name}"),
             AuthorizationContext = authorizationContext

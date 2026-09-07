@@ -158,7 +158,8 @@ public class ServiceResourceAuthorizerTests
             AdditionalResourceAttribute = source.AdditionalResourceAttribute,
             Parties = source.Parties,
             IncludeDialogParty = source.IncludeDialogParty,
-            Action = source.Action
+            Action = source.Action,
+            TokenReference = source.TokenReference
         };
 
     private static DialogEntity CreateDialog() => new()

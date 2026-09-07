@@ -12,9 +12,9 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Authorization;
 /// authorization context are matched against their <see cref="AuthorizationCheckBuilder"/>-built check;
 /// legacy entities use the legacy predicates. For child entities (attachments and navigational actions),
 /// access to the parent is a precondition — a child context can only further restrict access, never widen it.
-/// Each predicate takes the entity's check (built once by the caller via
+/// Each predicate takes the entity's check, built by the caller via
 /// <see cref="AuthorizationCheckBuilder.GetAuthorizationCheck(DialogTransmission, Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity)"/>
-/// and its overloads) so it can be shared with context token issuance instead of being rebuilt per lookup.
+/// and its overloads.
 /// </summary>
 public static class DialogDetailsAuthorizationResultExtensions
 {

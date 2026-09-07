@@ -18,5 +18,6 @@ public sealed class GetDialogSeenLogEndpointSummary : Summary<GetDialogSeenLogEn
         Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("seen log record");
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<GetDialogSeenLogEndpoint>().Build();
+        Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

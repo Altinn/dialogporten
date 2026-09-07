@@ -18,6 +18,7 @@ public sealed class PurgeDialogEndpointSummary : Summary<PurgeDialogEndpoint>
                       """;
 
         Responses[Status204NoContent] = Constants.SwaggerSummary.Deleted.FormatInvariant("aggregate");
+        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<PurgeDialogEndpoint>()
             .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("delete"))

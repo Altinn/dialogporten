@@ -18,6 +18,7 @@ public sealed class GetDialogEndpointSummary : Summary<GetDialogEndpoint>
                       """;
 
         Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("aggregate");
+        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<GetDialogEndpoint>()
             .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get"))

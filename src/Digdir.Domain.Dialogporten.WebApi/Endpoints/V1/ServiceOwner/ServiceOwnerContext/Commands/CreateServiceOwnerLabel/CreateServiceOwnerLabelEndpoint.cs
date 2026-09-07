@@ -37,11 +37,17 @@ public sealed class CreateServiceOwnerLabelEndpoint : Endpoint<CreateServiceOwne
 
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf(
-            StatusCodes.Status204NoContent,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status412PreconditionFailed));
+        Description(b => b
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status412PreconditionFailed,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(CreateServiceOwnerLabelRequest req, CancellationToken ct)

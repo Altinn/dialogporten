@@ -18,6 +18,10 @@ public sealed class SearchDialogSeenLogEndpointSummary : Summary<SearchDialogSee
 
         Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("seen log records");
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
-        Responses[Status403Forbidden] = DefaultForbiddenFor<SearchDialogSeenLogEndpoint>().Build();
+        Responses[Status403Forbidden] = DefaultForbiddenFor<SearchDialogSeenLogEndpoint>()
+            .Or(Application.Common.Authorization.Constants.AltinnAuthLevelTooLow)
+            .Build();
+        Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

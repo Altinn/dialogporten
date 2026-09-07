@@ -20,5 +20,6 @@ public sealed class GetDialogActivityEndpointSummary : Summary<GetDialogActivity
             .Or(Constants.SwaggerSummary.AccessDeniedToDialogForChildEntity.FormatInvariant("get"))
             .Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogActivityNotFound;
+        Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

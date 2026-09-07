@@ -21,5 +21,6 @@ public sealed class SearchDialogActivityEndpointSummary : Summary<SearchDialogAc
             .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get"))
             .Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

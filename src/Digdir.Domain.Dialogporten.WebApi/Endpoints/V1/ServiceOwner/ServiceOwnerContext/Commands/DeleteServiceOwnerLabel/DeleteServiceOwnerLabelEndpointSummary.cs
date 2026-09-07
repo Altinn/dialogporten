@@ -18,5 +18,7 @@ public sealed class DeleteServiceOwnerLabelEndpointSummary : Summary<DeleteServi
         Responses[Status403Forbidden] = DefaultForbiddenFor<DeleteServiceOwnerLabelEndpoint>().Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.ServiceOwnerLabelNotFound;
         Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
+        Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }
 }

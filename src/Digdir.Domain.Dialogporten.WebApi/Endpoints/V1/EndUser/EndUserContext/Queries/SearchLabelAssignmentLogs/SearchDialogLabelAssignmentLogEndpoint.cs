@@ -31,10 +31,14 @@ public sealed class SearchDialogLabelAssignmentLogEndpoint : Endpoint<SearchLabe
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(d => d.ProducesOneOf<List<LabelAssignmentLogDto>>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status410Gone));
+        Description(d => d
+            .Produces<List<LabelAssignmentLogDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
     public override async Task HandleAsync(SearchLabelAssignmentLogQuery req, CancellationToken ct)
     {

@@ -18,7 +18,6 @@ public sealed class FreezeDialogEndpointSummary : Summary<FreezeDialogEndpoint>
                       """;
         ResponseHeaders = [HttpResponseHeaderExamples.NewDialogETagHeader(Status204NoContent)];
         Responses[Status204NoContent] = Constants.SwaggerSummary.Frozen.FormatInvariant("aggregate");
-        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<FreezeDialogEndpoint>()
             .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("freeze"))

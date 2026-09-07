@@ -15,6 +15,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
 using Digdir.Library.Utils.AspNet;
 using FastEndpoints;
@@ -286,7 +287,8 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
-            x.Errors.ResponseBuilder = (failures, ctx, _) => ctx.CreateApplicationProblemDetailsOrDefault(failures);
+            x.Errors.ResponseBuilder = (failures, ctx, _) => ProblemDetailsRules
+                .CreateProblemDetailsOrDefault(ctx, failures);
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>

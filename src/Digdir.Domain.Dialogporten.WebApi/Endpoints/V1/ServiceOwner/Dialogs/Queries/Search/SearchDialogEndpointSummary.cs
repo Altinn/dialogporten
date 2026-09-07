@@ -22,6 +22,7 @@ public sealed class SearchDialogEndpointSummary : Summary<SearchDialogEndpoint, 
                       """;
 
         Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("list");
+        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<SearchDialogEndpoint>().Build();
 

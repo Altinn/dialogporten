@@ -16,8 +16,10 @@ public sealed class NotificationConditionEndpointSummary : Summary<NotificationC
                       Used by Altinn Notification only. Takes a dialogId and returns a boolean value based on conditions used to determine if a notification is to be sent.
                       """;
         Responses[Status200OK] = "Successfully returned the notification determination.";
+        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<NotificationConditionEndpoint>().Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

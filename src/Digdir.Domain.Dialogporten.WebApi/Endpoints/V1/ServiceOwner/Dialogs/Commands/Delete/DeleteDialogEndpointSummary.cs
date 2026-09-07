@@ -26,7 +26,6 @@ public sealed class DeleteDialogEndpointSummary : Summary<DeleteDialogEndpoint>
         Responses[Status403Forbidden] = DefaultForbiddenFor<DeleteDialogEndpoint>()
             .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("delete"))
             .Build();
-        Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
         Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
         Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;

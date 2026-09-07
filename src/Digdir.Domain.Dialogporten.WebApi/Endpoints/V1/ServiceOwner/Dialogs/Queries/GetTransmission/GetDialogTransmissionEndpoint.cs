@@ -32,10 +32,14 @@ public sealed class GetDialogTransmissionEndpoint : Endpoint<GetTransmissionQuer
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf<TransmissionDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status410Gone));
+        Description(b => b
+            .Produces<TransmissionDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(GetTransmissionQuery req, CancellationToken ct)

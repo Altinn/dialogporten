@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-
-namespace Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
+﻿namespace Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 
 internal delegate Task<IEnumerable<TDestination>> CreateAsyncDelegate<TDestination, in TSource>(IEnumerable<TSource> creatables, CancellationToken cancellationToken = default);
 internal delegate Task UpdateAsyncDelegate<TDestination, TSource>(IEnumerable<UpdateSet<TDestination, TSource>> updateSets, CancellationToken cancellationToken = default);
@@ -77,14 +75,6 @@ internal static class MergeExtensions
         await DeleteAsync(destinations, delete, updateSets, cancellationToken);
         await UpdateAsync(update, updateSets, cancellationToken);
         await CreateAsync(destinations, concreteSources, create, updateSets, cancellationToken);
-    }
-
-    internal static void Update<TDestination, TSource>(this IMapperBase mapper, IEnumerable<UpdateSet<TDestination, TSource>> updateSets)
-    {
-        foreach (var (source, destination) in updateSets)
-        {
-            mapper.Map(source, destination);
-        }
     }
 
     private static async Task CreateAsync<TDestination, TSource>(

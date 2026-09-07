@@ -31,7 +31,7 @@ public class RouteNotFoundTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         problemDetails.Should().NotBeNull();
         problemDetails.Code.Should().BeNull();
         problemDetails.Detail.Should().BeNull();
-        problemDetails.Errors.Should().BeNull();
+        problemDetails.Errors.Should().NotBeNull();
         problemDetails.Instance.Should().Be(requestPath);
         problemDetails.Status.Should().Be((int)HttpStatusCode.NotFound);
         problemDetails.StatusDescription.Should().BeNull();

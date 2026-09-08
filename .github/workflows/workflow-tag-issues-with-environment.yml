@@ -16,7 +16,7 @@ on:
         required: false
         type: string
       version:
-        description: "Release version for release-based pull request discovery"
+        description: "Release version for release-based pull request discovery. Only used when from-sha/to-sha are not both set"
         required: false
         type: string
 
@@ -49,24 +49,17 @@ jobs:
               paste -sd ',' - || true
           }
 
-          if [[ -n "$VERSION" ]]; then
-            if [[ -n "$FROM_SHA" || -n "$TO_SHA" ]]; then
-              echo "::error::Provide either version or from-sha/to-sha, not both."
-              exit 1
-            fi
-
+          if [[ -n "$FROM_SHA" && -n "$TO_SHA" ]]; then
+            pr_numbers="$(
+              gh api --paginate "repos/${REPOSITORY}/compare/${FROM_SHA}...${TO_SHA}" --jq '.commits[].commit.message | split("\n")[0]' | extract_pull_request_numbers
+            )"
+          elif [[ -n "$VERSION" ]]; then
             pr_numbers="$(
               gh api "repos/${REPOSITORY}/releases/tags/v${VERSION}" --jq '.body // ""' | extract_pull_request_numbers
             )"
           else
-            if [[ -z "$FROM_SHA" || -z "$TO_SHA" ]]; then
-              echo "::error::Provide both from-sha and to-sha when version is not set."
-              exit 1
-            fi
-
-            pr_numbers="$(
-              gh api "repos/${REPOSITORY}/compare/${FROM_SHA}...${TO_SHA}" --jq '.commits[].commit.message | split("\n")[0]' | extract_pull_request_numbers
-            )"
+            echo "::error::Provide both from-sha and to-sha, or version."
+            exit 1
           fi
 
           echo "pr_numbers=${pr_numbers}" >> "$GITHUB_OUTPUT"
@@ -104,8 +97,8 @@ jobs:
                 /^## / && in_section { exit }
                 in_section { print }
               ' |
-              grep -oE '#[0-9]+' |
-              tr -d '#' |
+              grep -oE "#[0-9]+|github\.com/${REPOSITORY}/issues/[0-9]+" |
+              grep -oE '[0-9]+$' |
               sort -u || true
           }
 

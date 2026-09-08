@@ -124,11 +124,13 @@ jobs:
 
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for yt01
-    needs: [ deploy-apps, deploy-infra, resolve-version ]
+    needs: [ get-versions-from-github, deploy-apps, deploy-infra, resolve-version ]
     if: ${{ always() && !failure() && !cancelled() && (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
     with:
       environment-label: yt01
+      from-sha: ${{ needs.get-versions-from-github.outputs.apps_version_sha }}
+      to-sha: v${{ needs.resolve-version.outputs.version }}
       version: ${{ needs.resolve-version.outputs.version }}
 
   store-apps-version:

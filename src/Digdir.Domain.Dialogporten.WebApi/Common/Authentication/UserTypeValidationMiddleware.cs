@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
 using FastEndpoints;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -49,7 +50,11 @@ public sealed class UserTypeValidationMiddleware
                     new("Type",
                         $"The request was authenticated, but we were unable to determine valid user type in order to authorize the request. Valid user types for this endpoint are: {string.Join(", ", validUserTypes)}")
                 };
-                await context.Response.SendErrorsAsync(failures, StatusCodes.Status403Forbidden);
+                await context.Response.SendProblemDetailsAsync(
+                    failures,
+                    StatusCodes.Status403Forbidden,
+                    cancellation: context.RequestAborted
+                );
 
                 return;
             }

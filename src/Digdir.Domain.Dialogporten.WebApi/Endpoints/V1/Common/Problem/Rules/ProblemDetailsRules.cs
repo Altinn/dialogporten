@@ -108,3 +108,19 @@ public sealed class ProblemDetailsRules
         return messages;
     }
 }
+
+public static class HttpResponseExtensions
+{
+    extension(HttpResponse response)
+    {
+        /// <summary>
+        /// Convenience method to make a link between the SendErrorsAsync call and <see cref="ProblemDetailsRules"/>.
+        /// </summary>
+        public Task SendProblemDetailsAsync(List<ValidationFailure> failures,
+            int statusCode = 400,
+            CancellationToken cancellation = default)
+        {
+            return response.SendErrorsAsync(failures, statusCode, cancellation: cancellation);
+        }
+    }
+}

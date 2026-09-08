@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
 using FastEndpoints;
 using FluentValidation.Results;
 
@@ -44,9 +45,10 @@ public sealed class ServiceOwnerOnBehalfOfPersonMiddleware
                     $"'{NorwegianPersonIdentifier.PrefixWithSeparator}{{norwegian f-nr/d-nr}}'."
                 )
             ];
-            return context.Response.SendErrorsAsync(
+            return context.Response.SendProblemDetailsAsync(
                 failures,
-                StatusCodes.Status400BadRequest
+                StatusCodes.Status400BadRequest,
+                cancellation: context.RequestAborted
             );
         }
 

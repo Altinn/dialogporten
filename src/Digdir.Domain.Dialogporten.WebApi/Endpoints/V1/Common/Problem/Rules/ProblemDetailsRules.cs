@@ -98,12 +98,13 @@ public sealed class ProblemDetailsRules
         if (extras != null)
         {
             messages["Forbidden"] = [AuthorizationFailureMessageBuilder.DefaultForbiddenFor(extras).Build()];
+            return messages;
         }
 
         var displayUrl = context.Request.PathBase + context.Request.Path;
 
         var logger = context.Resolve<ILogger<ProblemDetailsRules>>();
-        logger.LogWarning("Found no Endpoint metadata for request url {Url}.", displayUrl);
+        logger.LogError("Found no Endpoint metadata for request url {Url}.", displayUrl);
         return messages;
     }
 }

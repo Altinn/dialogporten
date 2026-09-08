@@ -11,6 +11,10 @@ namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
 
 public sealed class ProblemDetailsRules
 {
+    private ProblemDetailsRules()
+    {
+    }
+
     public static IDialogportenProblemDetails CreateProblemDetailsOrDefault(
         HttpContext ctx,
         List<ValidationFailure> failures

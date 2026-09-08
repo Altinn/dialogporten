@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Factory;
 
-public sealed class ProblemDetailsBuilderFactory
+public static class ProblemDetailsBuilderFactory
 {
 
     public static ProblemDetailsBuilder<ProblemDetails> Unauthorized()

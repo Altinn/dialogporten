@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.121.1](https://github.com/Altinn/dialogporten/compare/v1.121.0...v1.121.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* align dialog sub-resource visibility with getDialogById ([#4368](https://github.com/Altinn/dialogporten/issues/4368)) ([c6cd932](https://github.com/Altinn/dialogporten/commit/c6cd93248a7e67ede156ab9830536a6c2b855e93))
+* changed GetLabelAssignmentLogs to return Gone for deleted dialogs ([#4369](https://github.com/Altinn/dialogporten/issues/4369)) ([f5b1138](https://github.com/Altinn/dialogporten/commit/f5b1138d9f6b787086fab5853f840d07b03572a4))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency fastendpoints.swagger to 8.3.0 ([#4375](https://github.com/Altinn/dialogporten/issues/4375)) ([c25a712](https://github.com/Altinn/dialogporten/commit/c25a712fe4d66bb9fe048a159f6df188164a8228))
+* **deps:** update grafana/loki docker tag to v3.7.7 ([#4372](https://github.com/Altinn/dialogporten/issues/4372)) ([3fb5d33](https://github.com/Altinn/dialogporten/commit/3fb5d334a22ff2284e52541a3ada228295bad099))
+* **deps:** update hotchocolate dependencies to 16.6.2 ([#4373](https://github.com/Altinn/dialogporten/issues/4373)) ([7420021](https://github.com/Altinn/dialogporten/commit/74200210060d0b38b4d642fbfaa839444a3280ce))
+* **deps:** update nginx docker tag to v1.31.4 ([#4374](https://github.com/Altinn/dialogporten/issues/4374)) ([769c6f4](https://github.com/Altinn/dialogporten/commit/769c6f44d9f9ff0fe483872271c3ef92b4a050a0))
+
 ## [1.121.0](https://github.com/Altinn/dialogporten/compare/v1.120.1...v1.121.0) (2026-09-03)
 
 

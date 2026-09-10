@@ -32,14 +32,18 @@ public sealed class UpdateDialogTransmissionEndpoint : Endpoint<UpdateTransmissi
         Policies(AuthorizationPolicy.ServiceProviderChangeTransmissions);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf(
-            StatusCodes.Status204NoContent,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status410Gone,
-            StatusCodes.Status412PreconditionFailed,
-            StatusCodes.Status422UnprocessableEntity));
+        Description(b => b
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status410Gone,
+                StatusCodes.Status412PreconditionFailed,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(UpdateTransmissionRequest req, CancellationToken ct)

@@ -34,10 +34,14 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(b => b.ProducesOneOf<List<TransmissionDto>>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status410Gone,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<List<TransmissionDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(SearchTransmissionRequest req, CancellationToken ct)

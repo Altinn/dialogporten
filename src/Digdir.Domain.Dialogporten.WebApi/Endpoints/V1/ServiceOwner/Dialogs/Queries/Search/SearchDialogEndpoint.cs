@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 
@@ -32,7 +33,13 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogQuery, Paginated
         Policies(AuthorizationPolicy.ServiceProviderSearch);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ClearDefaultProduces(StatusCodes.Status403Forbidden));
+        Description(b => b
+            .Produces<PaginatedList<DialogDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            ));
     }
 
     public override async Task HandleAsync(SearchDialogQuery req, CancellationToken ct)

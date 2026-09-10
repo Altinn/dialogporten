@@ -31,9 +31,14 @@ public sealed class GetDialogSeenLogEndpoint : Endpoint<GetSeenLogQuery, SeenLog
         Get("dialogs/{dialogId}/seenlog/{seenLogId}");
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
-        Description(d => d.ProducesOneOf<SeenLogDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound));
+        Description(d => d
+            .Produces<SeenLogDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(GetSeenLogQuery req, CancellationToken ct)

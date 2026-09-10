@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
 
@@ -30,6 +31,15 @@ public sealed class NotificationConditionEndpoint : Endpoint<NotificationConditi
         Get("dialogs/{dialogId}/actions/should-send-notification");
         Policies(AuthorizationPolicy.NotificationConditionCheck);
         Group<ServiceOwnerGroup>();
+        Description(b => b
+            .Produces<NotificationConditionDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(NotificationConditionQuery req, CancellationToken ct)

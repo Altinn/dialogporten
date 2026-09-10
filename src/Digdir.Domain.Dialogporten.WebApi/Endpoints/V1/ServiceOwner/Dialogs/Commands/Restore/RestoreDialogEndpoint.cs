@@ -33,11 +33,14 @@ public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
 
         Description(b => b
             .Accepts<RestoreDialogRequest>()
-            .ProducesOneOf(
-                StatusCodes.Status204NoContent,
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
                 StatusCodes.Status404NotFound,
                 StatusCodes.Status409Conflict,
-                StatusCodes.Status412PreconditionFailed));
+                StatusCodes.Status412PreconditionFailed
+            ));
     }
 
     public override async Task HandleAsync(RestoreDialogRequest req, CancellationToken ct)

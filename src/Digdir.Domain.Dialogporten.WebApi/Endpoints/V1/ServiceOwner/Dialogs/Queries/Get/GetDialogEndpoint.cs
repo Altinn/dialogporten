@@ -32,9 +32,14 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf<DialogDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<DialogDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound
+            ));
     }
 
     public override async Task HandleAsync(GetDialogQuery req, CancellationToken ct)

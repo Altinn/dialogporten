@@ -1,6 +1,3 @@
-using System.Reflection;
-using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-
 namespace Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
@@ -33,26 +30,5 @@ public sealed class OpenApiExtrasAttribute : Attribute
 
         Scopes = scopes;
         SecuritySchemes = securitySchemes;
-    }
-
-    public static string Get401Error<TEndpoint>() where TEndpoint : class
-    {
-        var metadata = typeof(TEndpoint).GetCustomAttribute<OpenApiExtrasAttribute>()
-                       ?? throw new InvalidOperationException(
-                           $"Endpoint {typeof(TEndpoint).FullName} missing {nameof(OpenApiExtrasAttribute)}"
-                       );
-        var flow = metadata.SecuritySchemes.Select(x => x switch
-        {
-            OpenApiSecurityScheme.IdportenSecurityScheme => "ID-porten",
-            OpenApiSecurityScheme.MaskinportenSecurityScheme => "Maskinporten",
-            _ => throw new ArgumentOutOfRangeException($"Unknown security scheme: {x}")
-        });
-
-        var requiredFlows = string.Join(" or ", flow);
-        var requiredScopes = string.Join(" ", metadata.Scopes);
-
-        return Constants.SwaggerSummary
-            .AuthenticationFailure
-            .FormatInvariant(requiredFlows, requiredScopes);
     }
 }

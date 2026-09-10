@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
@@ -23,8 +23,10 @@ public sealed class CreateDialogEndpointSummary : Summary<CreateDialogEndpoint>
         ResponseHeaders = [HttpResponseHeaderExamples.NewDialogETagHeader(Status201Created)];
         Responses[Status201Created] = Constants.SwaggerSummary.Created.FormatInvariant("aggregate");
         Responses[Status400BadRequest] = Constants.SwaggerSummary.ValidationError;
-        Responses[Status401Unauthorized] = OpenApiExtrasAttribute.Get401Error<CreateDialogEndpoint>();
-        Responses[Status403Forbidden] = Constants.SwaggerSummary.DialogCreationNotAllowed;
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<CreateDialogEndpoint>()
+            .Or(Constants.SwaggerSummary.DialogCreationNotAllowed)
+            .Build();
         Responses[Status409Conflict] = Constants.SwaggerSummary.IdempotentKeyConflict.FormatInvariant("01941821-ffca-73a1-9335-435a882be014");
         Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }

@@ -35,14 +35,18 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf(
-            StatusCodes.Status201Created,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status410Gone,
-            StatusCodes.Status412PreconditionFailed,
-            StatusCodes.Status422UnprocessableEntity));
+        Description(b => b
+            .Produces<string>(StatusCodes.Status201Created)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status410Gone,
+                StatusCodes.Status412PreconditionFailed,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(CreateTransmissionRequest req, CancellationToken ct)

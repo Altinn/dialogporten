@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
-using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
+using FastEndpoints;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using UserType = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogUserType.Values;
 using Policy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
@@ -43,15 +45,16 @@ public sealed class UserTypeValidationMiddleware
                         context.User.GetDiagnosticSummary());
                 }
 
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                var response = context.GetResponseOrDefault(
-                    context.Response.StatusCode,
-                    [
-                        new("Type",
-                            $"The request was authenticated, but we were unable to determine valid user type in order to authorize the request. Valid user types for this endpoint are: {string.Join(", ", validUserTypes)}")
-                    ]
+                var failures = new List<ValidationFailure>
+                {
+                    new("Type",
+                        $"The request was authenticated, but we were unable to determine valid user type in order to authorize the request. Valid user types for this endpoint are: {string.Join(", ", validUserTypes)}")
+                };
+                await context.Response.SendProblemDetailsAsync(
+                    failures,
+                    StatusCodes.Status403Forbidden,
+                    cancellation: context.RequestAborted
                 );
-                await context.Response.WriteAsJsonAsync(response, response.GetType());
 
                 return;
             }

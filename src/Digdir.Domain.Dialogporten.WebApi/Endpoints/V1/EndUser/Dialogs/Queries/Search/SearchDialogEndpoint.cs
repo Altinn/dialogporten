@@ -39,9 +39,14 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(b => b.ProducesOneOf<PaginatedList<DialogDto>>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status422UnprocessableEntity));
+        Description(b => b
+            .Produces<PaginatedList<DialogDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(SearchDialogRequest req, CancellationToken ct)

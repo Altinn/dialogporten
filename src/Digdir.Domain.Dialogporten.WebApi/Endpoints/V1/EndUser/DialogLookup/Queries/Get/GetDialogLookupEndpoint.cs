@@ -34,11 +34,15 @@ public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, E
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(b => b.ProducesOneOf<EndUserIdentifierLookupDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status403Forbidden,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<EndUserIdentifierLookupDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound
+            )
+        );
     }
 
     public override async Task HandleAsync(GetDialogLookupRequest req, CancellationToken ct)

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.OptionExtensions;
@@ -11,7 +11,6 @@ using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Library.Utils.AspNet;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
 using Npgsql;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -71,11 +70,14 @@ static void BuildAndRun(string[] args)
         ));
     }
 
-    // CORS allowed origins by environment in order for GraphQL streams to work from Arbeidsflate directly through APIM
-    var allowedOrigins = builder.Configuration
+    // Bound at registration time because both CORS and the health check probes need these values
+    // before the container exists. IOptions<GraphQlSettings> stays the runtime source of truth.
+    var graphQlSettings = builder.Configuration
         .GetSection(GraphQlSettings.SectionName)
-        .Get<GraphQlSettings>()
-        ?.Cors.AllowedOrigins.ToArray() ?? [];
+        .Get<GraphQlSettings>();
+
+    // CORS allowed origins by environment in order for GraphQL streams to work from Arbeidsflate directly through APIM
+    var allowedOrigins = graphQlSettings?.Cors?.AllowedOrigins?.ToArray() ?? [];
 
     builder.Services
         // Options setup
@@ -131,27 +133,19 @@ static void BuildAndRun(string[] args)
                 }),
             httpUrlTemplates: DependencyTelemetryUrlTemplates.Defaults)
 
-        // Add health checks with configured endpoints and well-known auth metadata endpoints
-        .AddAspNetHealthChecks((x, y) =>
-        {
-            var settings = y.GetRequiredService<IOptions<GraphQlSettings>>().Value;
-            var altinnBaseUri = y.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri;
-
-            x.HealthCheckSettings.HttpGetEndpointsToCheck = AspNetUtilitiesExtensions.ResolveHttpGetEndpointsToCheck(
-                settings.HealthCheckSettings.HttpGetEndpointsToCheck,
-                altinnBaseUri,
-                settings.Authentication.JwtBearerTokenSchemas.Select(schema => new HttpGetEndpointToCheck
-                {
-                    Name = schema.Name,
-                    Url = schema.WellKnown,
-                    HardDependency = false
-                }));
-        })
+        // Health checks: the Altinn endpoint convention plus config-driven outbound probes. The JWT
+        // bearer metadata endpoints are appended as soft (Degraded) dependencies.
+        .AddDialogportenHealthChecks(
+            builder.Configuration,
+            $"{GraphQlSettings.SectionName}:{DialogportenHealthCheckExtensions.ProbeSectionName}",
+            // Null-tolerant all the way down: this runs before ValidateOnStart, so a missing
+            // GraphQl:Authentication must surface as that validation failure, not as an NRE here.
+            additionalProbes: graphQlSettings?.Authentication?.JwtBearerTokenSchemas?
+                .Select(schema => new HealthProbe(schema.Name, schema.WellKnown)))
 
         // Auth
         .AddDialogportenAuthentication(builder.Configuration)
-        .AddAuthorization()
-        .AddHealthChecks();
+        .AddAuthorization();
 
     if (builder.Environment.IsDevelopment())
     {
@@ -165,8 +159,9 @@ static void BuildAndRun(string[] args)
     var app = builder.Build();
 
     app.UseCors();
-    app.MapAspNetHealthChecks()
-        .UseMaintenanceMode()
+    app.MapDialogportenHealthChecks();
+
+    app.UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()

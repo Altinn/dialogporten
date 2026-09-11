@@ -1,173 +1,278 @@
 # Health Checks — Implementation Guide
 
 This document explains *how* Dialogporten's health checks are implemented and *why* each
-design decision was made. It is intended both as a reference for this codebase and as a
-template for implementing the same pattern in other services.
+design decision was made.
 
 For the endpoint/status reference tables (per-check status rules, configuration shape), see
 [`HealthCheck.md`](./HealthCheck.md). This document focuses on architecture and rationale.
 
 ## Big picture
 
-There are **two layers**, deliberately split:
+The health-check convention lives in the **[`Altinn.AspNet.HealthChecks`][pkg] NuGet packages**,
+which were extracted from this codebase. Dialogporten consumes them rather than hand-rolling the
+pattern:
 
-1. **A reusable library** — `Digdir.Library.Utils.AspNet` — owns the *endpoint shape*, the
-   *tag → endpoint routing*, the always-healthy `self` check, and the generic external-HTTP
-   endpoint check. This is the portable part.
-2. **Per-app infrastructure checks** — `Digdir.Domain.Dialogporten.Infrastructure/HealthChecks`
-   — registers the concrete dependency checks (PostgreSQL, Redis, Azure Service Bus, warmup)
-   that are specific to this application.
+| Package | Owns |
+| --- | --- |
+| `Altinn.AspNet.HealthChecks` | default endpoint paths, tag → endpoint routing, the `self` check, response detail levels and the negotiated JSON/plain-text writers |
+| `Altinn.AspNet.HealthChecks.Probes` | config-driven outbound HTTP probes: binding, base-URI resolution, hard/soft severity, duplicate-name detection |
+| `Altinn.AspNet.HealthChecks.Warmup` | warmup state, the hosted service that runs phases and enforces the timeouts, the `warmup` readiness check |
+| `Altinn.AspNet.HealthChecks.OpenTelemetry` | the span filter that keeps probe traffic out of traces |
 
-Each of the three hosted services (WebApi, GraphQL, Service) calls the same two extension
-methods: `AddAspNetHealthChecks(...)` during registration and `MapAspNetHealthChecks()` during
-routing. The infrastructure checks are wired in via `AddCustomHealthChecks()` inside
-`InfrastructureExtensions`.
+[pkg]: https://www.nuget.org/packages/Altinn.AspNet.HealthChecks
+
+What stays in Dialogporten is **which concrete checks to register, with what severity, and
+which warmup phases to run**. That split is the point: the library has no opinion about
+PostgreSQL or Redis, and Dialogporten has no opinion about endpoint layout.
+
+Two registration sites, deliberately independent:
+
+- `InfrastructureExtensions.AddCustomHealthChecks` registers `postgres`, `redis` and the warmup
+  phases. It runs for every host that calls `AddInfrastructure`, including the Janitor.
+- `DialogportenHealthCheckExtensions.AddDialogportenHealthChecks` registers the config-driven
+  outbound probes, plus the JWT metadata URLs that live in another settings section. Each of
+  WebApi, GraphQL and Service calls it once.
+
+Both begin with `AddAltinnHealthChecks()`, which is idempotent — so neither call site needs to
+know about the other, and registration order does not matter. Each host then calls
+`app.MapDialogportenHealthChecks()`, which maps the library's endpoints and decides the
+exception-detail policy in one place (see *Cross-cutting details*).
 
 ## The core pattern: tags, not endpoints
 
-This is the key idea. Every check is registered **once** with one or more **tags**. Endpoints
-are then defined as **predicates over tags**, so a single check can appear in multiple
-endpoints, and a new endpoint can be added without touching any check.
+Every check is registered **once** with one or more **tags**. Endpoints are **predicates over
+tags**, so one check can appear on several endpoints and a new endpoint needs no change to any
+check. The library owns this mapping:
 
-Registration (`src/Digdir.Library.Utils.AspNet/AspNetUtilitiesExtensions.cs`):
+| Endpoint            | Predicate (tags)             | Checks it runs                   | Consumed by                        |
+| ------------------- | ---------------------------- | -------------------------------- | ---------------------------------- |
+| `/health/liveness`  | `live`                       | always-healthy stub              | Container Apps **Liveness** probe  |
+| `/health/readiness` | `critical` OR `warmup`       | postgres + warmup gate           | Container Apps **Readiness** probe |
+| `/health/startup`   | `dependencies`               | postgres + redis + servicebus    | Container Apps **Startup** probe   |
+| `/health`           | `dependencies`               | postgres + redis + servicebus    | humans / dashboards                |
+| `/health/deep`      | `dependencies` OR `external` | the above + outbound HTTP probes | APIM availability test             |
 
-```csharp
-services.AddHealthChecks()
-    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["self"])
-    .AddCheck<EndpointsHealthCheck>("Endpoints", failureStatus: HealthStatus.Unhealthy, tags: ["external"]);
-```
+Use the `HealthCheckTags` constants (`Live`, `Dependencies`, `Critical`, `Warmup`, `External`)
+rather than string literals.
 
-Routing — each endpoint is just a tag filter, all sharing the HealthChecks-UI JSON response
-writer:
-
-| Endpoint            | Predicate (tags)         | Checks it runs                  | Consumed by                          |
-| ------------------- | ------------------------ | ------------------------------- | ------------------------------------ |
-| `/health/liveness`  | `self`                   | always-healthy stub             | Container Apps **Liveness** probe    |
-| `/health/readiness` | `critical` OR `warmup`   | postgres + warmup gate          | Container Apps **Readiness** probe   |
-| `/health/startup`   | `dependencies`           | postgres + redis + servicebus   | Container Apps **Startup** probe     |
-| `/health`           | `dependencies`           | postgres + redis + servicebus   | humans / dashboards                  |
-| `/health/deep`      | `dependencies` OR `external` | the above + outbound HTTP checks | APIM availability test               |
-
-> Note: an earlier version of [`HealthCheck.md`](./HealthCheck.md) lists `/health/readiness`
-> as `critical`-only. The implementation actually routes `critical` **OR** `warmup`, so the
-> warmup readiness-gate (see below) is part of readiness.
+`/health/liveness` is a pinned path, not the library default: the library moved liveness to
+`/alive` in 0.3.0 to match the Aspire service-defaults scaffolding, and
+`DialogportenHealthCheckExtensions.LivenessPath` holds it at `/health/liveness` so the Container
+Apps probe wiring below keeps working. The same endpoint layout is handed to
+`AddHealthCheckActivityFilter`, whose default route suffixes would otherwise stop suppressing
+liveness probe spans.
 
 ASP.NET Core's default status → HTTP mapping does the rest: `Healthy`/`Degraded` → **200**,
-`Unhealthy` → **503**. So a check returning `Degraded` keeps the probe green; only `Unhealthy`
+`Unhealthy` → **503**. A check returning `Degraded` keeps the probe green; only `Unhealthy`
 trips it.
+
+> **Health check names must be unique.** `DefaultHealthCheckService` throws on duplicates and is
+> resolved per request, so a single collision turns *every* health endpoint — liveness included —
+> into a 500. The probes package therefore rejects a duplicate at registration, naming the
+> configuration path that introduced it, and `AddDialogportenHealthChecks` refuses to register the
+> same configuration section twice so a repeated call stays harmless.
 
 ## Endpoint → Kubernetes probe mapping
 
 The Azure Container Apps probe wiring lives in `.azure/modules/containerApp/main.bicep`:
 
-| Probe type | Path                | Selects                         |
-| ---------- | ------------------- | ------------------------------- |
-| Startup    | `/health/startup`   | dependency visibility           |
-| Readiness  | `/health/readiness` | only what should pull traffic   |
-| Liveness   | `/health/liveness`  | process liveness only           |
+| Probe type | Path                | Selects                       |
+| ---------- | ------------------- | ----------------------------- |
+| Startup    | `/health/startup`   | dependency visibility         |
+| Readiness  | `/health/readiness` | only what should pull traffic |
+| Liveness   | `/health/liveness`  | process liveness only         |
 
 The APIM availability test points at `/health/deep` (`.azure/infrastructure/main.bicep`).
 
 This creates a natural ordering: the Startup probe (`dependencies`) effectively waits on
 PostgreSQL (Redis/Service Bus only ever degrade — see below); once startup passes, Readiness
 adds the warmup gate before the pod receives traffic, while Liveness stays green throughout so
-the pod is not killed during a slow dependency outage.
+the pod is not killed during a slow dependency outage. The readiness probe's `failureThreshold`
+of 45 at a 2s period is what gives warmup its budget.
 
 ## Registered checks and severity rationale
 
 The severity philosophy is the most transferable decision: **choose the status by asking
 "what should this failure actually do?"**
 
-### `self` (tag: `self`)
+### `self` (tag: `live`)
 
-Always returns `Healthy`. Liveness must answer only "is the process wedged?" — never include
-dependencies, or pods get restarted for downstream outages they cannot fix.
+Registered by `AddAltinnHealthChecks()`. Always returns `Healthy`. Liveness must answer only "is
+the process wedged?" — never include dependencies, or pods get restarted for downstream outages
+they cannot fix.
 
 ### PostgreSQL (tags: `dependencies`, `critical`)
 
-Registered via `AddDbContextCheck<DialogDbContext>("postgres", ...)`. It is the **only**
-`critical` dependency, so the only infra check that can fail readiness. Rationale: without
-PostgreSQL the app can neither serve requests nor preserve outbox messages, so it *should* be
-pulled from traffic.
+`AddNpgSql(sp => sp.GetRequiredService<NpgsqlDataSource>(), name: "postgres", …)`. The factory
+overload matters: the probe then uses the *same* `NpgsqlDataSource`, and therefore the same
+pool and credentials, as the application.
+
+It is the **only** `critical` dependency, so the only infra check that can fail readiness.
+Rationale: without PostgreSQL the app can neither serve requests nor preserve outbox messages,
+so it *should* be pulled from traffic.
 
 ### Redis (tag: `dependencies`)
 
-`RedisHealthCheck` connects and runs `PING`. **Every failure path returns `Degraded`, never
-`Unhealthy`** (timeout, connection failure, unexpected exception — all `Degraded`; a response
-slower than 5s is also `Degraded`). Redis is not `critical`, so Redis problems never pull a pod
-from traffic — the app degrades to cache-miss behaviour instead.
+`AddRedis(…, failureStatus: HealthStatus.Degraded)`. Registering it with an explicit
+`failureStatus` is what encodes the policy: **every** Redis failure degrades, never fails.
+Redis is not `critical`, so Redis problems never pull a pod from traffic — the app degrades to
+cache-miss behaviour instead.
 
 ### Azure Service Bus (tag: `dependencies`)
 
-`ServiceBusHealthCheck` does **not** call the Azure SDK. It is a thin application-level wrapper
-over **MassTransit's own** health check, registered only in apps that enable MassTransit
-publish/subscribe:
+There is no Dialogporten check here at all. MassTransit already ships a bus-state check, so we
+only configure how it is exposed:
 
-- MassTransit's check is renamed/retagged internally to `masstransit-servicebus` /
-  `masstransit-servicebus-internal` so it is **never** selected by any public endpoint's tag
-  predicate.
-- The wrapper (`servicebus`, tag `dependencies`) calls `HealthCheckService.CheckHealthAsync`
-  with a predicate matching only that inner check, then re-maps the result:
+```csharp
+configurator.ConfigureHealthCheckOptions(options =>
+{
+    options.Name = "servicebus";
+    options.MinimalFailureStatus = HealthStatus.Degraded;
+    options.Tags.Add(HealthCheckTags.Dependencies);
+});
+```
 
-| Inner MassTransit result    | Wrapper returns | Why                                                                 |
-| --------------------------- | --------------- | ------------------------------------------------------------------- |
-| Healthy                     | Healthy         |                                                                     |
-| Degraded **or** Unhealthy   | **Degraded**    | the PostgreSQL outbox buffers outbound messages until the broker recovers; restarting pods won't fix broker connectivity |
-| Missing (not registered)    | **Unhealthy**   | that is local misconfiguration — a different class of problem       |
+`MinimalFailureStatus` clamps the worst status the check can report. Service Bus outages are
+`Degraded`, not `Unhealthy`: the PostgreSQL outbox preserves outbound messages until broker
+connectivity recovers, and restarting pods does not fix broker connectivity.
 
-This "wrap a library's own check so you control how it is exposed" pattern avoids
-double-reporting (raw + app-level) and lets you reinterpret severity.
+> Earlier versions wrapped MassTransit's check in an application-level `ServiceBusHealthCheck`
+> purely to re-map its severity, which in turn required renaming the inner check so the public
+> endpoints would not report both. `MinimalFailureStatus` does the same job with no custom code
+> and no hidden second registration.
 
 ### Warmup (tag: `warmup`)
 
-Gates readiness during cold start — see the next section.
+Registered by `AddWarmup`. Gates readiness during cold start — see the next section.
 
 ### External HTTP endpoints (tag: `external`)
 
-`EndpointsHealthCheck`, included only in `/health/deep`. It fans out parallel `GET`s over a
-configured list, each with a per-endpoint timeout (20s) and a slow threshold (5s → `Degraded`).
-Each entry carries a `HardDependency` flag:
+`AddOutboundProbes(section, probes => probes.BaseUri = …)` from the probes package: one
+registration **per configured entry**, included only in `/health/deep`, each with a 10s timeout.
+`Hard` selects the failure status — `Unhealthy` for hard, `Degraded` for soft — so a soft
+dependency can never trip the APIM availability test. WebApi and GraphQL also register their JWT
+bearer `WellKnown` metadata URLs as soft probes via `AddOutboundProbe`.
 
-- 2xx fast → Healthy; 2xx slow → `Degraded` (regardless of hard/soft)
-- non-2xx / exception / timeout → `Unhealthy` if `HardDependency`, else `Degraded`
+`Hard` and `critical` are different axes, and conflating them is the mistake worth naming: `Hard`
+decides how loudly `/health/deep` complains, `critical` decides whether the instance is de-pooled.
+Outbound probes are never `critical` — otherwise an upstream outage pulls our own healthy replicas
+out of rotation, turning someone else's incident into ours.
 
-It emits rich diagnostic `data` (`checkedEndpoints`, `totalCount`, `hardFailureCount`,
-`softFailureCount`, `slowCount`) in the JSON response. WebApi and GraphQL also auto-append their
-JWT bearer `WellKnown` metadata URLs as **soft** dependencies.
+Because each endpoint is its own check, `/health/deep` reports them individually by name
+instead of as one aggregate entry.
 
 ## The warmup subsystem
 
 This solves cold-start latency: a fresh pod should not take production traffic until its
-connection pool and EF model are primed. Three collaborating pieces:
+connection pool and EF model are primed. The library owns the machinery; Dialogporten supplies
+the phases in `src/Digdir.Domain.Dialogporten.Infrastructure/HealthChecks/WarmupPhases.cs`:
 
-1. **`WarmupState`** — a thread-safe singleton holding `Pending | Healthy | Failed` plus the
-   current/failed phase.
-2. **`WarmupService : IHostedService`** — on startup runs phases on a background task:
-   `db-pool` (opens N pooled connections in parallel, each running `SELECT 1`), `ef-model`
-   (forces EF model compilation via a trivial query), and optionally `end-user-search` (a real
-   query under a synthetic principal). It marks state Healthy/Failed, with a configurable
-   timeout. If warmup is disabled it immediately marks Healthy.
-3. **`WarmupHealthCheck`** (tag `warmup`) — `Pending` → `Unhealthy`, `Failed` → `Unhealthy`,
-   `Healthy` → `Healthy`.
+| Phase | Optional | What it primes |
+| --- | --- | --- |
+| `db-pool` | no | opens N pooled connections in parallel, each running `SELECT 1` |
+| `ef-model` | no | forces EF model compilation via a trivial query |
+| `service-resource-metadata` | yes | populates the service-resource catalogue cache |
+| `end-user-search` | yes | a real search under a synthetic principal |
+
+Phases run **sequentially in registration order, sharing one DI scope per attempt**, under an
+**attempt budget** (`Infrastructure:Warmup:TimeoutSeconds`, 80 in the shipped appsettings, validated
+1–3600 at host startup) covering all of them, with a **per-phase budget** layered underneath (20s for
+the two required phases, 15s for the optional ones). The per-phase budget is what keeps one slow
+phase from spending the whole attempt: without it a hung optional phase starves whatever comes after
+it. Both budgets work by cancelling the token handed to the phase, so they bound only work that
+observes cancellation.
+
+The attempt budget must stay **larger than the sum of the per-phase budgets** (70s today with
+`RunEndUserSearch` on, 55s without, hence 80s) — `WarmupSettingsValidator` enforces this at
+startup against the same `WarmupPhases` budget constants the registration uses.
+`optional: true` only covers a phase *failing*; when the **attempt** budget fires it is recorded as a
+warmup failure regardless of which phase it interrupted, which turns a skippable overrun into a
+failed attempt retried from the top. Keeping the attempt budget above the phase budgets means that,
+for a phase observing cancellation, only its per-phase budget can ever fire, and an optional phase
+that overruns is skipped as intended. A phase that ignores its token forfeits that guarantee:
+it can burn through its own budget into the attempt budget — escalating an optional overrun into a
+failed attempt — or, if it never observes cancellation at all, hold readiness at Pending
+indefinitely, since no timeout can interrupt it and no retry can start behind it. All four phases
+above pass their token through to the queries they run.
+
+### Retrying
+
+A failed attempt is retried, indefinitely by default, backing off from 2s to 60s with jitter
+(`Altinn.AspNet.HealthChecks.Warmup` 0.4.0 defaults; Dialogporten does not override them).
+`/health/readiness` reports 503 throughout, so the replica stays out of rotation until it is
+genuinely warm.
+
+This matters because a failed readiness probe is **not** a restart signal. Container Apps takes the
+replica out of load balancing and leaves it running, and it still counts toward `minReplicas`, so
+nothing replaces it either. The startup probe would restart it, but only inside its own window — its
+first sample is 10s in and it needs three consecutive failures, so a blip shorter than ~30s leaves
+the startup probe green. Before retrying existed, a DNS hiccup lasting seconds during `db-pool` cost
+the replica for as long as it lived; this happened, and two replicas sat unready for 3.5 and 4 days
+(Altinn/dialogporten#4285).
+
+Each attempt gets a **fresh DI scope**, so nothing the failed attempt left faulted — a broken
+connection, a `DbContext` holding the error — is handed to the retry. A retry re-runs **every**
+phase, including those that already succeeded, so **phases must be idempotent**. All four are:
+each is a read-only query, and the ambient principal `end-user-search` installs is scoped to a
+`using` block.
+
+`optional: true` means a phase failure is logged and warmup continues, so the phase cannot fail
+readiness. Optional phases therefore contain **no exception handling of their own** — catching
+there would only hide the failure the library is about to log.
 
 Because readiness routes `critical` **OR** `warmup`, a booting pod reports **503 on
-`/health/readiness`** until warmup finishes — so the platform withholds traffic until the pod
-is actually warm — while `/health/liveness` stays 200 the whole time so it is not killed.
+`/health/readiness`** until warmup finishes — so the platform withholds traffic until the pod is
+actually warm — while `/health/liveness` stays 200 the whole time so it is not killed.
+
+Setting `Infrastructure:Warmup:Enabled = false` marks warmup complete immediately. The Janitor
+does this: it runs the same `AddInfrastructure` registrations but maps no health endpoints and
+has no cold-start traffic to gate.
 
 ## Cross-cutting details
 
-- **Response format**: all endpoints use `UIResponseWriter.WriteHealthCheckUIResponse` (from
-  `AspNetCore.HealthChecks.UI.Client`) for structured JSON instead of the bare status string.
-- **Telemetry noise suppression**: `HealthCheckFilter` is an OpenTelemetry
-  `BaseProcessor<Activity>` that drops spans for `/health` and `/health/deep` routes so probe
-  traffic does not flood traces.
-- **Per-service configuration**: WebApi/GraphQL bind external endpoints from their own settings
-  section (`WebApi:HealthCheckSettings`, etc.) and append well-known auth URLs; the Service
-  binds from a top-level `HealthCheckSettings`. `ResolveHttpGetEndpointsToCheck` normalizes each
-  entry — either an absolute `Url` or an `AltinnPlatformRelativePath` resolved against the
-  Altinn base URI.
+- **Response format**: all endpoints use the library's `HealthReportResponseWriter`, which
+  negotiates on `Accept` between `HealthReportJsonFormatter` and `HealthReportTextFormatter`,
+  JSON first. JSON is labelled `application/vnd.altinn.health.v1+json` — a versioned vendor type
+  so the payload shape can be versioned independently of the package — and a client asking for
+  plain `application/json` still lands there, since a `+json` type is a subset of it. The shape is
+  `{"status","totalDuration","entries":{name:{"status","duration","description","data","tags"}}}`
+  with lowercase statuses and every field but `status` and `duration` omitted when absent or
+  withheld; it is the library's own format, not the HealthChecks UI one. `text/plain` gets the
+  overall status as a single lowercase word and never any entry detail.
+- **Telemetry noise suppression**: `AddHealthCheckActivityFilter()` drops the ASP.NET Core
+  server span for all five `/health*` routes. Register it **before** any exporter on the same
+  `TracerProviderBuilder` — processors only affect exporters added after them. Matching is by
+  case-insensitive route *suffix*, so a business route ending in `/health` would also be
+  dropped; pass explicit suffixes if that ever matters. Child spans (for example DB calls made
+  by a deep check) are not affected.
+- **Response detail**: `MapDialogportenHealthChecks` sets `DetailLevel` to
+  `HealthReportDetailLevel.Full` in development and `Summary` outside it. `Summary` covers two
+  different leaks. Exception details: the body carries neither the exception message nor the
+  description of a check that threw — the health check service uses the exception message as the
+  description, so suppressing one field alone would still leak it. Entry data: a check chooses its
+  own `data`, and MassTransit's bus-state check publishes the Service Bus host address and its
+  queue names there *while healthy*, with no knob to trim it (`ConfigureHealthCheckOptions` offers
+  only `Name`, `Tags`, `FailureStatus`, `MinimalFailureStatus`). Withheld fields are omitted from
+  the JSON rather than written empty. Worth suppressing because the endpoints are public: WebApi
+  and GraphQL through APIM, and the Service directly on its container app ingress, which carries
+  no IP allow-list. The level is set explicitly rather than left to the library's default
+  derivation, which only recognises the literal environment name `Production` and would resolve
+  our `prod`/`staging`/`test`/`yt01` container apps to `Diagnostic` — exactly the level that
+  publishes entry data and exception messages.
+- **Per-service configuration**: WebApi and GraphQL bind their probe list from their own settings
+  section (`WebApi:HealthProbes`, `GraphQl:HealthProbes`) and add their well-known auth URLs; the
+  Service binds the top-level `HealthProbes`. That asymmetry is deliberate — Azure App
+  Configuration can inject keys that appear in no appsettings file, so an unused-looking section
+  is still registered. Each entry sets exactly one of an absolute `Url` or a `RelativePath`
+  resolved against `Infrastructure:Altinn:BaseUri`, which differs per environment.
+- **Registration-time binding**: the probe list is bound during registration rather than through
+  `IOptions<T>`, because each probe needs its own health check registration and there is no
+  service provider yet. Validation therefore happens at registration too: a missing name, both or
+  neither address, a `RelativePath` that is absolute or leading-slashed, or a duplicate name all
+  throw with the offending configuration path in the message. `Infrastructure:Altinn:BaseUri` is
+  read the same way, and is only required when some entry actually uses `RelativePath`.
 
-## Reusable patterns to carry into another product
+## Reusable patterns
 
 The transferable skeleton, independent of Dialogporten's specific dependencies:
 
@@ -178,22 +283,22 @@ The transferable skeleton, independent of Dialogporten's specific dependencies:
 3. **Decide severity by consequence**: use `Unhealthy` only when restarting/depooling the pod
    *helps*. If the app has a fallback (outbox, cache-miss), the dependency is `Degraded` and
    **not** `critical`. This single rule is most of the design.
-4. **Wrap third-party health checks** when you need to rename, retag, or reinterpret their
-   severity, and hide the raw one from public endpoints via tags.
-5. **Gate readiness on a warmup state object** if cold-start latency matters: an `IHostedService`
-   does the warming, a singleton holds the state, a health check tagged into readiness exposes
-   it.
+4. **Configure a third-party check rather than wrapping it.** If a library ships its own check,
+   look for knobs to rename, retag and clamp its severity before writing an adapter around it.
+5. **Gate readiness on a warmup check** if cold-start latency matters, and express the warming
+   as ordered phases where the non-essential ones are explicitly optional.
 6. Add a **deep** endpoint for outbound dependency visibility that dashboards can hit but
    liveness/readiness never do, and **filter probe spans** out of telemetry.
 
 ## Key source files
 
-| Concern                                   | File                                                                       |
-| ----------------------------------------- | -------------------------------------------------------------------------- |
-| Endpoint/tag routing, `self`, resolver    | `src/Digdir.Library.Utils.AspNet/AspNetUtilitiesExtensions.cs`             |
-| External HTTP endpoint check              | `src/Digdir.Library.Utils.AspNet/HealthChecks/EndpointsHealthCheck.cs`     |
-| Settings shape                            | `src/Digdir.Library.Utils.AspNet/AspNetUtilitiesSettings.cs`              |
-| Telemetry span filter                     | `src/Digdir.Library.Utils.AspNet/HealthCheckFilter.cs`                     |
-| Infra check registration                  | `src/Digdir.Domain.Dialogporten.Infrastructure/InfrastructureExtensions.cs` |
-| Redis / Service Bus / Warmup checks       | `src/Digdir.Domain.Dialogporten.Infrastructure/HealthChecks/`             |
-| Container Apps probes                      | `.azure/modules/containerApp/main.bicep`                                   |
+| Concern                                | File                                                                        |
+| -------------------------------------- | --------------------------------------------------------------------------- |
+| Endpoint/tag routing, `self`, JSON     | `Altinn.AspNet.HealthChecks` (NuGet)                                        |
+| Warmup machinery                       | `Altinn.AspNet.HealthChecks.Warmup` (NuGet)                                 |
+| Telemetry span filter                  | `Altinn.AspNet.HealthChecks.OpenTelemetry` (NuGet)                          |
+| Config-driven outbound probes          | `Altinn.AspNet.HealthChecks.Probes` (NuGet)                                 |
+| Probe + endpoint wiring for the hosts  | `src/Digdir.Library.Utils.AspNet/DialogportenHealthCheckExtensions.cs`      |
+| Infra check + warmup registration      | `src/Digdir.Domain.Dialogporten.Infrastructure/InfrastructureExtensions.cs` |
+| Warmup phase bodies                    | `src/Digdir.Domain.Dialogporten.Infrastructure/HealthChecks/WarmupPhases.cs`|
+| Container Apps probes                  | `.azure/modules/containerApp/main.bicep`                                    |

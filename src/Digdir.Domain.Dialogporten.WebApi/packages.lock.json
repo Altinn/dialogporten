@@ -122,23 +122,62 @@
           "System.IdentityModel.Tokens.Jwt": "8.15.0"
         }
       },
+      "Altinn.AspNet.HealthChecks": {
+        "type": "Transitive",
+        "resolved": "0.4.0",
+        "contentHash": "HU1o9CDumgaBkUprBYPE3Asq8lxVJsO+bjCkUA0OyftFwyWF/9wxPsdgDijekhZROQkDvR8XtDS6eTplTzvGSg=="
+      },
+      "Altinn.AspNet.HealthChecks.OpenTelemetry": {
+        "type": "Transitive",
+        "resolved": "0.4.0",
+        "contentHash": "nSf4Rj6LjzXhFK0TJwo1oMzOYAosz2PyZLt2KB9phkPMzlyxpD63z2KR2rxgNthZL+mlcM2fbKLlUVw2ftVRbQ==",
+        "dependencies": {
+          "Altinn.AspNet.HealthChecks": "0.4.0",
+          "OpenTelemetry": "1.17.0"
+        }
+      },
+      "Altinn.AspNet.HealthChecks.Probes": {
+        "type": "Transitive",
+        "resolved": "0.4.0",
+        "contentHash": "zs4AxhuLUW4PXKVe1uNxT6Br/Fb8yhCuB6e3zrapo41bL64hPdfb2qJeNb3+j82GgS7kj7MXZZnXzuLGkek2Fg==",
+        "dependencies": {
+          "Altinn.AspNet.HealthChecks": "0.4.0",
+          "AspNetCore.HealthChecks.Uris": "9.0.0"
+        }
+      },
+      "Altinn.AspNet.HealthChecks.Warmup": {
+        "type": "Transitive",
+        "resolved": "0.4.0",
+        "contentHash": "kufYRerSdsJjUJovD62ze1evOgH33TtMaZLUVNAgC7T80K8AFpiy/MTgSc+KLHcomxGFH2VAkouLdfElXli+Ng==",
+        "dependencies": {
+          "Altinn.AspNet.HealthChecks": "0.4.0"
+        }
+      },
       "Altinn.Authorization.ABAC": {
         "type": "Transitive",
         "resolved": "0.1.1",
         "contentHash": "Ln+6W3j06wt3yXA+AQwy6gw4pJllI1vC0+IzUWTy57NccW2Q5cqPz2cxBaJF2Z+eG8fhH3tYShsw0gqM9SEylA=="
       },
-      "AspNetCore.HealthChecks.UI.Client": {
+      "AspNetCore.HealthChecks.NpgSql": {
         "type": "Transitive",
         "resolved": "9.0.0",
-        "contentHash": "1Ub3Wvvbz7CMuFNWgLEc9qqQibiMoovDML/WHrwr5J83RPgtI20giCR92s/ipLgu7IIuqw+W/y7WpIeHqAICxg==",
+        "contentHash": "npc58/AD5zuVxERdhCl2Kb7WnL37mwX42SJcXIwvmEig0/dugOLg3SIwtfvvh3TnvTwR/sk5LYNkkPaBdks61A==",
         "dependencies": {
-          "AspNetCore.HealthChecks.UI.Core": "9.0.0"
+          "Npgsql": "8.0.3"
         }
       },
-      "AspNetCore.HealthChecks.UI.Core": {
+      "AspNetCore.HealthChecks.Redis": {
         "type": "Transitive",
         "resolved": "9.0.0",
-        "contentHash": "TVriy4hgYnhfqz6NAzv8qe62Q8wf82iKUL6WV9selqeFZTq1ILi39Sic6sFQegRysvAVcnxKP/vY8z9Fk8x6XQ=="
+        "contentHash": "yNH0h8GLRbAf+PU5HNVLZ5hNeyq9mDVmRKO9xuZsme/znUYoBJlQvI0gq45gaZNlLncCHkMhR4o90MuT+gxxPw==",
+        "dependencies": {
+          "StackExchange.Redis": "2.7.4"
+        }
+      },
+      "AspNetCore.HealthChecks.Uris": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "XYdNlA437KeF8p9qOpZFyNqAN+c0FXt/JjTvzH/Qans0q0O3pPE8KPnn39ucQQjR/Roum1vLTP3kXiUs8VHyuA=="
       },
       "AsyncKeyedLock": {
         "type": "Transitive",
@@ -1008,14 +1047,6 @@
         "resolved": "10.0.0",
         "contentHash": "RFYJR7APio/BiqdQunRq6DB+nDB6nc2qhHr77mlvZ0q0BT8PubMXN7XicmfzCbrDE/dzhBnUKBRXLTcqUiZDGg=="
       },
-      "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": {
-        "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "R3OADoj7geeFn7BYbw03milCTYgC57MeqGAUQtOOzB1fzYhZMl1grGAwz3wZdoYnD4/RIEYBbOy5PspZHlr7fQ==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.11"
-        }
-      },
       "Microsoft.Extensions.Http.Polly": {
         "type": "Transitive",
         "resolved": "10.0.11",
@@ -1538,7 +1569,11 @@
         "type": "Project",
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.1.0, )",
+          "Altinn.AspNet.HealthChecks": "[0.4.0, )",
+          "Altinn.AspNet.HealthChecks.Warmup": "[0.4.0, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
+          "AspNetCore.HealthChecks.NpgSql": "[9.0.0, )",
+          "AspNetCore.HealthChecks.Redis": "[9.0.0, )",
           "Dapper": "[2.1.79, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
@@ -1548,7 +1583,6 @@
           "MassTransit.EntityFrameworkCore": "[8.5.7, 9.0.0)",
           "MessagePack": "[3.1.8, )",
           "Microsoft.Extensions.Caching.StackExchangeRedis": "[10.0.11, )",
-          "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[10.0.11, )",
           "Microsoft.Extensions.Http.Polly": "[10.0.11, )",
           "Npgsql": "[10.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )",
@@ -1575,7 +1609,9 @@
       "digdir.library.utils.aspnet": {
         "type": "Project",
         "dependencies": {
-          "AspNetCore.HealthChecks.UI.Client": "[9.0.0, )",
+          "Altinn.AspNet.HealthChecks": "[0.4.0, )",
+          "Altinn.AspNet.HealthChecks.OpenTelemetry": "[0.4.0, )",
+          "Altinn.AspNet.HealthChecks.Probes": "[0.4.0, )",
           "Azure.Identity": "[1.21.0, )",
           "Azure.Monitor.OpenTelemetry.AspNetCore": "[1.6.0, )",
           "Digdir.Domain.Dialogporten.Infrastructure": "[1.0.0, )",

@@ -3,6 +3,8 @@ using System.Globalization;
 using Altinn.ApiClients.Maskinporten.Extensions;
 using Altinn.ApiClients.Maskinporten.Interfaces;
 using Altinn.ApiClients.Maskinporten.Services;
+using Altinn.AspNet.HealthChecks;
+using Altinn.AspNet.HealthChecks.Warmup;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -39,6 +41,7 @@ using MessagePack.Resolvers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -126,7 +129,7 @@ public static class InfrastructureExtensions
                         Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1),
                             retryCount: 3)));
             })
-            .AddCustomHealthChecks()
+            .AddCustomHealthChecks(infrastructureSettings)
 
             // Scoped
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
@@ -471,8 +474,6 @@ public static class InfrastructureExtensions
             });
         });
 
-        builderContext.Services.AddServiceBusHealthCheck();
-
         new DummyRequestExecutorBuilder { Services = builderContext.Services }
             .AddRedisSubscriptions(_ => ConnectionMultiplexer.Connect(builderContext.InfraSettings.Redis.ConnectionString),
                 new SubscriptionOptions
@@ -504,8 +505,6 @@ public static class InfrastructureExtensions
 
             x.UsingAzureServiceBus();
         });
-
-        builderContext.Services.AddServiceBusHealthCheck();
 
         new DummyRequestExecutorBuilder { Services = builderContext.Services }
             .AddRedisSubscriptions(_ => ConnectionMultiplexer.Connect(builderContext.InfraSettings.Redis.ConnectionString),
@@ -563,35 +562,72 @@ public static class InfrastructureExtensions
         return services;
     }
 
+    // MassTransit owns the actual bus-state probe; we only name it, tag it into the public
+    // dependency endpoints, and clamp the worst status it can report. Service Bus outages must
+    // degrade rather than de-pool: the PostgreSQL outbox holds outbound messages until broker
+    // connectivity recovers, and restarting a replica does not fix the broker.
     private static void ConfigureServiceBusHealthCheck(IBusRegistrationConfigurator configurator) =>
         configurator.ConfigureHealthCheckOptions(options =>
         {
-            options.Name = ServiceBusHealthCheck.InnerHealthCheckName;
-            options.Tags.Add(ServiceBusHealthCheck.InnerHealthCheckTag);
+            options.Name = "servicebus";
+            options.MinimalFailureStatus = HealthStatus.Degraded;
+            options.Tags.Add(HealthCheckTags.Dependencies);
         });
 
-    private static IServiceCollection AddServiceBusHealthCheck(this IServiceCollection services)
+    private static IServiceCollection AddCustomHealthChecks(
+        this IServiceCollection services,
+        InfrastructureSettings settings)
     {
-        services.AddHealthChecks()
-            .AddCheck<ServiceBusHealthCheck>("servicebus", tags: ["dependencies"]);
+        // AddAltinnHealthChecks is idempotent and registers the "self" liveness check. The hosts
+        // call it again when they register their outbound probes; both append to the same list.
+        services.AddAltinnHealthChecks()
+            // Probes the same NpgsqlDataSource - and therefore the same pool - the app uses.
+            .AddNpgSql(
+                dbDataSourceFactory: static sp => sp.GetRequiredService<NpgsqlDataSource>(),
+                name: "postgres",
+                tags: [HealthCheckTags.Dependencies, HealthCheckTags.Critical])
+            // Redis is a cache: losing it costs latency, never correctness. So it degrades, is not
+            // "critical", and must never pull a replica out of traffic.
+            .AddRedis(
+                connectionStringFactory: static sp => sp
+                    .GetRequiredService<IOptions<InfrastructureSettings>>().Value.Redis.ConnectionString,
+                name: "redis",
+                failureStatus: HealthStatus.Degraded,
+                tags: [HealthCheckTags.Dependencies]);
 
-        services.AddSingleton<ServiceBusHealthCheck>();
+        services.AddWarmup(options =>
+        {
+            options.Enabled = settings.Warmup.Enabled;
+            // Budget for a single attempt, layered above the per-phase budgets below. The library
+            // validates it (1-3600s) at host startup. It must stay LARGER than the sum of the
+            // per-phase budgets: the attempt budget firing is recorded as a warmup *failure* even
+            // when the phase it interrupts is optional, which turns a skippable overrun into a
+            // failed attempt that has to be retried from the top. Keep
+            // Infrastructure:Warmup:TimeoutSeconds above the phase budgets so only the per-phase
+            // budgets can ever fire.
+            options.TimeoutSeconds = settings.Warmup.TimeoutSeconds;
 
-        return services;
-    }
+            // Retry is left at the library defaults: retry for as long as the pod runs, backing
+            // off from 2s to 60s with jitter. A failure here is nearly always transient - the
+            // incident that prompted it was a DNS blip during db-pool - and a readiness failure is
+            // not a restart signal, so a replica that gives up sits unready until someone notices.
+            // See Altinn/dialogporten#4285.
 
-    private static IServiceCollection AddCustomHealthChecks(this IServiceCollection services)
-    {
-        services.AddHealthChecks()
-            .AddCheck<RedisHealthCheck>("redis", tags: ["dependencies"])
-            .AddDbContextCheck<DialogDbContext>("postgres", tags: ["dependencies", "critical"])
-            .AddCheck<WarmupHealthCheck>("warmup", tags: ["warmup"]);
+            // Sequential, sharing one DI scope per attempt. Each phase also gets its own budget, so
+            // one slow phase cannot spend the whole attempt and leave a later phase either unrun or
+            // blamed for the timeout. The two optional phases go last and are the ones that talk to
+            // Altinn or run a real search, so they get the tighter budgets.
+            // A retry re-runs every phase, so each must stay idempotent - they are all read-only
+            // queries today.
+            options.AddPhase("db-pool", WarmupPhases.WarmupDbPoolAsync, timeoutSeconds: WarmupPhases.DbPoolBudgetSeconds);
+            options.AddPhase("ef-model", WarmupPhases.WarmupEfModelAsync, timeoutSeconds: WarmupPhases.EfModelBudgetSeconds);
+            options.AddPhase("service-resource-metadata", WarmupPhases.WarmupServiceResourceMetadataAsync, optional: true, timeoutSeconds: WarmupPhases.ServiceResourceMetadataBudgetSeconds);
 
-        services
-            .AddSingleton<RedisHealthCheck>()
-            .AddSingleton<WarmupState>()
-            .AddSingleton<WarmupHealthCheck>()
-            .AddHostedService<WarmupService>();
+            if (settings.Warmup.RunEndUserSearch)
+            {
+                options.AddPhase("end-user-search", WarmupPhases.WarmupEndUserSearchAsync, optional: true, timeoutSeconds: WarmupPhases.EndUserSearchBudgetSeconds);
+            }
+        });
 
         return services;
     }

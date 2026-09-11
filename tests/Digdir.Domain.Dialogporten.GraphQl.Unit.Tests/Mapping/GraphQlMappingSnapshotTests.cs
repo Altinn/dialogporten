@@ -1,21 +1,16 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Queries.GetParties;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.Limits.Queries.Get;
-using Digdir.Domain.Dialogporten.GraphQL;
-using Microsoft.Extensions.DependencyInjection;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.Limits;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.Parties;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 using GetDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
-using SearchDialogQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.SearchDialogQuery;
-using SetSystemLabelCommand = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel.SetSystemLabelCommand;
-using BulkSetSystemLabelCommand = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels.BulkSetSystemLabelCommand;
-using Dialog = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById.Dialog;
 using SearchDialogInput = Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs.SearchDialogInput;
-using SearchDialogsPayload = Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs.SearchDialogsPayload;
-using DialogLookupModel = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup.DialogLookup;
-using LimitsModel = Digdir.Domain.Dialogporten.GraphQL.EndUser.Limits.Limits;
-using AuthorizedParty = Digdir.Domain.Dialogporten.GraphQL.EndUser.Parties.AuthorizedParty;
 using SetSystemLabelInput = Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes.SetSystemLabelInput;
 using BulkSetSystemLabelInput = Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes.BulkSetSystemLabelInput;
 
@@ -24,28 +19,19 @@ namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.Mapping;
 #pragma warning disable CS0618 // Obsolete DTO members are intentionally exercised by the snapshots
 
 /// <summary>
-/// Golden-master snapshots of the current AutoMapper-based GraphQL mappings. These lock in the exact
-/// output of every <c>mapper.Map&lt;T&gt;(...)</c> call site in the GraphQL EndUser query/mutation
-/// handlers so that the upcoming migration to hand-written static mappers (issue #967) can be proven
-/// behaviour-preserving: after the migration the Act step is switched to the static mapper and the
-/// verified files must stay byte-for-byte identical.
+/// Golden-master snapshots of the GraphQL mappings. These lock in the exact output of every mapping
+/// call site in the GraphQL EndUser query/mutation handlers. The snapshots were originally captured
+/// against the AutoMapper-based mappings and are now produced by the hand-written static mappers
+/// (issue #967); the verified files staying byte-for-byte identical proves the migration is
+/// behaviour-preserving.
 /// </summary>
 public sealed class GraphQlMappingSnapshotTests
 {
-    private readonly IMapper _mapper;
-
-    public GraphQlMappingSnapshotTests()
-    {
-        var services = new ServiceCollection();
-        services.AddAutoMapper(GraphQLAssemblyMarker.Assembly);
-        _mapper = services.BuildServiceProvider().GetRequiredService<IMapper>();
-    }
-
     [Fact]
     public Task DialogById_DialogDto_To_Dialog()
     {
         var source = ObjectFiller.Fill<GetDialogDto>();
-        var result = _mapper.Map<Dialog>(source);
+        var result = source.ToDialog();
         return Verify(result).UseDirectory("Snapshots");
     }
 
@@ -53,7 +39,7 @@ public sealed class GraphQlMappingSnapshotTests
     public Task SearchDialogs_Input_To_Query()
     {
         var source = ObjectFiller.Fill<SearchDialogInput>();
-        var result = _mapper.Map<SearchDialogQuery>(source);
+        var result = source.ToSearchDialogQuery();
         return Verify(result).UseDirectory("Snapshots");
     }
 
@@ -67,7 +53,7 @@ public sealed class GraphQlMappingSnapshotTests
             @continue: "continuation-token",
             orderBy: "order-by-string");
 
-        var result = _mapper.Map<SearchDialogsPayload>(source);
+        var result = source.ToSearchDialogsPayload();
         return Verify(result).UseDirectory("Snapshots");
     }
 
@@ -75,7 +61,7 @@ public sealed class GraphQlMappingSnapshotTests
     public Task DialogLookup_Dto_To_Model()
     {
         var source = ObjectFiller.Fill<EndUserIdentifierLookupDto>();
-        var result = _mapper.Map<DialogLookupModel>(source);
+        var result = source.ToDialogLookup();
         return Verify(result).UseDirectory("Snapshots");
     }
 
@@ -83,7 +69,7 @@ public sealed class GraphQlMappingSnapshotTests
     public Task Limits_Dto_To_Model()
     {
         var source = ObjectFiller.Fill<GetLimitsDto>();
-        var result = _mapper.Map<LimitsModel>(source);
+        var result = source.ToLimits();
         return Verify(result).UseDirectory("Snapshots");
     }
 
@@ -97,7 +83,7 @@ public sealed class GraphQlMappingSnapshotTests
             filler.Create<AuthorizedPartyDto>()
         };
 
-        var result = _mapper.Map<List<AuthorizedParty>>(source);
+        var result = source.ToAuthorizedParties();
         return Verify(result).UseDirectory("Snapshots");
     }
 
@@ -105,7 +91,7 @@ public sealed class GraphQlMappingSnapshotTests
     public Task Mutation_SetSystemLabelInput_To_Command()
     {
         var source = ObjectFiller.Fill<SetSystemLabelInput>();
-        var result = _mapper.Map<SetSystemLabelCommand>(source);
+        var result = source.ToCommand();
         return Verify(result).UseDirectory("Snapshots");
     }
 
@@ -113,7 +99,7 @@ public sealed class GraphQlMappingSnapshotTests
     public Task Mutation_BulkSetSystemLabelInput_To_Command()
     {
         var source = ObjectFiller.Fill<BulkSetSystemLabelInput>();
-        var result = _mapper.Map<BulkSetSystemLabelCommand>(source);
+        var result = source.ToCommand();
         return Verify(result).UseDirectory("Snapshots");
     }
 }

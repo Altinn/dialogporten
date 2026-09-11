@@ -54,8 +54,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                var mappedStatus = Application.GetMapper()
-                    .Map<DialogStatus.Values>(createDto.Status);
+                var mappedStatus = createDto.Status is { } status
+                    ? (DialogStatus.Values)status
+                    : default;
                 result.Status.Should().Be(mappedStatus);
 
                 result.Should().NotBeNull();
@@ -170,8 +171,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                var mappedStatus = Application.GetMapper()
-                    .Map<DialogStatus.Values>(createDto.Status);
+                var mappedStatus = createDto.Status is { } status
+                    ? (DialogStatus.Values)status
+                    : default;
                 result.Status.Should().Be(mappedStatus);
 
                 result.Should().NotBeNull();

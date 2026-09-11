@@ -26,6 +26,9 @@ internal static class RouteHandlerBuilderExtensions
                 case StatusCodes.Status422UnprocessableEntity:
                     builder.ProducesProblemFE<ProblemDetails>(statusCode);
                     break;
+                case StatusCodes.Status409Conflict:
+                    builder.ProducesProblemFE<ConflictProblemDetails>(statusCode);
+                    break;
                 default:
                     builder.Produces(statusCode);
                     break;

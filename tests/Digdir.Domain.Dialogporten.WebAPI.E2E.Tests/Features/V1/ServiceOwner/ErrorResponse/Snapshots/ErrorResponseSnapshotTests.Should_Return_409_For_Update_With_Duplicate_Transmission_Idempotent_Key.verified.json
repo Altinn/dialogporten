@@ -8,5 +8,12 @@
     "IdempotentKey": [
       "Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: \u0027duplicate-transmission-key\u0027."
     ]
-  }
+  },
+  "conflicts": [
+    {
+      "key": "IdempotentKey",
+      "value": "duplicate-transmission-key",
+      "reason": "IdempotentKey already exists"
+    }
+  ]
 }

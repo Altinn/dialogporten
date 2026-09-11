@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
@@ -186,8 +187,11 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         }
 
         var conflictingKeys = string.Join(", ", duplicatedIdempotentKeys.Select(x => $"'{x}'"));
-        return new Conflict(nameof(DialogTransmission.IdempotentKey),
-            $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
+        return new Conflict(
+            nameof(DialogTransmission.IdempotentKey),
+            $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.",
+            new IdempotentKeyConflict(duplicatedIdempotentKeys)
+        );
     }
 
     private async Task<DialogEntity?> LoadDialogAsync(Guid dialogId, CancellationToken cancellationToken)

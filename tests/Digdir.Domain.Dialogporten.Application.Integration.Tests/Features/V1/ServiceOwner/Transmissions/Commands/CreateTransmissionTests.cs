@@ -1,18 +1,21 @@
+using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
-using AwesomeAssertions;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
+using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using Digdir.Tool.Dialogporten.GenerateFakeData;
+using Microsoft.Extensions.DependencyInjection;
 using TransmissionAttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission.TransmissionAttachmentDto;
 using GetTransmissionDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission.TransmissionDto;
-using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using Microsoft.Extensions.DependencyInjection;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 
@@ -51,6 +54,28 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 result.Transmissions.Last().RelatedTransmissionId.Should()
                     .Be(result.Transmissions.First().Id);
             });
+
+
+
+    [Fact]
+    public async Task Cannot_Use_Existing_Transmission_IdempotentKey_When_Updating_Dialog()
+    {
+        var idempotentKey1 = NewUuidV7().ToString();
+
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey1)
+                .AddTransmission(x =>
+                    x.IdempotentKey = idempotentKey1))
+            .ExecuteAndAssert<Conflict>(x =>
+            {
+                x.ErrorMessage.Should().Contain(idempotentKey1);
+                x.AttemptedValues.Should().BeOfType<IdempotentKeyConflict>();
+                var attempt = x.AttemptedValues.As<IdempotentKeyConflict>();
+                attempt.ConflictingIdempotentKeys.Single().Should().Be(idempotentKey1);
+            });
+    }
 
     [Fact]
     public Task Can_Create_100_Linked_Transmissions() =>
@@ -196,10 +221,10 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             {
                 Id = id,
                 RelatedTransmissionId = index == 0 ? null : ids[index - 1],
-                Type = Domain.Dialogs.Entities.Transmissions.DialogTransmissionType.Values.Information,
+                Type = DialogTransmissionType.Values.Information,
                 Sender = new()
                 {
-                    ActorType = Domain.Actors.ActorType.Values.ServiceOwner
+                    ActorType = ActorType.Values.ServiceOwner
                 },
                 Content = new()
                 {

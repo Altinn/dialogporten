@@ -1,0 +1,22 @@
+﻿{
+  Dto: {
+    Dialogs: [
+      {
+        DialogId: 00000001-0000-0000-0000-000000000000,
+        EndUserContextRevision: 00000002-0000-0000-0000-000000000000
+      },
+      {
+        DialogId: 00000003-0000-0000-0000-000000000000,
+        EndUserContextRevision: 00000004-0000-0000-0000-000000000000
+      }
+    ],
+    AddLabels: [
+      Default,
+      Bin
+    ],
+    RemoveLabels: [
+      Archive,
+      MarkedAsUnopened
+    ]
+  }
+}

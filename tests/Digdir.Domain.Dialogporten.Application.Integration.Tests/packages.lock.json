@@ -108,14 +108,6 @@
         "resolved": "8.1.2",
         "contentHash": "FworLhWdK1fnSW8mbUtmQSqO2cSdQ7Ctb4q1WGZvNbu10xTHSS0WjuWk6UNLO3MbxtCk8uhduX8yu6HNoaI0Tw=="
       },
-      "AutoMapper": {
-        "type": "Transitive",
-        "resolved": "14.0.0",
-        "contentHash": "OC+1neAPM4oCCqQj3g2GJ2shziNNhOkxmNB9cVS8jtx4JbgmRzLcUOxB9Tsz6cVPHugdkHgCaCrTjjSI0Z5sCQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Options": "8.0.0"
-        }
-      },
       "Azure.Core": {
         "type": "Transitive",
         "resolved": "1.53.0",
@@ -1327,7 +1319,6 @@
         "type": "Project",
         "dependencies": {
           "AsyncKeyedLock": "[8.1.2, )",
-          "AutoMapper": "[14.0.0, )",
           "Digdir.Domain.Dialogporten.Domain": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.1.1, )",

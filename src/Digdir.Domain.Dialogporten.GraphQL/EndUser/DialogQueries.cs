@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -18,7 +17,6 @@ public partial class Queries
 {
     public async Task<DialogByIdPayload> GetDialogById(
         [Service] ISender mediator,
-        [Service] IMapper mapper,
         [Service] IHttpContextAccessor httpContextAccessor,
         [Argument] Guid dialogId,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
@@ -32,7 +30,7 @@ public partial class Queries
 
         var result = await mediator.Send(request, cancellationToken);
         return result.Match(
-            dialog => new DialogByIdPayload { Dialog = mapper.Map<Dialog>(dialog) },
+            dialog => new DialogByIdPayload { Dialog = dialog.ToDialog() },
             notFound => new DialogByIdPayload { Errors = [new DialogByIdNotFound { Message = notFound.Message }] },
             notVisible =>
             {
@@ -82,7 +80,6 @@ public partial class Queries
 
     public async Task<SearchDialogsPayload> SearchDialogs(
         [Service] ISender mediator,
-        [Service] IMapper mapper,
         [Service] IValidator<SearchDialogInput> inputValidator,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         SearchDialogInput input,
@@ -103,7 +100,7 @@ public partial class Queries
             };
         }
 
-        var searchDialogQuery = mapper.Map<SearchDialogQuery>(input);
+        var searchDialogQuery = input.ToSearchDialogQuery();
         searchDialogQuery.AcceptedLanguages = acceptLanguage?.AcceptedLanguage;
 
         if (!ContinuationTokenSet<SearchDialogQueryOrderDefinition, DialogEntity>.TryParse(
@@ -132,7 +129,7 @@ public partial class Queries
         return result.Match(
             paginatedList =>
             {
-                var mappedResult = mapper.Map<SearchDialogsPayload>(paginatedList);
+                var mappedResult = paginatedList.ToSearchDialogsPayload();
                 mappedResult.OrderBy = paginatedList.OrderBy.AsSpan().ToSearchDialogSortTypeList();
                 return mappedResult;
             },

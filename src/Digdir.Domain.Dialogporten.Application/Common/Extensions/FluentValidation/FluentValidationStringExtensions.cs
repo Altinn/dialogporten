@@ -101,7 +101,7 @@ internal static partial class FluentValidationStringExtensions
         const string https = "https://";
         const string href = "href";
         return node.Attributes.Count == 1 &&
-               node.Attributes[href] is not null &&
-               node.Attributes[href].Value.StartsWith(https, StringComparison.InvariantCultureIgnoreCase);
+               node.Attributes[href]?.Value is { } hrefValue &&
+               hrefValue.StartsWith(https, StringComparison.InvariantCultureIgnoreCase);
     }
 }

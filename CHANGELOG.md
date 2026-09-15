@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.121.1](https://github.com/Altinn/dialogporten/compare/v1.121.0...v1.121.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* align dialog sub-resource visibility with getDialogById ([#4368](https://github.com/Altinn/dialogporten/issues/4368)) ([c6cd932](https://github.com/Altinn/dialogporten/commit/c6cd93248a7e67ede156ab9830536a6c2b855e93))
+* changed GetLabelAssignmentLogs to return Gone for deleted dialogs ([#4369](https://github.com/Altinn/dialogporten/issues/4369)) ([f5b1138](https://github.com/Altinn/dialogporten/commit/f5b1138d9f6b787086fab5853f840d07b03572a4))
+* **ci:** retry Azure OIDC login on transient token endpoint failures ([#4356](https://github.com/Altinn/dialogporten/issues/4356)) ([7c36411](https://github.com/Altinn/dialogporten/commit/7c364111351b59f620fafb5d7f7aa7ee0a8b1f85))
+* **ci:** tag all PRs in the deployed range for prod, tt02 and yt01 ([#4363](https://github.com/Altinn/dialogporten/issues/4363)) ([e4fcc02](https://github.com/Altinn/dialogporten/commit/e4fcc02a0e8ab45255aab0aabf396c38028d4488))
+* **ci:** use a Dialogporten-owned digdir resource as the second org in staging k6 tests ([#4371](https://github.com/Altinn/dialogporten/issues/4371)) ([1c9101b](https://github.com/Altinn/dialogporten/commit/1c9101b534149243f5e5315d1b58519f0a271f99))
+* **infra:** scale prod Redis to Standard C3 ([#4391](https://github.com/Altinn/dialogporten/issues/4391)) ([24e6b13](https://github.com/Altinn/dialogporten/commit/24e6b134517f9e1042e345504065e23845859ebb))
+* **infra:** whitelist dis-edge IP range on test ingress ([#4390](https://github.com/Altinn/dialogporten/issues/4390)) ([71f6769](https://github.com/Altinn/dialogporten/commit/71f67699c7ebc36b06d5ffafa393731b2aa6e8cc))
+
+
+### Miscellaneous Chores
+
+* **deps:** align local grafana with Azure Managed Grafana 12.4.8 ([#4392](https://github.com/Altinn/dialogporten/issues/4392)) ([63d59ba](https://github.com/Altinn/dialogporten/commit/63d59ba55e54bbf6134a55aaf2fe498c38f11cad))
+* **deps:** update dependency fastendpoints.swagger to 8.3.0 ([#4375](https://github.com/Altinn/dialogporten/issues/4375)) ([c25a712](https://github.com/Altinn/dialogporten/commit/c25a712fe4d66bb9fe048a159f6df188164a8228))
+* **deps:** update dependency htmlagilitypack to 1.13.0 ([#4388](https://github.com/Altinn/dialogporten/issues/4388)) ([9856a37](https://github.com/Altinn/dialogporten/commit/9856a3738e7829a07128a15f8727de4fd200daba))
+* **deps:** update grafana/loki docker tag to v3.7.7 ([#4372](https://github.com/Altinn/dialogporten/issues/4372)) ([3fb5d33](https://github.com/Altinn/dialogporten/commit/3fb5d334a22ff2284e52541a3ada228295bad099))
+* **deps:** update hotchocolate dependencies to 16.6.2 ([#4373](https://github.com/Altinn/dialogporten/issues/4373)) ([7420021](https://github.com/Altinn/dialogporten/commit/74200210060d0b38b4d642fbfaa839444a3280ce))
+* **deps:** update hotchocolate dependencies to 16.6.4 ([#4380](https://github.com/Altinn/dialogporten/issues/4380)) ([b499aa0](https://github.com/Altinn/dialogporten/commit/b499aa0db9c19c2b2f8ba1898aab81472d460a45))
+* **deps:** update nginx docker tag to v1.31.4 ([#4374](https://github.com/Altinn/dialogporten/issues/4374)) ([769c6f4](https://github.com/Altinn/dialogporten/commit/769c6f44d9f9ff0fe483872271c3ef92b4a050a0))
+* **deps:** update nginx docker tag to v1.31.5 ([#4386](https://github.com/Altinn/dialogporten/issues/4386)) ([3e94c4f](https://github.com/Altinn/dialogporten/commit/3e94c4fdd4a3ecfe0973be7e3edb3fc6a965989f))
+* **deps:** update step-security/harden-runner action to v2.21.1 ([#4387](https://github.com/Altinn/dialogporten/issues/4387)) ([d1de86b](https://github.com/Altinn/dialogporten/commit/d1de86b5c3af65337d48007e59dc6d4f3f9fbb63))
+
 ## [1.121.0](https://github.com/Altinn/dialogporten/compare/v1.120.1...v1.121.0) (2026-09-03)
 
 

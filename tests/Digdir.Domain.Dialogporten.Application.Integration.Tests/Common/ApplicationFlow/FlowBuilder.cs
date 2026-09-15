@@ -9,11 +9,11 @@ public static class FlowBuilder
     public static IFlowStep For(DialogApplication application, Action<IServiceCollection> appConfig)
     {
         application.ConfigureServices(appConfig);
-        return new FlowStep<object?>(new FlowContext(application, [], []));
+        return new FlowStep<object?>(new FlowContext(application, new FlowState(), [], []));
     }
 
     public static IFlowStep For(DialogApplication application) =>
-        new FlowStep<object?>(new FlowContext(application, [], []));
+        new FlowStep<object?>(new FlowContext(application, new FlowState(), [], []));
 }
 
 public readonly struct FlowStep<TIn> : IFlowExecutor<TIn>

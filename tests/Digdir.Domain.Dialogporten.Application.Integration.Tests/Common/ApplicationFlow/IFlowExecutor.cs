@@ -1,3 +1,6 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using MediatR;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
@@ -73,5 +76,23 @@ internal static class FlowStepExtensions
 
 public record FlowContext(
     DialogApplication Application,
+    FlowState State,
     Dictionary<string, object?> Bag,
-    List<Func<object?, CancellationToken, Task<object?>>> Commands);
+    List<Func<object?, CancellationToken, Task<object?>>> Commands
+);
+
+public record FlowState()
+{
+    public List<CommandResultPair<CreateDialogCommand, CreateDialogResult?>> CreatedDialogs { get; } = [];
+
+    public List<CommandResultPair<CreateTransmissionCommand, CreateTransmissionResult?>> CreatedTransmissions { get; } =
+        [];
+
+    public List<CommandResultPair<CreateActivityCommand, CreateActivityResult?>> CreatedActivities { get; } = [];
+}
+
+public class CommandResultPair<TCommand, TResult>(TCommand command)
+{
+    public TCommand Command { get; } = command;
+    public TResult? Result { get; set; }
+}

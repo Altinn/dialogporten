@@ -29,8 +29,8 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
-using OpenApiSecurityScheme = Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -228,7 +228,7 @@ static void BuildAndRun(string[] args)
             .DisableAgent();
 
         options.HideTestRequestButton = !openApiSettings.EnableTryItOut;
-        options.AddAuthorizationCodeFlow(OpenApiSecurityScheme.IdportenSecurityScheme,
+        options.AddAuthorizationCodeFlow(IdportenSecurityScheme,
             authOptions => authOptions
                 .WithClientId(openApiSettings.IdportenClientId)
                 .WithAuthorizationUrl(openApiSettings.IdportenAuthorizationUrl + "?prompt=login")
@@ -315,6 +315,7 @@ static void BuildAndRun(string[] args)
 
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
+            uiConfig.Path = dialogPrefix + "/swagger";
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
             uiConfig.CustomJavaScriptPath = dialogPrefix + "/swagger-oidc-workaround.js";
@@ -326,7 +327,9 @@ static void BuildAndRun(string[] args)
                 Scopes = { "openid", "profile", "digdir:dialogporten" },
             };
             uiConfig.EnableTryItOut = false; // Don't open try-it-out by default (this does not remove the button)
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_SECURITY_SCHEME"] = IdportenSecurityScheme;
             uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = openApiSettings.IdportenLogoutUrl;
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH"] = dialogPrefix + "/swagger/index.html";
             if (!openApiSettings.EnableTryItOut)
             {
                 uiConfig.AdditionalSettings["supportedSubmitMethods"] = new List<string>();

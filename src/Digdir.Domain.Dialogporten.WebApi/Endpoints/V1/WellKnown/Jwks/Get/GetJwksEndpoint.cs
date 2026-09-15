@@ -26,7 +26,7 @@ public sealed class GetJwksEndpoint : EndpointWithoutRequest<GetJwksDto>
         PreProcessor<RequireJsonAcceptPreProcessor>();
         Group<MetadataGroup>();
 
-        Description(b => b.ProducesOneOf<GetJwksDto>(StatusCodes.Status200OK));
+        Description(b => b.Produces<GetJwksDto>());
     }
 
     public override async Task HandleAsync(CancellationToken ct)

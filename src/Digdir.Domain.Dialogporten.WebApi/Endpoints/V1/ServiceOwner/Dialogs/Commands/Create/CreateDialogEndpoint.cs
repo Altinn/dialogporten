@@ -35,11 +35,15 @@ public sealed class CreateDialogEndpoint : Endpoint<CreateDialogRequest>
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf(
-            StatusCodes.Status201Created,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status422UnprocessableEntity,
-            StatusCodes.Status409Conflict));
+        Description(b => b
+            .Produces<string>(StatusCodes.Status201Created)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(CreateDialogRequest req, CancellationToken ct)

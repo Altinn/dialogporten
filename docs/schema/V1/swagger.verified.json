@@ -7954,10 +7954,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Authenticated end user is not authorized for the supplied instance reference."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Authenticated end user is not authorized for the supplied instance reference."
           },
           "404": {
             "content": {
@@ -8282,11 +8296,35 @@
             },
             "description": "Successfully returned the dialog list."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "422": {
             "content": {
@@ -8374,11 +8412,35 @@
             },
             "description": "Successfully returned the dialog aggregate."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -8389,6 +8451,16 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -8470,10 +8542,24 @@
             "description": "Successfully returned the dialog activity list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -8484,6 +8570,16 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -8571,10 +8667,24 @@
             "description": "Successfully returned the dialog activity."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -8585,6 +8695,16 @@
               }
             },
             "description": "The specified dialog ID or activity ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -8654,10 +8774,24 @@
             "description": "Successfully returned the dialog label assignment log list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -8670,6 +8804,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -8771,10 +8912,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -8787,9 +8942,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -8880,10 +9049,24 @@
             "description": "Successfully returned the dialog seen log records."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Altinn authentication level too low."
           },
           "404": {
             "content": {
@@ -8893,7 +9076,17 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -8969,10 +9162,24 @@
             "description": "Successfully returned the dialog seen log record."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "404": {
             "content": {
@@ -8983,6 +9190,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -9064,10 +9281,24 @@
             "description": "Successfully returned the dialog transmission list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -9080,6 +9311,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -9168,10 +9406,24 @@
             "description": "Successfully returned the dialog transmission."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -9184,6 +9436,13 @@
             "description": "The specified dialog ID or transmission ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -9254,10 +9513,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -9270,6 +9543,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -9346,10 +9626,24 @@
             "description": "The list of authorized parties for the end user"
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "503": {
             "content": {
@@ -9433,10 +9727,24 @@
             "description": "Authorized service resource metadata."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "503": {
             "content": {
@@ -9620,10 +9928,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Authenticated service owner does not own the resolved dialog."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Authenticated service owner does not own the resolved dialog."
           },
           "404": {
             "content": {
@@ -9972,8 +10294,35 @@
             },
             "description": "Successfully returned the dialog list."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
+          },
+          "403": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search\u0022."
           },
           "503": {
             "content": {
@@ -10054,12 +10403,33 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization)."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created."
           },
           "422": {
@@ -10142,7 +10512,7 @@
               }
             }
           },
-          "400": {
+          "401": {
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -10150,13 +10520,17 @@
                 }
               }
             },
-            "description": "Validation error occurred. See problem details for a list of errors."
-          },
-          "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to delete the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -10169,9 +10543,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -10250,11 +10638,35 @@
             },
             "description": "Successfully returned the dialog aggregate."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -10516,10 +10928,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -10532,9 +10958,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -10627,7 +11067,7 @@
               }
             }
           },
-          "400": {
+          "401": {
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -10635,13 +11075,17 @@
                 }
               }
             },
-            "description": "Validation error occurred. See problem details for a list of errors."
-          },
-          "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to freeze the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to freeze the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -10654,9 +11098,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -10730,11 +11188,35 @@
           "204": {
             "description": "The dialog aggregate was deleted successfully."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to delete the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -10747,6 +11229,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -10821,10 +11310,24 @@
             "description": "The dialog aggregate was restored successfully."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -10837,6 +11340,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -10941,11 +11451,55 @@
             },
             "description": "Successfully returned the notification determination."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022altinn:system/notifications.condition.check\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022altinn:system/notifications.condition.check\u0022."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -11010,10 +11564,24 @@
             "description": "Successfully returned the dialog activity list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -11024,6 +11592,16 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -11125,10 +11703,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to create child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to create child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -11141,9 +11733,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -11235,10 +11841,24 @@
             "description": "Successfully returned the dialog activity."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -11251,6 +11871,13 @@
             "description": "The specified dialog ID or activity ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -11325,10 +11952,24 @@
             }
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -11430,12 +12071,43 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.changetransmissions\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.changetransmissions\u0022."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -11447,6 +12119,16 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
             "content": {
@@ -11528,10 +12210,24 @@
             }
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -11544,6 +12240,13 @@
             "description": "The given dialog or service owner label was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -11554,7 +12257,17 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
             "content": {
@@ -11658,10 +12371,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -11674,9 +12401,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -11762,10 +12503,24 @@
             "description": "Successfully returned the dialog seen log records."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -11778,6 +12533,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -11849,10 +12611,24 @@
             "description": "Successfully returned the dialog seen log record."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -11865,6 +12641,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -11930,10 +12713,24 @@
             "description": "Successfully returned the dialog transmission list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -11946,6 +12743,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -12048,10 +12852,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to create child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to create child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -12064,9 +12882,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -12158,10 +12990,24 @@
             "description": "Successfully returned the dialog transmission."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -12174,6 +13020,13 @@
             "description": "The specified dialog ID or transmission ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -12277,10 +13130,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.changetransmissions\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.changetransmissions\u0022.\n- Unauthorized to update child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -12293,9 +13160,23 @@
             "description": "The specified dialog ID or transmission ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -12429,8 +13310,35 @@
             },
             "description": "Successfully returned the dialog list."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
+          },
+          "403": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search\u0022."
           },
           "503": {
             "content": {
@@ -12506,10 +13414,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -12522,7 +13444,24 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
           },
           "412": {
             "content": {

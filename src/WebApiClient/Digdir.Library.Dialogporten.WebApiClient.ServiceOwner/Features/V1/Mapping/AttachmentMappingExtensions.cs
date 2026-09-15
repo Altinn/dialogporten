@@ -2,6 +2,10 @@ using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
+// The authorizationContext members these maps carry are flagged experimental for consumers; the SDK's
+// own mapping layer is part of the feature, so it opts in rather than warning about itself.
+#pragma warning disable DPEXP001
+
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 
 /// <summary>
@@ -17,6 +21,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     internal static UpdateDialogAttachment ToUpdateDialogAttachment(this DialogAttachment source) => new()
@@ -26,6 +31,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContextInput(),
     };
 
     internal static UpdateDialogAttachment ToUpdateDialogAttachment(this CreateDialogAttachment source) => new()
@@ -35,6 +41,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToUpdateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     internal static CreateDialogAttachment ToCreateDialogAttachment(this UpdateDialogAttachment source) => new()
@@ -44,6 +51,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToCreateDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext,
     };
 
     private static CreateDialogAttachmentUrl ToCreateDialogAttachmentUrl(this DialogAttachmentUrl source) => new()
@@ -88,6 +96,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 
     internal static DialogAttachment ToDialogAttachment(this UpdateDialogAttachment source) => new()
@@ -97,6 +106,7 @@ internal static class AttachmentMappingExtensions
         Name = source.Name,
         Urls = source.Urls?.Select(x => x.ToDialogAttachmentUrl()).ToList() ?? [],
         ExpiresAt = source.ExpiresAt,
+        AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
     };
 
     private static DialogAttachmentUrl ToDialogAttachmentUrl(this CreateDialogAttachmentUrl source) => new()
@@ -115,3 +125,5 @@ internal static class AttachmentMappingExtensions
         ConsumerType = source.ConsumerType,
     };
 }
+
+#pragma warning restore DPEXP001

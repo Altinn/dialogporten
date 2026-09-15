@@ -106,7 +106,8 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+      "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+      "isAuthorized": true
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -125,7 +126,8 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "isAuthorized": true
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -144,9 +146,11 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "isAuthorized": true
     }
   ],
+  "excludedAttachments": [],
   "transmissions": [
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -229,11 +233,14 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true
         }
       ],
+      "excludedAttachments": [],
       "navigationalActions": [
         {
+          "id": "00000000-0000-0000-0000-000000000000",
           "title": [
             {
               "value": "Expired navigation",
@@ -245,9 +252,11 @@
             }
           ],
           "url": "https://digdir.no/transmission/expired-navigation",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true
         },
         {
+          "id": "00000000-0000-0000-0000-000000000000",
           "title": [
             {
               "value": "Aktiv navigasjon",
@@ -255,9 +264,11 @@
             }
           ],
           "url": "https://digdir.no/transmission/active-navigation",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": true
         }
-      ]
+      ],
+      "excludedNavigationalActions": []
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -327,11 +338,14 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "isAuthorized": false
         }
       ],
+      "excludedAttachments": [],
       "navigationalActions": [
         {
+          "id": "00000000-0000-0000-0000-000000000000",
           "title": [
             {
               "value": "Uautorisert navigasjon",
@@ -339,15 +353,17 @@
             }
           ],
           "url": "urn:dialogporten:unauthorized",
-          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00"
+          "expiresAt": "0000-00-00T00:00:00.000000\u002B00:00",
+          "isAuthorized": false
         }
-      ]
+      ],
+      "excludedNavigationalActions": []
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "someunavailablesubresource",
-      "isAuthorized": false,
+      "isAuthorized": true,
       "extendedType": null,
       "externalReference": null,
       "relatedTransmissionId": null,
@@ -406,17 +422,21 @@
           "urls": [
             {
               "id": "00000000-0000-0000-0000-000000000000",
-              "url": "urn:dialogporten:unauthorized",
+              "url": "https://digdir.apps.tt02.altinn.no/some-other-url",
               "mediaType": null,
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "isAuthorized": true
         }
       ],
-      "navigationalActions": []
+      "excludedAttachments": [],
+      "navigationalActions": [],
+      "excludedNavigationalActions": []
     }
   ],
+  "excludedTransmissions": [],
   "guiActions": [
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -458,6 +478,7 @@
       ]
     }
   ],
+  "excludedGuiActions": [],
   "apiActions": [
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -491,6 +512,7 @@
       ]
     }
   ],
+  "excludedApiActions": [],
   "activities": [
     {
       "id": "00000000-0000-0000-0000-000000000000",

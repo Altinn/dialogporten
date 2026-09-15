@@ -24,7 +24,8 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
     public IValidationResult Validate(ReadOnlySpan<char> token,
         Guid? dialogId = null,
         string[]? requiredActions = null,
-        DialogTokenValidationParameters? options = null)
+        DialogTokenValidationParameters? options = null,
+        string? requiredEntityReference = null)
     {
         const string tokenPropertyName = "token";
         options ??= DialogTokenValidationParameters.Default;
@@ -61,6 +62,15 @@ internal sealed class DialogTokenValidator : IDialogTokenValidator
         if (requiredActions is not null && !validationResult.ClaimsPrincipal.VerifyActions(requiredActions))
         {
             validationResult.AddError(tokenPropertyName, "Invalid actions");
+        }
+
+        if (requiredEntityReference is not null && !dialogId.HasValue)
+        {
+            validationResult.AddError(tokenPropertyName, "Dialog ID is required when validating an entity reference");
+        }
+        else if (requiredEntityReference is not null && !validationResult.ClaimsPrincipal.VerifyEntityReference(requiredEntityReference))
+        {
+            validationResult.AddError(tokenPropertyName, "Invalid entity reference");
         }
 
         return validationResult;

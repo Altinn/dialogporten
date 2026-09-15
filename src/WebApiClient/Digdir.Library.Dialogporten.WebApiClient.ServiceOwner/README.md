@@ -185,6 +185,21 @@ var result = validator.Validate(token, options: new DialogTokenValidationParamet
 });
 ```
 
+### Authorization contexts
+
+An entity with an `authorizationContext` (a transmission, attachment, action or navigational action) can be granted through a party or resource other than the dialog's own, so its grant is not expressed by the actions claim. Instead the dialog token's `e` claim lists, for every such entity the end user is authorized for, the entity's id or the `tokenRef` the service owner supplied on the context. For a request scoped to such an entity, pass the reference and the validation fails unless it is listed:
+
+```csharp
+var result = validator.Validate(dialogToken, dialogId: dialogId, requiredEntityReference: transmissionId.ToString());
+// or, when the context was created with a tokenRef:
+var result = validator.Validate(dialogToken, dialogId: dialogId, requiredEntityReference: "my-own-reference");
+
+// The listed references are also available directly:
+var authorizedEntities = result.ClaimsPrincipal?.GetAuthorizedEntityReferences();
+```
+
+Always supply `dialogId` when validating an entity reference; token references are scoped to one dialog. A service owner may intentionally assign the same `tokenRef` to several entities in a dialog. This creates an OR-group: authorization for any member adds the shared reference to `e`, and a recipient validating that reference cannot distinguish which member was authorized. Only group entities that deliberately share access semantics.
+
 ## Settings reference
 
 ```json

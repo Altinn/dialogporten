@@ -29,7 +29,7 @@ runs:
     - name: OIDC Login to Azure Public Cloud
       id: login-attempt-1
       continue-on-error: true
-      uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
+      uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
       with:
         client-id: ${{ inputs.client-id }}
         tenant-id: ${{ inputs.tenant-id }}
@@ -45,7 +45,7 @@ runs:
       id: login-attempt-2
       if: steps.login-attempt-1.outcome == 'failure'
       continue-on-error: true
-      uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
+      uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
       with:
         client-id: ${{ inputs.client-id }}
         tenant-id: ${{ inputs.tenant-id }}
@@ -59,7 +59,7 @@ runs:
 
     - name: OIDC Login to Azure Public Cloud (attempt 3)
       if: steps.login-attempt-1.outcome == 'failure' && steps.login-attempt-2.outcome == 'failure'
-      uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
+      uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
       with:
         client-id: ${{ inputs.client-id }}
         tenant-id: ${{ inputs.tenant-id }}

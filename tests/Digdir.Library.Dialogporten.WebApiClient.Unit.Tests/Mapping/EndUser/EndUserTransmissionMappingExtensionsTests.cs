@@ -54,6 +54,24 @@ public class EndUserTransmissionMappingExtensionsTests
         Assert.Single(result.NavigationalActions);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ToDialogTransmission_CarriesAuthorizationFlags(bool fromDetails)
+    {
+        // Losing an authorization flag while normalizing the endpoint families would silently misreport
+        // what the caller may access.
+        var result = fromDetails ? FullDetails().ToDialogTransmission() : FullSearchItem().ToDialogTransmission();
+
+        Assert.True(result.IsAuthorized);
+
+        var attachment = Assert.Single(result.Attachments);
+        Assert.True(attachment.IsAuthorized);
+
+        var navigationalAction = Assert.Single(result.NavigationalActions);
+        Assert.True(navigationalAction.IsAuthorized);
+    }
+
     [Fact]
     public void ToDialogTransmission_FromDetails_NullCollectionsBecomeEmpty()
     {
@@ -109,10 +127,18 @@ public class EndUserTransmissionMappingExtensionsTests
             {
                 Id = Guid.NewGuid(),
                 Name = "a",
+                IsAuthorized = true,
                 Urls = [new DialogTransmissionAttachmentUrlDetails { Id = Guid.NewGuid(), Url = new Uri("https://example.com/t"), ConsumerType = AttachmentUrlConsumerType.Api }],
             },
         ],
-        NavigationalActions = [new DialogTransmissionNavigationalActionDetails { Url = new Uri("https://example.com/nav") }],
+        NavigationalActions =
+        [
+            new DialogTransmissionNavigationalActionDetails
+            {
+                Url = new Uri("https://example.com/nav"),
+                IsAuthorized = true,
+            },
+        ],
     };
 
     private static DialogTransmissionSearchItem FullSearchItem() => new()
@@ -134,9 +160,17 @@ public class EndUserTransmissionMappingExtensionsTests
             {
                 Id = Guid.NewGuid(),
                 Name = "a",
+                IsAuthorized = true,
                 Urls = [new DialogTransmissionSearchAttachmentUrl { Id = Guid.NewGuid(), Url = new Uri("https://example.com/t"), ConsumerType = AttachmentUrlConsumerType.Api }],
             },
         ],
-        NavigationalActions = [new DialogTransmissionSearchNavigationalAction { Url = new Uri("https://example.com/nav") }],
+        NavigationalActions =
+        [
+            new DialogTransmissionSearchNavigationalAction
+            {
+                Url = new Uri("https://example.com/nav"),
+                IsAuthorized = true,
+            },
+        ],
     };
 }

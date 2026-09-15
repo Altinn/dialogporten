@@ -7,6 +7,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
@@ -151,9 +152,11 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
         modelBuilder.Entity<Actor>();
         modelBuilder.Entity<Attachment>();
         modelBuilder.Entity<LocalizationSet>();
+        modelBuilder.Entity<AuthorizationContext>();
         modelBuilder.ConfigureTphForeignKeyPartialIndexes<Actor>();
         modelBuilder.ConfigureTphForeignKeyPartialIndexes<Attachment>();
         modelBuilder.ConfigureTphForeignKeyPartialIndexes<LocalizationSet>();
+        modelBuilder.ConfigureTphForeignKeyPartialIndexes<AuthorizationContext>();
 
         modelBuilder
             .HasPostgresExtension(Constants.PostgreSqlTrigram)

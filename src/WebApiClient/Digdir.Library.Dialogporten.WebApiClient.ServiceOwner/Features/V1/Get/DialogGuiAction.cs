@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 
@@ -14,9 +15,13 @@ public class DialogGuiAction
 
     /// <summary>
     /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
+    /// <br/>
+    /// <br/>Empty when the action was supplied with an authorizationContext, in which case the action is found
+    /// <br/>in authorizationContext.action.
     /// </summary>
     [JsonPropertyName("action")]
-    public required string Action { get; set; }
+    [Obsolete("Use 'AuthorizationContext.Action' instead.")]
+    public string Action { get; set; } = null!;
 
     /// <summary>
     /// The fully qualified URL of the action, to which the user will be redirected when the action is triggered.
@@ -31,7 +36,16 @@ public class DialogGuiAction
     /// <br/>Can also be used to refer to other service policies.
     /// </summary>
     [JsonPropertyName("authorizationAttribute")]
+    [Obsolete("Use 'AuthorizationContext' instead.")]
     public string? AuthorizationAttribute { get; set; }
+
+    /// <summary>
+    /// Describes the authorization inputs used when evaluating end user access to this action.
+    /// <br/>Null when the action uses legacy authorization fields.
+    /// </summary>
+    [JsonPropertyName("authorizationContext")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+    public AuthorizationContext? AuthorizationContext { get; set; }
 
     /// <summary>
     /// Whether the user, if supplied in the query, is authorized to perform the action.

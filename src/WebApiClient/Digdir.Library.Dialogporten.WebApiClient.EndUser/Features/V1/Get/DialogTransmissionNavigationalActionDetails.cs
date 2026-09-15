@@ -1,10 +1,17 @@
 using System.Text.Json.Serialization;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Get;
 
 public class DialogTransmissionNavigationalActionDetails
 {
+    /// <summary>
+    /// The unique identifier for the navigational action in UUIDv7 format.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
     /// <summary>
     /// The title of the navigational action.
     /// </summary>
@@ -23,4 +30,13 @@ public class DialogTransmissionNavigationalActionDetails
     /// </summary>
     [JsonPropertyName("expiresAt")]
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+    /// <br/>replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    [JsonPropertyName("isAuthorized")]
+    [Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+    public bool IsAuthorized { get; set; }
+
 }

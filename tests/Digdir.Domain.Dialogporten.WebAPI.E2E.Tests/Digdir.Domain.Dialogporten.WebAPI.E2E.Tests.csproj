@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <!-- Tests exercise the experimental authorizationContext SDK surface on purpose. -->
+        <NoWarn>$(NoWarn);DPEXP001</NoWarn>
         <IsTestProject>true</IsTestProject>
         <IsPackable>false</IsPackable>
     </PropertyGroup>

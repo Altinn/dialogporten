@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -82,6 +82,13 @@ static void BuildAndRun(string[] args)
         .Bind(builder.Configuration.GetSection(WebApiSettings.SectionName))
         .ValidateFluently()
         .ValidateOnStart();
+
+    // Health check registration needs the probe list and the JWT well-known URLs before the
+    // container exists, so bind the section directly here. IOptions<WebApiSettings> above stays
+    // the runtime source of truth for everything else.
+    var webApiSettings = builder.Configuration
+        .GetSection(WebApiSettings.SectionName)
+        .Get<WebApiSettings>();
 
     if (!builder.Environment.IsDevelopment())
     {
@@ -170,22 +177,15 @@ static void BuildAndRun(string[] args)
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))
             .AddNewtonsoftJson()
             .Services
-        // Add health checks with configured endpoints and well-known auth metadata endpoints
-        .AddAspNetHealthChecks((x, y) =>
-        {
-            var settings = y.GetRequiredService<IOptions<WebApiSettings>>().Value;
-            var altinnBaseUri = y.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri;
-
-            x.HealthCheckSettings.HttpGetEndpointsToCheck = AspNetUtilitiesExtensions.ResolveHttpGetEndpointsToCheck(
-                settings.HealthCheckSettings.HttpGetEndpointsToCheck,
-                altinnBaseUri,
-                settings.Authentication.JwtBearerTokenSchemas.Select(schema => new HttpGetEndpointToCheck
-                {
-                    Name = schema.Name,
-                    Url = schema.WellKnown,
-                    HardDependency = false
-                }));
-        })
+        // Health checks: the Altinn endpoint convention plus config-driven outbound probes. The JWT
+        // bearer metadata endpoints are appended as soft (Degraded) dependencies.
+        .AddDialogportenHealthChecks(
+            builder.Configuration,
+            $"{WebApiSettings.SectionName}:{DialogportenHealthCheckExtensions.ProbeSectionName}",
+            // Null-tolerant all the way down: this runs before ValidateOnStart, so a missing
+            // WebApi:Authentication must surface as that validation failure, not as an NRE here.
+            additionalProbes: webApiSettings?.Authentication?.JwtBearerTokenSchemas?
+                .Select(schema => new HealthProbe(schema.Name, schema.WellKnown)))
         // Auth
         .AddDialogportenAuthentication(builder.Configuration)
         .AddAuthorization();
@@ -202,8 +202,8 @@ static void BuildAndRun(string[] args)
     }
 
     var app = builder.Build();
-    app.MapAspNetHealthChecks()
-        .MapControllers();
+    app.MapDialogportenHealthChecks();
+    app.MapControllers();
 
     var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
 

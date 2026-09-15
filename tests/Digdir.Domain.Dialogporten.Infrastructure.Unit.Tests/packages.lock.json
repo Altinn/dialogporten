@@ -55,10 +55,41 @@
           "System.IdentityModel.Tokens.Jwt": "8.15.0"
         }
       },
+      "Altinn.AspNet.HealthChecks": {
+        "type": "Transitive",
+        "resolved": "0.4.0",
+        "contentHash": "HU1o9CDumgaBkUprBYPE3Asq8lxVJsO+bjCkUA0OyftFwyWF/9wxPsdgDijekhZROQkDvR8XtDS6eTplTzvGSg=="
+      },
+      "Altinn.AspNet.HealthChecks.Warmup": {
+        "type": "Transitive",
+        "resolved": "0.4.0",
+        "contentHash": "kufYRerSdsJjUJovD62ze1evOgH33TtMaZLUVNAgC7T80K8AFpiy/MTgSc+KLHcomxGFH2VAkouLdfElXli+Ng==",
+        "dependencies": {
+          "Altinn.AspNet.HealthChecks": "0.4.0"
+        }
+      },
       "Altinn.Authorization.ABAC": {
         "type": "Transitive",
         "resolved": "0.1.1",
         "contentHash": "Ln+6W3j06wt3yXA+AQwy6gw4pJllI1vC0+IzUWTy57NccW2Q5cqPz2cxBaJF2Z+eG8fhH3tYShsw0gqM9SEylA=="
+      },
+      "AspNetCore.HealthChecks.NpgSql": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "npc58/AD5zuVxERdhCl2Kb7WnL37mwX42SJcXIwvmEig0/dugOLg3SIwtfvvh3TnvTwR/sk5LYNkkPaBdks61A==",
+        "dependencies": {
+          "Microsoft.Extensions.Diagnostics.HealthChecks": "8.0.11",
+          "Npgsql": "8.0.3"
+        }
+      },
+      "AspNetCore.HealthChecks.Redis": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "yNH0h8GLRbAf+PU5HNVLZ5hNeyq9mDVmRKO9xuZsme/znUYoBJlQvI0gq45gaZNlLncCHkMhR4o90MuT+gxxPw==",
+        "dependencies": {
+          "Microsoft.Extensions.Diagnostics.HealthChecks": "8.0.11",
+          "StackExchange.Redis": "2.7.4"
+        }
       },
       "AsyncKeyedLock": {
         "type": "Transitive",
@@ -613,16 +644,6 @@
         "resolved": "10.0.11",
         "contentHash": "5DCBP95vpklAkEfIbT2yzunianCeRtjaLrmAwoIgTf+xOJGFMmkAut/p3R2YmZL7TM1dnV81adGIg4m7Kg6wUw=="
       },
-      "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": {
-        "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "R3OADoj7geeFn7BYbw03milCTYgC57MeqGAUQtOOzB1fzYhZMl1grGAwz3wZdoYnD4/RIEYBbOy5PspZHlr7fQ==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.11",
-          "Microsoft.Extensions.Diagnostics.HealthChecks": "10.0.11",
-          "Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions": "10.0.11"
-        }
-      },
       "Microsoft.Extensions.FileProviders.Abstractions": {
         "type": "Transitive",
         "resolved": "10.0.11",
@@ -1170,7 +1191,11 @@
         "type": "Project",
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.1.0, )",
+          "Altinn.AspNet.HealthChecks": "[0.4.0, )",
+          "Altinn.AspNet.HealthChecks.Warmup": "[0.4.0, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
+          "AspNetCore.HealthChecks.NpgSql": "[9.0.0, )",
+          "AspNetCore.HealthChecks.Redis": "[9.0.0, )",
           "Dapper": "[2.1.79, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
@@ -1182,7 +1207,6 @@
           "Microsoft.Extensions.Caching.StackExchangeRedis": "[10.0.11, )",
           "Microsoft.Extensions.Configuration.UserSecrets": "[10.0.11, )",
           "Microsoft.Extensions.Diagnostics.HealthChecks": "[10.0.11, )",
-          "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[10.0.11, )",
           "Microsoft.Extensions.Hosting.Abstractions": "[10.0.11, )",
           "Microsoft.Extensions.Http.Polly": "[10.0.11, )",
           "Npgsql": "[10.0.3, )",

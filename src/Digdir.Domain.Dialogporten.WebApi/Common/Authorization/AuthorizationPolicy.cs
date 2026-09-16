@@ -9,4 +9,5 @@ internal static class AuthorizationPolicy
     public const string ServiceProviderChangeTransmissions = "serviceproviderChangeTransmissions";
     public const string Testing = "testing";
     public const string ServiceProviderAdmin = "serviceproviderAdmin";
+    public const string Compliance = "compliance";
 }

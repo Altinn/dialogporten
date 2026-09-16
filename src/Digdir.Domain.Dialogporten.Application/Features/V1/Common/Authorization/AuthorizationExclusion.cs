@@ -3,7 +3,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization;
 
 internal static class AuthorizationExclusion
 {

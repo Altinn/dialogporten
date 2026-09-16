@@ -16,7 +16,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
-using static Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.AuthorizationExclusion;
+using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.AuthorizationExclusion;
 using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;

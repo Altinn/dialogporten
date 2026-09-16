@@ -94,6 +94,11 @@ public static class AuthorizationScope
     /// </summary>
     public const string Testing = "digdir:dialogporten.developer.test";
 
+    /// <summary>
+    /// Gives access to the compliance surface, e.g. retrieving compliance documents for a party.
+    /// </summary>
+    public const string Compliance = "digdir:dialogporten.compliance";
+
     public static readonly Lazy<IReadOnlyCollection<string>> AllScopes = new(GetAll);
     private static ReadOnlyCollection<string> GetAll() =>
         typeof(AuthorizationScope)

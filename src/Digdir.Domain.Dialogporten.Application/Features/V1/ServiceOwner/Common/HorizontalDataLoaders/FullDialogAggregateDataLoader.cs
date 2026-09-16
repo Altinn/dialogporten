@@ -3,13 +3,13 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
-using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents;
+using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.HorizontalDataLoaders;
@@ -19,6 +19,43 @@ public sealed class FullDialogAggregateDataLoader
     private readonly IDialogDbContext _dialogDbContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly Dictionary<Guid, DialogEntity> _dialogEntities = new();
+
+    public FullDialogAggregateDataLoader(IDialogDbContext dialogDbContext, IUserResourceRegistry userResourceRegistry)
+    {
+        _dialogDbContext = dialogDbContext;
+        _userResourceRegistry = userResourceRegistry;
+    }
+
+    public async Task<DialogEntity?> LoadDialogEntity(Guid dialogId, CancellationToken cancellationToken)
+    {
+        if (_dialogEntities.TryGetValue(dialogId, out var entity))
+        {
+            return entity;
+        }
+
+        var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+
+        var dialogEntity = await _dialogDbContext.WrapWithRepeatableRead((dbCtx, ct) =>
+            dbCtx.Dialogs.IncludeFullDialogAggregate()
+                .IgnoreQueryFilters()
+                .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
+                    x => resourceIds.Contains(x.ServiceResource))
+                .FirstOrDefaultAsync(x => x.Id == dialogId, ct),
+            cancellationToken);
+
+        if (dialogEntity is not null)
+        {
+            _dialogEntities.TryAdd(dialogId, dialogEntity);
+            return dialogEntity;
+        }
+
+        return null;
+    }
+
+}
+
+public static class DbSetDialogEntityExtensions
+{
 
     private static readonly Expression<Func<DialogEntity, IEnumerable<DialogSearchTag>>> OrderedSearchTags =
         e => e.SearchTags.OrderBy(s => s.CreatedAt).ThenBy(s => s.Id);
@@ -47,23 +84,11 @@ public sealed class FullDialogAggregateDataLoader
     private static readonly Expression<Func<DialogEntity, IEnumerable<DialogContent>>> OrderedContent =
         e => e.Content.OrderBy(c => c.Id).ThenBy(c => c.CreatedAt);
 
-    public FullDialogAggregateDataLoader(IDialogDbContext dialogDbContext, IUserResourceRegistry userResourceRegistry)
+    extension(DbSet<DialogEntity> dialogs)
     {
-        _dialogDbContext = dialogDbContext;
-        _userResourceRegistry = userResourceRegistry;
-    }
-
-    public async Task<DialogEntity?> LoadDialogEntity(Guid dialogId, CancellationToken cancellationToken)
-    {
-        if (_dialogEntities.TryGetValue(dialogId, out var entity))
+        public IQueryable<DialogEntity> IncludeFullDialogAggregate()
         {
-            return entity;
-        }
-
-        var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-
-        var dialogEntity = await _dialogDbContext.WrapWithRepeatableRead((dbCtx, ct) =>
-            dbCtx.Dialogs
+            return dialogs
                 .Include(OrderedSearchTags)
                 .Include(OrderedContent).ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(OrderedAttachments).ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
@@ -74,31 +99,25 @@ public sealed class FullDialogAggregateDataLoader
                 .Include(OrderedAttachments).ThenInclude(x => x.AuthorizationContext)
                 .Include(OrderedGuiActions).ThenInclude(x => x.AuthorizationContext)
                 .Include(OrderedApiActions).ThenInclude(x => x.AuthorizationContext)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionContent).ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionContent)
+                .ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(OrderedTransmissions).ThenInclude(x => x.Sender).ThenInclude(x => x.ActorNameEntity)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions).ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments)
+                .ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments)
+                .ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions)
+                .ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(OrderedTransmissions).ThenInclude(x => x.AuthorizationContext)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.AuthorizationContext)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions).ThenInclude(x => x.AuthorizationContext)
+                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments)
+                .ThenInclude(x => x.AuthorizationContext)
+                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions)
+                .ThenInclude(x => x.AuthorizationContext)
                 .Include(OrderedActivities).ThenInclude(x => x.Description!.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(OrderedActivities).ThenInclude(x => x.PerformedBy).ThenInclude(x => x.ActorNameEntity)
                 .Include(OrderedSeenLog).ThenInclude(x => x.SeenBy).ThenInclude(x => x.ActorNameEntity)
                 .Include(x => x.EndUserContext).ThenInclude(OrderedEndUserContextSystemLabels)
-                .Include(x => x.ServiceOwnerContext).ThenInclude(OrderedServiceOwnerLabels)
-                .IgnoreQueryFilters()
-                .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
-                    x => resourceIds.Contains(x.ServiceResource))
-                .FirstOrDefaultAsync(x => x.Id == dialogId, ct),
-            cancellationToken);
-
-        if (dialogEntity is not null)
-        {
-            _dialogEntities.TryAdd(dialogId, dialogEntity);
-            return dialogEntity;
+                .Include(x => x.ServiceOwnerContext).ThenInclude(OrderedServiceOwnerLabels);
         }
-
-        return null;
     }
 }

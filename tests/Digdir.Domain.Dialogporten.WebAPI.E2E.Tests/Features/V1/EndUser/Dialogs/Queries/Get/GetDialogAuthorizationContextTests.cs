@@ -14,10 +14,14 @@ namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.Dialog
 public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
 {
     // A foreign party the default test end user does not represent; used to exercise
-    // multi-party (OR) semantics against the real PDP.
+    // multi-party (OR) semantics against the real PDP. The party must exist in the register
+    // of the environment under test: the PDP enriches every context party from the register
+    // and fails the whole decision request when a lookup returns 404.
     private const string ForeignOrgParty = "urn:altinn:organization:identifier-no:991825827";
 
-    [E2EFact]
+    // ForeignOrgParty is not registered in yt01, which makes the PDP fail the decision request
+    // and the dialog respond 502.
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Evaluate_Multi_Party_AuthorizationContext_On_Dialog_Attachments()
     {
         // Arrange: three dialog attachments with authorization contexts:

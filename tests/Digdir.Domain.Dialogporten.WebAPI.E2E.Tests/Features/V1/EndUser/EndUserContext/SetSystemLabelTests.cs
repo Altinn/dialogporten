@@ -30,7 +30,8 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
     }
 
-    [E2EFact]
+    // yt01 has no provisioned system user, see E2EConstants.DefaultSystemUserId
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Be_Able_To_Set_System_Label_When_SystemUser()
     {
         // Arrange

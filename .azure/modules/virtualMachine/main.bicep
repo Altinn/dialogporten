@@ -79,6 +79,11 @@ param sshPublicKey string
 @description('Enable Just-in-Time access for the virtual machine')
 param enableJit bool = false
 
+@description('Resource ID of an Azure Update Manager maintenance configuration to assign to the virtual machine. When set, patches install on that schedule instead of the platform-orchestrated one.')
+param maintenanceConfigurationId string = ''
+
+var useCustomerManagedPatchSchedule = !empty(maintenanceConfigurationId)
+
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2025-11-01' = {
   name: name
   location: location
@@ -107,7 +112,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2025-11-01' = {
           patchMode: 'AutomaticByPlatform'
           automaticByPlatformSettings: {
             rebootSetting: 'IfRequired'
-            bypassPlatformSafetyChecksOnUserSchedule: false
+            bypassPlatformSafetyChecksOnUserSchedule: useCustomerManagedPatchSchedule
           }
           assessmentMode: 'AutomaticByPlatform'
         }
@@ -142,6 +147,16 @@ resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-0
         ]
       }
     ]
+  }
+}
+
+resource maintenanceAssignment 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = if (useCustomerManagedPatchSchedule) {
+  name: '${name}-maintenance'
+  location: location
+  scope: virtualMachine
+  properties: {
+    maintenanceConfigurationId: maintenanceConfigurationId
+    resourceId: virtualMachine.id
   }
 }
 

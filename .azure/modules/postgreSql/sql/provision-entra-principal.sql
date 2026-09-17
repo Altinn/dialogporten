@@ -40,12 +40,15 @@
 -- oid, so the new identity could not authenticate. We therefore inspect the existing mapping:
 --   role_exists      = a PG role with this name exists at all
 --   mapped_oid       = the object id the existing Entra mapping points to ('' if no mapping)
--- pgaadauth_list_principals(false) returns (rolename, principalType, objectId, tenantId, ...).
+-- pgaadauth_list_principals(false) returns lowercase, unquoted columns on the server:
+--   (rolname, principaltype, objectid, tenantid, ismfa, isadmin)
+-- Microsoft's documentation spells them rolename/principalType/objectId; that spelling does not
+-- match the actual function (verified on AT23, PostgreSQL 18.4, 2026-09-17).
 SELECT
   EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'role_name')                       AS role_exists,
-  COALESCE((SELECT p."objectId"
+  COALESCE((SELECT p.objectid
             FROM pgaadauth_list_principals(false) AS p
-            WHERE p.rolename = :'role_name'), '')                                     AS mapped_oid
+            WHERE p.rolname = :'role_name'), '')                                     AS mapped_oid
 \gset
 
 \if :role_exists

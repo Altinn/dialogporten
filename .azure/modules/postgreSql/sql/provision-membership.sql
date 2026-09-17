@@ -29,6 +29,29 @@ GRANT :"profile" TO :"role_name";
 -- Session audit for schema and role changes. The application roles issue no DDL and no GRANTs, so
 -- this is expected to stay silent; it costs nothing while silent and turns an unexpected schema or
 -- membership change into a log line that names the role that made it.
+--
+-- ALTER ROLE ... SET accepts pgaudit.log whether or not pgaudit is actually in place, because a
+-- dotted name is stored as a customized option, so a missing extension would leave a setting that
+-- looks configured and audits nothing. Installing pgaudit - the server extension allowlist,
+-- shared_preload_libraries, and CREATE EXTENSION in this database - is an infrastructure
+-- prerequisite handled separately, so this script refuses to proceed rather than paper over it.
+-- That the audit records actually appear is verified with a fresh login session during rollout;
+-- it cannot be established from here, since the setting only takes effect on the next connection.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pgaudit') THEN
+    RAISE EXCEPTION
+      'pgaudit is not installed in database %. Run CREATE EXTENSION pgaudit there before provisioning.',
+      current_database();
+  END IF;
+
+  IF position('pgaudit' in current_setting('shared_preload_libraries')) = 0 THEN
+    RAISE EXCEPTION
+      'pgaudit is not in shared_preload_libraries (currently: %). Add it on the server before provisioning.',
+      current_setting('shared_preload_libraries');
+  END IF;
+END $$;
+
 ALTER ROLE :"role_name" SET pgaudit.log = 'ddl,role';
 
 -- Scheduled jobs have a bounded unit of work, so a statement that runs past it is stuck rather

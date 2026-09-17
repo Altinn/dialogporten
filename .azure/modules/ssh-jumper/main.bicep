@@ -28,6 +28,7 @@ var name = '${namePrefix}-ssh-jumper'
 resource maintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfigurations@2023-04-01' = {
   name: '${namePrefix}-vm-maint-conf'
   location: location
+  tags: tags
   properties: {
     maintenanceScope: 'InGuestPatch'
     extensionProperties: {
@@ -49,7 +50,6 @@ resource maintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfiguratio
       }
     }
   }
-  tags: tags
 }
 
 resource publicIp 'Microsoft.Network/publicIPAddresses@2025-07-01' = {

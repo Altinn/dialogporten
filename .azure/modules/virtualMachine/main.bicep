@@ -151,9 +151,9 @@ resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-0
 }
 
 resource maintenanceAssignment 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = if (useCustomerManagedPatchSchedule) {
+  scope: virtualMachine
   name: '${name}-maintenance'
   location: location
-  scope: virtualMachine
   properties: {
     maintenanceConfigurationId: maintenanceConfigurationId
     resourceId: virtualMachine.id

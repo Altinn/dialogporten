@@ -1,0 +1,32 @@
+﻿[
+  {
+    Source: Default,
+    Result: [
+      Default
+    ]
+  },
+  {
+    Source: Bin,
+    Result: [
+      Bin
+    ]
+  },
+  {
+    Source: Archive,
+    Result: [
+      Archive
+    ]
+  },
+  {
+    Source: MarkedAsUnopened,
+    Result: [
+      MarkedAsUnopened
+    ]
+  },
+  {
+    Source: Sent,
+    Result: [
+      Sent
+    ]
+  }
+]

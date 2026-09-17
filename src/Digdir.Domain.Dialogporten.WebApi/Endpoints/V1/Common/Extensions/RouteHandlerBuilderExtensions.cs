@@ -1,7 +1,4 @@
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
-using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
-using FastEndpoints;
-using ProblemDetails = Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 
@@ -17,12 +14,7 @@ internal static class RouteHandlerBuilderExtensions
                 var problem = ProblemDetailsRules.TryCreateProblemDetails(fakeCtx, [])
                               ?? throw new ArgumentException($"Missing ProblemDetails for status: {status}");
 
-                _ = problem switch
-                {
-                    ProblemDetails => builder.ProducesProblemFE<ProblemDetails>(status),
-
-                    _ => throw new ArgumentException("Unknown problem for status: ", nameof(status))
-                };
+                builder.Produces(status, problem.GetType(), "application/problem+json");
             }
 
             return builder;

@@ -1,0 +1,250 @@
+name: Provision DB principals
+
+# Provisions Entra token authentication to PostgreSQL for the workload managed identities.
+#
+# For each workload it registers a PostgreSQL login role named after the workload's managed
+# identity, and puts that role into one of the shared profile roles that carry the privileges the
+# workload needs. The managed identities themselves are created by the app and job templates under
+# .azure/applications/, not here.
+#
+# Two different connections are needed, because the two halves have different requirements:
+#   * The pgaadauth_* functions used to register a principal exist only in the `postgres` database
+#     and may only be called by an Entra administrator of the server. That is the GitHub deployer
+#     service principal, registered as one by .azure/modules/postgreSql/create.bicep.
+#   * GRANT and ALTER DEFAULT PRIVILEGES must be issued by the owner of the application tables, so
+#     the profile and membership scripts connect to `dialogporten` as the server administrator
+#     login, whose password comes from the environment Key Vault.
+#
+# Provisioning is ADDITIVE: it creates what is missing and adds the expected grants and
+# memberships. It does NOT remove grants a role may already hold from an earlier version, and it
+# does not converge to an exact grant set - there is no drift reconciliation here. That is
+# acceptable for rollout; exact-set reconciliation is a deliberate future step, not implied.
+#
+# Fresh-environment ordering: the login roles are named after managed identities that the app and
+# job templates create. A brand-new environment must therefore be deployed once in the default
+# password authentication mode, so that the identities exist, before this workflow can provision
+# anything. The resolve step fails loudly on a missing identity rather than inventing a role.
+
+on:
+  workflow_call:
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_RESOURCE_GROUP_NAME:
+        required: true
+      AZURE_ENVIRONMENT_KEY_VAULT_NAME:
+        required: true
+    inputs:
+      environment:
+        required: true
+        type: string
+      dryRun:
+        description: "If true, provisioning is skipped (no whatIf equivalent for SQL)."
+        required: false
+        type: boolean
+        default: false
+      serverNameStem:
+        description: >-
+          Name stem of the target PostgreSQL server, matching serverNameStem in the infrastructure
+          parameter file. Used to select the active server: the resource group can contain a legacy
+          server and a backup server that share the Dialogporten product tag.
+        required: false
+        type: string
+        default: postgres2
+      ref:
+        description: "The branch or tag ref to deploy. Using default checkout ref if not provided."
+        required: false
+        default: ${{ github.ref }}
+        type: string
+
+env:
+  # The application database, and the server administrator login that owns its tables.
+  PG_DATABASE: dialogporten
+  PG_OWNER_USER: dialogportenPgAdmin
+
+jobs:
+  # The profile roles and their privileges are shared by every workload, so they are provisioned
+  # once per run rather than once per workload. The per-workload job below needs this one.
+  provision-profiles:
+    name: Provision DB profiles (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    # Enabled per environment as each is rolled out; test (at23) only for now. Opening another
+    # environment is a change to this condition and the one on the job below.
+    if: ${{ !inputs.dryRun && inputs.environment == 'test' }}
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve PG server FQDN
+        id: resolve
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
+        with:
+          inlineScript: |
+            set -euo pipefail
+            ./.github/tools/resolvePostgresFqdn.sh \
+              "${{ secrets.AZURE_RESOURCE_GROUP_NAME }}" "${{ inputs.serverNameStem }}"
+
+      # psql runs on the runner rather than in the Azure CLI action's container, which is a
+      # different distribution and has no PostgreSQL client. The az session from the login step is
+      # available here all the same.
+      - name: Provision profile roles
+        env:
+          PG_FQDN: ${{ steps.resolve.outputs.pg_fqdn }}
+          KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+        run: |
+          set -euo pipefail
+          command -v psql >/dev/null 2>&1 || \
+            { sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client; }
+
+          source ./.github/tools/pgOwnerPassword.sh
+
+          psql --host "$PG_FQDN" --port 5432 --username "$PG_OWNER_USER" --dbname "$PG_DATABASE" \
+            --set=sslmode=require -v ON_ERROR_STOP=1 \
+            -f .azure/modules/postgreSql/sql/provision-profile-roles.sql
+
+      - name: Logout from azure
+        if: ${{failure() || success()}}
+        continue-on-error: true
+        run: az logout
+
+  provision-db-principals:
+    name: Provision DB principal ${{ matrix.identitySuffix }} (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    needs: provision-profiles
+    if: ${{ !inputs.dryRun && inputs.environment == 'test' }}
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    # One entry per workload. identitySuffix is the part of the managed identity name between the
+    # environment and the trailing '-identity', so the role name is derived from inputs.environment
+    # below and opening another environment does not mean editing this list.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - identitySuffix: webapi-so
+            profile: dp_api_dml
+          - identitySuffix: webapi-eu
+            profile: dp_api_dml
+          - identitySuffix: graphql
+            profile: dp_api_dml
+          - identitySuffix: service
+            profile: dp_service_dml
+          - identitySuffix: sync-sr-mappings
+            profile: dp_sync_sr_mappings
+          - identitySuffix: sync-rp-info
+            profile: dp_sync_rp_info
+          - identitySuffix: reindex-search
+            profile: dp_reindex_search
+          - identitySuffix: custom-metrics
+            profile: dp_metrics_read
+    steps:
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve MI object id and PG server FQDN
+        id: resolve
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
+        env:
+          ROLE_NAME: dp-be-${{ inputs.environment }}-${{ matrix.identitySuffix }}-identity
+        with:
+          inlineScript: |
+            set -euo pipefail
+            RG="${{ secrets.AZURE_RESOURCE_GROUP_NAME }}"
+
+            # The managed identity's object (principal) id is what pgaadauth maps the role to. The
+            # identity is created by the workload's own template under .azure/applications/, so a
+            # miss here means this environment has not yet been deployed in the default password
+            # authentication mode. Deploy it once that way, then run this again.
+            if ! MI_OID=$(az identity show --name "$ROLE_NAME" --resource-group "$RG" \
+                            --query principalId -o tsv 2>/dev/null) || [ -z "$MI_OID" ]; then
+              echo "::error::Managed identity '$ROLE_NAME' was not found in $RG. It is created by" \
+                   "the workload's own template; deploy the environment once before provisioning."
+              exit 1
+            fi
+
+            echo "role_name=$ROLE_NAME" >> "$GITHUB_OUTPUT"
+            echo "mi_oid=$MI_OID" >> "$GITHUB_OUTPUT"
+            ./.github/tools/resolvePostgresFqdn.sh "$RG" "${{ inputs.serverNameStem }}"
+
+      - name: Register Entra principal
+        env:
+          ROLE_NAME: ${{ steps.resolve.outputs.role_name }}
+          MI_OID: ${{ steps.resolve.outputs.mi_oid }}
+          PG_FQDN: ${{ steps.resolve.outputs.pg_fqdn }}
+          # The deployer SP's PostgreSQL role name, matching deployerPrincipalName in this
+          # environment's file under .azure/infrastructure/.
+          DEPLOYER_PG_USER: "GitHub: altinn/dialogporten - Dev"
+        run: |
+          set -euo pipefail
+          command -v psql >/dev/null 2>&1 || \
+            { sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client; }
+
+          # Token-as-password. The deployer SP is registered as an Entra administrator on the
+          # server, which is what pgaadauth_create_principal_with_oid requires.
+          PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms \
+                         --query accessToken -o tsv)
+          export PGPASSWORD
+
+          # PostgreSQL expects the deployer's Entra admin principalName as the username. If it
+          # rejects this, an Entra admin service principal may instead authenticate by its appId:
+          # az ad sp show --id <client-id>.
+          psql --host "$PG_FQDN" --port 5432 --username "$DEPLOYER_PG_USER" --dbname postgres \
+            --set=sslmode=require -v ON_ERROR_STOP=1 \
+            -v role_name="$ROLE_NAME" -v mi_oid="$MI_OID" \
+            -f .azure/modules/postgreSql/sql/provision-entra-principal.sql
+
+      - name: Grant profile membership
+        env:
+          ROLE_NAME: ${{ steps.resolve.outputs.role_name }}
+          PROFILE: ${{ matrix.profile }}
+          PG_FQDN: ${{ steps.resolve.outputs.pg_fqdn }}
+          KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
+        run: |
+          set -euo pipefail
+          source ./.github/tools/pgOwnerPassword.sh
+
+          psql --host "$PG_FQDN" --port 5432 --username "$PG_OWNER_USER" --dbname "$PG_DATABASE" \
+            --set=sslmode=require -v ON_ERROR_STOP=1 \
+            -v role_name="$ROLE_NAME" -v profile="$PROFILE" \
+            -f .azure/modules/postgreSql/sql/provision-membership.sql
+
+      - name: Logout from azure
+        if: ${{failure() || success()}}
+        continue-on-error: true
+        run: az logout

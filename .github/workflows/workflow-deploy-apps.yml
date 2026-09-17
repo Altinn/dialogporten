@@ -142,12 +142,32 @@ jobs:
         continue-on-error: true
         run: az logout
 
+  # DB principal provisioning runs after the migration job so that grants target tables migrations
+  # have already created or altered - otherwise provisioning could race migrations on a fresh
+  # environment, or reference a table introduced by the same deploy. The always() && !failure()
+  # guard lets provisioning still run when the migration job is intentionally SKIPPED
+  # (runMigration false) but not when it FAILED.
+  # This job is invoked in every environment; the called workflow's own jobs skip unless the
+  # environment is one where provisioning is enabled (currently test/at23 only).
+  provision-db-principals:
+    name: Provision DB principals
+    if: ${{ always() && !failure() && !cancelled() }}
+    needs: deploy-migration-job
+    uses: ./.github/workflows/workflow-provision-db-principals.yml
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}
+      dryRun: ${{ inputs.dryRun }}
+      ref: ${{ inputs.ref }}
+
   deploy-apps:
     name: Deploy ${{ matrix.name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    # Should run even though the migration job was skipped
+    # Should run even though the migration job was skipped.
+    # A failed provision-db-principals blocks the app deploy (an app may depend on its grants);
+    # a skipped one, in an environment where provisioning does not run, does not.
     if: ${{ always() && !failure() && !cancelled() }}
-    needs: deploy-migration-job
+    needs: [deploy-migration-job, provision-db-principals]
     strategy:
       fail-fast: true
       matrix:
@@ -240,9 +260,11 @@ jobs:
   deploy-jobs:
     name: Deploy job ${{ matrix.name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    # Should run even though the migration job was skipped
+    # Should run even though the migration job was skipped.
+    # Depends on provision-db-principals as well: a job must not deploy before the grants its
+    # database role needs exist. A failed provisioning blocks the deploy; a skipped one does not.
     if: ${{ always() && !failure() && !cancelled() }}
-    needs: deploy-apps
+    needs: [deploy-apps, provision-db-principals]
     environment: ${{ inputs.environment }}
     permissions:
       id-token: write

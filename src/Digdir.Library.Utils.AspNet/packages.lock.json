@@ -885,29 +885,29 @@
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "VOSGU8en6HZJs8t7UMFN+9vGcRgVOOn6fA44Ngcg2NyvJ3P1KE94iAb0XzaVaGhXGtt+qaM/VtEn0/hzluQJeg==",
+        "resolved": "10.0.12",
+        "contentHash": "e7OrVN8U5yr4kuwdTHWBHGVQIVsGfMkAr0Ej1/BnrS989Q0XBVANpIzNZ2bc1GvMZ0/XwMt5InTnmKskxGy99Q==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.11",
-          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.11"
+          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.12",
+          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.12"
         }
       },
       "Microsoft.EntityFrameworkCore.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "6auJR+9+9VunznKfH7WGrHMrnrmA0F7JZ22EXzwXvVhjfnbu9Xq7NSIWaOf3KJsOanM2qf5ajJ2JR5TlcPZTLA=="
+        "resolved": "10.0.12",
+        "contentHash": "kDrux7T6C3V/YYYe2LXr7x6AEsVyq5Y2YoTE9er1SwbDtap3z1g8RgxNh5eKQVyB4T+DKvBBJ4Ezd/VZzJQJZg=="
       },
       "Microsoft.EntityFrameworkCore.Analyzers": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "Bv7X4wSSnzCQED9WYXKJ8fwgyvKwf0xZM1GO8xkf6CF9zl+UBnvjxmcPnokJRy0JKjc1SlHSzzhx1HcL4jitTQ=="
+        "resolved": "10.0.12",
+        "contentHash": "Kd4o2oO1A6dfKxjz5LS16QyLtpCFTUiFWwmBABETAXRsSImBdRdWeKjSgbbRhAMiV3a3/nWr95ZtzClT4uaADQ=="
       },
       "Microsoft.EntityFrameworkCore.Relational": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "grznnTJgEYxaWpdKAsTzg6j+89jHgCXWYp+QGtlX5O92+w/VuhWM6JLPYb+uw8M9VhGUvOTsO76dYOy9vNPd5Q==",
+        "resolved": "10.0.12",
+        "contentHash": "OiHmr8XzX96dbgMsYGe8qoqg4KxibdZG2r0QUVJBGktFInOp8IrABe8jvcbo5hrqeWfbwpK7fCEBiEPbY/ik4A==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.11"
+          "Microsoft.EntityFrameworkCore": "10.0.12"
         }
       },
       "Microsoft.Extensions.Azure": {
@@ -921,8 +921,8 @@
       },
       "Microsoft.Extensions.Caching.StackExchangeRedis": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "0SCQuU1m+BcLMjyh6q1X9j0hongN9EZx9KhgDyPgHxVa5RJ5xuHBkvcgnX95KSa5bQlkYupeQFu8IAI3NgPIUQ==",
+        "resolved": "10.0.12",
+        "contentHash": "iQoMgbt02dl49cv7GLNeh771xstAbg9xKpuWosYmnOU0CJ9ni10F3+1IrgvbjyaV0JGulauGRrNir50QKWonKQ==",
         "dependencies": {
           "StackExchange.Redis": "2.7.27"
         }
@@ -947,16 +947,16 @@
       },
       "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "R3OADoj7geeFn7BYbw03milCTYgC57MeqGAUQtOOzB1fzYhZMl1grGAwz3wZdoYnD4/RIEYBbOy5PspZHlr7fQ==",
+        "resolved": "10.0.12",
+        "contentHash": "BMG8waDSju79jJGdnOPrFrpqUv9/A+Qbg43WLmqUwMgdN26ozOK5iLXVCdaXgX71TvwEGX3HWCAGy711vGAl2Q==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.11"
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.12"
         }
       },
       "Microsoft.Extensions.Http.Polly": {
         "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "DIxaTXWdbjRJihAIutpDIgPbpD9PwW8lW0EIawlNH4zs7coCgwPnd9rYlzXYkuKKphnjcKYlo6gXFeg6z15GLg==",
+        "resolved": "10.0.12",
+        "contentHash": "guggIopNFSFyQSr+9xc66cjr9ohls5/312T/vRsAryh+NYsqo2f9BxMElEYkOxw8QPqK7/Lo8emi2NDnqo6w4Q==",
         "dependencies": {
           "Polly": "7.2.4",
           "Polly.Extensions.Http": "3.0.0"
@@ -1317,9 +1317,9 @@
           "MassTransit.Azure.ServiceBus.Core": "[8.5.7, 9.0.0)",
           "MassTransit.EntityFrameworkCore": "[8.5.7, 9.0.0)",
           "MessagePack": "[3.1.8, )",
-          "Microsoft.Extensions.Caching.StackExchangeRedis": "[10.0.11, )",
-          "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[10.0.11, )",
-          "Microsoft.Extensions.Http.Polly": "[10.0.11, )",
+          "Microsoft.Extensions.Caching.StackExchangeRedis": "[10.0.12, )",
+          "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[10.0.12, )",
+          "Microsoft.Extensions.Http.Polly": "[10.0.12, )",
           "Npgsql": "[10.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )",
           "Polly.Contrib.WaitAndRetry": "[1.1.1, )",
@@ -1339,7 +1339,7 @@
         "type": "Project",
         "dependencies": {
           "Digdir.Library.Entity.Abstractions": "[1.0.0, )",
-          "Microsoft.EntityFrameworkCore.Relational": "[10.0.11, )"
+          "Microsoft.EntityFrameworkCore.Relational": "[10.0.12, )"
         }
       }
     }

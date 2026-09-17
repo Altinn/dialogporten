@@ -46,6 +46,10 @@ param postgresConfiguration = {
   // Azure enhanced metrics: per-database activity counters and autovacuum diagnostics
   additionalServerConfigurations: [
     {
+      name: 'logfiles.retention_days'
+      value: '7'
+    }
+    {
       name: 'metrics.autovacuum_diagnostics'
       value: 'on'
     }

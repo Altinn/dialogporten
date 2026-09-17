@@ -58,6 +58,10 @@ param postgresConfiguration = {
   enableTrackIoTiming: true
   additionalServerConfigurations: [
     {
+      name: 'logfiles.retention_days'
+      value: '7'
+    }
+    {
       name: 'autovacuum_max_workers'
       value: '12'
     }

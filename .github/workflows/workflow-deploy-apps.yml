@@ -157,6 +157,7 @@ jobs:
     secrets: inherit
     with:
       environment: ${{ inputs.environment }}
+      version: ${{ inputs.version }}
       dryRun: ${{ inputs.dryRun }}
       ref: ${{ inputs.ref }}
 

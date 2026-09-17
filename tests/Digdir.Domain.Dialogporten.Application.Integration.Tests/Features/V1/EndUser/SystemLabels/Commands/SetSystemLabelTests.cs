@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
@@ -261,6 +262,49 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     dto.PerformedBy.ActorId == "" &&
                     dto.PerformedBy.ActorType == ActorType.Values.PartyRepresentative);
             });
+
+    [Fact]
+    public Task Search_Returns_Entries_When_No_Main_Resource_Access_But_List_Authorization() =>
+        //When the user lacks main-resource access but is granted access via the list
+        // authorization, the entries should be returned instead of NotFound.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                // No authorized actions => no access to the main resource
+                altinnAuthorization
+                    .GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(new DialogDetailsAuthorizationResult { AuthorizedChecks = [] });
+                // But access is granted via the list authorization
+                altinnAuthorization
+                    .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(true);
+                altinnAuthorization
+                    .UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(true);
+            })
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x => x.Should().ContainSingle());
+
+    [Fact]
+    public Task Search_Returns_NotFound_When_No_Main_Resource_Access_And_No_List_Authorization() =>
+        // When the user has neither main-resource access nor list authorization,
+        // the dialog is not visible and the label log must return NotFound.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                altinnAuthorization
+                    .GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(new DialogDetailsAuthorizationResult { AuthorizedChecks = [] });
+                altinnAuthorization
+                    .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(false);
+            })
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

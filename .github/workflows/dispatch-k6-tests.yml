@@ -34,3 +34,6 @@ jobs:
       environment: ${{ inputs.environment }}
       apiVersion: ${{ inputs.apiVersion }}
       testSuitePath: ${{ inputs.testSuitePath }}
+    permissions:
+      checks: write
+      pull-requests: write

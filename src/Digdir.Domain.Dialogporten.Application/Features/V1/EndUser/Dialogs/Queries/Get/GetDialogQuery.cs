@@ -193,25 +193,10 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
-            dialog,
-            cancellationToken: cancellationToken);
-
-        if (!authorizationResult.HasAccessToMainResource())
+        var (hasAccess, authorizationResult) = await _altinnAuthorization.GetDialogAccess(dialog, cancellationToken);
+        if (!hasAccess)
         {
-            // If the user for some reason does not have access to the main resource, which might be
-            // because they are granted access to XACML-actions besides "read" not explicitly defined in the dialog,
-            // we do a recheck if the user has access to the dialog via the list authorization. If this is the case,
-            // we return the dialog and let DecorateWithAuthorization flag the actions as unauthorized. Note that
-            // there might be transmissions that the user has access to, even though there are no authorized actions.
-            var listAuthorizationResult = await _altinnAuthorization.HasListAuthorizationForDialog(
-                dialog,
-                cancellationToken: cancellationToken);
-
-            if (!listAuthorizationResult)
-            {
-                return new Forbidden("Forbidden");
-            }
+            return new Forbidden("Forbidden");
         }
 
         if (dialog.Deleted)

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.121.3](https://github.com/Altinn/dialogporten/compare/v1.121.2...v1.121.3) (2026-09-17)
+
+
+### Miscellaneous Chores
+
+* **infra:** set PostgreSQL server log retention to 7 days ([#4401](https://github.com/Altinn/dialogporten/issues/4401)) ([20d931a](https://github.com/Altinn/dialogporten/commit/20d931a5ad6cfabb16bc95327e4bfec32ea4755f))
+
 ## [1.121.2](https://github.com/Altinn/dialogporten/compare/v1.121.1...v1.121.2) (2026-09-17)
 
 

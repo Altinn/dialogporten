@@ -39,6 +39,10 @@ param replicaTimeOutInSeconds int
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -70,7 +74,7 @@ module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' 
   }
 }
 
-var containerAppEnvVars = [
+var baseContainerAppEnvVars = [
   {
     name: 'Infrastructure__DialogDbConnectionString'
     secretRef: 'dbconnectionstring'
@@ -92,6 +96,25 @@ var containerAppEnvVars = [
     value: managedIdentity.properties.clientId
   }
 ]
+
+// Entra token authentication needs the mode and the PostgreSQL role name, which is the managed
+// identity's own name. The connection string secret above stays wired either way, so a workload
+// moves between the two modes by parameter alone.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
 
 // Base URL for accessing secrets in the Key Vault
 // https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-functions-deployment#example-1

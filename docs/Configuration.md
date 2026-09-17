@@ -91,7 +91,9 @@ Keys:
 
 In `Password` mode the connection string is used as-is, including the credentials it carries.
 
-In `EntraToken` mode the data source is built from the same connection string, but the password is removed and the user name is replaced by `Infrastructure:DialogDbAuth:Username`. The password is instead supplied by a periodic token provider that acquires an access token for the `https://ossrdbms-aad.database.windows.net/.default` scope through `DefaultAzureCredential`, which picks up the user-assigned managed identity from `AZURE_CLIENT_ID`. Tokens are refreshed every 50 minutes, and every 10 seconds after a failed refresh. Token acquisition is logged (role name only) on the first success and on every failure.
+In `EntraToken` mode the data source is built from the same connection string, but the password is removed and the user name is replaced by `Infrastructure:DialogDbAuth:Username`. Removing the password is required: Npgsql refuses to build a data source that has both a password provider and a password in its connection string.
+
+The password is instead supplied per physical connection by a password provider that asks `DefaultAzureCredential` for an access token for the `https://ossrdbms-aad.database.windows.net/.default` scope. `DefaultAzureCredential` picks up the user-assigned managed identity from `AZURE_CLIENT_ID`. Token lifetime is governed by Azure Identity's own cache, which refreshes proactively ahead of expiry and keeps serving the still-valid cached token while a refresh is failing, so in the common case opening a connection is a cache read. A single credential call is bounded at 30 seconds. Token acquisition is logged (role name only) on the first success and on every failure.
 
 Example:
 ```json

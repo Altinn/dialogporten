@@ -7,19 +7,17 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 
 /// <summary>
 /// Wires the dialog database data source for the authentication mode selected in <see cref="DialogDbAuthSettings"/>.
-/// In <see cref="DialogDbAuthMode.EntraToken"/> mode the data source connects as the configured PostgreSQL role with a
-/// rotating access token supplied by <see cref="DefaultAzureCredential"/> instead of a password.
+/// In <see cref="DialogDbAuthMode.EntraToken"/> mode the data source connects as the configured PostgreSQL role with an
+/// access token from <see cref="DefaultAzureCredential"/> instead of a password. The token is read from the credential
+/// cache every time a physical connection is opened, so its lifetime is governed by Azure Identity, which refreshes
+/// proactively ahead of expiry and keeps serving the still-valid cached token while a refresh is failing.
 /// </summary>
 internal static partial class DialogDbAuthExtensions
 {
     private const string OssRdbmsScope = "https://ossrdbms-aad.database.windows.net/.default";
 
-    private static readonly TimeSpan SuccessRefreshInterval = TimeSpan.FromMinutes(50);
-    private static readonly TimeSpan FailureRefreshInterval = TimeSpan.FromSeconds(10);
-
     /// <summary>
-    /// The periodic password provider callback is only cancelled when the data source is disposed, so the token
-    /// request gets its own timeout.
+    /// Upper bound on a single credential call, so a slow token endpoint cannot hold a connection open indefinitely.
     /// </summary>
     private static readonly TimeSpan TokenAcquisitionTimeout = TimeSpan.FromSeconds(30);
 
@@ -29,6 +27,10 @@ internal static partial class DialogDbAuthExtensions
     /// PostgreSQL role the access token is issued for. All other options are kept as-is. In
     /// <see cref="DialogDbAuthMode.Password"/> mode the connection string is returned unchanged.
     /// </summary>
+    /// <remarks>
+    /// Removing the password is required, not cosmetic: Npgsql refuses to build a data source that has both a
+    /// password provider and a password in its connection string.
+    /// </remarks>
     internal static string BuildConnectionString(string connectionString, DialogDbAuthSettings auth)
     {
         ArgumentNullException.ThrowIfNull(connectionString);
@@ -51,8 +53,9 @@ internal static partial class DialogDbAuthExtensions
     extension(NpgsqlDataSourceBuilder dataSourceBuilder)
     {
         /// <summary>
-        /// Configures a periodic access token provider when <see cref="DialogDbAuthMode.EntraToken"/> is selected.
-        /// Does nothing in <see cref="DialogDbAuthMode.Password"/> mode.
+        /// Supplies an access token as the password for every physical connection when
+        /// <see cref="DialogDbAuthMode.EntraToken"/> is selected. Does nothing in
+        /// <see cref="DialogDbAuthMode.Password"/> mode.
         /// </summary>
         internal NpgsqlDataSourceBuilder UseDialogDbAuth(DialogDbAuthSettings auth, ILoggerFactory loggerFactory)
         {
@@ -70,9 +73,35 @@ internal static partial class DialogDbAuthExtensions
             var tokenRequestContext = new TokenRequestContext([OssRdbmsScope]);
             var acquisitionLogged = 0;
 
-            return dataSourceBuilder.UsePeriodicPasswordProvider(
+            // Both callbacks are mandatory: Npgsql rejects the registration unless a sync and an async provider are
+            // supplied, and picks the one matching how the connection is opened. Each call is a credential cache read
+            // in the common case, which is what keeps connection opening fast.
+            return dataSourceBuilder.UsePasswordProvider(
+                _ =>
+                {
+                    using var timeout = new CancellationTokenSource(TokenAcquisitionTimeout);
+
+                    try
+                    {
+                        var token = credential.GetToken(tokenRequestContext, timeout.Token);
+
+                        if (Interlocked.Exchange(ref acquisitionLogged, 1) == 0)
+                        {
+                            AccessTokenAcquired(logger, role);
+                        }
+
+                        return token.Token;
+                    }
+                    catch (Exception exception)
+                    {
+                        AccessTokenAcquisitionFailed(logger, role, exception);
+                        throw;
+                    }
+                },
                 async (_, cancellationToken) =>
                 {
+                    // The supplied token cancels when the connection open is cancelled; the linked source adds the
+                    // independent bound on the credential call itself.
                     using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                     timeout.CancelAfter(TokenAcquisitionTimeout);
 
@@ -92,9 +121,7 @@ internal static partial class DialogDbAuthExtensions
                         AccessTokenAcquisitionFailed(logger, role, exception);
                         throw;
                     }
-                },
-                successRefreshInterval: SuccessRefreshInterval,
-                failureRefreshInterval: FailureRefreshInterval);
+                });
         }
     }
 

@@ -91,6 +91,26 @@ public sealed class DialogDbAuthTests
     }
 
     [Fact]
+    public void BuildConnectionString_Should_Produce_A_Connection_String_A_Password_Provider_Can_Be_Built_On()
+    {
+        // Npgsql refuses to build a data source that has both a password provider and a password, so the password
+        // removal above is load-bearing rather than cosmetic.
+        var auth = new DialogDbAuthSettings
+        {
+            Mode = DialogDbAuthMode.EntraToken,
+            Username = "dialogporten-identity"
+        };
+
+        var builder = new NpgsqlDataSourceBuilder(
+            DialogDbAuthExtensions.BuildConnectionString(ConnectionString, auth));
+        builder.UsePasswordProvider(_ => "token", (_, _) => ValueTask.FromResult("token"));
+
+        var build = () => builder.Build().Dispose();
+
+        build.Should().NotThrow();
+    }
+
+    [Fact]
     public void DialogDbAuthSettings_Should_Default_To_Password_Mode()
     {
         var settings = new DialogDbAuthSettings();

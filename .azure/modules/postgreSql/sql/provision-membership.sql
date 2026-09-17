@@ -1,8 +1,7 @@
 -- Puts one workload login role into one profile role, and sets the per-role options that belong
 -- on a login role.
 --
--- RUN AS: the server administrator login `dialogportenPgAdmin`, which created the profile roles
---         and therefore holds ADMIN OPTION on them.
+-- RUN AS: an Entra administrator of the server, which SET ROLEs to the owner login (see below).
 -- RUN AGAINST: the application database (`dialogporten`).
 --
 -- Run once per workload, after provision-entra-principal.sql has created the login role and
@@ -13,12 +12,28 @@
 --               e.g. dp-be-test-webapi-so-identity
 --   profile     one of dp_api_dml, dp_service_dml, dp_reindex_search, dp_metrics_read,
 --               dp_sync_sr_mappings, dp_sync_rp_info
+--   owner_role  the login that owns the application tables and created the profiles,
+--               `dialogportenPgAdmin`
 --
 -- Idempotent: re-granting an existing membership is a no-op, and ALTER ROLE ... SET overwrites.
 -- If either role is missing, the GRANT fails loudly rather than provisioning a half-configured
 -- workload.
 
 \set ON_ERROR_STOP on
+
+-- The profiles are owned by the owner login, which holds ADMIN OPTION on them, and
+-- ALTER ROLE ... SET additionally requires CREATEROLE plus admin option on the target role.
+-- Verified on AT23 (PostgreSQL 18.4, 2026-09-17): that ALTER ROLE fails for a plain member of
+-- azure_pg_admin and succeeds after SET ROLE to the owner. So the whole script runs as the owner.
+--
+-- The connecting role reaches it without a password: on Azure Flexible Server a member of
+-- azure_pg_admin holds implicit SET and USAGE on every non-superuser role, so SET ROLE to the
+-- owner succeeds although 'MEMBER' is false. This is Azure-specific and does not hold on stock
+-- PostgreSQL, where the membership would have to be granted explicitly.
+--
+-- SET ROLE changes current_user and leaves session_user as the connecting identity, so the audit
+-- trail still names the job that ran this rather than the shared owner login.
+SET ROLE :"owner_role";
 
 GRANT :"profile" TO :"role_name";
 
@@ -38,6 +53,8 @@ GRANT :"profile" TO :"role_name";
 -- That the audit records actually appear is verified with a fresh login session during rollout;
 -- it cannot be established from here, since the setting only takes effect on the next connection.
 DO $$
+DECLARE
+  preloaded text;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pgaudit') THEN
     RAISE EXCEPTION
@@ -45,13 +62,29 @@ BEGIN
       current_database();
   END IF;
 
-  IF position('pgaudit' in current_setting('shared_preload_libraries')) = 0 THEN
+  -- shared_preload_libraries may only be examined by a superuser or a member of
+  -- pg_read_all_settings, and the owner login is neither, so a denial here says nothing about the
+  -- server and must not fail the run. The check above already rules out the case this would catch:
+  -- pgaudit's own CREATE EXTENSION refuses unless the library is preloaded, so the extension
+  -- cannot be present without it. This is a second look for servers where the setting is readable.
+  BEGIN
+    preloaded := current_setting('shared_preload_libraries');
+  EXCEPTION WHEN insufficient_privilege THEN
+    preloaded := NULL;
+  END;
+
+  IF preloaded IS NOT NULL AND position('pgaudit' in preloaded) = 0 THEN
     RAISE EXCEPTION
       'pgaudit is not in shared_preload_libraries (currently: %). Add it on the server before provisioning.',
-      current_setting('shared_preload_libraries');
+      preloaded;
   END IF;
 END $$;
 
+-- pgaudit.log is a superuser-set parameter, so this needs more than ownership of the target role:
+-- the executing role must be a superuser or hold SET on the parameter. On Azure Flexible Server
+-- azure_pg_admin is expected to carry that, which is how Microsoft documents configuring per-role
+-- session audit logging. A plain non-superuser owner does not, so this statement is the one that
+-- fails first if that expectation does not hold on the server.
 ALTER ROLE :"role_name" SET pgaudit.log = 'ddl,role';
 
 -- Scheduled jobs have a bounded unit of work, so a statement that runs past it is stuck rather

@@ -1,9 +1,10 @@
 -- Creates the Dialogporten PostgreSQL profile roles and their privileges.
 --
--- RUN AS: the server administrator login `dialogportenPgAdmin`, which owns the application
---         tables. GRANT and ALTER DEFAULT PRIVILEGES are the owner's to issue, so this script
---         cannot run as the deployer service principal.
+-- RUN AS: an Entra administrator of the server, which SET ROLEs to the owner login (see below).
 -- RUN AGAINST: the application database (`dialogporten`).
+--
+-- Required psql variables (-v name=value), quoted at the use site:
+--   owner_role  the login that owns the application tables, `dialogportenPgAdmin`
 --
 -- A profile is a plain NOLOGIN PostgreSQL role, not an Entra principal. Each workload's login
 -- role - created by provision-entra-principal.sql and named after its managed identity - is made
@@ -38,6 +39,20 @@
 -- and this script re-run.
 
 \set ON_ERROR_STOP on
+
+-- GRANT and ALTER DEFAULT PRIVILEGES are the object owner's to issue, and the owner-scoped loops
+-- below match on current_user, so the whole script runs as the owner login.
+--
+-- The connecting role reaches it without a password: on Azure Flexible Server a member of
+-- azure_pg_admin holds implicit SET and USAGE on every non-superuser role. Verified on AT23
+-- (PostgreSQL 18.4, 2026-09-17): for a role whose only membership is azure_pg_admin,
+-- pg_has_role(current_user, 'dialogportenPgAdmin', 'SET') and 'USAGE' are both true while
+-- 'MEMBER' is false, and SET ROLE to the owner succeeds. This is Azure-specific; it does not hold
+-- on stock PostgreSQL, where the membership would have to be granted explicitly.
+--
+-- SET ROLE changes current_user and leaves session_user as the connecting identity, so the audit
+-- trail still names the job that ran this rather than the shared owner login.
+SET ROLE :"owner_role";
 
 -- ===========================================================================
 -- Profile roles and database access

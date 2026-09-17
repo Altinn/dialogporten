@@ -86,6 +86,10 @@ param scale Scale = {
   ]
 }
 
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -127,7 +131,7 @@ module appConfigReaderAccessPolicy '../../modules/appConfiguration/addReaderRole
   }
 }
 
-var containerAppEnvVars = [
+var baseContainerAppEnvVars = [
   {
     name: 'ASPNETCORE_ENVIRONMENT'
     value: environment
@@ -157,6 +161,25 @@ var containerAppEnvVars = [
     value: otelTraceSamplerRatio
   }
 ]
+
+// Entra token authentication needs the mode and the PostgreSQL role name, which is the managed
+// identity's own name. The connection string secret above stays wired either way, so a workload
+// moves between the two modes by parameter alone.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
 
 var containerAppName = '${namePrefix}-webapi-so-ca'
 

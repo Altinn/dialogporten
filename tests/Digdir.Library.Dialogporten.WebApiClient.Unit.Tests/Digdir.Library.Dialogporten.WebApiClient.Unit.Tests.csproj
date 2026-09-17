@@ -26,6 +26,13 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
         <!-- Provides System.Buffers.Text.Base64Url, which is only in the BCL from .NET 9. -->
         <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.12" />
+        <!-- The .NET 10 SDK bundles no net8.0 apphost, so it emits an implicit PackageDownload for
+             one. A locked mode restore discards implicit downloads, leaving the build to fail on a
+             missing apphost whenever the NuGet cache lacks the exact version the SDK asks for. An
+             explicit PackageDownload survives locked mode. The version must match the net8.0
+             AppHostPackVersion in the SDK's Microsoft.NETCoreSdk.BundledVersions.props, and so
+             moves together with the dotnet-sdk pin in global.json. -->
+        <PackageDownload Include="Microsoft.NETCore.App.Host.$(NETCoreSdkPortableRuntimeIdentifier)" Version="[8.0.31]" />
     </ItemGroup>
 
     <ItemGroup>

@@ -7,6 +7,9 @@ param imageTag = readEnvironmentVariable('IMAGE_TAG')
 // stuck rather than busy.
 param replicaTimeOutInSeconds = 600
 
+// Keep in sync with postgresConfiguration.serverNameStem in .azure/infrastructure/test.bicepparam.
+param serverNameStem = 'postgres2'
+
 // name is the identity name between the environment prefix and '-identity'.
 param workloads = [
   { name: 'webapi-so', profile: 'dp_api_dml' }
@@ -21,4 +24,3 @@ param workloads = [
 
 //secrets
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')
-param environmentKeyVaultName = readEnvironmentVariable('AZURE_ENVIRONMENT_KEY_VAULT_NAME')

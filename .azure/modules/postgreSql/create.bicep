@@ -349,9 +349,12 @@ resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/admin
 }
 
 // The provisioning job calls pgaadauth_create_principal_with_oid, which requires the caller to be
-// a Microsoft Entra administrator of the server. Sequenced after the deployer's record because the
-// resource provider handles one administrator write at a time per server; the object id is
-// distinct, so the note above about duplicate object ids does not apply.
+// a Microsoft Entra administrator of the server. The registration also carries azure_pg_admin
+// membership, which on Azure Flexible Server confers implicit SET on every non-superuser role, so
+// the job reaches the application table owner with SET ROLE and issues its grants as that owner
+// without needing the owner's password. Sequenced after the deployer's record because the resource
+// provider handles one administrator write at a time per server; the object id is distinct, so the
+// note above about duplicate object ids does not apply.
 module dbProvisionerAdministrator 'addEntraAdministrator.bicep' = {
   name: 'dbProvisionerAdministrator'
   params: {

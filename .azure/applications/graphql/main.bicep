@@ -58,26 +58,44 @@ param workloadProfileName string = 'Consumption'
 @allowed(['Password', 'EntraToken'])
 param dbAuthMode string = 'Password'
 
+@description('Minimum number of replicas')
+@minValue(0)
+param minReplicas int = 1
+
+@description('The scaling configuration for the container app')
+param scale Scale = {
+  minReplicas: minReplicas
+  maxReplicas: 10
+  rules: [
+    {
+      name: 'cpu'
+      custom: {
+        type: 'cpu'
+        metadata: {
+          type: 'Utilization'
+          value: '70'
+        }
+      }
+    }
+    {
+      name: 'memory'
+      custom: {
+        type: 'memory'
+        metadata: {
+          type: 'Utilization'
+          value: '70'
+        }
+      }
+    }
+  ]
+}
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
 var additionalTags = {}
 
 var tags = baseTags(additionalTags, environment)
-
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
-  name: appConfigurationName
-}
-
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-graphql-identity'
-  location: location
-  tags: tags
-}
 
 var baseContainerAppEnvVars = [
   {
@@ -125,43 +143,25 @@ var containerAppEnvVars = concat(
   dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
 )
 
-@description('Minimum number of replicas')
-@minValue(0)
-param minReplicas int = 1
+var containerAppName = '${namePrefix}-graphql-ca'
 
-@description('The scaling configuration for the container app')
-param scale Scale = {
-  minReplicas: minReplicas
-  maxReplicas: 10
-  rules: [
-    {
-      name: 'cpu'
-      custom: {
-        type: 'cpu'
-        metadata: {
-          type: 'Utilization'
-          value: '70'
-        }
-      }
-    }
-    {
-      name: 'memory'
-      custom: {
-        type: 'memory'
-        metadata: {
-          type: 'Utilization'
-          value: '70'
-        }
-      }
-    }
-  ]
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+  name: appConfigurationName
+}
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-graphql-identity'
+  location: location
+  tags: tags
 }
 
 resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: environmentKeyVaultName
 }
-
-var containerAppName = '${namePrefix}-graphql-ca'
 
 module containerApp '../../modules/containerApp/main.bicep' = {
   name: containerAppName

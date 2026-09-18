@@ -51,26 +51,6 @@ var additionalTags = {
 
 var tags = baseTags(additionalTags, environment)
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${name}-identity'
-  location: location
-  tags: tags
-}
-
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
-  name: 'keyVaultReaderAccessPolicy-${name}'
-  params: {
-    keyvaultName: environmentKeyVaultName
-    principalIds: [
-      managedIdentity.properties.principalId
-    ]
-  }
-}
-
 var baseContainerAppEnvVars = [
   {
     name: 'Infrastructure__DialogDbConnectionString'
@@ -129,6 +109,26 @@ var secrets = [
     identity: managedIdentity.id
   }
 ]
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${name}-identity'
+  location: location
+  tags: tags
+}
+
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+  name: 'keyVaultReaderAccessPolicy-${name}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalIds: [
+      managedIdentity.properties.principalId
+    ]
+  }
+}
 
 module dialogsearchReindexJob '../../modules/containerAppJob/main.bicep' = {
   name: name

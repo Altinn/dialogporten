@@ -26,8 +26,8 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2025-08-01' existin
 }
 
 resource administrator 'Microsoft.DBforPostgreSQL/flexibleServers/administrators@2025-08-01' = {
-  name: principalObjectId
   parent: postgres
+  name: principalObjectId
   properties: {
     principalName: principalName
     principalType: principalType

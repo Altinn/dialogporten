@@ -398,13 +398,13 @@ module additionalAdministrators 'addEntraAdministrator.bicep' = [
 resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {
     parent: postgres
     name: 'azure.extensions'
+    dependsOn: [dbProvisionerAdministrator, additionalAdministrators]
     // PGAUDIT is allowlisted so CREATE EXTENSION pgaudit is permitted in databases where it is not
     // yet installed. azure.extensions is a dynamic parameter, so this needs no restart.
     properties: {
       value: 'PG_TRGM,BTREE_GIN,PGAUDIT'
       source: 'user-override'
     }
-    dependsOn: [dbProvisionerAdministrator, additionalAdministrators]
   }
 
 resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {

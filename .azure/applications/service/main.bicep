@@ -94,20 +94,6 @@ var additionalTags = {}
 
 var tags = baseTags(additionalTags, environment)
 
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
-  name: appConfigurationName
-}
-
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-service-identity'
-  location: location
-  tags: tags
-}
-
 var baseContainerAppEnvVars = [
   {
     name: 'ASPNETCORE_ENVIRONMENT'
@@ -162,13 +148,27 @@ var containerAppEnvVars = concat(
   dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
 )
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
-  name: environmentKeyVaultName
-}
-
 var serviceName = 'service'
 
 var containerAppName = '${namePrefix}-${serviceName}'
+
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+  name: appConfigurationName
+}
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-service-identity'
+  location: location
+  tags: tags
+}
+
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
+  name: environmentKeyVaultName
+}
 
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'

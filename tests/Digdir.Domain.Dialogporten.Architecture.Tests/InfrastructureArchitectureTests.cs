@@ -16,6 +16,9 @@ public class InfrastructureArchitectureTests
             nameof(InfrastructureAssemblyMarker),
             nameof(InfrastructureExtensions),
 
+            // Part of the public settings surface: exposed by a public property on DialogDbAuthSettings
+            nameof(DialogDbAuthMode),
+
             // These classes are currently public but should be internal, moved to another assembly, or deleted
             nameof(IUpstreamServiceError)
         };
@@ -26,6 +29,8 @@ public class InfrastructureArchitectureTests
             .And().DoNotHaveNameEndingWith("Settings")
             .And().DoNotHaveNameEndingWith("Constants")
             .And().AreNotInterfaces()
+            // Compiler-generated types, e.g. the marker type emitted for an extension block
+            .And().DoNotHaveNameStartingWith("<")
             .And().DoNotHaveName(publicByDesignClasses)
             .Should().NotBePublic()
             .GetResult();

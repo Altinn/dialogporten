@@ -16,6 +16,7 @@ public sealed class InfrastructureSettings
     public required MassTransitSettings MassTransit { get; set; }
     public required DialogSearchSettings DialogSearch { get; init; } = new();
     public WarmupSettings Warmup { get; init; } = new();
+    public DialogDbAuthSettings DialogDbAuth { get; init; } = new();
     public bool EnableSqlStatementLogging { get; init; }
     public bool EnableSqlParametersLogging { get; init; }
 }
@@ -29,6 +30,30 @@ public sealed class WarmupSettings
     public bool RunEndUserSearch { get; init; } = true;
     // Synthetic warmup user expected to exist in all non-prod environments. Override in prod and local dev.
     public string? EndUserPid { get; init; } = "14886498226";
+}
+
+public sealed class DialogDbAuthSettings
+{
+    public DialogDbAuthMode Mode { get; init; } = DialogDbAuthMode.Password;
+
+    /// <summary>
+    /// PostgreSQL role name to connect as when <see cref="Mode"/> is <see cref="DialogDbAuthMode.EntraToken"/>.
+    /// Equals the managed identity name by convention.
+    /// </summary>
+    public string? Username { get; init; }
+}
+
+public enum DialogDbAuthMode
+{
+    /// <summary>
+    /// Connect with the credentials carried by the connection string.
+    /// </summary>
+    Password,
+
+    /// <summary>
+    /// Connect with a rotating Entra access token acquired for the configured PostgreSQL role.
+    /// </summary>
+    EntraToken
 }
 
 public sealed class DialogSearchSettings
@@ -75,7 +100,8 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
         IValidator<RedisSettings> redisSettingsValidator,
         IValidator<DialogSearchSettings> dialogSearchSettingsValidator,
         IValidator<WarmupSettings> warmupSettingsValidator,
-        IValidator<MassTransitSettings> massTransitSettingsValidator)
+        IValidator<MassTransitSettings> massTransitSettingsValidator,
+        IValidator<DialogDbAuthSettings> dialogDbAuthSettingsValidator)
     {
         RuleFor(x => x.DialogDbConnectionString)
             .NotEmpty();
@@ -106,6 +132,10 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
 
         RuleFor(x => x.MassTransit)
             .SetValidator(massTransitSettingsValidator);
+
+        RuleFor(x => x.DialogDbAuth)
+            .NotNull()
+            .SetValidator(dialogDbAuthSettingsValidator);
     }
 
     // This is here to be able to use the validator without having access to the service provider.
@@ -116,7 +146,8 @@ internal sealed class InfrastructureSettingsValidator : AbstractValidator<Infras
         new RedisSettingsValidator(),
         new DialogSearchSettingsValidator(),
         new WarmupSettingsValidator(),
-        new MassTransitSettingsValidator())
+        new MassTransitSettingsValidator(),
+        new DialogDbAuthSettingsValidator())
     { }
 }
 
@@ -132,6 +163,17 @@ internal sealed class WarmupSettingsValidator : AbstractValidator<WarmupSettings
 
         RuleFor(x => x.DbConnectionParallelism)
             .GreaterThan(0);
+    }
+}
+
+internal sealed class DialogDbAuthSettingsValidator : AbstractValidator<DialogDbAuthSettings>
+{
+    public DialogDbAuthSettingsValidator()
+    {
+        RuleFor(x => x.Username)
+            .NotEmpty()
+            .When(x => x.Mode is DialogDbAuthMode.EntraToken)
+            .WithMessage($"{nameof(DialogDbAuthSettings.Username)} is required when {nameof(DialogDbAuthSettings.Mode)} is {nameof(DialogDbAuthMode.EntraToken)}.");
     }
 }
 

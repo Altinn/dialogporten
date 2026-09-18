@@ -1,5 +1,4 @@
 using System.Globalization;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -12,16 +11,17 @@ namespace Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 /// </summary>
 public sealed partial class OutboxQueueSizeMetricCollector : IMetricCollector
 {
-    private readonly string _connectionString;
+    private readonly NpgsqlDataSource _dataSource;
     private readonly ILogger<OutboxQueueSizeMetricCollector> _logger;
     private long _latestValue;
 
     public OutboxQueueSizeMetricCollector(
-        IConfiguration configuration,
+        NpgsqlDataSource dataSource,
         ILogger<OutboxQueueSizeMetricCollector> logger)
     {
-        _connectionString = configuration["Infrastructure:DialogDbConnectionString"]
-            ?? throw new InvalidOperationException("Infrastructure:DialogDbConnectionString is not configured");
+        ArgumentNullException.ThrowIfNull(dataSource);
+
+        _dataSource = dataSource;
         _logger = logger;
 
         CustomMetrics.Meter.CreateObservableGauge(
@@ -35,8 +35,7 @@ public sealed partial class OutboxQueueSizeMetricCollector : IMetricCollector
 
     public async Task CollectAndRecordAsync(CancellationToken cancellationToken)
     {
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync(cancellationToken);
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
 
         await using var command = new NpgsqlCommand(
             @"SELECT 

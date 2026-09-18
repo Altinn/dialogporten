@@ -71,8 +71,12 @@ public static class InfrastructureExtensions
             {
                 var infrastructure = sp.GetRequiredService<IOptions<InfrastructureSettings>>().Value;
                 var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-                var dataSourceBuilder = new NpgsqlDataSourceBuilder(infrastructure.DialogDbConnectionString)
-                    .UseLoggerFactory(loggerFactory);
+                var connectionString = DialogDbAuthExtensions.BuildConnectionString(
+                    infrastructure.DialogDbConnectionString,
+                    infrastructure.DialogDbAuth);
+                var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString)
+                    .UseLoggerFactory(loggerFactory)
+                    .UseDialogDbAuth(infrastructure.DialogDbAuth, loggerFactory);
 
                 if (infrastructure.EnableSqlParametersLogging)
                 {

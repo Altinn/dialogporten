@@ -147,6 +147,8 @@ type EntraAdministrator = {
   name: string
   @description('The object (principal) id of the principal.')
   principalId: string
+  @description('Defaults to ServicePrincipal for managed identities and applications.')
+  principalType: ('ServicePrincipal' | 'User' | 'Group')?
 }
 
 @description('Principals to register as Microsoft Entra administrators of the server in addition to the deployer and the database provisioner, for example identities created by another platform whose object ids are not resolvable here.')
@@ -385,11 +387,12 @@ module dbProvisionerAdministrator 'addEntraAdministrator.bicep' = if (enableDbPr
 @batchSize(1)
 module additionalAdministrators 'addEntraAdministrator.bicep' = [
   for administrator in additionalEntraAdministrators: {
-    name: 'entraAdministrator-${administrator.name}'
+    name: 'entraAdministrator-${uniqueString(administrator.principalId)}'
     params: {
       serverName: postgres.name
       principalObjectId: administrator.principalId
       principalName: administrator.name
+      principalType: administrator.?principalType ?? 'ServicePrincipal'
     }
     dependsOn: [dbProvisionerAdministrator]
   }

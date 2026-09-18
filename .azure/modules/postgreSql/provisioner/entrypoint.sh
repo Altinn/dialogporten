@@ -208,7 +208,8 @@ for i in $(seq 0 $((workload_count - 1))); do
 done
 
 export PGHOST PGPORT
-export PGSSLMODE=require
+export PGSSLMODE=verify-full
+export PGSSLROOTCERT="${PGSSLROOTCERT:-system}"
 export PGUSER="$PG_ADMIN_ROLE"
 
 PSQL_OPTS=(--no-psqlrc -v ON_ERROR_STOP=1)
@@ -225,6 +226,10 @@ if [[ -z "$PGPASSWORD" ]]; then
   exit 1
 fi
 export PGPASSWORD
+
+# Check the database prerequisite before creating any principals, profiles or memberships.
+# Installing the extension and restarting the server are deliberate bootstrap operations.
+psql "${PSQL_OPTS[@]}" --dbname "$PG_DATABASE" -f "$SQL_DIR/require-pgaudit.sql"
 
 # ---------------------------------------------------------------------------
 # Step 1: register the Entra login roles (database: postgres)

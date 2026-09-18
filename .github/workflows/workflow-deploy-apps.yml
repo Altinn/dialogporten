@@ -38,6 +38,11 @@ on:
         description: "Current version to use as tag"
         required: true
         type: string
+      provisionDbPrincipals:
+        description: "Provision database identities. Disable only for initial bootstrap with all workloads in Password mode."
+        required: false
+        type: boolean
+        default: true
       runMigration:
         description: "If true, the migration job will be run."
         required: false
@@ -151,7 +156,7 @@ jobs:
   # environment is one where provisioning is enabled (currently test/at23 only).
   provision-db-principals:
     name: Provision DB principals
-    if: ${{ always() && !failure() && !cancelled() }}
+    if: ${{ always() && !failure() && !cancelled() && inputs.provisionDbPrincipals }}
     needs: deploy-migration-job
     uses: ./.github/workflows/workflow-provision-db-principals.yml
     secrets: inherit

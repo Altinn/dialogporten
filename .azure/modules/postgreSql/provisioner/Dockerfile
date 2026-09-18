@@ -10,7 +10,7 @@ FROM postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf
 
 # bash for the entrypoint, jq to read the workload list and the responses from the token and
 # cluster APIs, and curl to call them.
-RUN apk add --no-cache bash curl jq
+RUN apk add --no-cache bash ca-certificates curl jq
 
 WORKDIR /opt/provisioner
 

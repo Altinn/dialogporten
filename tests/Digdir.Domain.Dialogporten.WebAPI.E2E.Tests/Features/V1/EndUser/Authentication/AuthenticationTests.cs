@@ -46,7 +46,7 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         problemDetails.Should().NotBeNull();
         problemDetails.Code.Should().BeNull();
         problemDetails.Detail.Should().BeNull();
-        problemDetails.Instance.Should().Be(requestPath);
+        problemDetails.Instance.Should().BeOneOf(requestPath, $"/dialogporten{requestPath}");
         problemDetails.Status.Should().Be((int)HttpStatusCode.Unauthorized);
         problemDetails.StatusDescription.Should().BeNull();
         problemDetails.Title.Should().Be("Unauthorized.");

@@ -35,7 +35,7 @@ public class AuthorizationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         problemDetails.Should().NotBeNull();
         problemDetails.Code.Should().BeNull();
         problemDetails.Detail.Should().BeNull();
-        problemDetails.Instance.Should().BeOneOf(requestPath, $"/dialogporten{requestPath}");
+        problemDetails.Instance.Should().Be(requestPath);
         problemDetails.Status.Should().Be((int)HttpStatusCode.Forbidden);
         problemDetails.StatusDescription.Should().BeNull();
         problemDetails.Title.Should().Be("Forbidden.");

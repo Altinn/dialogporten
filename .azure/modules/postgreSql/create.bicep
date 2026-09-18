@@ -141,6 +141,22 @@ param administratorLoginPassword string
 @minLength(3)
 param deployerPrincipalName string
 
+@export()
+type EntraAdministrator = {
+  @description('The principal name recorded for the administrator.')
+  name: string
+  @description('The object (principal) id of the principal.')
+  principalId: string
+  @description('Defaults to ServicePrincipal for managed identities and applications.')
+  principalType: ('ServicePrincipal' | 'User' | 'Group')?
+}
+
+@description('Principals to register as Microsoft Entra administrators of the server in addition to the deployer and the database provisioner, for example identities created by another platform whose object ids are not resolvable here.')
+param additionalEntraAdministrators EntraAdministrator[] = []
+
+@description('Creates the database provisioner identity and registers it as a Microsoft Entra administrator on the server. Enable per environment as workload provisioning is rolled out.')
+param enableDbProvisioner bool = false
+
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
@@ -277,6 +293,14 @@ resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   tags: tags
 }
 
+// Used by the database provisioning job, which registers the workload login roles on this server.
+// Created here rather than with the job, so the identity exists before any app deployment runs.
+resource dbProvisionerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = if (enableDbProvisioner) {
+  name: '${namePrefix}-db-provisioner-identity'
+  location: location
+  tags: tags
+}
+
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2025-08-01' = {
   name: postgresServerName
   location: location
@@ -340,14 +364,50 @@ resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/admin
   }
 }
 
+// The provisioning job calls pgaadauth_create_principal_with_oid, which requires the caller to be
+// a Microsoft Entra administrator of the server. The registration also carries azure_pg_admin
+// membership, which on Azure Flexible Server confers implicit SET on every non-superuser role, so
+// the job reaches the application table owner with SET ROLE and issues its grants as that owner
+// without needing the owner's password. Sequenced after the deployer's record because the resource
+// provider handles one administrator write at a time per server; the object id is distinct, so the
+// note above about duplicate object ids does not apply.
+module dbProvisionerAdministrator 'addEntraAdministrator.bicep' = if (enableDbProvisioner) {
+  name: 'dbProvisionerAdministrator'
+  params: {
+    serverName: postgres.name
+    principalObjectId: dbProvisionerIdentity.?properties.principalId ?? ''
+    principalName: dbProvisionerIdentity.?name ?? ''
+  }
+  dependsOn: [postgresAdministrators]
+}
+
+// Registered one at a time and after the provisioner's record, for the same reason that record is
+// sequenced after the deployer's: the resource provider handles one administrator write at a time
+// per server. Each object id must be distinct from the ones already registered.
+@batchSize(1)
+module additionalAdministrators 'addEntraAdministrator.bicep' = [
+  for administrator in additionalEntraAdministrators: {
+    name: 'entraAdministrator-${uniqueString(administrator.principalId)}'
+    params: {
+      serverName: postgres.name
+      principalObjectId: administrator.principalId
+      principalName: administrator.name
+      principalType: administrator.?principalType ?? 'ServicePrincipal'
+    }
+    dependsOn: [dbProvisionerAdministrator]
+  }
+]
+
 resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {
     parent: postgres
     name: 'azure.extensions'
+    dependsOn: [dbProvisionerAdministrator, additionalAdministrators]
+    // PGAUDIT is allowlisted so CREATE EXTENSION pgaudit is permitted in databases where it is not
+    // yet installed. azure.extensions is a dynamic parameter, so this needs no restart.
     properties: {
-      value: 'PG_TRGM,BTREE_GIN'
+      value: 'PG_TRGM,BTREE_GIN,PGAUDIT'
       source: 'user-override'
     }
-    dependsOn: [postgresAdministrators]
   }
 
 resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {
@@ -487,6 +547,7 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublish
 }
 
 output serverName string = postgres.name
+output dbProvisionerIdentityName string = enableDbProvisioner ? dbProvisionerIdentity.name : ''
 output fullyQualifiedDomainName string = postgres.properties.fullyQualifiedDomainName
 output adoConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? adoConnectionString.outputs.secretUri : ''
 output psqlConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? psqlConnectionString.outputs.secretUri : ''

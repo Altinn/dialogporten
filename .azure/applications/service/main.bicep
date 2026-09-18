@@ -83,6 +83,10 @@ param scale Scale = {
   ]
 }
 
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -90,21 +94,7 @@ var additionalTags = {}
 
 var tags = baseTags(additionalTags, environment)
 
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
-  name: appConfigurationName
-}
-
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-service-identity'
-  location: location
-  tags: tags
-}
-
-var containerAppEnvVars = [
+var baseContainerAppEnvVars = [
   {
     name: 'ASPNETCORE_ENVIRONMENT'
     value: environment
@@ -139,13 +129,46 @@ var containerAppEnvVars = [
   }
 ]
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
-  name: environmentKeyVaultName
-}
+// Entra token authentication needs the mode and the PostgreSQL role name, which is the managed
+// identity's own name. The connection string secret above stays wired either way, so a workload
+// moves between the two modes by parameter alone.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
 
 var serviceName = 'service'
 
 var containerAppName = '${namePrefix}-${serviceName}'
+
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+  name: appConfigurationName
+}
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-service-identity'
+  location: location
+  tags: tags
+}
+
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
+  name: environmentKeyVaultName
+}
 
 module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'

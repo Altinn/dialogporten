@@ -1,0 +1,202 @@
+name: Provision DB principals
+
+# Deploys and runs the database provisioning job, which gives the workload managed identities
+# Entra token authentication to PostgreSQL: a login role per identity, and membership of the
+# profile role carrying the privileges that workload uses.
+#
+# The work happens inside a container app job rather than here, because the PostgreSQL server is
+# VNet-injected and is not reachable from a hosted runner. This workflow only deploys the job,
+# starts it, and waits for the execution to report its result.
+#
+# The job holds no secret: it authenticates to PostgreSQL with a token for its own managed
+# identity, which the infrastructure deployment registers as a Microsoft Entra administrator of
+# the server.
+#
+# The provisioner image is platform-neutral and the same image also runs as a Kubernetes job, where
+# it acquires its token through Azure workload identity federation and can read a workload's object
+# id from the ApplicationIdentity resource describing it. This workflow covers the container app
+# job only.
+#
+# The job is ADDITIVE and idempotent: it creates what is missing and re-applies the expected grants
+# and memberships. It removes nothing and does not reconcile drift. That is acceptable for rollout;
+# exact-set reconciliation is a deliberate future step, not implied.
+#
+# Fresh-environment ordering: the login roles are named after managed identities that the app and
+# job templates create. A brand-new environment must therefore be deployed once in the default
+# password authentication mode, so the identities exist, before this can provision anything.
+
+on:
+  workflow_call:
+    # Validation has no environment or Azure credentials. Deployment resolves these
+    # from its environment (or the caller) and checks them before authenticating.
+    secrets:
+      AZURE_CLIENT_ID:
+        required: false
+      AZURE_TENANT_ID:
+        required: false
+      AZURE_SUBSCRIPTION_ID:
+        required: false
+      AZURE_RESOURCE_GROUP_NAME:
+        required: false
+      AZURE_CONTAINER_APP_ENVIRONMENT_NAME:
+        required: false
+    inputs:
+      environment:
+        required: true
+        type: string
+      version:
+        description: "Current version to use as tag"
+        required: true
+        type: string
+      dryRun:
+        description: "If true, compile the template and parameters without Azure authentication or deployment."
+        required: false
+        type: boolean
+        default: false
+      ref:
+        description: "The branch or tag ref to deploy. Using default checkout ref if not provided."
+        required: false
+        default: ${{ github.ref }}
+        type: string
+
+jobs:
+  validate:
+    name: Validate DB provisioner without Azure credentials
+    if: ${{ inputs.environment == 'test' && (inputs.dryRun || github.event_name == 'pull_request' || github.event_name == 'pull_request_target') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Compile provisioner template and test parameters
+        env:
+          IMAGE_TAG: validation
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: validation-only
+        run: |
+          az bicep build --file .azure/applications/db-provisioner-job/main.bicep
+          az bicep build-params --file .azure/applications/db-provisioner-job/test.bicepparam
+
+  resolve-deployment-ref:
+    name: Verify provisioner deployment commit
+    if: ${{ inputs.environment == 'test' && !inputs.dryRun && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      # No code from the requested ref executes here. Only commits already in main may
+      # supply the local actions and scripts used by the credential-bearing job below.
+      - name: Resolve main or release tag to an approved commit
+        id: resolve
+        env:
+          DEPLOY_REF: ${{ inputs.ref }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$DEPLOY_REF" in
+            refs/heads/main) sha="$WORKFLOW_SHA" ;;
+            refs/tags/v*) sha=$(git rev-parse --verify "$DEPLOY_REF^{commit}") ;;
+            *) echo "::error::Provisioning requires main or a release tag merged into main."; exit 1 ;;
+          esac
+          git merge-base --is-ancestor "$sha" refs/remotes/origin/main
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+  provision-db-principals:
+    name: Provision DB principals (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    # Runs only after the credential-free job has accepted a test deployment ref.
+    needs: resolve-deployment-ref
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve-deployment-ref.outputs.sha }}
+          persist-credentials: false
+
+      - name: Check deployment credentials
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID AZURE_RESOURCE_GROUP_NAME AZURE_CONTAINER_APP_ENVIRONMENT_NAME; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing deployment configuration: $name"
+              exit 1
+            fi
+          done
+
+      - name: Azure Login
+        uses: ./.github/actions/azure-login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy db provisioner job (${{ inputs.environment }})
+        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
+        id: deploy
+        env:
+          # parameters
+          IMAGE_TAG: ${{ inputs.version }}
+          # secrets
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+        with:
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          type: deployment
+          operation: create
+          name: "db-provisioner-job-${{ inputs.version }}"
+          template-file: ./.azure/applications/db-provisioner-job/main.bicep
+          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          parameters-file: ./.azure/applications/db-provisioner-job/${{ inputs.environment }}.bicepparam
+
+      - name: Start db provisioner job
+        env:
+          JOB_NAME: ${{ steps.deploy.outputs.name }}
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
+        with:
+          inlineScript: |
+            az containerapp job start -n "$JOB_NAME" -g "$RESOURCE_GROUP"
+
+      - name: Verify provisioning
+        env:
+          JOB_NAME: ${{ steps.deploy.outputs.name }}
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          IMAGE_TAG: ${{ inputs.version }}
+        uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
+        id: verify-provisioning
+        timeout-minutes: 15
+        with:
+          inlineScript: |
+            ./.github/tools/containerAppJobVerifier.sh "$JOB_NAME" "$RESOURCE_GROUP" "$IMAGE_TAG"
+
+      - name: Logout from azure
+        if: ${{failure() || success()}}
+        continue-on-error: true
+        run: az logout

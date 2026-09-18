@@ -54,53 +54,9 @@ param otelTraceSamplerRatio string
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 
-var namePrefix = 'dp-be-${environment}'
-var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
-
-var additionalTags = {}
-
-var tags = baseTags(additionalTags, environment)
-
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
-  name: appConfigurationName
-}
-
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-graphql-identity'
-  location: location
-  tags: tags
-}
-
-var containerAppEnvVars = [
-  {
-    name: 'ASPNETCORE_ENVIRONMENT'
-    value: environment
-  }
-  {
-    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-    value: appInsightConnectionString
-  }
-  {
-    name: 'AZURE_APPCONFIG_URI'
-    value: appConfiguration.properties.endpoint
-  }
-  {
-    name: 'AZURE_CLIENT_ID'
-    value: managedIdentity.properties.clientId
-  }
-  {
-    name: 'OTEL_TRACES_SAMPLER'
-    value: 'parentbased_traceidratio'
-  }
-  {
-    name: 'OTEL_TRACES_SAMPLER_ARG'
-    value: otelTraceSamplerRatio
-  }
-]
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
 
 @description('Minimum number of replicas')
 @minValue(0)
@@ -134,11 +90,78 @@ param scale Scale = {
   ]
 }
 
+var namePrefix = 'dp-be-${environment}'
+var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+
+var additionalTags = {}
+
+var tags = baseTags(additionalTags, environment)
+
+var baseContainerAppEnvVars = [
+  {
+    name: 'ASPNETCORE_ENVIRONMENT'
+    value: environment
+  }
+  {
+    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+    value: appInsightConnectionString
+  }
+  {
+    name: 'AZURE_APPCONFIG_URI'
+    value: appConfiguration.properties.endpoint
+  }
+  {
+    name: 'AZURE_CLIENT_ID'
+    value: managedIdentity.properties.clientId
+  }
+  {
+    name: 'OTEL_TRACES_SAMPLER'
+    value: 'parentbased_traceidratio'
+  }
+  {
+    name: 'OTEL_TRACES_SAMPLER_ARG'
+    value: otelTraceSamplerRatio
+  }
+]
+
+// Entra token authentication needs the mode and the PostgreSQL role name, which is the managed
+// identity's own name. The connection string secret above stays wired either way, so a workload
+// moves between the two modes by parameter alone.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
+
+var containerAppName = '${namePrefix}-graphql-ca'
+
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+  name: appConfigurationName
+}
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-graphql-identity'
+  location: location
+  tags: tags
+}
+
 resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: environmentKeyVaultName
 }
-
-var containerAppName = '${namePrefix}-graphql-ca'
 
 module containerApp '../../modules/containerApp/main.bicep' = {
   name: containerAppName

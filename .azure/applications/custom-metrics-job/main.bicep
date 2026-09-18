@@ -39,6 +39,10 @@ param replicaTimeOutInSeconds int
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -52,25 +56,7 @@ var additionalTags = {
 
 var tags = baseTags(additionalTags, environment)
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-custom-metrics-identity'
-  location: location
-  tags: tags
-}
-
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
-  name: 'keyVaultReaderAccessPolicy-${name}'
-  params: {
-    keyvaultName: environmentKeyVaultName
-    principalIds: [managedIdentity.properties.principalId]
-  }
-}
-
-var containerAppEnvVars = [
+var baseContainerAppEnvVars = [
   {
     name: 'Infrastructure__DialogDbConnectionString'
     secretRef: 'dbconnectionstring'
@@ -93,6 +79,25 @@ var containerAppEnvVars = [
   }
 ]
 
+// Entra token authentication needs the mode and the PostgreSQL role name, which is the managed
+// identity's own name. The connection string secret above stays wired either way, so a workload
+// moves between the two modes by parameter alone.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
+
 // Base URL for accessing secrets in the Key Vault
 // https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-functions-deployment#example-1
 var keyVaultBaseUrl = 'https://${environmentKeyVaultName}${az.environment().suffixes.keyvaultDns}/secrets'
@@ -109,6 +114,24 @@ var secrets = [
     identity: managedIdentity.id
   }
 ]
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-custom-metrics-identity'
+  location: location
+  tags: tags
+}
+
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+  name: 'keyVaultReaderAccessPolicy-${name}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalIds: [managedIdentity.properties.principalId]
+  }
+}
 
 module customMetricsJob '../../modules/containerAppJob/main.bicep' = {
   name: name

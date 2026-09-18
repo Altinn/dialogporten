@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.AccessManagement.Querie
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.PreProcessors;
 using FastEndpoints;
 using MediatR;
@@ -32,7 +33,12 @@ public sealed class GetPartiesEndpoint : EndpointWithoutRequest<PartiesDto>
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(d => d.Produces<PartiesDto>());
+        Description(d => d
+            .Produces<PartiesDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            ));
     }
 
     public override async Task HandleAsync(CancellationToken ct)

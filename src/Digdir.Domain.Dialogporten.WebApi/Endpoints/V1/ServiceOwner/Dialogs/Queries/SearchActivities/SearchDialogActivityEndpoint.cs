@@ -32,9 +32,14 @@ public sealed class SearchDialogActivityEndpoint : Endpoint<SearchActivityQuery,
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf<List<ActivityDto>>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<List<ActivityDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(SearchActivityQuery req, CancellationToken ct)

@@ -35,11 +35,15 @@ public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
 
         Description(b => b
             .Accepts<PurgeDialogRequest>()
-            .ProducesOneOf(
-            StatusCodes.Status204NoContent,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status412PreconditionFailed));
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status412PreconditionFailed
+            ));
     }
 
     public override async Task HandleAsync(PurgeDialogRequest req, CancellationToken ct)

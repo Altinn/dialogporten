@@ -1,5 +1,8 @@
+using System.Diagnostics;
 using System.Net;
+using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.Authentication;
 using Digdir.Library.Dialogporten.E2E.Common;
@@ -23,6 +26,7 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         var response = await AuthenticationTestHelpers.InvokeEndpointAsync(
             Fixture.EndUserApi.V1, endpointScenario.Method, TestContext.Current.CancellationToken);
+        var requestPath = response.RequestMessage!.RequestUri!.AbsolutePath ?? throw new UnreachableException();
 
         response.ShouldHaveStatusCode(HttpStatusCode.Unauthorized);
 
@@ -33,5 +37,26 @@ public class AuthenticationTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         var authenticateHeaderValue = string.Join(',', authenticateHeaders ?? []);
         authenticateHeaderValue.Should().Contain("Bearer");
         authenticateHeaderValue.Should().Contain(authenticationScenario.ExpectedAuthenticateHeaderFragment);
+
+        response.Error.Should().NotBeNull();
+        var errorContent = response.Error.Content;
+        errorContent.Should().NotBeNull();
+        var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(errorContent, JsonSerializerOptions.Web);
+
+        problemDetails.Should().NotBeNull();
+        problemDetails.Code.Should().BeNull();
+        problemDetails.Detail.Should().BeNull();
+        problemDetails.Instance.Should().Be(requestPath);
+        problemDetails.Status.Should().Be((int)HttpStatusCode.Unauthorized);
+        problemDetails.StatusDescription.Should().BeNull();
+        problemDetails.Title.Should().Be("Unauthorized.");
+        problemDetails.TraceId.Should().NotBeNull();
+        problemDetails.ValidationErrors.Should().BeNull();
+
+        problemDetails.Errors.Should().NotBeNull();
+        var validationFailure = problemDetails.Errors.Single();
+
+        validationFailure.Key.Should().Be("Unauthorized");
+        validationFailure.Value.Should().NotBeNull();
     }
 }

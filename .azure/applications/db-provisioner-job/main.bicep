@@ -79,18 +79,6 @@ var additionalTags = {
 
 var tags = baseTags(additionalTags, environment)
 
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-// Created by the infrastructure deployment, which registers it as a Microsoft Entra administrator
-// of the PostgreSQL server. Infrastructure always deploys before applications, so it is present.
-// The identity only exists where the infrastructure parameters set enableDbProvisioner, so this
-// template must not be deployed elsewhere; the workflow gate already ensures that.
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' existing = {
-  name: '${namePrefix}-db-provisioner-identity'
-}
-
 // The server name is derived the same way the infrastructure derives it, from the name stem and a
 // string unique to this subscription and resource group. This job deploys into that same resource
 // group, so the two agree and the FQDN can be read here instead of being passed in.
@@ -101,19 +89,6 @@ var postgresServerName = uniqueResourceName(
   subscription().id,
   resourceGroup().id
 )
-
-resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2025-08-01' existing = {
-  name: postgresServerName
-}
-
-// Resolves the workloads' own identities, created by their own templates. Only object ids are read.
-module workloadPrincipals 'workloadPrincipals.bicep' = {
-  name: 'workloadPrincipals-${name}'
-  params: {
-    namePrefix: namePrefix
-    workloads: workloads
-  }
-}
 
 var containerAppEnvVars = [
   {
@@ -143,6 +118,31 @@ var containerAppEnvVars = [
     value: managedIdentity.properties.clientId
   }
 ]
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+// Created by the infrastructure deployment, which registers it as a Microsoft Entra administrator
+// of the PostgreSQL server. Infrastructure always deploys before applications, so it is present.
+// The identity only exists where the infrastructure parameters set enableDbProvisioner, so this
+// template must not be deployed elsewhere; the workflow gate already ensures that.
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' existing = {
+  name: '${namePrefix}-db-provisioner-identity'
+}
+
+resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2025-08-01' existing = {
+  name: postgresServerName
+}
+
+// Resolves the workloads' own identities, created by their own templates. Only object ids are read.
+module workloadPrincipals 'workloadPrincipals.bicep' = {
+  name: 'workloadPrincipals-${name}'
+  params: {
+    namePrefix: namePrefix
+    workloads: workloads
+  }
+}
 
 module provisionerJob '../../modules/containerAppJob/main.bicep' = {
   name: name

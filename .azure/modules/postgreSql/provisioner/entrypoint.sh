@@ -64,7 +64,7 @@ APPLICATION_IDENTITY_API="apis/application.dis.altinn.cloud/v1alpha1"
 
 require_env() {
   local name="$1"
-  if [ -z "${!name:-}" ]; then
+  if [[ -z "${!name:-}" ]]; then
     echo "ERROR: $name is not set" >&2
     exit 1
   fi
@@ -78,11 +78,11 @@ done
 # assertion it is exchanged for are only ever assigned, never printed.
 acquire_token() {
   local authority response
-  if [ -n "${AZURE_FEDERATED_TOKEN_FILE:-}" ] && [ -r "${AZURE_FEDERATED_TOKEN_FILE}" ]; then
+  if [[ -n "${AZURE_FEDERATED_TOKEN_FILE:-}" ]] && [[ -r "${AZURE_FEDERATED_TOKEN_FILE}" ]]; then
     require_env AZURE_TENANT_ID
     authority="${AZURE_AUTHORITY_HOST:-https://login.microsoftonline.com/}"
     # The authority is written with a trailing slash in some places and without it in others.
-    [ "${authority: -1}" = "/" ] || authority="${authority}/"
+    [[ "${authority: -1}" = "/" ]] || authority="${authority}/"
     response="$(
       curl -sS -f \
         --data-urlencode "client_id=${AZURE_CLIENT_ID}" \
@@ -96,7 +96,7 @@ acquire_token() {
     return 0
   fi
 
-  if [ -n "${IDENTITY_ENDPOINT:-}" ] && [ -n "${IDENTITY_HEADER:-}" ]; then
+  if [[ -n "${IDENTITY_ENDPOINT:-}" ]] && [[ -n "${IDENTITY_HEADER:-}" ]]; then
     response="$(
       curl -sS -f \
         -H "X-IDENTITY-HEADER: ${IDENTITY_HEADER}" \
@@ -117,15 +117,15 @@ read_application_identity_status() {
   local name="$1"
   local namespace token response ready
 
-  if [ -z "${KUBERNETES_SERVICE_HOST:-}" ]; then
+  if [[ -z "${KUBERNETES_SERVICE_HOST:-}" ]]; then
     echo "ERROR: workload entry names the ApplicationIdentity '$name', which can only be resolved" >&2
     echo "       from inside a Kubernetes cluster. Give the entry an objectId instead." >&2
     return 1
   fi
 
   namespace="${PROVISION_NAMESPACE:-}"
-  if [ -z "$namespace" ]; then
-    if [ ! -r "${SERVICE_ACCOUNT_DIR}/namespace" ]; then
+  if [[ -z "$namespace" ]]; then
+    if [[ ! -r "${SERVICE_ACCOUNT_DIR}/namespace" ]]; then
       echo "ERROR: cannot read ${SERVICE_ACCOUNT_DIR}/namespace. Set PROVISION_NAMESPACE to the" >&2
       echo "       namespace holding the ApplicationIdentity resources." >&2
       return 1
@@ -133,7 +133,7 @@ read_application_identity_status() {
     namespace="$(cat "${SERVICE_ACCOUNT_DIR}/namespace")"
   fi
 
-  if [ ! -r "${SERVICE_ACCOUNT_DIR}/token" ]; then
+  if [[ ! -r "${SERVICE_ACCOUNT_DIR}/token" ]]; then
     echo "ERROR: cannot read the service account token needed to look up ApplicationIdentity '$name'" >&2
     return 1
   fi
@@ -150,7 +150,7 @@ read_application_identity_status() {
   fi
 
   ready="$(jq -r 'first(.status.conditions[]? | select(.type == "Ready") | .status) // empty' <<<"$response")"
-  if [ "$ready" != "True" ]; then
+  if [[ "$ready" != "True" ]]; then
     echo "ERROR: ApplicationIdentity '$name' in namespace '$namespace' is not Ready (condition: ${ready:-none})" >&2
     return 1
   fi
@@ -159,7 +159,7 @@ read_application_identity_status() {
 }
 
 workload_count="$(jq 'length' <<<"$PROVISION_WORKLOADS")"
-if [ "$workload_count" -eq 0 ]; then
+if [[ "$workload_count" -eq 0 ]]; then
   echo "No workloads to provision"
   exit 0
 fi
@@ -176,17 +176,17 @@ for i in $(seq 0 $((workload_count - 1))); do
   profile="$(jq -r '.profile // empty' <<<"$entry")"
   application_identity="$(jq -r '.applicationIdentity // empty' <<<"$entry")"
 
-  if [ -n "$application_identity" ]; then
+  if [[ -n "$application_identity" ]]; then
     echo "Resolving ApplicationIdentity $application_identity"
     identity_status="$(read_application_identity_status "$application_identity")"
     object_id="$(jq -r '.principalId // empty' <<<"$identity_status")"
-    if [ -z "$object_id" ]; then
+    if [[ -z "$object_id" ]]; then
       echo "ERROR: ApplicationIdentity '$application_identity' carries no principalId" >&2
       exit 1
     fi
-    if [ -z "$role_name" ]; then
+    if [[ -z "$role_name" ]]; then
       role_name="$(jq -r '.managedIdentityName // empty' <<<"$identity_status")"
-      if [ -z "$role_name" ]; then
+      if [[ -z "$role_name" ]]; then
         echo "ERROR: ApplicationIdentity '$application_identity' carries no managedIdentityName," >&2
         echo "       and the workload entry gives no roleName to use instead" >&2
         exit 1
@@ -195,7 +195,7 @@ for i in $(seq 0 $((workload_count - 1))); do
   fi
 
   for field in role_name object_id profile; do
-    if [ -z "${!field}" ]; then
+    if [[ -z "${!field}" ]]; then
       echo "ERROR: workload entry $i resolves to no $field: $entry" >&2
       exit 1
     fi
@@ -220,7 +220,7 @@ echo "Provisioning $workload_count workload(s) against $PGHOST as $PG_ADMIN_ROLE
 if ! PGPASSWORD="$(acquire_token)"; then
   exit 1
 fi
-if [ -z "$PGPASSWORD" ]; then
+if [[ -z "$PGPASSWORD" ]]; then
   echo "ERROR: could not obtain an access token for the job identity" >&2
   exit 1
 fi

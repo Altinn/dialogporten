@@ -74,11 +74,13 @@ import { WorkspaceTransformConfiguration } from '../modules/applicationInsights/
 @description('Optional ingestion-time transformations for the Application Insights workspace')
 param appInsightsWorkspaceTransform WorkspaceTransformConfiguration?
 
-import { Sku as PostgresSku } from '../modules/postgreSql/create.bicep'
-import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgreSql/create.bicep'
-import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
-import { ServerConfiguration as PostgresServerConfiguration } from '../modules/postgreSql/create.bicep'
-import { EntraAdministrator as PostgresEntraAdministrator } from '../modules/postgreSql/create.bicep'
+import {
+  Sku as PostgresSku
+  StorageConfiguration as PostgresStorageConfig
+  HighAvailabilityConfiguration as PostgresHighAvailabilityConfig
+  ServerConfiguration as PostgresServerConfiguration
+  EntraAdministrator as PostgresEntraAdministrator
+} from '../modules/postgreSql/create.bicep'
 
 param postgresConfiguration {
   serverNameStem: string

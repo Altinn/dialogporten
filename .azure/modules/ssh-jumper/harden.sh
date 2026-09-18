@@ -36,3 +36,21 @@ cat > /etc/opt/microsoft/mdatp/managed/mdatp_managed.json <<'MDATP'
 }
 MDATP
 chmod 0644 /etc/opt/microsoft/mdatp/managed/mdatp_managed.json
+
+# The agent is auto-provisioned by Defender for Servers and may not be installed
+# yet on a new machine; it applies the file on install. When it is present, wait
+# for the settings to take effect and report the outcome. This is reported, not
+# fatal: a jumper hardening step must not block an infrastructure deployment.
+if command -v mdatp >/dev/null 2>&1; then
+  for _ in $(seq 1 18); do
+    [ "$(mdatp health --field real_time_protection_enabled 2>/dev/null)" = "true" ] && break
+    sleep 5
+  done
+  if [ "$(mdatp health --field real_time_protection_enabled 2>/dev/null)" = "true" ]; then
+    echo "defender: managed configuration applied (version $(mdatp health --field app_version 2>/dev/null))"
+  else
+    echo "warning: defender is installed but real-time protection is not enabled after 90s (version $(mdatp health --field app_version 2>/dev/null))" >&2
+  fi
+else
+  echo "defender: agent not installed yet; configuration will apply when Defender for Servers provisions it"
+fi

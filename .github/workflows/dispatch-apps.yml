@@ -17,6 +17,11 @@ on:
         description: "Version to deploy (e.g., `1.23.4`)"
         required: true
         type: string
+      provisionDbPrincipals:
+        description: "Provision DB identities (disable only for initial Password-mode bootstrap)"
+        default: true
+        required: false
+        type: boolean
       runMigration:
         description: "Run migrations"
         default: false
@@ -63,4 +68,5 @@ jobs:
       environment: ${{ inputs.environment }}
       version: ${{ inputs.version }}
       runMigration: ${{ inputs.runMigration }}
+      provisionDbPrincipals: ${{ inputs.provisionDbPrincipals }}
       ref: "refs/tags/v${{ inputs.version }}"

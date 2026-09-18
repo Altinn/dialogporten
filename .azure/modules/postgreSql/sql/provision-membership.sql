@@ -35,6 +35,8 @@
 -- trail still names the job that ran this rather than the shared owner login.
 SET ROLE :"owner_role";
 
+\ir require-pgaudit.sql
+
 GRANT :"profile" TO :"role_name";
 
 -- ALTER ROLE ... SET writes to pg_db_role_setting keyed on the role that actually connects, and
@@ -52,33 +54,6 @@ GRANT :"profile" TO :"role_name";
 -- prerequisite handled separately, so this script refuses to proceed rather than paper over it.
 -- That the audit records actually appear is verified with a fresh login session during rollout;
 -- it cannot be established from here, since the setting only takes effect on the next connection.
-DO $$
-DECLARE
-  preloaded text;
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pgaudit') THEN
-    RAISE EXCEPTION
-      'pgaudit is not installed in database %. Run CREATE EXTENSION pgaudit there before provisioning.',
-      current_database();
-  END IF;
-
-  -- shared_preload_libraries may only be examined by a superuser or a member of
-  -- pg_read_all_settings, and the owner login is neither, so a denial here says nothing about the
-  -- server and must not fail the run. The check above already rules out the case this would catch:
-  -- pgaudit's own CREATE EXTENSION refuses unless the library is preloaded, so the extension
-  -- cannot be present without it. This is a second look for servers where the setting is readable.
-  BEGIN
-    preloaded := current_setting('shared_preload_libraries');
-  EXCEPTION WHEN insufficient_privilege THEN
-    preloaded := NULL;
-  END;
-
-  IF preloaded IS NOT NULL AND position('pgaudit' in preloaded) = 0 THEN
-    RAISE EXCEPTION
-      'pgaudit is not in shared_preload_libraries (currently: %). Add it on the server before provisioning.',
-      preloaded;
-  END IF;
-END $$;
 
 -- pgaudit.log is a superuser-set parameter, so this needs more than ownership of the target role:
 -- the executing role must be a superuser or hold SET on the parameter. On Azure Flexible Server

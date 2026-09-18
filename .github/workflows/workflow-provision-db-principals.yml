@@ -124,20 +124,27 @@ jobs:
           parameters-file: ./.azure/applications/db-provisioner-job/${{ inputs.environment }}.bicepparam
 
       - name: Start db provisioner job
+        env:
+          JOB_NAME: ${{ steps.deploy.outputs.name }}
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
         uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
         if: ${{ !inputs.dryRun }}
         with:
           inlineScript: |
-            az containerapp job start -n ${{ steps.deploy.outputs.name }} -g ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+            az containerapp job start -n "$JOB_NAME" -g "$RESOURCE_GROUP"
 
       - name: Verify provisioning
+        env:
+          JOB_NAME: ${{ steps.deploy.outputs.name }}
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          IMAGE_TAG: ${{ inputs.version }}
         uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
         if: ${{ !inputs.dryRun }}
         id: verify-provisioning
         timeout-minutes: 15
         with:
           inlineScript: |
-            ./.github/tools/containerAppJobVerifier.sh ${{ steps.deploy.outputs.name }} ${{ secrets.AZURE_RESOURCE_GROUP_NAME }} ${{ inputs.version }}
+            ./.github/tools/containerAppJobVerifier.sh "$JOB_NAME" "$RESOURCE_GROUP" "$IMAGE_TAG"
 
       - name: Logout from azure
         if: ${{failure() || success()}}

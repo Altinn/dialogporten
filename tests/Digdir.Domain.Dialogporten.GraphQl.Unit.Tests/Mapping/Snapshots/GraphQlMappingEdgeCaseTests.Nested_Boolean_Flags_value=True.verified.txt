@@ -1,0 +1,17 @@
+﻿{
+  GuiAction: {
+    IsAuthorized: true,
+    IsDeleteDialogAction: false
+  },
+  Transmission: {
+    IsAuthorized: true,
+    IsOpened: false
+  },
+  ApiActionAuthorized: true,
+  AttachmentAuthorized: true,
+  TransmissionAttachmentAuthorized: true,
+  NavigationalActionAuthorized: true,
+  EndpointDeprecated: true,
+  SeenByCurrentEndUser: true,
+  SearchSeenByCurrentEndUser: true
+}

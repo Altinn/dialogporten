@@ -27,17 +27,19 @@ name: Provision DB principals
 
 on:
   workflow_call:
+    # Validation has no environment or Azure credentials. Deployment resolves these
+    # from its environment (or the caller) and checks them before authenticating.
     secrets:
       AZURE_CLIENT_ID:
-        required: true
+        required: false
       AZURE_TENANT_ID:
-        required: true
+        required: false
       AZURE_SUBSCRIPTION_ID:
-        required: true
+        required: false
       AZURE_RESOURCE_GROUP_NAME:
-        required: true
+        required: false
       AZURE_CONTAINER_APP_ENVIRONMENT_NAME:
-        required: true
+        required: false
     inputs:
       environment:
         required: true
@@ -130,6 +132,23 @@ jobs:
         with:
           ref: ${{ needs.resolve-deployment-ref.outputs.sha }}
           persist-credentials: false
+
+      - name: Check deployment credentials
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID AZURE_RESOURCE_GROUP_NAME AZURE_CONTAINER_APP_ENVIRONMENT_NAME; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing deployment configuration: $name"
+              exit 1
+            fi
+          done
 
       - name: Azure Login
         uses: ./.github/actions/azure-login

@@ -93,6 +93,8 @@ In `Password` mode the connection string is used as-is, including the credential
 
 In `EntraToken` mode the data source is built from the same connection string, but the password is removed and the user name is replaced by `Infrastructure:DialogDbAuth:Username`. Removing the password is required: Npgsql refuses to build a data source that has both a password provider and a password in its connection string.
 
+Entra token mode also enforces `SSL Mode=VerifyFull` and removes the legacy `Trust Server Certificate` option. The server certificate chain and host name must validate before the token is sent. Use the server FQDN and ensure its issuing CA is trusted by the runtime image; a custom `Root Certificate` setting is preserved. Password mode is unchanged.
+
 The password is instead supplied per physical connection by a password provider that asks `DefaultAzureCredential` for an access token for the `https://ossrdbms-aad.database.windows.net/.default` scope. `DefaultAzureCredential` picks up the user-assigned managed identity from `AZURE_CLIENT_ID`. Token lifetime is governed by Azure Identity's own cache, which refreshes proactively ahead of expiry and keeps serving the still-valid cached token while a refresh is failing, so in the common case opening a connection is a cache read. A single credential call is bounded at 30 seconds. Token acquisition is logged (role name only) on the first success and on every failure.
 
 Example:

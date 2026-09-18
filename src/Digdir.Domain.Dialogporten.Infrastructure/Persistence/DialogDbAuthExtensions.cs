@@ -24,7 +24,7 @@ internal static partial class DialogDbAuthExtensions
     /// <summary>
     /// Returns the connection string the data source should be built from. In
     /// <see cref="DialogDbAuthMode.EntraToken"/> mode the password is removed and the user name is replaced by the
-    /// PostgreSQL role the access token is issued for. All other options are kept as-is. In
+    /// PostgreSQL role the access token is issued for. TLS validates the server certificate and host name. In
     /// <see cref="DialogDbAuthMode.Password"/> mode the connection string is returned unchanged.
     /// </summary>
     /// <remarks>
@@ -44,8 +44,12 @@ internal static partial class DialogDbAuthExtensions
         var builder = new NpgsqlConnectionStringBuilder(connectionString)
         {
             Password = null,
-            Username = auth.Username
+            Username = auth.Username,
+            SslMode = SslMode.VerifyFull
         };
+
+        // Older connection strings can carry this legacy bypass option. Entra tokens require server validation.
+        builder.Remove("Trust Server Certificate");
 
         return builder.ConnectionString;
     }

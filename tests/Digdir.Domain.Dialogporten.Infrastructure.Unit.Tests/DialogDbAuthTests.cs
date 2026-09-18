@@ -84,10 +84,38 @@ public sealed class DialogDbAuthTests
         result.Host.Should().Be(original.Host);
         result.Port.Should().Be(original.Port);
         result.Database.Should().Be(original.Database);
-        result.SslMode.Should().Be(original.SslMode);
         result.IncludeErrorDetail.Should().Be(original.IncludeErrorDetail);
         result.MaxPoolSize.Should().Be(original.MaxPoolSize);
         result.CommandTimeout.Should().Be(original.CommandTimeout);
+    }
+
+    [Theory]
+    [InlineData(SslMode.Disable)]
+    [InlineData(SslMode.Allow)]
+    [InlineData(SslMode.Prefer)]
+    [InlineData(SslMode.Require)]
+    [InlineData(SslMode.VerifyCA)]
+    [InlineData(SslMode.VerifyFull)]
+    public void BuildConnectionString_Should_Require_Validated_Tls_For_Entra_Tokens(SslMode sslMode)
+    {
+        var original = new NpgsqlConnectionStringBuilder(ConnectionString)
+        {
+            SslMode = sslMode,
+            RootCertificate = "/certificates/postgres-root.pem"
+        };
+        original["Trust Server Certificate"] = true;
+        var auth = new DialogDbAuthSettings
+        {
+            Mode = DialogDbAuthMode.EntraToken,
+            Username = "dialogporten-identity"
+        };
+
+        var result = new NpgsqlConnectionStringBuilder(
+            DialogDbAuthExtensions.BuildConnectionString(original.ConnectionString, auth));
+
+        result.SslMode.Should().Be(SslMode.VerifyFull);
+        result.RootCertificate.Should().Be(original.RootCertificate);
+        result.ConnectionString.Should().NotContain("Trust Server Certificate");
     }
 
     [Fact]

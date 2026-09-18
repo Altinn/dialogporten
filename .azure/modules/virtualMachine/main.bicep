@@ -76,6 +76,9 @@ param adminLoginGroupObjectId string
 @secure()
 param sshPublicKey string
 
+@description('Shell script to run inside the virtual machine after provisioning. Re-applied whenever the script changes. Empty disables the run command.')
+param postProvisionScript string = ''
+
 @description('Enable Just-in-Time access for the virtual machine')
 param enableJit bool = false
 
@@ -185,5 +188,20 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: vmAdminLoginRoleDefinition.id
     principalId: adminLoginGroupObjectId
     principalType: 'Group'
+  }
+}
+
+resource postProvision 'Microsoft.Compute/virtualMachines/runCommands@2024-07-01' = if (!empty(postProvisionScript)) {
+  parent: virtualMachine
+  name: 'post-provision'
+  location: location
+  tags: tags
+  properties: {
+    source: {
+      script: postProvisionScript
+    }
+    asyncExecution: false
+    timeoutInSeconds: 600
+    treatFailureAsDeploymentFailure: true
   }
 }

@@ -47,7 +47,7 @@ on:
         required: true
         type: string
       dryRun:
-        description: "If true, the deployment will be validated but the job will not be started."
+        description: "If true, compile the template and parameters without Azure authentication or deployment."
         required: false
         type: boolean
         default: false
@@ -58,12 +58,64 @@ on:
         type: string
 
 jobs:
+  validate:
+    name: Validate DB provisioner without Azure credentials
+    if: ${{ inputs.environment == 'test' && (inputs.dryRun || github.event_name == 'pull_request' || github.event_name == 'pull_request_target') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Compile provisioner template and test parameters
+        env:
+          IMAGE_TAG: validation
+          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: validation-only
+        run: |
+          az bicep build --file .azure/applications/db-provisioner-job/main.bicep
+          az bicep build-params --file .azure/applications/db-provisioner-job/test.bicepparam
+
+  resolve-deployment-ref:
+    name: Verify provisioner deployment commit
+    if: ${{ inputs.environment == 'test' && !inputs.dryRun && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      # No code from the requested ref executes here. Only commits already in main may
+      # supply the local actions and scripts used by the credential-bearing job below.
+      - name: Resolve main or release tag to an approved commit
+        id: resolve
+        env:
+          DEPLOY_REF: ${{ inputs.ref }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$DEPLOY_REF" in
+            refs/heads/main) sha="$WORKFLOW_SHA" ;;
+            refs/tags/v*) sha=$(git rev-parse --verify "$DEPLOY_REF^{commit}") ;;
+            *) echo "::error::Provisioning requires main or a release tag merged into main."; exit 1 ;;
+          esac
+          git merge-base --is-ancestor "$sha" refs/remotes/origin/main
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
   provision-db-principals:
     name: Provision DB principals (${{ inputs.environment }})
     runs-on: ubuntu-latest
-    # Enabled per environment as each is rolled out; test (at23) only for now. Opening another
-    # environment means adding its bicepparam and relaxing this condition.
-    if: ${{ inputs.environment == 'test' }}
+    # Runs only after the credential-free job has accepted a test deployment ref.
+    needs: resolve-deployment-ref
     environment: ${{ inputs.environment }}
     permissions:
       id-token: write
@@ -76,7 +128,8 @@ jobs:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ needs.resolve-deployment-ref.outputs.sha }}
+          persist-credentials: false
 
       - name: Azure Login
         uses: ./.github/actions/azure-login
@@ -85,28 +138,8 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Dryrun Deploy db provisioner job (${{ inputs.environment }})
-        uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
-        if: ${{ inputs.dryRun }}
-        id: deploy-dry-run
-        env:
-          # parameters
-          IMAGE_TAG: ${{ inputs.version }}
-          # secrets
-          AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
-        with:
-          scope: resourceGroup
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          type: deployment
-          operation: whatIf
-          name: "db-provisioner-job-${{ inputs.version }}"
-          template-file: ./.azure/applications/db-provisioner-job/main.bicep
-          resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          parameters-file: ./.azure/applications/db-provisioner-job/${{ inputs.environment }}.bicepparam
-
       - name: Deploy db provisioner job (${{ inputs.environment }})
         uses: azure/bicep-deploy@66910e9c5c7733c33a1cd605030d02234b3bc4ed # v2.3.0
-        if: ${{ !inputs.dryRun }}
         id: deploy
         env:
           # parameters
@@ -128,7 +161,6 @@ jobs:
           JOB_NAME: ${{ steps.deploy.outputs.name }}
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
         uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
-        if: ${{ !inputs.dryRun }}
         with:
           inlineScript: |
             az containerapp job start -n "$JOB_NAME" -g "$RESOURCE_GROUP"
@@ -139,7 +171,6 @@ jobs:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           IMAGE_TAG: ${{ inputs.version }}
         uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
-        if: ${{ !inputs.dryRun }}
         id: verify-provisioning
         timeout-minutes: 15
         with:

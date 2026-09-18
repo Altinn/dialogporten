@@ -16,6 +16,9 @@
 // workloads' own templates, so they do not exist until the apps and jobs have been deployed once
 // in the default password authentication mode. The first provisioning run must follow that
 // deployment; until then the identity lookups below have nothing to resolve.
+//
+// Identities that live outside this deployment are passed in through additionalPrincipals, which
+// carries the object id directly because there is nothing here to resolve it from.
 
 targetScope = 'resourceGroup'
 
@@ -59,6 +62,9 @@ param ownerRoleName string = 'dialogportenPgAdmin'
 
 @description('The workloads to provision. name is the identity name between the environment prefix and "-identity"; profile is the PostgreSQL profile role the workload is made a member of.')
 param workloads { name: string, profile: string }[]
+
+@description('Principals whose object ids are not resolvable in this deployment, for example identities created by another platform. Each entry is provisioned exactly like a derived one: a login role bound to the object id, and membership of the profile.')
+param additionalPrincipals { roleName: string, objectId: string, profile: string }[] = []
 
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
@@ -110,7 +116,7 @@ module workloadPrincipals 'workloadPrincipals.bicep' = {
 var containerAppEnvVars = [
   {
     name: 'PROVISION_WORKLOADS'
-    value: string(workloadPrincipals.outputs.provisionWorkloads)
+    value: string(concat(workloadPrincipals.outputs.provisionWorkloads, additionalPrincipals))
   }
   {
     name: 'PGHOST'

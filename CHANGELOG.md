@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.122.0](https://github.com/Altinn/dialogporten/compare/v1.121.3...v1.122.0) (2026-09-18)
+
+
+### Features
+
+* add snapshot tests for GraphQl mappers ([#4385](https://github.com/Altinn/dialogporten/issues/4385)) ([e1ce384](https://github.com/Altinn/dialogporten/commit/e1ce38428998104620e65c0351ba7ccd3b67ff29))
+
+
+### Bug Fixes
+
+* Add ProblemDetails to ASPs 401, 403 and 404 responses ([#4240](https://github.com/Altinn/dialogporten/issues/4240)) ([271a8cd](https://github.com/Altinn/dialogporten/commit/271a8cd6a97e37b4434fd2db480716528ad3bae0))
+* Allow /dialogporten as prefix in Instance path ([#4408](https://github.com/Altinn/dialogporten/issues/4408)) ([d356b89](https://github.com/Altinn/dialogporten/commit/d356b891bba2a7210a595213f996be2ad82a915c))
+* swagger logout ([#4319](https://github.com/Altinn/dialogporten/issues/4319)) ([96360e3](https://github.com/Altinn/dialogporten/commit/96360e3413a4e809bbb942ff84788bdcaf4ce398))
+
+
+### Miscellaneous Chores
+
+* **infra:** baseline hardening of SSH jumpers via run command ([#4405](https://github.com/Altinn/dialogporten/issues/4405)) ([d8b1117](https://github.com/Altinn/dialogporten/commit/d8b1117cae52bb9ea51eb9397afe014a4f6a7dd6))
+* **infra:** patch SSH jumpers nightly via Azure Update Manager ([#4403](https://github.com/Altinn/dialogporten/issues/4403)) ([90a1b73](https://github.com/Altinn/dialogporten/commit/90a1b73bf6afdc402e331e3c232a4152da61ad14))
+
 ## [1.121.3](https://github.com/Altinn/dialogporten/compare/v1.121.2...v1.121.3) (2026-09-17)
 
 

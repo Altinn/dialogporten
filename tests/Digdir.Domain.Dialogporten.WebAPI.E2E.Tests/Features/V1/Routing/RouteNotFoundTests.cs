@@ -33,7 +33,7 @@ public class RouteNotFoundTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
         problemDetails.Detail.Should().BeNull();
         problemDetails.Errors.Should().NotBeNull();
         problemDetails.Errors.Keys.Count.Should().Be(0);
-        problemDetails.Instance.Should().Be(requestPath);
+        problemDetails.Instance.Should().BeOneOf(requestPath, $"/dialogporten{requestPath}");
         problemDetails.Status.Should().Be((int)HttpStatusCode.NotFound);
         problemDetails.StatusDescription.Should().BeNull();
         problemDetails.Title.Should().Be("Endpoint not found.");

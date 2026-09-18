@@ -12,6 +12,11 @@ name: Provision DB principals
 # identity, which the infrastructure deployment registers as a Microsoft Entra administrator of
 # the server.
 #
+# The provisioner image is platform-neutral and the same image also runs as a Kubernetes job, where
+# it acquires its token through Azure workload identity federation and can read a workload's object
+# id from the ApplicationIdentity resource describing it. This workflow covers the container app
+# job only.
+#
 # The job is ADDITIVE and idempotent: it creates what is missing and re-applies the expected grants
 # and memberships. It removes nothing and does not reconcile drift. That is acceptable for rollout;
 # exact-set reconciliation is a deliberate future step, not implied.

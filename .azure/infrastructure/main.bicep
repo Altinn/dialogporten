@@ -78,6 +78,7 @@ import { Sku as PostgresSku } from '../modules/postgreSql/create.bicep'
 import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgreSql/create.bicep'
 import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
 import { ServerConfiguration as PostgresServerConfiguration } from '../modules/postgreSql/create.bicep'
+import { EntraAdministrator as PostgresEntraAdministrator } from '../modules/postgreSql/create.bicep'
 
 param postgresConfiguration {
   serverNameStem: string
@@ -91,6 +92,7 @@ param postgresConfiguration {
   additionalServerConfigurations: PostgresServerConfiguration[]?
   staticServerConfigurations: PostgresServerConfiguration[]?
   applyStaticServerConfigurations: bool?
+  additionalEntraAdministrators: PostgresEntraAdministrator[]?
   highAvailability: PostgresHighAvailabilityConfig?
   backupRetentionDays: int
   availabilityZone: string
@@ -276,6 +278,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     additionalServerConfigurations: postgresConfiguration.?additionalServerConfigurations ?? []
     staticServerConfigurations: postgresConfiguration.?staticServerConfigurations ?? []
     applyStaticServerConfigurations: postgresConfiguration.?applyStaticServerConfigurations ?? false
+    additionalEntraAdministrators: postgresConfiguration.?additionalEntraAdministrators ?? []
     subnetId: vnet.outputs.postgresqlSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     highAvailability: postgresConfiguration.?highAvailability

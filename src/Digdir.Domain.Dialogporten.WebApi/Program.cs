@@ -241,6 +241,7 @@ static void BuildAndRun(string[] args)
     // Wraps the response body before any downstream middleware writes. Must precede
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
+    app.UseForwardedHeaders();
     app.UseDefaultExceptionHandler()
         .UseStatusCodePages(UseStatusCodePagesHandlers.CreateStatusCodePageProblemDetails)
         .UseMaintenanceMode()

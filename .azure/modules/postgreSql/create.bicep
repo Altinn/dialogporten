@@ -141,6 +141,17 @@ param administratorLoginPassword string
 @minLength(3)
 param deployerPrincipalName string
 
+@export()
+type EntraAdministrator = {
+  @description('The principal name recorded for the administrator.')
+  name: string
+  @description('The object (principal) id of the principal.')
+  principalId: string
+}
+
+@description('Principals to register as Microsoft Entra administrators of the server in addition to the deployer and the database provisioner, for example identities created by another platform whose object ids are not resolvable here.')
+param additionalEntraAdministrators EntraAdministrator[] = []
+
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
@@ -365,6 +376,22 @@ module dbProvisionerAdministrator 'addEntraAdministrator.bicep' = {
   dependsOn: [postgresAdministrators]
 }
 
+// Registered one at a time and after the provisioner's record, for the same reason that record is
+// sequenced after the deployer's: the resource provider handles one administrator write at a time
+// per server. Each object id must be distinct from the ones already registered.
+@batchSize(1)
+module additionalAdministrators 'addEntraAdministrator.bicep' = [
+  for administrator in additionalEntraAdministrators: {
+    name: 'entraAdministrator-${administrator.name}'
+    params: {
+      serverName: postgres.name
+      principalObjectId: administrator.principalId
+      principalName: administrator.name
+    }
+    dependsOn: [dbProvisionerAdministrator]
+  }
+]
+
 resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {
     parent: postgres
     name: 'azure.extensions'
@@ -374,7 +401,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
       value: 'PG_TRGM,BTREE_GIN,PGAUDIT'
       source: 'user-override'
     }
-    dependsOn: [dbProvisionerAdministrator]
+    dependsOn: [dbProvisionerAdministrator, additionalAdministrators]
   }
 
 resource idle_transactions_timeout 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {

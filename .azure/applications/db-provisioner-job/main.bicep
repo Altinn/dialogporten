@@ -85,6 +85,8 @@ resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-p
 
 // Created by the infrastructure deployment, which registers it as a Microsoft Entra administrator
 // of the PostgreSQL server. Infrastructure always deploys before applications, so it is present.
+// The identity only exists where the infrastructure parameters set enableDbProvisioner, so this
+// template must not be deployed elsewhere; the workflow gate already ensures that.
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' existing = {
   name: '${namePrefix}-db-provisioner-identity'
 }

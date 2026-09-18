@@ -152,6 +152,9 @@ type EntraAdministrator = {
 @description('Principals to register as Microsoft Entra administrators of the server in addition to the deployer and the database provisioner, for example identities created by another platform whose object ids are not resolvable here.')
 param additionalEntraAdministrators EntraAdministrator[] = []
 
+@description('Creates the database provisioner identity and registers it as a Microsoft Entra administrator on the server. Enable per environment as workload provisioning is rolled out.')
+param enableDbProvisioner bool = false
+
 var administratorLogin = 'dialogportenPgAdmin'
 var databaseName = 'dialogporten'
 var postgresServerNameMaxLength = 63
@@ -290,7 +293,7 @@ resource postgresAdminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
 
 // Used by the database provisioning job, which registers the workload login roles on this server.
 // Created here rather than with the job, so the identity exists before any app deployment runs.
-resource dbProvisionerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+resource dbProvisionerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = if (enableDbProvisioner) {
   name: '${namePrefix}-db-provisioner-identity'
   location: location
   tags: tags
@@ -366,12 +369,12 @@ resource postgresAdministrators 'Microsoft.DBforPostgreSQL/flexibleServers/admin
 // without needing the owner's password. Sequenced after the deployer's record because the resource
 // provider handles one administrator write at a time per server; the object id is distinct, so the
 // note above about duplicate object ids does not apply.
-module dbProvisionerAdministrator 'addEntraAdministrator.bicep' = {
+module dbProvisionerAdministrator 'addEntraAdministrator.bicep' = if (enableDbProvisioner) {
   name: 'dbProvisionerAdministrator'
   params: {
     serverName: postgres.name
-    principalObjectId: dbProvisionerIdentity.properties.principalId
-    principalName: dbProvisionerIdentity.name
+    principalObjectId: dbProvisionerIdentity.?properties.principalId ?? ''
+    principalName: dbProvisionerIdentity.?name ?? ''
   }
   dependsOn: [postgresAdministrators]
 }
@@ -541,7 +544,7 @@ module psqlConnectionString '../keyvault/upsertSecret.bicep' = if (shouldPublish
 }
 
 output serverName string = postgres.name
-output dbProvisionerIdentityName string = dbProvisionerIdentity.name
+output dbProvisionerIdentityName string = enableDbProvisioner ? dbProvisionerIdentity.name : ''
 output fullyQualifiedDomainName string = postgres.properties.fullyQualifiedDomainName
 output adoConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? adoConnectionString.outputs.secretUri : ''
 output psqlConnectionStringSecretUri string = shouldPublishCanonicalConnectionSecrets ? psqlConnectionString.outputs.secretUri : ''

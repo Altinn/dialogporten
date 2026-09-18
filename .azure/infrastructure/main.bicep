@@ -88,6 +88,7 @@ param postgresConfiguration {
   staticServerConfigurations: PostgresServerConfiguration[]?
   applyStaticServerConfigurations: bool?
   additionalEntraAdministrators: PostgresEntraAdministrator[]?
+  enableDbProvisioner: bool?
   highAvailability: PostgresHighAvailabilityConfig?
   backupRetentionDays: int
   availabilityZone: string
@@ -258,6 +259,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     staticServerConfigurations: postgresConfiguration.?staticServerConfigurations ?? []
     applyStaticServerConfigurations: postgresConfiguration.?applyStaticServerConfigurations ?? false
     additionalEntraAdministrators: postgresConfiguration.?additionalEntraAdministrators ?? []
+    enableDbProvisioner: postgresConfiguration.?enableDbProvisioner ?? false
     subnetId: vnet.outputs.postgresqlSubnetId
     vnetId: vnet.outputs.virtualNetworkId
     highAvailability: postgresConfiguration.?highAvailability

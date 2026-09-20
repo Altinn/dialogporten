@@ -394,14 +394,16 @@ module additionalAdministrators 'addEntraAdministrator.bicep' = [
       principalName: administrator.name
       principalType: administrator.?principalType ?? 'ServicePrincipal'
     }
-    dependsOn: [dbProvisionerAdministrator]
+    // Preserve ordering when the optional provisioner administrator is disabled.
+    dependsOn: [postgresAdministrators, dbProvisionerAdministrator]
   }
 ]
 
 resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = {
     parent: postgres
     name: 'azure.extensions'
-    dependsOn: [dbProvisionerAdministrator, additionalAdministrators]
+    // Keep the deployer dependency when optional administrator deployments are absent.
+    dependsOn: [postgresAdministrators, dbProvisionerAdministrator, additionalAdministrators]
     // PGAUDIT is allowlisted so CREATE EXTENSION pgaudit is permitted in databases where it is not
     // yet installed. azure.extensions is a dynamic parameter, so this needs no restart.
     properties: {

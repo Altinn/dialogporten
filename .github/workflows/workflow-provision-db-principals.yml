@@ -80,6 +80,13 @@ jobs:
           az bicep build --file .azure/applications/db-provisioner-job/main.bicep
           az bicep build-params --file .azure/applications/db-provisioner-job/test.bicepparam
 
+      - name: Validate authentication templates and provisioning control flow
+        run: |
+          az bicep install --version v0.43.1
+          BICEP_CLI="$HOME/.azure/bin/bicep" python3 -m unittest discover -s .azure/tests
+          python3 -m unittest discover -s .azure/modules/postgreSql/provisioner/tests
+          shellcheck .azure/modules/postgreSql/provisioner/entrypoint.sh
+
   resolve-deployment-ref:
     name: Verify provisioner deployment commit
     if: ${{ inputs.environment == 'test' && !inputs.dryRun && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}

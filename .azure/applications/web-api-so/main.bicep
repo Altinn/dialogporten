@@ -1,6 +1,7 @@
 targetScope = 'resourceGroup'
 
 import { baseTags } from '../../functions/baseTags.bicep'
+import { dialogDbConnectionString } from '../../functions/dialogDbConnectionString.bicep'
 
 import { Scale } from '../../modules/containerApp/main.bicep'
 
@@ -90,6 +91,12 @@ param scale Scale = {
 @allowed(['Password', 'EntraToken'])
 param dbAuthMode string = 'Password'
 
+@description('PostgreSQL server FQDN, required in EntraToken mode. No database password is read in this mode.')
+param dbHost string = ''
+
+@description('Explicit list of non-database Key Vault secrets referenced by this workload\'s App Configuration, required in EntraToken mode. Include the Redis connection string and the other runtime secrets it resolves.')
+param runtimeSecretNames string[] = []
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -115,11 +122,20 @@ resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' exis
   name: environmentKeyVaultName
 }
 
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = if (dbAuthMode == 'Password') {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'
   params: {
     keyvaultName: environmentKeyVaultResource.name
     principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
+module runtimeSecretReaderAccessPolicy '../../modules/keyvault/addSecretReaderRoles.bicep' = if (dbAuthMode == 'EntraToken') {
+  name: 'runtimeSecretReaderAccessPolicy-${containerAppName}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalId: managedIdentity.properties.principalId
+    secretNames: empty(runtimeSecretNames) ? fail('EntraToken requires an explicit runtimeSecretNames allowlist.') : runtimeSecretNames
   }
 }
 
@@ -162,10 +178,13 @@ var baseContainerAppEnvVars = [
   }
 ]
 
-// Entra token authentication needs the mode and the PostgreSQL role name, which is the managed
-// identity's own name. The connection string secret above stays wired either way, so a workload
-// moves between the two modes by parameter alone.
+// Token mode receives only the server address and authenticates as this workload's identity.
+// The administrator connection string remains available only in Password mode.
 var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbConnectionString'
+    value: dbAuthMode == 'EntraToken' ? dialogDbConnectionString(dbHost) : ''
+  }
   {
     name: 'Infrastructure__DialogDbAuth__Mode'
     value: 'EntraToken'
@@ -200,6 +219,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     workloadProfileName: workloadProfileName
   }
   dependsOn: [
+    runtimeSecretReaderAccessPolicy
     keyVaultReaderAccessPolicy
     appConfigReaderAccessPolicy
   ]

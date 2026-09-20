@@ -84,7 +84,7 @@ END $$;
 DO $$
 DECLARE
   dml_profiles constant text[] := ARRAY['dp_api_dml', 'dp_service_dml'];
-  app_schemas  constant text[] := ARRAY['public', 'partyresource', 'maintenance', 'search'];
+  app_schemas  constant text[] := ARRAY['public', 'partyresource', 'search'];
   p text;
   s text;
   obj record;

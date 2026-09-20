@@ -40,6 +40,31 @@ param appConfigurationSku = {
 param appInsightsSku = {
   name: 'PerGB2018'
 }
+
+param appInsightsWorkspaceTransform = {
+  // Preserve the existing production DCR and its destination alias when adopting it into IaC.
+  name: 'FIlter-GraphQL-Subscriptions'
+  destinationName: '67c55f8fa47c440e9e7024780b1b6cd2'
+  transformations: [
+    {
+      table: 'AppExceptions'
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppExceptions.kql')
+    }
+    {
+      table: 'AppRequests'
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppRequests.kql')
+    }
+    {
+      table: 'AppTraces'
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppTraces.kql')
+    }
+    {
+      table: 'AppDependencies'
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppDependencies.kql')
+    }
+  ]
+}
+
 param postgresConfiguration = {
   serverNameStem: 'postgres2'
   version: '18'

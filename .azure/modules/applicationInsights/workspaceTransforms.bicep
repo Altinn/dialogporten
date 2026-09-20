@@ -21,7 +21,7 @@ param workspaceProperties object
 // WorkspaceTransforms applies inside the destination Log Analytics workspace.
 // It uses no credentials or outbound authentication, so no managed identity is needed.
 // https://learn.microsoft.com/en-us/azure/azure-monitor/data-collection/data-collection-transformations-create#create-workspace-transformation-dcr
-resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2024-03-11' = { // NOSONAR - S6378: no managed identity is needed for workspace transforms.
+resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2024-03-11' = {
   name: configuration.name
   location: location
   kind: 'WorkspaceTransforms'

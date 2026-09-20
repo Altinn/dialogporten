@@ -1,6 +1,7 @@
 targetScope = 'resourceGroup'
 
 import { baseTags } from '../../functions/baseTags.bicep'
+import { dialogDbConnectionString } from '../../functions/dialogDbConnectionString.bicep'
 
 @description('The tag of the image to be used')
 @minLength(3)
@@ -43,6 +44,9 @@ param workloadProfileName string = 'Consumption'
 @allowed(['Password', 'EntraToken'])
 param dbAuthMode string = 'Password'
 
+@description('PostgreSQL server FQDN, required in EntraToken mode. No database password is read in this mode.')
+param dbHost string = ''
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -57,10 +61,6 @@ var additionalTags = {
 var tags = baseTags(additionalTags, environment)
 
 var baseContainerAppEnvVars = [
-  {
-    name: 'Infrastructure__DialogDbConnectionString'
-    secretRef: 'dbconnectionstring'
-  }
   {
     name: 'Infrastructure__Redis__ConnectionString'
     secretRef: 'redisconnectionstring'
@@ -79,10 +79,13 @@ var baseContainerAppEnvVars = [
   }
 ]
 
-// Entra token authentication needs the mode and the PostgreSQL role name, which is the managed
-// identity's own name. The connection string secret above stays wired either way, so a workload
-// moves between the two modes by parameter alone.
+// Token mode receives only the server address and authenticates as this workload's identity.
+// The administrator connection string remains available only in Password mode.
 var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbConnectionString'
+    value: dbAuthMode == 'EntraToken' ? dialogDbConnectionString(dbHost) : ''
+  }
   {
     name: 'Infrastructure__DialogDbAuth__Mode'
     value: 'EntraToken'
@@ -95,25 +98,40 @@ var entraTokenEnvVars = [
 
 var containerAppEnvVars = concat(
   baseContainerAppEnvVars,
-  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : [
+    {
+      name: 'Infrastructure__DialogDbConnectionString'
+      secretRef: 'dbconnectionstring'
+    }
+  ]
 )
 
 // Base URL for accessing secrets in the Key Vault
 // https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-functions-deployment#example-1
 var keyVaultBaseUrl = 'https://${environmentKeyVaultName}${az.environment().suffixes.keyvaultDns}/secrets'
 
-var secrets = [
+var secrets = concat(dbAuthMode == 'Password' ? [
   {
     name: 'dbconnectionstring'
     keyVaultUrl: '${keyVaultBaseUrl}/dialogportenAdoConnectionString'
     identity: managedIdentity.id
   }
+] : [], [
   {
     name: 'redisconnectionstring'
     keyVaultUrl: '${keyVaultBaseUrl}/dialogportenRedisConnectionString'
     identity: managedIdentity.id
   }
-]
+])
+
+module runtimeSecretReaderAccessPolicy '../../modules/keyvault/addSecretReaderRoles.bicep' = if (dbAuthMode == 'EntraToken') {
+  name: 'runtimeSecretReaderAccessPolicy-${name}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalId: managedIdentity.properties.principalId
+    secretNames: ['dialogportenRedisConnectionString']
+  }
+}
 
 resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
   name: containerAppEnvironmentName
@@ -125,7 +143,7 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-
   tags: tags
 }
 
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = if (dbAuthMode == 'Password') {
   name: 'keyVaultReaderAccessPolicy-${name}'
   params: {
     keyvaultName: environmentKeyVaultName
@@ -152,6 +170,7 @@ module migrationJob '../../modules/containerAppJob/main.bicep' = {
     workloadProfileName: workloadProfileName
   }
   dependsOn: [
+    runtimeSecretReaderAccessPolicy
     keyVaultReaderAccessPolicy
   ]
 }

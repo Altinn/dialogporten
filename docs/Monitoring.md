@@ -47,6 +47,8 @@ Production's Log Analytics workspace uses the `FIlter-GraphQL-Subscriptions` wor
 
 These are the existing production filters; other environments leave `appInsightsWorkspaceTransform` unset and do not deploy a DCR. Change the checked-in KQL to update ingestion behavior, since infrastructure deployments overwrite edits made directly in Azure.
 
+KQL files may span multiple lines for readability. The transformation module replaces CRLF/LF line endings with spaces before deployment. Keep line comments out of these files: flattening a `//` comment would comment out the rest of the query. Put explanatory comments in the parameter file or this document instead.
+
 The [Application Insights module](../.azure/modules/applicationInsights/create.bicep) creates the workspace before deploying the DCR, then links it through `defaultDataCollectionRuleResourceId`. The linking update reuses the workspace's managed properties to preserve its retention, SKU, quota and purge settings. This order follows Azure's [workspace transformation setup](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-workspace-transformations-api).
 
 Before deployment, compile `.azure/infrastructure/main.bicep` with `az bicep build` and inspect the production infrastructure dry run. Adoption should retain the existing DCR, destination, four transforms and workspace settings, with the standard resource tags added to the DCR. No manual deletion or relinking of the production DCR is needed.

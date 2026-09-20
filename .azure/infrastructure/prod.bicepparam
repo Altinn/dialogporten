@@ -60,6 +60,7 @@ param appInsightsWorkspaceTransform = {
     }
     {
       table: 'AppDependencies'
+      // Exclude the resource-policy sync job from URL-based names to limit cardinality.
       transformKql: loadTextContent('./workspaceTransforms/prod/AppDependencies.kql')
     }
   ]

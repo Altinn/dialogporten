@@ -4,6 +4,7 @@ type WorkspaceTransformConfiguration = {
   destinationName: string
   transformations: {
     table: string
+    @description('KQL without line comments; line endings are replaced with spaces for deployment')
     transformKql: string
   }[]
 }
@@ -17,7 +18,10 @@ param tags object
 @description('The same managed workspace properties used when creating the workspace')
 param workspaceProperties object
 
-resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2024-03-11' = {
+// WorkspaceTransforms applies inside the destination Log Analytics workspace.
+// It uses no credentials or outbound authentication, so no managed identity is needed.
+// https://learn.microsoft.com/en-us/azure/azure-monitor/data-collection/data-collection-transformations-create#create-workspace-transformation-dcr
+resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2024-03-11' = { // NOSONAR - S6378: no managed identity is needed for workspace transforms.
   name: configuration.name
   location: location
   kind: 'WorkspaceTransforms'
@@ -38,7 +42,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2024-03-11' 
       destinations: [
         configuration.destinationName
       ]
-      transformKql: transformation.transformKql
+      transformKql: trim(replace(replace(transformation.transformKql, '\r\n', ' '), '\n', ' '))
     }]
   }
 }

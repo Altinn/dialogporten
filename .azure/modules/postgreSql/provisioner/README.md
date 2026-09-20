@@ -124,6 +124,12 @@ PRs and dry runs compile the provisioner Bicep template and test parameters in a
 job with only `contents: read`, no environment, and no Azure login. This does not
 perform an Azure what-if or verify that referenced resources exist.
 
+Python tests execute repository code in a separate job restricted to `pull_request`
+events, using the event's default merge checkout rather than the caller's `ref`.
+They do not run for manual dry runs or `pull_request_target`: read-only repository
+permissions do not isolate the Actions cache, and executing an arbitrary ref in a
+manual workflow on `main` could poison caches consumed by privileged workflows.
+
 Provisioning runs only from push or manual workflows on `main`. A separate job
 without Azure credentials resolves `main` or a release tag to a commit already
 in `main`; the deployment job checks out that immutable SHA. Checkout credentials

@@ -80,6 +80,20 @@ jobs:
           az bicep build --file .azure/applications/db-provisioner-job/main.bicep
           az bicep build-params --file .azure/applications/db-provisioner-job/test.bicepparam
 
+  test:
+    name: Test DB provisioning in pull request cache scope
+    # Repository tests execute code from the checkout. Keep them in the PR's cache
+    # scope: contents: read does not prevent writes to the Actions cache during a
+    # workflow_dispatch dry run on main. Never use the caller's ref in this job.
+    if: ${{ inputs.environment == 'test' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Validate authentication templates and provisioning control flow
         run: |
           az bicep install --version v0.43.1

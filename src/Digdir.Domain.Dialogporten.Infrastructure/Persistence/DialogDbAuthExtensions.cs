@@ -61,7 +61,10 @@ internal static partial class DialogDbAuthExtensions
         /// <see cref="DialogDbAuthMode.EntraToken"/> is selected. Does nothing in
         /// <see cref="DialogDbAuthMode.Password"/> mode.
         /// </summary>
-        internal NpgsqlDataSourceBuilder UseDialogDbAuth(DialogDbAuthSettings auth, ILoggerFactory loggerFactory)
+        internal NpgsqlDataSourceBuilder UseDialogDbAuth(
+            DialogDbAuthSettings auth,
+            ILoggerFactory loggerFactory,
+            TokenCredential? credential = null)
         {
             ArgumentNullException.ThrowIfNull(auth);
             ArgumentNullException.ThrowIfNull(loggerFactory);
@@ -73,7 +76,7 @@ internal static partial class DialogDbAuthExtensions
 
             var logger = loggerFactory.CreateLogger(typeof(DialogDbAuthExtensions));
             var role = dataSourceBuilder.ConnectionStringBuilder.Username ?? string.Empty;
-            var credential = new DefaultAzureCredential();
+            credential ??= new DefaultAzureCredential();
             var tokenRequestContext = new TokenRequestContext([OssRdbmsScope]);
             var acquisitionLogged = 0;
 

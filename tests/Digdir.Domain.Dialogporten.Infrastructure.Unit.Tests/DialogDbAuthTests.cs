@@ -1,6 +1,8 @@
 using AwesomeAssertions;
+using Azure.Core;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
 using Xunit;
 
@@ -131,11 +133,71 @@ public sealed class DialogDbAuthTests
 
         var builder = new NpgsqlDataSourceBuilder(
             DialogDbAuthExtensions.BuildConnectionString(ConnectionString, auth));
-        builder.UsePasswordProvider(_ => "token", (_, _) => ValueTask.FromResult("token"));
+        builder.UseDialogDbAuth(auth, NullLoggerFactory.Instance, new RecordingTokenCredential());
 
         var build = () => builder.Build().Dispose();
 
         build.Should().NotThrow();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task UseDialogDbAuth_Should_Read_Current_Token_For_Each_Physical_Connection(bool asynchronous)
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var server = new PostgreSqlAuthenticationStub();
+        var credential = new RecordingTokenCredential();
+        await using var dataSource = CreateDataSource(server, DialogDbAuthMode.EntraToken, credential);
+
+        var firstPassword = server.ReceivePasswordAsync(timeout.Token);
+        await OpenUntilAuthenticationResponse(dataSource, asynchronous, timeout.Token);
+        (await firstPassword).Should().Be("initial-token");
+
+        // A new physical connection must consult the credential again after its cached token changes.
+        credential.Token = "refreshed-token";
+        var secondPassword = server.ReceivePasswordAsync(timeout.Token);
+        await OpenUntilAuthenticationResponse(dataSource, asynchronous, timeout.Token);
+        (await secondPassword).Should().Be("refreshed-token");
+        credential.AsynchronousRequests.Should().Equal(asynchronous, asynchronous);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task UseDialogDbAuth_Should_Keep_Password_Authentication_Without_Requesting_A_Token(bool asynchronous)
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var server = new PostgreSqlAuthenticationStub();
+        var credential = new RecordingTokenCredential();
+        await using var dataSource = CreateDataSource(server, DialogDbAuthMode.Password, credential);
+
+        var password = server.ReceivePasswordAsync(timeout.Token);
+        await OpenUntilAuthenticationResponse(dataSource, asynchronous, timeout.Token);
+
+        (await password).Should().Be("static-password");
+        credential.AsynchronousRequests.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task UseDialogDbAuth_Should_Cancel_Token_Acquisition_When_Connection_Open_Is_Cancelled()
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var cancellation = new CancellationTokenSource();
+        using var server = new PostgreSqlAuthenticationStub();
+        var credential = new RecordingTokenCredential { WaitForCancellation = true };
+        await using var dataSource = CreateDataSource(server, DialogDbAuthMode.EntraToken, credential);
+        await using var connection = dataSource.CreateConnection();
+
+        var password = server.ReceivePasswordAsync(timeout.Token);
+        var opening = connection.OpenAsync(cancellation.Token);
+        await credential.RequestStarted.Task.WaitAsync(timeout.Token);
+        await cancellation.CancelAsync();
+
+        var exception = await Assert.ThrowsAsync<NpgsqlException>(() => opening.WaitAsync(timeout.Token));
+        exception.InnerException.Should().BeAssignableTo<OperationCanceledException>();
+        credential.LastCancellationToken.IsCancellationRequested.Should().BeTrue();
+        (await password).Should().BeNull();
     }
 
     [Fact]
@@ -205,5 +267,67 @@ public sealed class DialogDbAuthTests
         var result = new DialogDbAuthSettingsValidator().Validate(settings);
 
         result.IsValid.Should().BeTrue();
+    }
+
+    private static NpgsqlDataSource CreateDataSource(
+        PostgreSqlAuthenticationStub server,
+        DialogDbAuthMode mode,
+        TokenCredential credential)
+    {
+        var auth = new DialogDbAuthSettings { Mode = mode, Username = "dialogporten-identity" };
+        var connectionString = new NpgsqlConnectionStringBuilder(
+            DialogDbAuthExtensions.BuildConnectionString(server.ConnectionString, auth))
+        {
+            // This loopback stub implements only PostgreSQL authentication. TLS validation has separate tests above.
+            SslMode = SslMode.Disable
+        };
+        return new NpgsqlDataSourceBuilder(connectionString.ConnectionString)
+            .UseDialogDbAuth(auth, NullLoggerFactory.Instance, credential)
+            .Build();
+    }
+
+    private static async Task OpenUntilAuthenticationResponse(
+        NpgsqlDataSource dataSource,
+        bool asynchronous,
+        CancellationToken cancellationToken)
+    {
+        await using var connection = dataSource.CreateConnection();
+        // The stub rejects authentication after capturing the password, avoiding an unrelated database protocol mock.
+        var exception = asynchronous
+            ? await Assert.ThrowsAsync<PostgresException>(() => connection.OpenAsync(cancellationToken))
+            : Assert.Throws<PostgresException>(connection.Open);
+        exception.SqlState.Should().Be(PostgresErrorCodes.InvalidPassword);
+    }
+
+    private sealed class RecordingTokenCredential : TokenCredential
+    {
+        public string Token { get; set; } = "initial-token";
+        public bool WaitForCancellation { get; init; }
+        public List<bool> AsynchronousRequests { get; } = [];
+        public TaskCompletionSource RequestStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public CancellationToken LastCancellationToken { get; private set; }
+
+        public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
+            => RecordRequest(requestContext, asynchronous: false, cancellationToken);
+
+        public override async ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+        {
+            var token = RecordRequest(requestContext, asynchronous: true, cancellationToken);
+            if (WaitForCancellation)
+            {
+                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            }
+            return token;
+        }
+
+        private AccessToken RecordRequest(TokenRequestContext requestContext, bool asynchronous, CancellationToken cancellationToken)
+        {
+            requestContext.Scopes.Should().Equal("https://ossrdbms-aad.database.windows.net/.default");
+            cancellationToken.CanBeCanceled.Should().BeTrue();
+            LastCancellationToken = cancellationToken;
+            AsynchronousRequests.Add(asynchronous);
+            RequestStarted.TrySetResult();
+            return new AccessToken(Token, DateTimeOffset.UtcNow.AddHours(1));
+        }
     }
 }

@@ -35,7 +35,14 @@ public sealed class WebApiE2EFixture : E2EFixtureBase
 
         services
             .AddRefitClient<IEnduserApi>(refitSettings)
-            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
+            .ConfigureHttpClient(httpClient =>
+            {
+                httpClient.BaseAddress = webApiUri;
+
+                // Make the API behave as if it sits behind APIM when running locally.
+                // This has no effect in CI, because APIM will ignore this header and add its own.
+                httpClient.DefaultRequestHeaders.Add("X-Forwarded-Prefix", "/dialogporten");
+            })
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser));
 

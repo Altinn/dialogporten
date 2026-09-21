@@ -59,19 +59,29 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             Converters = { new JsonStringEnumConverter() }
         };
 
-        var webApiUri = new UriBuilder(settings.DialogportenBaseUri)
+        var refitBaseAddress = new UriBuilder(settings.DialogportenBaseUri)
         {
             Port = settings.WebAPiPort
         }.Uri;
 
-        WebApiUri = webApiUri;
+        WebApiUri = new UriBuilder(settings.DialogportenBaseUri + "/")
+        {
+            Port = settings.WebAPiPort
+        }.Uri;
 
         services
             .AddRefitClient<IServiceownerApi>(new RefitSettings
             {
                 ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
             })
-            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
+            .ConfigureHttpClient(httpClient =>
+            {
+                httpClient.BaseAddress = refitBaseAddress;
+
+                // Make the API behave as if it sits behind APIM when running locally.
+                // This has no effect in CI, because APIM will ignore this header and add its own.
+                httpClient.DefaultRequestHeaders.Add("X-Forwarded-Prefix", "/dialogporten");
+            })
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.ServiceOwner));
 
@@ -91,7 +101,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         var graphQlUri = graphQlUriBuilder.Uri;
 
-        ConfigureServices(services, settings, webApiUri, graphQlUri);
+        ConfigureServices(services, settings, refitBaseAddress, graphQlUri);
 
         _serviceProvider = services.BuildServiceProvider();
 
@@ -100,7 +110,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         AfterServiceProviderBuilt(_serviceProvider);
 
-        PreflightState = await CreatePreflightState(graphQlUri, webApiUri);
+        PreflightState = await CreatePreflightState(graphQlUri, refitBaseAddress);
     }
 
     public ValueTask DisposeAsync()

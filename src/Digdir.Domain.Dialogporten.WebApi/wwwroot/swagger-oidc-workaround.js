@@ -42,15 +42,8 @@ document.addEventListener('click', (e) => {
         console.error("SWAGGER_IDPORTEN_LOGOUT_URL is missing, can't log out properly")
         return;
     }
-    const logoutRedirectPath = ui.getConfigs().SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH?.replace(/\+$/, "");
-
-    if (!logoutRedirectPath) {
-        console.error("SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH is missing, can't log out properly")
-        return;
-    }
-
     const clientId = ui.getState().getIn(['auth', 'authorized', securityScheme, 'clientId']);
-    const logoutRedirectUri = `${encodeURIComponent(window.location.origin)}${logoutRedirectPath}`;
+    const logoutRedirectUri = `${window.location.origin}${window.location.pathname}`;
     const params = {
         "client_id": clientId,
         "post_logout_redirect_uri": logoutRedirectUri,

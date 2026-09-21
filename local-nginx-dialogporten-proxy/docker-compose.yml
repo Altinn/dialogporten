@@ -1,0 +1,12 @@
+services:
+  dialogporten-prefix-proxy:
+    image: nginx:1.31.5
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "8444:8444"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

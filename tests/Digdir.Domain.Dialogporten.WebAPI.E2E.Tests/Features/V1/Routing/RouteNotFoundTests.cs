@@ -16,10 +16,7 @@ public class RouteNotFoundTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2
     public async Task Should_Return_404_With_Expected_Body()
     {
         using var client = _fixture.GetHttpClientFactory().CreateClient();
-        client.BaseAddress = new UriBuilder(_fixture.Settings.DialogportenBaseUri)
-        {
-            Port = _fixture.Settings.WebAPiPort
-        }.Uri;
+        client.BaseAddress = _fixture.WebApiUri;
 
         var response = await client.GetAsync("unknown-endpoint");
         var requestPath = response.RequestMessage!.RequestUri!.AbsolutePath ?? throw new UnreachableException();

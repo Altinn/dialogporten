@@ -108,3 +108,62 @@ else
   echo "warning: sshd rejected the hardening drop-in, removed it and left sshd unchanged: ${sshd_check}" >&2
 fi
 
+# Network hardening: no ICMP redirects in either direction, strict reverse-path
+# filtering and logging of packets with impossible source addresses. Each
+# interface has its own value that the kernel also honours, so the glob lines set
+# every interface, including ones udev adds later. Applied with systemd-sysctl as
+# at boot; existing connections are unaffected.
+cat > /etc/sysctl.d/60-jumper-network.conf <<'SYSCTL'
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv4.conf.*.send_redirects = 0
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.*.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+net.ipv6.conf.*.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+net.ipv4.conf.*.secure_redirects = 0
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.conf.*.rp_filter = 1
+SYSCTL
+chmod 0644 /etc/sysctl.d/60-jumper-network.conf
+/lib/systemd/systemd-sysctl /etc/sysctl.d/60-jumper-network.conf
+echo "sysctl: network hardening applied"
+
+# Filesystems, network protocols and USB storage the jumper never uses: prevent
+# the kernel modules from being loaded.
+cat > /etc/modprobe.d/10-jumper-blacklist.conf <<'MODPROBE'
+install cramfs /bin/true
+install freevxfs /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install jffs2 /bin/true
+install dccp /bin/true
+install sctp /bin/true
+install rds /bin/true
+install tipc /bin/true
+install usb-storage /bin/true
+MODPROBE
+chmod 0644 /etc/modprobe.d/10-jumper-blacklist.conf
+# A module that is in use stays loaded until the next reboot; this is reported,
+# not fatal.
+still_loaded=""
+for module in cramfs freevxfs hfs hfsplus jffs2 dccp sctp rds tipc usb_storage; do
+  if [ -e "/sys/module/${module}/initstate" ]; then
+    modprobe -r "$module" 2>/dev/null || true
+    if [ -e "/sys/module/${module}/initstate" ]; then
+      still_loaded="${still_loaded} ${module}"
+    fi
+  fi
+done
+if [ -n "$still_loaded" ]; then
+  echo "warning: blocked from loading, but still loaded until the next reboot:${still_loaded}" >&2
+else
+  echo "modprobe: unused filesystem and protocol modules disabled"
+fi

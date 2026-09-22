@@ -43,9 +43,13 @@ resource maintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfiguratio
     installPatches: {
       rebootSetting: 'IfRequired'
       linuxParameters: {
+        // Ubuntu publishes many CVE fixes through the regular updates pocket, where they
+        // are classified as 'Other'. Nothing on a jumper is sensitive to routine upgrades,
+        // so all classifications are installed nightly.
         classificationsToInclude: [
           'Critical'
           'Security'
+          'Other'
         ]
       }
     }

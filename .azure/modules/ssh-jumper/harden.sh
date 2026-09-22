@@ -167,3 +167,38 @@ if [ -n "$still_loaded" ]; then
 else
   echo "modprobe: unused filesystem and protocol modules disabled"
 fi
+# Restrict access to credential stores, logger configuration and cron directories
+# to root.
+chmod 0400 /etc/shadow /etc/shadow- /etc/gshadow /etc/gshadow-
+chmod 0640 /etc/rsyslog.conf
+chmod 0700 /etc/cron.d /etc/cron.daily /etc/cron.hourly /etc/cron.weekly /etc/cron.monthly
+
+# No core dumps: a dump of a client process can contain credentials. The
+# wildcard entry does not apply to root, so root has its own.
+cat > /etc/security/limits.d/10-jumper-core.conf <<'LIMITS'
+* hard core 0
+root hard core 0
+LIMITS
+chmod 0644 /etc/security/limits.d/10-jumper-core.conf
+# Ubuntu's crash reporter sets fs.suid_dumpable = 2 when it starts at boot. The
+# jumper has no use for crash reports, so keep it disabled; stopping it resets
+# suid_dumpable and core_pattern.
+if [ -f /etc/default/apport ]; then
+  sed -i 's/^enabled=1$/enabled=0/' /etc/default/apport
+  systemctl stop apport
+fi
+# The baseline scanner reads this setting from /etc/sysctl.d/99-sysctl.conf by name.
+grep -qx 'fs.suid_dumpable = 0' /etc/sysctl.d/99-sysctl.conf || echo 'fs.suid_dumpable = 0' >> /etc/sysctl.d/99-sysctl.conf
+sysctl -q -w fs.suid_dumpable=0
+
+# Default umask for login sessions: files created by users are private to them.
+sed -i -E 's/^(UMASK\s+)[0-7]+/\1077/' /etc/login.defs
+
+# su only for members of the root group. Root itself passes through pam_rootok
+# first, so sudo su keeps working.
+if grep -qE '^auth\s+required\s+pam_wheel\.so' /etc/pam.d/su; then
+  sed -i -E '/^auth\s+required\s+pam_wheel\.so/ { /group=root/! s/$/ group=root/ }' /etc/pam.d/su
+else
+  sed -i '/^auth\s\+sufficient\s\+pam_rootok\.so/a auth       required   pam_wheel.so use_uid group=root' /etc/pam.d/su
+fi
+echo "perms: credential store, cron, logger, core dump, umask and su restrictions applied"

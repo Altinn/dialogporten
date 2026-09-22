@@ -202,3 +202,44 @@ else
   sed -i '/^auth\s\+sufficient\s\+pam_rootok\.so/a auth       required   pam_wheel.so use_uid group=root' /etc/pam.d/su
 fi
 echo "perms: credential store, cron, logger, core dump, umask and su restrictions applied"
+# Password policy for local accounts. Logins use keys and Entra certificates.
+# New local accounts inherit PASS_MAX_DAYS, and PAM enforces password expiry even
+# for key logins, so an account without a usable password would eventually be
+# forced into a password change it cannot complete. A daily job clears the
+# password lifetime of such accounts, including accounts created later.
+sed -i -E 's/^(PASS_MAX_DAYS\s+)[0-9]+/\1365/; s/^(PASS_MIN_DAYS\s+)[0-9]+/\17/' /etc/login.defs
+cat > /etc/cron.daily/jumper-key-only-accounts <<'CRON'
+#!/bin/sh
+# Installed by the jumper hardening: no password expiry for local accounts
+# without a usable password.
+set -eu
+awk -F: '$3 >= 1000 && $3 < 65534 {print $1}' /etc/passwd | while read -r user; do
+  status=$(passwd -S "$user" 2>/dev/null | awk '{print $2}')
+  max=$(getent shadow "$user" | cut -d: -f5)
+  if [ "$status" != "P" ] && [ -n "$max" ] && [ "$max" -lt 99999 ]; then
+    chage -M -1 "$user"
+  fi
+done
+CRON
+chmod 0755 /etc/cron.daily/jumper-key-only-accounts
+/etc/cron.daily/jumper-key-only-accounts \
+  || echo "warning: clearing password expiry for key-only accounts failed" >&2
+
+# Installed only when missing, waiting for the package lock if the patch window
+# or another installer holds it. A failure is reported, not fatal.
+export DEBIAN_FRONTEND=noninteractive
+if [ "$(dpkg-query -W -f='${db:Status-Abbrev}' libpam-pwquality auditd 2>/dev/null)" != "ii ii " ]; then
+  apt-get -qq -o DPkg::Lock::Timeout=300 install -y libpam-pwquality auditd >/dev/null \
+    || echo "warning: installing libpam-pwquality and auditd failed; password quality and audit logging not configured" >&2
+fi
+sed -i -E '/pam_pwquality\.so/ { /minlen=/! s/$/ minlen=14 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1/ }' /etc/pam.d/common-password
+sed -i -E '/pam_unix\.so/ { /remember=/! s/$/ remember=5/ }' /etc/pam.d/common-password
+
+# Kernel audit log, required by the baseline. Default ruleset, logs under /var/log/audit.
+if [ -e /lib/systemd/system/auditd.service ]; then
+  systemctl enable -q --now auditd
+fi
+
+# The image ships a games account the jumper has no use for.
+getent passwd games >/dev/null && userdel games || true
+echo "accounts: password policy, auditd and unused account removal applied"

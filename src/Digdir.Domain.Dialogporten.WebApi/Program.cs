@@ -319,7 +319,6 @@ static void BuildAndRun(string[] args)
 
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
-            uiConfig.Path = dialogPrefix + "/swagger";
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
             uiConfig.CustomJavaScriptPath = dialogPrefix + "/swagger-oidc-workaround.js";

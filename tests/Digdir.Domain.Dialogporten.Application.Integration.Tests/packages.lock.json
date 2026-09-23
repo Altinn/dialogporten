@@ -180,8 +180,8 @@
       },
       "Dapper": {
         "type": "Transitive",
-        "resolved": "2.1.79",
-        "contentHash": "8YijbzgTfmqmQOnVNorYM6K++pxqnW3nJ4aC1sRHzxUA2CcuoJ9gsTem3kgBnPRMc38zZHl4Esb6hAezXIEEuw=="
+        "resolved": "2.1.86",
+        "contentHash": "v5wQfl9GfHhfTeFhorWTefa8c1Ev4HO8VF8i8wbSdZkq+P/az+1DTcqpkz8s9lMGyFf9kvoeJ+b2ABShW4cuIA=="
       },
       "DeterministicGuids": {
         "type": "Transitive",
@@ -1352,7 +1352,7 @@
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.1.0, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
-          "Dapper": "[2.1.79, )",
+          "Dapper": "[2.1.86, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
           "EntityFrameworkCore.Exceptions.PostgreSQL": "[8.1.3, )",

@@ -58,6 +58,10 @@ param postgresConfiguration = {
   enableTrackIoTiming: true
   additionalServerConfigurations: [
     {
+      name: 'logfiles.retention_days'
+      value: '7'
+    }
+    {
       name: 'autovacuum_max_workers'
       value: '12'
     }
@@ -80,6 +84,14 @@ param postgresConfiguration = {
     {
       name: 'maintenance_work_mem'
       value: '2097151'
+    }
+    {
+      name: 'metrics.autovacuum_diagnostics'
+      value: 'on'
+    }
+    {
+      name: 'metrics.collector_database_activity'
+      value: 'on'
     }
     {
       name: 'track_cost_delay_timing'
@@ -127,7 +139,7 @@ param deployerPrincipalName = 'GitHub: altinn/dialogporten - Prod'
 param redisSku = {
   name: 'Standard'
   family: 'C'
-  capacity: 2
+  capacity: 3
 }
 
 param serviceBusSku = {

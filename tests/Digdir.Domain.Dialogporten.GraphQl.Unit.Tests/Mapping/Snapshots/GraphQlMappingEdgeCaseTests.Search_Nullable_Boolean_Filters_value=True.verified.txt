@@ -1,0 +1,23 @@
+﻿{
+  Org: [],
+  ServiceResource: [],
+  Party: [],
+  ExtendedStatus: [],
+  Status: [],
+  IsContentSeen: true,
+  SystemLabel: [],
+  ExcludeApiOnly: true,
+  OrderBy: {
+    Orders: [
+      {
+        Key: contentUpdatedAt,
+        Direction: Desc
+      },
+      {
+        Key: id,
+        Direction: Desc
+      }
+    ]
+  },
+  Limit: 100
+}

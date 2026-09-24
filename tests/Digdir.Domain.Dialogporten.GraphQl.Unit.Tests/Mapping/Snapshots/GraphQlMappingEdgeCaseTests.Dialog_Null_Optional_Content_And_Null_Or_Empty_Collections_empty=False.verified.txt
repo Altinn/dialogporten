@@ -1,0 +1,83 @@
+﻿{
+  Id: 00000001-0000-0000-0000-000000000000,
+  Revision: 00000002-0000-0000-0000-000000000000,
+  Org: str-3,
+  ServiceResource: str-4,
+  ServiceResourceType: str-5,
+  Party: str-6,
+  Process: str-8,
+  PrecedingProcess: str-9,
+  ExtendedStatus: str-10,
+  ExternalReference: str-11,
+  CreatedAt: 2020-01-01 00:00:14 +0,
+  UpdatedAt: 2020-01-01 00:00:15 +0,
+  ContentUpdatedAt: 2020-01-01 00:00:16 +0,
+  Status: Awaiting,
+  HasUnopenedContent: false,
+  FromServiceOwnerTransmissionsCount: 58,
+  FromPartyTransmissionsCount: 59,
+  IsApiOnly: true,
+  Content: {
+    Title: {
+      Value: [
+        {
+          Value: str-21,
+          LanguageCode: lang22
+        },
+        {
+          Value: str-23,
+          LanguageCode: lang24
+        }
+      ],
+      MediaType: str-25,
+      IsAuthorized: false
+    }
+  },
+  Attachments: [],
+  ExcludedAttachments: [],
+  GuiActions: [
+    {
+      IsAuthorized: false,
+      IsDeleteDialogAction: false,
+      Priority: Primary,
+      HttpMethod: GET,
+      Title: [],
+      Prompt: []
+    }
+  ],
+  ExcludedGuiActions: [],
+  ApiActions: [],
+  ExcludedApiActions: [],
+  Activities: [],
+  SeenSinceLastUpdate: [],
+  SeenSinceLastContentUpdate: [],
+  IsContentSeen: false,
+  Transmissions: [
+    {
+      IsAuthorized: false,
+      Type: Information,
+      Sender: {
+        ActorType: ServiceOwner
+      },
+      IsOpened: false,
+      Content: {
+        Title: {
+          Value: [],
+          MediaType: text/plain
+        }
+      },
+      Attachments: [],
+      ExcludedAttachments: [],
+      NavigationalActions: [],
+      ExcludedNavigationalActions: []
+    }
+  ],
+  ExcludedTransmissions: [],
+  EndUserContext: {
+    Revision: 0000019b-0000-0000-0000-000000000000,
+    SystemLabels: [
+      Archive,
+      MarkedAsUnopened
+    ]
+  }
+}

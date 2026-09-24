@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Library.Entity.Abstractions.Features.Aggregate;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
@@ -6,7 +7,7 @@ using Digdir.Library.Entity.Abstractions.Features.Immutable;
 
 namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 
-public sealed class DialogTransmissionNavigationalAction : IImmutableEntity, IIdentifiableEntity, ICreatableEntity
+public sealed class DialogTransmissionNavigationalAction : IImmutableEntity, IIdentifiableEntity, ICreatableEntity, IAuthorizationContextCarrier
 {
     public Guid Id { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
@@ -21,6 +22,11 @@ public sealed class DialogTransmissionNavigationalAction : IImmutableEntity, IId
     // === Principal relationships ===
     [AggregateChild]
     public DialogTransmissionNavigationalActionTitle Title { get; set; } = null!;
+
+    [AggregateChild]
+    public DialogTransmissionNavigationalActionAuthorizationContext? AuthorizationContext { get; set; }
+
+    AuthorizationContext? IAuthorizationContextCarrier.AuthorizationContext => AuthorizationContext;
 }
 
 public sealed class DialogTransmissionNavigationalActionTitle : LocalizationSet

@@ -101,7 +101,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
             .ExecuteAndAssert<TransmissionDto>(x =>
             {
                 x.IsAuthorized.Should().BeFalse();
-                x.Content.ContentReference.Should().NotBeNull();
+                x.Content!.ContentReference.Should().NotBeNull();
                 x.Content.ContentReference!.Value.Should().NotBeEmpty()
                     .And.AllSatisfy(localization =>
                         localization.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
@@ -138,7 +138,7 @@ public class GetTransmissionsTests(DialogApplication application) : ApplicationC
     {
         var authorizationResult = new DialogDetailsAuthorizationResult
         {
-            AuthorizedAltinnActions = [new AltinnAction(Constants.ReadAction)]
+            AuthorizedChecks = [TestAuthorizedChecks.Authorized(Constants.ReadAction)]
         };
         services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
     }

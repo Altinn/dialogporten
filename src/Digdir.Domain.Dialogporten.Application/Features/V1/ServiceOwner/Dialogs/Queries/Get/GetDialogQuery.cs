@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -99,7 +100,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 conflict => throw new UnreachableException("Should not get conflict when updating SeenAt.")
             );
 
-            DecorateWithAuthorization(dialogDto, authorizationResult);
+            DecorateWithAuthorization(dialog, dialogDto, authorizationResult);
         }
 
         dialogDto.SeenSinceLastUpdate = GetSeenLogs(
@@ -143,24 +144,44 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
     private static DialogSeenLogDto ToSeenDialogDto(string? endUserId, DialogSeenLog log)
         => log.ToDto(endUserId);
 
-    private static void DecorateWithAuthorization(DialogDto dto,
+    // Authorization is evaluated against the domain entities (which carry the authorization contexts);
+    // the DTO lists are mapped 1:1 in order from the entity lists, so pairwise zipping is safe.
+    // Unlike the end user API, the service owner API never hides or masks anything — flags only.
+    private static void DecorateWithAuthorization(DialogEntity dialog, DialogDto dto,
         DialogDetailsAuthorizationResult authorization)
     {
-        foreach (var a in dto.ApiActions)
+        foreach (var (a, apiAction) in dto.ApiActions.Zip(dialog.ApiActions))
         {
-            a.IsAuthorized = authorization.HasAccessToAction(a.Action, a.AuthorizationAttribute);
+            a.IsAuthorized = authorization.HasAccess(apiAction, apiAction.GetAuthorizationCheck(dialog));
         }
 
-        foreach (var g in dto.GuiActions)
+        foreach (var (g, guiAction) in dto.GuiActions.Zip(dialog.GuiActions))
         {
-            g.IsAuthorized = authorization.HasAccessToAction(g.Action, g.AuthorizationAttribute);
+            g.IsAuthorized = authorization.HasAccess(guiAction, guiAction.GetAuthorizationCheck(dialog));
         }
 
         dto.Content?.MainContentReference?.IsAuthorized = authorization.HasReadAccessToMainResource();
 
-        foreach (var t in dto.Transmissions)
+        foreach (var (a, attachment) in dto.Attachments.Zip(dialog.Attachments))
         {
-            t.IsAuthorized = authorization.HasReadAccessToDialogTransmission(t.AuthorizationAttribute);
+            a.IsAuthorized = authorization.HasAccess(attachment, attachment.GetAuthorizationCheck(dialog));
+        }
+
+        foreach (var (t, transmission) in dto.Transmissions.Zip(dialog.Transmissions))
+        {
+            t.IsAuthorized = authorization.HasAccess(transmission, transmission.GetAuthorizationCheck(dialog));
+
+            foreach (var (a, attachment) in t.Attachments.Zip(transmission.Attachments))
+            {
+                a.IsAuthorized = authorization.HasAccess(attachment, t.IsAuthorized.Value,
+                    attachment.GetAuthorizationCheck(dialog));
+            }
+
+            foreach (var (n, navigationalAction) in t.NavigationalActions.Zip(transmission.NavigationalActions))
+            {
+                n.IsAuthorized = authorization.HasAccess(navigationalAction, t.IsAuthorized.Value,
+                    navigationalAction.GetAuthorizationCheck(dialog));
+            }
         }
     }
 }

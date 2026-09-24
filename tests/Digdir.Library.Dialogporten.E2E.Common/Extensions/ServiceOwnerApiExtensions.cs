@@ -52,6 +52,19 @@ public static class ServiceOwnerApiExtensions
             return createActivityResponse.Content.ToGuid();
         }
 
+        public Task<IApiResponse> BulkSetSystemLabels(
+            string endUserId,
+            Action<V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel> modify,
+            CancellationToken? cancellationToken = null)
+        {
+            var request = new V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel();
+            modify(request);
+            return serviceownerApi.V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabelsBulkSetDialogSystemLabels(
+                endUserId,
+                request,
+                cancellationToken: cancellationToken ?? TestContext.Current.CancellationToken);
+        }
+
         public Task<IApiResponse> SetSystemLabel(
             Guid dialogId,
             string endUserId,

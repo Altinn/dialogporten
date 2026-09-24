@@ -76,8 +76,16 @@ param adminLoginGroupObjectId string
 @secure()
 param sshPublicKey string
 
+@description('Shell script to run inside the virtual machine after provisioning. Re-applied whenever the script changes. Empty disables the run command.')
+param postProvisionScript string = ''
+
 @description('Enable Just-in-Time access for the virtual machine')
 param enableJit bool = false
+
+@description('Resource ID of an Azure Update Manager maintenance configuration to assign to the virtual machine. When set, patches install on that schedule instead of the platform-orchestrated one.')
+param maintenanceConfigurationId string = ''
+
+var useCustomerManagedPatchSchedule = !empty(maintenanceConfigurationId)
 
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2025-11-01' = {
   name: name
@@ -107,7 +115,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2025-11-01' = {
           patchMode: 'AutomaticByPlatform'
           automaticByPlatformSettings: {
             rebootSetting: 'IfRequired'
-            bypassPlatformSafetyChecksOnUserSchedule: false
+            bypassPlatformSafetyChecksOnUserSchedule: useCustomerManagedPatchSchedule
           }
           assessmentMode: 'AutomaticByPlatform'
         }
@@ -145,6 +153,16 @@ resource jitPolicy 'Microsoft.Security/locations/jitNetworkAccessPolicies@2020-0
   }
 }
 
+resource maintenanceAssignment 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = if (useCustomerManagedPatchSchedule) {
+  scope: virtualMachine
+  name: '${name}-maintenance'
+  location: location
+  properties: {
+    maintenanceConfigurationId: maintenanceConfigurationId
+    resourceId: virtualMachine.id
+  }
+}
+
 resource aadLoginExtension 'Microsoft.Compute/virtualMachines/extensions@2025-11-01' = {
   parent: virtualMachine
   name: 'AADSSHLoginForLinux'
@@ -170,5 +188,20 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: vmAdminLoginRoleDefinition.id
     principalId: adminLoginGroupObjectId
     principalType: 'Group'
+  }
+}
+
+resource postProvision 'Microsoft.Compute/virtualMachines/runCommands@2024-07-01' = if (!empty(postProvisionScript)) {
+  parent: virtualMachine
+  name: 'post-provision'
+  location: location
+  tags: tags
+  properties: {
+    source: {
+      script: postProvisionScript
+    }
+    asyncExecution: false
+    timeoutInSeconds: 600
+    treatFailureAsDeploymentFailure: true
   }
 }

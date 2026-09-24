@@ -20,6 +20,12 @@ public abstract class E2EFixtureBase : IAsyncLifetime
     public string DotnetEnvironment { get; private set; } = Environments.Development;
     public E2ESettings Settings { get; private set; } = null!;
 
+    /// <summary>
+    /// The WebAPI base URI, for tests that need to reach unauthenticated endpoints outside the generated
+    /// clients (e.g. the JWKS document used to verify dialog token signatures).
+    /// </summary>
+    public Uri WebApiUri { get; private set; } = null!;
+
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
@@ -57,6 +63,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         {
             Port = settings.WebAPiPort
         }.Uri;
+
+        WebApiUri = webApiUri;
 
         services
             .AddRefitClient<IServiceownerApi>(new RefitSettings
@@ -101,6 +109,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         GC.SuppressFinalize(this);
         return ValueTask.CompletedTask;
     }
+
+    public IHttpClientFactory GetHttpClientFactory() => _serviceProvider!.GetRequiredService<IHttpClientFactory>();
 
     public IDisposable UseTokenOverrides(TokenOverrides overrides) =>
         _tokenOverridesAccessor is null

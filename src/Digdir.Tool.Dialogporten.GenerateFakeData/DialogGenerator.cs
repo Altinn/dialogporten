@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are used for backwards compatibility
 using Bogus;
 using System.Globalization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;

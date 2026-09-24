@@ -1,0 +1,26 @@
+﻿[
+  {
+    Source: InProgress,
+    Result: InProgress
+  },
+  {
+    Source: Draft,
+    Result: Draft
+  },
+  {
+    Source: RequiresAttention,
+    Result: RequiresAttention
+  },
+  {
+    Source: Completed,
+    Result: Completed
+  },
+  {
+    Source: NotApplicable,
+    Result: NotApplicable
+  },
+  {
+    Source: Awaiting,
+    Result: Awaiting
+  }
+]

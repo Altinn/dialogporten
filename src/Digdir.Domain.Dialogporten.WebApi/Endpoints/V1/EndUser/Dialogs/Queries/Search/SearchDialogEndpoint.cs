@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
@@ -8,6 +9,7 @@ using Digdir.Domain.Dialogporten.Domain.Localizations;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
@@ -16,6 +18,10 @@ using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.Search;
 
 [OpenApiOperationId("SearchDialogs")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.EndUser],
+    securitySchemes: [OpenApiSecurityScheme.IdportenSecurityScheme, OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, PaginatedList<DialogDto>>
 {
     private readonly ISender _sender;
@@ -33,9 +39,14 @@ public sealed class SearchDialogEndpoint : Endpoint<SearchDialogRequest, Paginat
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(b => b.ProducesOneOf<PaginatedList<DialogDto>>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status422UnprocessableEntity));
+        Description(b => b
+            .Produces<PaginatedList<DialogDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(SearchDialogRequest req, CancellationToken ct)

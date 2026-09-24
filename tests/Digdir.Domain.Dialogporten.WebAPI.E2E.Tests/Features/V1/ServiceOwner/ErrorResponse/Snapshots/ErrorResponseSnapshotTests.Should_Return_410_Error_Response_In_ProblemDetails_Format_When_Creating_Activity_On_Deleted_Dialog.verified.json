@@ -1,5 +1,5 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.9",
+  "type": "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.11",
   "title": "Resource no longer available.",
   "status": 410,
   "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000/activities",

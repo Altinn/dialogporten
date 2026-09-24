@@ -1,0 +1,34 @@
+﻿[
+  {
+    Source: Information,
+    Result: Information
+  },
+  {
+    Source: Acceptance,
+    Result: Acceptance
+  },
+  {
+    Source: Rejection,
+    Result: Rejection
+  },
+  {
+    Source: Request,
+    Result: Request
+  },
+  {
+    Source: Alert,
+    Result: Alert
+  },
+  {
+    Source: Decision,
+    Result: Decision
+  },
+  {
+    Source: Submission,
+    Result: Submission
+  },
+  {
+    Source: Correction,
+    Result: Correction
+  }
+]

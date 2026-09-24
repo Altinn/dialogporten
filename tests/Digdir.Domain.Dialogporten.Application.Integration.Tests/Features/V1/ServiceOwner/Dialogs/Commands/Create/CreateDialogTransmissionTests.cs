@@ -11,6 +11,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
@@ -324,6 +325,43 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
                 transmission.Content.ContentReference!
                     .MediaType.Should().Be(MediaTypes.LegacyEmbeddableHtml);
             });
+
+    [Fact]
+    public Task Create_Should_Persist_Self_Supplied_NavigationalAction_Id_And_Generate_Missing_Ones()
+    {
+        var navigationalActionId = IdentifiableExtensions.CreateVersion7();
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x
+                .AddTransmission(transmission =>
+                {
+                    transmission.AddNavigationalAction(action => action.Id = navigationalActionId);
+                    transmission.AddNavigationalAction();
+                }))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                var navigationalActions = x.Transmissions.Single().NavigationalActions;
+                navigationalActions.Should().HaveCount(2);
+                navigationalActions.Should().Contain(a => a.Id == navigationalActionId);
+                navigationalActions.Should().OnlyContain(a => a.Id != Guid.Empty);
+                navigationalActions.Select(a => a.Id).Should().OnlyHaveUniqueItems();
+            });
+    }
+
+    [Fact]
+    public Task Create_Should_Fail_When_NavigationalAction_Ids_Are_Not_Unique()
+    {
+        var navigationalActionId = IdentifiableExtensions.CreateVersion7();
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x
+                .AddTransmission(transmission =>
+                {
+                    transmission.AddNavigationalAction(action => action.Id = navigationalActionId);
+                    transmission.AddNavigationalAction(action => action.Id = navigationalActionId);
+                }))
+            .ExecuteAndAssert<ValidationError>(x =>
+                x.Errors.Should().Contain(e => e.ErrorMessage.Contains("duplicate")));
+    }
 
     private static void SetLegacyEmbeddableHtmlDeprecated(TransmissionDto x) =>
         x.Content!.ContentReference = new()

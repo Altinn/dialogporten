@@ -13,7 +13,7 @@
       "isMainAdministrator": false,
       "isAccessManager": false,
       "hasOnlyAccessToSubParties": false,
-      "subParties": null
+      "subParties": []
     },
     {
       "party": "urn:altinn:organization:identifier-no:310923044",
@@ -42,7 +42,7 @@
           "isMainAdministrator": false,
           "isAccessManager": false,
           "hasOnlyAccessToSubParties": false,
-          "subParties": null
+          "subParties": []
         }
       ]
     },
@@ -59,7 +59,7 @@
       "isMainAdministrator": false,
       "isAccessManager": false,
       "hasOnlyAccessToSubParties": false,
-      "subParties": null
+      "subParties": []
     }
   ]
 }

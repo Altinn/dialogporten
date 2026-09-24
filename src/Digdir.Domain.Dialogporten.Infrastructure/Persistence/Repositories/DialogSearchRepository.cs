@@ -440,6 +440,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             INNER JOIN "DialogContentType" AS ct ON c."TypeId" = ct."Id" AND ct."OutputInList"
             INNER JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogContentValue' AND ls."DialogContentId" = c."Id"
             INNER JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
+            ORDER BY l."LanguageCode"
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);

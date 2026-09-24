@@ -8,7 +8,7 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 
 public interface ICompactJwsGenerator
 {
-    string GetCompactJws(Dictionary<string, object?> claims);
+    string GetCompactJws(Dictionary<string, object?> claims, string tokenType);
     bool VerifyCompactJws(string compactJws);
 }
 
@@ -25,12 +25,12 @@ public sealed class Ed25519Generator : ICompactJwsGenerator
         InitSigningKey();
     }
 
-    public string GetCompactJws(Dictionary<string, object?> claims)
+    public string GetCompactJws(Dictionary<string, object?> claims, string tokenType)
     {
         var header = JsonSerializer.SerializeToUtf8Bytes(new
         {
             alg = "EdDSA",
-            typ = "JWT",
+            typ = tokenType,
             kid = _kid
         });
 
@@ -100,7 +100,7 @@ internal sealed class LocalDevelopmentCompactJwsGeneratorDecorator : ICompactJws
     {
     }
 
-    public string GetCompactJws(Dictionary<string, object?> claims) => "local-development-jws";
+    public string GetCompactJws(Dictionary<string, object?> claims, string tokenType) => "local-development-jws";
 
     public bool VerifyCompactJws(string compactJws) => true;
 }

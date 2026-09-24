@@ -1,0 +1,794 @@
+﻿{
+  Id: 00000001-0000-0000-0000-000000000000,
+  Revision: 00000002-0000-0000-0000-000000000000,
+  Org: str-3,
+  ServiceResource: str-4,
+  ServiceResourceType: str-5,
+  Party: str-6,
+  Progress: 7,
+  Process: str-8,
+  PrecedingProcess: str-9,
+  ExtendedStatus: str-10,
+  ExternalReference: str-11,
+  DueAt: 2020-01-01 00:00:12 +0,
+  ExpiresAt: 2020-01-01 00:00:13 +0,
+  CreatedAt: 2020-01-01 00:00:14 +0,
+  UpdatedAt: 2020-01-01 00:00:15 +0,
+  ContentUpdatedAt: 2020-01-01 00:00:16 +0,
+  DialogToken: str-57,
+  Status: Awaiting,
+  HasUnopenedContent: false,
+  FromServiceOwnerTransmissionsCount: 58,
+  FromPartyTransmissionsCount: 59,
+  IsApiOnly: true,
+  Content: {
+    Title: {
+      Value: [
+        {
+          Value: str-21,
+          LanguageCode: lang22
+        },
+        {
+          Value: str-23,
+          LanguageCode: lang24
+        }
+      ],
+      MediaType: str-25,
+      IsAuthorized: false
+    },
+    Summary: {
+      Value: [
+        {
+          Value: str-27,
+          LanguageCode: lang28
+        },
+        {
+          Value: str-29,
+          LanguageCode: lang30
+        }
+      ],
+      MediaType: str-31,
+      IsAuthorized: false
+    },
+    SenderName: {
+      Value: [
+        {
+          Value: str-33,
+          LanguageCode: lang34
+        },
+        {
+          Value: str-35,
+          LanguageCode: lang36
+        }
+      ],
+      MediaType: str-37,
+      IsAuthorized: false
+    },
+    AdditionalInfo: {
+      Value: [
+        {
+          Value: str-39,
+          LanguageCode: lang40
+        },
+        {
+          Value: str-41,
+          LanguageCode: lang42
+        }
+      ],
+      MediaType: str-43,
+      IsAuthorized: false
+    },
+    ExtendedStatus: {
+      Value: [
+        {
+          Value: str-45,
+          LanguageCode: lang46
+        },
+        {
+          Value: str-47,
+          LanguageCode: lang48
+        }
+      ],
+      MediaType: str-49,
+      IsAuthorized: false
+    },
+    MainContentReference: {
+      Value: [
+        {
+          Value: str-51,
+          LanguageCode: lang52
+        },
+        {
+          Value: str-53,
+          LanguageCode: lang54
+        }
+      ],
+      MediaType: str-55,
+      IsAuthorized: false
+    }
+  },
+  Attachments: [
+    {
+      Id: 0000003c-0000-0000-0000-000000000000,
+      DisplayName: [
+        {
+          Value: str-61,
+          LanguageCode: lang62
+        },
+        {
+          Value: str-63,
+          LanguageCode: lang64
+        }
+      ],
+      Name: str-65,
+      Urls: [
+        {
+          Id: 00000042-0000-0000-0000-000000000000,
+          Url: https://example.com/67,
+          MediaType: str-68,
+          ConsumerType: Api
+        },
+        {
+          Id: 00000046-0000-0000-0000-000000000000,
+          Url: https://example.com/71,
+          MediaType: str-72,
+          ConsumerType: Api
+        }
+      ],
+      ExpiresAt: 2020-01-01 00:01:14 +0,
+      IsAuthorized: true
+    },
+    {
+      Id: 0000004c-0000-0000-0000-000000000000,
+      DisplayName: [
+        {
+          Value: str-77,
+          LanguageCode: lang78
+        },
+        {
+          Value: str-79,
+          LanguageCode: lang80
+        }
+      ],
+      Name: str-81,
+      Urls: [
+        {
+          Id: 00000052-0000-0000-0000-000000000000,
+          Url: https://example.com/83,
+          MediaType: str-84,
+          ConsumerType: Api
+        },
+        {
+          Id: 00000056-0000-0000-0000-000000000000,
+          Url: https://example.com/87,
+          MediaType: str-88,
+          ConsumerType: Api
+        }
+      ],
+      ExpiresAt: 2020-01-01 00:01:30 +0,
+      IsAuthorized: true
+    }
+  ],
+  ExcludedAttachments: [
+    {
+      Id: 0000005c-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:01:33 +0
+    },
+    {
+      Id: 0000005e-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:01:35 +0
+    }
+  ],
+  GuiActions: [
+    {
+      Id: 00000110-0000-0000-0000-000000000000,
+      Action: str-273,
+      Url: https://example.com/274,
+      AuthorizationAttribute: str-275,
+      IsAuthorized: false,
+      IsDeleteDialogAction: true,
+      Priority: Tertiary,
+      HttpMethod: GET,
+      Title: [
+        {
+          Value: str-280,
+          LanguageCode: lang281
+        },
+        {
+          Value: str-282,
+          LanguageCode: lang283
+        }
+      ],
+      Prompt: [
+        {
+          Value: str-284,
+          LanguageCode: lang285
+        },
+        {
+          Value: str-286,
+          LanguageCode: lang287
+        }
+      ]
+    },
+    {
+      Id: 00000120-0000-0000-0000-000000000000,
+      Action: str-289,
+      Url: https://example.com/290,
+      AuthorizationAttribute: str-291,
+      IsAuthorized: false,
+      IsDeleteDialogAction: true,
+      Priority: Primary,
+      HttpMethod: TRACE,
+      Title: [
+        {
+          Value: str-296,
+          LanguageCode: lang297
+        },
+        {
+          Value: str-298,
+          LanguageCode: lang299
+        }
+      ],
+      Prompt: [
+        {
+          Value: str-300,
+          LanguageCode: lang301
+        },
+        {
+          Value: str-302,
+          LanguageCode: lang303
+        }
+      ]
+    }
+  ],
+  ExcludedGuiActions: [
+    {
+      Id: 00000130-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:05 +0
+    },
+    {
+      Id: 00000132-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:07 +0
+    }
+  ],
+  ApiActions: [
+    {
+      Id: 00000134-0000-0000-0000-000000000000,
+      Action: str-309,
+      AuthorizationAttribute: str-310,
+      IsAuthorized: true,
+      Name: str-312,
+      Endpoints: [
+        {
+          Id: 00000139-0000-0000-0000-000000000000,
+          Version: str-314,
+          Url: https://example.com/315,
+          HttpMethod: POST,
+          DocumentationUrl: https://example.com/317,
+          RequestSchema: https://example.com/318,
+          ResponseSchema: https://example.com/319,
+          Deprecated: false,
+          SunsetAt: 2020-01-01 00:05:21 +0
+        },
+        {
+          Id: 00000142-0000-0000-0000-000000000000,
+          Version: str-323,
+          Url: https://example.com/324,
+          HttpMethod: POST,
+          DocumentationUrl: https://example.com/326,
+          RequestSchema: https://example.com/327,
+          ResponseSchema: https://example.com/328,
+          Deprecated: true,
+          SunsetAt: 2020-01-01 00:05:30 +0
+        }
+      ]
+    },
+    {
+      Id: 0000014b-0000-0000-0000-000000000000,
+      Action: str-332,
+      AuthorizationAttribute: str-333,
+      IsAuthorized: false,
+      Name: str-335,
+      Endpoints: [
+        {
+          Id: 00000150-0000-0000-0000-000000000000,
+          Version: str-337,
+          Url: https://example.com/338,
+          HttpMethod: OPTIONS,
+          DocumentationUrl: https://example.com/340,
+          RequestSchema: https://example.com/341,
+          ResponseSchema: https://example.com/342,
+          Deprecated: true,
+          SunsetAt: 2020-01-01 00:05:44 +0
+        },
+        {
+          Id: 00000159-0000-0000-0000-000000000000,
+          Version: str-346,
+          Url: https://example.com/347,
+          HttpMethod: OPTIONS,
+          DocumentationUrl: https://example.com/349,
+          RequestSchema: https://example.com/350,
+          ResponseSchema: https://example.com/351,
+          Deprecated: false,
+          SunsetAt: 2020-01-01 00:05:53 +0
+        }
+      ]
+    }
+  ],
+  ExcludedApiActions: [
+    {
+      Id: 00000162-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:55 +0
+    },
+    {
+      Id: 00000164-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:57 +0
+    }
+  ],
+  Activities: [
+    {
+      Id: 00000166-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:59 +0,
+      ExtendedType: https://example.com/360,
+      Type: PaymentMade,
+      TransmissionId: 0000016a-0000-0000-0000-000000000000,
+      PerformedBy: {
+        ActorType: ServiceOwner,
+        ActorId: str-365,
+        ActorName: str-364
+      },
+      Description: [
+        {
+          Value: str-366,
+          LanguageCode: lang367
+        },
+        {
+          Value: str-368,
+          LanguageCode: lang369
+        }
+      ]
+    },
+    {
+      Id: 00000172-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:06:11 +0,
+      ExtendedType: https://example.com/372,
+      Type: CorrespondenceConfirmed,
+      TransmissionId: 00000176-0000-0000-0000-000000000000,
+      PerformedBy: {
+        ActorType: ServiceOwner,
+        ActorId: str-377,
+        ActorName: str-376
+      },
+      Description: [
+        {
+          Value: str-378,
+          LanguageCode: lang379
+        },
+        {
+          Value: str-380,
+          LanguageCode: lang381
+        }
+      ]
+    }
+  ],
+  SeenSinceLastUpdate: [
+    {
+      Id: 0000017e-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:23 +0,
+      SeenBy: {
+        ActorType: PartyRepresentative,
+        ActorId: str-386,
+        ActorName: str-385
+      },
+      IsViaServiceOwner: true,
+      IsCurrentEndUser: false
+    },
+    {
+      Id: 00000185-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:30 +0,
+      SeenBy: {
+        ActorType: ServiceOwner,
+        ActorId: str-393,
+        ActorName: str-392
+      },
+      IsViaServiceOwner: false,
+      IsCurrentEndUser: true
+    }
+  ],
+  SeenSinceLastContentUpdate: [
+    {
+      Id: 0000018c-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:37 +0,
+      SeenBy: {
+        ActorType: PartyRepresentative,
+        ActorId: str-400,
+        ActorName: str-399
+      },
+      IsViaServiceOwner: true,
+      IsCurrentEndUser: false
+    },
+    {
+      Id: 00000193-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:44 +0,
+      SeenBy: {
+        ActorType: ServiceOwner,
+        ActorId: str-407,
+        ActorName: str-406
+      },
+      IsViaServiceOwner: false,
+      IsCurrentEndUser: true
+    }
+  ],
+  IsContentSeen: false,
+  Transmissions: [
+    {
+      Id: 00000060-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:01:37 +0,
+      AuthorizationAttribute: str-98,
+      IsAuthorized: true,
+      ExtendedType: https://example.com/100,
+      ExternalReference: str-101,
+      RelatedTransmissionId: 00000066-0000-0000-0000-000000000000,
+      Type: Correction,
+      Sender: {
+        ActorType: PartyRepresentative,
+        ActorId: str-106,
+        ActorName: str-105
+      },
+      IsOpened: true,
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: str-108,
+              LanguageCode: lang109
+            },
+            {
+              Value: str-110,
+              LanguageCode: lang111
+            }
+          ],
+          MediaType: str-112,
+          IsAuthorized: true
+        },
+        Summary: {
+          Value: [
+            {
+              Value: str-114,
+              LanguageCode: lang115
+            },
+            {
+              Value: str-116,
+              LanguageCode: lang117
+            }
+          ],
+          MediaType: str-118,
+          IsAuthorized: true
+        },
+        ContentReference: {
+          Value: [
+            {
+              Value: str-120,
+              LanguageCode: lang121
+            },
+            {
+              Value: str-122,
+              LanguageCode: lang123
+            }
+          ],
+          MediaType: str-124,
+          IsAuthorized: true
+        }
+      },
+      Attachments: [
+        {
+          Id: 0000007e-0000-0000-0000-000000000000,
+          DisplayName: [
+            {
+              Value: str-127,
+              LanguageCode: lang128
+            },
+            {
+              Value: str-129,
+              LanguageCode: lang130
+            }
+          ],
+          Name: str-131,
+          Urls: [
+            {
+              Id: 00000084-0000-0000-0000-000000000000,
+              Url: https://example.com/133,
+              MediaType: str-134,
+              ConsumerType: Api
+            },
+            {
+              Id: 00000088-0000-0000-0000-000000000000,
+              Url: https://example.com/137,
+              MediaType: str-138,
+              ConsumerType: Api
+            }
+          ],
+          ExpiresAt: 2020-01-01 00:02:20 +0,
+          IsAuthorized: true
+        },
+        {
+          Id: 0000008e-0000-0000-0000-000000000000,
+          DisplayName: [
+            {
+              Value: str-143,
+              LanguageCode: lang144
+            },
+            {
+              Value: str-145,
+              LanguageCode: lang146
+            }
+          ],
+          Name: str-147,
+          Urls: [
+            {
+              Id: 00000094-0000-0000-0000-000000000000,
+              Url: https://example.com/149,
+              MediaType: str-150,
+              ConsumerType: Api
+            },
+            {
+              Id: 00000098-0000-0000-0000-000000000000,
+              Url: https://example.com/153,
+              MediaType: str-154,
+              ConsumerType: Api
+            }
+          ],
+          ExpiresAt: 2020-01-01 00:02:36 +0,
+          IsAuthorized: true
+        }
+      ],
+      ExcludedAttachments: [
+        {
+          Id: 0000009e-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:02:39 +0
+        },
+        {
+          Id: 000000a0-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:02:41 +0
+        }
+      ],
+      NavigationalActions: [
+        {
+          Id: 000000a2-0000-0000-0000-000000000000,
+          Title: [
+            {
+              Value: str-163,
+              LanguageCode: lang164
+            },
+            {
+              Value: str-165,
+              LanguageCode: lang166
+            }
+          ],
+          Url: https://example.com/167,
+          ExpiresAt: 2020-01-01 00:02:48 +0,
+          IsAuthorized: true
+        },
+        {
+          Id: 000000aa-0000-0000-0000-000000000000,
+          Title: [
+            {
+              Value: str-171,
+              LanguageCode: lang172
+            },
+            {
+              Value: str-173,
+              LanguageCode: lang174
+            }
+          ],
+          Url: https://example.com/175,
+          ExpiresAt: 2020-01-01 00:02:56 +0,
+          IsAuthorized: true
+        }
+      ],
+      ExcludedNavigationalActions: [
+        {
+          Id: 000000b2-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:02:59 +0
+        },
+        {
+          Id: 000000b4-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:03:01 +0
+        }
+      ]
+    },
+    {
+      Id: 000000b6-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:03:03 +0,
+      AuthorizationAttribute: str-184,
+      IsAuthorized: true,
+      ExtendedType: https://example.com/186,
+      ExternalReference: str-187,
+      RelatedTransmissionId: 000000bc-0000-0000-0000-000000000000,
+      Type: Decision,
+      Sender: {
+        ActorType: PartyRepresentative,
+        ActorId: str-192,
+        ActorName: str-191
+      },
+      IsOpened: true,
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: str-194,
+              LanguageCode: lang195
+            },
+            {
+              Value: str-196,
+              LanguageCode: lang197
+            }
+          ],
+          MediaType: str-198,
+          IsAuthorized: true
+        },
+        Summary: {
+          Value: [
+            {
+              Value: str-200,
+              LanguageCode: lang201
+            },
+            {
+              Value: str-202,
+              LanguageCode: lang203
+            }
+          ],
+          MediaType: str-204,
+          IsAuthorized: true
+        },
+        ContentReference: {
+          Value: [
+            {
+              Value: str-206,
+              LanguageCode: lang207
+            },
+            {
+              Value: str-208,
+              LanguageCode: lang209
+            }
+          ],
+          MediaType: str-210,
+          IsAuthorized: true
+        }
+      },
+      Attachments: [
+        {
+          Id: 000000d4-0000-0000-0000-000000000000,
+          DisplayName: [
+            {
+              Value: str-213,
+              LanguageCode: lang214
+            },
+            {
+              Value: str-215,
+              LanguageCode: lang216
+            }
+          ],
+          Name: str-217,
+          Urls: [
+            {
+              Id: 000000da-0000-0000-0000-000000000000,
+              Url: https://example.com/219,
+              MediaType: str-220,
+              ConsumerType: Api
+            },
+            {
+              Id: 000000de-0000-0000-0000-000000000000,
+              Url: https://example.com/223,
+              MediaType: str-224,
+              ConsumerType: Api
+            }
+          ],
+          ExpiresAt: 2020-01-01 00:03:46 +0,
+          IsAuthorized: true
+        },
+        {
+          Id: 000000e4-0000-0000-0000-000000000000,
+          DisplayName: [
+            {
+              Value: str-229,
+              LanguageCode: lang230
+            },
+            {
+              Value: str-231,
+              LanguageCode: lang232
+            }
+          ],
+          Name: str-233,
+          Urls: [
+            {
+              Id: 000000ea-0000-0000-0000-000000000000,
+              Url: https://example.com/235,
+              MediaType: str-236,
+              ConsumerType: Api
+            },
+            {
+              Id: 000000ee-0000-0000-0000-000000000000,
+              Url: https://example.com/239,
+              MediaType: str-240,
+              ConsumerType: Api
+            }
+          ],
+          ExpiresAt: 2020-01-01 00:04:02 +0,
+          IsAuthorized: true
+        }
+      ],
+      ExcludedAttachments: [
+        {
+          Id: 000000f4-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:05 +0
+        },
+        {
+          Id: 000000f6-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:07 +0
+        }
+      ],
+      NavigationalActions: [
+        {
+          Id: 000000f8-0000-0000-0000-000000000000,
+          Title: [
+            {
+              Value: str-249,
+              LanguageCode: lang250
+            },
+            {
+              Value: str-251,
+              LanguageCode: lang252
+            }
+          ],
+          Url: https://example.com/253,
+          ExpiresAt: 2020-01-01 00:04:14 +0,
+          IsAuthorized: true
+        },
+        {
+          Id: 00000100-0000-0000-0000-000000000000,
+          Title: [
+            {
+              Value: str-257,
+              LanguageCode: lang258
+            },
+            {
+              Value: str-259,
+              LanguageCode: lang260
+            }
+          ],
+          Url: https://example.com/261,
+          ExpiresAt: 2020-01-01 00:04:22 +0,
+          IsAuthorized: true
+        }
+      ],
+      ExcludedNavigationalActions: [
+        {
+          Id: 00000108-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:25 +0
+        },
+        {
+          Id: 0000010a-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:27 +0
+        }
+      ]
+    }
+  ],
+  ExcludedTransmissions: [
+    {
+      Id: 0000010c-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:04:29 +0
+    },
+    {
+      Id: 0000010e-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:04:31 +0
+    }
+  ],
+  EndUserContext: {
+    Revision: 0000019b-0000-0000-0000-000000000000,
+    SystemLabels: [
+      Archive,
+      MarkedAsUnopened
+    ]
+  }
+}

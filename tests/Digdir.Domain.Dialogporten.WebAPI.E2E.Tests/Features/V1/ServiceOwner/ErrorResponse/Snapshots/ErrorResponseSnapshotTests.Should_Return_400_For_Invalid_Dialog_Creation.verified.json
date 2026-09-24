@@ -1,5 +1,5 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
+  "type": "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.1",
   "title": "One or more validation errors occurred.",
   "status": 400,
   "instance": "/api/v1/serviceowner/dialogs",

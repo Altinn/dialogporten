@@ -1,14 +1,21 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Restore;
 
 [OpenApiOperationId("RestoreDialog")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
 {
     private readonly ISender _sender;
@@ -26,11 +33,14 @@ public sealed class RestoreDialogEndpoint : Endpoint<RestoreDialogRequest>
 
         Description(b => b
             .Accepts<RestoreDialogRequest>()
-            .ProducesOneOf(
-                StatusCodes.Status204NoContent,
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
                 StatusCodes.Status404NotFound,
                 StatusCodes.Status409Conflict,
-                StatusCodes.Status412PreconditionFailed));
+                StatusCodes.Status412PreconditionFailed
+            ));
     }
 
     public override async Task HandleAsync(RestoreDialogRequest req, CancellationToken ct)

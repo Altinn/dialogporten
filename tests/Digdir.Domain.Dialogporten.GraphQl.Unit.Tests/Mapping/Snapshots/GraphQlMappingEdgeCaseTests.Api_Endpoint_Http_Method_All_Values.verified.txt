@@ -1,0 +1,38 @@
+﻿[
+  {
+    Source: GET,
+    Result: GET
+  },
+  {
+    Source: POST,
+    Result: POST
+  },
+  {
+    Source: PUT,
+    Result: PUT
+  },
+  {
+    Source: PATCH,
+    Result: PATCH
+  },
+  {
+    Source: DELETE,
+    Result: DELETE
+  },
+  {
+    Source: HEAD,
+    Result: HEAD
+  },
+  {
+    Source: OPTIONS,
+    Result: OPTIONS
+  },
+  {
+    Source: TRACE,
+    Result: TRACE
+  },
+  {
+    Source: CONNECT,
+    Result: CONNECT
+  }
+]

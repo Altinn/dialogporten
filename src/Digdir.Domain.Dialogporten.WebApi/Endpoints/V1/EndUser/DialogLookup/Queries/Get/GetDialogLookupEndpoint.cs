@@ -1,16 +1,23 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 using GetDialogLookupQuery = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.DialogLookup.Queries.Get.GetDialogLookupQuery;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.DialogLookup.Queries.Get;
 
 [OpenApiOperationId("GetDialogLookup")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.EndUser],
+    securitySchemes: [OpenApiSecurityScheme.IdportenSecurityScheme, OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, EndUserIdentifierLookupDto>
 {
     private readonly ISender _sender;
@@ -27,11 +34,15 @@ public sealed class GetDialogLookupEndpoint : Endpoint<GetDialogLookupRequest, E
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(b => b.ProducesOneOf<EndUserIdentifierLookupDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status403Forbidden,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<EndUserIdentifierLookupDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound
+            )
+        );
     }
 
     public override async Task HandleAsync(GetDialogLookupRequest req, CancellationToken ct)

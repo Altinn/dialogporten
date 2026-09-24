@@ -27,6 +27,8 @@
     <Project Path="src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj" />
     <Project Path="src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj" />
     <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.WebApiSample/Digdir.Library.Dialogporten.WebApiClient.WebApiSample.csproj" />
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.EndUser.WebApiSample/Digdir.Library.Dialogporten.WebApiClient.EndUser.WebApiSample.csproj" />
+    <Project Path="src/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.WebApiSample/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.WebApiSample.csproj" />
     <Project Path="src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj" />
   </Folder>
   <Folder Name="/src/Tools/">

@@ -1,0 +1,21 @@
+﻿{
+  Org: [],
+  ServiceResource: [],
+  Party: [],
+  ExtendedStatus: [],
+  Status: [],
+  SystemLabel: [],
+  OrderBy: {
+    Orders: [
+      {
+        Key: contentUpdatedAt,
+        Direction: Desc
+      },
+      {
+        Key: id,
+        Direction: Desc
+      }
+    ]
+  },
+  Limit: 100
+}

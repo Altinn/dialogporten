@@ -107,7 +107,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             ServiceResource = dialogEntity.ServiceResource,
             InstanceRef = instanceRef,
             Party = dialogEntity.Party,
-            AltinnActions = dialogEntity.GetAltinnActions()
+            Checks = dialogEntity.GetAuthorizationChecks()
         };
 
         return await _pdpCache.GetOrSetAsync(request.GenerateCacheKey(), async token
@@ -197,11 +197,14 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
     public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
     {
-        var authorizedResourcesForSearch = await GetAuthorizedResourcesForSearch(
-            [dialog.Party], [dialog.ServiceResource], cancellationToken: cancellationToken);
+        var resources = await GetAuthorizedResourcesForSearch(
+            [dialog.Party],
+            [dialog.ServiceResource],
+            cancellationToken: cancellationToken
+        );
 
-        return authorizedResourcesForSearch.ResourcesByParties.Count > 0
-               || authorizedResourcesForSearch.DialogIds.Contains(dialog.Id);
+        var allowedResources = resources.ResourcesByParties.GetValueOrDefault(dialog.Party) ?? new HashSet<string>();
+        return allowedResources.Contains(dialog.ServiceResource) || resources.DialogIds.Contains(dialog.Id);
     }
 
     public bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel) =>
@@ -406,11 +409,19 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
     private async Task<DialogDetailsAuthorizationResult> PerformDialogDetailsAuthorization(
         DialogDetailsAuthorizationRequest request, CancellationToken cancellationToken)
     {
-        var xacmlJsonRequest = DecisionRequestHelper.CreateDialogDetailsRequest(request);
-        var xacmlJsonResponse = await SendPdpRequest(xacmlJsonRequest, cancellationToken);
-        LogIfIndeterminate(xacmlJsonResponse, xacmlJsonRequest);
+        var preparedRequest = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+        var xacmlJsonResponse = await SendPdpRequest(preparedRequest.Request, cancellationToken);
+        LogIfIndeterminate(xacmlJsonResponse, preparedRequest.Request);
 
-        return DecisionRequestHelper.CreateDialogDetailsResponse(request.AltinnActions, xacmlJsonResponse);
+        var responseCount = xacmlJsonResponse?.Response?.Count ?? 0;
+        if (responseCount != preparedRequest.ExpectedResults)
+        {
+            throw new UpstreamServiceException(
+                $"PDP response contained {responseCount} results, expected {preparedRequest.ExpectedResults}; " +
+                "decisions cannot be correlated reliably.");
+        }
+
+        return DecisionRequestHelper.CreateDialogDetailsResponse(preparedRequest, xacmlJsonResponse);
     }
 
     private void LogIfIndeterminate(XacmlJsonResponse? response, XacmlJsonRequestRoot request)

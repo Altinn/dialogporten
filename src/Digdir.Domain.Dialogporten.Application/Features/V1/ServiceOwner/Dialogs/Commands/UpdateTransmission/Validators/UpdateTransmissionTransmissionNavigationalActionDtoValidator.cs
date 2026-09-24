@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using FluentValidation;
@@ -10,8 +11,13 @@ internal sealed class UpdateTransmissionTransmissionNavigationalActionDtoValidat
 {
     public UpdateTransmissionTransmissionNavigationalActionDtoValidator(
         IValidator<IEnumerable<LocalizationDto>> localizationsValidator,
+        IValidator<AuthorizationContextDto> authorizationContextValidator,
         IClock clock)
     {
+        RuleFor(x => x.Id)
+            .IsValidUuidV7()
+            .UuidV7TimestampIsInPast(clock);
+
         RuleFor(x => x.Title)
             .NotEmpty()
             .SetValidator(localizationsValidator);
@@ -23,5 +29,9 @@ internal sealed class UpdateTransmissionTransmissionNavigationalActionDtoValidat
 
         RuleFor(x => x.ExpiresAt)
             .IsInFuture(clock);
+
+        RuleFor(x => x.AuthorizationContext)
+            .SetValidator(authorizationContextValidator!)
+            .When(x => x.AuthorizationContext is not null);
     }
 }

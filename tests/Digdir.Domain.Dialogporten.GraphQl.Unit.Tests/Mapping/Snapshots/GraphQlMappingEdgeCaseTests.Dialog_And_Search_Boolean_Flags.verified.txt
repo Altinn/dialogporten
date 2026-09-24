@@ -1,0 +1,54 @@
+﻿[
+  {
+    Case: AllFalse,
+    Dialog: {
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      IsContentSeen: false
+    },
+    Search: {
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      IsContentSeen: false
+    }
+  },
+  {
+    Case: IsApiOnly,
+    Dialog: {
+      IsApiOnly: true,
+      HasUnopenedContent: false,
+      IsContentSeen: false
+    },
+    Search: {
+      IsApiOnly: true,
+      HasUnopenedContent: false,
+      IsContentSeen: false
+    }
+  },
+  {
+    Case: HasUnopenedContent,
+    Dialog: {
+      IsApiOnly: false,
+      HasUnopenedContent: true,
+      IsContentSeen: false
+    },
+    Search: {
+      IsApiOnly: false,
+      HasUnopenedContent: true,
+      IsContentSeen: false
+    }
+  },
+  {
+    Case: IsContentSeen,
+    Dialog: {
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      IsContentSeen: true
+    },
+    Search: {
+      IsApiOnly: false,
+      HasUnopenedContent: false,
+      IsContentSeen: true
+    }
+  }
+]

@@ -79,14 +79,6 @@ static void BuildAndRun(string[] args)
         .Filter.WithHandledPostgresExceptionFilter()
         .WriteTo.OpenTelemetryOrConsole(context));
 
-    builder.Services.Configure<ForwardedHeadersOptions>(options =>
-    {
-        options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedPrefix;
-
-        options.KnownIPNetworks.Clear();
-        options.KnownProxies.Clear();
-    });
-
     builder.Services
         .AddOptions<WebApiSettings>()
         .Bind(builder.Configuration.GetSection(WebApiSettings.SectionName))
@@ -216,8 +208,7 @@ static void BuildAndRun(string[] args)
     app.MapAspNetHealthChecks()
         .MapControllers();
 
-    if (builder.Environment.IsDevelopment()) app.UsePathBase("/dialogporten");
-    app.UseForwardedHeaders();
+    app.UsePathBase("/dialogporten");
     app.UseStaticFiles();
 
     app.MapScalarApiReference("/scalar", options =>

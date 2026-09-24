@@ -54,3 +54,42 @@ if command -v mdatp >/dev/null 2>&1; then
 else
   echo "defender: agent not installed yet; configuration will apply when Defender for Servers provisions it"
 fi
+
+# SSH server hardening as a drop-in. sshd_config.d is included at the top of
+# sshd_config and the first value wins, so these settings take precedence.
+# The config is validated before sshd is reloaded; a reload keeps existing
+# sessions open, so a mistake here never cuts off the session fixing it.
+cat > /etc/ssh/sshd_config.d/10-jumper-hardening.conf <<'SSHD'
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+LoginGraceTime 60
+PermitRootLogin no
+Banner /etc/issue.net
+AllowUsers *@*
+DenyUsers root
+# Do not set global AllowGroups or DenyGroups: both block first-time Entra login.
+# https://learn.microsoft.com/en-us/entra/identity/devices/howto-vm-sign-in-azure-ad-linux
+SSHD
+# The baseline scanner looks for a literal 'Protocol 2' line in sshd_config, or in
+# this specific file when sshd_config includes it by name, directly below the
+# '# Azure OSConfig Remediation' header line (the wildcard include is not
+# recognised). The directive is a no-op on OpenSSH 7.4 and later.
+cat > /etc/ssh/sshd_config.d/osconfig_remediation.conf <<'SSHD'
+Protocol 2
+SSHD
+if ! grep -Pzq '\n# Azure OSConfig Remediation\nInclude /etc/ssh/sshd_config\.d/osconfig_remediation\.conf\n' /etc/ssh/sshd_config; then
+  if grep -qx 'Include /etc/ssh/sshd_config.d/osconfig_remediation.conf' /etc/ssh/sshd_config; then
+    sed -i '/^Include \/etc\/ssh\/sshd_config\.d\/osconfig_remediation\.conf$/i # Azure OSConfig Remediation' /etc/ssh/sshd_config
+  else
+    sed -i '/^Include \/etc\/ssh\/sshd_config\.d\/\*\.conf$/a # Azure OSConfig Remediation\nInclude /etc/ssh/sshd_config.d/osconfig_remediation.conf' /etc/ssh/sshd_config
+  fi
+fi
+chmod 0600 /etc/ssh/sshd_config /etc/ssh/sshd_config.d/10-jumper-hardening.conf /etc/ssh/sshd_config.d/osconfig_remediation.conf
+if sshd_check=$(sshd -t 2>&1); then
+  systemctl reload ssh
+  echo "sshd: hardening drop-in applied and sshd reloaded"
+else
+  rm -f /etc/ssh/sshd_config.d/10-jumper-hardening.conf /etc/ssh/sshd_config.d/osconfig_remediation.conf
+  echo "warning: sshd rejected the hardening drop-in, removed it and left sshd unchanged: ${sshd_check}" >&2
+fi
+

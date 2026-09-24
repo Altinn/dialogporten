@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -23,6 +24,12 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
     }
 
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
+    public Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
+        ClaimsPrincipal _,
+        DialogEntity dialogEntity,
+        CancellationToken cancellationToken)
+        => GetDialogDetailsAuthorization(dialogEntity, cancellationToken);
+
     public Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
         DialogEntity dialogEntity,
         CancellationToken __) =>
@@ -152,6 +159,9 @@ internal sealed class LocalDevelopmentAltinnAuthorization : IAltinnAuthorization
                 .ToList()
         };
     }
+
+    public Task<bool> HasListAuthorizationForDialog(ClaimsPrincipal _, DialogEntity __, CancellationToken ___)
+        => Task.FromResult(true);
 
     public Task<bool> HasListAuthorizationForDialog(DialogEntity _, CancellationToken __) => Task.FromResult(true);
 

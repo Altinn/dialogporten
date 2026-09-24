@@ -1,6 +1,4 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
-
-namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
+namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 
 /// <summary>
 /// A stub standing in for an element the authenticated user is not authorized for, and whose authorization

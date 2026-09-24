@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Altinn.Authorization.ABAC.Xacml.JsonProfile;
@@ -95,7 +94,13 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         _partyNameRegistry = partyNameRegistry;
     }
 
+    public Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
+        DialogEntity dialogEntity,
+        CancellationToken cancellationToken = default
+    ) => GetDialogDetailsAuthorization(_user.GetPrincipal(), dialogEntity, cancellationToken);
+
     public async Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
+        ClaimsPrincipal claimsPrincipal,
         DialogEntity dialogEntity,
         CancellationToken cancellationToken = default)
     {
@@ -103,7 +108,7 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
         var request = new DialogDetailsAuthorizationRequest
         {
-            ClaimsPrincipal = _user.GetPrincipal(),
+            ClaimsPrincipal = claimsPrincipal,
             ServiceResource = dialogEntity.ServiceResource,
             InstanceRef = instanceRef,
             Party = dialogEntity.Party,
@@ -114,16 +119,33 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
             => await PerformDialogDetailsAuthorization(request, token), token: cancellationToken);
     }
 
-    public async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
+    public Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearch(
+        List<string> constraintParties,
+        List<string> serviceResources,
+        bool includeDialogIds = true,
+        int? minResourcesPruningThreshold = null,
+        CancellationToken cancellationToken = default
+    ) => GetAuthorizedResourcesForSearchInternal(
+        _user.GetPrincipal(),
+        constraintParties,
+        serviceResources,
+        includeDialogIds,
+        minResourcesPruningThreshold,
+        cancellationToken
+    );
+
+    private async Task<DialogSearchAuthorizationResult> GetAuthorizedResourcesForSearchInternal(
+        ClaimsPrincipal claimsPrincipal,
         List<string> constraintParties,
         List<string> serviceResources,
         bool includeDialogIds = true,
         int? minResourcesPruningThreshold = null,
         CancellationToken cancellationToken = default)
     {
-        var claims = _user.GetPrincipal().Claims.ToList();
+        var claims = claimsPrincipal.Claims.ToList();
         var request = new DialogSearchAuthorizationRequest
         {
+            EndUserPartyIdentifier = claimsPrincipal.GetEndUserPartyIdentifierOrThrow(),
             Claims = claims,
             ConstraintParties = constraintParties,
             ConstraintServiceResources = serviceResources
@@ -195,9 +217,13 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return flatten ? authorizedParties.Flatten() : authorizedParties;
     }
 
-    public async Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
+    public Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken)
+     => HasListAuthorizationForDialog(_user.GetPrincipal(), dialog, cancellationToken);
+
+    public async Task<bool> HasListAuthorizationForDialog(ClaimsPrincipal claimsPrincipal, DialogEntity dialog, CancellationToken cancellationToken)
     {
-        var resources = await GetAuthorizedResourcesForSearch(
+        var resources = await GetAuthorizedResourcesForSearchInternal(
+            claimsPrincipal,
             [dialog.Party],
             [dialog.ServiceResource],
             cancellationToken: cancellationToken
@@ -244,12 +270,15 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
         return result;
     }
 
-    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(DialogSearchAuthorizationRequest request, bool includeDialogIds, int? minResourcesPruningThreshold, CancellationToken cancellationToken)
+    private async Task<DialogSearchAuthorizationResult> PerformDialogSearchAuthorization(
+        DialogSearchAuthorizationRequest request,
+        bool includeDialogIds,
+        int? minResourcesPruningThreshold,
+        CancellationToken cancellationToken
+    )
     {
-        var partyIdentifier = _user.GetPrincipal().GetEndUserPartyIdentifierOrThrow();
-
         var authorizedPartiesRequest = new AuthorizedPartiesRequest(
-            partyIdentifier,
+            request.EndUserPartyIdentifier,
             includeAccessPackages: true,
             includeRoles: true,
             includeResources: true,

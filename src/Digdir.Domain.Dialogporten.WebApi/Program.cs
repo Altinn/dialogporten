@@ -81,8 +81,10 @@ static void BuildAndRun(string[] args)
 
     builder.Services.Configure<ForwardedHeadersOptions>(options =>
     {
-        options.ForwardedHeaders =
-            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedPrefix;
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedPrefix;
+
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
     });
 
     builder.Services

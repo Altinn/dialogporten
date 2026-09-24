@@ -205,10 +205,10 @@ static void BuildAndRun(string[] args)
     }
 
     var app = builder.Build();
+    app.UsePathBase("/dialogporten");
     app.MapAspNetHealthChecks()
         .MapControllers();
 
-    app.UsePathBase("/dialogporten");
     app.UseStaticFiles();
 
     app.MapScalarApiReference("/scalar", options =>

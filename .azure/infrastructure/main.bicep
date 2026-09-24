@@ -70,6 +70,10 @@ param appConfigurationSku AppConfigurationSku
 import { Sku as AppInsightsSku } from '../modules/applicationInsights/create.bicep'
 param appInsightsSku AppInsightsSku
 
+import { WorkspaceTransformConfiguration } from '../modules/applicationInsights/workspaceTransforms.bicep'
+@description('Optional ingestion-time transformations for the Application Insights workspace')
+param appInsightsWorkspaceTransform WorkspaceTransformConfiguration?
+
 import { Sku as PostgresSku } from '../modules/postgreSql/create.bicep'
 import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgreSql/create.bicep'
 import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
@@ -159,6 +163,7 @@ module appInsights '../modules/applicationInsights/create.bicep' = {
     sku: appInsightsSku
     tags: tags
     immediatePurgeDataOn30Days: appInsightsPurgeDataOn30Days
+    workspaceTransform: appInsightsWorkspaceTransform
   }
 }
 

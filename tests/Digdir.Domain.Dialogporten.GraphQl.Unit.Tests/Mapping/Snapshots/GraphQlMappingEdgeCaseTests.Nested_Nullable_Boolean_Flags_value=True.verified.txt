@@ -5,10 +5,16 @@
     IsAuthorized: true
   },
   Seen: {
+    SeenBy: {
+      ActorType: ServiceOwner
+    },
     IsViaServiceOwner: true,
     IsCurrentEndUser: false
   },
   SearchSeen: {
+    SeenBy: {
+      ActorType: ServiceOwner
+    },
     IsViaServiceOwner: true,
     IsCurrentEndUser: false
   }

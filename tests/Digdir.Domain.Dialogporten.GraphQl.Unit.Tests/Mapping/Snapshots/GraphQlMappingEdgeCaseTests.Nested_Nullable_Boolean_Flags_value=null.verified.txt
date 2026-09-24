@@ -4,9 +4,15 @@
     MediaType: text/plain
   },
   Seen: {
+    SeenBy: {
+      ActorType: ServiceOwner
+    },
     IsCurrentEndUser: false
   },
   SearchSeen: {
+    SeenBy: {
+      ActorType: ServiceOwner
+    },
     IsCurrentEndUser: false
   }
 }

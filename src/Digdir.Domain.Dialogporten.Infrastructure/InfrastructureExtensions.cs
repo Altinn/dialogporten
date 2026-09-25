@@ -146,6 +146,7 @@ public static class InfrastructureExtensions
             .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
+            .AddTransient<ISearchTermsSamplingRepository, SearchTermsSamplingRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()

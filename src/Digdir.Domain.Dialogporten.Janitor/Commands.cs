@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncPolicy;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ResourceRegistry.Commands.SyncSubjectMap;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Search.Commands.ReindexDialogSearch;
+using Digdir.Domain.Dialogporten.Application.Features.V1.SearchTerms.Commands.GenerateSearchTerms;
 using Digdir.Domain.Dialogporten.Janitor.CostManagementAggregation;
 using Digdir.Domain.Dialogporten.Janitor.CustomMetrics;
 using MediatR;
@@ -122,6 +123,35 @@ internal static partial class Commands
                 return result.Match(
                     success => 0,
                     failure => -1);
+            });
+
+        app.AddCommand("generate-searchterms", async (
+                [FromService] CoconaAppContext ctx,
+                [FromService] ISender application,
+                [Option('n', Description = "Samples per service resource (3-100, default 7)")] int? sampleSize,
+                [Option("pool-rows", Description = "Stage A TABLESAMPLE pool target rows (default 150000)")] int? poolRows,
+                [Option('m', Description = "Minimum word length (default 5)")] int? minLength,
+                [Option('l', Description = "Comma-separated language codes (default nb,nn,en)")] string? languages,
+                [Option("exclude-orgs", Description = "Comma-separated service owner org codes to exclude from sampling (default acn,bft,ttd; pass \"\" to disable)")] string? excludeOrgs = null,
+                [Option('o', Description = "Write results to a JSONL file instead of persisting to the database (dry-run)")] string? output = null)
+            =>
+            {
+                var langs = string.IsNullOrWhiteSpace(languages)
+                    ? null
+                    : languages.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var orgs = excludeOrgs?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var result = await application.Send(
+                    new GenerateSearchTermsCommand
+                    {
+                        SampleSize = sampleSize,
+                        PoolRows = poolRows,
+                        MinLength = minLength,
+                        Languages = langs,
+                        ExcludedOrgs = orgs,
+                        OutputPath = output
+                    },
+                    ctx.CancellationToken);
+                return result.Match(success => 0, validationError => -1);
             });
 
         app.AddCommand("collect-custom-metrics", async (

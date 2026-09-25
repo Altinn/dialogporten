@@ -254,6 +254,8 @@ jobs:
           - name: sync-subject-resource-mappings-job
           - name: sync-resource-policy-information-job
           - name: reindex-dialogsearch-job
+          - name: generate-searchterms-job
+            environments: ['test', 'staging', 'prod']
           - name: aggregate-cost-metrics-job
             environments: ['staging', 'prod']
           - name: custom-metrics-job

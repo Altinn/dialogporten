@@ -169,6 +169,13 @@ The janitor image contains a resumable `reindex-dialogsearch` command that can b
 - **Check progress:** Trigger the `Show reindex dialogsearch progress` workflow to display the last 10 logs from the active execution. The workflow fails if no execution is currently running.
 - **Job naming:** Each environment deploys the job as `dp-be-<environment>-reindex-search`. The job uses the regular janitor secrets (database, Redis, Application Insights) and a user-assigned managed identity identical to the scheduled janitor jobs.
 
+## Scheduled search-term generation job
+
+The janitor `generate-searchterms` command builds the per-language search-term lists served from `GET /api/v1/metadata/searchterms`. It runs as a **scheduled** Azure Container Apps job (`dp-be-<environment>-gen-searchterms`) every night at 04:20 UTC with default parameters, deployed to the `test`, `staging` and `prod` environments (see `.azure/applications/generate-searchterms-job/`).
+
+- **Run on demand:** Trigger the `Dispatch generate searchterms` workflow and select the environment. It starts the same job with the same default arguments, aborts if an execution is already running, and verifies that the execution starts. Progress can be inspected with the Azure CLI (`az containerapp job execution list/show/logs`).
+- **Changing the schedule or parameters:** The cron expression lives in the per-environment `.bicepparam` files; the command arguments are baked into the job template in `main.bicep`.
+
 ## Connecting to resources in Azure
 
 There is a `ssh-jumper` virtual machine deployed with the infrastructure. This can be used to create a `ssh`-tunnel into the `vnet`. There are two ways to establish connections:

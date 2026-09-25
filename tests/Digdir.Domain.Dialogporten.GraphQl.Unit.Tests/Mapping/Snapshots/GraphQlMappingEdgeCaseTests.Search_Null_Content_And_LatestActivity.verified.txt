@@ -1,0 +1,85 @@
+﻿{
+  Items: [
+    {
+      Id: 00000001-0000-0000-0000-000000000000,
+      Org: str-2,
+      ServiceResource: str-3,
+      ServiceResourceType: str-4,
+      Party: str-5,
+      Progress: 6,
+      Process: str-7,
+      PrecedingProcess: str-8,
+      GuiAttachmentCount: 9,
+      ExtendedStatus: str-10,
+      ExternalReference: str-11,
+      CreatedAt: 2020-01-01 00:00:12 +0,
+      UpdatedAt: 2020-01-01 00:00:13 +0,
+      ContentUpdatedAt: 2020-01-01 00:00:14 +0,
+      DueAt: 2020-01-01 00:00:15 +0,
+      Status: NotApplicable,
+      HasUnopenedContent: true,
+      IsApiOnly: true,
+      FromServiceOwnerTransmissionsCount: 20,
+      FromPartyTransmissionsCount: 21,
+      SeenSinceLastUpdate: [
+        {
+          Id: 00000022-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:35 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-38,
+            ActorName: str-37
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
+        },
+        {
+          Id: 00000029-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:42 +0,
+          SeenBy: {
+            ActorType: ServiceOwner,
+            ActorId: str-45,
+            ActorName: str-44
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: true
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: 00000030-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:49 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-52,
+            ActorName: str-51
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
+        },
+        {
+          Id: 00000037-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:56 +0,
+          SeenBy: {
+            ActorType: ServiceOwner,
+            ActorId: str-59,
+            ActorName: str-58
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: true
+        }
+      ],
+      IsContentSeen: false,
+      EndUserContext: {
+        Revision: 0000003f-0000-0000-0000-000000000000,
+        SystemLabels: [
+          Sent,
+          Default
+        ]
+      }
+    }
+  ],
+  HasNextPage: false,
+  OrderBy: [],
+  Errors: []
+}

@@ -1,14 +1,21 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Purge;
 
 [OpenApiOperationId("PurgeDialog")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
 {
     private readonly ISender _sender;
@@ -28,11 +35,15 @@ public sealed class PurgeDialogEndpoint : Endpoint<PurgeDialogRequest>
 
         Description(b => b
             .Accepts<PurgeDialogRequest>()
-            .ProducesOneOf(
-            StatusCodes.Status204NoContent,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status412PreconditionFailed));
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status412PreconditionFailed
+            ));
     }
 
     public override async Task HandleAsync(PurgeDialogRequest req, CancellationToken ct)

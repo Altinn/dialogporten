@@ -1,7 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.GetSeenLog;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
@@ -9,6 +11,10 @@ using MediatR;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.GetSeenLog;
 
 [OpenApiOperationId("GetDialogSeenLog")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.EndUser],
+    securitySchemes: [OpenApiSecurityScheme.IdportenSecurityScheme, OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class GetDialogSeenLogEndpoint : Endpoint<GetSeenLogQuery, SeenLogDto>
 {
     private readonly ISender _sender;
@@ -25,9 +31,14 @@ public sealed class GetDialogSeenLogEndpoint : Endpoint<GetSeenLogQuery, SeenLog
         Get("dialogs/{dialogId}/seenlog/{seenLogId}");
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
-        Description(d => d.ProducesOneOf<SeenLogDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound));
+        Description(d => d
+            .Produces<SeenLogDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(GetSeenLogQuery req, CancellationToken ct)

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
@@ -42,7 +43,7 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
                         {
                             Url = new Uri("https://example.com/updated-attachment.pdf"),
                             MediaType = "application/pdf",
-                            ConsumerType = Altinn.ApiClients.Dialogporten.Features.V1.Attachments_AttachmentUrlConsumerType.Gui
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
                         }
                     ]
                 }
@@ -177,6 +178,31 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
     }
 
     [E2EFact]
+    public async Task Should_Return_Forbidden_Without_No_Scope()
+    {
+        // Arrange
+        var transmissionId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+            x.AddTransmission(x => x.Id = transmissionId));
+
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: "360-no-scope");
+        var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
+
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                request,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+
+    [E2EFact]
     public async Task Should_Return_Forbidden_Without_ChangeTransmission_Scope()
     {
         // Arrange
@@ -184,8 +210,34 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
             x.AddTransmission(x => x.Id = transmissionId));
 
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: E2EConstants.ServiceOwnerScopes);
         var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
 
+        // Act
+        var response = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                request,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_Forbidden_Without_ServiceOwner_Scope()
+    {
+        // Arrange
+        var transmissionId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(x =>
+            x.AddTransmission(x => x.Id = transmissionId));
+
+        var request = CreateUpdateRequest(x => x.ExternalReference = "forbidden-update");
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(
+            scopes: AuthorizationScope.ServiceProviderChangeTransmissions
+        );
         // Act
         var response = await Fixture.ServiceownerApi
             .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
@@ -296,10 +348,10 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         {
             IsSilentUpdate = true,
             CreatedAt = DateTimeOffset.UtcNow.AddMinutes(-1),
-            Type = Altinn.ApiClients.Dialogporten.Features.V1.DialogsEntitiesTransmissions_DialogTransmissionType.Information,
+            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Information,
             Sender = new V1ServiceOwnerCommonActors_Actor
             {
-                ActorType = Altinn.ApiClients.Dialogporten.Features.V1.Actors_ActorType.ServiceOwner
+                ActorType = Actors_ActorType.ServiceOwner
             },
             Content = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionContent
             {
@@ -312,6 +364,159 @@ public class UpdateTransmissionTests(WebApiE2EFixture fixture) : E2ETestBase<Web
         };
 
         modify?.Invoke(request);
+        return request;
+    }
+
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Update_Transmission_Verify_Snapshot()
+    {
+        // Arrange
+        using var _ = Fixture.UseServiceOwnerTokenOverrides(scopes: ChangeTransmissionScopes);
+
+        var transmissionId = DialogTestData.NewUuidV7();
+        var existingAttachmentId = DialogTestData.NewUuidV7();
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+            dialog.AddTransmission(transmission =>
+            {
+                transmission.Id = transmissionId;
+                transmission.Attachments =
+                [
+                    new()
+                    {
+                        Id = existingAttachmentId,
+                        Name = "existing-attachment",
+                        DisplayName = [DialogTestData.CreateLocalization("Existing attachment")],
+                        Urls =
+                        [
+                            new()
+                            {
+                                Url = new Uri("https://digdir.com/existing-attachment-url"),
+                                MediaType = "application/pdf",
+                                ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                            }
+                        ]
+                    }
+                ];
+            }));
+
+        // Attachment urls are returned ordered by CreatedAt, then Id. Both urls below are created by the same
+        // update, so CreatedAt ties and Id decides — and the ids are minted while iterating the change tracker,
+        // whose order is unspecified. Hand them pre-sorted ids so the snapshot order matches the declaration
+        // order instead of being a coin flip.
+        var existingAttachmentUrlIds = OrderedVersion7Ids(2);
+        var request = CreateComplexUpdateRequest(existingAttachmentId, existingAttachmentUrlIds);
+
+        // Act
+        var updateResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsCommandsUpdateTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                request,
+                if_Match: null,
+                TestContext.Current.CancellationToken);
+
+        var getResponse = await Fixture.ServiceownerApi
+            .V1ServiceOwnerDialogsQueriesGetTransmissionDialogTransmission(
+                dialogId,
+                transmissionId,
+                TestContext.Current.CancellationToken);
+
+        // Assert
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        getResponse.ShouldHaveStatusCode(HttpStatusCode.OK);
+        getResponse.Content.Should().NotBeNull();
+
+        await JsonSnapshotVerifier.VerifyJsonSnapshot(
+            JsonSerializer.Serialize(getResponse.Content));
+    }
+
+    private static Guid[] OrderedVersion7Ids(int count) =>
+        Enumerable.Range(0, count)
+            .Select(_ => DialogTestData.NewUuidV7())
+            .Order()
+            .ToArray();
+
+    private static V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest CreateComplexUpdateRequest(
+        Guid existingAttachmentId,
+        Guid[] existingAttachmentUrlIds)
+    {
+        var request = new V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionRequest
+        {
+            IsSilentUpdate = true,
+            Type = DialogsEntitiesTransmissions_DialogTransmissionType.Submission,
+            ExternalReference = "updated-external-reference",
+            ExtendedType = new Uri("https://digdir.com/updated-transmission-type"),
+            Sender = new()
+            {
+                ActorType = Actors_ActorType.PartyRepresentative,
+                ActorId = $"urn:altinn:organization:identifier-no:{E2EConstants.GetDefaultServiceOwnerOrgNr()}"
+            },
+            Content = new()
+            {
+                Title = DialogTestData.CreateContentValue(
+                    value: "Oppdatert forsendelsestittel",
+                    languageCode: "nb"),
+                Summary = DialogTestData.CreateContentValue(
+                    value: "Oppdatert oppsummering",
+                    languageCode: "nb"),
+                ContentReference = DialogTestData.CreateContentValue(
+                    mediaType: "application/vnd.dialogporten.frontchannelembed-url;type=text/markdown",
+                    value: [DialogTestData.CreateLocalization("https://digdir.com/updated-content-reference")])
+            },
+            Attachments =
+            [
+                // Existing attachment matched by id: fields are updated and the url list is replaced.
+                new()
+                {
+                    Id = existingAttachmentId,
+                    Name = "updated-existing-attachment",
+                    DisplayName = [DialogTestData.CreateLocalization("Updated existing attachment")],
+                    Urls =
+                    [
+                        new()
+                        {
+                            Id = existingAttachmentUrlIds[0],
+                            Url = new Uri("https://digdir.com/updated-existing-attachment-gui-url"),
+                            MediaType = "text/html",
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                        },
+                        new()
+                        {
+                            Id = existingAttachmentUrlIds[1],
+                            Url = new Uri("https://digdir.com/updated-existing-attachment-api-url"),
+                            MediaType = "application/json",
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Api
+                        }
+                    ]
+                },
+                // Attachment without id: created by the update. Its url omits the id as well, so the
+                // generated-id path stays covered alongside the explicit ids above.
+                new()
+                {
+                    Name = "new-attachment",
+                    DisplayName = [DialogTestData.CreateLocalization("New attachment")],
+                    ExpiresAt = new DateTimeOffset(2124, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    Urls =
+                    [
+                        new()
+                        {
+                            Url = new Uri("https://digdir.com/new-attachment-url"),
+                            MediaType = "application/pdf",
+                            ConsumerType = Attachments_AttachmentUrlConsumerType.Gui
+                        }
+                    ]
+                }
+            ],
+            NavigationalActions =
+            [
+                new()
+                {
+                    Title = [DialogTestData.CreateLocalization("Updated action title")],
+                    ExpiresAt = new DateTimeOffset(2124, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    Url = new Uri("https://digdir.com/updated-action-url")
+                }
+            ]
+        };
         return request;
     }
 }

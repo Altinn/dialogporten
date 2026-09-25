@@ -77,6 +77,177 @@
           "Api"
         ]
       },
+      "AuthorizationContext": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "tokenRef": {
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
+            "example": "my-own-reference",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "AuthorizationContextDetails": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "tokenRef": {
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
+            "example": "my-own-reference",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "AuthorizationContextInput": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Optional; defaults to \u0022read\u0022 if not supplied.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource. Cannot contain a service resource reference; use \u0022serviceResource\u0022 for that. References\nto an app (\u0022urn:altinn:app\u0022) or an organization (\u0022urn:altinn:org\u0022) are not allowed either; both are\nderived from the effective service resource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy. The service owner must have access to the referenced resource.\nWhen set, the dialog\u0027s instance reference no longer applies to the evaluation of this entity.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "tokenRef": {
+            "description": "An optional reference identifying this context in the dialog token. When the end user is authorized for\nthis context, the dialog token\u0027s \u0022e\u0022 claim lists this value instead of the id of the entity carrying the\ncontext, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.\nThe same value may be shared by multiple entities in one dialog to form an OR-group: authorization for any\nentity in the group adds the shared value to \u0022e\u0022, so a recipient validating that value cannot distinguish\nwhich individual entity was authorized. Only group entities that intentionally share access semantics.\nToken references are scoped to a dialog; recipients must also validate the token\u0027s dialog id (\u0022i\u0022).\nMaximum 50 characters.",
+            "example": "my-own-reference",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Required. Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "AuthorizationContextUnauthorizedPresentation": {
+        "description": "",
+        "enum": [
+          "Disabled",
+          "Excluded"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Disabled",
+          "Excluded"
+        ]
+      },
       "BulkSetSystemLabel": {
         "additionalProperties": false,
         "properties": {
@@ -517,15 +688,30 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
             "example": "write",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -613,6 +799,16 @@
       "CreateDialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -763,14 +959,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -871,10 +1082,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -949,6 +1172,16 @@
       "CreateDialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1047,9 +1280,26 @@
       "CreateDialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
             "nullable": true,
             "type": "string"
           },
@@ -1081,6 +1331,16 @@
       "CreateTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1179,9 +1439,26 @@
       "CreateTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
             "nullable": true,
             "type": "string"
           },
@@ -1213,10 +1490,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -1761,15 +2050,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
+            "deprecated": true,
+            "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nEmpty when the action was supplied with an authorizationContext, in which case the action is found in\nauthorizationContext.action.",
             "example": "write",
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -1858,6 +2161,16 @@
       "DialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -1876,6 +2189,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this attachment.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2029,14 +2347,28 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "deprecated": true,
+            "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.\n            \nEmpty when the action was supplied with an authorizationContext, in which case the action is found in\nauthorizationContext.action.",
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nNull when no authorization context is set, including when the action uses legacy\nauthorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -2573,10 +2905,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses legacy\nauthorization fields.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -2657,6 +3001,16 @@
       "DialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2675,6 +3029,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this attachment.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -2696,6 +3055,16 @@
       "DialogTransmissionAttachmentDetails": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextDetails"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -2870,9 +3239,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextDetails"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The content of the transmission.",
@@ -2944,11 +3325,31 @@
       "DialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "Indicates whether the end user is authorized for this navigational action.\n            \nIsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.",
+            "nullable": true,
+            "type": "boolean"
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -2970,10 +3371,25 @@
       "DialogTransmissionNavigationalActionDetails": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextDetails"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "title": {
@@ -2996,6 +3412,16 @@
       "DialogTransmissionSearchAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchAuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -3063,6 +3489,59 @@
         },
         "type": "object"
       },
+      "DialogTransmissionSearchAuthorizationContext": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "action": {
+            "description": "The XACML action to evaluate. Null when not overridden; the effective action is then \u0022read\u0022.",
+            "example": "read",
+            "nullable": true,
+            "type": "string"
+          },
+          "additionalResourceAttribute": {
+            "description": "An additional resource attribute to be matched within the effective service policy, e.g. a task or\nsubresource.",
+            "example": "urn:altinn:task:Task_1\nurn:altinn:subresource:mycustomresource",
+            "nullable": true,
+            "type": "string"
+          },
+          "includeDialogParty": {
+            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
+            "type": "boolean"
+          },
+          "parties": {
+            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "serviceResource": {
+            "description": "A service resource that overrides the dialog\u0027s own service resource in the authorization evaluation,\nreferring to another service policy.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "tokenRef": {
+            "description": "The service owner supplied reference identifying this context in the dialog token\u0027s \u0022e\u0022 claim, if any.\nNull when the carrying entity\u0027s id is used instead. Sharing a value between entities in one dialog forms\nan OR-group: authorization for any group member adds the shared value to \u0022e\u0022. Recipients must also validate\nthe token\u0027s dialog id (\u0022i\u0022).",
+            "example": "my-own-reference",
+            "nullable": true,
+            "type": "string"
+          },
+          "unauthorizedPresentation": {
+            "description": "Controls how the entity is presented to end users that fail the authorization check:\n\u0022disabled\u0022 keeps the entity visible but masks its URLs and embedded content references, while\n\u0022excluded\u0022 removes it from the collection it belongs to entirely, leaving only its id and\ncreation time in the sibling \u0022excluded\u0022 list (e.g. \u0022excludedTransmissions\u0022 beside\n\u0022transmissions\u0022).",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextUnauthorizedPresentation"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
       "DialogTransmissionSearchContent": {
         "additionalProperties": false,
         "properties": {
@@ -3107,9 +3586,21 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nNull when no authorization context is set, including when the transmission uses the legacy\n\u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchAuthorizationContext"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The content of the transmission.",
@@ -3181,10 +3672,25 @@
       "DialogTransmissionSearchNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogTransmissionSearchAuthorizationContext"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
             "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
             "type": "string"
           },
           "title": {
@@ -4041,15 +4547,30 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "String identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy,\nwhich by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.",
             "example": "write",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -4137,6 +4658,16 @@
       "UpdateDialogAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4288,14 +4819,29 @@
         "additionalProperties": false,
         "properties": {
           "action": {
+            "deprecated": true,
             "description": "The action identifier for the action, corresponding to the \u0022action\u0022 attributeId used in the XACML service policy.",
-            "type": "string"
+            "nullable": true,
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext.Action\u0027 instead."
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this action.\nCannot be combined with \u0022authorizationAttribute\u0022 or \u0022action\u0022; the XACML action is given by\n\u0022authorizationContext.action\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -4372,10 +4918,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -4450,6 +5008,16 @@
       "UpdateDialogTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent is always required in addition; this context\ncan only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4548,9 +5116,26 @@
       "UpdateDialogTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
             "nullable": true,
             "type": "string"
           },
@@ -4573,6 +5158,16 @@
       "UpdateTransmissionAttachment": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this attachment.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition;\nthis context can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "displayName": {
             "description": "The display name of the attachment that should be used in GUIs.",
             "items": {
@@ -4621,6 +5216,13 @@
                 "$ref": "#/components/schemas/AttachmentUrlConsumerType"
               }
             ]
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions and updates of attachment URLs. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "nullable": true,
+            "type": "string"
           },
           "mediaType": {
             "description": "The media type of the attachment.",
@@ -4671,9 +5273,26 @@
       "UpdateTransmissionNavigationalAction": {
         "additionalProperties": false,
         "properties": {
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes additional authorization inputs used when evaluating end user access to this navigational action.\nThe XACML action defaults to \u0022read\u0022. Access to the parent transmission is always required in addition; this\ncontext can only further restrict access, never widen it.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
+          },
           "expiresAt": {
             "description": "The UTC timestamp when the navigational action expires and is no longer available.",
             "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
             "nullable": true,
             "type": "string"
           },
@@ -4705,10 +5324,22 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use \u0027AuthorizationContext\u0027 instead."
+          },
+          "authorizationContext": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDescribes the authorization inputs used when evaluating end user access to this transmission.\nCannot be combined with \u0022authorizationAttribute\u0022.",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthorizationContextInput"
+              }
+            ],
+            "x-experimental": true
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -4779,9 +5410,9 @@
       }
     },
     "securitySchemes": {
-      "JWTBearerAuth": {
+      "maskinporten": {
         "bearerFormat": "JWT",
-        "description": "Enter a JWT token to authorize the requests...",
+        "description": "Machine login using Maskinporten.\n\n- This is a OAuth2 scheme that uses the JWT Bearer Grant (RFC 7523).\n  We can\u0027t express this flow in the OpenAPI specification. \n  That\u0027s why we use the more generic \u0022Http\u0022 type for this scheme instead.\n  Please refer to the Maskinporten documentation for how to implement this flow.\n- Well known: https://test.maskinporten.no/.well-known/oauth-authorization-server/\n- This token can be used for all secured endpoints (enduser and serviceowner).\n- To use this token with the Enduser API\u0027s, you have to register a \u0022system\u0022 and \u0022system user\u0022.\n  Please refer to the Dialogporten documentation for how to register systems and system users.\n- Required scopes are listed per endpoint as Security Requirement Objects.\n\nClaims we look for:\n- authorization_details (contains the system user ID)\n- consumer (identifies the organization/service owner)\n- email (identifies Email-users in the case the amr claim is Selfregistered-email)\n\nAvailable scopes for this security scheme are:\n- digdir:dialogporten (system user only)\n- digdir:dialogporten.serviceprovider\n- digdir:dialogporten.serviceprovider.search\n- digdir:dialogporten.serviceprovider.changetransmissions\n- altinn:system/notifications.condition.check",
         "scheme": "bearer",
         "type": "http"
       }
@@ -5052,10 +5683,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Authenticated service owner does not own the resolved dialog."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Authenticated service owner does not own the resolved dialog."
           },
           "404": {
             "content": {
@@ -5089,7 +5734,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -5404,8 +6049,35 @@
             },
             "description": "Successfully returned the dialog list."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.search\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
+          },
+          "403": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search\u0022."
           },
           "503": {
             "content": {
@@ -5429,7 +6101,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider",
               "digdir:dialogporten.serviceprovider.search"
             ]
@@ -5486,12 +6158,33 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization)."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Dialog with IdempotentKey 01941821-ffca-73a1-9335-435a882be014 has already been created."
           },
           "422": {
@@ -5526,7 +6219,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -5574,7 +6267,7 @@
               }
             }
           },
-          "400": {
+          "401": {
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -5582,13 +6275,17 @@
                 }
               }
             },
-            "description": "Validation error occurred. See problem details for a list of errors."
-          },
-          "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to delete the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -5601,9 +6298,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -5638,7 +6349,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -5682,11 +6393,35 @@
             },
             "description": "Successfully returned the dialog aggregate."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -5720,7 +6455,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -5880,7 +6615,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -5948,10 +6683,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -5964,9 +6713,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -6011,7 +6774,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6059,7 +6822,7 @@
               }
             }
           },
-          "400": {
+          "401": {
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -6067,13 +6830,17 @@
                 }
               }
             },
-            "description": "Validation error occurred. See problem details for a list of errors."
-          },
-          "401": {
-            "description": "Unauthorized"
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to freeze the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to freeze the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -6086,9 +6853,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -6123,7 +6904,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6162,11 +6943,35 @@
           "204": {
             "description": "The dialog aggregate was deleted successfully."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to delete the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to delete the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -6179,6 +6984,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -6213,7 +7025,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6253,10 +7065,24 @@
             "description": "The dialog aggregate was restored successfully."
           },
           "401": {
-            "description": "Unauthorized"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -6269,6 +7095,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -6303,7 +7136,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6373,11 +7206,55 @@
             },
             "description": "Successfully returned the notification determination."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022altinn:system/notifications.condition.check\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022altinn:system/notifications.condition.check\u0022."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -6401,8 +7278,8 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
-              "digdir:dialogporten.serviceprovider"
+            "maskinporten": [
+              "altinn:system/notifications.condition.check"
             ]
           }
         ],
@@ -6442,10 +7319,24 @@
             "description": "Successfully returned the dialog activity list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -6456,6 +7347,16 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -6479,7 +7380,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6557,10 +7458,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to create child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to create child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -6573,9 +7488,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -6620,7 +7549,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6667,10 +7596,24 @@
             "description": "Successfully returned the dialog activity."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -6683,6 +7626,13 @@
             "description": "The specified dialog ID or activity ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -6707,7 +7657,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6745,13 +7695,36 @@
                 }
               }
             },
-            "description": "Successfully retrieved the service owner labels."
+            "description": "Successfully retrieved the service owner labels.",
+            "headers": {
+              "Etag": {
+                "description": "The new UUID ETag of the ServiceOwner Context",
+                "example": "123e4567-e89b-12d3-a456-426614174000",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -6785,7 +7758,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -6853,12 +7826,43 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.changetransmissions\u0022."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -6870,6 +7874,16 @@
               }
             },
             "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
             "content": {
@@ -6893,8 +7907,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
-              "digdir:dialogporten.serviceprovider"
+            "maskinporten": [
+              "digdir:dialogporten.serviceprovider",
+              "digdir:dialogporten.serviceprovider.changetransmissions"
             ]
           }
         ],
@@ -6950,10 +7965,24 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -6966,6 +7995,13 @@
             "description": "The given dialog or service owner label was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -6976,7 +8012,17 @@
                 }
               }
             },
-            "description": ""
+            "description": "The supplied If-Match header did not match the current Revision value for the dialog. The request was not applied."
+          },
+          "422": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Domain error occurred. See problem details for a list of errors."
           },
           "503": {
             "content": {
@@ -7000,7 +8046,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -7080,10 +8126,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -7096,9 +8156,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -7143,7 +8217,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -7184,10 +8258,24 @@
             "description": "Successfully returned the dialog seen log records."
           },
           "401": {
-            "description": "Unauthorized"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -7200,6 +8288,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -7224,7 +8319,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -7271,10 +8366,24 @@
             "description": "Successfully returned the dialog seen log record."
           },
           "401": {
-            "description": "Unauthorized"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
           },
           "404": {
             "content": {
@@ -7287,6 +8396,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -7311,7 +8427,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -7352,10 +8468,24 @@
             "description": "Successfully returned the dialog transmission list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -7368,6 +8498,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -7392,7 +8529,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -7470,10 +8607,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to create child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to create child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -7486,9 +8637,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -7533,7 +8698,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -7580,10 +8745,24 @@
             "description": "Successfully returned the dialog transmission."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -7596,6 +8775,13 @@
             "description": "The specified dialog ID or transmission ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -7620,7 +8806,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }
@@ -7699,10 +8885,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.changetransmissions\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.changetransmissions\u0022.\n- Unauthorized to update child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -7715,9 +8915,23 @@
             "description": "The specified dialog ID or transmission ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -7762,8 +8976,9 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
-              "digdir:dialogporten.serviceprovider"
+            "maskinporten": [
+              "digdir:dialogporten.serviceprovider",
+              "digdir:dialogporten.serviceprovider.changetransmissions"
             ]
           }
         ],
@@ -7781,7 +8996,7 @@
           {
             "description": "Filter by one or more owning parties",
             "example": [
-              ""
+              "urn:altinn:organization:identifier-no:912345678"
             ],
             "explode": true,
             "in": "query",
@@ -7850,8 +9065,35 @@
             },
             "description": "Successfully returned the dialog list."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider.search\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
+          },
+          "403": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search\u0022."
           },
           "503": {
             "content": {
@@ -7875,7 +9117,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider",
               "digdir:dialogporten.serviceprovider.search"
             ]
@@ -7927,10 +9169,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. Requires a Maskinporten-token with the scope \u0022digdir:dialogporten.serviceprovider\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -7943,7 +9199,24 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": ""
           },
           "412": {
             "content": {
@@ -7987,7 +9260,7 @@
         },
         "security": [
           {
-            "JWTBearerAuth": [
+            "maskinporten": [
               "digdir:dialogporten.serviceprovider"
             ]
           }

@@ -1,7 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.ServiceResources.Queries.Search;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
@@ -10,6 +12,10 @@ using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.ServiceResources.Search;
 
 [OpenApiOperationId("SearchAuthorizedServiceResources")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.EndUser],
+    securitySchemes: [OpenApiSecurityScheme.IdportenSecurityScheme, OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class SearchAuthorizedServiceResourcesEndpoint
     : Endpoint<SearchAuthorizedServiceResourcesRequest, SearchAuthorizedServiceResourcesDto>
 {
@@ -29,7 +35,13 @@ public sealed class SearchAuthorizedServiceResourcesEndpoint
         Group<EndUserGroup>();
 
         // Response compression is intentionally NOT enabled on this authenticated endpoint (CRIME/BREACH).
-        Description(b => b.ProducesOneOf<SearchAuthorizedServiceResourcesDto>(StatusCodes.Status200OK));
+        Description(b => b
+            .Produces<SearchAuthorizedServiceResourcesDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            )
+        );
     }
 
     public override async Task HandleAsync(SearchAuthorizedServiceResourcesRequest req, CancellationToken ct)

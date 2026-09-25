@@ -1,0 +1,86 @@
+﻿[
+  {
+    HasOnlyAccessToSubParties: false,
+    SubParties: [
+      {
+        Party: str-13,
+        PartyUuid: 0000000e-0000-0000-0000-000000000000,
+        PartyId: 15,
+        Name: str-16,
+        DateOfBirth: str-17,
+        PartyType: str-18,
+        IsDeleted: true,
+        HasKeyRole: false,
+        IsCurrentEndUser: true,
+        IsMainAdministrator: false,
+        IsAccessManager: true
+      },
+      {
+        Party: str-25,
+        PartyUuid: 0000001a-0000-0000-0000-000000000000,
+        PartyId: 27,
+        Name: str-28,
+        DateOfBirth: str-29,
+        PartyType: str-30,
+        IsDeleted: true,
+        HasKeyRole: false,
+        IsCurrentEndUser: true,
+        IsMainAdministrator: false,
+        IsAccessManager: true
+      }
+    ],
+    Party: str-1,
+    PartyUuid: 00000002-0000-0000-0000-000000000000,
+    PartyId: 3,
+    Name: str-4,
+    DateOfBirth: str-5,
+    PartyType: str-6,
+    IsDeleted: true,
+    HasKeyRole: false,
+    IsCurrentEndUser: true,
+    IsMainAdministrator: false,
+    IsAccessManager: true
+  },
+  {
+    HasOnlyAccessToSubParties: false,
+    SubParties: [
+      {
+        Party: str-49,
+        PartyUuid: 00000032-0000-0000-0000-000000000000,
+        PartyId: 51,
+        Name: str-52,
+        DateOfBirth: str-53,
+        PartyType: str-54,
+        IsDeleted: true,
+        HasKeyRole: false,
+        IsCurrentEndUser: true,
+        IsMainAdministrator: false,
+        IsAccessManager: true
+      },
+      {
+        Party: str-61,
+        PartyUuid: 0000003e-0000-0000-0000-000000000000,
+        PartyId: 63,
+        Name: str-64,
+        DateOfBirth: str-65,
+        PartyType: str-66,
+        IsDeleted: true,
+        HasKeyRole: false,
+        IsCurrentEndUser: true,
+        IsMainAdministrator: false,
+        IsAccessManager: true
+      }
+    ],
+    Party: str-37,
+    PartyUuid: 00000026-0000-0000-0000-000000000000,
+    PartyId: 39,
+    Name: str-40,
+    DateOfBirth: str-41,
+    PartyType: str-42,
+    IsDeleted: true,
+    HasKeyRole: false,
+    IsCurrentEndUser: true,
+    IsMainAdministrator: false,
+    IsAccessManager: true
+  }
+]

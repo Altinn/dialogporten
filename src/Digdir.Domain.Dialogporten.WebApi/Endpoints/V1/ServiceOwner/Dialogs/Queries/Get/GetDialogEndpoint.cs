@@ -1,7 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
@@ -9,6 +11,10 @@ using MediatR;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.Get;
 
 [OpenApiOperationId("GetDialog")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
 {
     private readonly ISender _sender;
@@ -26,9 +32,14 @@ public sealed class GetDialogEndpoint : Endpoint<GetDialogQuery, DialogDto>
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf<DialogDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<DialogDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound
+            ));
     }
 
     public override async Task HandleAsync(GetDialogQuery req, CancellationToken ct)

@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
@@ -8,9 +9,11 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using static Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.AuthorizationExclusion;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchTransmissions;
 
@@ -29,7 +32,10 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IClock _clock;
 
-    public SearchTransmissionQueryHandler(IDialogDbContext db, IAltinnAuthorization altinnAuthorization, IClock clock)
+    public SearchTransmissionQueryHandler(
+        IDialogDbContext db,
+        IAltinnAuthorization altinnAuthorization,
+        IClock clock)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
@@ -60,6 +66,14 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
                 .Include(x => x.Transmissions)
                     .ThenInclude(x => x.Sender)
                     .ThenInclude(x => x.ActorNameEntity)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.AuthorizationContext)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.Attachments.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.AuthorizationContext)
+                .Include(x => x.Transmissions)
+                    .ThenInclude(x => x.NavigationalActions.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .ThenInclude(x => x.AuthorizationContext)
                 .Include(x => x.ServiceOwnerContext)
                     .ThenInclude(x => x.ServiceOwnerLabels)
                 .IgnoreQueryFilters()
@@ -71,12 +85,8 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
-            dialog,
-            cancellationToken: cancellationToken);
-
-        // If we cannot access the dialog at all, we don't allow access to any of the activity history
-        if (!authorizationResult.HasAccessToMainResource())
+        var (hasAccess, authorizationResult) = await _altinnAuthorization.GetDialogAccess(dialog, cancellationToken);
+        if (!hasAccess)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
@@ -93,44 +103,78 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
 
         dialog.FilterDialogLocalizations(request.AcceptedLanguages);
 
-        var dto = dialog.Transmissions
+        var transmissions = dialog.Transmissions
             .OrderBy(x => x.CreatedAt)
             .ThenBy(x => x.Id)
-            .Select(t => t.ToDto())
             .ToList();
 
-        foreach (var transmission in dto)
+        var dtos = new List<TransmissionDto>(transmissions.Count);
+        foreach (var transmission in transmissions)
         {
-            transmission.IsAuthorized = authorizationResult.HasReadAccessToDialogTransmission(transmission.AuthorizationAttribute);
+            var dto = transmission.ToDto();
+            var transmissionCheck = transmission.GetAuthorizationCheck(dialog);
+            dto.IsAuthorized = authorizationResult.HasAccess(transmission, transmissionCheck);
 
-            if (transmission.IsAuthorized)
+            if (!dto.IsAuthorized && transmission.ShouldExcludeWhenUnauthorized())
             {
-                ReplaceExpiredAttachmentUrls(transmission);
-                ReplaceExpiredNavigationalActionUrls(transmission);
+                // Dropped rather than listed: this endpoint returns a bare JSON array, with nowhere to hang a
+                // top-level "excludedTransmissions" - and wrapping it in an envelope would break every client's
+                // deserializer. The dialog GET is the authoritative timeline and does publish the exclusion.
                 continue;
             }
 
-            var urls = transmission.Attachments.SelectMany(a => a.Urls).ToList();
-            foreach (var url in urls)
+            // Parent-first narrowing: transmission access is a precondition for its attachments and
+            // navigational actions; a child context can only further restrict access. The DTO lists are
+            // mapped 1:1 in order from the entity lists, so pairwise zipping is safe.
+            foreach (var (attachmentDto, attachment) in dto.Attachments.Zip(transmission.Attachments))
+            {
+                var check = attachment.GetAuthorizationCheck(dialog);
+                attachmentDto.IsAuthorized = authorizationResult.HasAccess(attachment, dto.IsAuthorized, check);
+            }
+
+            foreach (var (navigationalActionDto, navigationalAction) in dto.NavigationalActions.Zip(transmission.NavigationalActions))
+            {
+                var check = navigationalAction.GetAuthorizationCheck(dialog);
+                navigationalActionDto.IsAuthorized = authorizationResult.HasAccess(navigationalAction, dto.IsAuthorized, check);
+            }
+
+            // After the loops, so each DTO could still be paired with its entity by position above.
+            (dto.Attachments, dto.ExcludedAttachments) =
+                PartitionExcluded(dto.Attachments, transmission.Attachments, x => x.IsAuthorized);
+            (dto.NavigationalActions, dto.ExcludedNavigationalActions) =
+                PartitionExcluded(dto.NavigationalActions, transmission.NavigationalActions, x => x.IsAuthorized);
+
+            foreach (var url in dto.Attachments.Where(a => !a.IsAuthorized).SelectMany(a => a.Urls))
             {
                 url.Url = Constants.UnauthorizedUri;
             }
 
-            foreach (var action in transmission.NavigationalActions)
+            foreach (var action in dto.NavigationalActions.Where(a => !a.IsAuthorized))
             {
                 action.Url = Constants.UnauthorizedUri;
             }
 
-            transmission.Content.ContentReference.ReplaceUnauthorizedContentReference();
+            if (!dto.IsAuthorized)
+            {
+                dto.Content.ContentReference.ReplaceUnauthorizedContentReference();
+            }
+            else
+            {
+                ReplaceExpiredAttachmentUrls(dto);
+                ReplaceExpiredNavigationalActionUrls(dto);
+            }
+
+            dtos.Add(dto);
         }
 
-        return dto;
+        return dtos;
     }
 
     private void ReplaceExpiredAttachmentUrls(TransmissionDto dto)
     {
         var expiredTransmissionAttachmentUrls = dto
             .Attachments
+            .Where(x => x.IsAuthorized)
             .Where(x => x.ExpiresAt < _clock.UtcNowOffset)
             .SelectMany(x => x.Urls);
 
@@ -143,6 +187,7 @@ internal sealed class SearchTransmissionQueryHandler : IRequestHandler<SearchTra
     private void ReplaceExpiredNavigationalActionUrls(TransmissionDto dto)
     {
         var expiredNavigationalActions = dto.NavigationalActions
+            .Where(x => x.IsAuthorized)
             .Where(x => x.ExpiresAt < _clock.UtcNowOffset);
 
         foreach (var action in expiredNavigationalActions)

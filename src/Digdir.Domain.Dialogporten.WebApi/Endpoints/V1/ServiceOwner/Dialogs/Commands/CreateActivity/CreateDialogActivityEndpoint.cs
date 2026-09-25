@@ -1,8 +1,10 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetActivity;
 using FastEndpoints;
@@ -12,6 +14,10 @@ using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
 
 [OpenApiOperationId("CreateDialogActivity")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityRequest>
 {
     private readonly ISender _sender;
@@ -28,14 +34,18 @@ public sealed class CreateDialogActivityEndpoint : Endpoint<CreateActivityReques
         Post("dialogs/{dialogId}/activities");
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
-        Description(b => b.ProducesOneOf(
-            StatusCodes.Status201Created,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status410Gone,
-            StatusCodes.Status412PreconditionFailed,
-            StatusCodes.Status422UnprocessableEntity));
+        Description(b => b
+            .Produces<string>(StatusCodes.Status201Created)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status410Gone,
+                StatusCodes.Status412PreconditionFailed,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(CreateActivityRequest req, CancellationToken ct)

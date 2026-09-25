@@ -1,9 +1,10 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3",
+  "type": "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.4",
   "title": "Forbidden.",
   "status": 403,
   "instance": "/api/v1/enduser/dialogs/00000000-0000-0000-0000-000000000000",
   "traceId": "00-00000000000000000000000000000000-0000000000000000-00",
+  "validationErrors": [],
   "errors": {
     "Forbidden": [
       "Altinn authentication level too low."

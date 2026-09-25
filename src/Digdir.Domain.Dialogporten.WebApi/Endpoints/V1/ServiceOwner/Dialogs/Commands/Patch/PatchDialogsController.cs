@@ -1,14 +1,20 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+﻿using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Builder;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Factory;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
+using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 using DialogportenAuthorizationPolicy = Digdir.Domain.Dialogporten.WebApi.Common.Authorization.AuthorizationPolicy;
-using ProblemDetails = Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.ProblemDetails;
+using ProblemDetails = Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types.ProblemDetails;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
 
@@ -54,6 +60,10 @@ public sealed class PatchDialogsController : ControllerBase
     [Consumes("application/json", "application/json-patch+json")]
     [OpenApiOperationId("PatchDialog")]
     [OpenApiOperation("V1ServiceOwnerDialogsPatchDialog")]
+    [OpenApiExtras(
+        scopes: [AuthorizationScope.ServiceProvider],
+        securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+    ]
     [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
@@ -75,11 +85,21 @@ public sealed class PatchDialogsController : ControllerBase
         if (!dialogQueryResult.TryPickT0(out var dialog, out var errors))
         {
             return errors.Match<IActionResult>(
-                notFound => NotFound(HttpContext.GetResponseOrDefault(StatusCodes.Status404NotFound,
-                    notFound.ToValidationResults())),
-                validationFailed =>
-                    BadRequest(HttpContext.GetResponseOrDefault(StatusCodes.Status400BadRequest,
-                        validationFailed.Errors.ToList())));
+                notFound => NotFound(
+                    ProblemDetailsBuilderFactory
+                        .NotFound()
+                        .WithErrors(notFound.ToValidationResults())
+                        .ForContext(HttpContext)
+                        .Build()
+                ),
+                validationFailed => BadRequest(
+                    ProblemDetailsBuilderFactory
+                        .BadRequest()
+                        .WithErrors(validationFailed.Errors.ToList())
+                        .ForContext(HttpContext)
+                        .Build()
+                )
+            );
         }
 
         var updateDialogDto = dialog.ToUpdateDialogDto();
@@ -106,13 +126,59 @@ public sealed class PatchDialogsController : ControllerBase
                 HttpContext.Response.Headers.Append(Constants.ETag, success.Revision.ToString());
                 return (IActionResult)NoContent();
             },
-            notFound => NotFound(HttpContext.GetResponseOrDefault(StatusCodes.Status404NotFound, notFound.ToValidationResults())),
-            entityDeleted => StatusCode(StatusCodes.Status410Gone, HttpContext.GetResponseOrDefault(StatusCodes.Status410Gone, entityDeleted.ToValidationResults())),
-            validationFailed => BadRequest(HttpContext.GetResponseOrDefault(StatusCodes.Status400BadRequest, validationFailed.Errors.ToList())),
-            forbidden => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status403Forbidden, forbidden.ToValidationResults())),
-            domainError => UnprocessableEntity(HttpContext.GetResponseOrDefault(StatusCodes.Status422UnprocessableEntity, domainError.ToValidationResults())),
-            concurrencyError => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status412PreconditionFailed)) { StatusCode = StatusCodes.Status412PreconditionFailed },
-            conflict => new ObjectResult(HttpContext.GetResponseOrDefault(StatusCodes.Status409Conflict, conflict.ToValidationResults())) { StatusCode = StatusCodes.Status409Conflict }
+            notFound => NotFound(
+                ProblemDetailsBuilderFactory
+                    .NotFound()
+                    .WithErrors(notFound.ToValidationResults())
+                    .ForContext(HttpContext)
+                    .Build()
+            ),
+            entityDeleted => StatusCode(
+                StatusCodes.Status410Gone,
+                ProblemDetailsBuilderFactory
+                    .Gone()
+                    .WithErrors(entityDeleted.ToValidationResults())
+                    .ForContext(HttpContext)
+                    .Build()
+            ),
+            validationFailed => BadRequest(
+                ProblemDetailsBuilderFactory.BadRequest()
+                    .WithErrors(validationFailed.Errors.ToList())
+                    .ForContext(HttpContext)
+                    .Build()
+            ),
+            forbidden => new ObjectResult(ProblemDetailsBuilderFactory
+                .Forbidden()
+                .WithErrors(forbidden.ToValidationResults())
+                .ForContext(HttpContext)
+                .Build()
+            ),
+            domainError => UnprocessableEntity(
+                ProblemDetailsBuilderFactory
+                    .UnprocessableEntity()
+                    .WithErrors(domainError.ToValidationResults())
+                    .ForContext(HttpContext)
+                    .Build()
+            ),
+            concurrencyError => new ObjectResult(
+                ProblemDetailsBuilderFactory
+                    .PreconditionFailed()
+                    .ForContext(HttpContext)
+                    .Build()
+            )
+            {
+                StatusCode = StatusCodes.Status412PreconditionFailed
+            },
+            conflict => new ObjectResult(
+                ProblemDetailsBuilderFactory
+                    .Conflict()
+                    .WithErrors(conflict.ToValidationResults())
+                    .ForContext(HttpContext)
+                    .Build()
+            )
+            {
+                StatusCode = StatusCodes.Status409Conflict
+            }
         );
     }
 

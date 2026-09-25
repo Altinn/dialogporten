@@ -2,6 +2,8 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using FastEndpoints;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.EndUser.Dialogs.Queries.SearchActivities;
 
@@ -13,9 +15,12 @@ public sealed class SearchDialogActivityEndpointSummary : Summary<SearchDialogAc
         Description = """
                       Gets the list of activities belonging to a dialog
                       """;
-        Responses[StatusCodes.Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("activity list");
-        Responses[StatusCodes.Status401Unauthorized] = Constants.SwaggerSummary.EndUserAuthenticationFailure;
-        Responses[StatusCodes.Status403Forbidden] = Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get");
-        Responses[StatusCodes.Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status200OK] = Constants.SwaggerSummary.ReturnedResult.FormatInvariant("activity list");
+        Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
+        Responses[Status403Forbidden] = DefaultForbiddenFor<SearchDialogActivityEndpoint>()
+            .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("get"))
+            .Build();
+        Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
+        Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
     }
 }

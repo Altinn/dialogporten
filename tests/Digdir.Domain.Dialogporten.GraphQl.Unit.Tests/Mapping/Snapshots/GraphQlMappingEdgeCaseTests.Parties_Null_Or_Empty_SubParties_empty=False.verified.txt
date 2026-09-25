@@ -1,0 +1,14 @@
+﻿[
+  {
+    HasOnlyAccessToSubParties: false,
+    SubParties: [],
+    Party: party,
+    Name: name,
+    PartyType: Person,
+    IsDeleted: false,
+    HasKeyRole: false,
+    IsCurrentEndUser: false,
+    IsMainAdministrator: false,
+    IsAccessManager: false
+  }
+]

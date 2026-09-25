@@ -1,8 +1,10 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.GetTransmission;
 using FastEndpoints;
@@ -12,6 +14,10 @@ using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 
 [OpenApiOperationId("CreateDialogTransmission")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissionRequest>
 {
     private readonly ISender _sender;
@@ -29,14 +35,18 @@ public sealed class CreateDialogTransmissionEndpoint : Endpoint<CreateTransmissi
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf(
-            StatusCodes.Status201Created,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status410Gone,
-            StatusCodes.Status412PreconditionFailed,
-            StatusCodes.Status422UnprocessableEntity));
+        Description(b => b
+            .Produces<string>(StatusCodes.Status201Created)
+            .ProducesDpProblemFor(
+                StatusCodes.Status400BadRequest,
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status410Gone,
+                StatusCodes.Status412PreconditionFailed,
+                StatusCodes.Status422UnprocessableEntity
+            ));
     }
 
     public override async Task HandleAsync(CreateTransmissionRequest req, CancellationToken ct)

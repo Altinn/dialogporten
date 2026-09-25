@@ -1,7 +1,9 @@
+using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchTransmissions;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Authorization;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Extensions;
 using FastEndpoints;
 using MediatR;
@@ -9,6 +11,10 @@ using MediatR;
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Queries.SearchTransmissions;
 
 [OpenApiOperationId("SearchDialogTransmissions")]
+[OpenApiExtras(
+    scopes: [AuthorizationScope.ServiceProvider],
+    securitySchemes: [OpenApiSecurityScheme.MaskinportenSecurityScheme])
+]
 public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissionQuery, List<TransmissionDto>>
 {
     private readonly ISender _sender;
@@ -26,10 +32,14 @@ public sealed class SearchDialogTransmissionEndpoint : Endpoint<SearchTransmissi
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf<List<TransmissionDto>>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status410Gone));
+        Description(b => b
+            .Produces<List<TransmissionDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(SearchTransmissionQuery req, CancellationToken ct)

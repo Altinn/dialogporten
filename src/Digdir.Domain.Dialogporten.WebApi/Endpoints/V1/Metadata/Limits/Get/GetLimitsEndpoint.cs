@@ -25,7 +25,7 @@ public sealed class GetLimitsEndpoint : EndpointWithoutRequest<GetLimitsDto>
         PreProcessor<RequireJsonAcceptPreProcessor>();
         Group<MetadataGroup>();
 
-        Description(b => b.ProducesOneOf<GetLimitsDto>(StatusCodes.Status200OK));
+        Description(b => b.Produces<GetLimitsDto>());
     }
 
     public override async Task HandleAsync(CancellationToken ct)

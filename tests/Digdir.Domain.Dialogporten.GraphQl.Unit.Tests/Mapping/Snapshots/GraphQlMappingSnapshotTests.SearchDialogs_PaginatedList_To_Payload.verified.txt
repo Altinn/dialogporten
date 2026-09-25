@@ -1,0 +1,322 @@
+﻿{
+  Items: [
+    {
+      Id: 00000001-0000-0000-0000-000000000000,
+      Org: str-2,
+      ServiceResource: str-3,
+      ServiceResourceType: str-4,
+      Party: str-5,
+      Progress: 6,
+      Process: str-7,
+      PrecedingProcess: str-8,
+      GuiAttachmentCount: 9,
+      ExtendedStatus: str-10,
+      ExternalReference: str-11,
+      CreatedAt: 2020-01-01 00:00:12 +0,
+      UpdatedAt: 2020-01-01 00:00:13 +0,
+      ContentUpdatedAt: 2020-01-01 00:00:14 +0,
+      DueAt: 2020-01-01 00:00:15 +0,
+      Status: NotApplicable,
+      HasUnopenedContent: true,
+      IsApiOnly: true,
+      FromServiceOwnerTransmissionsCount: 20,
+      FromPartyTransmissionsCount: 21,
+      LatestActivity: {
+        Id: 00000016-0000-0000-0000-000000000000,
+        CreatedAt: 2020-01-01 00:00:23 +0,
+        ExtendedType: https://example.com/24,
+        Type: DialogRestored,
+        TransmissionId: 0000001a-0000-0000-0000-000000000000,
+        PerformedBy: {
+          ActorType: ServiceOwner,
+          ActorId: str-29,
+          ActorName: str-28
+        },
+        Description: [
+          {
+            Value: str-30,
+            LanguageCode: lang31
+          },
+          {
+            Value: str-32,
+            LanguageCode: lang33
+          }
+        ]
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: str-66,
+              LanguageCode: lang67
+            },
+            {
+              Value: str-68,
+              LanguageCode: lang69
+            }
+          ],
+          MediaType: str-70,
+          IsAuthorized: true
+        },
+        Summary: {
+          Value: [
+            {
+              Value: str-72,
+              LanguageCode: lang73
+            },
+            {
+              Value: str-74,
+              LanguageCode: lang75
+            }
+          ],
+          MediaType: str-76,
+          IsAuthorized: true
+        },
+        SenderName: {
+          Value: [
+            {
+              Value: str-78,
+              LanguageCode: lang79
+            },
+            {
+              Value: str-80,
+              LanguageCode: lang81
+            }
+          ],
+          MediaType: str-82,
+          IsAuthorized: true
+        },
+        ExtendedStatus: {
+          Value: [
+            {
+              Value: str-84,
+              LanguageCode: lang85
+            },
+            {
+              Value: str-86,
+              LanguageCode: lang87
+            }
+          ],
+          MediaType: str-88,
+          IsAuthorized: true
+        }
+      },
+      SeenSinceLastUpdate: [
+        {
+          Id: 00000022-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:35 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-38,
+            ActorName: str-37
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
+        },
+        {
+          Id: 00000029-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:42 +0,
+          SeenBy: {
+            ActorType: ServiceOwner,
+            ActorId: str-45,
+            ActorName: str-44
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: true
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: 00000030-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:49 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-52,
+            ActorName: str-51
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
+        },
+        {
+          Id: 00000037-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:56 +0,
+          SeenBy: {
+            ActorType: ServiceOwner,
+            ActorId: str-59,
+            ActorName: str-58
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: true
+        }
+      ],
+      IsContentSeen: false,
+      EndUserContext: {
+        Revision: 0000003f-0000-0000-0000-000000000000,
+        SystemLabels: [
+          Sent,
+          Default
+        ]
+      }
+    },
+    {
+      Id: 0000005a-0000-0000-0000-000000000000,
+      Org: str-91,
+      ServiceResource: str-92,
+      ServiceResourceType: str-93,
+      Party: str-94,
+      Progress: 95,
+      Process: str-96,
+      PrecedingProcess: str-97,
+      GuiAttachmentCount: 98,
+      ExtendedStatus: str-99,
+      ExternalReference: str-100,
+      CreatedAt: 2020-01-01 00:01:41 +0,
+      UpdatedAt: 2020-01-01 00:01:42 +0,
+      ContentUpdatedAt: 2020-01-01 00:01:43 +0,
+      DueAt: 2020-01-01 00:01:44 +0,
+      Status: Completed,
+      HasUnopenedContent: false,
+      IsApiOnly: false,
+      FromServiceOwnerTransmissionsCount: 109,
+      FromPartyTransmissionsCount: 110,
+      LatestActivity: {
+        Id: 0000006f-0000-0000-0000-000000000000,
+        CreatedAt: 2020-01-01 00:01:52 +0,
+        ExtendedType: https://example.com/113,
+        Type: SentToPayment,
+        TransmissionId: 00000073-0000-0000-0000-000000000000,
+        PerformedBy: {
+          ActorType: PartyRepresentative,
+          ActorId: str-118,
+          ActorName: str-117
+        },
+        Description: [
+          {
+            Value: str-119,
+            LanguageCode: lang120
+          },
+          {
+            Value: str-121,
+            LanguageCode: lang122
+          }
+        ]
+      },
+      Content: {
+        Title: {
+          Value: [
+            {
+              Value: str-155,
+              LanguageCode: lang156
+            },
+            {
+              Value: str-157,
+              LanguageCode: lang158
+            }
+          ],
+          MediaType: str-159,
+          IsAuthorized: false
+        },
+        Summary: {
+          Value: [
+            {
+              Value: str-161,
+              LanguageCode: lang162
+            },
+            {
+              Value: str-163,
+              LanguageCode: lang164
+            }
+          ],
+          MediaType: str-165,
+          IsAuthorized: false
+        },
+        SenderName: {
+          Value: [
+            {
+              Value: str-167,
+              LanguageCode: lang168
+            },
+            {
+              Value: str-169,
+              LanguageCode: lang170
+            }
+          ],
+          MediaType: str-171,
+          IsAuthorized: false
+        },
+        ExtendedStatus: {
+          Value: [
+            {
+              Value: str-173,
+              LanguageCode: lang174
+            },
+            {
+              Value: str-175,
+              LanguageCode: lang176
+            }
+          ],
+          MediaType: str-177,
+          IsAuthorized: false
+        }
+      },
+      SeenSinceLastUpdate: [
+        {
+          Id: 0000007b-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:02:04 +0,
+          SeenBy: {
+            ActorType: ServiceOwner,
+            ActorId: str-127,
+            ActorName: str-126
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: true
+        },
+        {
+          Id: 00000082-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:02:11 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-134,
+            ActorName: str-133
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
+        }
+      ],
+      SeenSinceLastContentUpdate: [
+        {
+          Id: 00000089-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:02:18 +0,
+          SeenBy: {
+            ActorType: ServiceOwner,
+            ActorId: str-141,
+            ActorName: str-140
+          },
+          IsViaServiceOwner: false,
+          IsCurrentEndUser: true
+        },
+        {
+          Id: 00000090-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:02:25 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-148,
+            ActorName: str-147
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
+        }
+      ],
+      IsContentSeen: true,
+      EndUserContext: {
+        Revision: 00000098-0000-0000-0000-000000000000,
+        SystemLabels: [
+          MarkedAsUnopened,
+          Sent
+        ]
+      }
+    }
+  ],
+  HasNextPage: true,
+  ContinuationToken: continuation-token
+}

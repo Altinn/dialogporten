@@ -101,11 +101,13 @@ jobs:
 
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for staging
-    needs: [ deploy-apps, deploy-infra ]
+    needs: [ get-versions-from-github, deploy-apps, deploy-infra ]
     if: ${{ always() && !failure() && !cancelled() && (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
     with:
       environment-label: tt02
+      from-sha: ${{ needs.get-versions-from-github.outputs.apps_version_sha }}
+      to-sha: v${{ github.event.client_payload.version }}
       version: ${{ github.event.client_payload.version }}
 
   publish-sdk-to-nuget:
@@ -133,17 +135,6 @@ jobs:
       environment: staging
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
-
-  publish-schema-npm:
-    name: Publish schema npm package
-    needs: [check-for-changes, deploy-apps]
-    if: ${{ always() && !failure() && !cancelled() && (needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasGqlSchemaChanges == 'true') }}
-    uses: ./.github/workflows/workflow-publish-schema.yml
-    with:
-      version: ${{ github.event.client_payload.version }}
-      ref: "refs/tags/v${{ github.event.client_payload.version }}"
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   run-e2e-tests:
     name: "Run K6 functional end-to-end tests"
@@ -189,7 +180,7 @@ jobs:
 
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [deploy-infra, deploy-apps, tag-issues-with-environment, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests, publish-schema-npm]
+    needs: [deploy-infra, deploy-apps, tag-issues-with-environment, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests]
     if: ${{ always() && failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     with:
@@ -199,7 +190,6 @@ jobs:
       e2e_tests_status: ${{ needs.run-e2e-tests.result }}
       graphql_e2e_tests_status: ${{ needs.run-graphql-e2e-tests.result }}
       webapi_e2e_tests_status: ${{ needs.run-webapi-e2e-tests.result }}
-      schema_npm_status: ${{ needs.publish-schema-npm.result }}
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}

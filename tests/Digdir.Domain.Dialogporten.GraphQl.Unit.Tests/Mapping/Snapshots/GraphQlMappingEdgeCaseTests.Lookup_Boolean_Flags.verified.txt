@@ -1,0 +1,82 @@
+﻿[
+  {
+    Case: AllFalse,
+    Evidence: {
+      ViaRole: false,
+      ViaAccessPackage: false,
+      ViaResourceDelegation: false,
+      ViaInstanceDelegation: false,
+      Evidence: []
+    },
+    Resource: {
+      Id: resource,
+      IsDelegable: false,
+      MinimumAuthenticationLevel: 3,
+      Name: []
+    }
+  },
+  {
+    Case: ViaRoleAndDelegable,
+    Evidence: {
+      ViaRole: true,
+      ViaAccessPackage: false,
+      ViaResourceDelegation: false,
+      ViaInstanceDelegation: false,
+      Evidence: []
+    },
+    Resource: {
+      Id: resource,
+      IsDelegable: true,
+      MinimumAuthenticationLevel: 3,
+      Name: []
+    }
+  },
+  {
+    Case: ViaAccessPackage,
+    Evidence: {
+      ViaRole: false,
+      ViaAccessPackage: true,
+      ViaResourceDelegation: false,
+      ViaInstanceDelegation: false,
+      Evidence: []
+    },
+    Resource: {
+      Id: resource,
+      IsDelegable: false,
+      MinimumAuthenticationLevel: 3,
+      Name: []
+    }
+  },
+  {
+    Case: ViaResourceDelegation,
+    Evidence: {
+      ViaRole: false,
+      ViaAccessPackage: false,
+      ViaResourceDelegation: true,
+      ViaInstanceDelegation: false,
+      Evidence: []
+    },
+    Resource: {
+      Id: resource,
+      IsDelegable: false,
+      MinimumAuthenticationLevel: 3,
+      Name: []
+    }
+  },
+  {
+    Case: ViaInstanceDelegation,
+    Evidence: {
+      ViaRole: false,
+      ViaAccessPackage: false,
+      ViaResourceDelegation: false,
+      ViaInstanceDelegation: true,
+      Evidence: []
+    },
+    Resource: {
+      Id: resource,
+      IsDelegable: false,
+      MinimumAuthenticationLevel: 3,
+      Name: []
+    }
+  }
+]

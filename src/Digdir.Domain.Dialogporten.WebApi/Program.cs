@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -14,6 +15,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
 using Digdir.Library.Utils.AspNet;
 using FastEndpoints;
@@ -23,10 +25,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using NSwag;
+using NSwag.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
 
 // Using two-stage initialization to catch startup errors.
@@ -119,18 +123,51 @@ static void BuildAndRun(string[] args)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
         .AddDialogportenResponseCompression()
+        .AddProblemDetails()
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, "v1", "Dialogporten");
+            ConfigureOpenApiV1Document(
+                options: x,
+                postProcess: document =>
+                {
+
+                    document.RemoveDefaultSecurityScheme();
+                    document.AddMaskinportenSecurityScheme(builder, GetWellKnown(x.Services, "Maskinporten"));
+                    document.AddIdportenSecurityScheme(builder, GetWellKnown(x.Services, "Idporten"));
+                },
+                documentName: "v1",
+                title: "Dialogporten"
+            );
         })
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, "v1.enduser", "Dialogporten EndUser", audience: "enduser");
+            ConfigureOpenApiV1Document(
+                options: x,
+                postProcess: document =>
+                {
+                    document.RemoveDefaultSecurityScheme();
+                    document.AddMaskinportenSecurityScheme(builder, GetWellKnown(x.Services, "Maskinporten"));
+                    document.AddIdportenSecurityScheme(builder, GetWellKnown(x.Services, "Idporten"));
+                },
+                documentName: "v1.enduser",
+                title: "Dialogporten EndUser",
+                audience: "enduser"
+            );
         })
         .SwaggerDocument(x =>
         {
-            ConfigureOpenApiV1Document(x, "v1.serviceowner", "Dialogporten ServiceOwner", audience: "serviceowner");
+            ConfigureOpenApiV1Document(
+                options: x,
+                postProcess: document =>
+                {
+                    document.RemoveDefaultSecurityScheme();
+                    document.AddMaskinportenSecurityScheme(builder, GetWellKnown(x.Services, "Maskinporten"));
+                },
+                documentName: "v1.serviceowner",
+                title: "Dialogporten ServiceOwner",
+                audience: "serviceowner"
+            );
         })
         .AddControllers(options => options.InputFormatters.Insert(0, JsonPatchInputFormatter.Get()))
             .AddNewtonsoftJson()
@@ -172,23 +209,40 @@ static void BuildAndRun(string[] args)
 
     var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
 
-    app.MapScalarApiReference("/scalar", options => options
-        .WithTitle("Dialogporten API")
-        // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
-        // the base path it auto-detects (window.location.pathname minus the server request path).
-        // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
-        // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
-        .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
-        .AddDocument("v1", "(Legacy) Dialogporten - EndUser/ServiceOwner combined")
-        .AddDocument("v1.enduser", "Dialogporten EndUser")
-        .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
-        .DisableAgent());
+    app.UseStaticFiles();
+
+    app.MapScalarApiReference("/scalar", options =>
+    {
+        var openApiSettings = builder.Configuration
+            .GetSection(WebApiSettings.SectionName)
+            .Get<WebApiSettings>()!.OpenApi;
+
+        options
+            .WithTitle("Dialogporten API")
+            // Unlike the Swagger UI, Scalar resolves a relative document URL against the origin plus
+            // the base path it auto-detects (window.location.pathname minus the server request path).
+            // Behind APIM that base path is already "/dialogporten", so the route pattern must NOT
+            // include the prefix here, or it would be applied twice (e.g. /dialogporten/dialogporten/...).
+            .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+            .AddDocument("v1", "(Legacy) Dialogporten - EndUser/ServiceOwner combined")
+            .AddDocument("v1.enduser", "Dialogporten EndUser")
+            .AddDocument("v1.serviceowner", "Dialogporten ServiceOwner", isDefault: true)
+            .DisableAgent();
+
+        options.HideTestRequestButton = !openApiSettings.EnableTryItOut;
+        options.AddAuthorizationCodeFlow(IdportenSecurityScheme,
+            authOptions => authOptions
+                .WithClientId(openApiSettings.IdportenClientId)
+                .WithAuthorizationUrl(openApiSettings.IdportenAuthorizationUrl + "?prompt=login")
+        );
+    });
 
     app.UseHttpsRedirection();
     // Wraps the response body before any downstream middleware writes. Must precede
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
     app.UseDefaultExceptionHandler()
+        .UseStatusCodePages(UseStatusCodePagesHandlers.CreateStatusCodePageProblemDetails)
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
@@ -233,7 +287,8 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
-            x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
+            x.Errors.ResponseBuilder = (failures, ctx, _) => ProblemDetailsRules
+                .CreateProblemDetailsOrDefault(ctx, failures);
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
@@ -258,18 +313,61 @@ static void BuildAndRun(string[] args)
             };
         }, uiConfig: uiConfig =>
         {
+            var openApiSettings = builder.Configuration
+                .GetRequiredSection(WebApiSettings.SectionName)
+                .Get<WebApiSettings>()?.OpenApi ?? throw new UnreachableException("OpenApiOptions is required");
+
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
             // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
             uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
+            uiConfig.CustomJavaScriptPath = dialogPrefix + "/swagger-oidc-workaround.js";
+            uiConfig.OAuth2Client = new OAuth2ClientSettings
+            {
+                ClientId = openApiSettings.IdportenClientId,
+                ClientSecret = null,
+                UsePkceWithAuthorizationCodeGrant = true,
+                Scopes = { "openid", "profile", "digdir:dialogporten" },
+            };
+            uiConfig.EnableTryItOut = false; // Don't open try-it-out by default (this does not remove the button)
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_SECURITY_SCHEME"] = IdportenSecurityScheme;
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = openApiSettings.IdportenLogoutUrl;
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH"] = dialogPrefix + "/swagger/index.html";
+            if (!openApiSettings.EnableTryItOut)
+            {
+                uiConfig.AdditionalSettings["supportedSubmitMethods"] = new List<string>();
+            }
         })
         .UseFeatureMetrics();
 
     app.Run();
 }
 
-static void ConfigureOpenApiV1Document(DocumentOptions options, string documentName, string title, string? audience = null)
+
+static string GetWellKnown(IServiceProvider services, string name)
 {
+    var settings = services.GetRequiredService<IOptions<WebApiSettings>>().Value;
+    var schema = settings.Authentication.JwtBearerTokenSchemas.Find(x => x.Name == name);
+
+    return schema is null
+        ? throw new InvalidOperationException($"Unable to find authentication schema '{name}'")
+        : schema.WellKnown;
+}
+
+
+static void ConfigureOpenApiV1Document(
+    DocumentOptions options,
+    Action<OpenApiDocument> postProcess,
+    string documentName,
+    string title,
+    string? audience = null
+)
+{
+    // Every document surfaces experimental-feature notices: a feature can reach the contract on either
+    // side of the API (authorizationContext on the service owner side, isAuthorized and the excluded*
+    // collections on the end user side), and the combined legacy document carries both.
+    var experimentalProcessor = new ExperimentalFeatureSchemaProcessor();
+
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;
     options.RemoveEmptyRequestSchema = true;
@@ -285,6 +383,9 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
             document.AddServiceUnavailableResponse();
             document.RemoveUnusedPaginationSchemas();
             document.RemoveRequiredPropertiesFromSchemas();
+            postProcess.Invoke(document);
+            document.ChangeEndUserContextPartyExample();
+            experimentalProcessor.AddPropertyNotices(document);
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;
@@ -296,6 +397,8 @@ static void ConfigureOpenApiV1Document(DocumentOptions options, string documentN
         s.EnsureJsonPatchConsumes();
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
+
+        s.SchemaSettings.SchemaProcessors.Add(experimentalProcessor);
 
         if (audience is not null)
         {

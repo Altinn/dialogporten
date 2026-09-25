@@ -93,3 +93,8 @@ indent_size = 2
 
 # Enforce indentation to be 2 spaces
 indent_size = 2
+
+# Verify snapshot files are generated, and Verify compares them byte-for-byte.
+# A final newline that the generator does not emit makes the snapshot mismatch.
+[*.verified.*]
+insert_final_newline = false

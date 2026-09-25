@@ -1,0 +1,42 @@
+{
+  "channel": "${{ env.CHANNEL_ID }}",
+  "text": "${{ env.SUMMARY }}",
+  "attachments": [
+    {
+      "color": "${{ env.COLOR }}",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Auto-restart (${{ env.MODE }})",
+            "emoji": true
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Verdict:* ${{ env.VERDICT_TEXT }}\n*App:* ${{ env.APP }}\n*Replica:* ${{ env.REPLICA }}\n*Avg duration:* ${{ env.VALUE }} ms\n*Reason:* ${{ env.REASON }}"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "View Run"
+              },
+              "url": "${{ env.RUN_URL }}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

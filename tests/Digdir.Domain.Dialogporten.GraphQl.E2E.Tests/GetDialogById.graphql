@@ -40,6 +40,8 @@ query GetDialogById($dialogId: UUID!) {
       attachments {
         expiresAt
         id
+        name
+        isAuthorized
         displayName {
           languageCode
           value
@@ -151,6 +153,8 @@ query GetDialogById($dialogId: UUID!) {
         attachments {
           expiresAt
           id
+          name
+          isAuthorized
           displayName {
             languageCode
             value
@@ -183,6 +187,16 @@ query GetDialogById($dialogId: UUID!) {
               languageCode
               value
             }
+          }
+        }
+        navigationalActions {
+          id
+          expiresAt
+          url
+          isAuthorized
+          title {
+            languageCode
+            value
           }
         }
         sender {

@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
@@ -10,6 +11,7 @@ using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 using Activity = Digdir.Domain.Dialogporten.GraphQL.EndUser.Common.Activity;
 using ActorType = Digdir.Domain.Dialogporten.Domain.Actors.ActorType;
 using Attachment = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById.Attachment;
+using ExcludedElement = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById.ExcludedElement;
 using AttachmentUrl = Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById.AttachmentUrl;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using DialogStatus = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogStatus;
@@ -70,6 +72,7 @@ public class PropertyNameComparisonTests
             Add(typeof(DialogTransmissionAttachmentDto), typeof(Attachment), null);
             Add(typeof(DialogTransmissionAttachmentUrlDto), typeof(AttachmentUrl), null);
             Add(typeof(DialogTransmissionNavigationalActionDto), typeof(TransmissionNavigationalAction), null);
+            Add(typeof(ExcludedElementDto), typeof(ExcludedElement), null);
 
             // ====== Enums =======
             Add(typeof(DialogStatus.Values), typeof(GraphQL.EndUser.Common.DialogStatus), null);

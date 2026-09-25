@@ -1998,7 +1998,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The authorization attribute associated with the transmission.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this transmission.
+        /// <br/>Null when the transmission uses the legacy "authorizationAttribute".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// The extended type URI for the transmission.
@@ -2183,6 +2192,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition;
+        /// <br/>this context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -2234,6 +2252,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -2250,6 +2274,88 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
+
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition;
+        /// <br/>this context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext AuthorizationContext { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_AuthorizationContext
+    {
+
+        /// <summary>
+        /// A service resource that overrides the dialog's own service resource in the authorization evaluation,
+        /// <br/>referring to another service policy.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
+        /// <br/>subresource.
+        /// </summary>
+        [JsonPropertyName("additionalResourceAttribute")]
+        public string AdditionalResourceAttribute { get; set; }
+
+        /// <summary>
+        /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
+        /// <br/>effective resource for at least one of the parties.
+        /// </summary>
+        [JsonPropertyName("parties")]
+        public ICollection<string> Parties { get; set; }
+
+        /// <summary>
+        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// </summary>
+        [JsonPropertyName("includeDialogParty")]
+        public bool IncludeDialogParty { get; set; }
+
+        /// <summary>
+        /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        /// <summary>
+        /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
+
+        /// <summary>
+        /// Controls how the entity is presented to end users that fail the authorization check:
+        /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
+        /// </summary>
+        [JsonPropertyName("unauthorizedPresentation")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
+        public DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation
+    {
+
+        // Numbered to match the server's domain enum (Disabled = 1, Excluded = 2), not the schema-generator's
+        // default 0-based numbering: an unset value must serialize as an unnamed number and fail the server's
+        // IsInEnum() check, rather than silently deserializing as a named (and less restrictive) "Disabled".
+        [System.Runtime.Serialization.EnumMember(Value = @"Disabled")]
+        Disabled = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Excluded")]
+        Excluded = 2,
 
     }
 
@@ -2905,7 +3011,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The authorization attribute associated with the transmission.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this transmission.
+        /// <br/>Null when the transmission uses the legacy "authorizationAttribute".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// The extended type URI for the transmission.
@@ -3028,6 +3143,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition;
+        /// <br/>this context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3067,6 +3191,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -3083,6 +3213,73 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
+
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition;
+        /// <br/>this context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext AuthorizationContext { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_AuthorizationContext
+    {
+
+        /// <summary>
+        /// A service resource that overrides the dialog's own service resource in the authorization evaluation,
+        /// <br/>referring to another service policy.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
+        /// <br/>subresource.
+        /// </summary>
+        [JsonPropertyName("additionalResourceAttribute")]
+        public string AdditionalResourceAttribute { get; set; }
+
+        /// <summary>
+        /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
+        /// <br/>effective resource for at least one of the parties.
+        /// </summary>
+        [JsonPropertyName("parties")]
+        public ICollection<string> Parties { get; set; }
+
+        /// <summary>
+        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// </summary>
+        [JsonPropertyName("includeDialogParty")]
+        public bool IncludeDialogParty { get; set; }
+
+        /// <summary>
+        /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        /// <summary>
+        /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
+
+        /// <summary>
+        /// Controls how the entity is presented to end users that fail the authorization check:
+        /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
+        /// </summary>
+        [JsonPropertyName("unauthorizedPresentation")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
+        public DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
 
     }
 
@@ -3499,6 +3696,23 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent is always required in addition; this context
+        /// <br/>can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
+
+        /// <summary>
+        /// Indicates whether the end user is authorized for this attachment.
+        /// <br/>            
+        /// <br/>IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3561,7 +3775,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this transmission.
+        /// <br/>Null when the transmission uses legacy authorization fields.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Flag indicating if the authenticated user supplied in the query is authorized for this transmission.
@@ -3686,6 +3909,23 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent is always required in addition; this context
+        /// <br/>can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
+
+        /// <summary>
+        /// Indicates whether the end user is authorized for this attachment.
+        /// <br/>            
+        /// <br/>IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3725,6 +3965,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// The unique identifier for the navigational action in UUIDv7 format.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -3742,6 +3988,81 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+        /// <br/>The XACML action defaults to "read". Access to the parent is always required in addition; this context
+        /// <br/>can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
+
+        /// <summary>
+        /// Indicates whether the end user is authorized for this navigational action.
+        /// <br/>            
+        /// <br/>IsAuthorized is evaluated only when you use the EndUserId query-parameter, otherwise it is null.
+        /// </summary>
+        [JsonPropertyName("isAuthorized")]
+        public bool? IsAuthorized { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGet_AuthorizationContext
+    {
+
+        /// <summary>
+        /// A service resource that overrides the dialog's own service resource in the authorization evaluation,
+        /// <br/>referring to another service policy.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
+        /// <br/>subresource.
+        /// </summary>
+        [JsonPropertyName("additionalResourceAttribute")]
+        public string AdditionalResourceAttribute { get; set; }
+
+        /// <summary>
+        /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
+        /// <br/>effective resource for at least one of the parties.
+        /// </summary>
+        [JsonPropertyName("parties")]
+        public ICollection<string> Parties { get; set; }
+
+        /// <summary>
+        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// </summary>
+        [JsonPropertyName("includeDialogParty")]
+        public bool IncludeDialogParty { get; set; }
+
+        /// <summary>
+        /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        /// <summary>
+        /// The service owner supplied reference identifying this context in the dialog token's "e" claim, if any.
+        /// <br/>Null when the carrying entity's id is used instead. Sharing a value between entities in one dialog
+        /// <br/>forms an OR-group: authorization for any group member adds the shared value to "e". Recipients must
+        /// <br/>also validate the token's dialog id ("i").
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
+
+        /// <summary>
+        /// Controls how the entity is presented to end users that fail the authorization check:
+        /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
+        /// </summary>
+        [JsonPropertyName("unauthorizedPresentation")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
+        public DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3756,8 +4077,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         /// <summary>
         /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
+        /// <br/>            
+        /// <br/>Empty when the action was supplied with an authorizationContext, in which case the action is found
+        /// <br/>in authorizationContext.action.
         /// </summary>
         [JsonPropertyName("action")]
+        [System.Obsolete("Use 'AuthorizationContext.Action' instead.")]
         public string Action { get; set; }
 
         /// <summary>
@@ -3773,7 +4098,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this action.
+        /// <br/>Null when the action uses legacy authorization fields.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Whether the user, if supplied in the query, is authorized to perform the action.
@@ -3879,8 +4213,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <summary>
         /// String identifier for the action, corresponding to the "action" attributeId used in the XACML service policy,
         /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
+        /// <br/>            
+        /// <br/>Empty when the action was supplied with an authorizationContext, in which case the action is found
+        /// <br/>in authorizationContext.action.
         /// </summary>
         [JsonPropertyName("action")]
+        [System.Obsolete("Use 'AuthorizationContext.Action' instead.")]
         public string Action { get; set; }
 
         /// <summary>
@@ -3890,7 +4228,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this action.
+        /// <br/>Null when the action uses legacy authorization fields.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1ServiceOwnerDialogsQueriesGet_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// True if the authenticated user (set in the query) is authorized for this action.
@@ -4140,7 +4487,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this transmission.
+        /// <br/>Cannot be combined with "authorizationAttribute".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -4256,11 +4612,26 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition;
+        /// <br/>this context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class V1ServiceOwnerDialogsCommandsUpdateTransmission_TransmissionAttachmentUrl
     {
+
+        /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions and updates of attachment URLs. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
         /// <summary>
         /// The fully qualified URL of the attachment.
@@ -4288,6 +4659,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -4304,6 +4681,80 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
+
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition; this
+        /// <br/>context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonAuthorizationContexts_AuthorizationContext
+    {
+
+        /// <summary>
+        /// A service resource that overrides the dialog's own service resource in the authorization evaluation,
+        /// <br/>referring to another service policy. The service owner must have access to the referenced resource.
+        /// <br/>When set, the dialog's instance reference no longer applies to the evaluation of this entity.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// An additional resource attribute to be matched within the effective service policy, e.g. a task or
+        /// <br/>subresource. Cannot contain a service resource reference; use "serviceResource" for that.
+        /// <br/>References to an app ("urn:altinn:app") or an organization ("urn:altinn:org") are not allowed
+        /// <br/>either; both are derived from the effective service resource.
+        /// </summary>
+        [JsonPropertyName("additionalResourceAttribute")]
+        public string AdditionalResourceAttribute { get; set; }
+
+        /// <summary>
+        /// The parties to evaluate access on behalf of. Access is granted if the end user has access to the
+        /// <br/>effective resource for at least one of the parties. Must contain at least one party unless
+        /// <br/>"includeDialogParty" is true.
+        /// </summary>
+        [JsonPropertyName("parties")]
+        public ICollection<string> Parties { get; set; }
+
+        /// <summary>
+        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// </summary>
+        [JsonPropertyName("includeDialogParty")]
+        public bool IncludeDialogParty { get; set; }
+
+        /// <summary>
+        /// The XACML action to evaluate. Optional; defaults to "read" if not supplied.
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        /// <summary>
+        /// An optional reference identifying this context in the dialog token. When the end user is authorized for
+        /// <br/>this context, the dialog token's "e" claim lists this value instead of the id of the entity carrying the
+        /// <br/>context, allowing the service owner to recognize the grant without tracking Dialogporten entity ids.
+        /// <br/>Sharing a value between entities in one dialog forms an OR-group: authorization for any group member
+        /// <br/>adds the shared value to "e", so only group entities that intentionally share access semantics.
+        /// <br/>Recipients must validate the token's dialog id ("i") together with the reference.
+        /// <br/>Maximum 50 characters.
+        /// </summary>
+        [JsonPropertyName("tokenRef")]
+        public string TokenRef { get; set; }
+
+        /// <summary>
+        /// Required. Controls how the entity is presented to end users that fail the authorization check:
+        /// <br/>"disabled" keeps the entity visible but masks its URLs and embedded content references, while
+        /// <br/>"excluded" removes it from the collection it belongs to entirely, leaving only its id and
+        /// <br/>creation time in the sibling "excluded" list (e.g. "excludedTransmissions" beside "transmissions").
+        /// </summary>
+        [JsonPropertyName("unauthorizedPresentation")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
+        public DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
 
     }
 
@@ -4551,6 +5002,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent is always required in addition; this context
+        /// <br/>can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -4615,7 +5075,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this transmission.
+        /// <br/>Cannot be combined with "authorizationAttribute".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -4728,6 +5197,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent is always required in addition; this context
+        /// <br/>can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -4760,6 +5238,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent additions of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -4777,6 +5261,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition; this
+        /// <br/>context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -4793,6 +5286,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
         /// </summary>
         [JsonPropertyName("action")]
+        [System.Obsolete("Use 'AuthorizationContext.Action' instead.")]
         public string Action { get; set; }
 
         /// <summary>
@@ -4809,7 +5303,17 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this action.
+        /// <br/>Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+        /// <br/>"authorizationContext.action".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -4863,6 +5367,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
         /// </summary>
         [JsonPropertyName("action")]
+        [System.Obsolete("Use 'AuthorizationContext.Action' instead.")]
         public string Action { get; set; }
 
         /// <summary>
@@ -4872,7 +5377,17 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this action.
+        /// <br/>Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+        /// <br/>"authorizationContext.action".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// The logical name of the operation the API action refers to.
@@ -5036,7 +5551,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this transmission.
+        /// <br/>Cannot be combined with "authorizationAttribute".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -5149,6 +5673,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition;
+        /// <br/>this context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -5181,6 +5714,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -5197,6 +5736,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// </summary>
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
+
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition; this
+        /// <br/>context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
     }
 
@@ -5552,6 +6100,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent is always required in addition; this context
+        /// <br/>can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -5615,7 +6172,16 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this transmission.
+        /// <br/>Cannot be combined with "authorizationAttribute".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -5728,6 +6294,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this attachment.
+        /// <br/>The XACML action defaults to "read". Access to the parent is always required in addition; this context
+        /// <br/>can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -5760,6 +6335,12 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     {
 
         /// <summary>
+        /// A self-defined UUIDv7 may be provided to support idempotent creation of navigational actions. If not provided, a new UUIDv7 will be generated.
+        /// </summary>
+        [JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+        /// <summary>
         /// The title of the navigational action.
         /// </summary>
         [JsonPropertyName("title")]
@@ -5777,6 +6358,15 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("expiresAt")]
         public System.DateTimeOffset? ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Describes additional authorization inputs used when evaluating end user access to this navigational action.
+        /// <br/>The XACML action defaults to "read". Access to the parent transmission is always required in addition; this
+        /// <br/>context can only further restrict access, never widen it.
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -5793,6 +6383,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// The action identifier for the action, corresponding to the "action" attributeId used in the XACML service policy.
         /// </summary>
         [JsonPropertyName("action")]
+        [System.Obsolete("Use 'AuthorizationContext.Action' instead.")]
         public string Action { get; set; }
 
         /// <summary>
@@ -5809,7 +6400,17 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this action.
+        /// <br/>Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+        /// <br/>"authorizationContext.action".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -5863,6 +6464,7 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>which by default is the policy belonging to the service referred to by "serviceResource" in the dialog.
         /// </summary>
         [JsonPropertyName("action")]
+        [System.Obsolete("Use 'AuthorizationContext.Action' instead.")]
         public string Action { get; set; }
 
         /// <summary>
@@ -5872,7 +6474,17 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         /// <br/>Can also be used to refer to other service policies.
         /// </summary>
         [JsonPropertyName("authorizationAttribute")]
+        [System.Obsolete("Use 'AuthorizationContext' instead.")]
         public string AuthorizationAttribute { get; set; }
+
+        /// <summary>
+        /// Describes the authorization inputs used when evaluating end user access to this action.
+        /// <br/>Cannot be combined with "authorizationAttribute" or "action"; the XACML action is given by
+        /// <br/>"authorizationContext.action".
+        /// </summary>
+        [JsonPropertyName("authorizationContext")]
+        [System.Diagnostics.CodeAnalysis.Experimental("DPEXP001", UrlFormat = "https://github.com/Altinn/dialogporten/issues/3978")]
+        public V1CommonAuthorizationContexts_AuthorizationContext AuthorizationContext { get; set; }
 
         /// <summary>
         /// The logical name of the operation the API action refers to.

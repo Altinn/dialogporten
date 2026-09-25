@@ -29,10 +29,11 @@ public sealed class GetSearchTermsEndpoint : Endpoint<GetSearchTermsRequest, Get
         Get("metadata/searchterms");
         Group<MetadataGroup>();
 
-        Description(b => b.ProducesOneOf<GetSearchTermsResponse>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status304NotModified,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<GetSearchTermsResponse>()
+            .Produces(StatusCodes.Status304NotModified)
+            .ProducesDpProblemFor(StatusCodes.Status404NotFound)
+        );
     }
 
     [EnableResponseCompression]

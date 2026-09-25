@@ -18,6 +18,15 @@ APT::Periodic::Update-Package-Lists "0";
 APT::Periodic::Unattended-Upgrade "0";
 APT
 
+# Package upgrades run unattended in the maintenance window. Keep configuration
+# files that were changed locally and take new defaults only for unchanged ones,
+# so an upgrade never stops at an interactive configuration file prompt.
+cat > /etc/dpkg/dpkg.cfg.d/50-jumper-keep-local-conffiles <<'DPKG'
+force-confdef
+force-confold
+DPKG
+chmod 0644 /etc/dpkg/dpkg.cfg.d/50-jumper-keep-local-conffiles
+
 # Microsoft Defender for Endpoint: real-time protection, behaviour monitoring and a
 # daily low-priority quick scan at 04:00 local time. The daemon reloads this file
 # on its own; no restart is needed.

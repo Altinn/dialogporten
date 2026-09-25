@@ -68,12 +68,18 @@ fi
 # sshd_config and the first value wins, so these settings take precedence.
 # The config is validated before sshd is reloaded; a reload keeps existing
 # sessions open, so a mistake here never cuts off the session fixing it.
+# The pre-login banner is a file of our own: the distribution's /etc/issue.net
+# names the OS release.
+cat > /etc/ssh/jumper-banner <<'BANNER'
+Authorised access only. Activity on this system is logged.
+BANNER
+chmod 0644 /etc/ssh/jumper-banner
 cat > /etc/ssh/sshd_config.d/10-jumper-hardening.conf <<'SSHD'
 Ciphers aes128-ctr,aes192-ctr,aes256-ctr
 MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
 LoginGraceTime 60
 PermitRootLogin no
-Banner /etc/issue.net
+Banner /etc/ssh/jumper-banner
 AllowUsers *@*
 DenyUsers root
 # Do not set global AllowGroups or DenyGroups: both block first-time Entra login.

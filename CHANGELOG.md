@@ -1,5 +1,105 @@
 # Changelog
 
+## [1.121.3](https://github.com/Altinn/dialogporten/compare/v1.121.2...v1.121.3) (2026-09-17)
+
+
+### Miscellaneous Chores
+
+* **infra:** set PostgreSQL server log retention to 7 days ([#4401](https://github.com/Altinn/dialogporten/issues/4401)) ([20d931a](https://github.com/Altinn/dialogporten/commit/20d931a5ad6cfabb16bc95327e4bfec32ea4755f))
+
+## [1.121.2](https://github.com/Altinn/dialogporten/compare/v1.121.1...v1.121.2) (2026-09-17)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency dotnet-sdk to v10.0.401 ([#4394](https://github.com/Altinn/dialogporten/issues/4394)) ([1de2b7c](https://github.com/Altinn/dialogporten/commit/1de2b7c90734dc6032ee4304b288e348bf42c696))
+* **deps:** update microsoft dependencies to 10.0.12 ([#4395](https://github.com/Altinn/dialogporten/issues/4395)) ([9a1e81b](https://github.com/Altinn/dialogporten/commit/9a1e81b997cde87b324f92b16d3d20f9365da95f))
+
+## [1.121.1](https://github.com/Altinn/dialogporten/compare/v1.121.0...v1.121.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* align dialog sub-resource visibility with getDialogById ([#4368](https://github.com/Altinn/dialogporten/issues/4368)) ([c6cd932](https://github.com/Altinn/dialogporten/commit/c6cd93248a7e67ede156ab9830536a6c2b855e93))
+* changed GetLabelAssignmentLogs to return Gone for deleted dialogs ([#4369](https://github.com/Altinn/dialogporten/issues/4369)) ([f5b1138](https://github.com/Altinn/dialogporten/commit/f5b1138d9f6b787086fab5853f840d07b03572a4))
+* **ci:** retry Azure OIDC login on transient token endpoint failures ([#4356](https://github.com/Altinn/dialogporten/issues/4356)) ([7c36411](https://github.com/Altinn/dialogporten/commit/7c364111351b59f620fafb5d7f7aa7ee0a8b1f85))
+* **ci:** tag all PRs in the deployed range for prod, tt02 and yt01 ([#4363](https://github.com/Altinn/dialogporten/issues/4363)) ([e4fcc02](https://github.com/Altinn/dialogporten/commit/e4fcc02a0e8ab45255aab0aabf396c38028d4488))
+* **ci:** use a Dialogporten-owned digdir resource as the second org in staging k6 tests ([#4371](https://github.com/Altinn/dialogporten/issues/4371)) ([1c9101b](https://github.com/Altinn/dialogporten/commit/1c9101b534149243f5e5315d1b58519f0a271f99))
+* **infra:** scale prod Redis to Standard C3 ([#4391](https://github.com/Altinn/dialogporten/issues/4391)) ([24e6b13](https://github.com/Altinn/dialogporten/commit/24e6b134517f9e1042e345504065e23845859ebb))
+* **infra:** whitelist dis-edge IP range on test ingress ([#4390](https://github.com/Altinn/dialogporten/issues/4390)) ([71f6769](https://github.com/Altinn/dialogporten/commit/71f67699c7ebc36b06d5ffafa393731b2aa6e8cc))
+
+
+### Miscellaneous Chores
+
+* **deps:** align local grafana with Azure Managed Grafana 12.4.8 ([#4392](https://github.com/Altinn/dialogporten/issues/4392)) ([63d59ba](https://github.com/Altinn/dialogporten/commit/63d59ba55e54bbf6134a55aaf2fe498c38f11cad))
+* **deps:** update dependency fastendpoints.swagger to 8.3.0 ([#4375](https://github.com/Altinn/dialogporten/issues/4375)) ([c25a712](https://github.com/Altinn/dialogporten/commit/c25a712fe4d66bb9fe048a159f6df188164a8228))
+* **deps:** update dependency htmlagilitypack to 1.13.0 ([#4388](https://github.com/Altinn/dialogporten/issues/4388)) ([9856a37](https://github.com/Altinn/dialogporten/commit/9856a3738e7829a07128a15f8727de4fd200daba))
+* **deps:** update grafana/loki docker tag to v3.7.7 ([#4372](https://github.com/Altinn/dialogporten/issues/4372)) ([3fb5d33](https://github.com/Altinn/dialogporten/commit/3fb5d334a22ff2284e52541a3ada228295bad099))
+* **deps:** update hotchocolate dependencies to 16.6.2 ([#4373](https://github.com/Altinn/dialogporten/issues/4373)) ([7420021](https://github.com/Altinn/dialogporten/commit/74200210060d0b38b4d642fbfaa839444a3280ce))
+* **deps:** update hotchocolate dependencies to 16.6.4 ([#4380](https://github.com/Altinn/dialogporten/issues/4380)) ([b499aa0](https://github.com/Altinn/dialogporten/commit/b499aa0db9c19c2b2f8ba1898aab81472d460a45))
+* **deps:** update nginx docker tag to v1.31.4 ([#4374](https://github.com/Altinn/dialogporten/issues/4374)) ([769c6f4](https://github.com/Altinn/dialogporten/commit/769c6f44d9f9ff0fe483872271c3ef92b4a050a0))
+* **deps:** update nginx docker tag to v1.31.5 ([#4386](https://github.com/Altinn/dialogporten/issues/4386)) ([3e94c4f](https://github.com/Altinn/dialogporten/commit/3e94c4fdd4a3ecfe0973be7e3edb3fc6a965989f))
+* **deps:** update step-security/harden-runner action to v2.21.1 ([#4387](https://github.com/Altinn/dialogporten/issues/4387)) ([d1de86b](https://github.com/Altinn/dialogporten/commit/d1de86b5c3af65337d48007e59dc6d4f3f9fbb63))
+
+## [1.121.0](https://github.com/Altinn/dialogporten/compare/v1.120.1...v1.121.0) (2026-09-03)
+
+
+### Features
+
+* add authorizationContext as replacement for authorizationAttribute ([#4362](https://github.com/Altinn/dialogporten/issues/4362)) ([886c23a](https://github.com/Altinn/dialogporten/commit/886c23ad00b5f58ad7ac0c4781ee1330f4d99512))
+* replace context tokens with an authorized entities claim on the dialog token ([#4364](https://github.com/Altinn/dialogporten/issues/4364)) ([909cacd](https://github.com/Altinn/dialogporten/commit/909cacdcb4c15a8870ddfedf4cdd86ce5648ee13))
+
+
+### Bug Fixes
+
+* add dummy data to labelAssignmentLogs where database is missing PerformedBy  ([#4354](https://github.com/Altinn/dialogporten/issues/4354)) ([7b6c723](https://github.com/Altinn/dialogporten/commit/7b6c7234fb7e99353fb5d8ee062922c44aae68ab))
+
+
+### Miscellaneous Chores
+
+* **deps:** update azure/login action to v3.0.2 ([#4357](https://github.com/Altinn/dialogporten/issues/4357)) ([5ac12fa](https://github.com/Altinn/dialogporten/commit/5ac12fa93245197a7f23071cc8b29d620c1b5880))
+* **deps:** update dependency azure.storage.blobs to 12.29.2 ([#4358](https://github.com/Altinn/dialogporten/issues/4358)) ([3befa2c](https://github.com/Altinn/dialogporten/commit/3befa2c3337c416d663bb9c75bb5d6152a94853d))
+
+## [1.120.1](https://github.com/Altinn/dialogporten/compare/v1.120.0...v1.120.1) (2026-08-31)
+
+
+### Bug Fixes
+
+* **ci:** base schema prereleases on the next patch version ([#4336](https://github.com/Altinn/dialogporten/issues/4336)) ([cd15ebb](https://github.com/Altinn/dialogporten/commit/cd15ebbb6735813fa3cf25ac0b69b2e405b64bd9))
+* inverted token format check in net8.0 build of DialogTokenValidator ([#4342](https://github.com/Altinn/dialogporten/issues/4342)) ([2084ee1](https://github.com/Altinn/dialogporten/commit/2084ee1206b6a430be2c6b64b1f019f51bf18a4a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v7 ([#4346](https://github.com/Altinn/dialogporten/issues/4346)) ([d72a40e](https://github.com/Altinn/dialogporten/commit/d72a40ea718e1b7e1e4981f01e40dbb8b80d96a4))
+* **deps:** update actions/setup-dotnet action to v6 ([#4347](https://github.com/Altinn/dialogporten/issues/4347)) ([df5df7e](https://github.com/Altinn/dialogporten/commit/df5df7e8da36ac571e04c3ce40e19eaf05417b86))
+* **deps:** update actions/setup-node action to v7 ([#4348](https://github.com/Altinn/dialogporten/issues/4348)) ([5d0ae1f](https://github.com/Altinn/dialogporten/commit/5d0ae1f91c3fc5257bf04c6a546f1c1b172ed2fb))
+* **deps:** update dependency awesomeassertions to 9.6.0 ([#4344](https://github.com/Altinn/dialogporten/issues/4344)) ([e1ab346](https://github.com/Altinn/dialogporten/commit/e1ab3462e8d65ed9ec9c27174d482ac781e2ca85))
+* **deps:** update dependency microsoft.openapi to 2.12.2 ([#4343](https://github.com/Altinn/dialogporten/issues/4343)) ([bf34a06](https://github.com/Altinn/dialogporten/commit/bf34a0621b456773f9b16cdbe390da72eabb46b1))
+* **deps:** update step-security/harden-runner action to v2.21.0 ([#4345](https://github.com/Altinn/dialogporten/issues/4345)) ([a8718b7](https://github.com/Altinn/dialogporten/commit/a8718b7392ef8a8189e02e461be7ef1a89c76853))
+* made collections non-nullable in webapi SDK ([#4337](https://github.com/Altinn/dialogporten/issues/4337)) ([9aff3be](https://github.com/Altinn/dialogporten/commit/9aff3bebdaba7980e9a8d569ffe16f59bd5ce75b))
+* persist PostgreSQL enhanced metrics server parameters in IaC ([#4335](https://github.com/Altinn/dialogporten/issues/4335)) ([bd3481a](https://github.com/Altinn/dialogporten/commit/bd3481a4cf54198713ebf8935b8de8127e3e6776))
+* **SDK:** Make Content not nullable, and require value in localization ([#4353](https://github.com/Altinn/dialogporten/issues/4353)) ([d83da71](https://github.com/Altinn/dialogporten/commit/d83da71a0311fb1ec6ab361e453380eaeb1f00ce))
+
+## [1.120.0](https://github.com/Altinn/dialogporten/compare/v1.119.1...v1.120.0) (2026-08-27)
+
+
+### Features
+
+* **graphql:** add labelAssignmentLog query to end-user GraphQL API ([#4322](https://github.com/Altinn/dialogporten/issues/4322)) ([e12a482](https://github.com/Altinn/dialogporten/commit/e12a4826873907efeb3d9885002cf607bc74b1f5))
+
+
+### Miscellaneous Chores
+
+* cleanup old refitter autogen ([#4255](https://github.com/Altinn/dialogporten/issues/4255)) ([7ff0e74](https://github.com/Altinn/dialogporten/commit/7ff0e742052f161a5f4ad8c5bd3f77ce2864044b))
+* **deps:** update dependency microsoft.net.test.sdk to 18.9.0 ([#4329](https://github.com/Altinn/dialogporten/issues/4329)) ([4d0be94](https://github.com/Altinn/dialogporten/commit/4d0be948cfaf1b3f87324bf4209e48ecf4157833))
+* **deps:** update dependency microsoft.openapi to 2.12.0 ([#4330](https://github.com/Altinn/dialogporten/issues/4330)) ([18385eb](https://github.com/Altinn/dialogporten/commit/18385eb5d372e30d88dc8bed0656c92badbb0ab9))
+* **deps:** update dependency scalar.aspnetcore to 2.16.20 ([#4324](https://github.com/Altinn/dialogporten/issues/4324)) ([f4c0855](https://github.com/Altinn/dialogporten/commit/f4c0855c2425211b3d5879dce1cb220ff7a04e60))
+* **deps:** update dependency testcontainers.postgresql to 4.14.0 ([#4331](https://github.com/Altinn/dialogporten/issues/4331)) ([5ec2ec0](https://github.com/Altinn/dialogporten/commit/5ec2ec0add32b21f848d72ab5c8e0b4f710fb610))
+* **deps:** update hotchocolate dependencies to 16.6.1 ([#4325](https://github.com/Altinn/dialogporten/issues/4325)) ([967d806](https://github.com/Altinn/dialogporten/commit/967d8066d420880f048a7f5a5c178f5f3080c44c))
+* **docs:** update instructions for running Arbeidsflate locally with a couple of pointers ([#4323](https://github.com/Altinn/dialogporten/issues/4323)) ([26f6c35](https://github.com/Altinn/dialogporten/commit/26f6c35de4b1c18ba5db463985c8f277496a890d))
+* **infra:** ship Key Vault audit logs to the environment workspace ([#4320](https://github.com/Altinn/dialogporten/issues/4320)) ([743f07f](https://github.com/Altinn/dialogporten/commit/743f07fdebd887759d29f8a8bb4f1fe6e9fd664b))
+
 ## [1.119.1](https://github.com/Altinn/dialogporten/compare/v1.119.0...v1.119.1) (2026-08-19)
 
 

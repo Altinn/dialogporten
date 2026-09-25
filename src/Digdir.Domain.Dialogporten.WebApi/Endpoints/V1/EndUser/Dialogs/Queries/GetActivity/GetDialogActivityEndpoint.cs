@@ -34,9 +34,14 @@ public sealed class GetDialogActivityEndpoint : Endpoint<GetActivityRequest, Act
         Policies(AuthorizationPolicy.EndUser);
         Group<EndUserGroup>();
 
-        Description(b => b.ProducesOneOf<ActivityDto>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<ActivityDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status410Gone
+            ));
     }
 
     public override async Task HandleAsync(GetActivityRequest req, CancellationToken ct)

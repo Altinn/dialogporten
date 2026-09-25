@@ -123,7 +123,9 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "authorizationContext": null,
+      "isAuthorized": null
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -142,7 +144,9 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "authorizationContext": null,
+      "isAuthorized": null
     },
     {
       "id": "00000000-0000-0000-0000-000000000000",
@@ -161,7 +165,9 @@
           "consumerType": "Gui"
         }
       ],
-      "expiresAt": null
+      "expiresAt": null,
+      "authorizationContext": null,
+      "isAuthorized": null
     }
   ],
   "transmissions": [
@@ -170,6 +176,7 @@
       "idempotentKey": null,
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "urn:altinn:resource:ttd-dialogporten-automated-tests-correspondence",
+      "authorizationContext": null,
       "isAuthorized": null,
       "extendedType": null,
       "externalReference": null,
@@ -247,7 +254,9 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "authorizationContext": null,
+          "isAuthorized": null
         }
       ],
       "navigationalActions": []
@@ -257,6 +266,7 @@
       "idempotentKey": null,
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "urn:altinn:resource:ttd-altinn-events-automated-tests",
+      "authorizationContext": null,
       "isAuthorized": null,
       "extendedType": null,
       "externalReference": null,
@@ -321,7 +331,9 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "authorizationContext": null,
+          "isAuthorized": null
         }
       ],
       "navigationalActions": []
@@ -331,6 +343,7 @@
       "idempotentKey": null,
       "createdAt": "0000-00-00T00:00:00.000000\u002B00:00",
       "authorizationAttribute": "someunavailablesubresource",
+      "authorizationContext": null,
       "isAuthorized": null,
       "extendedType": null,
       "externalReference": null,
@@ -395,7 +408,9 @@
               "consumerType": "Gui"
             }
           ],
-          "expiresAt": null
+          "expiresAt": null,
+          "authorizationContext": null,
+          "isAuthorized": null
         }
       ],
       "navigationalActions": []
@@ -407,6 +422,7 @@
       "action": "read",
       "url": "https://digdir.no/",
       "authorizationAttribute": null,
+      "authorizationContext": null,
       "isAuthorized": null,
       "isDeleteDialogAction": false,
       "priority": "Primary",
@@ -424,6 +440,7 @@
       "action": "read",
       "url": "https://digdir.no/",
       "authorizationAttribute": null,
+      "authorizationContext": null,
       "isAuthorized": null,
       "isDeleteDialogAction": false,
       "priority": "Secondary",
@@ -447,6 +464,7 @@
       "id": "00000000-0000-0000-0000-000000000000",
       "action": "some_unauthorized_action",
       "authorizationAttribute": null,
+      "authorizationContext": null,
       "isAuthorized": null,
       "name": "confirm",
       "endpoints": [

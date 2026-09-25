@@ -15,6 +15,7 @@ using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
 using Digdir.Domain.Dialogporten.WebApi.Common.FeatureMetric;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.ServiceOwner.Dialogs.Commands.Patch;
 using Digdir.Library.Utils.AspNet;
 using FastEndpoints;
@@ -29,8 +30,8 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Scalar.AspNetCore;
 using Serilog;
+using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 using Constants = Digdir.Domain.Dialogporten.WebApi.Common.Constants;
-using OpenApiSecurityScheme = Digdir.Domain.Dialogporten.WebApi.Common.Swagger.OpenApiSecurityScheme;
 
 // Using two-stage initialization to catch startup errors.
 Log.Logger = new LoggerConfiguration()
@@ -129,6 +130,7 @@ static void BuildAndRun(string[] args)
         .AddAzureAppConfiguration()
         .AddEndpointsApiExplorer()
         .AddDialogportenResponseCompression()
+        .AddProblemDetails()
         .AddFastEndpoints()
         .SwaggerDocument(x =>
         {
@@ -228,7 +230,7 @@ static void BuildAndRun(string[] args)
             .DisableAgent();
 
         options.HideTestRequestButton = !openApiSettings.EnableTryItOut;
-        options.AddAuthorizationCodeFlow(OpenApiSecurityScheme.IdportenSecurityScheme,
+        options.AddAuthorizationCodeFlow(IdportenSecurityScheme,
             authOptions => authOptions
                 .WithClientId(openApiSettings.IdportenClientId)
                 .WithAuthorizationUrl(openApiSettings.IdportenAuthorizationUrl + "?prompt=login")
@@ -240,6 +242,7 @@ static void BuildAndRun(string[] args)
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
     app.UseDefaultExceptionHandler()
+        .UseStatusCodePages(UseStatusCodePagesHandlers.CreateStatusCodePageProblemDetails)
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
@@ -284,7 +287,8 @@ static void BuildAndRun(string[] args)
             x.Serializer.Options.Converters.Add(new JsonStringEnumConverter());
             x.Serializer.Options.Converters.Add(new UtcDateTimeOffsetConverter());
             x.Serializer.Options.Converters.Add(new DateTimeNotSupportedConverter());
-            x.Errors.ResponseBuilder = ErrorResponseBuilderExtensions.ResponseBuilder;
+            x.Errors.ResponseBuilder = (failures, ctx, _) => ProblemDetailsRules
+                .CreateProblemDetailsOrDefault(ctx, failures);
         })
         .UseAddSwaggerCorsHeader()
         .UseSwaggerGen(config: config =>
@@ -326,7 +330,9 @@ static void BuildAndRun(string[] args)
                 Scopes = { "openid", "profile", "digdir:dialogporten" },
             };
             uiConfig.EnableTryItOut = false; // Don't open try-it-out by default (this does not remove the button)
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_SECURITY_SCHEME"] = IdportenSecurityScheme;
             uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = openApiSettings.IdportenLogoutUrl;
+            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH"] = dialogPrefix + "/swagger/index.html";
             if (!openApiSettings.EnableTryItOut)
             {
                 uiConfig.AdditionalSettings["supportedSubmitMethods"] = new List<string>();
@@ -357,6 +363,11 @@ static void ConfigureOpenApiV1Document(
     string? audience = null
 )
 {
+    // Every document surfaces experimental-feature notices: a feature can reach the contract on either
+    // side of the API (authorizationContext on the service owner side, isAuthorized and the excluded*
+    // collections on the end user side), and the combined legacy document carries both.
+    var experimentalProcessor = new ExperimentalFeatureSchemaProcessor();
+
     options.MaxEndpointVersion = 1;
     options.ShortSchemaNames = true;
     options.RemoveEmptyRequestSchema = true;
@@ -373,6 +384,8 @@ static void ConfigureOpenApiV1Document(
             document.RemoveUnusedPaginationSchemas();
             document.RemoveRequiredPropertiesFromSchemas();
             postProcess.Invoke(document);
+            document.ChangeEndUserContextPartyExample();
+            experimentalProcessor.AddPropertyNotices(document);
         };
         s.Title = title;
         s.Description = Constants.SwaggerSummary.GlobalDescription;
@@ -384,6 +397,8 @@ static void ConfigureOpenApiV1Document(
         s.EnsureJsonPatchConsumes();
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
+
+        s.SchemaSettings.SchemaProcessors.Add(experimentalProcessor);
 
         if (audience is not null)
         {

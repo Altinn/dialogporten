@@ -335,7 +335,7 @@
             "type": "string"
           },
           "dialogToken": {
-            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.",
+            "description": "The dialog token. May be used (if supported) against external URLs referred to in this dialog\u0027s apiActions,\ntransmissions or attachments. It should also be used for front-channel embeds.\n            \nThe token\u0027s authorized entities (\u0022e\u0022) claim lists, for every entity carrying an authorization context that\nthe end user is authorized for, the entity\u0027s id or the \u0022tokenRef\u0022 the service owner supplied on the context.\nA tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the\nshared value. Recipients must validate the dialog id (\u0022i\u0022) together with an entity reference.",
             "nullable": true,
             "type": "string"
           },
@@ -353,6 +353,42 @@
                 "$ref": "#/components/schemas/DialogEndUserContext"
               }
             ]
+          },
+          "excludedApiActions": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nAPI actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. An API action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
+          },
+          "excludedAttachments": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nDialog-level attachments that exist but are withheld from the authenticated user, listed by id and\ncreation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
+          },
+          "excludedGuiActions": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nGUI actions that exist but are withheld from the authenticated user, listed by id and creation time\nonly. A GUI action is excluded rather than returned with isAuthorized=false when its authorization\ncontext sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
+          },
+          "excludedTransmissions": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nTransmissions that exist but are withheld from the authenticated user, listed by id and creation\ntime only. A transmission is excluded rather than returned with isAuthorized=false when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022; its children go with it.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "expiresAt": {
             "description": "The expiration date for the dialog. This is the last date when the dialog is available for the end user.\n            \nAfter this date is passed, the dialog will be considered expired and no longer available for the end user in any\nAPI. If not supplied, the dialog will be considered to never expire. This field can be changed by the service\nowner after the dialog has been created.",
@@ -728,10 +764,12 @@
             "type": "string"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "endpoints": {
             "description": "The endpoints associated with the action.",
@@ -838,6 +876,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -976,10 +1019,12 @@
             "type": "string"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "httpMethod": {
             "description": "The HTTP method that the frontend should use when redirecting the user.",
@@ -1380,10 +1425,12 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "Contains an authorization resource attributeId, that can used in custom authorization rules in the XACML service\npolicy, which by default is the policy belonging to the service referred to by \u0022serviceResource\u0022 in the dialog.\n            \nCan also be used to refer to other service policies.",
             "example": "mycustomresource\n/* equivalent to the above */\nurn:altinn:subresource:mycustomresource\nurn:altinn:task:Task_1\n/* refer to another service */\nurn:altinn:resource:some-other-service-identifier",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "content": {
             "description": "The transmission unstructured text content.",
@@ -1397,6 +1444,24 @@
             "description": "The date and time when the transmission was created.",
             "format": "date-time",
             "type": "string"
+          },
+          "excludedAttachments": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nTransmission-level attachments that exist but are withheld from the authenticated user, listed by id\nand creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
+          },
+          "excludedNavigationalActions": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nNavigational actions that exist but are withheld from the authenticated user, listed by id and\ncreation time only. A navigational action is excluded rather than returned with isAuthorized=false\nwhen its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "extendedType": {
             "description": "Arbitrary URI/URN describing a service-specific transmission type.\n            \nRefer to the service-specific documentation provided by the service owner for details (if in use).",
@@ -1477,6 +1542,11 @@
             "format": "guid",
             "type": "string"
           },
+          "isAuthorized": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
+          },
           "name": {
             "description": "The logical name of the attachment.",
             "example": "receipt",
@@ -1515,6 +1585,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -1671,9 +1746,11 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "content": {
             "description": "The content of the transmission.",
@@ -1693,6 +1770,24 @@
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "excludedAttachments": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nAttachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
+          },
+          "excludedNavigationalActions": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nNavigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "extendedType": {
             "description": "The extended type URI for the transmission.",
@@ -1756,6 +1851,16 @@
             "nullable": true,
             "type": "string"
           },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
+          },
           "title": {
             "description": "The title of the navigational action.",
             "items": {
@@ -1781,6 +1886,16 @@
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -1820,6 +1935,11 @@
             "description": "The unique identifier for the attachment in UUIDv7 format.",
             "format": "guid",
             "type": "string"
+          },
+          "isAuthorized": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this attachment. If not, the URLs will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "name": {
             "description": "The logical name of the attachment.",
@@ -1913,9 +2033,11 @@
             "type": "array"
           },
           "authorizationAttribute": {
+            "deprecated": true,
             "description": "The authorization attribute associated with the transmission.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "x-deprecatedMessage": "Use of \u0027authorizationContext\u0027 on the service owner API is preferred; this field only reflects the legacy authorization attribute."
           },
           "content": {
             "description": "The content of the transmission.",
@@ -1935,6 +2057,24 @@
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "excludedAttachments": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nAttachments on this transmission that exist but are withheld from the authenticated user, listed by\nid and creation time only. An attachment is excluded rather than shown with masked URLs when its\nauthorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
+          },
+          "excludedNavigationalActions": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nNavigational actions on this transmission that exist but are withheld from the authenticated user,\nlisted by id and creation time only. A navigational action is excluded rather than returned with\nisAuthorized=false when its authorization context sets unauthorizedPresentation to \u0022excluded\u0022.\n            \nExclusions are reported per collection: the full set for a dialog is \u0022excludedAttachments\u0022,\n\u0022excludedTransmissions\u0022, \u0022excludedGuiActions\u0022 and \u0022excludedApiActions\u0022 on the dialog itself, plus\n\u0022excludedAttachments\u0022 and \u0022excludedNavigationalActions\u0022 on each transmission. Merge all six when\nanswering \u0022what changed that I am not allowed to see?\u0022; reading only one under-reports silently.",
+            "items": {
+              "$ref": "#/components/schemas/ExcludedElement"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "extendedType": {
             "description": "The extended type URI for the transmission.",
@@ -1997,6 +2137,16 @@
             "format": "date-time",
             "nullable": true,
             "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier for the navigational action in UUIDv7 format.",
+            "format": "guid",
+            "type": "string"
+          },
+          "isAuthorized": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nIndicates whether the authenticated user is authorized for this navigational action. If not, the URL will be\nreplaced with \u0022urn:dialogporten:unauthorized\u0022.",
+            "type": "boolean",
+            "x-experimental": true
           },
           "title": {
             "description": "The title of the navigational action.",
@@ -2092,6 +2242,24 @@
           }
         },
         "type": "object"
+      },
+      "ExcludedElement": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nA stub standing in for an element the authenticated user is not authorized for, and whose authorization\ncontext asks for it to be excluded rather than disabled. The element is removed from the collection it\nbelongs to and recorded here instead, so that a client can tell \u0022this existed and you cannot see it\u0022\napart from \u0022this does not exist\u0022 without being shown anything about it.",
+        "properties": {
+          "createdAt": {
+            "description": "The UTC timestamp when the excluded element was created. Lets a client order exclusions against the\nelements it can see, e.g. to tell where in a transmission thread something is missing.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The identifier of the excluded element, matching the id it would have had in its own collection.",
+            "format": "guid",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "x-experimental": true
       },
       "GetDialogActivityRequest": {
         "additionalProperties": false,
@@ -2814,10 +2982,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Authenticated end user is not authorized for the supplied instance reference."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Authenticated end user is not authorized for the supplied instance reference."
           },
           "404": {
             "content": {
@@ -3142,11 +3324,35 @@
             },
             "description": "Successfully returned the dialog list."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "422": {
             "content": {
@@ -3234,11 +3440,35 @@
             },
             "description": "Successfully returned the dialog aggregate."
           },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -3249,6 +3479,16 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -3330,10 +3570,24 @@
             "description": "Successfully returned the dialog activity list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -3344,6 +3598,16 @@
               }
             },
             "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -3431,10 +3695,24 @@
             "description": "Successfully returned the dialog activity."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -3445,6 +3723,16 @@
               }
             },
             "description": "The specified dialog ID or activity ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -3514,10 +3802,24 @@
             "description": "Successfully returned the dialog label assignment log list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -3530,6 +3832,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -3631,10 +3940,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -3647,9 +3970,23 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "412": {
@@ -3740,10 +4077,24 @@
             "description": "Successfully returned the dialog seen log records."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Altinn authentication level too low."
           },
           "404": {
             "content": {
@@ -3753,7 +4104,17 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -3829,10 +4190,24 @@
             "description": "Successfully returned the dialog seen log record."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "404": {
             "content": {
@@ -3843,6 +4218,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
           },
           "503": {
             "content": {
@@ -3924,10 +4309,24 @@
             "description": "Successfully returned the dialog transmission list."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -3940,6 +4339,13 @@
             "description": "The given dialog ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -4028,10 +4434,24 @@
             "description": "Successfully returned the dialog transmission."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to get child entity for the given dialog (dialog not owned by authenticated organization or has additional scope requirements defined in service identifiers policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to get child entity for the given dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -4044,6 +4464,13 @@
             "description": "The specified dialog ID or transmission ID was not found."
           },
           "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Entity with the given key(s) is removed."
           },
           "503": {
@@ -4114,10 +4541,24 @@
             "description": "Validation error occurred. See problem details for a list of errors."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Unauthorized to update the supplied dialog (not owned by authenticated organization or has additional scope requirements defined in policy)."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "One of: \n- This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022.\n- Unauthorized to update the supplied dialog (not owned by authenticated organization)."
           },
           "404": {
             "content": {
@@ -4130,6 +4571,13 @@
             "description": "The given dialog ID was not found."
           },
           "409": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
             "description": "Conflict occurred while processing the request."
           },
           "412": {
@@ -4206,10 +4654,24 @@
             "description": "The list of authorized parties for the end user"
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "503": {
             "content": {
@@ -4293,10 +4755,24 @@
             "description": "Authorized service resource metadata."
           },
           "401": {
-            "description": "Missing or invalid authentication token. This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
           },
           "403": {
-            "description": "Forbidden"
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
           },
           "503": {
             "content": {

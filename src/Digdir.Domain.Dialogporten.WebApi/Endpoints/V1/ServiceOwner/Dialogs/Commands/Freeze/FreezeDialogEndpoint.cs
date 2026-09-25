@@ -35,14 +35,15 @@ public sealed class FreezeDialogEndpoint : Endpoint<FreezeDialogRequest>
 
         Description(b => b
             .Accepts<FreezeDialogRequest>()
-            .ProducesOneOf(
-            StatusCodes.Status204NoContent,
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status403Forbidden,
-            StatusCodes.Status404NotFound,
-            StatusCodes.Status409Conflict,
-            StatusCodes.Status410Gone,
-            StatusCodes.Status412PreconditionFailed));
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound,
+                StatusCodes.Status409Conflict,
+                StatusCodes.Status410Gone,
+                StatusCodes.Status412PreconditionFailed
+            ));
     }
 
     public override async Task HandleAsync(FreezeDialogRequest req, CancellationToken ct)

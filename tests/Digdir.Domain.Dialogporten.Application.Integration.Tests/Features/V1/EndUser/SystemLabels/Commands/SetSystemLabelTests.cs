@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
@@ -12,6 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -225,6 +227,84 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
         log.PerformedBy.ActorNameEntity.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
         log.PerformedBy.ActorNameEntity.Name.Should().Be("Mock system user name");
     }
+
+    [Fact]
+    public Task Search_Handles_Legacy_Log_Entry_Missing_Actor_Row() =>
+        // Finding A in issue #4340: LabelAssignmentLog rows written before the
+        // shared-actor fix in #3553 can lack their Actor row entirely. The search
+        // must tolerate such rows instead of dereferencing the missing PerformedBy.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .Do(async ctx =>
+            {
+                // Simulate the legacy data state by deleting a single log entry's actor row.
+                using var scope = Application.GetServiceProvider().CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+                var dialogId = ctx.GetDialogId();
+                var logId = await db.LabelAssignmentLogs
+                    .Where(l => l.Context.DialogId == dialogId)
+                    .Select(l => l.Id)
+                    .FirstAsync(TestContext.Current.CancellationToken);
+                var deleted = await db.Database.ExecuteSqlAsync($"""
+                                                                 DELETE FROM "Actor"
+                                                                 WHERE "LabelAssignmentLogId" = {logId}
+                                                                 """);
+                deleted.Should().Be(1);
+            })
+            .SendCommand(ctx => new SearchLabelAssignmentLogQuery
+            {
+                DialogId = ctx.GetDialogId(),
+            }).ExecuteAndAssert<List<LabelAssignmentLogDto>>(dtoList =>
+            {
+                dtoList.Should().ContainSingle(dto =>
+                    dto.PerformedBy.ActorName == "" &&
+                    dto.PerformedBy.ActorId == "" &&
+                    dto.PerformedBy.ActorType == ActorType.Values.PartyRepresentative);
+            });
+
+    [Fact]
+    public Task Search_Returns_Entries_When_No_Main_Resource_Access_But_List_Authorization() =>
+        //When the user lacks main-resource access but is granted access via the list
+        // authorization, the entries should be returned instead of NotFound.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                // No authorized actions => no access to the main resource
+                altinnAuthorization
+                    .GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(new DialogDetailsAuthorizationResult { AuthorizedChecks = [] });
+                // But access is granted via the list authorization
+                altinnAuthorization
+                    .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(true);
+                altinnAuthorization
+                    .UserHasRequiredAuthLevel(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(true);
+            })
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x => x.Should().ContainSingle());
+
+    [Fact]
+    public Task Search_Returns_NotFound_When_No_Main_Resource_Access_And_No_List_Authorization() =>
+        // When the user has neither main-resource access nor list authorization,
+        // the dialog is not visible and the label log must return NotFound.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                altinnAuthorization
+                    .GetDialogDetailsAuthorization(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(new DialogDetailsAuthorizationResult { AuthorizedChecks = [] });
+                altinnAuthorization
+                    .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(false);
+            })
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 
     private static GetDialogQuery GetDialog(Guid? id) => new() { DialogId = id!.Value };
 }

@@ -1,3 +1,5 @@
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+
 namespace Altinn.ApiClients.Dialogporten.EndUser;
 
 /// <summary>
@@ -8,5 +10,5 @@ public interface IEndUserApi
     /// <summary>
     /// Gets the V1 EndUser API.
     /// </summary>
-    Features.V1.IEnduserApi V1 { get; }
+    IEnduserApi V1 { get; }
 }

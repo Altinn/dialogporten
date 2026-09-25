@@ -89,10 +89,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         var dialog = request.Dto.ToDialogEntity();
         dialog.StatusId = request.Dto.Status.ToDialogStatusValue();
 
-        // Ensure transmissions and attachments have a UUIDv7 ID, needed for the transmission hierarchy validation
-        // and to guarantee deterministic order of input to output dtos.
+        // Ensure transmissions, attachments and navigational actions have a UUIDv7 ID, needed for the
+        // transmission hierarchy validation and to guarantee deterministic order of input to output dtos.
         dialog.Transmissions.Cast<IIdentifiableEntity>()
             .Concat(dialog.Transmissions.SelectMany(x => x.Attachments))
+            .Concat(dialog.Transmissions.SelectMany(x => x.NavigationalActions))
             .Concat(dialog.Attachments)
             .EnsureIds();
 

@@ -273,12 +273,12 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction(Constants.ReadAction),
-                        new AltinnAction("ApiAction", "urn:altinn:resource:api-action"),
-                        new AltinnAction("GuiAction", "urn:altinn:resource:gui-action"),
-                        new AltinnAction(Constants.TransmissionReadAction, "urn:altinn:resource:transmission-1"),
-                        new AltinnAction(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction),
+                        TestAuthorizedChecks.Authorized("ApiAction", "urn:altinn:resource:api-action"),
+                        TestAuthorizedChecks.Authorized("GuiAction", "urn:altinn:resource:gui-action"),
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-1"),
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:transmission-2"),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);
@@ -325,12 +325,11 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             {
                 var authorizationResult = new DialogDetailsAuthorizationResult
                 {
-                    AuthorizedAltinnActions = [
-                        new AltinnAction("subscribe"),
-                        new AltinnAction("ApiAction", "urn:altinn:resource:restricted"),
-                        new AltinnAction("GuiAction", "urn:altinn:resource:restricted"),
-                        new AltinnAction(Constants.TransmissionReadAction, "urn:altinn:resource:restricted"),
-                        new AltinnAction(Constants.ReadAction, "urn:altinn:resource:restricted"),
+                    AuthorizedChecks = [
+                        TestAuthorizedChecks.Authorized("subscribe"),
+                        TestAuthorizedChecks.Authorized("ApiAction", "urn:altinn:resource:restricted"),
+                        TestAuthorizedChecks.Authorized("GuiAction", "urn:altinn:resource:restricted"),
+                        TestAuthorizedChecks.Authorized(Constants.ReadAction, "urn:altinn:resource:restricted"),
                     ]
                 };
                 services.ConfigureDialogDetailsAuthorizationResult(authorizationResult);

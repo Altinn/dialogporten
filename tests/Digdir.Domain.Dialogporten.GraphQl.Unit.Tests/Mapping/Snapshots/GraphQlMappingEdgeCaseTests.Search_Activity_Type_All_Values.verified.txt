@@ -1,0 +1,70 @@
+﻿[
+  {
+    Source: DialogCreated,
+    Result: DialogCreated
+  },
+  {
+    Source: DialogClosed,
+    Result: DialogClosed
+  },
+  {
+    Source: Information,
+    Result: Information
+  },
+  {
+    Source: TransmissionOpened,
+    Result: TransmissionOpened
+  },
+  {
+    Source: PaymentMade,
+    Result: PaymentMade
+  },
+  {
+    Source: SignatureProvided,
+    Result: SignatureProvided
+  },
+  {
+    Source: DialogOpened,
+    Result: DialogOpened
+  },
+  {
+    Source: DialogDeleted,
+    Result: DialogDeleted
+  },
+  {
+    Source: DialogRestored,
+    Result: DialogRestored
+  },
+  {
+    Source: SentToSigning,
+    Result: SentToSigning
+  },
+  {
+    Source: SentToFormFill,
+    Result: SentToFormFill
+  },
+  {
+    Source: SentToSendIn,
+    Result: SentToSendIn
+  },
+  {
+    Source: SentToPayment,
+    Result: SentToPayment
+  },
+  {
+    Source: FormSubmitted,
+    Result: FormSubmitted
+  },
+  {
+    Source: FormSaved,
+    Result: FormSaved
+  },
+  {
+    Source: CorrespondenceOpened,
+    Result: CorrespondenceOpened
+  },
+  {
+    Source: CorrespondenceConfirmed,
+    Result: CorrespondenceConfirmed
+  }
+]

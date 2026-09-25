@@ -1,0 +1,22 @@
+﻿{
+  Single: {
+    AddLabels: [],
+    RemoveLabels: []
+  },
+  Bulk: {
+    Dto: {
+      Dialogs: [
+        {}
+      ],
+      AddLabels: [],
+      RemoveLabels: []
+    }
+  },
+  EmptyBulk: {
+    Dto: {
+      Dialogs: [],
+      AddLabels: [],
+      RemoveLabels: []
+    }
+  }
+}

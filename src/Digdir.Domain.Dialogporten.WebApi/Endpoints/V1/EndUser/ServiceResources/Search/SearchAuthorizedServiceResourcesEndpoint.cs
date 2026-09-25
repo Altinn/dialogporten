@@ -35,7 +35,13 @@ public sealed class SearchAuthorizedServiceResourcesEndpoint
         Group<EndUserGroup>();
 
         // Response compression is intentionally NOT enabled on this authenticated endpoint (CRIME/BREACH).
-        Description(b => b.ProducesOneOf<SearchAuthorizedServiceResourcesDto>(StatusCodes.Status200OK));
+        Description(b => b
+            .Produces<SearchAuthorizedServiceResourcesDto>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden
+            )
+        );
     }
 
     public override async Task HandleAsync(SearchAuthorizedServiceResourcesRequest req, CancellationToken ct)

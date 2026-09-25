@@ -1,5 +1,5 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc4918#section-11.2",
+  "type": "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.21",
   "title": "Unprocessable request.",
   "status": 422,
   "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000/activities",

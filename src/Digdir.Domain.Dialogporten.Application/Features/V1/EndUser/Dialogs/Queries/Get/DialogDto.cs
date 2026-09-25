@@ -1,5 +1,7 @@
-﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+﻿using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Content;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -161,6 +163,11 @@ public sealed class DialogDto
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,
     /// transmissions or attachments. It should also be used for front-channel embeds.
+    ///
+    /// The token's authorized entities ("e") claim lists, for every entity carrying an authorization context that
+    /// the end user is authorized for, the entity's id or the "tokenRef" the service owner supplied on the context.
+    /// A tokenRef shared by multiple entities represents an OR-group: authorization for any group member adds the
+    /// shared value. Recipients must validate the dialog id ("i") together with an entity reference.
     /// </summary>
     public string? DialogToken { get; set; }
 
@@ -180,9 +187,33 @@ public sealed class DialogDto
     public List<DialogAttachmentDto> Attachments { get; set; } = [];
 
     /// <summary>
+    /// Dialog-level attachments that exist but are withheld from the authenticated user, listed by id and
+    /// creation time only. An attachment is excluded rather than shown with masked URLs when its
+    /// authorization context sets unauthorizedPresentation to "excluded".
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedAttachments { get; set; }
+
+    /// <summary>
     /// The immutable list of transmissions associated with the dialog.
     /// </summary>
     public List<DialogTransmissionDto> Transmissions { get; set; } = [];
+
+    /// <summary>
+    /// Transmissions that exist but are withheld from the authenticated user, listed by id and creation
+    /// time only. A transmission is excluded rather than returned with isAuthorized=false when its
+    /// authorization context sets unauthorizedPresentation to "excluded"; its children go with it.
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedTransmissions { get; set; }
 
     /// <summary>
     /// The GUI actions associated with the dialog. Should be used in browser-based interactive frontends.
@@ -190,9 +221,33 @@ public sealed class DialogDto
     public List<DialogGuiActionDto> GuiActions { get; set; } = [];
 
     /// <summary>
+    /// GUI actions that exist but are withheld from the authenticated user, listed by id and creation time
+    /// only. A GUI action is excluded rather than returned with isAuthorized=false when its authorization
+    /// context sets unauthorizedPresentation to "excluded".
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedGuiActions { get; set; }
+
+    /// <summary>
     /// The API actions associated with the dialog. Should be used in specialized, non-browser-based integrations.
     /// </summary>
     public List<DialogApiActionDto> ApiActions { get; set; } = [];
+
+    /// <summary>
+    /// API actions that exist but are withheld from the authenticated user, listed by id and creation time
+    /// only. An API action is excluded rather than returned with isAuthorized=false when its authorization
+    /// context sets unauthorizedPresentation to "excluded".
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedApiActions { get; set; }
 
     /// <summary>
     /// An immutable list of activities associated with the dialog.
@@ -267,6 +322,7 @@ public sealed class DialogTransmissionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -274,6 +330,7 @@ public sealed class DialogTransmissionDto
     /// the attachments will not be available.
     /// </summary>
     public bool IsAuthorized { get; set; }
+
 
     /// <summary>
     /// Arbitrary URI/URN describing a service-specific transmission type.
@@ -318,9 +375,33 @@ public sealed class DialogTransmissionDto
     public List<DialogTransmissionAttachmentDto> Attachments { get; set; } = [];
 
     /// <summary>
+    /// Transmission-level attachments that exist but are withheld from the authenticated user, listed by id
+    /// and creation time only. An attachment is excluded rather than shown with masked URLs when its
+    /// authorization context sets unauthorizedPresentation to "excluded".
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedAttachments { get; set; }
+
+    /// <summary>
     /// The transmission-level navigational actions.
     /// </summary>
     public List<DialogTransmissionNavigationalActionDto> NavigationalActions { get; set; } = [];
+
+    /// <summary>
+    /// Navigational actions that exist but are withheld from the authenticated user, listed by id and
+    /// creation time only. A navigational action is excluded rather than returned with isAuthorized=false
+    /// when its authorization context sets unauthorizedPresentation to "excluded".
+    ///
+    /// Exclusions are reported per collection: the full set for a dialog is "excludedAttachments",
+    /// "excludedTransmissions", "excludedGuiActions" and "excludedApiActions" on the dialog, plus
+    /// "excludedAttachments" and "excludedNavigationalActions" on each transmission. Merge all six when
+    /// answering "what changed that I am not allowed to see?"; reading only one under-reports silently.
+    /// </summary>
+    public List<ExcludedElementDto>? ExcludedNavigationalActions { get; set; }
 }
 
 public sealed class DialogSeenLogDto
@@ -473,6 +554,7 @@ public sealed class DialogApiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
@@ -480,6 +562,7 @@ public sealed class DialogApiActionDto
     /// and all endpoints will be replaced with a fixed placeholder.
     /// </summary>
     public bool IsAuthorized { get; set; }
+
 
     /// <summary>
     /// The logical name of the operation the API action refers to.
@@ -588,12 +671,14 @@ public sealed class DialogGuiActionDto
     /// /* refer to another service */
     /// urn:altinn:resource:some-other-service-identifier
     /// </example>
+    [Obsolete("Use of 'authorizationContext' on the service owner API is preferred; this field only reflects the legacy authorization attribute.")]
     public string? AuthorizationAttribute { get; set; }
 
     /// <summary>
     /// Whether the user is authorized to perform the action.
     /// </summary>
     public bool IsAuthorized { get; set; }
+
 
     /// <summary>
     /// Indicates whether the action results in the dialog being deleted. Used by frontends to implement custom UX
@@ -651,6 +736,14 @@ public sealed class DialogAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
+    public bool IsAuthorized { get; set; } = true;
+
 }
 
 public sealed class DialogAttachmentUrlDto
@@ -710,6 +803,14 @@ public sealed class DialogTransmissionAttachmentDto
     /// The UTC timestamp when the attachment expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this attachment. If not, the URLs will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
+    public bool IsAuthorized { get; set; } = true;
+
 }
 
 public sealed class DialogTransmissionAttachmentUrlDto
@@ -747,6 +848,11 @@ public sealed class DialogTransmissionAttachmentUrlDto
 public sealed class DialogTransmissionNavigationalActionDto
 {
     /// <summary>
+    /// The unique identifier for the navigational action in UUIDv7 format.
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// The title of the navigational action.
     /// </summary>
     public List<LocalizationDto> Title { get; set; } = [];
@@ -766,4 +872,12 @@ public sealed class DialogTransmissionNavigationalActionDto
     /// The UTC timestamp when the navigational action expires and is no longer available.
     /// </summary>
     public DateTimeOffset? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the authenticated user is authorized for this navigational action. If not, the URL will be
+    /// replaced with "urn:dialogporten:unauthorized".
+    /// </summary>
+    [ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
+    public bool IsAuthorized { get; set; } = true;
+
 }

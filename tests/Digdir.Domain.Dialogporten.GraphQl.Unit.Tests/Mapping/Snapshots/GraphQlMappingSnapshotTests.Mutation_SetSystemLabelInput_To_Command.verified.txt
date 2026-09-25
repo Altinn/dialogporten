@@ -1,0 +1,11 @@
+﻿{
+  DialogId: 00000001-0000-0000-0000-000000000000,
+  AddLabels: [
+    Archive,
+    MarkedAsUnopened
+  ],
+  RemoveLabels: [
+    Sent,
+    Default
+  ]
+}

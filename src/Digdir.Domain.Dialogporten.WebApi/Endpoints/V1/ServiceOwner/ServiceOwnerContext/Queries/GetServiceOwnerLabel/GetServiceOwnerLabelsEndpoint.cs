@@ -33,9 +33,13 @@ public sealed class GetServiceOwnerLabelEndpoint : Endpoint<GetServiceOwnerLabel
         Policies(AuthorizationPolicy.ServiceProvider);
         Group<ServiceOwnerGroup>();
 
-        Description(b => b.ProducesOneOf<List<ServiceOwnerLabelDto>>(
-            StatusCodes.Status200OK,
-            StatusCodes.Status404NotFound));
+        Description(b => b
+            .Produces<List<ServiceOwnerLabelDto>>()
+            .ProducesDpProblemFor(
+                StatusCodes.Status401Unauthorized,
+                StatusCodes.Status403Forbidden,
+                StatusCodes.Status404NotFound
+            ));
     }
 
     public override async Task HandleAsync(GetServiceOwnerLabelsQuery req, CancellationToken ct)

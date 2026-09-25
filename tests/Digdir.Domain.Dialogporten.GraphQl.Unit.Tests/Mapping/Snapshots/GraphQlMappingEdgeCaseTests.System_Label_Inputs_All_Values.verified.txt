@@ -1,0 +1,127 @@
+﻿[
+  {
+    Source: Default,
+    Search: [
+      Default
+    ],
+    Single: {
+      AddLabels: [
+        Default
+      ],
+      RemoveLabels: [
+        Default
+      ]
+    },
+    Bulk: {
+      Dto: {
+        Dialogs: [],
+        AddLabels: [
+          Default
+        ],
+        RemoveLabels: [
+          Default
+        ]
+      }
+    }
+  },
+  {
+    Source: Bin,
+    Search: [
+      Bin
+    ],
+    Single: {
+      AddLabels: [
+        Bin
+      ],
+      RemoveLabels: [
+        Bin
+      ]
+    },
+    Bulk: {
+      Dto: {
+        Dialogs: [],
+        AddLabels: [
+          Bin
+        ],
+        RemoveLabels: [
+          Bin
+        ]
+      }
+    }
+  },
+  {
+    Source: Archive,
+    Search: [
+      Archive
+    ],
+    Single: {
+      AddLabels: [
+        Archive
+      ],
+      RemoveLabels: [
+        Archive
+      ]
+    },
+    Bulk: {
+      Dto: {
+        Dialogs: [],
+        AddLabels: [
+          Archive
+        ],
+        RemoveLabels: [
+          Archive
+        ]
+      }
+    }
+  },
+  {
+    Source: MarkedAsUnopened,
+    Search: [
+      MarkedAsUnopened
+    ],
+    Single: {
+      AddLabels: [
+        MarkedAsUnopened
+      ],
+      RemoveLabels: [
+        MarkedAsUnopened
+      ]
+    },
+    Bulk: {
+      Dto: {
+        Dialogs: [],
+        AddLabels: [
+          MarkedAsUnopened
+        ],
+        RemoveLabels: [
+          MarkedAsUnopened
+        ]
+      }
+    }
+  },
+  {
+    Source: Sent,
+    Search: [
+      Sent
+    ],
+    Single: {
+      AddLabels: [
+        Sent
+      ],
+      RemoveLabels: [
+        Sent
+      ]
+    },
+    Bulk: {
+      Dto: {
+        Dialogs: [],
+        AddLabels: [
+          Sent
+        ],
+        RemoveLabels: [
+          Sent
+        ]
+      }
+    }
+  }
+]

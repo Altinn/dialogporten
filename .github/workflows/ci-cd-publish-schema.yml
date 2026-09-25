@@ -56,7 +56,7 @@ jobs:
       force_publish: ${{ steps.context.outputs.force_publish }}
       dist_tag: ${{ steps.context.outputs.dist_tag }}
     steps:
-      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
@@ -89,7 +89,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           sparse-checkout: |
@@ -115,9 +115,19 @@ jobs:
           # Sets a global rather than echoing: set -e does not fire through
           # `v=$(fn)`, so failures here would silently yield "1.2.3-" or "-abc123".
           # Short SHA width must match workflow-generate-git-short-sha.yml so the
-          # npm version lines up with the docker tag - don't hard-code a width.
+          # npm version carries the same commit id as the docker tag for the same
+          # build - don't hard-code a width.
+          #
+          # version.txt holds the version that was last released, so appending a
+          # prerelease suffix to it yields a version semver sorts BELOW that
+          # release: 1.2.3-abc123 < 1.2.3. Consumers cannot then reach it through
+          # any range that also matches the release, and the `^` range npm writes
+          # on install resolves straight back to the release. Bumping the patch
+          # first keeps main builds sorted above the release they follow. The
+          # number only establishes ordering - the eventual release may bump the
+          # minor or major instead, and will still sort above these prereleases.
           resolve_version_from_file() {
-            local version short_sha
+            local version short_sha major minor patch
             version=$(cat version.txt) || {
               echo "::error::Could not read version.txt"; exit 1;
             }
@@ -128,7 +138,12 @@ jobs:
               echo "::error::Empty version ('$version') or short SHA ('$short_sha')"
               exit 1
             fi
-            RESOLVED_VERSION="${version}-${short_sha}"
+            IFS=. read -r major minor patch <<<"$version"
+            if ! printf '%s' "${major}.${minor}.${patch}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::version.txt must hold a plain semver version, got '$version'"
+              exit 1
+            fi
+            RESOLVED_VERSION="${major}.${minor}.$((patch + 1))-${short_sha}"
           }
 
           # npm versions are immutable - reject malformed ones before publishing.
@@ -283,18 +298,18 @@ jobs:
     env:
       WORKING_DIRECTORY: docs/schema/V1
     steps:
-      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           ref: ${{ needs.resolve-context.outputs.ref }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           # Trusted Publishing needs node >= 22.14.0 / npm >= 11.5.1.
           node-version: '24'
@@ -362,12 +377,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           sparse-checkout: .github/slack-templates

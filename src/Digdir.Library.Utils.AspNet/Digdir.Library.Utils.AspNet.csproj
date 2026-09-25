@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
-        <PackageReference Include="HotChocolate.Diagnostics" Version="16.6.0" />
+        <PackageReference Include="HotChocolate.Diagnostics" Version="16.6.6" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.1.2" />
         <PackageReference Include="Altinn.AspNet.HealthChecks" Version="0.4.0" />
         <PackageReference Include="Altinn.AspNet.HealthChecks.OpenTelemetry" Version="0.4.0" />

@@ -88,7 +88,6 @@ static void BuildAndRun(string[] args)
         .AddInfrastructure(builder.Configuration, builder.Environment)
             .WithPubCapabilities()
             .Build()
-        .AddAutoMapper(GraphQLAssemblyMarker.Assembly)
         .AddHttpContextAccessor()
         .AddScoped<IUser, ApplicationUser>()
         .AddValidatorsFromAssembly(GraphQLAssemblyMarker.Assembly,

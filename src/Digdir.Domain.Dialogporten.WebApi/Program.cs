@@ -76,7 +76,7 @@ static void BuildAndRun(string[] args)
         .Enrich.WithEnvironmentName()
         .Enrich.FromLogContext()
         .Filter.WithHandledPostgresExceptionFilter()
-        .WriteTo.OpenTelemetryOrConsole(context));
+        .WriteTo.OpenTelemetryOrConsoleWithFeatureMetricEndpoint(context));
 
     builder.Services
         .AddOptions<WebApiSettings>()

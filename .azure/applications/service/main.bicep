@@ -1,6 +1,7 @@
 targetScope = 'resourceGroup'
 
 import { baseTags } from '../../functions/baseTags.bicep'
+import { dialogDbConnectionString } from '../../functions/dialogDbConnectionString.bicep'
 
 import { Scale } from '../../modules/containerApp/main.bicep'
 
@@ -83,6 +84,16 @@ param scale Scale = {
   ]
 }
 
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
+
+@description('PostgreSQL server FQDN, required in EntraToken mode. No database password is read in this mode.')
+param dbHost string = ''
+
+@description('Explicit list of non-database Key Vault secrets referenced by App Configuration, required in EntraToken mode. Include Redis and the other runtime secrets it resolves.')
+param runtimeSecretNames string[] = []
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -90,21 +101,7 @@ var additionalTags = {}
 
 var tags = baseTags(additionalTags, environment)
 
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
-  name: appConfigurationName
-}
-
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-service-identity'
-  location: location
-  tags: tags
-}
-
-var containerAppEnvVars = [
+var baseContainerAppEnvVars = [
   {
     name: 'ASPNETCORE_ENVIRONMENT'
     value: environment
@@ -139,19 +136,64 @@ var containerAppEnvVars = [
   }
 ]
 
-resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
-  name: environmentKeyVaultName
-}
+// Token mode receives only the server address and authenticates as this workload's identity.
+// The administrator connection string remains available only in Password mode.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbConnectionString'
+    value: dbAuthMode == 'EntraToken' ? dialogDbConnectionString(dbHost) : ''
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
 
 var serviceName = 'service'
 
 var containerAppName = '${namePrefix}-${serviceName}'
 
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+  name: appConfigurationName
+}
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-service-identity'
+  location: location
+  tags: tags
+}
+
+resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
+  name: environmentKeyVaultName
+}
+
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = if (dbAuthMode == 'Password') {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'
   params: {
     keyvaultName: environmentKeyVaultResource.name
     principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
+module runtimeSecretReaderAccessPolicy '../../modules/keyvault/addSecretReaderRoles.bicep' = if (dbAuthMode == 'EntraToken') {
+  name: 'runtimeSecretReaderAccessPolicy-${containerAppName}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalId: managedIdentity.properties.principalId
+    secretNames: empty(runtimeSecretNames) ? fail('EntraToken requires an explicit runtimeSecretNames allowlist.') : runtimeSecretNames
   }
 }
 
@@ -187,6 +229,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     workloadProfileName: workloadProfileName
   }
   dependsOn: [
+    runtimeSecretReaderAccessPolicy
     keyVaultReaderAccessPolicy
     appConfigReaderAccessPolicy
     serviceBusOwnerAccessPolicy

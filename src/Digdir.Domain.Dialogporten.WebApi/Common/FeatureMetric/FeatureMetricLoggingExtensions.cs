@@ -15,6 +15,8 @@ internal static class FeatureMetricLoggingExtensions
     // and a value there would send their feature metrics to an endpoint they cannot reach.
     internal const string OtlpEndpointVariable = "FEATURE_METRICS_OTLP_ENDPOINT";
 
+    // Same scope as Serilog's MinimumLevel.Override (the category and the categories nested under it), so every
+    // event that the appsettings.json override raises to Information is routed to the feature-metric endpoint.
     private static readonly Func<LogEvent, bool> IsFeatureMetricEvent = Matching.FromSource(FeatureMetricLogCategory.Name);
 
     extension(LoggerSinkConfiguration writeTo)

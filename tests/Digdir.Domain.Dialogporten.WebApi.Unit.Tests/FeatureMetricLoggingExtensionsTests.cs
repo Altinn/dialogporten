@@ -35,13 +35,15 @@ public class FeatureMetricLoggingExtensionsTests
             .CreateLogger();
 
         logger.ForContext(Constants.SourceContextPropertyName, FeatureMetricLogCategory.Name).Information("feature metric");
+        logger.ForContext(Constants.SourceContextPropertyName, FeatureMetricLogCategory.Name + ".Nested").Information("nested category");
         logger.ForContext(Constants.SourceContextPropertyName, DialogSearchCategory).Information("dialog search");
         logger.ForContext(Constants.SourceContextPropertyName, FeatureMetricNamespaceSibling).Warning("namespace sibling");
         logger.ForContext(Constants.SourceContextPropertyName, FeatureMetricLogCategory.Name + "Lookalike").Warning("lookalike category");
         logger.ForContext(Constants.SourceContextPropertyName, "Microsoft.AspNetCore.Hosting.Diagnostics").Warning("framework warning");
         logger.Warning("no source context");
 
-        featureMetrics.Messages.Should().Equal("feature metric");
+        // The level override also covers nested categories, so the routing must too.
+        featureMetrics.Messages.Should().Equal("feature metric", "nested category");
         otherEvents.Messages.Should().Equal(
             "dialog search", "namespace sibling", "lookalike category", "framework warning", "no source context");
     }

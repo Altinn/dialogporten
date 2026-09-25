@@ -1397,6 +1397,7 @@
         "dependencies": {
           "Altinn.ApiClients.Maskinporten": "[10.1.0, )",
           "Altinn.Authorization.ABAC": "[0.1.1, )",
+          "Azure.Identity": "[1.21.0, )",
           "Dapper": "[2.1.79, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",

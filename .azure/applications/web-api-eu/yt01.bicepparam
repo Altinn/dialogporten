@@ -4,6 +4,7 @@ param environment = 'yt01'
 param location = 'norwayeast'
 param whitelistedIPs = [
   '51.13.85.197'
+  '20.100.147.64/28' // dis-edge-yt01-aks outbound IPv4 prefix
 ]
 param imageTag = readEnvironmentVariable('IMAGE_TAG')
 param revisionSuffix = readEnvironmentVariable('REVISION_SUFFIX')

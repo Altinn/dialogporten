@@ -2,7 +2,7 @@
   "type": "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.5",
   "title": "Resource not found.",
   "status": 404,
-  "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000",
+  "instance": "/dialogporten/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000",
   "traceId": "00-00000000000000000000000000000000-0000000000000000-00",
   "errors": {
     "DialogEntity": [

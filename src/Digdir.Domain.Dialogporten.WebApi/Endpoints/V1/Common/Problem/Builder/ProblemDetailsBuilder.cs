@@ -25,7 +25,7 @@ public sealed class ProblemDetailsBuilder<TProblemDetails> : IProblemDetailsBuil
 
     public ProblemDetailsBuilder<TProblemDetails> ForContext(HttpContext context)
     {
-        _problem.Instance = context.Request.Path;
+        _problem.Instance = context.Request.PathBase + context.Request.Path;
         _problem.TraceId = Activity.Current?.Id ?? context.TraceIdentifier;
         return this;
     }

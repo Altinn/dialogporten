@@ -35,7 +35,10 @@ public sealed class WebApiE2EFixture : E2EFixtureBase
 
         services
             .AddRefitClient<IEnduserApi>(refitSettings)
-            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
+            .ConfigureHttpClient(httpClient =>
+            {
+                httpClient.BaseAddress = webApiUri;
+            })
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.EndUser));
 

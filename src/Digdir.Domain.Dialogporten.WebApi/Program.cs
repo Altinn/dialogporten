@@ -321,7 +321,7 @@ static void BuildAndRun(string[] args)
             uiConfig.CustomJavaScriptPath = "/swagger-oidc-workaround.js";
             uiConfig.OAuth2Client = new OAuth2ClientSettings
             {
-                ClientId = openApiSettings.IdportenClientId,
+                ClientId = openApiSettings.IdportenClientId ?? "client_id",
                 ClientSecret = null,
                 UsePkceWithAuthorizationCodeGrant = true,
                 Scopes = { "openid", "profile", "digdir:dialogporten" },

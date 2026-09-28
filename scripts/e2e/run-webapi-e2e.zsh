@@ -227,7 +227,7 @@ done
 export DOTNET_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
 export ASPNETCORE_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
 export RUNNING_E2E_TESTS=true
-export DialogportenBaseUri="${DialogportenBaseUri:-https://localhost}"
+export DialogportenBaseUri="${DialogportenBaseUri:-https://localhost/dialogporten}"
 export WebApiPort="${WEBAPI_PORT:-7215}" # Default port should not colide with default port of APIs
 export GraphQlPort="${GRAPHQL_PORT:-5180}"
 export ServicePort="${SERVICE_PORT:-56843}"

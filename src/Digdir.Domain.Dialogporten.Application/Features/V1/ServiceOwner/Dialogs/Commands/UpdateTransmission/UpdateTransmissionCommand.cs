@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
@@ -154,7 +153,7 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
             ? new Conflict(
                 nameof(DialogTransmission.IdempotentKey),
                 $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting key: '{transmission.IdempotentKey}'.",
-                new IdempotentKeyConflict(transmission.IdempotentKey)
+                new IdempotentKeyConflictProblem(transmission.IdempotentKey)
             )
             : null;
     }

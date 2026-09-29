@@ -1,7 +1,6 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -68,8 +67,8 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .ExecuteAndAssert<Conflict>(x =>
             {
                 x.ErrorMessage.Should().Contain(ExistingKey);
-                x.AttemptedValues.Should().BeOfType<IdempotentKeyConflict>();
-                var attempt = x.AttemptedValues.As<IdempotentKeyConflict>();
+                x.AttemptedValue.Should().BeOfType<IdempotentKeyConflictProblem>();
+                var attempt = x.AttemptedValue.As<IdempotentKeyConflictProblem>();
                 attempt.ConflictingIdempotentKeys.Single().Should().Be(ExistingKey);
             });
 

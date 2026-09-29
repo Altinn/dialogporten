@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using OneOf;
 using OneOf.Types;

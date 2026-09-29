@@ -1,6 +1,5 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Rules;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflict;
 using FastEndpoints;
 using FluentValidation.Results;
 

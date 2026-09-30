@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.123.0](https://github.com/Altinn/dialogporten/compare/v1.122.0...v1.123.0) (2026-09-30)
+
+
+### Features
+
+* **infra:** add Entra token authentication mode for the PostgreSQL data source ([#4406](https://github.com/Altinn/dialogporten/issues/4406)) ([b2f31cc](https://github.com/Altinn/dialogporten/commit/b2f31ccf566251bbe33d3a1e3e139536dde253f1))
+
+
+### Bug Fixes
+
+* Default client id if not set. Otherwise OAuth is not initialized ([#4440](https://github.com/Altinn/dialogporten/issues/4440)) ([1626c5b](https://github.com/Altinn/dialogporten/commit/1626c5b66034902c2cea918c44807c7e6eb5eb12))
+
+
+### Miscellaneous Chores
+
+* **deps:** update grafana/loki docker tag to v3.7.8 ([#4443](https://github.com/Altinn/dialogporten/issues/4443)) ([16690eb](https://github.com/Altinn/dialogporten/commit/16690ebfbd5114af36cddf0276a7529c1af693ea))
+* **deps:** update grafana/setup-k6-action action to v1.2.2 ([#4444](https://github.com/Altinn/dialogporten/issues/4444)) ([393ba03](https://github.com/Altinn/dialogporten/commit/393ba03adc5d8d16e741790b45aafdfe2ef7643c))
+* **deps:** update nginx docker tag to v1.31.6 ([#4446](https://github.com/Altinn/dialogporten/issues/4446)) ([5a52b39](https://github.com/Altinn/dialogporten/commit/5a52b398962e5f3a36ff9f70490afd66eaaa8534))
+
 ## [1.122.0](https://github.com/Altinn/dialogporten/compare/v1.121.3...v1.122.0) (2026-09-28)
 
 

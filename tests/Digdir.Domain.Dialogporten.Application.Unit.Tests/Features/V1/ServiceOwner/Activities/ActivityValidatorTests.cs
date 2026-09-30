@@ -1,4 +1,3 @@
-using AutoMapper;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
@@ -29,13 +28,6 @@ public class ActivityValidatorTests
         DialogActivityType.Values activityType)
     {
         // Arrange
-        var mapper = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<CreateDialogActivityDto, UpdateDialogActivityDto>();
-                cfg.CreateMap<CreateDialogActivityDto, CreateActivityDto>();
-            })
-            .CreateMapper();
-
         var activity = DialogGenerator.GenerateFakeDialogActivity(type: activityType);
         activity.TransmissionId = IdentifiableExtensions.CreateVersion7();
 
@@ -50,8 +42,8 @@ public class ActivityValidatorTests
 
         // Act
         var createValidation = createValidator.Validate(activity);
-        var updateValidation = updateValidator.Validate(mapper.Map<UpdateDialogActivityDto>(activity));
-        var createActivityValidation = createActivityValidator.Validate(mapper.Map<CreateActivityDto>(activity));
+        var updateValidation = updateValidator.Validate(ToUpdateActivityDto(activity));
+        var createActivityValidation = createActivityValidator.Validate(ToCreateActivityDto(activity));
 
         // Assert
         if (activityType == DialogActivityType.Values.TransmissionOpened)
@@ -72,4 +64,28 @@ public class ActivityValidatorTests
             updateValidation.Errors.First().ErrorMessage.Should().Contain("TransmissionOpened");
         }
     }
+
+    // The activity DTOs share the same shape across the create/update/create-activity commands; these
+    // replace the by-convention AutoMapper maps the test previously used (issue #967).
+    private static UpdateDialogActivityDto ToUpdateActivityDto(CreateDialogActivityDto source) => new()
+    {
+        Id = source.Id,
+        CreatedAt = source.CreatedAt,
+        ExtendedType = source.ExtendedType,
+        Type = source.Type,
+        TransmissionId = source.TransmissionId,
+        PerformedBy = source.PerformedBy,
+        Description = source.Description
+    };
+
+    private static CreateActivityDto ToCreateActivityDto(CreateDialogActivityDto source) => new()
+    {
+        Id = source.Id,
+        CreatedAt = source.CreatedAt,
+        ExtendedType = source.ExtendedType,
+        Type = source.Type,
+        TransmissionId = source.TransmissionId,
+        PerformedBy = source.PerformedBy,
+        Description = source.Description
+    };
 }

@@ -116,7 +116,6 @@ static void BuildAndRun(string[] args)
 
         // Asp infrastructure
         .AddExceptionHandler<GlobalExceptionHandler>()
-        .AddAutoMapper(WebApiAssemblyMarker.Assembly)
         .AddScoped<IUser, ApplicationUser>()
         .AddHttpContextAccessor()
         .AddValidatorsFromAssembly(WebApiAssemblyMarker.Assembly,

@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.SetSystemLabel;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common;
@@ -41,11 +42,11 @@ public sealed class SetDialogSystemLabelsEndpoint : Endpoint<SetDialogSystemLabe
                 StatusCodes.Status401Unauthorized,
                 StatusCodes.Status403Forbidden,
                 StatusCodes.Status404NotFound,
-                StatusCodes.Status409Conflict,
                 StatusCodes.Status410Gone,
                 StatusCodes.Status412PreconditionFailed,
                 StatusCodes.Status422UnprocessableEntity
-            ));
+            )
+        );
     }
 
     public override async Task HandleAsync(SetDialogSystemLabelRequest req, CancellationToken ct)

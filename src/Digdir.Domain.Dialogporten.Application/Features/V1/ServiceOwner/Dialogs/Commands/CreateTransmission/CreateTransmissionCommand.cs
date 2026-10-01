@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ErrorReasons;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
@@ -190,12 +190,10 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         return new Conflict(
             nameof(DialogTransmission.IdempotentKey),
             $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.",
-            conflictingKeys.Select(x => new ConflictErrorReason
+            new IdempotentKeysExist
             {
-                Key = nameof(DialogTransmission.IdempotentKey),
-                Value = x,
-                Explanation = "IdempotentKey already exists"
-            }).ToArray()
+                IdempotentKeys = duplicatedIdempotentKeys
+            }
         );
     }
 

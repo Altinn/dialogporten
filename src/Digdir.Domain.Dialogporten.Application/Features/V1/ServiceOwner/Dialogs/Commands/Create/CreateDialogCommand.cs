@@ -4,7 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.ErrorReasons;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
@@ -126,20 +126,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return new Conflict(
                 nameof(DialogEntity.IdempotentKey),
                 $"'{dialog.IdempotentKey}' already exists with DialogId '{existingDialogId}'",
-                [
-                    new ConflictErrorReason
-                    {
-                        Key = nameof(CreateDialogDto.IdempotentKey),
-                        Value = dialog.IdempotentKey!,
-                        Explanation = "Idempotent key already exists for another dialog"
-                    },
-                    new ConflictErrorReason
-                    {
-                        Key = nameof(DialogDto.Id),
-                        Value = existingDialogId.Value,
-                        Explanation = "Dialog id already exists with this idempotent key"
-                    }
-                ]
+                new DialogIdForIdempotentKeyExists
+                {
+                    IdempotentKey = dialog.IdempotentKey!,
+                    DialogId = existingDialogId.Value
+                }
             );
         }
 
@@ -177,12 +168,11 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return new Conflict(
                 nameof(DialogTransmission.IdempotentKey),
                 $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.",
-                conflictingKeys.Select(x => new ConflictErrorReason
+                new IdempotentKeysExist
                 {
-                    Key = nameof(DialogTransmission.IdempotentKey),
-                    Value = x,
-                    Explanation = "IdempotentKey already exists"
-                }).ToArray());
+                    IdempotentKeys = duplicatedKeys
+                }
+            );
         }
 
         var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();

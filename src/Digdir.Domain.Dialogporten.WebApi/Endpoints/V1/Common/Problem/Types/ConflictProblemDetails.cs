@@ -1,41 +1,21 @@
+using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.WebApi.Common;
-using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
-using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Reasons;
-using FluentValidation.Results;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
 
 [OpenApiTypeName("ConflictProblemDetails")]
 public sealed class ConflictProblemDetails : ProblemDetails
 {
-    public List<Conflict> Conflicts { get; set; } = [];
+    public List<ProblemDetailsConflict> Conflicts { get; set; } = [];
 }
 
-[OpenApiTypeName("Conflict")]
-public sealed class Conflict
+public class ProblemDetailsConflict
 {
-    public required string Key { get; set; }
-    [OneOfTypes(typeof(string), typeof(int))]
-    public required object Value { get; set; }
-    public required string Reason { get; set; }
-}
+    public required string Code { get; init; }
+    public required string Title { get; init; }
 
-public static class ValidationFailuresExtensions
-{
-    extension(List<ValidationFailure> failures)
-    {
-        public List<Conflict> ToConflicts()
-        {
-            return failures.Select(x =>
-            {
-                var reason = (ConflictProblemReason)x.CustomState;
-                return new Conflict
-                {
-                    Key = reason.Key,
-                    Value = reason.Value,
-                    Reason = reason.Explanation
-                };
-            }).ToList();
-        }
-    }
+    [JsonExtensionData]
+    public IDictionary<string, object?> Extensions { get; set; } = new Dictionary<string, object?>(
+        StringComparer.Ordinal
+    );
 }

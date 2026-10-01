@@ -42,6 +42,10 @@
         </OpenApiDocument>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Endpoints\V1\Common\Problem\Extensions\" />
+    </ItemGroup>
+
     <Target Name="NSwag" AfterTargets="Build" Condition="$(Configuration)=='Release'">
         <Exec
             WorkingDirectory="$(ProjectDir)"

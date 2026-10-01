@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Builder;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Mappers;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
 using FastEndpoints;
 using FluentValidation.Results;

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Application;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
@@ -23,6 +24,7 @@ using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using NJsonSchema.Generation;
 using Npgsql;
 using NSwag;
 using NSwag.AspNetCore;
@@ -397,7 +399,6 @@ static void ConfigureOpenApiV1Document(
         s.EnsureJsonPatchConsumes();
 
         s.SchemaSettings.SchemaNameGenerator = new ShortNameGenerator(documentName);
-        s.SchemaSettings.SchemaProcessors.Add(new OneOfTypesSchemaProcessor());
 
         s.SchemaSettings.SchemaProcessors.Add(experimentalProcessor);
 

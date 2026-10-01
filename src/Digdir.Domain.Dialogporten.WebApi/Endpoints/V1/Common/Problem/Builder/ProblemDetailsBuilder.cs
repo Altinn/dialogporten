@@ -83,7 +83,7 @@ public static class ProblemDetailsBuilderExtensions
 {
     extension(ProblemDetailsBuilder<ConflictProblemDetails> builder)
     {
-        public ProblemDetailsBuilder<ConflictProblemDetails> WithConflicts(List<Conflict> conflicts)
+        public ProblemDetailsBuilder<ConflictProblemDetails> WithConflicts(List<ProblemDetailsConflict> conflicts)
         {
             builder.Modify(x => x.Conflicts = conflicts);
             return builder;

@@ -135,13 +135,3 @@ without Azure credentials resolves `main` or a release tag to a commit already
 in `main`; the deployment job checks out that immutable SHA. Checkout credentials
 are not persisted. Start **Dispatch Apps** from `main`, with the release version
 as its input.
-
-These checks prevent the normal PR call path from authenticating, but editable
-workflow checks are not a security boundary against a malicious PR. The shared
-`test` environment must also restrict deployment branches to `main` (with no PR
-merge-ref allowance), and the Azure federated credential must require that
-protected environment. Before enabling that policy, migrate the existing
-infrastructure and app PR what-if jobs to credential-free validation or a
-separately approved workflow. Otherwise those existing PR checks will fail.
-This is a repository-wide follow-up; this provisioning change alone does not
-secure the other credential-bearing PR workflows.

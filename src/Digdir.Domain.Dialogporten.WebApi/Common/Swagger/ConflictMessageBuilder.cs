@@ -14,19 +14,22 @@ public sealed class ConflictMessageBuilder
 
     public ConflictMessageBuilder ConcurrentOperationRejected()
     {
-        _messages.Add($"[{ProblemDetailsConflictMapper.ConcurrentOperationRejectedProblemCode}](#Conflicts)");
+        var code = ProblemDetailsConflictMapper.ConcurrentOperationRejectedProblemCode;
+        _messages.Add($"[{code}](#{code})");
         return this;
     }
 
     public ConflictMessageBuilder IdempotentKeysExist()
     {
-        _messages.Add($"[{ProblemDetailsConflictMapper.IdempotentKeysExistProblemCode}](#Conflicts)");
+        var code = ProblemDetailsConflictMapper.IdempotentKeysExistProblemCode;
+        _messages.Add($"[{code}](#{code})");
         return this;
     }
 
     public ConflictMessageBuilder DialogIdForIdempotentKeyExists()
     {
-        _messages.Add($"[{ProblemDetailsConflictMapper.DialogIdForIdempotentKeyExistsProblemCode}](#Conflicts)");
+        var code = ProblemDetailsConflictMapper.DialogIdForIdempotentKeyExistsProblemCode;
+        _messages.Add($"[{code}](#{code})");
         return this;
     }
 
@@ -37,7 +40,7 @@ public sealed class ConflictMessageBuilder
 
         if (_messages.Count > 1) sb.AppendLine("One of: ");
 
-        sb.Append(string.Join("\n", _messages.Select(m => $"- {m}")));
+        sb.Append(string.Join("\n", _messages.Order().Select(m => $"- {m}")));
 
         return sb.ToString();
     }

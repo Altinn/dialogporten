@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -16,6 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using OneOf.Types;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
+using AuthorizationConstants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Transmissions.Commands;
 
@@ -67,9 +69,9 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             .ExecuteAndAssert<Conflict>(x =>
             {
                 x.ErrorMessage.Should().Contain(ExistingKey);
-                x.AttemptedValue.Should().BeOfType<IdempotentKeyConflictProblem>();
-                var attempt = x.AttemptedValue.As<IdempotentKeyConflictProblem>();
-                attempt.ConflictingIdempotentKeys.Single().Should().Be(ExistingKey);
+                x.Reason.Should().BeOfType<IdempotentKeysExist>();
+                var attempt = x.Reason.As<IdempotentKeysExist>();
+                attempt.IdempotentKeys.Single().Should().Be(ExistingKey);
             });
 
     [Fact]
@@ -489,17 +491,17 @@ public class UpdateTransmissionTests(DialogApplication application) : Applicatio
             // owner may supply it on a transmission that has no authorization context. Suppressing it on
             // read would drop the restriction here: this flow round-trips the GET response straight back
             // through UpdateTransmission, which is how a suppressed attribute would be persisted as null.
-            .CreateTransmission((x, _) => x.AuthorizationAttribute = Constants.ExcludedTransmissionAttribute)
+            .CreateTransmission((x, _) => x.AuthorizationAttribute = AuthorizationConstants.ExcludedTransmissionAttribute)
             .GetServiceOwnerDialog()
             .AssertResult<DialogDto>((dialog, ctx) =>
                 dialog.Transmissions.Should().ContainSingle(x => x.Id == ctx.GetTransmissionId())
-                    .Which.AuthorizationAttribute.Should().Be(Constants.ExcludedTransmissionAttribute))
+                    .Which.AuthorizationAttribute.Should().Be(AuthorizationConstants.ExcludedTransmissionAttribute))
             .UpdateTransmission((_, _) => { })
             .AssertSuccess()
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>((dialog, ctx) =>
                 dialog.Transmissions.Should().ContainSingle(x => x.Id == ctx.GetTransmissionId())
-                    .Which.AuthorizationAttribute.Should().Be(Constants.ExcludedTransmissionAttribute));
+                    .Which.AuthorizationAttribute.Should().Be(AuthorizationConstants.ExcludedTransmissionAttribute));
 }
 
 

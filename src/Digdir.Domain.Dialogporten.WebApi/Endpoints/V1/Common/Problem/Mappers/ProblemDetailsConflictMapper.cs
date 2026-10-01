@@ -30,7 +30,7 @@ public sealed class ProblemDetailsConflictMapper
             DialogIdForIdempotentKeyExists x => new ProblemDetailsConflict
             {
                 Code = DialogIdForIdempotentKeyExistsProblemCode,
-                Title = "Idempotent Key caused dialog id conflict.",
+                Title = "Idempotent Key caused a dialog id conflict.",
                 Extensions = new Dictionary<string, object?>
                 {
                     ["dialogId"] = x.DialogId,

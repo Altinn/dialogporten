@@ -1,5 +1,6 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
@@ -114,10 +115,10 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .ExecuteAndAssert<Conflict>((x, ctx) =>
             {
                 x.ErrorMessage.Should().Contain(idempotentKey);
-                x.AttemptedValue.Should().BeOfType<IdempotentKeyCausedDialogIdProblem>();
-                var attempt = x.AttemptedValue.As<IdempotentKeyCausedDialogIdProblem>();
-                attempt.ConflictingDialogId.Should().Be(ctx.State.CreatedDialogs.First().Command.Dto.Id!.Value);
-                attempt.SuppliedIdempotentKey.Should().Be(idempotentKey);
+                x.Reason.Should().BeOfType<DialogIdForIdempotentKeyExists>();
+                var attempt = x.Reason.As<DialogIdForIdempotentKeyExists>();
+                attempt.DialogId.Should().Be(ctx.State.CreatedDialogs.First().Command.Dto.Id!.Value);
+                attempt.IdempotentKey.Should().Be(idempotentKey);
             });
     }
 
@@ -164,10 +165,10 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .ExecuteAndAssert<Conflict>(x =>
             {
                 x.ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2);
-                x.AttemptedValue.Should().BeOfType<IdempotentKeyConflictProblem>();
-                var attempt = x.AttemptedValue.As<IdempotentKeyConflictProblem>();
-                attempt.ConflictingIdempotentKeys.Count.Should().Be(2);
-                attempt.ConflictingIdempotentKeys.Should().Contain([idempotentKey1, idempotentKey2]);
+                x.Reason.Should().BeOfType<IdempotentKeysExist>();
+                var attempt = x.Reason.As<IdempotentKeysExist>();
+                attempt.IdempotentKeys.Count.Should().Be(2);
+                attempt.IdempotentKeys.Should().Contain([idempotentKey1, idempotentKey2]);
             });
     }
 
@@ -244,10 +245,10 @@ public class UniqueConstraintTests : ApplicationCollectionFixture
             .ExecuteAndAssert<Conflict>(x =>
             {
                 x.ErrorMessage.Should().ContainAll(idempotentKey1, idempotentKey2);
-                x.AttemptedValue.Should().BeOfType<IdempotentKeyConflictProblem>();
-                var attempt = x.AttemptedValue.As<IdempotentKeyConflictProblem>();
-                attempt.ConflictingIdempotentKeys.Count.Should().Be(2);
-                attempt.ConflictingIdempotentKeys.Should().Contain([idempotentKey1, idempotentKey2]);
+                x.Reason.Should().BeOfType<IdempotentKeysExist>();
+                var attempt = x.Reason.As<IdempotentKeysExist>();
+                attempt.IdempotentKeys.Count.Should().Be(2);
+                attempt.IdempotentKeys.Should().Contain([idempotentKey1, idempotentKey2]);
             });
     }
 

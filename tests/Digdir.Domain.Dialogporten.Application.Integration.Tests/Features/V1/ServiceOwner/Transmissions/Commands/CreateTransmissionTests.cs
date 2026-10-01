@@ -1,5 +1,6 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
@@ -70,9 +71,9 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             .ExecuteAndAssert<Conflict>(x =>
             {
                 x.ErrorMessage.Should().Contain(idempotentKey1);
-                x.AttemptedValue.Should().BeOfType<IdempotentKeyConflictProblem>();
-                var attempt = x.AttemptedValue.As<IdempotentKeyConflictProblem>();
-                attempt.ConflictingIdempotentKeys.Single().Should().Be(idempotentKey1);
+                x.Reason.Should().BeOfType<IdempotentKeysExist>();
+                var attempt = x.Reason.As<IdempotentKeysExist>();
+                attempt.IdempotentKeys.Single().Should().Be(idempotentKey1);
             });
     }
 

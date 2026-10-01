@@ -380,6 +380,7 @@ static void ConfigureOpenApiV1Document(
             document.Generator = null;
             document.MakeCollectionsNullable();
             document.AddTagDescriptions();
+            document.AddConflictsSection();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();

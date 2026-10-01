@@ -65,5 +65,9 @@ internal sealed class AuthorizationOptionsSetup : IConfigureOptions<Authorizatio
             .Combine(options.GetPolicy(AuthorizationPolicy.ServiceProvider)!)
             .RequireScope(AuthorizationScope.ServiceOwnerAdminScope)
         );
+
+        options.AddPolicy(AuthorizationPolicy.Compliance, builder => builder
+            .Combine(options.DefaultPolicy)
+            .RequireScope(AuthorizationScope.Compliance));
     }
 }

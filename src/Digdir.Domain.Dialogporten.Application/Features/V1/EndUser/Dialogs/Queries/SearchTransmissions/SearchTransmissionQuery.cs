@@ -9,11 +9,10 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
-using static Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common.AuthorizationExclusion;
+using static Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.AuthorizationExclusion;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchTransmissions;
 

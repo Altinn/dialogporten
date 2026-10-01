@@ -1,10 +1,16 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+﻿using System.Security.Claims;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 
 public interface IAltinnAuthorization
 {
+    Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
+        ClaimsPrincipal claimsPrincipal,
+        DialogEntity dialogEntity,
+        CancellationToken cancellationToken = default);
+
     Task<DialogDetailsAuthorizationResult> GetDialogDetailsAuthorization(
         DialogEntity dialogEntity,
         CancellationToken cancellationToken = default);
@@ -27,6 +33,7 @@ public interface IAltinnAuthorization
         List<string> constraintParties,
         CancellationToken cancellationToken = default);
 
+    Task<bool> HasListAuthorizationForDialog(ClaimsPrincipal claimsPrincipal, DialogEntity dialog, CancellationToken cancellationToken);
     Task<bool> HasListAuthorizationForDialog(DialogEntity dialog, CancellationToken cancellationToken);
 
     bool UserHasRequiredAuthLevel(int minimumAuthenticationLevel);

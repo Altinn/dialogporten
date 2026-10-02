@@ -18,7 +18,7 @@ on:
         required: true
         type: string
       provisionDbPrincipals:
-        description: "Provision DB identities (disable only for initial Password-mode bootstrap)"
+        description: "Provision DB identities where enabled (disable for the initial Password-mode bootstrap or for a release without the db-provisioner job)"
         default: true
         required: false
         type: boolean

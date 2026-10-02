@@ -24,6 +24,10 @@ name: Provision DB principals
 # Fresh-environment ordering: the login roles are named after managed identities that the app and
 # job templates create. A brand-new environment must therefore be deployed once in the default
 # password authentication mode, so the identities exist, before this can provision anything.
+#
+# Deployment is opt-in: the jobs that deploy and run the provisioner only run while the repository
+# variable DB_PROVISIONING_ENABLED is 'true'. Until then, deployments skip provisioning and nothing
+# waits on it. Pull request validation runs either way.
 
 on:
   workflow_call:
@@ -103,7 +107,7 @@ jobs:
 
   resolve-deployment-ref:
     name: Verify provisioner deployment commit
-    if: ${{ inputs.environment == 'test' && !inputs.dryRun && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+    if: ${{ vars.DB_PROVISIONING_ENABLED == 'true' && inputs.environment == 'test' && !inputs.dryRun && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

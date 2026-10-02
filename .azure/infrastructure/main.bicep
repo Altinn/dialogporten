@@ -184,6 +184,7 @@ module serviceBus '../modules/serviceBus/main.bicep' = {
     subnetId: serviceBusVnetEnabled ? vnet.outputs.serviceBusSubnetId : null
     vnetId: serviceBusVnetEnabled ? vnet.outputs.virtualNetworkId : null
     tags: tags
+    appInsightWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
   }
 }
 

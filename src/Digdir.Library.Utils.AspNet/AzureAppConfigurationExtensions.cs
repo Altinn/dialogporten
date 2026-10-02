@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Azure.Core;
 using Azure.Identity;
+using Digdir.Domain.Dialogporten.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Digdir.Library.Utils.AspNet;
 
@@ -16,6 +18,7 @@ public static class AzureAppConfigurationExtensions
 {
     private const string AzureAppConfigurationUriConfigName = "AZURE_APPCONFIG_URI";
     private const string SentinelKey = "Sentinel";
+    private const string DialogDbConnectionStringKey = "Infrastructure:DialogDbConnectionString";
 
     public static IConfigurationBuilder AddAzureConfiguration(
         this ConfigurationManager config,
@@ -33,6 +36,7 @@ public static class AzureAppConfigurationExtensions
 
         return config.AddAzureAppConfiguration(appConfigOptions => appConfigOptions
             .Connect(appConfigUri, credential)
+            .ConfigureDialogDatabaseConnection(config)
             .Select(KeyFilter.Any, LabelFilter.Null)
             .SelectIf(!string.IsNullOrWhiteSpace(environment),
                 keyFilter: KeyFilter.Any,
@@ -43,6 +47,45 @@ public static class AzureAppConfigurationExtensions
             .ConfigureKeyVault(keyVaultOptions => keyVaultOptions
                 .SetCredential(credential)
                 .SetSecretRefreshInterval(refreshRate.Value)));
+    }
+
+    extension(AzureAppConfigurationOptions options)
+    {
+        internal AzureAppConfigurationOptions ConfigureDialogDatabaseConnection(IConfiguration bootstrapConfiguration)
+        {
+            if (bootstrapConfiguration.GetValue<DialogDbAuthMode>("Infrastructure:DialogDbAuth:Mode")
+                is not DialogDbAuthMode.EntraToken)
+            {
+                return options;
+            }
+
+            var connectionString = bootstrapConfiguration[DialogDbConnectionStringKey];
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException(
+                    $"{DialogDbConnectionStringKey} must be configured before Azure App Configuration is loaded when using EntraToken authentication.");
+            }
+
+            var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString);
+            if (connectionStringBuilder.Password is not null || connectionStringBuilder.Passfile is not null)
+            {
+                throw new InvalidOperationException(
+                    $"{DialogDbConnectionStringKey} must not contain a password or passfile when using EntraToken authentication.");
+            }
+
+            // Mapping happens before Key Vault resolution, both on initial load and refresh. Replace
+            // the shared administrator reference so this workload never requests its secret.
+            return options.Map(setting =>
+            {
+                if (string.Equals(setting.Key, DialogDbConnectionStringKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    setting.Value = connectionString;
+                    setting.ContentType = null;
+                }
+
+                return ValueTask.FromResult(setting);
+            });
+        }
     }
 
     public static IApplicationBuilder UseAzureConfiguration(this IApplicationBuilder builder)

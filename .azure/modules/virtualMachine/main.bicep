@@ -195,6 +195,11 @@ resource postProvision 'Microsoft.Compute/virtualMachines/runCommands@2024-07-01
   parent: virtualMachine
   name: 'post-provision'
   location: location
+  // The login extension's installer edits sshd_config and holds the dpkg lock
+  // while it runs, so the script runs after it.
+  dependsOn: [
+    aadLoginExtension
+  ]
   tags: tags
   properties: {
     source: {

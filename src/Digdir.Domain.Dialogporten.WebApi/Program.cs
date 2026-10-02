@@ -22,6 +22,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using NSwag;
@@ -204,10 +205,9 @@ static void BuildAndRun(string[] args)
     }
 
     var app = builder.Build();
+    app.UsePathBase("/dialogporten");
     app.MapAspNetHealthChecks()
         .MapControllers();
-
-    var dialogPrefix = builder.Environment.IsDevelopment() ? "" : "/dialogporten";
 
     app.UseStaticFiles();
 
@@ -237,7 +237,6 @@ static void BuildAndRun(string[] args)
         );
     });
 
-    app.UseHttpsRedirection();
     // Wraps the response body before any downstream middleware writes. Must precede
     // UseDefaultExceptionHandler so problem+json error bodies on opted-in endpoints are compressed too.
     app.UseResponseCompression();
@@ -319,12 +318,10 @@ static void BuildAndRun(string[] args)
 
             // Hide schemas view
             uiConfig.DefaultModelsExpandDepth = -1;
-            // We have to add dialogporten here to get the correct base url for swagger.json in the APIM. Should not be done for development
-            uiConfig.DocumentPath = dialogPrefix + "/swagger/{documentName}/swagger.json";
-            uiConfig.CustomJavaScriptPath = dialogPrefix + "/swagger-oidc-workaround.js";
+            uiConfig.CustomJavaScriptPath = "/swagger-oidc-workaround.js";
             uiConfig.OAuth2Client = new OAuth2ClientSettings
             {
-                ClientId = openApiSettings.IdportenClientId,
+                ClientId = openApiSettings.IdportenClientId ?? "client_id",
                 ClientSecret = null,
                 UsePkceWithAuthorizationCodeGrant = true,
                 Scopes = { "openid", "profile", "digdir:dialogporten" },
@@ -332,7 +329,6 @@ static void BuildAndRun(string[] args)
             uiConfig.EnableTryItOut = false; // Don't open try-it-out by default (this does not remove the button)
             uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_SECURITY_SCHEME"] = IdportenSecurityScheme;
             uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_URL"] = openApiSettings.IdportenLogoutUrl;
-            uiConfig.AdditionalSettings["SWAGGER_IDPORTEN_LOGOUT_REDIRECT_PATH"] = dialogPrefix + "/swagger/index.html";
             if (!openApiSettings.EnableTryItOut)
             {
                 uiConfig.AdditionalSettings["supportedSubmitMethods"] = new List<string>();

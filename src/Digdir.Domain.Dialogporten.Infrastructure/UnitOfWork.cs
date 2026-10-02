@@ -2,9 +2,10 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
@@ -157,7 +158,11 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             // men med ulik HTTP-statuskode avhengig av om klienten har bedt om samtidighetskontroll eller ikke.
             return _enableConcurrencyCheck
                 ? new ConcurrencyError()
-                : new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+                : new Conflict(
+                    "",
+                    "The request conflicted with a concurrent operation. Please try again.",
+                    new ConcurrentOperationRejected()
+                );
         }
         catch (Exception ex) when (ex is UniqueConstraintException or ReferenceConstraintException &&
                                    ex.InnerException?.Data["Detail"] is string message &&
@@ -174,7 +179,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         }
         catch (Exception ex) when (IsSerializationFailure(ex))
         {
-            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.");
+            return new Conflict("", "The request conflicted with a concurrent operation. Please try again.", new ConcurrentOperationRejected());
         }
 
         // Interceptors can add domain errors, so check again

@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Diagnostics;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Builder;
 
@@ -77,5 +76,17 @@ public sealed class ProblemDetailsBuilder<TProblemDetails> : IProblemDetailsBuil
     public IDialogportenProblemDetails Build()
     {
         return _problem;
+    }
+}
+
+public static class ProblemDetailsBuilderExtensions
+{
+    extension(ProblemDetailsBuilder<ConflictProblemDetails> builder)
+    {
+        public ProblemDetailsBuilder<ConflictProblemDetails> WithConflicts(List<ProblemDetailsConflict> conflicts)
+        {
+            builder.Modify(x => x.Conflicts = conflicts);
+            return builder;
+        }
     }
 }

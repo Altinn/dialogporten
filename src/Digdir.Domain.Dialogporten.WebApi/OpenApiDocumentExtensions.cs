@@ -1,7 +1,10 @@
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Json;
+using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Mappers;
+using Namotion.Reflection;
 using NJsonSchema;
 using NSwag;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Json.SecurityRequirementsOperationProcessor;
@@ -325,6 +328,49 @@ public static class OpenApiDocumentExtensions
 
             tag.Description = description;
         }
+    }
+
+    public static void AddConflictsSection(this OpenApiDocument openApiDocument)
+    {
+        var knownConflicts = new List<IConflictReason>
+            {
+                new ConcurrentOperationRejected(),
+                new DialogIdForIdempotentKeyExists
+                {
+                    IdempotentKey = "IdempotentKey",
+                    DialogId = Guid.CreateVersion7()
+                },
+                new IdempotentKeysExist
+                {
+                    IdempotentKeys = ["IdempotentKey1", "IdempotentKey2"],
+                }
+            }
+            .SelectMany(ProblemDetailsConflictMapper.ToConflicts)
+            .DistinctBy(x => x.Code)
+            .OrderBy(x => x.Code);
+
+        var documentation = knownConflicts
+            .Select(r =>
+            {
+                var attributes = r.Extensions.Select(x => $"{x.Key} ({x.Value!.GetType().GetDisplayName()})");
+                return $"<a id=\"{r.Code}\">{r.Code}</a> | {r.Title} | {string.Join(", ", attributes)}";
+            });
+
+        openApiDocument.Info.Description += $"""
+                                             
+                                             ### About HTTP 409 Conflict
+
+                                             All `409 Conflict` responses in Dialogporten
+                                             will contain a RFC 9457 compliant ProblemDetails in the response body.
+                                             The ProblemDetails will contain the offending conflict(s), along with 
+                                             any extra fields necessary to describe the conflict(s).
+                                             These extra fields are not visible in the specification for 409 responses.
+                                             Please refer to this table to learn what extra fields each conflict has:
+
+                                             | Code | Description | Extra fields |
+                                             | --- | --- | --- |
+                                             {string.Join("\n", documentation)}
+                                             """;
     }
 
     private static void MakeCollectionsNullable(JsonSchema schema)

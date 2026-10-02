@@ -2,18 +2,18 @@
   "type": "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10",
   "title": "Conflict.",
   "status": 409,
-  "instance": "/dialogporten/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000",
+  "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000/transmissions",
   "traceId": "00-00000000000000000000000000000000-0000000000000000-00",
   "errors": {
     "IdempotentKey": [
-      "Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: \u0027duplicate-transmission-key\u0027."
+      "Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: \u002700000000-0000-0000-0000-000000000000\u0027."
     ]
   },
   "conflicts": [
     {
       "code": "DP.CFL-00001",
       "title": "Idempotent key already exist.",
-      "idempotentKey": "duplicate-transmission-key"
+      "idempotentKey": "00000000-0000-0000-0000-000000000000"
     }
   ]
 }

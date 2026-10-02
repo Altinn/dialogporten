@@ -391,7 +391,7 @@ Besides ordinary unit and integration tests, the primary end-to-end tests are th
 - [Scripts E2E](scripts/e2e/README.md)
 - [K6 testing](tests/k6/README.md)
 
-If you use Rider for local E2E, the repository includes ready-made `.run/` profiles for `WebApi (E2E)`, `GraphQL (E2E)`, `Service (E2E)`, and `E2E (WebAPI/GQL/Service)`.
+If you use Rider for local E2E, the repository includes ready-made `launchSettings.json`.
 
 ## Pull requests
 For pull requests, the title must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).

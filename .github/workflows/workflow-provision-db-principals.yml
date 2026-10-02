@@ -201,25 +201,48 @@ jobs:
           parameters-file: ./.azure/applications/db-provisioner-job/${{ inputs.environment }}.bicepparam
 
       - name: Start db provisioner job
+        id: start
         env:
           JOB_NAME: ${{ steps.deploy.outputs.name }}
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
         uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
         with:
           inlineScript: |
-            az containerapp job start -n "$JOB_NAME" -g "$RESOURCE_GROUP"
+            execution_name="$(az containerapp job start -n "$JOB_NAME" -g "$RESOURCE_GROUP" --query name -o tsv)"
+            if [[ -z "$execution_name" ]]; then
+              echo "::error::Starting $JOB_NAME returned no execution name"
+              exit 1
+            fi
+            echo "Started execution $execution_name of $JOB_NAME"
+            echo "execution-name=$execution_name" >> "$GITHUB_OUTPUT"
 
+      # Waits for the execution started above, looked up by its name. Every execution of one version
+      # runs the same image, so matching on the image tag could pick up an earlier one, as on a re-run.
       - name: Verify provisioning
         env:
           JOB_NAME: ${{ steps.deploy.outputs.name }}
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          IMAGE_TAG: ${{ inputs.version }}
+          EXECUTION_NAME: ${{ steps.start.outputs.execution-name }}
         uses: azure/CLI@9eb25b8360668fb0ecbafa808d40e2197b2f5f52 # v3.0.0
         id: verify-provisioning
         timeout-minutes: 15
         with:
           inlineScript: |
-            ./.github/tools/containerAppJobVerifier.sh "$JOB_NAME" "$RESOURCE_GROUP" "$IMAGE_TAG"
+            while true; do
+              status="$(az containerapp job execution show -n "$JOB_NAME" -g "$RESOURCE_GROUP" \
+                --job-execution-name "$EXECUTION_NAME" --query properties.status -o tsv 2>/dev/null || true)"
+              echo "Execution $EXECUTION_NAME: ${status:-not visible yet}"
+              case "$status" in
+                Succeeded)
+                  exit 0
+                  ;;
+                Failed | Stopped)
+                  echo "::error::Execution $EXECUTION_NAME of $JOB_NAME ended as $status"
+                  exit 1
+                  ;;
+              esac
+              sleep 10
+            done
 
       - name: Logout from azure
         if: ${{failure() || success()}}

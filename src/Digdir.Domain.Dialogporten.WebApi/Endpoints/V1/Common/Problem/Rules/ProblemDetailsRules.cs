@@ -57,7 +57,7 @@ public sealed class ProblemDetailsRules
             StatusCodes.Status409Conflict => ProblemDetailsBuilderFactory
                 .Conflict()
                 .WithErrors(errors)
-                .WithConflicts(failures.ToConflicts()),
+                .WithConflicts(ProblemDetailsConflictMapper.ToConflicts(failures)),
             StatusCodes.Status410Gone => ProblemDetailsBuilderFactory
                 .Gone()
                 .WithErrors(errors),

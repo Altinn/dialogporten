@@ -14,21 +14,21 @@ public sealed class ConflictMessageBuilder
 
     public ConflictMessageBuilder ConcurrentOperationRejected()
     {
-        var code = ProblemDetailsConflictMapper.ConcurrentOperationRejectedProblemCode;
+        var code = ProblemDetailsConflictCode.ConcurrentOperationRejected;
         _messages.Add($"[{code}](#{code})");
         return this;
     }
 
     public ConflictMessageBuilder IdempotentKeysExist()
     {
-        var code = ProblemDetailsConflictMapper.IdempotentKeysExistProblemCode;
+        var code = ProblemDetailsConflictCode.IdempotentKeysExist;
         _messages.Add($"[{code}](#{code})");
         return this;
     }
 
     public ConflictMessageBuilder DialogIdForIdempotentKeyExists()
     {
-        var code = ProblemDetailsConflictMapper.DialogIdForIdempotentKeyExistsProblemCode;
+        var code = ProblemDetailsConflictCode.DialogIdForIdempotentKeyExists;
         _messages.Add($"[{code}](#{code})");
         return this;
     }

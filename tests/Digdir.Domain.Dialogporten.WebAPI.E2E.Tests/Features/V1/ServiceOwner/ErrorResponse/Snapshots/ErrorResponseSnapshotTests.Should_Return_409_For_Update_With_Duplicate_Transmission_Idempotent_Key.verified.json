@@ -11,9 +11,9 @@
   },
   "conflicts": [
     {
-      "key": "IdempotentKey",
-      "value": "duplicate-transmission-key",
-      "reason": "IdempotentKey already exists"
+      "code": "DP.CFL-00001",
+      "title": "Idempotent key already exist.",
+      "idempotentKey": "duplicate-transmission-key"
     }
   ]
 }

@@ -332,7 +332,7 @@ public static class OpenApiDocumentExtensions
 
     public static void AddConflictsSection(this OpenApiDocument openApiDocument)
     {
-        var documentation = new List<IConflictReason>()
+        var knownConflicts = new List<IConflictReason>
             {
                 new ConcurrentOperationRejected(),
                 new DialogIdForIdempotentKeyExists
@@ -345,8 +345,11 @@ public static class OpenApiDocumentExtensions
                     IdempotentKeys = ["IdempotentKey1", "IdempotentKey2"],
                 }
             }
-            .Select(ProblemDetailsConflictMapper.Map)
-            .OrderBy(x => x.Code)
+            .SelectMany(ProblemDetailsConflictMapper.ToConflicts)
+            .DistinctBy(x => x.Code)
+            .OrderBy(x => x.Code);
+
+        var documentation = knownConflicts
             .Select(r =>
             {
                 var attributes = r.Extensions.Select(x => $"{x.Key} ({x.Value!.GetType().GetDisplayName()})");
@@ -354,15 +357,17 @@ public static class OpenApiDocumentExtensions
             });
 
         openApiDocument.Info.Description += $"""
+                                             
                                              ### About HTTP 409 Conflict
 
                                              All `409 Conflict` responses in Dialogporten
                                              will contain a RFC 9457 compliant ProblemDetails in the response body.
                                              The ProblemDetails will contain the offending conflict(s), along with 
-                                             any extra attributes necessary to describe the offending key(s).
-                                             This is a list of all conflicts:
+                                             any extra fields necessary to describe the conflict(s).
+                                             These extra fields are not visible in the specification for 409 responses.
+                                             Please refer to this table to learn what extra fields each conflict has:
 
-                                             | Code | Description | Extra attributes |
+                                             | Code | Description | Extra fields |
                                              | --- | --- | --- |
                                              {string.Join("\n", documentation)}
                                              """;

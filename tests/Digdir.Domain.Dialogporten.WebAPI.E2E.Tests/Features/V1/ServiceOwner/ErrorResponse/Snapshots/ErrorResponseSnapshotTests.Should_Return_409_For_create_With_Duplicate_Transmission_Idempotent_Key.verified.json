@@ -1,5 +1,5 @@
 ﻿{
-  "type": "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8",
+  "type": "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10",
   "title": "Conflict.",
   "status": 409,
   "instance": "/api/v1/serviceowner/dialogs/00000000-0000-0000-0000-000000000000/transmissions",
@@ -11,9 +11,9 @@
   },
   "conflicts": [
     {
-      "key": "IdempotentKey",
-      "value": "00000000-0000-0000-0000-000000000000",
-      "reason": "IdempotentKey already exists"
+      "code": "DP.CFL-00001",
+      "title": "Idempotent key already exist.",
+      "idempotentKey": "00000000-0000-0000-0000-000000000000"
     }
   ]
 }

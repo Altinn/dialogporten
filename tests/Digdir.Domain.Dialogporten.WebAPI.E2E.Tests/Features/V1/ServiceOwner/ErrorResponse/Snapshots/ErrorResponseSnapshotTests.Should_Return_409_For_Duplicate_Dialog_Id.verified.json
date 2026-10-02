@@ -11,9 +11,10 @@
   },
   "conflicts": [
     {
-      "key": "Id",
-      "value": "00000000-0000-0000-0000-000000000000",
-      "reason": "Dialog Id already exists for this IdempotentKey"
+      "code": "DP.CFL-00002",
+      "title": "Idempotent Key caused a dialog id conflict.",
+      "dialogId": "00000000-0000-0000-0000-000000000000",
+      "idempotentKey": "duplicate-idempotent-key"
     }
   ]
 }

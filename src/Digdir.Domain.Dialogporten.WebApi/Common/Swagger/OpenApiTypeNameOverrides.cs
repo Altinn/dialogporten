@@ -246,9 +246,9 @@ internal static class OpenApiTypeNameOverrides
             return;
         }
 
-        // throw new InvalidOperationException(
-        //     $"Missing temporary OpenAPI type-name override for '{type.FullName}' in '{documentName}'. " +
-        //     $"The generated fallback name '{currentName}' still contains namespace segments, so add a mapping " +
-        //     $"to {nameof(OpenApiTypeNameOverrides)} or move the contract to a WebApi-owned type with an explicit OpenAPI name.");
+        throw new InvalidOperationException(
+            $"Missing temporary OpenAPI type-name override for '{type.FullName}' in '{documentName}'. " +
+            $"The generated fallback name '{currentName}' still contains namespace segments, so add a mapping " +
+            $"to {nameof(OpenApiTypeNameOverrides)} or move the contract to a WebApi-owned type with an explicit OpenAPI name.");
     }
 }

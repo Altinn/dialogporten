@@ -9,7 +9,7 @@ public sealed class ConflictProblemDetails : ProblemDetails
     public List<ProblemDetailsConflict> Conflicts { get; set; } = [];
 }
 
-public class ProblemDetailsConflict
+public sealed class ProblemDetailsConflict
 {
     public required string Code { get; init; }
     public required string Title { get; init; }

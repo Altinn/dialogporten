@@ -1,6 +1,7 @@
 targetScope = 'resourceGroup'
 
 import { baseTags } from '../../functions/baseTags.bicep'
+import { dialogDbConnectionString } from '../../functions/dialogDbConnectionString.bicep'
 
 import { Scale } from '../../modules/containerApp/main.bicep'
 
@@ -54,57 +55,15 @@ param otelTraceSamplerRatio string
 @description('The workload profile name to use, defaults to "Consumption"')
 param workloadProfileName string = 'Consumption'
 
-var namePrefix = 'dp-be-${environment}'
-var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
 
-var additionalTags = {}
+@description('PostgreSQL server FQDN, required in EntraToken mode. No database password is read in this mode.')
+param dbHost string = ''
 
-var tags = baseTags(additionalTags, environment)
-
-resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
-  name: appConfigurationName
-}
-
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
-  name: containerAppEnvironmentName
-}
-
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  name: '${namePrefix}-webapi-eu-identity'
-  location: location
-  tags: tags
-}
-
-var containerAppEnvVars = [
-  {
-    name: 'ASPNETCORE_ENVIRONMENT'
-    value: environment
-  }
-  {
-    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-    value: appInsightConnectionString
-  }
-  {
-    name: 'AZURE_APPCONFIG_URI'
-    value: appConfiguration.properties.endpoint
-  }
-  {
-    name: 'ASPNETCORE_URLS'
-    value: 'http://+:8080'
-  }
-  {
-    name: 'AZURE_CLIENT_ID'
-    value: managedIdentity.properties.clientId
-  }
-  {
-    name: 'OTEL_TRACES_SAMPLER'
-    value: 'parentbased_traceidratio'
-  }
-  {
-    name: 'OTEL_TRACES_SAMPLER_ARG'
-    value: otelTraceSamplerRatio
-  }
-]
+@description('Explicit list of non-database Key Vault secrets referenced by this workload\'s App Configuration, required in EntraToken mode. Include the Redis connection string and the other runtime secrets it resolves.')
+param runtimeSecretNames string[] = []
 
 @description('Minimum number of replicas')
 @minValue(0)
@@ -138,15 +97,100 @@ param scale Scale = {
   ]
 }
 
+var namePrefix = 'dp-be-${environment}'
+var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
+
+var additionalTags = {}
+
+var tags = baseTags(additionalTags, environment)
+
+var baseContainerAppEnvVars = [
+  {
+    name: 'ASPNETCORE_ENVIRONMENT'
+    value: environment
+  }
+  {
+    name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+    value: appInsightConnectionString
+  }
+  {
+    name: 'AZURE_APPCONFIG_URI'
+    value: appConfiguration.properties.endpoint
+  }
+  {
+    name: 'ASPNETCORE_URLS'
+    value: 'http://+:8080'
+  }
+  {
+    name: 'AZURE_CLIENT_ID'
+    value: managedIdentity.properties.clientId
+  }
+  {
+    name: 'OTEL_TRACES_SAMPLER'
+    value: 'parentbased_traceidratio'
+  }
+  {
+    name: 'OTEL_TRACES_SAMPLER_ARG'
+    value: otelTraceSamplerRatio
+  }
+]
+
+// Token mode receives only the server address and authenticates as this workload's identity.
+// The administrator connection string remains available only in Password mode.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbConnectionString'
+    value: dbAuthMode == 'EntraToken' ? dialogDbConnectionString(dbHost) : ''
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
+
+var containerAppName = '${namePrefix}-webapi-eu-ca'
+
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-01' existing = {
+  name: appConfigurationName
+}
+
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2025-10-02-preview' existing = {
+  name: containerAppEnvironmentName
+}
+
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: '${namePrefix}-webapi-eu-identity'
+  location: location
+  tags: tags
+}
+
 resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' existing = {
   name: environmentKeyVaultName
 }
 
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = if (dbAuthMode == 'Password') {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'
   params: {
     keyvaultName: environmentKeyVaultResource.name
     principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
+module runtimeSecretReaderAccessPolicy '../../modules/keyvault/addSecretReaderRoles.bicep' = if (dbAuthMode == 'EntraToken') {
+  name: 'runtimeSecretReaderAccessPolicy-${containerAppName}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalId: managedIdentity.properties.principalId
+    secretNames: empty(runtimeSecretNames) ? fail('EntraToken requires an explicit runtimeSecretNames allowlist.') : runtimeSecretNames
   }
 }
 
@@ -158,8 +202,6 @@ module appConfigReaderAccessPolicy '../../modules/appConfiguration/addReaderRole
   }
 }
 
-
-var containerAppName = '${namePrefix}-webapi-eu-ca'
 
 module containerApp '../../modules/containerApp/main.bicep' = {
   name: containerAppName
@@ -178,6 +220,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     workloadProfileName: workloadProfileName
   }
   dependsOn: [
+    runtimeSecretReaderAccessPolicy
     keyVaultReaderAccessPolicy
     appConfigReaderAccessPolicy
   ]

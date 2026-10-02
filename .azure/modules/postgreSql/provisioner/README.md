@@ -34,8 +34,10 @@ mounted CA file when a custom trust store is needed; use the server FQDN as `PGH
    These are deliberate environment setup operations, not part of each app deploy.
    Production database setup and any restart must be performed manually.
 4. Enable provisioning. On ACA, set the repository variable `DB_PROVISIONING_ENABLED`
-   to `true`: the next deployment to the environment runs the provisioner, and from
-   then on a failed run blocks that deployment. On AKS, manually create a Job from the
+   to `true`. The provisioning workflow only admits `test`; another environment also
+   needs that gate opened and a `db-provisioner-job` parameter file. The next deployment
+   to an admitted environment runs the provisioner, and from then on a failed run
+   blocks that deployment. On AKS, manually create a Job from the
    provisioner CronJob. The image tag must reference a published image; on ACA the job
    pulls without registry credentials, so the container package must be public.
    The read-only pgAudit preflight runs before any principal or privilege changes.

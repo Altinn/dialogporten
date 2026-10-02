@@ -39,7 +39,7 @@ on:
         required: true
         type: string
       provisionDbPrincipals:
-        description: "Provision database identities. Disable only for initial bootstrap with all workloads in Password mode."
+        description: "Provision database identities where provisioning is enabled. Disable for the initial bootstrap with all workloads in Password mode, or to deploy a release that predates the db-provisioner job."
         required: false
         type: boolean
         default: true
@@ -152,8 +152,9 @@ jobs:
   # environment, or reference a table introduced by the same deploy. The always() && !failure()
   # guard lets provisioning still run when the migration job is intentionally SKIPPED
   # (runMigration false) but not when it FAILED.
-  # This job is invoked in every environment; the called workflow's own jobs skip unless the
-  # environment is one where provisioning is enabled (currently test/at23 only).
+  # This job is invoked in every environment; the called workflow's deployment jobs skip unless the
+  # repository variable DB_PROVISIONING_ENABLED is 'true' and the environment is one where
+  # provisioning is supported (currently test/at23 only).
   provision-db-principals:
     name: Provision DB principals
     if: ${{ always() && !failure() && !cancelled() && inputs.provisionDbPrincipals }}

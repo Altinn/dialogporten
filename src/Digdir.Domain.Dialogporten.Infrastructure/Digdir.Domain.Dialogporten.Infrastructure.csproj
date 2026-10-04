@@ -31,7 +31,7 @@
         <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.6.0" />
         <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack" Version="2.6.0" />
         <!-- Pin transitive MessagePack at or above 3.1.9 (GHSA-hv8m-jj95-wg3x, GHSA-qhrr-8q5h-9q3h). Remove once NeueccMessagePack references >= 3.1.9. -->
-        <PackageReference Include="MessagePack" Version="3.1.9" />
+        <PackageReference Include="MessagePack" Version="3.1.10" />
     </ItemGroup>
 
     <ItemGroup>

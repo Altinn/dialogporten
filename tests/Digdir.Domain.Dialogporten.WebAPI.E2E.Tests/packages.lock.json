@@ -96,8 +96,8 @@
       },
       "AsyncKeyedLock": {
         "type": "Transitive",
-        "resolved": "8.0.2",
-        "contentHash": "QGys5cnIerNryv7V14PDkvGnlLz69kJtTfdnr+Lndcu+lRre397RNyU4FIeAJWgI9u73lTzXL52Qca9B/ncLXw=="
+        "resolved": "8.1.2",
+        "contentHash": "FworLhWdK1fnSW8mbUtmQSqO2cSdQ7Ctb4q1WGZvNbu10xTHSS0WjuWk6UNLO3MbxtCk8uhduX8yu6HNoaI0Tw=="
       },
       "AutoMapper": {
         "type": "Transitive",
@@ -783,7 +783,7 @@
       "digdir.domain.dialogporten.application": {
         "type": "Project",
         "dependencies": {
-          "AsyncKeyedLock": "[8.0.2, )",
+          "AsyncKeyedLock": "[8.1.2, )",
           "AutoMapper": "[14.0.0, )",
           "Digdir.Domain.Dialogporten.Domain": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",

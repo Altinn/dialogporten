@@ -81,18 +81,24 @@ public record FlowContext(
     List<Func<object?, CancellationToken, Task<object?>>> Commands
 );
 
-public record FlowState()
+public record FlowState
 {
-    public List<CommandResultPair<CreateDialogCommand, CreateDialogResult?>> CreatedDialogs { get; } = [];
+    public List<BaseFlowAction> Actions { get; } = [];
 
-    public List<CommandResultPair<CreateTransmissionCommand, CreateTransmissionResult?>> CreatedTransmissions { get; } =
-        [];
+    public IEnumerable<FlowAction<CreateDialogCommand, CreateDialogResult>> CreatedDialogs =>
+        Actions.OfType<FlowAction<CreateDialogCommand, CreateDialogResult>>();
 
-    public List<CommandResultPair<CreateActivityCommand, CreateActivityResult?>> CreatedActivities { get; } = [];
+    public IEnumerable<FlowAction<CreateTransmissionCommand, CreateTransmissionResult>> CreatedTransmissions =>
+        Actions.OfType<FlowAction<CreateTransmissionCommand, CreateTransmissionResult>>();
+
+    public IEnumerable<FlowAction<CreateActivityCommand, CreateActivityResult>> CreatedActivities =>
+        Actions.OfType<FlowAction<CreateActivityCommand, CreateActivityResult>>();
 }
 
-public class CommandResultPair<TCommand, TResult>(TCommand command)
+public abstract record BaseFlowAction;
+
+public record FlowAction<TCommand, TResult>(TCommand Command) : BaseFlowAction
 {
-    public TCommand Command { get; } = command;
-    public TResult? Result { get; set; }
+    // Test harness must set Result after each command. Not nullable as seen from tests.
+    public TResult Result { get; set; } = default!;
 }

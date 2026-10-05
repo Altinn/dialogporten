@@ -108,7 +108,7 @@ public static class IFlowStepExtensions
         {
             var command = commandSelector(ctx);
             command.Dto.Id ??= IdentifiableExtensions.CreateVersion7(DialogApplication.Clock.UtcNowOffset);
-            ctx.State.CreatedDialogs.Add(new CommandResultPair<CreateDialogCommand, CreateDialogResult?>(command));
+            ctx.State.Actions.Add(new FlowAction<CreateDialogCommand, CreateDialogResult>(command));
             return command;
         })
         .Select((result, ctx) =>
@@ -164,8 +164,8 @@ public static class IFlowStepExtensions
                 IfMatchDialogRevision = ifMatchDialogRevision,
                 Transmissions = [transmission]
             };
-            var act = new CommandResultPair<CreateTransmissionCommand, CreateTransmissionResult?>(command);
-            ctx.State.CreatedTransmissions.Add(act);
+            var act = new FlowAction<CreateTransmissionCommand, CreateTransmissionResult>(command);
+            ctx.State.Actions.Add(act);
 
             return command;
         })
@@ -558,8 +558,8 @@ public static class IFlowStepExtensions
                     IsSilentUpdate = false
                 };
                 modify(createActivityCommand, ctx);
-                var act = new CommandResultPair<CreateActivityCommand, CreateActivityResult?>(createActivityCommand);
-                ctx.State.CreatedActivities.Add(act);
+                var act = new FlowAction<CreateActivityCommand, CreateActivityResult>(createActivityCommand);
+                ctx.State.Actions.Add(act);
                 return createActivityCommand;
             })
             .Select((result, ctx) =>
@@ -696,7 +696,7 @@ public static class IFlowStepExtensions
 
     public static Guid GetActivityId(this FlowContext ctx)
     {
-        return ctx.State.CreatedActivities.Last().Result!.AsT0.ActivityId;
+        return ctx.State.CreatedActivities.Last().Result.AsT0.ActivityId;
     }
 
     public static string GetParty(this FlowContext ctx)

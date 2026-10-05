@@ -22,4 +22,3 @@ internal static class RouteHandlerBuilderExtensions
     }
 }
 
-public sealed record ConflictReasonTypesMetadata(Type[] ReasonTypes);

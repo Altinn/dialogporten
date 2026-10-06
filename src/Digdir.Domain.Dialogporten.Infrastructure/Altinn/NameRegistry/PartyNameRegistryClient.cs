@@ -15,9 +15,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 {
     private readonly IFusionCache _cache;
     private readonly ILogger<PartyNameRegistryClient> _logger;
-    private readonly IOptionsSnapshot<ApplicationSettings> _applicationSettings;
     private readonly IPartyNameRegistryTransport _partyNameRegistryTransport;
-    private bool _useCorrectPersonNameOrdering;
+    private readonly bool _useCorrectPersonNameOrdering;
 
     public PartyNameRegistryClient(
         IFusionCacheProvider cacheProvider,
@@ -34,8 +33,10 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         _logger = logger;
         _cache = cache;
-        _applicationSettings = applicationSettings;
         _partyNameRegistryTransport = partyNameRegistryTransport;
+
+        // Fixing the flag at construct-time. Application must be restarted for changes to take effect.
+        _useCorrectPersonNameOrdering = applicationSettings.Value.FeatureToggle.UseCorrectPersonNameOrdering;
     }
 
     public async Task<string> GetNameOrFail(string externalIdWithPrefix, CancellationToken cancellationToken)
@@ -79,8 +80,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private string GetCacheKey(string externalIdWithPrefix)
     {
-        // Use a instance member to ensure we use the same value in the factory method
-        _useCorrectPersonNameOrdering = _applicationSettings.Value.FeatureToggle.UseCorrectPersonNameOrdering;
         return $"Name{(_useCorrectPersonNameOrdering ? "_v2" : "")}_{externalIdWithPrefix}";
     }
 

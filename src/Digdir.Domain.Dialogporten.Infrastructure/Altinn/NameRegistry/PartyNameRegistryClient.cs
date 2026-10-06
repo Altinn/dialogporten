@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application;
@@ -44,8 +45,13 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
             throw new ArgumentException($"Unable to parse PartyIdentifier {externalIdWithPrefix}");
 
-        return TryGetLocalName(partyIdentifier)
-            ?? await GetNameFromRegisterOrFail(partyIdentifier, ToNameLookup(partyIdentifier), cancellationToken);
+        if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return name;
+        if (!TryCreateNameLookup(partyIdentifier, out var nameLookup))
+        {
+            throw new InvalidOperationException($"Unable to create lookup for party id {partyIdentifier.FullId}");
+        }
+
+        return await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken);
     }
 
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>
@@ -86,30 +92,15 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken ct)
     {
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
-            throw new ArgumentException($"Unable to parse PartyIdentifier {externalIdWithPrefix}");
+        {
+            return null;
+        }
 
-        return TryGetLocalName(partyIdentifier)
-            ?? await GetNameFromRegister(partyIdentifier, ToNameLookup(partyIdentifier), ct);
+        if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return name;
+        if (!TryCreateNameLookup(partyIdentifier, out var nameLookup)) return null;
+
+        return await GetNameFromRegister(partyIdentifier, nameLookup, ct);
     }
-
-    private static string? TryGetLocalName(IPartyIdentifier partyIdentifier) => partyIdentifier switch
-    {
-        AltinnSelfIdentifiedUserIdentifier x => x.Id,
-        IdportenEmailUserIdentifier x => x.Id,
-        FeideUserIdentifier x => $"Feide User ({x.Id[..6]})",
-        NorwegianPersonIdentifier => null,
-        NorwegianOrganizationIdentifier => null,
-        SystemUserIdentifier => null,
-        _ => throw new ArgumentOutOfRangeException()
-    };
-
-    private static NameLookup ToNameLookup(IPartyIdentifier partyIdentifier) => partyIdentifier switch
-    {
-        NorwegianPersonIdentifier => new NameLookup { Data = [partyIdentifier.FullId] },
-        NorwegianOrganizationIdentifier => new NameLookup { Data = [partyIdentifier.FullId] },
-        SystemUserIdentifier => new NameLookup { Data = [partyIdentifier.FullId] },
-        _ => throw new ArgumentOutOfRangeException()
-    };
 
     private async Task<string?> GetNameFromRegister(IPartyIdentifier partyIdentifier, NameLookup nameLookup,
         CancellationToken ct)
@@ -181,6 +172,39 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
                       throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
+    }
+
+    private static bool TryCreateNameLookup(IPartyIdentifier partyIdentifier, [NotNullWhen(true)] out NameLookup? nameLookup)
+    {
+
+        nameLookup = partyIdentifier switch
+        {
+            NorwegianPersonIdentifier personIdentifier => new() { Data = [personIdentifier.FullId] },
+            NorwegianOrganizationIdentifier organizationIdentifier => new() { Data = [organizationIdentifier.FullId] },
+            SystemUserIdentifier systemUserIdentifier => new() { Data = [systemUserIdentifier.FullId] },
+            _ => null
+        };
+
+        return nameLookup is not null;
+    }
+
+    /// <summary>
+    /// We don't have any information about self-identified or Feide users in the party name registry
+    /// </summary>
+    private static bool TryGetNameForUnsupportedIdentifiers(
+        IPartyIdentifier partyIdentifier,
+        [NotNullWhen(true)] out string? name
+    )
+    {
+        name = partyIdentifier switch
+        {
+            AltinnSelfIdentifiedUserIdentifier x => x.Id,
+            IdportenEmailUserIdentifier x => x.Id,
+            FeideUserIdentifier x => $"Feide User ({x.Id[..6]})",
+            _ => null
+        };
+
+        return name is not null;
     }
 
     private async Task<NameLookupResult?> PerformPartyNameRequest(

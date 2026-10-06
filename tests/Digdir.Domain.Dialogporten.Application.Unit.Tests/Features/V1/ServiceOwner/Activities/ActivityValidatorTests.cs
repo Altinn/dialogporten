@@ -65,8 +65,6 @@ public class ActivityValidatorTests
         }
     }
 
-    // The activity DTOs share the same shape across the create/update/create-activity commands; these
-    // replace the by-convention AutoMapper maps the test previously used (issue #967).
     private static UpdateDialogActivityDto ToUpdateActivityDto(CreateDialogActivityDto source) => new()
     {
         Id = source.Id,

@@ -8,10 +8,9 @@ using SoActorDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwn
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
 /// <summary>
-/// Test-only projection of an end-user dialog view back into a service-owner update DTO. This replicates the
-/// by-convention AutoMapper mapping previously used by <see cref="IFlowStepExtensions"/> (issue #967): only
+/// Test-only projection of an end-user dialog view back into a service-owner update DTO. Only
 /// members that exist on both DTOs are copied; service-owner-only members (search tags, authorization
-/// contexts, idempotency keys, non-sensitive content) are left at their defaults, exactly as AutoMapper did.
+/// contexts, idempotency keys, non-sensitive content) are left at their defaults.
 /// </summary>
 internal static class EndUserDialogMappingExtensions
 {
@@ -25,7 +24,7 @@ internal static class EndUserDialogMappingExtensions
         PrecedingProcess = source.PrecedingProcess,
         ExpiresAt = source.ExpiresAt,
         IsApiOnly = source.IsApiOnly,
-        Status = (DialogStatusInput)source.Status,
+        Status = source.Status.ToDialogStatusInput(),
         Content = ToContentDto(source.Content),
         Attachments = source.Attachments.Select(ToAttachmentDto).ToList(),
         Transmissions = source.Transmissions.Select(ToTransmissionDto).ToList(),

@@ -127,12 +127,7 @@ public partial class Queries
         var result = await mediator.Send(searchDialogQuery, cancellationToken);
 
         return result.Match(
-            paginatedList =>
-            {
-                var mappedResult = paginatedList.ToSearchDialogsPayload();
-                mappedResult.OrderBy = paginatedList.OrderBy.AsSpan().ToSearchDialogSortTypeList();
-                return mappedResult;
-            },
+            paginatedList => paginatedList.ToSearchDialogsPayload(),
             validationError => new SearchDialogsPayload
             {
                 Errors = [.. validationError.Errors.Select(x => new SearchDialogValidationError { Message = x.ErrorMessage })]

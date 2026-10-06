@@ -20,10 +20,7 @@ namespace Digdir.Domain.Dialogporten.GraphQl.Unit.Tests.Mapping;
 
 /// <summary>
 /// Golden-master snapshots of the GraphQL mappings. These lock in the exact output of every mapping
-/// call site in the GraphQL EndUser query/mutation handlers. The snapshots were originally captured
-/// against the AutoMapper-based mappings and are now produced by the hand-written static mappers
-/// (issue #967); the verified files staying byte-for-byte identical proves the migration is
-/// behaviour-preserving.
+/// call site in the GraphQL EndUser query/mutation handlers.
 /// </summary>
 public sealed class GraphQlMappingSnapshotTests
 {
@@ -51,7 +48,7 @@ public sealed class GraphQlMappingSnapshotTests
             items: [filler.Create<SearchDialogDto>(), filler.Create<SearchDialogDto>()],
             hasNextPage: true,
             @continue: "continuation-token",
-            orderBy: "order-by-string");
+            orderBy: "createdat");
 
         var result = source.ToSearchDialogsPayload();
         return Verify(result).UseDirectory("Snapshots");

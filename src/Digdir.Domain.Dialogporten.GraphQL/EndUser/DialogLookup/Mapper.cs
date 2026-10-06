@@ -44,7 +44,7 @@ internal static class DialogLookupMapExtensions
 
     internal static DialogLookupAuthorizationEvidenceItem ToEvidenceItem(IdentifierLookupAuthorizationEvidenceItemDto source) => new()
     {
-        GrantType = source.GrantType.MapByName<DialogLookupGrantType>(),
+        GrantType = source.GrantType.ToGraphQl(),
         Subject = source.Subject,
         Name = source.Name.ToGraphQlLocalizations(),
         Links = source.Links is null ? null : ToLinks(source.Links)

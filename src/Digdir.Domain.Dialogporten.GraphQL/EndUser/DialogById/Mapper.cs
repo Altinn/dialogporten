@@ -26,7 +26,7 @@ internal static class DialogByIdMapExtensions
         UpdatedAt = source.UpdatedAt,
         ContentUpdatedAt = source.ContentUpdatedAt,
         DialogToken = source.DialogToken,
-        Status = source.Status.MapByName<DialogStatus>(),
+        Status = source.Status.ToGraphQl(),
         HasUnopenedContent = source.HasUnopenedContent,
         FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
         FromPartyTransmissionsCount = source.FromPartyTransmissionsCount,
@@ -60,7 +60,7 @@ internal static class DialogByIdMapExtensions
     internal static EndUserContext ToEndUserContext(DialogEndUserContextDto source) => new()
     {
         Revision = source.Revision,
-        SystemLabels = source.SystemLabels.Select(x => x.MapByName<SystemLabel>()).ToList()
+        SystemLabels = source.SystemLabels.Select(x => x.ToGraphQl()).ToList()
     };
 
     internal static ExcludedElement ToExcludedElement(ExcludedElementDto source) => new()
@@ -84,7 +84,7 @@ internal static class DialogByIdMapExtensions
         Id = source.Id,
         Url = source.Url,
         MediaType = source.MediaType,
-        ConsumerType = source.ConsumerType.MapByName<AttachmentUrlConsumer>()
+        ConsumerType = source.ConsumerType.ToGraphQl()
     };
 
     internal static Attachment ToAttachment(DialogTransmissionAttachmentDto source) => new()
@@ -102,7 +102,7 @@ internal static class DialogByIdMapExtensions
         Id = source.Id,
         Url = source.Url,
         MediaType = source.MediaType,
-        ConsumerType = source.ConsumerType.MapByName<AttachmentUrlConsumer>()
+        ConsumerType = source.ConsumerType.ToGraphQl()
     };
 
     internal static GuiAction ToGuiAction(DialogGuiActionDto source) => new()
@@ -113,8 +113,8 @@ internal static class DialogByIdMapExtensions
         AuthorizationAttribute = source.AuthorizationAttribute,
         IsAuthorized = source.IsAuthorized,
         IsDeleteDialogAction = source.IsDeleteDialogAction,
-        Priority = source.Priority.MapByName<GuiActionPriority>(),
-        HttpMethod = source.HttpMethod.MapByName<HttpVerb>(),
+        Priority = source.Priority.ToGraphQl(),
+        HttpMethod = source.HttpMethod.ToGraphQl(),
         Title = source.Title.ToGraphQlLocalizations(),
         Prompt = (source.Prompt ?? []).ToGraphQlLocalizations()
     };
@@ -134,7 +134,7 @@ internal static class DialogByIdMapExtensions
         Id = source.Id,
         Version = source.Version,
         Url = source.Url,
-        HttpMethod = source.HttpMethod.MapByName<HttpVerb>(),
+        HttpMethod = source.HttpMethod.ToGraphQl(),
         DocumentationUrl = source.DocumentationUrl,
         RequestSchema = source.RequestSchema,
         ResponseSchema = source.ResponseSchema,
@@ -156,7 +156,7 @@ internal static class DialogByIdMapExtensions
         Id = source.Id,
         CreatedAt = source.CreatedAt,
         ExtendedType = source.ExtendedType,
-        Type = source.Type.MapByName<ActivityType>(),
+        Type = source.Type.ToGraphQl(),
         TransmissionId = source.TransmissionId,
         PerformedBy = source.PerformedBy.ToGraphQlActor(),
         Description = source.Description.ToGraphQlLocalizations()
@@ -171,7 +171,7 @@ internal static class DialogByIdMapExtensions
         ExtendedType = source.ExtendedType,
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
-        Type = source.Type.MapByName<TransmissionType>(),
+        Type = source.Type.ToGraphQl(),
         Sender = source.Sender.ToGraphQlActor(),
         IsOpened = source.IsOpened,
         Content = ToTransmissionContent(source.Content),

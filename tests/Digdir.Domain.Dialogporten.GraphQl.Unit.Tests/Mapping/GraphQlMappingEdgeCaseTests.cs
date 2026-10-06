@@ -103,15 +103,21 @@ public sealed class GraphQlMappingEdgeCaseTests
         source.Activities = [];
         source.SeenSinceLastUpdate = [];
         source.SeenSinceLastContentUpdate = [];
-        source.GuiActions = [new() { Priority = GuiActionPriority.Primary, HttpMethod = HttpVerb.GET, Prompt = empty ? [] : null }];
-        source.Transmissions = [new()
-        {
-            Content = new() { Title = new() },
-            Sender = new() { ActorType = ActorType.ServiceOwner },
-            Type = TransmissionType.Information,
-            ExcludedAttachments = empty ? [] : null,
-            ExcludedNavigationalActions = empty ? [] : null
-        }];
+        source.GuiActions =
+        [
+            new() { Priority = GuiActionPriority.Primary, HttpMethod = HttpVerb.GET, Prompt = empty ? [] : null }
+        ];
+        source.Transmissions =
+        [
+            new()
+            {
+                Content = new() { Title = new() },
+                Sender = new() { ActorType = ActorType.ServiceOwner },
+                Type = TransmissionType.Information,
+                ExcludedAttachments = empty ? [] : null,
+                ExcludedNavigationalActions = empty ? [] : null
+            }
+        ];
         var result = Model.DialogByIdMapExtensions.ToDialog(source);
         result.Progress.Should().BeNull();
         result.DueAt.Should().BeNull();
@@ -124,7 +130,13 @@ public sealed class GraphQlMappingEdgeCaseTests
     [InlineData(true)]
     public Task Parties_Null_Or_Empty_SubParties(bool empty)
     {
-        var source = new AuthorizedPartyDto { Party = "party", Name = "name", PartyType = "Person", SubParties = empty ? [] : null };
+        var source = new AuthorizedPartyDto
+        {
+            Party = "party",
+            Name = "name",
+            PartyType = "Person",
+            SubParties = empty ? [] : null
+        };
         var result = Party.PartiesMapExtensions.ToAuthorizedParties(new List<AuthorizedPartyDto> { source });
         return Verify(result).UseParameters(empty).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
@@ -133,83 +145,143 @@ public sealed class GraphQlMappingEdgeCaseTests
     public Task Mutations_Empty_Labels_And_Null_Revision()
     {
         var single = Mutation.MutationsMapExtensions.ToCommand(new Mutation.SetSystemLabelInput());
-        var bulk = Mutation.MutationsMapExtensions.ToCommand(new Mutation.BulkSetSystemLabelInput { Dialogs = [new()] });
+        var bulk = Mutation.MutationsMapExtensions.ToCommand(
+            new Mutation.BulkSetSystemLabelInput { Dialogs = [new()] });
         var emptyBulk = Mutation.MutationsMapExtensions.ToCommand(new Mutation.BulkSetSystemLabelInput());
         // Verify omits default scalar values; distinguish null from Guid.Empty explicitly.
         bulk.Dto.Dialogs.Single().EndUserContextRevision.Should().BeNull();
-        return Verify(new { Single = single, Bulk = bulk, EmptyBulk = emptyBulk })
-            .DontIgnoreEmptyCollections().UseDirectory("Snapshots");
+        return Verify(new { Single = single, Bulk = bulk, EmptyBulk = emptyBulk }).DontIgnoreEmptyCollections()
+            .UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Dialog_Status_All_Values()
     {
-        var result = Enum.GetValues<DialogStatus>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToDialog(new Get.DialogDto { Status = value, Content = new() { Title = new() }, EndUserContext = new() }).Status });
+        var result = Enum.GetValues<DialogStatus>().Select(value => new
+        {
+            Source = value,
+            Result = Model.DialogByIdMapExtensions.ToDialog(new Get.DialogDto
+            {
+                Status = value,
+                Content = new() { Title = new() },
+                EndUserContext = new()
+            }).Status
+        });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Search_Result_Status_All_Values()
     {
-        var result = Enum.GetValues<DialogStatus>()
-            .Select(value => new { Source = value, Result = SearchModel.SearchDialogsMapExtensions.ToSearchDialog(new Search.DialogDto { Status = value, EndUserContext = new() }).Status });
+        var result = Enum.GetValues<DialogStatus>().Select(value => new
+        {
+            Source = value,
+            Result = SearchModel.SearchDialogsMapExtensions
+                .ToSearchDialog(new Search.DialogDto { Status = value, EndUserContext = new() }).Status
+        });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Actor_Type_All_Values()
     {
-        var result = Enum.GetValues<ActorType>()
-            .Select(value => new { Source = value, Result = Common.CommonMapExtensions.ToGraphQlActor(new ActorDto { ActorType = value }).ActorType });
+        var result = Enum.GetValues<ActorType>().Select(value => new
+        {
+            Source = value,
+            Result = Common.CommonMapExtensions.ToGraphQlActor(new ActorDto { ActorType = value }).ActorType
+        });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Dialog_Activity_Type_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities.DialogActivityType.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToActivity(new Get.DialogActivityDto { Type = value, PerformedBy = new() }).Type });
+        var result = Enum
+            .GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities.DialogActivityType.Values>()
+            .Select(value => new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToActivity(new Get.DialogActivityDto { Type = value, PerformedBy = new() { ActorType = ActorType.ServiceOwner } }).Type
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Search_Activity_Type_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities.DialogActivityType.Values>()
-            .Select(value => new { Source = value, Result = SearchModel.SearchDialogsMapExtensions.ToActivity(new Search.DialogActivityDto { Type = value, PerformedBy = new() }).Type });
+        var result = Enum
+            .GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities.DialogActivityType.Values>()
+            .Select(value => new
+            {
+                Source = value,
+                Result = SearchModel.SearchDialogsMapExtensions
+                    .ToActivity(new Search.DialogActivityDto { Type = value, PerformedBy = new() { ActorType = ActorType.ServiceOwner } }).Type
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Transmission_Type_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionType.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToTransmission(new Get.DialogTransmissionDto { Type = value, Sender = new(), Content = new() { Title = new() } }).Type });
+        var result = Enum
+            .GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionType.Values>()
+            .Select(value => new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToTransmission(new Get.DialogTransmissionDto
+                    {
+                        Type = value,
+                        Sender = new() { ActorType = ActorType.ServiceOwner },
+                        Content = new() { Title = new() }
+                    }).Type
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Gui_Action_Priority_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiActionPriority.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToGuiAction(new Get.DialogGuiActionDto { Priority = value, HttpMethod = HttpVerb.GET }).Priority });
+        var result = Enum
+            .GetValues<Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiActionPriority.Values>()
+            .Select(value => new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToGuiAction(new Get.DialogGuiActionDto { Priority = value, HttpMethod = HttpVerb.GET })
+                    .Priority
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Gui_Action_Http_Method_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Http.HttpVerb.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToGuiAction(new Get.DialogGuiActionDto { HttpMethod = value, Priority = GuiActionPriority.Primary }).HttpMethod });
+        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Http.HttpVerb.Values>().Select(value =>
+            new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToGuiAction(new Get.DialogGuiActionDto
+                    {
+                        HttpMethod = value,
+                        Priority = GuiActionPriority.Primary
+                    }).HttpMethod
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Api_Endpoint_Http_Method_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Http.HttpVerb.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToApiActionEndpoint(new Get.DialogApiActionEndpointDto { HttpMethod = value }).HttpMethod });
+        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Http.HttpVerb.Values>().Select(value =>
+            new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToApiActionEndpoint(new Get.DialogApiActionEndpointDto { HttpMethod = value }).HttpMethod
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
@@ -217,7 +289,12 @@ public sealed class GraphQlMappingEdgeCaseTests
     public Task Attachment_Consumer_All_Values()
     {
         var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Attachments.AttachmentUrlConsumerType.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToAttachmentUrl(new Get.DialogAttachmentUrlDto { ConsumerType = value }).ConsumerType });
+            .Select(value => new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToAttachmentUrl(new Get.DialogAttachmentUrlDto { ConsumerType = value }).ConsumerType
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
@@ -225,23 +302,41 @@ public sealed class GraphQlMappingEdgeCaseTests
     public Task Transmission_Attachment_Consumer_All_Values()
     {
         var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.Attachments.AttachmentUrlConsumerType.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToAttachmentUrl(new Get.DialogTransmissionAttachmentUrlDto { ConsumerType = value }).ConsumerType });
+            .Select(value => new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToAttachmentUrl(new Get.DialogTransmissionAttachmentUrlDto { ConsumerType = value })
+                    .ConsumerType
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Dialog_System_Labels_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel.Values>()
-            .Select(value => new { Source = value, Result = Model.DialogByIdMapExtensions.ToEndUserContext(new Get.DialogEndUserContextDto { SystemLabels = [value] }).SystemLabels });
+        var result = Enum
+            .GetValues<Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel.Values>()
+            .Select(value => new
+            {
+                Source = value,
+                Result = Model.DialogByIdMapExtensions
+                    .ToEndUserContext(new Get.DialogEndUserContextDto { SystemLabels = [value] }).SystemLabels
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
     [Fact]
     public Task Search_System_Labels_All_Values()
     {
-        var result = Enum.GetValues<Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel.Values>()
-            .Select(value => new { Source = value, Result = SearchModel.SearchDialogsMapExtensions.ToEndUserContext(new Search.DialogEndUserContextDto { SystemLabels = [value] }).SystemLabels });
+        var result = Enum
+            .GetValues<Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel.Values>()
+            .Select(value => new
+            {
+                Source = value,
+                Result = SearchModel.SearchDialogsMapExtensions
+                    .ToEndUserContext(new Search.DialogEndUserContextDto { SystemLabels = [value] }).SystemLabels
+            });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
@@ -252,7 +347,8 @@ public sealed class GraphQlMappingEdgeCaseTests
         {
             Source = value,
             Result = Lookup.DialogLookupMapExtensions.ToEvidenceItem(
-                new IdentifierLookupAuthorizationEvidenceItemDto { Subject = "subject", GrantType = value }).GrantType
+                    new IdentifierLookupAuthorizationEvidenceItemDto { Subject = "subject", GrantType = value })
+                .GrantType
         });
         return Verify(result).UseDirectory("Snapshots");
     }
@@ -263,7 +359,8 @@ public sealed class GraphQlMappingEdgeCaseTests
         var result = Enum.GetValues<Common.DialogStatus>().Select(value => new
         {
             Source = value,
-            Result = SearchModel.SearchDialogsMapExtensions.ToSearchDialogQuery(new SearchModel.SearchDialogInput { Status = [value] }).Status
+            Result = SearchModel.SearchDialogsMapExtensions
+                .ToSearchDialogQuery(new SearchModel.SearchDialogInput { Status = [value] }).Status
         });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
@@ -274,9 +371,14 @@ public sealed class GraphQlMappingEdgeCaseTests
         var result = Enum.GetValues<Common.SystemLabel>().Select(value => new
         {
             Source = value,
-            Search = SearchModel.SearchDialogsMapExtensions.ToSearchDialogQuery(new SearchModel.SearchDialogInput { SystemLabel = [value] }).SystemLabel,
-            Single = Mutation.MutationsMapExtensions.ToCommand(new Mutation.SetSystemLabelInput { AddLabels = [value], RemoveLabels = [value] }),
-            Bulk = Mutation.MutationsMapExtensions.ToCommand(new Mutation.BulkSetSystemLabelInput { AddLabels = [value], RemoveLabels = [value] })
+            Search =
+                SearchModel.SearchDialogsMapExtensions
+                    .ToSearchDialogQuery(new SearchModel.SearchDialogInput { SystemLabel = [value] }).SystemLabel,
+            Single =
+                Mutation.MutationsMapExtensions.ToCommand(
+                    new Mutation.SetSystemLabelInput { AddLabels = [value], RemoveLabels = [value] }),
+            Bulk = Mutation.MutationsMapExtensions.ToCommand(
+                new Mutation.BulkSetSystemLabelInput { AddLabels = [value], RemoveLabels = [value] })
         });
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
@@ -318,7 +420,11 @@ public sealed class GraphQlMappingEdgeCaseTests
     [Fact]
     public Task Party_Boolean_Flags()
     {
-        string[] cases = ["AllFalse", "IsDeleted", "HasKeyRole", "IsCurrentEndUser", "IsMainAdministrator", "IsAccessManager", "HasOnlyAccessToSubParties"];
+        string[] cases =
+        [
+            "AllFalse", "IsDeleted", "HasKeyRole", "IsCurrentEndUser", "IsMainAdministrator", "IsAccessManager",
+            "HasOnlyAccessToSubParties"
+        ];
         var result = cases.Select((caseName, index) =>
         {
             var source = new AuthorizedPartyDto
@@ -343,7 +449,10 @@ public sealed class GraphQlMappingEdgeCaseTests
     [Fact]
     public Task Lookup_Boolean_Flags()
     {
-        string[] cases = ["AllFalse", "ViaRoleAndDelegable", "ViaAccessPackage", "ViaResourceDelegation", "ViaInstanceDelegation"];
+        string[] cases =
+        [
+            "AllFalse", "ViaRoleAndDelegable", "ViaAccessPackage", "ViaResourceDelegation", "ViaInstanceDelegation"
+        ];
         var result = cases.Select((caseName, index) =>
         {
             var evidence = new IdentifierLookupAuthorizationEvidenceDto
@@ -373,19 +482,50 @@ public sealed class GraphQlMappingEdgeCaseTests
     [InlineData(true)]
     public Task Nested_Boolean_Flags(bool value)
     {
-        var guiAction = Model.DialogByIdMapExtensions.ToGuiAction(new Get.DialogGuiActionDto { Priority = GuiActionPriority.Primary, HttpMethod = HttpVerb.GET, IsAuthorized = value, IsDeleteDialogAction = !value });
-        var transmission = Model.DialogByIdMapExtensions.ToTransmission(new Get.DialogTransmissionDto { Type = TransmissionType.Information, IsAuthorized = value, IsOpened = !value, Sender = new(), Content = new() { Title = new() } });
+        var guiAction = Model.DialogByIdMapExtensions.ToGuiAction(new Get.DialogGuiActionDto
+        {
+            Priority = GuiActionPriority.Primary,
+            HttpMethod = HttpVerb.GET,
+            IsAuthorized = value,
+            IsDeleteDialogAction = !value
+        });
+        var transmission = Model.DialogByIdMapExtensions.ToTransmission(new Get.DialogTransmissionDto
+        {
+            Type = TransmissionType.Information,
+            IsAuthorized = value,
+            IsOpened = !value,
+            Sender = new() { ActorType = ActorType.ServiceOwner },
+            Content = new() { Title = new() }
+        });
         var result = new
         {
             GuiAction = new { guiAction.IsAuthorized, guiAction.IsDeleteDialogAction },
             Transmission = new { transmission.IsAuthorized, transmission.IsOpened },
-            ApiActionAuthorized = Model.DialogByIdMapExtensions.ToApiAction(new Get.DialogApiActionDto { IsAuthorized = value }).IsAuthorized,
-            AttachmentAuthorized = Model.DialogByIdMapExtensions.ToAttachment(new Get.DialogAttachmentDto { IsAuthorized = value }).IsAuthorized,
-            TransmissionAttachmentAuthorized = Model.DialogByIdMapExtensions.ToAttachment(new Get.DialogTransmissionAttachmentDto { IsAuthorized = value }).IsAuthorized,
-            NavigationalActionAuthorized = Model.DialogByIdMapExtensions.ToNavigationalAction(new Get.DialogTransmissionNavigationalActionDto { IsAuthorized = value }).IsAuthorized,
-            EndpointDeprecated = Model.DialogByIdMapExtensions.ToApiActionEndpoint(new Get.DialogApiActionEndpointDto { HttpMethod = HttpVerb.GET, Deprecated = value }).Deprecated,
-            SeenByCurrentEndUser = Model.DialogByIdMapExtensions.ToSeenLog(new Get.DialogSeenLogDto { IsCurrentEndUser = value, SeenBy = new() }).IsCurrentEndUser,
-            SearchSeenByCurrentEndUser = SearchModel.SearchDialogsMapExtensions.ToSeenLog(new Search.DialogSeenLogDto { IsCurrentEndUser = value, SeenBy = new() }).IsCurrentEndUser
+            ApiActionAuthorized =
+                Model.DialogByIdMapExtensions.ToApiAction(new Get.DialogApiActionDto { IsAuthorized = value })
+                    .IsAuthorized,
+            AttachmentAuthorized =
+                Model.DialogByIdMapExtensions.ToAttachment(new Get.DialogAttachmentDto { IsAuthorized = value })
+                    .IsAuthorized,
+            TransmissionAttachmentAuthorized =
+                Model.DialogByIdMapExtensions
+                    .ToAttachment(new Get.DialogTransmissionAttachmentDto { IsAuthorized = value }).IsAuthorized,
+            NavigationalActionAuthorized =
+                Model.DialogByIdMapExtensions
+                    .ToNavigationalAction(new Get.DialogTransmissionNavigationalActionDto { IsAuthorized = value })
+                    .IsAuthorized,
+            EndpointDeprecated =
+                Model.DialogByIdMapExtensions
+                    .ToApiActionEndpoint(
+                        new Get.DialogApiActionEndpointDto { HttpMethod = HttpVerb.GET, Deprecated = value })
+                    .Deprecated,
+            SeenByCurrentEndUser =
+                Model.DialogByIdMapExtensions
+                    .ToSeenLog(new Get.DialogSeenLogDto { IsCurrentEndUser = value, SeenBy = new() { ActorType = ActorType.ServiceOwner } })
+                    .IsCurrentEndUser,
+            SearchSeenByCurrentEndUser = SearchModel.SearchDialogsMapExtensions
+                .ToSeenLog(new Search.DialogSeenLogDto { IsCurrentEndUser = value, SeenBy = new() { ActorType = ActorType.ServiceOwner } })
+                .IsCurrentEndUser
         };
         return Verify(result).UseParameters(value).UseDirectory("Snapshots");
     }
@@ -398,9 +538,18 @@ public sealed class GraphQlMappingEdgeCaseTests
     {
         var result = new
         {
-            Content = Common.CommonMapExtensions.ToGraphQlContentValue(new ContentValueDto { IsAuthorized = value }),
-            Seen = Model.DialogByIdMapExtensions.ToSeenLog(new Get.DialogSeenLogDto { IsViaServiceOwner = value, SeenBy = new() { ActorType = ActorType.ServiceOwner } }),
-            SearchSeen = SearchModel.SearchDialogsMapExtensions.ToSeenLog(new Search.DialogSeenLogDto { IsViaServiceOwner = value, SeenBy = new() { ActorType = ActorType.ServiceOwner } })
+            Content =
+                Common.CommonMapExtensions.ToGraphQlContentValue(new ContentValueDto { IsAuthorized = value }),
+            Seen = Model.DialogByIdMapExtensions.ToSeenLog(new Get.DialogSeenLogDto
+            {
+                IsViaServiceOwner = value,
+                SeenBy = new() { ActorType = ActorType.ServiceOwner }
+            }),
+            SearchSeen = SearchModel.SearchDialogsMapExtensions.ToSeenLog(new Search.DialogSeenLogDto
+            {
+                IsViaServiceOwner = value,
+                SeenBy = new() { ActorType = ActorType.ServiceOwner }
+            })
         };
         return Verify(result).UseParameters(value).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }

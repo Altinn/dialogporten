@@ -1,8 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
-using DomainDialogStatus = Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogStatus;
-using DomainSystemLabel = Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
 
@@ -15,9 +13,9 @@ internal static class SearchDialogsMapExtensions
         Party = source.Party ?? [],
         ExtendedStatus = source.ExtendedStatus ?? [],
         ExternalReference = source.ExternalReference,
-        Status = source.Status?.Select(x => x.MapByName<DomainDialogStatus.Values>()).ToList() ?? [],
+        Status = source.Status?.Select(x => x.ToDomain()).ToList() ?? [],
         Process = source.Process,
-        SystemLabel = source.SystemLabel?.Select(x => x.MapByName<DomainSystemLabel.Values>()).ToList() ?? [],
+        SystemLabel = source.SystemLabel?.Select(x => x.ToDomain()).ToList() ?? [],
         ExcludeApiOnly = source.ExcludeApiOnly,
         CreatedAfter = source.CreatedAfter,
         CreatedBefore = source.CreatedBefore,
@@ -37,7 +35,8 @@ internal static class SearchDialogsMapExtensions
     {
         Items = source.Items.Select(ToSearchDialog).ToList(),
         HasNextPage = source.HasNextPage,
-        ContinuationToken = source.ContinuationToken
+        ContinuationToken = source.ContinuationToken,
+        OrderBy = source.OrderBy.AsSpan().ToSearchDialogSortTypeList()
     };
 
     internal static SearchDialog ToSearchDialog(DialogDto source) => new()
@@ -57,7 +56,7 @@ internal static class SearchDialogsMapExtensions
         UpdatedAt = source.UpdatedAt,
         ContentUpdatedAt = source.ContentUpdatedAt,
         DueAt = source.DueAt,
-        Status = source.Status.MapByName<DialogStatus>(),
+        Status = source.Status.ToGraphQl(),
         HasUnopenedContent = source.HasUnopenedContent,
         IsApiOnly = source.IsApiOnly,
         FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
@@ -81,7 +80,7 @@ internal static class SearchDialogsMapExtensions
     internal static EndUserContext ToEndUserContext(DialogEndUserContextDto source) => new()
     {
         Revision = source.Revision,
-        SystemLabels = source.SystemLabels.Select(x => x.MapByName<SystemLabel>()).ToList()
+        SystemLabels = source.SystemLabels.Select(x => x.ToGraphQl()).ToList()
     };
 
     internal static SeenLog ToSeenLog(DialogSeenLogDto source) => new()
@@ -98,7 +97,7 @@ internal static class SearchDialogsMapExtensions
         Id = source.Id,
         CreatedAt = source.CreatedAt,
         ExtendedType = source.ExtendedType,
-        Type = source.Type.MapByName<ActivityType>(),
+        Type = source.Type.ToGraphQl(),
         TransmissionId = source.TransmissionId,
         PerformedBy = source.PerformedBy.ToGraphQlActor(),
         Description = source.Description.ToGraphQlLocalizations()

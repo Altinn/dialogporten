@@ -80,6 +80,10 @@
     }
   ],
   HasNextPage: false,
-  OrderBy: [],
+  OrderBy: [
+    {
+      ContentUpdatedAt: Desc
+    }
+  ],
   Errors: []
 }

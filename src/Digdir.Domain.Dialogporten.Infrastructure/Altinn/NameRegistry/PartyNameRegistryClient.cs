@@ -102,8 +102,11 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return await GetNameFromRegister(partyIdentifier, nameLookup, ct);
     }
 
-    private async Task<string?> GetNameFromRegister(IPartyIdentifier partyIdentifier, NameLookup nameLookup,
-        CancellationToken ct)
+    private async Task<string?> GetNameFromRegister(
+        IPartyIdentifier partyIdentifier,
+        NameLookup nameLookup,
+        CancellationToken ct
+    )
     {
         var nameLookupResult = await PerformPartyNameRequest(nameLookup, ct);
         if (nameLookupResult is null) return null;

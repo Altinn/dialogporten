@@ -144,10 +144,11 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     )
     {
         var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
+        if (name is null) return null;
 
         // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does
         // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
-        return !string.IsNullOrWhiteSpace(name) ? FlipNameIfPerson(partyIdentifier, name) : null;
+        return FlipNameIfPerson(partyIdentifier, name);
     }
 
     private async Task<NameLookupResult> PerformPartyNameRequestOrFail(

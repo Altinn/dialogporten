@@ -1,0 +1,13 @@
+﻿{
+  EndUserSearch: {
+    MaxPartyFilterValues: 1,
+    MaxServiceResourceFilterValues: 2,
+    MaxOrgFilterValues: 3,
+    MaxExtendedStatusFilterValues: 4
+  },
+  ServiceOwnerSearch: {
+    MaxPartyFilterValues: 5,
+    MaxServiceResourceFilterValues: 6,
+    MaxExtendedStatusFilterValues: 7
+  }
+}

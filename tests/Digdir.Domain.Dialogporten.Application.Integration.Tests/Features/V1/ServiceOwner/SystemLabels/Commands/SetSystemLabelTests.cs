@@ -10,6 +10,7 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applicatio
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using NSubstitute;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -41,6 +42,22 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 x.AddLabels = [SystemLabel.Values.Bin];
             })
             .ExecuteAndAssert<ConcurrencyError>();
+
+    [Fact]
+    public Task Set_Returns_Forbidden_On_Unauthorized() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+            {
+                altinnAuthorization
+                    .HasListAuthorizationForDialog(Arg.Any<DialogEntity>(), Arg.Any<CancellationToken>())
+                    .Returns(false);
+            })
+            .SetSystemLabelsServiceOwner(x =>
+            {
+                x.AddLabels = [SystemLabel.Values.Bin];
+            })
+            .ExecuteAndAssert<Forbidden>();
 
     [Fact]
     public async Task Set_Succeeds_On_Revision_Match()

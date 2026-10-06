@@ -23,6 +23,9 @@ type Sku = {
 @description('The SKU of the Service Bus')
 param sku Sku
 
+@description('The name of the Application Insights workspace receiving the namespace diagnostic logs')
+param appInsightWorkspaceName string
+
 @description('The ID of the subnet for the private endpoint. Required when Premium SKU with VNET.')
 param subnetId string?
 
@@ -30,7 +33,7 @@ param subnetId string?
 param vnetId string?
 
 var serviceBusNameMaxLength = 50
-var serviceBusName = uniqueResourceName('${namePrefix}-service-bus', serviceBusNameMaxLength)
+var serviceBusName = uniqueResourceName('${namePrefix}-service-bus', serviceBusNameMaxLength, subscription().id, resourceGroup().id)
 
 var vnetRequested = subnetId != null || vnetId != null
 var vnetSkuValidation = vnetRequested && sku.name != 'Premium'
@@ -54,10 +57,39 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
   tags: tags
 }
 
-// private endpoint name max characters is 80
-var serviceBusPrivateEndpointName = uniqueResourceName('${namePrefix}-service-bus-pe', 80)
+resource appInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {
+  name: appInsightWorkspaceName
+}
 
-resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = if (vnetEnabled) {
+// Management-plane and error logs only; the per-message runtime audit log is left
+// off because of its volume. Retention is governed by the workspace.
+resource diagnosticSetting 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  scope: serviceBusNamespace
+  name: 'ServiceBusDiagnosticSetting'
+  properties: {
+    workspaceId: appInsightsWorkspace.id
+    logAnalyticsDestinationType: 'Dedicated'
+    logs: [
+      {
+        category: 'OperationalLogs'
+        enabled: true
+      }
+      {
+        category: 'DiagnosticErrorLogs'
+        enabled: true
+      }
+      {
+        category: 'VNetAndIPFilteringLogs'
+        enabled: true
+      }
+    ]
+  }
+}
+
+// private endpoint name max characters is 80
+var serviceBusPrivateEndpointName = uniqueResourceName('${namePrefix}-service-bus-pe', 80, subscription().id, resourceGroup().id)
+
+resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2025-07-01' = if (vnetEnabled) {
   name: serviceBusPrivateEndpointName
   location: location
   properties: {
@@ -72,7 +104,7 @@ resource serviceBusPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-0
         }
       }
     ]
-    customNetworkInterfaceName: uniqueResourceName('${namePrefix}-service-bus-pe-nic', 80)
+    customNetworkInterfaceName: uniqueResourceName('${namePrefix}-service-bus-pe-nic', 80, subscription().id, resourceGroup().id)
     subnet: {
       id: subnetId!
     }

@@ -25,34 +25,41 @@ export default function () {
         });
     })
 
-    describe('Attempt to create dialog with same idempotentKey different Org', () => {
+    describe('Attempt to create dialog with same idempotentKey for a different org code', () => {
+        // idempotentKey uniqueness is scoped by the org code of the resource owner, so the same key
+        // must be accepted once per org code. otherServiceResource is owned by a different org code
+        // than the default resource.
+        const idempotentKey = uuidv7();
+
         let dialog = dialogToInsert();
-        dialog.idempotentKey = uuidv7();
-        dialog.serviceResource = "urn:altinn:resource:" +otherServiceResource;
+        dialog.idempotentKey = idempotentKey;
+        dialog.serviceResource = "urn:altinn:resource:" + otherServiceResource;
         dialog.activities[2].performedBy.actorId = "urn:altinn:organization:identifier-no:" + otherOrgNo;
 
-        let responseNav = postSO('dialogs', dialog, null, otherOrg);
-        expectStatusFor(responseNav).to.equal(201);
+        let responseOtherOrg = postSO('dialogs', dialog, null, otherOrg);
+        expectStatusFor(responseOtherOrg).to.equal(201);
 
-        expect(responseNav, 'response').to.have.validJsonBody();
-        expect(responseNav.json(), 'response json').to.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/);
+        expect(responseOtherOrg, 'response').to.have.validJsonBody();
+        expect(responseOtherOrg.json(), 'response json').to.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/);
 
+        const otherOrgDialogId = responseOtherOrg.json();
         dialogs.push({
-            id: responseNav.json(),
+            id: otherOrgDialogId,
             org: otherOrg
         })
 
         dialog = dialogToInsert();
-        dialog.idempotentKey = uuidv7();
+        dialog.idempotentKey = idempotentKey;
 
-        let responseDigdir = postSO('dialogs', dialog);
-        expectStatusFor(responseDigdir).to.equal(201);
+        let responseDefaultOrg = postSO('dialogs', dialog);
+        expectStatusFor(responseDefaultOrg).to.equal(201);
 
-        expect(responseDigdir, 'response').to.have.validJsonBody();
-        expect(responseDigdir.json(), 'response json').to.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/);
+        expect(responseDefaultOrg, 'response').to.have.validJsonBody();
+        expect(responseDefaultOrg.json(), 'response json').to.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/);
+        expect(responseDefaultOrg.json(), 'response json').to.not.equal(otherOrgDialogId);
 
         dialogs.push({
-            id: responseDigdir.json(),
+            id: responseDefaultOrg.json(),
             org: null
         });
     })

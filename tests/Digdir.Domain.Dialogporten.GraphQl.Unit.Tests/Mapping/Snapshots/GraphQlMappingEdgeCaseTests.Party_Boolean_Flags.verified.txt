@@ -1,0 +1,135 @@
+﻿[
+  {
+    Case: AllFalse,
+    Party: {
+      HasOnlyAccessToSubParties: false,
+      SubParties: [],
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    },
+    SubParty: {
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    }
+  },
+  {
+    Case: IsDeleted,
+    Party: {
+      HasOnlyAccessToSubParties: false,
+      SubParties: [],
+      IsDeleted: true,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    },
+    SubParty: {
+      IsDeleted: true,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    }
+  },
+  {
+    Case: HasKeyRole,
+    Party: {
+      HasOnlyAccessToSubParties: false,
+      SubParties: [],
+      IsDeleted: false,
+      HasKeyRole: true,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    },
+    SubParty: {
+      IsDeleted: false,
+      HasKeyRole: true,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    }
+  },
+  {
+    Case: IsCurrentEndUser,
+    Party: {
+      HasOnlyAccessToSubParties: false,
+      SubParties: [],
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: true,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    },
+    SubParty: {
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: true,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    }
+  },
+  {
+    Case: IsMainAdministrator,
+    Party: {
+      HasOnlyAccessToSubParties: false,
+      SubParties: [],
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: true,
+      IsAccessManager: false
+    },
+    SubParty: {
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: true,
+      IsAccessManager: false
+    }
+  },
+  {
+    Case: IsAccessManager,
+    Party: {
+      HasOnlyAccessToSubParties: false,
+      SubParties: [],
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: true
+    },
+    SubParty: {
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: true
+    }
+  },
+  {
+    Case: HasOnlyAccessToSubParties,
+    Party: {
+      HasOnlyAccessToSubParties: true,
+      SubParties: [],
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    },
+    SubParty: {
+      IsDeleted: false,
+      HasKeyRole: false,
+      IsCurrentEndUser: false,
+      IsMainAdministrator: false,
+      IsAccessManager: false
+    }
+  }
+]

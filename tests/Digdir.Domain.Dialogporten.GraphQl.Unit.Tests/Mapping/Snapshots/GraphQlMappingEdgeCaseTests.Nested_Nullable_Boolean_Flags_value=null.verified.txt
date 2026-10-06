@@ -1,0 +1,12 @@
+﻿{
+  Content: {
+    Value: [],
+    MediaType: text/plain
+  },
+  Seen: {
+    IsCurrentEndUser: false
+  },
+  SearchSeen: {
+    IsCurrentEndUser: false
+  }
+}

@@ -19,9 +19,44 @@ param adminLoginGroupObjectId string
 @description('The size of the virtual machine')
 param vmSize string
 
+@description('First day of the nightly patch window, yyyy-MM-dd. Defaults to tomorrow so the value is never in the past when the maintenance configuration is created.')
+param patchWindowStartDate string = dateTimeAdd(utcNow(), 'P1D', 'yyyy-MM-dd')
+
 var name = '${namePrefix}-ssh-jumper'
 
-resource publicIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
+// Nightly customer-managed patch window, installing from live package repositories.
+resource maintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfigurations@2023-04-01' = {
+  name: '${namePrefix}-vm-maint-conf'
+  location: location
+  tags: tags
+  properties: {
+    maintenanceScope: 'InGuestPatch'
+    extensionProperties: {
+      InGuestPatchMode: 'User'
+    }
+    maintenanceWindow: {
+      startDateTime: '${patchWindowStartDate} 01:00'
+      duration: '02:00'
+      recurEvery: '1Day'
+      timeZone: 'W. Europe Standard Time'
+    }
+    installPatches: {
+      rebootSetting: 'IfRequired'
+      linuxParameters: {
+        // Ubuntu publishes many CVE fixes through the regular updates pocket, where they
+        // are classified as 'Other'. Nothing on a jumper is sensitive to routine upgrades,
+        // so all classifications are installed nightly.
+        classificationsToInclude: [
+          'Critical'
+          'Security'
+          'Other'
+        ]
+      }
+    }
+  }
+}
+
+resource publicIp 'Microsoft.Network/publicIPAddresses@2025-07-01' = {
   name: '${name}-ip'
   location: location
   sku: {
@@ -40,7 +75,7 @@ resource publicIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
   tags: tags
 }
 
-resource networkInterface 'Microsoft.Network/networkInterfaces@2024-05-01' = {
+resource networkInterface 'Microsoft.Network/networkInterfaces@2025-07-01' = {
   name: name
   location: location
   properties: {
@@ -82,10 +117,12 @@ module virtualMachine '../../modules/virtualMachine/main.bicep' = {
   params: {
     name: name
     sshPublicKey: sshPublicKey
+    postProvisionScript: loadTextContent('./harden.sh')
     location: location
     tags: tags
     adminLoginGroupObjectId: adminLoginGroupObjectId
     enableJit: true
+    maintenanceConfigurationId: maintenanceConfiguration.id
     hardwareProfile: {
       vmSize: vmSize
     }

@@ -1,0 +1,15 @@
+﻿{
+  Content: {
+    Value: [],
+    MediaType: text/plain,
+    IsAuthorized: false
+  },
+  Seen: {
+    IsViaServiceOwner: false,
+    IsCurrentEndUser: false
+  },
+  SearchSeen: {
+    IsViaServiceOwner: false,
+    IsCurrentEndUser: false
+  }
+}

@@ -26,7 +26,7 @@ public sealed class GetOauthAuthorizationServerEndpoint : EndpointWithoutRequest
         PreProcessor<RequireJsonAcceptPreProcessor>();
         Group<MetadataGroup>();
 
-        Description(b => b.ProducesOneOf<GetOauthAuthorizationServerDto>(StatusCodes.Status200OK));
+        Description(b => b.Produces<GetOauthAuthorizationServerDto>());
     }
 
     public override async Task HandleAsync(CancellationToken ct)

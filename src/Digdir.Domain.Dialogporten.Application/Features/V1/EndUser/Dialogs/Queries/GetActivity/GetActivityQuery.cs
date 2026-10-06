@@ -62,12 +62,8 @@ internal sealed class GetActivityQueryHandler : IRequestHandler<GetActivityQuery
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
-            dialog,
-            cancellationToken: cancellationToken);
-
-        // If we cannot access the dialog at all, we don't allow access to any of the activity history
-        if (!authorizationResult.HasAccessToMainResource())
+        var (hasAccess, _) = await _altinnAuthorization.GetDialogAccess(dialog, cancellationToken);
+        if (!hasAccess)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }

@@ -1,0 +1,18 @@
+﻿[
+  {
+    Source: Role,
+    Result: Role
+  },
+  {
+    Source: AccessPackage,
+    Result: AccessPackage
+  },
+  {
+    Source: ResourceDelegation,
+    Result: ResourceDelegation
+  },
+  {
+    Source: InstanceDelegation,
+    Result: InstanceDelegation
+  }
+]

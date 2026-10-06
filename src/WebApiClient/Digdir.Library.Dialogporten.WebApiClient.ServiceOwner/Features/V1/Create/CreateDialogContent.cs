@@ -1,0 +1,62 @@
+using System.Text.Json.Serialization;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Common;
+
+namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
+
+public class CreateDialogContent
+{
+    /// <summary>
+    /// The title of the dialog.
+    /// <br/>Supported media types: text/plain
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required ContentValue Title { get; set; }
+
+    /// <summary>
+    /// An optional non-sensitive title of the dialog.
+    /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    [JsonPropertyName("nonSensitiveTitle")]
+    public ContentValue? NonSensitiveTitle { get; set; }
+
+    /// <summary>
+    /// A short summary of the dialog and its current state.
+    /// <br/>Supported media types: text/plain
+    /// </summary>
+    [JsonPropertyName("summary")]
+    public ContentValue? Summary { get; set; }
+
+    /// <summary>
+    /// An optional non-sensitive summary of the dialog and its current state.
+    /// <br/>Used for search and list views if the user authorization does not meet the required eIDAS level
+    /// </summary>
+    [JsonPropertyName("nonSensitiveSummary")]
+    public ContentValue? NonSensitiveSummary { get; set; }
+
+    /// <summary>
+    /// Overridden sender name. If not supplied, assume "org" as the sender name. Must be text/plain if supplied.
+    /// <br/>Supported media types: text/plain
+    /// </summary>
+    [JsonPropertyName("senderName")]
+    public ContentValue? SenderName { get; set; }
+
+    /// <summary>
+    /// Additional information about the dialog.
+    /// <br/>Supported media types: text/plain, text/markdown
+    /// </summary>
+    [JsonPropertyName("additionalInfo")]
+    public ContentValue? AdditionalInfo { get; set; }
+
+    /// <summary>
+    /// Used as the human-readable label used to describe the "ExtendedStatus" field.
+    /// <br/>Supported media types: text/plain
+    /// </summary>
+    [JsonPropertyName("extendedStatus")]
+    public ContentValue? ExtendedStatus { get; set; }
+
+    /// <summary>
+    /// Front-channel embedded content. Used to dynamically embed content in the frontend from an external URL. Must be HTTPS.
+    /// </summary>
+    [JsonPropertyName("mainContentReference")]
+    public ContentValue? MainContentReference { get; set; }
+}

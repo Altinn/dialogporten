@@ -58,6 +58,7 @@ public class DialogApplication : IAsyncLifetime
     internal static TestClock Clock { get; } = new();
     internal static TestUser User { get; } = new();
     internal static TestAltinnAuthorization AltinnAuthorization { get; } = new();
+    internal static TestServiceResourceAuthorizer ServiceResourceAuthorizer { get; } = new();
     internal static TestPartyNameRegistry PartyNameRegistry { get; } = new();
     internal static TestApplicationSettings Settings { get; } = new();
 
@@ -123,7 +124,7 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<IClock>(Clock)
             .AddSingleton<IUser>(User)
             .RemoveAll<IServiceResourceAuthorizer>()
-            .AddSingleton<IServiceResourceAuthorizer, IntegrationTestServiceResourceAuthorizer>()
+            .AddSingleton<IServiceResourceAuthorizer>(ServiceResourceAuthorizer)
             .AddDistributedMemoryCache()
             .AddLogging()
             .AddScoped<PopulateActorNameInterceptor>()
@@ -323,6 +324,7 @@ public class DialogApplication : IAsyncLifetime
         Clock.Reset();
         User.Reset();
         AltinnAuthorization.Reset();
+        ServiceResourceAuthorizer.Reset();
         PartyNameRegistry.Reset();
         Settings.Reset();
         _publishedEvents.Clear();

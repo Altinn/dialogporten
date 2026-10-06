@@ -1,0 +1,87 @@
+﻿{
+  DialogId: 00000001-0000-0000-0000-000000000000,
+  InstanceRef: str-2,
+  Party: str-3,
+  Title: [
+    {
+      Value: str-17,
+      LanguageCode: lang18
+    },
+    {
+      Value: str-19,
+      LanguageCode: lang20
+    }
+  ],
+  ServiceResource: {
+    Id: str-4,
+    IsDelegable: true,
+    MinimumAuthenticationLevel: 6,
+    Name: [
+      {
+        Value: str-7,
+        LanguageCode: lang8
+      },
+      {
+        Value: str-9,
+        LanguageCode: lang10
+      }
+    ]
+  },
+  ServiceOwner: {
+    OrgNumber: str-11,
+    Code: str-12,
+    Name: [
+      {
+        Value: str-13,
+        LanguageCode: lang14
+      },
+      {
+        Value: str-15,
+        LanguageCode: lang16
+      }
+    ]
+  },
+  AuthorizationEvidence: {
+    CurrentAuthenticationLevel: 21,
+    ViaRole: false,
+    ViaAccessPackage: true,
+    ViaResourceDelegation: false,
+    ViaInstanceDelegation: true,
+    Evidence: [
+      {
+        GrantType: ResourceDelegation,
+        Subject: str-27,
+        Name: [
+          {
+            Value: str-28,
+            LanguageCode: lang29
+          },
+          {
+            Value: str-30,
+            LanguageCode: lang31
+          }
+        ],
+        Links: {
+          Metadata: str-32
+        }
+      },
+      {
+        GrantType: AccessPackage,
+        Subject: str-34,
+        Name: [
+          {
+            Value: str-35,
+            LanguageCode: lang36
+          },
+          {
+            Value: str-37,
+            LanguageCode: lang38
+          }
+        ],
+        Links: {
+          Metadata: str-39
+        }
+      }
+    ]
+  }
+}

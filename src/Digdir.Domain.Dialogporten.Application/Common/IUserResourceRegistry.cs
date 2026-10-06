@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.ResourceRegistry.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Common;
 
@@ -107,14 +108,19 @@ internal sealed class UserResourceRegistry : IUserResourceRegistry
 
     public bool UserCanModifyResourceType(string serviceResourceType) => serviceResourceType switch
     {
-        ResourceRegistry.Constants.CorrespondenceService => _user.GetPrincipal().HasScope(AuthorizationScope.CorrespondenceScope),
+        Constants.CorrespondenceService => _user.GetPrincipal().HasScope(AuthorizationScope.CorrespondenceScope),
         null => false,
         _ => true
     };
 
     public bool IsCurrentUserServiceOwnerAdmin() => _user.GetPrincipal().HasScope(AuthorizationScope.ServiceOwnerAdminScope);
 
-    public bool CurrentUserCanChangeTransmissions() => _user.GetPrincipal().HasScope(AuthorizationScope.ServiceProviderChangeTransmissions);
+    public bool CurrentUserCanChangeTransmissions()
+    {
+        var claimsPrincipal = _user.GetPrincipal();
+        return claimsPrincipal.HasScope(AuthorizationScope.ServiceProvider) &&
+               claimsPrincipal.HasScope(AuthorizationScope.ServiceProviderChangeTransmissions);
+    }
 }
 
 internal sealed class LocalDevelopmentUserResourceRegistryDecorator : IUserResourceRegistry

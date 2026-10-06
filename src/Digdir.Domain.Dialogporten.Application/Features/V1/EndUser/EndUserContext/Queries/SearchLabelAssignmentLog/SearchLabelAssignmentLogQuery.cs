@@ -44,6 +44,7 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
                         .ThenInclude(x => x.ActorNameEntity)
                     .Include(x => x.ServiceOwnerContext)
                         .ThenInclude(x => x.ServiceOwnerLabels)
+                    .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(x => x.Id == request.DialogId,
                         cancellationToken: ct),
             cancellationToken);
@@ -53,8 +54,8 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }
 
-        var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(dialog, cancellationToken: cancellationToken);
-        if (!authorizationResult.HasAccessToMainResource())
+        var (hasAccess, _) = await _altinnAuthorization.GetDialogAccess(dialog, cancellationToken);
+        if (!hasAccess)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
         }

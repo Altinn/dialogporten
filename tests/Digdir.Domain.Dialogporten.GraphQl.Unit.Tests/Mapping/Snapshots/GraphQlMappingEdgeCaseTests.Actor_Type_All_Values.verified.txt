@@ -1,0 +1,10 @@
+﻿[
+  {
+    Source: PartyRepresentative,
+    Result: PartyRepresentative
+  },
+  {
+    Source: ServiceOwner,
+    Result: ServiceOwner
+  }
+]

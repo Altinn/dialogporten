@@ -1,10 +1,12 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
+using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
 using Digdir.Library.Dialogporten.E2E.Common;
 using Digdir.Library.Dialogporten.E2E.Common.Extensions;
-using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.SystemLabel;
+using static Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums.SystemLabel;
 
 namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.EndUser.EndUserContext;
 
@@ -28,7 +30,8 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
         dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
     }
 
-    [E2EFact]
+    // yt01 has no provisioned system user, see E2EConstants.DefaultSystemUserId
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
     public async Task Should_Be_Able_To_Set_System_Label_When_SystemUser()
     {
         // Arrange
@@ -152,6 +155,68 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
 
         // Assert
         setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.PreconditionFailed);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_For_Unknown_Dialog()
+    {
+        // Act
+        var setLabelResponse = await Fixture.EndUserApi
+            .SetSystemLabels(
+                Guid.CreateVersion7(),
+                request => request.AddLabels = [Bin]
+        );
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_Forbidden_For_Unauthorized_Access()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync();
+
+        // Act
+        Fixture.UseEndUserTokenOverrides(ssn: "27069815400");
+        var setLabelResponse = await Fixture.EndUserApi
+            .SetSystemLabels(
+                dialogId,
+                request => request.AddLabels = [Bin]
+            );
+
+        // Assert
+        setLabelResponse.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+
+        Fixture.UseEndUserTokenOverrides();
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_403_For_Unauthorized_Dialog_When_Dialog_Has_Unauthorized_Party()
+    {
+        // Arrange
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+            dialog.Party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}{E2EConstants.AlternateEndUserSsn}");
+
+        // Act
+        var response = await Fixture.EndUserApi
+            .SetSystemLabels(
+                dialogId,
+                request => request.AddLabels = [Archive]);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.Forbidden);
+
+        Fixture.UseEndUserTokenOverrides(ssn: E2EConstants.AlternateEndUserSsn);
+        var dialog = await Fixture.EndUserApi.GetDialog(dialogId);
+        dialog.Content.Should().NotBeNull();
+        dialog.Content.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
     }
 
     [E2EFact]

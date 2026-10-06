@@ -109,7 +109,7 @@ internal static class TestUsers
 
         public TFlowStep AsChangeTransmissionUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
             flowStep.AsUser(() => FromDefault()
-                .WithScope(AuthorizationScope.ServiceProviderChangeTransmissions)
+                .WithScope($"{AuthorizationScope.ServiceProvider} {AuthorizationScope.ServiceProviderChangeTransmissions}")
                 .Configure(configure)
                 .Build());
 

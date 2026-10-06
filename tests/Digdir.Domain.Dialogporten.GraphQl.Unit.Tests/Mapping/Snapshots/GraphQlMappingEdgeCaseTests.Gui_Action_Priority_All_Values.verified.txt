@@ -1,0 +1,14 @@
+﻿[
+  {
+    Source: Primary,
+    Result: Primary
+  },
+  {
+    Source: Secondary,
+    Result: Secondary
+  },
+  {
+    Source: Tertiary,
+    Result: Tertiary
+  }
+]

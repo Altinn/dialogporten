@@ -4,13 +4,20 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
+using Altinn.ApiClients.Maskinporten.Config;
+using Altinn.ApiClients.Maskinporten.Extensions;
+using Altinn.ApiClients.Maskinporten.Services;
 using Bogus;
 using CommandLine;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using static Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Tool.Dialogporten.GenerateFakeData;
 
-public static class Program
+public class Program
 {
     private const int RefreshRateMs = 200; // How often the progress is updated
     private const int DialogsPerBatch = 5; // How many dialogs to generate per call DialogGenerator
@@ -18,13 +25,15 @@ public static class Program
     private const int Consumers = 20; // Number of consumers posting to the API
     private const string FailedDirectory = "failed"; // Directory to write failed requests to
     private const string OutputDirectory = "output"; // Directory to write files to when not posting to the API
+    private const string ClientBuilderName = "dialogporten";
 
     public static async Task Main(string[] args) => await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(RunAsync);
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     private static int _dialogCounter;
@@ -37,10 +46,21 @@ public static class Program
     {
         DialogGenerator.SetSeed(options.Seed);
 
+        var cancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = cancellationTokenSource.Token;
+
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true;
+            cancellationTokenSource.Cancel();
+        };
+        var host = await CreateHost(options, cancellationToken);
+        await LoadResources(host, options, cancellationToken);
+
         if (options is { Submit: false, WriteToDisk: false, Benchmark: false })
         {
             var dialogs = DialogGenerator.GenerateFakeDialogs(
-                count: options.Count, serviceResourceGenerator: () => MaybeGetRandomResource(options),
+                count: options.Count, serviceResourceGenerator: () => GetNextResource(options),
                 partyGenerator: () => MaybeGetRandomParty(options));
             var serialized = JsonSerializer.Serialize(dialogs, JsonSerializerOptions);
             Console.WriteLine(serialized);
@@ -76,19 +96,12 @@ public static class Program
         var writer = channel.Writer;
         var reader = channel.Reader;
 
-        var cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = cancellationTokenSource.Token;
-
-        using var client = new HttpClient();
-        client.BaseAddress = new Uri(options.Url);
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
         Console.WriteLine($"Generating {options.Count} fake dialogs...");
         Stopwatch.Start();
 
         var producerTask = Task.Run(() => ProduceDialogs(options, writer, cancellationToken), cancellationToken);
         var progressTask = Task.Run(() => UpdateProgress(options, cancellationToken), cancellationToken);
+        using var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient(ClientBuilderName);
 
         var consumerTasks = new List<Task>();
         for (var i = 0; i < Consumers; i++)
@@ -112,6 +125,33 @@ public static class Program
 
         Stopwatch.Stop();
         await progressTask;
+    }
+
+    private static async Task<IHost> CreateHost(Options options, CancellationToken cancellationToken)
+    {
+        var host = Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration(config => config.AddUserSecrets<Program>())
+            .ConfigureServices((ctx, services) =>
+            {
+                if (string.IsNullOrEmpty(options.Token))
+                {
+                    var settings = new MaskinportenSettings();
+                    ctx.Configuration.GetRequiredSection("DialogportenSettings:Maskinporten").Bind(settings);
+
+                    settings.Scope = "digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.admin";
+                    settings.Environment = "test";
+
+                    services.RegisterMaskinportenClientDefinition<SettingsJwkClientDefinition>(ClientBuilderName, settings);
+                    services.AddHttpClient(ClientBuilderName)
+                        .AddMaskinportenHttpMessageHandler<SettingsJwkClientDefinition>(ClientBuilderName);
+                }
+                else
+                {
+                    services.AddHttpClient(ClientBuilderName);
+                }
+            }).Build();
+        await host.StartAsync(cancellationToken);
+        return host;
     }
 
     private const double RateCalculationIntervalMilliseconds = 1000;
@@ -172,7 +212,7 @@ public static class Program
                 var dialogsToGenerate = Math.Min(DialogsPerBatch, totalDialogs - dialogCounter);
                 var dialogs = DialogGenerator.GenerateFakeDialogs(
                         count: dialogsToGenerate,
-                        serviceResourceGenerator: () => MaybeGetRandomResource(options),
+                        serviceResourceGenerator: () => GetNextResource(options),
                         partyGenerator: () => MaybeGetRandomParty(options))
                     .Take(dialogsToGenerate);
 
@@ -192,28 +232,75 @@ public static class Program
         }
     }
 
+    private static long _position;
     private static List<string> _resourceList = [];
-    private static string? MaybeGetRandomResource(Options options)
+
+    private static async Task LoadResources(IHost host, Options options, CancellationToken ct)
     {
-        if (options.ResourceListPath == string.Empty) return null;
-        if (_resourceList.Count != 0)
+        _resourceList = options.ResourceListPath == string.Empty
+            ? await LoadResourcesFromRegister(host, options, ct)
+            : LoadResourcesFromFile(options);
+    }
+
+    private sealed class RegisterResponse : List<RegisterResource>;
+    private sealed record RegisterResource(
+        string Identifier,
+        string ResourceType,
+        RegisterCompetentAuthority HasCompetentAuthority
+    );
+    private sealed record RegisterCompetentAuthority(string? Organization, string? Orgcode);
+
+    private static async Task<List<string>> LoadResourcesFromRegister(IHost host, Options options, CancellationToken ct)
+    {
+        var requestUri = $"{options.PlatformBaseUrl}/resourceregistry/api/v1/resource/resourcelist";
+        using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+        using var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient(ClientBuilderName);
+        var response = await client.SendAsync(request, ct);
+
+        if (!response.IsSuccessStatusCode)
         {
-            return _resourceList[MyRandomizer.Number(_resourceList.Count - 1)];
+            throw new InvalidOperationException($"Unable to fetch resource list. Got status {response.StatusCode}");
         }
 
-        if (!File.Exists(options.ResourceListPath))
-        {
-            throw new FileNotFoundException($"{options.ResourceListPath} was not found");
-        }
+        var json = await response.Content.ReadAsStringAsync(ct);
+        var registerResponse = JsonSerializer.Deserialize<RegisterResponse>(json, JsonSerializerOptions)
+                   ?? throw new UnreachableException("Register returned null");
 
-        _resourceList = File.ReadLines(options.ResourceListPath).ToList();
-        if (_resourceList.Count == 0)
-        {
-            throw new InvalidOperationException(
-                $"{options.ResourceListPath} needs to contain newline separated resources (eg. urn:altinn:resource:foobar)");
-        }
+        if (registerResponse.Count == 0) throw new UnreachableException("Register returned empty list");
 
-        return _resourceList[MyRandomizer.Number(_resourceList.Count - 1)];
+        var resources = registerResponse
+            .Where(x =>
+                SupportedResourceTypes.Contains(x.ResourceType)
+                && !string.IsNullOrEmpty(x.HasCompetentAuthority.Organization)
+                && !string.IsNullOrEmpty(x.HasCompetentAuthority.Orgcode)
+            )
+            .Select(x => $"urn:altinn:resource:{x.Identifier}")
+            .ToList();
+
+        if (resources.Count == 0) throw new UnreachableException("Resources cant be empty");
+
+        Console.WriteLine("Found {0} resource(s) in Register", resources.Count);
+
+        return resources;
+    }
+
+    private static List<string> LoadResourcesFromFile(Options options)
+    {
+        var resources = !File.Exists(options.ResourceListPath)
+            ? throw new FileNotFoundException($"{options.ResourceListPath} was not found")
+            : File.ReadLines(options.ResourceListPath).Distinct().ToList();
+
+        return resources.Count == 0
+            ? throw new InvalidOperationException(
+                $"{options.ResourceListPath} needs to contain newline separated resources (eg. urn:altinn:resource:foobar)")
+            : resources;
+    }
+
+    private static string GetNextResource(Options options)
+    {
+        return options.RandomizeResources
+            ? _resourceList[MyRandomizer.Number(_resourceList.Count - 1)]
+            : _resourceList[(int)(_position++ % _resourceList.Count)];
     }
 
     private static List<string> _partyList = [];
@@ -240,14 +327,15 @@ public static class Program
         return _partyList[MyRandomizer.Number(_partyList.Count - 1)];
     }
 
-    private static async Task ConsumeDialogsAndPost(Options options, ChannelReader<(int, CreateDialogDto)> reader, HttpClient client, CancellationToken cancellationToken)
+    private static async Task ConsumeDialogsAndPost(Options options, ChannelReader<(int, CreateDialogDto)> reader, HttpClient client, CancellationToken ct)
     {
-        await foreach (var item in reader.ReadAllAsync(cancellationToken))
+        await foreach (var item in reader.ReadAllAsync(ct))
         {
             try
             {
+                var requestUri = $"{options.Url}/api/v1/serviceowner/dialogs";
                 var json = JsonSerializer.Serialize(item.Item2, JsonSerializerOptions);
-                using var request = new HttpRequestMessage(HttpMethod.Post, options.Url)
+                using var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
                 {
                     Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
@@ -258,7 +346,7 @@ public static class Program
                         new AuthenticationHeaderValue("Bearer", options.Token);
                 }
 
-                var response = await client.SendAsync(request, cancellationToken);
+                var response = await client.SendAsync(request, ct);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -267,13 +355,13 @@ public static class Program
 
                 Interlocked.Increment(ref _dialogCounter);
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 break;
             }
             catch (Exception ex)
             {
-                if (!cancellationToken.IsCancellationRequested)
+                if (!ct.IsCancellationRequested)
                 {
                     Console.WriteLine($"\nException occurred while posting dialog: {ex.Message}");
                 }
@@ -348,8 +436,15 @@ public sealed class Options
     public string PartyListPath { get; set; } = string.Empty;
 
     [Option('r', "resources", Required = false,
-        HelpText = "Path to file containing newline separated resources to pick randomly from")]
+        HelpText = "Path to file containing newline separated resources to pick randomly from. Uses resource registry if unset")]
     public string ResourceListPath { get; set; } = string.Empty;
+
+    [Option('z', "randomize", Required = false,
+        HelpText = "Randomly pick resources if true, otherwise pick with round robin")]
+    public bool RandomizeResources { get; set; } = false;
+
+    [Option('e', "platformEnvironmentUrl", Required = false, HelpText = "Platform environment base URL")]
+    public string PlatformBaseUrl { get; set; } = "https://platform.at23.altinn.cloud";
 
     [Option('a', "api", Required = false, HelpText = "Attempt to create the generated dialogs using service owner API.")]
     public bool Submit { get; set; } = false;
@@ -361,8 +456,8 @@ public sealed class Options
     public bool Benchmark { get; set; } = false;
 
     [Option('u', "url", Required = false,
-        Default = "https://localhost:7214/api/v1/serviceowner/dialogs",
-        HelpText = "Service owner endpoint to post dialogs")]
+        Default = "https://localhost:7214",
+        HelpText = "Base url for dialogporten")]
     public string Url { get; set; } = null!;
 
     [Option('t', "token", Required = false, HelpText = "Bearer token to send as authorization header.")]

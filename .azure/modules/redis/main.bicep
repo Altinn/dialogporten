@@ -37,7 +37,7 @@ type Sku = {
 param sku Sku
 
 var redisNameMaxLength = 63
-var redisName = uniqueResourceName('${namePrefix}-redis', redisNameMaxLength)
+var redisName = uniqueResourceName('${namePrefix}-redis', redisNameMaxLength, subscription().id, resourceGroup().id)
 
 // https://learn.microsoft.com/en-us/azure/templates/microsoft.cache/redis?pivots=deployment-language-bicep
 resource redis 'Microsoft.Cache/Redis@2024-11-01' = {
@@ -62,9 +62,9 @@ resource redis 'Microsoft.Cache/Redis@2024-11-01' = {
 var redisAccessKeys = redis.listKeys()
 
 // private endpoint name max characters is 80
-var redisPrivateEndpointName = uniqueResourceName('${namePrefix}-redis-pe', 80)
+var redisPrivateEndpointName = uniqueResourceName('${namePrefix}-redis-pe', 80, subscription().id, resourceGroup().id)
 
-resource redisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = {
+resource redisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2025-07-01' = {
   name: redisPrivateEndpointName
   location: location
   properties: {
@@ -79,7 +79,7 @@ resource redisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = 
         }
       }
     ]
-    customNetworkInterfaceName: uniqueResourceName('${namePrefix}-redis-pe-nic', 80)
+    customNetworkInterfaceName: uniqueResourceName('${namePrefix}-redis-pe-nic', 80, subscription().id, resourceGroup().id)
     subnet: {
       id: subnetId
     }

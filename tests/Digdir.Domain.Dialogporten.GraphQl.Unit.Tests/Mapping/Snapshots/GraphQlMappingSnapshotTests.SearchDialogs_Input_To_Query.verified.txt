@@ -1,0 +1,53 @@
+﻿{
+  Org: [
+    str-1,
+    str-2
+  ],
+  ServiceResource: [
+    str-3,
+    str-4
+  ],
+  Party: [
+    str-5,
+    str-6
+  ],
+  ExtendedStatus: [
+    str-7,
+    str-8
+  ],
+  ExternalReference: str-9,
+  Status: [
+    Completed,
+    NotApplicable
+  ],
+  CreatedAfter: 2020-01-01 00:00:16 +0,
+  CreatedBefore: 2020-01-01 00:00:17 +0,
+  UpdatedAfter: 2020-01-01 00:00:21 +0,
+  UpdatedBefore: 2020-01-01 00:00:22 +0,
+  ContentUpdatedAfter: 2020-01-01 00:00:18 +0,
+  ContentUpdatedBefore: 2020-01-01 00:00:19 +0,
+  IsContentSeen: false,
+  DueAfter: 2020-01-01 00:00:23 +0,
+  DueBefore: 2020-01-01 00:00:24 +0,
+  Process: str-12,
+  SystemLabel: [
+    MarkedAsUnopened,
+    Sent
+  ],
+  ExcludeApiOnly: true,
+  Search: str-25,
+  SearchLanguageCode: lang26,
+  OrderBy: {
+    Orders: [
+      {
+        Key: contentUpdatedAt,
+        Direction: Desc
+      },
+      {
+        Key: id,
+        Direction: Desc
+      }
+    ]
+  },
+  Limit: 27
+}

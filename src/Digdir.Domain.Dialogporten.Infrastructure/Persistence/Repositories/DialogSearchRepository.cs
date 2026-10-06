@@ -276,7 +276,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
                 row.DialogId,
                 row.EndUserContextRevision,
                 new DateTimeOffset(row.ContentUpdatedAt),
-                row.SystemLabels.ToList()))
+                row.SystemLabels.Select(x => (SystemLabel.Values)x).ToList()))
             .ToList();
 
         var hasNextPage = items.Count > limit;
@@ -440,6 +440,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             INNER JOIN "DialogContentType" AS ct ON c."TypeId" = ct."Id" AND ct."OutputInList"
             INNER JOIN "LocalizationSet" ls ON ls."Discriminator" = 'DialogContentValue' AND ls."DialogContentId" = c."Id"
             INNER JOIN "Localization" l ON l."LocalizationSetId" = ls."Id"
+            ORDER BY l."LanguageCode"
             """;
 
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
@@ -687,7 +688,9 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
         public Guid DialogId { get; set; }
         public Guid EndUserContextRevision { get; set; }
         public DateTime ContentUpdatedAt { get; set; }
-        public SystemLabel.Values[] SystemLabels { get; set; } = [];
+        // Dapper only assigns an array column to a property of the exact same array type,
+        // so the integer[] from Postgres is read as int[] and converted in the projection.
+        public int[] SystemLabels { get; set; } = [];
     }
     private sealed record RawSeenLogRow(Guid DialogId, Guid SeenLogId, DateTime SeenAt, bool IsViaServiceOwner,
         ActorType.Values ActorType, string? ActorId, string? ActorName, bool IsCurrentEndUser);

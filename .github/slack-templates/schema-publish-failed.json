@@ -1,0 +1,47 @@
+{
+  "channel": "${{ env.CHANNEL_ID }}",
+  "attachments": [
+    {
+      "color": "#FF0000",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Schema NPM publish failed",
+            "emoji": true
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Environment:*\n${{ env.ENVIRONMENT }}"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Version:*\n${{ env.VERSION }}"
+            }
+          ]
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "View Run"
+              },
+              "url": "${{ env.RUN_URL }}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -20,6 +20,12 @@ public abstract class E2EFixtureBase : IAsyncLifetime
     public string DotnetEnvironment { get; private set; } = Environments.Development;
     public E2ESettings Settings { get; private set; } = null!;
 
+    /// <summary>
+    /// The WebAPI base URI, for tests that need to reach unauthenticated endpoints outside the generated
+    /// clients (e.g. the JWKS document used to verify dialog token signatures).
+    /// </summary>
+    public Uri WebApiUri { get; private set; } = null!;
+
     public IServiceownerApi ServiceownerApi { get; private set; } = null!;
 
     public async ValueTask InitializeAsync()
@@ -53,7 +59,12 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             Converters = { new JsonStringEnumConverter() }
         };
 
-        var webApiUri = new UriBuilder(settings.DialogportenBaseUri)
+        var refitBaseAddress = new UriBuilder(settings.DialogportenBaseUri)
+        {
+            Port = settings.WebAPiPort
+        }.Uri;
+
+        WebApiUri = new UriBuilder(settings.DialogportenBaseUri + "/")
         {
             Port = settings.WebAPiPort
         }.Uri;
@@ -63,7 +74,10 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             {
                 ContentSerializer = new SystemTextJsonContentSerializer(jsonSerializerOptions)
             })
-            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = webApiUri)
+            .ConfigureHttpClient(httpClient =>
+            {
+                httpClient.BaseAddress = refitBaseAddress;
+            })
             .AddHttpMessageHandler(serviceProvider =>
                 ActivatorUtilities.CreateInstance<TestTokenHandler>(serviceProvider, TokenKind.ServiceOwner));
 
@@ -83,7 +97,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         var graphQlUri = graphQlUriBuilder.Uri;
 
-        ConfigureServices(services, settings, webApiUri, graphQlUri);
+        ConfigureServices(services, settings, refitBaseAddress, graphQlUri);
 
         _serviceProvider = services.BuildServiceProvider();
 
@@ -92,7 +106,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         AfterServiceProviderBuilt(_serviceProvider);
 
-        PreflightState = await CreatePreflightState(graphQlUri, webApiUri);
+        PreflightState = await CreatePreflightState(graphQlUri, refitBaseAddress);
     }
 
     public ValueTask DisposeAsync()
@@ -101,6 +115,8 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         GC.SuppressFinalize(this);
         return ValueTask.CompletedTask;
     }
+
+    public IHttpClientFactory GetHttpClientFactory() => _serviceProvider!.GetRequiredService<IHttpClientFactory>();
 
     public IDisposable UseTokenOverrides(TokenOverrides overrides) =>
         _tokenOverridesAccessor is null

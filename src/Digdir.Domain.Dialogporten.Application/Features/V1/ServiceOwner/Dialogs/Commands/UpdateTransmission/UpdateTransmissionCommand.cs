@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
@@ -37,7 +36,6 @@ public sealed record UpdateTransmissionSuccess(Guid Revision);
 internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateTransmissionCommand, UpdateTransmissionResult>
 {
     private readonly IDialogDbContext _db;
-    private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly IUserResourceRegistry _userResourceRegistry;
@@ -45,21 +43,18 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
 
     public UpdateTransmissionCommandHandler(
         IDialogDbContext db,
-        IMapper mapper,
         IUnitOfWork unitOfWork,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         IUserResourceRegistry userResourceRegistry,
         ITransmissionHierarchyValidator transmissionHierarchyValidator)
     {
         ArgumentNullException.ThrowIfNull(db);
-        ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(serviceResourceAuthorizer);
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
         ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
 
         _db = db;
-        _mapper = mapper;
         _unitOfWork = unitOfWork;
         _serviceResourceAuthorizer = serviceResourceAuthorizer;
         _userResourceRegistry = userResourceRegistry;
@@ -77,12 +72,6 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         if (dialog is null)
         {
             return new EntityNotFound<DialogEntity>(request.DialogId);
-        }
-
-        var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
-        if (authorizeResult.Value is Forbidden forbidden)
-        {
-            return forbidden;
         }
 
         if (dialog.Deleted)
@@ -103,7 +92,7 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
             return new EntityNotFound<DialogTransmission>(request.TransmissionId);
         }
 
-        _mapper.Map(request.Dto, transmission);
+        transmission.UpdateFrom(request.Dto);
 
         transmission.Attachments
             .Merge(request.Dto.Attachments,
@@ -112,6 +101,22 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                 create: CreateTransmissionAttachments,
                 update: UpdateTransmissionAttachments,
                 delete: DeleteDelegate.Default);
+
+        transmission.NavigationalActions
+            .Merge(request.Dto.NavigationalActions,
+                destinationKeySelector: x => x.Id,
+                sourceKeySelector: x => x.Id,
+                create: CreateTransmissionNavigationalActions,
+                update: UpdateTransmissionNavigationalActions,
+                delete: DeleteDelegate.Default);
+
+        // Authorization of referenced service resources must happen after the incoming DTO has been
+        // mapped onto the aggregate, so that incoming authorization attributes/contexts are covered.
+        var authorizeResult = await _serviceResourceAuthorizer.AuthorizeServiceResources(dialog, cancellationToken);
+        if (authorizeResult.Value is Forbidden forbidden)
+        {
+            return forbidden;
+        }
 
         var conflict = ValidateIdempotentKeys(dialog, transmission);
         if (conflict is not null)
@@ -154,9 +159,8 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
     {
         return creatables.Select(dto =>
         {
-            var attachment = _mapper.Map<DialogTransmissionAttachment>(dto);
+            var attachment = dto.ToDialogTransmissionAttachment();
             attachment.EnsureId();
-            attachment.Urls = _mapper.Map<List<AttachmentUrl>>(dto.Urls);
             _db.DialogTransmissionAttachments.Add(attachment);
             return attachment;
         });
@@ -166,12 +170,53 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
     {
         foreach (var (source, destination) in updateSets)
         {
-            _mapper.Map(source, destination);
-            destination.Urls = _mapper.Map<List<AttachmentUrl>>(source.Urls);
-            foreach (var url in destination.Urls)
-            {
-                _db.AttachmentUrls.Add(url);
-            }
+            destination.UpdateFrom(source);
+            destination.Urls
+                .Merge(source.Urls,
+                    destinationKeySelector: x => x.Id,
+                    sourceKeySelector: x => x.Id,
+                    create: CreateAttachmentUrls,
+                    update: UpdateAttachmentUrls,
+                    delete: DeleteDelegate.Default);
+        }
+    }
+
+    private IEnumerable<DialogTransmissionNavigationalAction> CreateTransmissionNavigationalActions(
+        IEnumerable<TransmissionNavigationalActionDto> creatables)
+    {
+        return creatables.Select(dto =>
+        {
+            var navigationalAction = dto.ToDialogTransmissionNavigationalAction();
+            navigationalAction.EnsureId();
+            _db.DialogTransmissionNavigationalActions.Add(navigationalAction);
+            return navigationalAction;
+        });
+    }
+
+    private static void UpdateTransmissionNavigationalActions(
+        IEnumerable<UpdateSet<DialogTransmissionNavigationalAction, TransmissionNavigationalActionDto>> updateSets)
+    {
+        foreach (var (source, destination) in updateSets)
+        {
+            destination.UpdateFrom(source);
+        }
+    }
+
+    private static void UpdateAttachmentUrls(IEnumerable<UpdateSet<AttachmentUrl, TransmissionAttachmentUrlDto>> updateSets)
+    {
+        foreach (var (source, destination) in updateSets)
+        {
+            destination.UpdateFrom(source);
+        }
+    }
+
+    private IEnumerable<AttachmentUrl> CreateAttachmentUrls(IEnumerable<TransmissionAttachmentUrlDto> creatables)
+    {
+        foreach (var dto in creatables)
+        {
+            var url = dto.ToAttachmentUrl();
+            _db.AttachmentUrls.Add(url);
+            yield return url;
         }
     }
 
@@ -202,6 +247,14 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
                         .ThenInclude(x => x.Localizations)
             .Include(x => x.Transmissions)
                 .ThenInclude(x => x.Sender)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.AuthorizationContext)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.Attachments)
+                    .ThenInclude(x => x.AuthorizationContext)
+            .Include(x => x.Transmissions)
+                .ThenInclude(x => x.NavigationalActions)
+                    .ThenInclude(x => x.AuthorizationContext)
             .IgnoreQueryFilters()
             .WhereIf(!isAdmin, x => x.Org == org)
             .FirstOrDefaultAsync(x => x.Id == dialogId, cancellationToken);

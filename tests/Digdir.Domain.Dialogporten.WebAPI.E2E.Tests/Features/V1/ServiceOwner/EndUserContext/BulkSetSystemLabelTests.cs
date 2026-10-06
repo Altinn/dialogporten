@@ -1,0 +1,177 @@
+using System.Net;
+using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Library.Dialogporten.E2E.Common;
+using Digdir.Library.Dialogporten.E2E.Common.Extensions;
+using static Altinn.ApiClients.Dialogporten.Features.V1.DialogEndUserContextsEntities_SystemLabel;
+using Constants = Digdir.Domain.Dialogporten.Application.Features.V1.Common.Authorization.Constants;
+
+namespace Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Features.V1.ServiceOwner.EndUserContext;
+
+[Collection(nameof(WebApiTestCollectionFixture))]
+public class BulkSetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2EFixture>(fixture)
+{
+    [E2EFact]
+    public async Task Should_BulkSet_Labels_For_Accessible_Dialogs()
+    {
+        // Arrange
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        await Task.WhenAll(createDialog1, createDialog2);
+
+        // Act
+        var response = await Fixture.ServiceownerApi.BulkSetSystemLabels(
+            endUserId: E2EConstants.DefaultParty,
+            modify: request =>
+            {
+                request.Dialogs =
+                [
+                    new() { DialogId = createDialog1.Result },
+                    new() { DialogId = createDialog2.Result }
+                ];
+
+                request.AddLabels = [Bin];
+            });
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+
+        var getDialog1 = Fixture.ServiceownerApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.ServiceownerApi.GetDialog(createDialog2.Result);
+        await Task.WhenAll(getDialog1, getDialog2);
+
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Bin);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_When_BulkSet_Contains_Dialog_From_Another_Party()
+    {
+        // Arrange
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var createForbiddenDialog = Fixture.ServiceownerApi
+            .CreateSimpleDialogAsync(dialog => dialog.Party = $"{NorwegianPersonIdentifier.PrefixWithSeparator}" +
+                                                              $"{E2EConstants.AlternateEndUserSsn}");
+
+        await Task.WhenAll(createDialog1, createDialog2, createForbiddenDialog);
+
+        // Act
+        var response = await Fixture.ServiceownerApi.BulkSetSystemLabels(
+            endUserId: E2EConstants.DefaultParty,
+            modify: request =>
+            {
+                request.Dialogs =
+                [
+                    new() { DialogId = createDialog1.Result },
+                    new() { DialogId = createDialog2.Result },
+                    new() { DialogId = createForbiddenDialog.Result }
+                ];
+                request.AddLabels = [Archive];
+            });
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        response.Error.Should().NotBeNull();
+        response.Error.Content.Should().Contain(createForbiddenDialog.Result.ToString());
+
+        var getDialog1 = Fixture.ServiceownerApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.ServiceownerApi.GetDialog(createDialog2.Result);
+        var getDialog3 = Fixture.ServiceownerApi.GetDialog(createForbiddenDialog.Result);
+        await Task.WhenAll(getDialog1, getDialog2, getDialog3);
+
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        var dialog3 = getDialog3.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog3.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+        dialog3.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_404_When_BulkSet_Contains_Dialog_From_Another_Service_Owner()
+    {
+        // Arrange
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+
+        await Task.WhenAll(createDialog1, createDialog2);
+
+        // Act
+        Fixture.UseServiceOwnerTokenOverrides("964951284", "hko");
+        var response = await Fixture.ServiceownerApi.BulkSetSystemLabels(
+            endUserId: E2EConstants.DefaultParty,
+            modify: request =>
+            {
+                request.Dialogs =
+                [
+                    new() { DialogId = createDialog1.Result },
+                    new() { DialogId = createDialog2.Result },
+                ];
+                request.AddLabels = [Archive];
+            });
+
+        Fixture.UseServiceOwnerTokenOverrides();
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NotFound);
+        response.Error.Should().NotBeNull();
+
+        var getDialog1 = Fixture.ServiceownerApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.ServiceownerApi.GetDialog(createDialog2.Result);
+        await Task.WhenAll(getDialog1, getDialog2);
+
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Default);
+    }
+
+    [E2EFact]
+    public async Task Should_Return_204_When_BulkSet_Contains_Dialog_From_Another_Service_Owner_As_Admin()
+    {
+        // Arrange
+        var createDialog1 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+        var createDialog2 = Fixture.ServiceownerApi.CreateComplexDialogAsync();
+
+        await Task.WhenAll(createDialog1, createDialog2);
+
+        // Act
+        Fixture.UseServiceOwnerTokenOverrides("964951284", "hko", E2EConstants.ServiceOwnerAdminScopes);
+        var response = await Fixture.ServiceownerApi.BulkSetSystemLabels(
+            endUserId: E2EConstants.DefaultParty,
+            modify: request =>
+            {
+                request.Dialogs =
+                [
+                    new() { DialogId = createDialog1.Result },
+                    new() { DialogId = createDialog2.Result },
+                ];
+                request.AddLabels = [Archive];
+            });
+
+        Fixture.UseServiceOwnerTokenOverrides();
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.NoContent);
+
+        var getDialog1 = Fixture.ServiceownerApi.GetDialog(createDialog1.Result);
+        var getDialog2 = Fixture.ServiceownerApi.GetDialog(createDialog2.Result);
+        await Task.WhenAll(getDialog1, getDialog2);
+
+        var dialog1 = getDialog1.Result.Content;
+        var dialog2 = getDialog2.Result.Content;
+        dialog1.Should().NotBeNull();
+        dialog2.Should().NotBeNull();
+        dialog1.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Archive);
+        dialog2.EndUserContext.SystemLabels.Should().ContainSingle().Which.Should().Be(Archive);
+    }
+}

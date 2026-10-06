@@ -87,7 +87,9 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 if (newSeenLog != null) dialog.AddSeenEvent(userId.ExternalIdWithPrefix, userId.Type, newSeenLog.Id);
                 if (newSeenLog != null && seenResult.OutOfSyncActorNameId)
                 {
-                    var actorNameId = newSeenLog.SeenBy.ActorNameEntityId ?? throw new UnreachableException();
+                    var actorNameId = newSeenLog.SeenBy.ActorNameEntityId ?? throw new UnreachableException(
+                        $"ActorNameEntityId must not be null if OutOfSyncActorNameId is true. Seen Log: {newSeenLog.Id}"
+                    );
                     dialog.AddResyncActorNameEvent(
                         actorNameId: actorNameId,
                         reason: $"{nameof(GetDialogQueryHandler)} (SO): Actor name for SeenLog is null {newSeenLog.Id}",

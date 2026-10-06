@@ -164,8 +164,7 @@ public static class IFlowStepExtensions
                 IfMatchDialogRevision = ifMatchDialogRevision,
                 Transmissions = [transmission]
             };
-            var act = new FlowAction<CreateTransmissionCommand, CreateTransmissionResult>(command);
-            ctx.State.Actions.Add(act);
+            ctx.State.Actions.Add(new FlowAction<CreateTransmissionCommand, CreateTransmissionResult>(command));
 
             return command;
         })
@@ -550,17 +549,16 @@ public static class IFlowStepExtensions
         return step
             .SendCommand(ctx =>
             {
-                var createActivityCommand = new CreateActivityCommand
+                var command = new CreateActivityCommand
                 {
                     DialogId = ctx.GetDialogId(),
                     IfMatchDialogRevision = null,
                     Activity = new(),
                     IsSilentUpdate = false
                 };
-                modify(createActivityCommand, ctx);
-                var act = new FlowAction<CreateActivityCommand, CreateActivityResult>(createActivityCommand);
-                ctx.State.Actions.Add(act);
-                return createActivityCommand;
+                modify(command, ctx);
+                ctx.State.Actions.Add(new FlowAction<CreateActivityCommand, CreateActivityResult>(command));
+                return command;
             })
             .Select((result, ctx) =>
             {

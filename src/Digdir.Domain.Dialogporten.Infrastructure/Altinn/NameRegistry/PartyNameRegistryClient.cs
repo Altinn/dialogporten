@@ -110,15 +110,16 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);
 
-        if (name is not null) return name;
+        if (name is null)
+        {
+            _logger.LogWarning(
+                "Search in party name registry returned no results for external id {ExternalId}. Response: {@Response}",
+                partyIdentifier.FullId,
+                nameLookupResult
+            );
+        }
 
-        _logger.LogWarning(
-            "Search in party name registry returned no results for external id {ExternalId}. Response: {@Response}",
-            partyIdentifier.FullId,
-            nameLookupResult
-        );
-
-        return null;
+        return name;
     }
 
     private async Task<string> GetNameFromRegisterOrFail(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)

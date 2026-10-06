@@ -121,8 +121,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return _domainContext.IsValid;
     }
 
-    private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added,
-        CancellationToken cancellationToken)
+    private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added, CancellationToken cancellationToken)
     {
         var existing = await GetExistingActorNames(dbContext, added, cancellationToken);
 
@@ -157,12 +156,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
     }
 
-    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId,
-        CancellationToken cancellationToken) =>
+    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
         (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
 
-    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext,
-        IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
+    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         // Why are we doing "composite key contains" this way, you ask?
         // See https://stackoverflow.com/a/26201371/2301766

@@ -173,16 +173,19 @@ internal sealed class DialogSeenLogWriter(
         DateTimeOffset seenAt,
         CancellationToken cancellationToken)
     {
-        return await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                              INSERT INTO "DialogSeenLog" ("Id", "CreatedAt", "DialogId", "EndUserTypeId", "IsViaServiceOwner")
-                                                              VALUES (
-                                                                  {seenLogId},
-                                                                  {seenAt},
-                                                                  {dialogId},
-                                                                  {(int)userType},
-                                                                  {userType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson})
-                                                              ON CONFLICT ("Id") DO NOTHING
-                                                              """, cancellationToken);
+        return await db.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO "DialogSeenLog" ("Id", "CreatedAt", "DialogId", "EndUserTypeId", "IsViaServiceOwner")
+             VALUES (
+                 {seenLogId},
+                 {seenAt},
+                 {dialogId},
+                 {(int)userType},
+                 {userType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson})
+             ON CONFLICT ("Id") DO NOTHING
+             """,
+            cancellationToken
+        );
     }
 
     private async Task EnsureSeenByActor(

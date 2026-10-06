@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
 using FluentValidation.Results;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Mappers;
 
@@ -26,10 +27,13 @@ public sealed record ProblemDetailsConflictCode
 
 public sealed class ProblemDetailsConflictMapper
 {
+    /// <summary>
+    /// Implicit contract with <see cref="Conflict.ToValidationResults"/>
+    /// </summary>
     public static List<ProblemDetailsConflict> ToConflicts(List<ValidationFailure> failures)
     {
         return failures
-            .SelectMany(x => ToConflicts((IConflictReason)x.CustomState!))
+            .SelectMany(x => ToConflicts((IConflictReason)x.CustomState))
             .ToList();
     }
 

@@ -1,6 +1,6 @@
+using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get;
@@ -17,7 +17,9 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.SystemLabels.Commands;
 
@@ -180,10 +182,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
             .CreateSimpleDialog()
             .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
             .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Archive])
-            .SendCommand(ctx => new SearchLabelAssignmentLogQuery
-            {
-                DialogId = ctx.GetDialogId(),
-            })
+            .GetLabelAssignmentLogs()
             .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
             {
                 var actorNameEntities = Application.GetDbEntities<ActorName>()
@@ -196,7 +195,56 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     {
                         x.PerformedBy.Should().NotBeNull();
                         x.PerformedBy.ActorName.Should().Be(actorName.Name);
-                    }).And.HaveCount(3);
+                    });
+            });
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public Task Set_Adds_LabelLog_Even_When_Party_Name_Registry_Is_Down(string failHow) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .GetLabelAssignmentLogs()
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().BeNull();
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
             });
 
     [Fact]
@@ -210,22 +258,20 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
             .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
-            .ExecuteAndAssert<DialogDto>(x =>
-                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive));
-
-        using var scope = Application.GetServiceProvider().CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IDialogDbContext>();
-        var expectedLabelName = SystemLabel.Values.Archive.ToNamespacedName();
-
-        var log = await dbContext.LabelAssignmentLogs
-            .Include(x => x.PerformedBy)
-            .ThenInclude(x => x.ActorNameEntity)
-            .SingleAsync(x => x.Name == expectedLabelName, TestContext.Current.CancellationToken);
-
-        log.PerformedBy.ActorTypeId.Should().Be(ActorType.Values.PartyRepresentative);
-        log.PerformedBy.ActorNameEntity.Should().NotBeNull();
-        log.PerformedBy.ActorNameEntity.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
-        log.PerformedBy.ActorNameEntity.Name.Should().Be("Mock system user name");
+            .AssertResult<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive))
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultSystemUserUrn);
+                        x.PerformedBy.ActorName.Should().Be("Systembruker");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            });
     }
 
     [Fact]

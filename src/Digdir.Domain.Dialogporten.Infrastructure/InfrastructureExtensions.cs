@@ -110,6 +110,8 @@ public static class InfrastructureExtensions
                     })
                     .EnableSensitiveDataLogging(environment.IsDevelopment())
                     .AddInterceptors(
+                        // Order decides which interceptors, of the same type, that run first
+                        // PopulateActorNameInterceptor makes events for ConvertDomainEventsToOutboxMessagesInterceptor
                         services.GetRequiredService<PopulateActorNameInterceptor>(),
                         services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()
                     );
@@ -139,6 +141,7 @@ public static class InfrastructureExtensions
             .AddScoped<PopulateActorNameInterceptor>()
 
             // Transient
+            .AddTransient<IPartyNameRegistry, PartyNameRegistryClient>()
             .AddTransient<ISearchStrategySelector<EndUserSearchContext>, DialogEndUserSearchStrategySelector>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, SinglePartyFtsStrategy>()
             .AddTransient<IQueryStrategy<EndUserSearchContext>, SingleServiceFtsStrategy>()
@@ -374,7 +377,7 @@ public static class InfrastructureExtensions
             .ReplaceTransient<IResourceRegistry, LocalDevelopmentResourceRegistry>(predicate: localDeveloperSettings.UseLocalDevelopmentResourceRegister)
             .ReplaceTransient<IAltinnAuthorization, LocalDevelopmentAltinnAuthorization>(predicate: localDeveloperSettings.UseLocalDevelopmentAltinnAuthorization)
             .ReplaceSingleton<IFusionCache, NullFusionCache>(predicate: localDeveloperSettings.DisableCache)
-            .ReplaceSingleton<IPartyNameRegistry, LocalPartNameRegistryClient>(predicate: localDeveloperSettings.UseLocalDevelopmentPartyNameRegistry);
+            .ReplaceSingleton<IPartyNameRegistryTransport, LocalPartyNameRegistryTransport>(predicate: localDeveloperSettings.UseLocalDevelopmentPartyNameRegistry);
     }
 
     private static string FormatOtelDbParameterValue(object? value)
@@ -542,7 +545,7 @@ public static class InfrastructureExtensions
                 client.BaseAddress = services.GetRequiredService<IOptions<InfrastructureSettings>>().Value.Altinn.BaseUri)
             .AddPolicyHandlerFromRegistry(PollyPolicy.DefaultHttpRetryPolicy);
 
-        services.AddMaskinportenHttpClient<IPartyNameRegistry, PartyNameRegistryClient, SettingsJwkClientDefinition>(
+        services.AddMaskinportenHttpClient<IPartyNameRegistryTransport, PartyNameRegistryTransport, SettingsJwkClientDefinition>(
                 infrastructureSettings,
                 x => x.ClientSettings.ExhangeToAltinnToken = true)
             .ConfigureHttpClient((services, client) =>

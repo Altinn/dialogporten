@@ -9,5 +9,6 @@
   DialogSearchIndexer_DialogCreatedDomainEvent,
   DialogSearchIndexer_DialogUpdatedDomainEvent,
   PartyResourceReferenceCacheInvalidator_DialogCreatedDomainEvent,
-  PartyResourceReferenceCacheInvalidator_DialogDeletedDomainEvent
+  PartyResourceReferenceCacheInvalidator_DialogDeletedDomainEvent,
+  ResyncActorName_ResyncActorNameEvent
 ]

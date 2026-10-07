@@ -1,4 +1,5 @@
-﻿using AwesomeAssertions;
+﻿using System.Diagnostics;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -11,7 +12,10 @@ using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Commo
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 
@@ -137,6 +141,80 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened);
                 }
             )
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Count.Should().Be(2);
+                x[0].CreatedAt.Should().BeBefore(DateTimeOffset.Now);
+                x[0].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[0].Action.Should().Be("set");
+                x[0].PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                x[0].PerformedBy.ActorName.Should().Be("Brando Sando");
+                x[0].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+
+                x[1].CreatedAt.Should().BeBefore(DateTimeOffset.Now).And.BeAfter(x[0].CreatedAt);
+                x[1].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[1].Action.Should().Be("remove");
+                x[1].PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                x[1].PerformedBy.ActorName.Should().Be("Brando Sando");
+                x[1].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+            });
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel_And_Create_A_LabelLog_When_PartyNameRegistry_Fails(
+        string failHow
+    ) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .SetSystemLabelsServiceOwner(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Values.MarkedAsUnopened);
+            })
+            .GetServiceOwnerDialogAsEndUser()
+            .AssertResult<DialogDto>(x =>
+                {
+                    x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened);
+                }
+            )
+            .GetLabelAssignmentLogs()
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Count.Should().Be(2);
+                x[0].CreatedAt.Should().BeBefore(DateTimeOffset.Now);
+                x[0].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[0].Action.Should().Be("set");
+                x[0].PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                x[0].PerformedBy.ActorName.Should().BeNull();
+                x[0].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+
+                x[1].CreatedAt.Should().BeBefore(DateTimeOffset.Now).And.BeAfter(x[0].CreatedAt);
+                x[1].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[1].Action.Should().Be("remove");
+                x[1].PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                x[1].PerformedBy.ActorName.Should().BeNull();
+                x[1].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
             .GetLabelAssignmentLogs()
             .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
             {

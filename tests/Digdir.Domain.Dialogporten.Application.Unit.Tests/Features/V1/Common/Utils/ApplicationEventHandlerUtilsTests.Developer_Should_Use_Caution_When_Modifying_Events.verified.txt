@@ -5,5 +5,6 @@
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogRestoredDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogSeenDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogTransmissionCreatedDomainEvent,
-  Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogUpdatedDomainEvent
+  Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogUpdatedDomainEvent,
+  Digdir.Domain.Dialogporten.Domain.Dialogs.Events.ResyncActorNameEvent
 ]

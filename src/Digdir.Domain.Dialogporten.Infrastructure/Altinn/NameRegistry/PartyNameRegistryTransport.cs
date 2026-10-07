@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using static System.StringComparison;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
@@ -94,7 +96,7 @@ internal sealed class LocalPartyNameRegistryTransport : IPartyNameRegistryTransp
         {
             var x when x.Data
                 .Single()
-                .StartsWith(Constants.SystemuserPrefix, StringComparison.InvariantCulture) => "Systembruker",
+                .StartsWith(SystemUserIdentifier.PrefixWithSeparator, InvariantCulture) => "Systembruker",
             _ => "Brando Sando"
         };
 

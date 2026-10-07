@@ -11,7 +11,6 @@ public static class Constants
     public const int MaxIdempotentKeyLength = 36;
     public const int MinIdempotentKeyLength = 3;
 
-    public const string SystemuserPrefix = "urn:altinn:systemuser:uuid:";
     public const string ServiceResourcePrefix = "urn:altinn:resource:";
     public const string AppResourcePrefix = "urn:altinn:app:";
     public const string AppResourceIdPrefix = "app_";

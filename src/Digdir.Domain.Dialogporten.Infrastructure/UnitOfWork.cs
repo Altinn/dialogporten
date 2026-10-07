@@ -193,7 +193,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             .Entries<ActorName>()
             .Where(e => e.State == EntityState.Added)
             .Select(e => e.Entity)
-            .Where(e => e.ActorId is not null && e.Name is not null)
+            .Where(e => e.ActorId is not null)
             .ToList();
 
         if (addedActorNames.Count == 0)

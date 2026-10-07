@@ -51,7 +51,9 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             throw new InvalidOperationException($"Unable to create lookup for party id {partyIdentifier.FullId}");
         }
 
-        return await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken);
+        var nameFromRegister = await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken);
+        await _cache.SetAsync(externalIdWithPrefix, nameFromRegister, token: cancellationToken);
+        return nameFromRegister;
     }
 
     public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>

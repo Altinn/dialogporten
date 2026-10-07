@@ -1,4 +1,5 @@
-﻿using AwesomeAssertions;
+﻿using System.Diagnostics;
+using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -12,6 +13,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
@@ -158,14 +160,28 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 x[1].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
             });
 
-    [Fact]
-    public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel_And_Create_A_LabelLog_Even_When_Party_Name_Registry_Is_Down() =>
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel_And_Create_A_LabelLog_When_PartyNameRegistry_Fails(
+        string failHow
+    ) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.InternalServerError);
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
             })
             .SetSystemLabelsServiceOwner(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
             .GetServiceOwnerDialog()

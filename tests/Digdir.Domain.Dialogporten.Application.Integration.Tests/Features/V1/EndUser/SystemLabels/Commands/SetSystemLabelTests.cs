@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
@@ -16,6 +17,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
@@ -196,14 +198,26 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     });
             });
 
-    [Fact]
-    public Task Set_Adds_LabelLog_Even_When_Party_Name_Registry_Is_Down() =>
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public Task Set_Adds_LabelLog_Even_When_Party_Name_Registry_Is_Down(string failHow) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.InternalServerError);
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
             })
             .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
             .GetLabelAssignmentLogs()

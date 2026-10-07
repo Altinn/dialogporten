@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
@@ -17,6 +18,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 using ActivityDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;
@@ -117,15 +119,29 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             );
     }
 
-    [Fact]
-    public Task Can_Create_Activity_On_Existing_Dialog_And_Get_The_Activity_Afterwards_Even_When_Party_Name_Registry_Is_Down()
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public Task Can_Create_Activity_On_Existing_Dialog_And_Get_The_Activity_Afterwards_Even_When_Party_Name_Registry_Is_Down(
+        string failHow
+    )
     {
         var guid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
         return FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.InternalServerError);
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
             })
             .CreateSimpleDialog()
             .AssertResult<CreateDialogSuccess>()

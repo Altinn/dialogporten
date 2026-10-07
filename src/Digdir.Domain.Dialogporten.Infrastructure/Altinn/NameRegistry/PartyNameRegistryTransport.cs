@@ -1,14 +1,20 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.Domain.Common;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 
 internal interface IPartyNameRegistryTransport
 {
-    Task<HttpResponseMessage> QueryPartyName(
+    Task<HttpResponseMessage> QueryPartyNameResponse(
+        NameLookup nameLookup,
+        CancellationToken cancellationToken
+    );
+    Task<NameLookupResult> QueryPartyName(
         NameLookup nameLookup,
         CancellationToken cancellationToken
     );
@@ -46,8 +52,25 @@ internal sealed class PartyNameRegistryTransport : IPartyNameRegistryTransport
         _client = client;
     }
 
-    public async Task<HttpResponseMessage> QueryPartyName(
-        IPartyNameRegistryTransport.NameLookup nameLookup,
+    public async Task<NameLookupResult> QueryPartyName(
+        NameLookup nameLookup,
+        CancellationToken cancellationToken
+    )
+    {
+        var response = await _client.PostAsJsonEnsuredAsync(
+            QueryPartiesUrl,
+            nameLookup,
+            serializerOptions: SerializerOptions,
+            cancellationToken: cancellationToken
+        );
+
+        return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ?? throw new JsonException(
+            $"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {QueryPartiesUrl}"
+        );
+    }
+
+    public async Task<HttpResponseMessage> QueryPartyNameResponse(
+        NameLookup nameLookup,
         CancellationToken cancellationToken
     )
     {
@@ -62,8 +85,8 @@ internal sealed class PartyNameRegistryTransport : IPartyNameRegistryTransport
 
 internal sealed class LocalPartyNameRegistryTransport : IPartyNameRegistryTransport
 {
-    public Task<HttpResponseMessage> QueryPartyName(
-        IPartyNameRegistryTransport.NameLookup nameLookup,
+    public Task<HttpResponseMessage> QueryPartyNameResponse(
+        NameLookup nameLookup,
         CancellationToken cancellationToken
     )
     {
@@ -77,11 +100,11 @@ internal sealed class LocalPartyNameRegistryTransport : IPartyNameRegistryTransp
 
         return Task.FromResult(new HttpResponseMessage
         {
-            Content = JsonContent.Create(new IPartyNameRegistryTransport.NameLookupResult
+            Content = JsonContent.Create(new NameLookupResult
             {
                 Data =
                 [
-                    new IPartyNameRegistryTransport.NameLookupEntry
+                    new NameLookupEntry
                     {
                         DisplayName = name
                     }
@@ -89,5 +112,16 @@ internal sealed class LocalPartyNameRegistryTransport : IPartyNameRegistryTransp
             }),
             StatusCode = HttpStatusCode.OK
         });
+    }
+
+    public async Task<NameLookupResult> QueryPartyName(
+        NameLookup nameLookup,
+        CancellationToken cancellationToken
+    )
+    {
+        var response = await QueryPartyNameResponse(nameLookup, cancellationToken);
+        return await response
+            .Content
+            .ReadFromJsonAsync<NameLookupResult>(cancellationToken) ?? throw new UnreachableException();
     }
 }

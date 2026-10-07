@@ -54,7 +54,11 @@ internal sealed class RoutedPartyNameRegistryTransport : IPartyNameRegistryTrans
     private IPartyNameRegistryTransport Current =>
         _testPartyNameRegistry.Override ?? _fallbackPartyNameRegistryTransport;
 
-    public Task<HttpResponseMessage> QueryPartyName(
+    public Task<HttpResponseMessage> QueryPartyNameResponse(
+        NameLookup nameLookup,
+        CancellationToken cancellationToken) => Current.QueryPartyNameResponse(nameLookup, cancellationToken);
+
+    public Task<NameLookupResult> QueryPartyName(
         NameLookup nameLookup,
         CancellationToken cancellationToken) => Current.QueryPartyName(nameLookup, cancellationToken);
 }

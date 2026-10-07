@@ -127,7 +127,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
     private async Task<string> GetNameFromRegisterOrFail(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)
     {
-        var nameLookupResult = await PerformPartyNameRequestOrFail(nameLookup, ct);
+        var nameLookupResult = await _partyNameRegistryTransport.QueryPartyName(nameLookup, ct);
         var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);
 
         if (name is not null) return name;
@@ -153,31 +153,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does
         // the flip itself for persons. See https://github.com/Altinn/dialogporten/issues/3171
         return FlipNameIfPerson(partyIdentifier, name);
-    }
-
-    private async Task<NameLookupResult> PerformPartyNameRequestOrFail(
-        NameLookup nameLookup,
-        CancellationToken cancellationToken
-    )
-    {
-        var response = await _partyNameRegistryTransport.QueryPartyName(nameLookup, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError(
-                "Failed POST {ApiUrl} with: {RequestBody}. Status code: {StatusCode}. ResponseBody: {ResponseBody}",
-                PartyNameRegistryTransport.QueryPartiesUrl,
-                nameLookup,
-                response.StatusCode,
-                await response.Content.ReadAsStringAsync(cancellationToken)
-            );
-
-            throw new HttpRequestException($"Failed to POST {PartyNameRegistryTransport.QueryPartiesUrl}");
-        }
-
-        return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ?? throw new JsonException(
-            $"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}"
-        );
     }
 
     private static bool TryCreateNameLookup(IPartyIdentifier partyIdentifier, [NotNullWhen(true)] out NameLookup? nameLookup)
@@ -218,23 +193,40 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         CancellationToken cancellationToken
     )
     {
-        var response = await _partyNameRegistryTransport.QueryPartyName(nameLookup, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            _logger.LogWarning(
-                "Failed POST {ApiUrl} with: {RequestBody}. Status code: {StatusCode}. ResponseBody: {ResponseBody}",
+            var response = await _partyNameRegistryTransport.QueryPartyNameResponse(nameLookup, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError(
+                    "Failed POST {ApiUrl} with: {RequestBody}. Status code: {StatusCode}. ResponseBody: {ResponseBody}",
+                    PartyNameRegistryTransport.QueryPartiesUrl,
+                    nameLookup,
+                    response.StatusCode,
+                    await response.Content.ReadAsStringAsync(cancellationToken)
+                );
+
+                return null;
+            }
+
+            return await response
+                       .Content
+                       .ReadFromJsonAsync<NameLookupResult>(cancellationToken)
+                   ?? throw new JsonException(
+                       $"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}"
+                    );
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(
+                "Failed POST {ApiUrl} with: {RequestBody}. {Exception}",
                 PartyNameRegistryTransport.QueryPartiesUrl,
                 nameLookup,
-                response.StatusCode,
-                await response.Content.ReadAsStringAsync(cancellationToken)
+                e
             );
-
             return null;
         }
-
-        return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ??
-                      throw new JsonException($"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}");
     }
 
     private string FlipNameIfPerson(IPartyIdentifier partyIdentifier, string name)

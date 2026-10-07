@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
@@ -18,6 +19,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
@@ -107,8 +109,10 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
             });
     }
 
-    [Fact]
-    public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down()
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down(string failHow)
     {
         Guid? dialogId1 = NewUuidV7();
         Guid? dialogId2 = NewUuidV7();
@@ -116,8 +120,18 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
         await FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.InternalServerError);
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
             })
             .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
             .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)

@@ -240,7 +240,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             })
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                     .Returns(TestPartyNameRegistry.InternalServerError);
             })
             .GetEndUserDialog()
@@ -376,7 +376,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                     .Returns(TestPartyNameRegistry.InternalServerError);
             })
             .ConsumeEvents()
@@ -401,7 +401,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                     .Returns(TestPartyNameRegistry.Ok(new NameLookupResult
                     {
                         Data = []

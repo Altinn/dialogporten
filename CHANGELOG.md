@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.123.0](https://github.com/Altinn/dialogporten/compare/v1.122.0...v1.123.0) (2026-10-06)
+
+
+### Features
+
+* **infra:** add Entra token authentication mode for the PostgreSQL data source ([#4406](https://github.com/Altinn/dialogporten/issues/4406)) ([b2f31cc](https://github.com/Altinn/dialogporten/commit/b2f31ccf566251bbe33d3a1e3e139536dde253f1))
+
+
+### Bug Fixes
+
+* Default client id if not set. Otherwise OAuth is not initialized ([#4440](https://github.com/Altinn/dialogporten/issues/4440)) ([1626c5b](https://github.com/Altinn/dialogporten/commit/1626c5b66034902c2cea918c44807c7e6eb5eb12))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency asynckeyedlock to 8.1.2 ([#4458](https://github.com/Altinn/dialogporten/issues/4458)) ([391bccd](https://github.com/Altinn/dialogporten/commit/391bccd9e0182c8f7a74c31d1b2fedbe467fa8a0))
+* **deps:** update dependency dapper to 2.1.89 ([#4445](https://github.com/Altinn/dialogporten/issues/4445)) ([f72993b](https://github.com/Altinn/dialogporten/commit/f72993b0ce5f2da554b9a62d2bc97e5c832c574f))
+* **deps:** update dependency messagepack to 3.1.10 ([#4456](https://github.com/Altinn/dialogporten/issues/4456)) ([4b9a63b](https://github.com/Altinn/dialogporten/commit/4b9a63bc47c2446329815608e4ed329595ce0665))
+* **deps:** update grafana/loki docker tag to v3.7.8 ([#4443](https://github.com/Altinn/dialogporten/issues/4443)) ([16690eb](https://github.com/Altinn/dialogporten/commit/16690ebfbd5114af36cddf0276a7529c1af693ea))
+* **deps:** update grafana/setup-k6-action action to v1.2.2 ([#4444](https://github.com/Altinn/dialogporten/issues/4444)) ([393ba03](https://github.com/Altinn/dialogporten/commit/393ba03adc5d8d16e741790b45aafdfe2ef7643c))
+* **deps:** update hotchocolate dependencies to 16.6.7 ([#4457](https://github.com/Altinn/dialogporten/issues/4457)) ([9c9b55a](https://github.com/Altinn/dialogporten/commit/9c9b55a74b0f5d533ddcbb99a582283ddd095818))
+* **deps:** update nginx docker tag to v1.31.6 ([#4446](https://github.com/Altinn/dialogporten/issues/4446)) ([5a52b39](https://github.com/Altinn/dialogporten/commit/5a52b398962e5f3a36ff9f70490afd66eaaa8534))
+
+## [1.122.0](https://github.com/Altinn/dialogporten/compare/v1.121.3...v1.122.0) (2026-09-28)
+
+
+### Features
+
+* add snapshot tests for GraphQl mappers ([#4385](https://github.com/Altinn/dialogporten/issues/4385)) ([e1ce384](https://github.com/Altinn/dialogporten/commit/e1ce38428998104620e65c0351ba7ccd3b67ff29))
+
+
+### Bug Fixes
+
+* Add ProblemDetails to ASPs 401, 403 and 404 responses ([#4240](https://github.com/Altinn/dialogporten/issues/4240)) ([271a8cd](https://github.com/Altinn/dialogporten/commit/271a8cd6a97e37b4434fd2db480716528ad3bae0))
+* Allow /dialogporten as prefix in Instance path ([#4408](https://github.com/Altinn/dialogporten/issues/4408)) ([d356b89](https://github.com/Altinn/dialogporten/commit/d356b891bba2a7210a595213f996be2ad82a915c))
+* API path prefix ([#4409](https://github.com/Altinn/dialogporten/issues/4409)) ([dd9ec70](https://github.com/Altinn/dialogporten/commit/dd9ec709f777317a0c70a58a98a99f5f52efc81e))
+* Remove uiConfig.Path ([#4424](https://github.com/Altinn/dialogporten/issues/4424)) ([59cfac1](https://github.com/Altinn/dialogporten/commit/59cfac17a57b9cb181161cbb66a1dbf6b11ca218))
+* swagger logout ([#4319](https://github.com/Altinn/dialogporten/issues/4319)) ([96360e3](https://github.com/Altinn/dialogporten/commit/96360e3413a4e809bbb942ff84788bdcaf4ce398))
+
+
+### Miscellaneous Chores
+
+* **deps:** update azure/login action to v3.1.0 ([#4422](https://github.com/Altinn/dialogporten/issues/4422)) ([58826a7](https://github.com/Altinn/dialogporten/commit/58826a7b9562112728641406ba8d2872311b1649))
+* **deps:** update dependency messagepack to 3.1.9 ([#4435](https://github.com/Altinn/dialogporten/issues/4435)) ([90c40bb](https://github.com/Altinn/dialogporten/commit/90c40bb2cf43612d01172f63fb4c7f47d4ad05e4))
+* **deps:** update dependency strawberryshake.tools to v16.6.6 ([#4436](https://github.com/Altinn/dialogporten/issues/4436)) ([7790467](https://github.com/Altinn/dialogporten/commit/7790467f953d97c402afea1fb0c146fedef1d849))
+* **deps:** update hotchocolate dependencies to 16.6.6 ([#4421](https://github.com/Altinn/dialogporten/issues/4421)) ([42bae59](https://github.com/Altinn/dialogporten/commit/42bae5984706f6b68a82e80fdd183d17f8a9aa86))
+* **infra:** baseline hardening of SSH jumpers via run command ([#4405](https://github.com/Altinn/dialogporten/issues/4405)) ([d8b1117](https://github.com/Altinn/dialogporten/commit/d8b1117cae52bb9ea51eb9397afe014a4f6a7dd6))
+* **infra:** patch SSH jumpers nightly via Azure Update Manager ([#4403](https://github.com/Altinn/dialogporten/issues/4403)) ([90a1b73](https://github.com/Altinn/dialogporten/commit/90a1b73bf6afdc402e331e3c232a4152da61ad14))
+
 ## [1.121.3](https://github.com/Altinn/dialogporten/compare/v1.121.2...v1.121.3) (2026-09-17)
 
 

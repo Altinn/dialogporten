@@ -3,19 +3,20 @@ using System.Net.Http.Json;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using NSubstitute;
+using NSubstitute.Core;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 internal sealed class TestPartyNameRegistry
 {
-    public static readonly HttpResponseMessage InternalServerError = new()
+    public static Func<CallInfo, HttpResponseMessage> InternalServerError => _ => new()
     {
         Content = null,
         StatusCode = HttpStatusCode.InternalServerError
     };
 
-    public static HttpResponseMessage Ok(NameLookupResult result) => new()
+    public static Func<CallInfo, HttpResponseMessage> Ok(NameLookupResult result) => _ => new()
     {
         Content = JsonContent.Create(result),
         StatusCode = HttpStatusCode.OK

@@ -107,7 +107,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         {
             var newActorName = actorNameById[actorName.ActorId!];
 
-            if (string.IsNullOrWhiteSpace(newActorName))
+            if (newActorName == null)
             {
                 _logger.LogWarning("Unable to look up name for actor id: {ActorId}", actorName.ActorId);
                 actorName.Name = null;

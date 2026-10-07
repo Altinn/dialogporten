@@ -56,9 +56,9 @@ public static class ProblemDetailsBuilderFactory
             .WithType("https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.7");
     }
 
-    public static ProblemDetailsBuilder<ProblemDetails> Conflict()
+    public static ProblemDetailsBuilder<ConflictProblemDetails> Conflict()
     {
-        return new ProblemDetailsBuilder<ProblemDetails>(new ProblemDetails())
+        return new ProblemDetailsBuilder<ConflictProblemDetails>(new ConflictProblemDetails())
             .WithTitle("Conflict.")
             .WithStatusCode(StatusCodes.Status409Conflict)
             .WithType("https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10");

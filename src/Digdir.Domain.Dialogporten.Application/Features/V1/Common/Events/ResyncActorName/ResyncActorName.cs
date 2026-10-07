@@ -3,13 +3,15 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.ResyncActorName;
 
 public sealed class ResyncActorName(
     IDialogDbContext db,
     IUnitOfWork unitOfWork,
-    IPartyNameRegistry partyNameRegistry
+    IPartyNameRegistry partyNameRegistry,
+    ILogger<ResyncActorName> logger
 ) : INotificationHandler<ResyncActorNameEvent>
 {
     public async Task Handle(ResyncActorNameEvent resyncActorNameEvent, CancellationToken cancellationToken)
@@ -39,9 +41,45 @@ public sealed class ResyncActorName(
 
         if (resyncActorNameEvent.DisableUpdateableFilter) unitOfWork.DisableUpdatableFilter();
 
-        await unitOfWork
+        var result = await unitOfWork
             .DisableAggregateFilter()
             .DisableImmutableFilter()
             .SaveChangesAsync(cancellationToken);
+
+        result.Match<SaveChangesResult>(
+            success => success,
+            domainError =>
+            {
+                var errors = domainError.Errors.Select(error => $"{error.PropertyName} = {error.ErrorMessage}");
+                var errorsString = string.Join(", ", errors);
+                logger.LogError(
+                    "Domain error on {Class}, for {Event}. With errors: {Errors}",
+                    nameof(ResyncActorName),
+                    resyncActorNameEvent.EventId,
+                    errorsString
+                );
+                throw new InvalidOperationException($"Failed to save changes for {nameof(ResyncActorName)}");
+            },
+            concurrencyError =>
+            {
+                logger.LogError(
+                    "Concurrency error on {Class}, for {Event}",
+                    nameof(ResyncActorName),
+                    resyncActorNameEvent.EventId
+                );
+                throw new InvalidOperationException($"Failed to save changes for {nameof(ResyncActorName)}");
+            },
+            conflict =>
+            {
+                logger.LogError(
+                    "Conflict on error on {Class}, for {Event}: {PropertyName} = {ErrorMessage}",
+                    nameof(ResyncActorName),
+                    resyncActorNameEvent.EventId,
+                    conflict.PropertyName,
+                    conflict.ErrorMessage
+                );
+                throw new InvalidOperationException($"Failed to save changes for {nameof(ResyncActorName)}");
+            }
+        );
     }
 }

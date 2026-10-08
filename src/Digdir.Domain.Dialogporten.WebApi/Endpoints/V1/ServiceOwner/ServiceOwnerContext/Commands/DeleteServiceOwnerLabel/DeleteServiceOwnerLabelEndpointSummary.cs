@@ -1,3 +1,4 @@
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
@@ -17,7 +18,9 @@ public sealed class DeleteServiceOwnerLabelEndpointSummary : Summary<DeleteServi
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<DeleteServiceOwnerLabelEndpoint>().Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.ServiceOwnerLabelNotFound;
-        Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        Responses[Status409Conflict] = new ConflictMessageBuilder()
+            .ConcurrentOperationRejected()
+            .Build();
         Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
         Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }

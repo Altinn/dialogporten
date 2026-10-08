@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
@@ -27,7 +28,11 @@ public sealed class CreateDialogEndpointSummary : Summary<CreateDialogEndpoint>
         Responses[Status403Forbidden] = DefaultForbiddenFor<CreateDialogEndpoint>()
             .Or(Constants.SwaggerSummary.DialogCreationNotAllowed)
             .Build();
-        Responses[Status409Conflict] = Constants.SwaggerSummary.IdempotentKeyConflict.FormatInvariant("01941821-ffca-73a1-9335-435a882be014");
+        Responses[Status409Conflict] = new ConflictMessageBuilder()
+            .IdempotentKeysExist()
+            .DialogIdForIdempotentKeyExists()
+            .ConcurrentOperationRejected()
+            .Build();
         Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }
 }

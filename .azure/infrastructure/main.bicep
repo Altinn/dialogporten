@@ -162,6 +162,19 @@ module appInsights '../modules/applicationInsights/create.bicep' = {
   }
 }
 
+// Read by the feature-metrics collector on DIS (Altinn/dialogporten-manifests), which sends the
+// cost-allocation feature metrics to this Application Insights. See docs/FeatureMetrics.md.
+module appInsightsConnectionStringSecret '../modules/keyvault/upsertSecret.bicep' = {
+  scope: resourceGroup
+  name: 'appInsightsConnectionStringSecret'
+  params: {
+    destKeyVaultName: environmentKeyVault.outputs.name
+    secretName: 'dialogportenAppInsightsConnectionString'
+    secretValue: appInsights.outputs.connectionString
+    tags: tags
+  }
+}
+
 module apimAvailabilityTest '../modules/applicationInsights/availabilityTest.bicep' = {
   scope: resourceGroup
   name: 'apimAvailabilityTest'

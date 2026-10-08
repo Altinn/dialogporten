@@ -7,6 +7,12 @@ Runs the local E2E setup for WebAPI, Service, and optionally GraphQL, then execu
 ```bash
 podman compose -f docker-compose-db-redis.yml up -d
 ```
+  If Postgres (`localhost:15432`) and Redis (`localhost:16379`) already accept connections, the script uses them as-is.
+  Otherwise it looks for the compose containers and starts them with `podman compose` (or `docker compose` if `podman` is not installed).
+  When running inside a VM guest with DB/Redis in podman/docker on the host, set `E2E_DB_HOST` to the host
+  (e.g. `E2E_DB_HOST=host.docker.internal` on OrbStack) so the script finds them there instead of starting duplicates in the guest.
+  `E2E_POSTGRES_PORT` and `E2E_REDIS_PORT` override the ports.
+  These variables only control this check. The started apps still connect using their own configuration (user secrets), so keep that pointing at the same DB/Redis.
 - User secrets are configured for the projects you start locally (`WebApi`, `GraphQL`, `Service`) and for the E2E test projects.
   See [docs/E2E-Tests.md](../../docs/E2E-Tests.md).
 

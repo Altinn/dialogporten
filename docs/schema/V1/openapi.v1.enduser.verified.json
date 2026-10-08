@@ -205,6 +205,70 @@
         },
         "type": "object"
       },
+      "ConflictProblemDetails": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "nullable": true,
+            "type": "string"
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemDetailsConflict"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errors": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "instance": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "statusDescription": {
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "traceId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "string"
+          },
+          "validationErrors": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemDetails_Error"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Content": {
         "additionalProperties": false,
         "properties": {
@@ -2652,6 +2716,20 @@
         },
         "type": "object"
       },
+      "ProblemDetailsConflict": {
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SearchAuthorizedServiceResourcesRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2928,7 +3006,7 @@
     }
   },
   "info": {
-    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs",
+    "description": "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.\u003Cbr\u003E\u003Cbr\u003EAll operations* described within this document require authentication and authorization. Read more at \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cstrong\u003EAll GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).\u003C/strong\u003E\u003Cbr\u003E\u003Cbr\u003EFor more information about this product, see \u003Ca href=\u0022https://docs.altinn.studio/en/dialogporten\u0022\u003Ehttps://docs.altinn.studio/en/dialogporten\u003C/a\u003E\u003Cbr\u003E\u003Cbr\u003E\u003Cem\u003E* Except the metadata APIs\n### About HTTP 409 Conflict\n\nAll \u0060409 Conflict\u0060 responses in Dialogporten\nwill contain a RFC 9457 compliant ProblemDetails in the response body.\nThe ProblemDetails will contain the offending conflict(s), along with \nany extra fields necessary to describe the conflict(s).\nThese extra fields are not visible in the specification for 409 responses.\nPlease refer to this table to learn what extra fields each conflict has:\n\n| Code | Description | Extra fields |\n| --- | --- | --- |\n\u003Ca id=\u0022DP.CFL-00000\u0022\u003EDP.CFL-00000\u003C/a\u003E | The request conflicted with a concurrent operation. Please try again. | \n\u003Ca id=\u0022DP.CFL-00001\u0022\u003EDP.CFL-00001\u003C/a\u003E | Idempotent key already exist. | idempotentKey (String)\n\u003Ca id=\u0022DP.CFL-00002\u0022\u003EDP.CFL-00002\u003C/a\u003E | Idempotent Key caused a dialog id conflict. | dialogId (Guid), idempotentKey (String)",
     "title": "Dialogporten EndUser",
     "version": "v1"
   },
@@ -3973,11 +4051,11 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
                 }
               }
             },
-            "description": "Conflict occurred while processing the request."
+            "description": "[DP.CFL-00000](#DP.CFL-00000)"
           },
           "410": {
             "content": {
@@ -4574,11 +4652,11 @@
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ConflictProblemDetails"
                 }
               }
             },
-            "description": "Conflict occurred while processing the request."
+            "description": "[DP.CFL-00000](#DP.CFL-00000)"
           },
           "412": {
             "content": {

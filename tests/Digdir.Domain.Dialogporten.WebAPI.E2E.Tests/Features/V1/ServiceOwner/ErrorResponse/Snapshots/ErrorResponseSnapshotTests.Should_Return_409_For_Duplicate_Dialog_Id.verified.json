@@ -8,5 +8,13 @@
     "IdempotentKey": [
       "\u0027duplicate-idempotent-key\u0027 already exists with DialogId \u002700000000-0000-0000-0000-000000000000\u0027"
     ]
-  }
+  },
+  "conflicts": [
+    {
+      "code": "DP.CFL-00002",
+      "title": "Idempotent Key caused a dialog id conflict.",
+      "dialogId": "00000000-0000-0000-0000-000000000000",
+      "idempotentKey": "duplicate-idempotent-key"
+    }
+  ]
 }

@@ -77,7 +77,7 @@ static void BuildAndRun(string[] args)
         .Enrich.WithEnvironmentName()
         .Enrich.FromLogContext()
         .Filter.WithHandledPostgresExceptionFilter()
-        .WriteTo.OpenTelemetryOrConsole(context));
+        .WriteTo.OpenTelemetryOrConsoleWithFeatureMetricEndpoint(context));
 
     builder.Services
         .AddOptions<WebApiSettings>()
@@ -374,6 +374,7 @@ static void ConfigureOpenApiV1Document(
             document.Generator = null;
             document.MakeCollectionsNullable();
             document.AddTagDescriptions();
+            document.AddConflictsSection();
             document.FixJwtBearerCasing();
             document.RemoveSystemStringHeaderTitles();
             document.AddServiceUnavailableResponse();

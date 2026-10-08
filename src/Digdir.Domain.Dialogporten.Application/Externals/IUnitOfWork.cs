@@ -1,8 +1,8 @@
 ﻿using System.Data;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
-using OneOf.Types;
 using OneOf;
+using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 

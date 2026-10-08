@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.WebApi.Common;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
@@ -26,7 +27,9 @@ public sealed class SetDialogSystemLabelsEndpointSummary : Summary<SetDialogSyst
             .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("update"))
             .Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
-        Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        Responses[Status409Conflict] = new ConflictMessageBuilder()
+            .ConcurrentOperationRejected()
+            .Build();
         Responses[Status410Gone] = Constants.SwaggerSummary.DialogDeleted;
         Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
         Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;

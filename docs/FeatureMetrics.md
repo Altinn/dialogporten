@@ -67,18 +67,27 @@ The system uses different resolvers based on request type:
 
 ### 3. Delivery Layer
 
-#### Delivery Contexts
-Two delivery mechanisms based on environment:
+#### Delivery Context
+`LoggingFeatureMetricDeliveryContext` is the only implementation, in every environment. It logs each
+record at Information with `EventId` 1000 (`LogFeatureMetric`) under the category
+`FeatureMetricLogCategory.Name`. The WebApi's minimum level is Warning; `appsettings.json` raises this
+category to Information, and it must stay that way.
 
-**Development (Console Logging)**:
-- Uses `LoggingFeatureMetricDeliveryContext`
-- Outputs structured logs to console
-- Immediate visibility for debugging
+#### Where the records go
+- **Container Apps:** Serilog sends all log events, feature metrics included, over OTLP to the
+  environment's managed OpenTelemetry agent, which exports them to `dp-be-<env>-applicationInsights`.
+- **DIS:** the platform collector drops log records below Warning. When the environment variable
+  `FEATURE_METRICS_OTLP_ENDPOINT` is set, the WebApi sends feature-metric events only to that endpoint and
+  every other event to the usual OTLP endpoint (`FeatureMetricLoggingExtensions`). On DIS that is
+  `feature-metrics-collector` in `product-dialogporten`, which exports them to the same
+  `dp-be-<env>-applicationInsights`.
 
-**Production (OpenTelemetry)**:
-- Uses `OtelFeatureMetricLoggingDeliveryContext`
-- Sends metrics to OpenTelemetry collector
-- Integrates with monitoring infrastructure
+`FEATURE_METRICS_OTLP_ENDPOINT` is read from the process environment only, so it is set in the DIS
+manifests and nowhere else. Where it is set, feature metrics reach Application Insights only through that
+endpoint.
+
+The `aggregate-cost-metrics` Janitor job queries `dp-be-<env>-applicationInsights` for `EventId` 1000 once
+a day and writes the aggregate to the `costmetrics` storage container.
 
 ### 4. Data Model
 

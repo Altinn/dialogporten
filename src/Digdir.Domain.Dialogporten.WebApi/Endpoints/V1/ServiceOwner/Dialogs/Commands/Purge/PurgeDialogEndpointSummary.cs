@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using FastEndpoints;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
 using static Microsoft.AspNetCore.Http.StatusCodes;
@@ -24,7 +25,9 @@ public sealed class PurgeDialogEndpointSummary : Summary<PurgeDialogEndpoint>
             .Or(Constants.SwaggerSummary.AccessDeniedToDialog.FormatInvariant("delete"))
             .Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
-        Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        Responses[Status409Conflict] = new ConflictMessageBuilder()
+            .ConcurrentOperationRejected()
+            .Build();
         Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
     }
 }

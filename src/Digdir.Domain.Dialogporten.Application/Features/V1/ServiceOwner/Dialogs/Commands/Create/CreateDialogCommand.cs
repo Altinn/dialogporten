@@ -4,6 +4,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
@@ -12,6 +13,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -118,11 +120,18 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             dialog.Org = serviceResourceInformation.OwnOrgShortName;
         }
 
-        var dialogId = await GetExistingDialogIdByIdempotentKey(dialog, cancellationToken);
-        if (dialogId is not null)
+        var existingDialogId = await GetExistingDialogIdByIdempotentKey(dialog, cancellationToken);
+        if (existingDialogId is not null)
         {
-            return new Conflict(nameof(DialogEntity.IdempotentKey),
-                $"'{dialog.IdempotentKey}' already exists with DialogId '{dialogId}'");
+            return new Conflict(
+                nameof(DialogEntity.IdempotentKey),
+                $"'{dialog.IdempotentKey}' already exists with DialogId '{existingDialogId}'",
+                new DialogIdForIdempotentKeyExists
+                {
+                    IdempotentKey = dialog.IdempotentKey!,
+                    DialogId = existingDialogId.Value
+                }
+            );
         }
 
         if (!request.IsSilentUpdate && !_userResourceRegistry.IsCurrentUserServiceOwnerAdmin())
@@ -156,8 +165,14 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         if (duplicatedKeys.Count != 0)
         {
             var conflictingKeys = string.Join(", ", duplicatedKeys.Select(x => $"'{x}'"));
-            return new Conflict(nameof(DialogTransmission.IdempotentKey),
-                $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.");
+            return new Conflict(
+                nameof(DialogTransmission.IdempotentKey),
+                $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.",
+                new IdempotentKeysExist
+                {
+                    IdempotentKeys = duplicatedKeys
+                }
+            );
         }
 
         var (fromParty, fromServiceOwner) = dialog.Transmissions.GetTransmissionCounts();

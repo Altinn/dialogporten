@@ -110,10 +110,15 @@ public static class IFlowStepExtensions
         {
             var command = commandSelector(ctx);
             command.Dto.Id ??= IdentifiableExtensions.CreateVersion7(DialogApplication.Clock.UtcNowOffset);
-            ctx.Bag[DialogIdKey] = command.Dto.Id;
-            ctx.Bag[ServiceResource] = command.Dto.ServiceResource;
-            ctx.Bag[PartyKey] = command.Dto.Party;
+            ctx.State.Actions.Add(new FlowAction<CreateDialogCommand, CreateDialogResult>(command));
             return command;
+        })
+        .Select((result, ctx) =>
+        {
+            var lastCreateActivity = ctx.State.CreatedDialogs.Last();
+            lastCreateActivity.Result = result;
+
+            return result;
         });
 
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
@@ -153,7 +158,6 @@ public static class IFlowStepExtensions
             modify?.Invoke(transmission, ctx);
 
             transmission.Id ??= IdentifiableExtensions.CreateVersion7(DialogApplication.Clock.UtcNowOffset);
-            ctx.Bag[TransmissionIdKey] = transmission.Id;
 
             var command = new CreateTransmissionCommand
             {
@@ -161,8 +165,16 @@ public static class IFlowStepExtensions
                 IfMatchDialogRevision = ifMatchDialogRevision,
                 Transmissions = [transmission]
             };
+            ctx.State.Actions.Add(new FlowAction<CreateTransmissionCommand, CreateTransmissionResult>(command));
 
             return command;
+        })
+        .Select((result, ctx) =>
+        {
+            var lastCreateActivity = ctx.State.CreatedTransmissions.Last();
+            lastCreateActivity.Result = result;
+
+            return result;
         });
 
     public static IFlowExecutor<CreateDialogResult> CreateComplexDialog(this IFlowStep step,
@@ -548,29 +560,31 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<CreateActivityResult> CreateActivity<TIn>(
         this IFlowExecutor<TIn> step,
-        Action<CreateActivityCommand, FlowContext> modify) =>
-        step
+        Action<CreateActivityCommand, FlowContext> modify)
+
+    {
+        return step
             .SendCommand(ctx =>
             {
-                var createActivityCommand = new CreateActivityCommand
+                var command = new CreateActivityCommand
                 {
                     DialogId = ctx.GetDialogId(),
                     IfMatchDialogRevision = null,
                     Activity = new(),
                     IsSilentUpdate = false
                 };
-                modify(createActivityCommand, ctx);
-                return createActivityCommand;
+                modify(command, ctx);
+                ctx.State.Actions.Add(new FlowAction<CreateActivityCommand, CreateActivityResult>(command));
+                return command;
             })
-            .Select<CreateActivityResult>((x, a) =>
+            .Select((result, ctx) =>
             {
-                if (x.Value is CreateActivitySuccess success)
-                {
-                    a.Bag[ActivityIdKey] = success.ActivityId;
-                }
+                var lastCreateActivity = ctx.State.CreatedActivities.Last();
+                lastCreateActivity.Result = result;
 
-                return x;
+                return result;
             });
+    }
 
     public static IFlowExecutor<GetActivityResult> GetActivity<TIn>(
         this IFlowStep<TIn> step) =>
@@ -682,8 +696,7 @@ public static class IFlowStepExtensions
 
     public static Guid GetDialogId(this FlowContext ctx)
     {
-        ctx.Bag.TryGetValue(DialogIdKey, out var value).Should().BeTrue();
-        return value.Should().BeOfType<Guid>().Subject;
+        return ctx.State.CreatedDialogs.Last().Command.Dto.Id!.Value;
     }
 
     public static Guid GetGuidByKey(this FlowContext ctx, string key)
@@ -693,24 +706,21 @@ public static class IFlowStepExtensions
     }
 
     public static Guid GetTransmissionId(this FlowContext ctx)
-        => ctx.GetGuidByKey(TransmissionIdKey);
+        => ctx.State.CreatedTransmissions.Last().Command.Transmissions.Single().Id!.Value;
 
     public static Guid GetActivityId(this FlowContext ctx)
     {
-        ctx.Bag.TryGetValue(ActivityIdKey, out var value).Should().BeTrue();
-        return value.Should().BeOfType<Guid>().Subject;
+        return ctx.State.CreatedActivities.Last().Result.AsT0.ActivityId;
     }
 
     public static string GetParty(this FlowContext ctx)
     {
-        ctx.Bag.TryGetValue(PartyKey, out var value).Should().BeTrue();
-        return value.Should().BeOfType<string>().Subject;
+        return ctx.State.CreatedDialogs.Last().Command.Dto.Party;
     }
 
     public static string GetServiceResource(this FlowContext ctx)
     {
-        ctx.Bag.TryGetValue(ServiceResource, out var value).Should().BeTrue();
-        return value.Should().BeOfType<string>().Subject;
+        return ctx.State.CreatedDialogs.Last().Command.Dto.ServiceResource;
     }
 
     public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoSO dto, FlowContext ctx)

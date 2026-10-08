@@ -1,6 +1,7 @@
 targetScope = 'resourceGroup'
 
 import { baseTags } from '../../functions/baseTags.bicep'
+import { dialogDbConnectionString } from '../../functions/dialogDbConnectionString.bicep'
 
 import { Scale } from '../../modules/containerApp/main.bicep'
 
@@ -86,6 +87,16 @@ param scale Scale = {
   ]
 }
 
+@description('How the workload authenticates to PostgreSQL. EntraToken connects with the managed identity as the PostgreSQL role named after it.')
+@allowed(['Password', 'EntraToken'])
+param dbAuthMode string = 'Password'
+
+@description('PostgreSQL server FQDN, required in EntraToken mode. No database password is read in this mode.')
+param dbHost string = ''
+
+@description('Explicit list of non-database Key Vault secrets referenced by this workload\'s App Configuration, required in EntraToken mode. Include the Redis connection string and the other runtime secrets it resolves.')
+param runtimeSecretNames string[] = []
+
 var namePrefix = 'dp-be-${environment}'
 var baseImageUrl = 'ghcr.io/altinn/dialogporten-'
 
@@ -111,11 +122,20 @@ resource environmentKeyVaultResource 'Microsoft.KeyVault/vaults@2026-02-01' exis
   name: environmentKeyVaultName
 }
 
-module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = {
+module keyVaultReaderAccessPolicy '../../modules/keyvault/addReaderRoles.bicep' = if (dbAuthMode == 'Password') {
   name: 'keyVaultReaderAccessPolicy-${containerAppName}'
   params: {
     keyvaultName: environmentKeyVaultResource.name
     principalIds: [managedIdentity.properties.principalId]
+  }
+}
+
+module runtimeSecretReaderAccessPolicy '../../modules/keyvault/addSecretReaderRoles.bicep' = if (dbAuthMode == 'EntraToken') {
+  name: 'runtimeSecretReaderAccessPolicy-${containerAppName}'
+  params: {
+    keyvaultName: environmentKeyVaultName
+    principalId: managedIdentity.properties.principalId
+    secretNames: empty(runtimeSecretNames) ? fail('EntraToken requires an explicit runtimeSecretNames allowlist.') : runtimeSecretNames
   }
 }
 
@@ -127,7 +147,7 @@ module appConfigReaderAccessPolicy '../../modules/appConfiguration/addReaderRole
   }
 }
 
-var containerAppEnvVars = [
+var baseContainerAppEnvVars = [
   {
     name: 'ASPNETCORE_ENVIRONMENT'
     value: environment
@@ -158,6 +178,28 @@ var containerAppEnvVars = [
   }
 ]
 
+// Token mode receives only the server address and authenticates as this workload's identity.
+// The administrator connection string remains available only in Password mode.
+var entraTokenEnvVars = [
+  {
+    name: 'Infrastructure__DialogDbConnectionString'
+    value: dbAuthMode == 'EntraToken' ? dialogDbConnectionString(dbHost) : ''
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Mode'
+    value: 'EntraToken'
+  }
+  {
+    name: 'Infrastructure__DialogDbAuth__Username'
+    value: managedIdentity.name
+  }
+]
+
+var containerAppEnvVars = concat(
+  baseContainerAppEnvVars,
+  dbAuthMode == 'EntraToken' ? entraTokenEnvVars : []
+)
+
 var containerAppName = '${namePrefix}-webapi-so-ca'
 
 module containerApp '../../modules/containerApp/main.bicep' = {
@@ -177,6 +219,7 @@ module containerApp '../../modules/containerApp/main.bicep' = {
     workloadProfileName: workloadProfileName
   }
   dependsOn: [
+    runtimeSecretReaderAccessPolicy
     keyVaultReaderAccessPolicy
     appConfigReaderAccessPolicy
   ]

@@ -57,6 +57,7 @@ param postgresConfiguration = {
       value: 'on'
     }
   ]
+  enableDbProvisioner: true
   backupRetentionDays: 7
   availabilityZone: '1'
   enableBackupVault: false

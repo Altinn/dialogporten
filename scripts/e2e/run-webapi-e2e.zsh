@@ -63,7 +63,39 @@ setRepoPath() {
   fi
 }
 
+is_port_open() {
+  local host="$1"
+  local port="$2"
+  zmodload zsh/net/tcp 2>/dev/null || return 1
+  if ztcp "$host" "$port" 2>/dev/null; then
+    ztcp -c "$REPLY" 2>/dev/null || true
+    return 0
+  fi
+  return 1
+}
+
+# If DB/Redis already accept connections, use them as-is instead of looking for local containers.
+# This supports running the script inside a VM guest (e.g. OrbStack, Lima, WSL) where DB/Redis run
+# in podman/docker on the host: the guest's container engine cannot see the host's containers, so
+# the container lookup below would otherwise start a duplicate DB/Redis inside the guest.
+# Point the check at the host with E2E_DB_HOST (and E2E_POSTGRES_PORT/E2E_REDIS_PORT if needed).
+db_redis_reachable() {
+  local db_host="${E2E_DB_HOST:-localhost}"
+  local postgres_port="${E2E_POSTGRES_PORT:-15432}"
+  local redis_port="${E2E_REDIS_PORT:-16379}"
+
+  if is_port_open "$db_host" "$postgres_port" && is_port_open "$db_host" "$redis_port"; then
+    echo "Postgres (${db_host}:${postgres_port}) and Redis (${db_host}:${redis_port}) are reachable, skipping container check"
+    return 0
+  fi
+  return 1
+}
+
 podman_check() {
+  if db_redis_reachable; then
+    return
+  fi
+
   local engine=""
   local compose_file="$repo_root/docker-compose-db-redis.yml"
   local postgres_service="dialogporten-postgres"

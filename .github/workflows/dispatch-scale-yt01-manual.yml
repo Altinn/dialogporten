@@ -216,6 +216,23 @@ jobs:
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
+      - name: Start resource policy information sync
+        # yt01 is usable without a fresh sync, so a failure here must not skip the remaining steps
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # The nightly schedule of this job falls inside the scale-down window, so run it on every scale-on
+          EXECUTION=$(az containerapp job start \
+            --name "dp-be-yt01-sync-rp-info" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "name" -o tsv --only-show-errors)
+
+          echo "Started execution $EXECUTION of dp-be-yt01-sync-rp-info"
+        env:
+          RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
       - name: Enable public network access for container app environment
         shell: bash
         run: |

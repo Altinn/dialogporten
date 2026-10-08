@@ -52,7 +52,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         var nameFromRegister = await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken);
-        await _cache.SetAsync(externalIdWithPrefix, nameFromRegister, token: cancellationToken);
+        var cacheKey = GetCacheKey(externalIdWithPrefix);
+        await _cache.SetAsync(cacheKey, nameFromRegister, token: cancellationToken);
         return nameFromRegister;
     }
 

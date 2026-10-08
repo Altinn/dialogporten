@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.124.0](https://github.com/Altinn/dialogporten/compare/v1.123.0...v1.124.0) (2026-10-08)
+
+
+### Features
+
+* Return conflicts in 409 problem details ([#4454](https://github.com/Altinn/dialogporten/issues/4454)) ([9aef2b4](https://github.com/Altinn/dialogporten/commit/9aef2b47ac18885b64b73416cc3246bb3d7fc5f5))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency polly to 8.8.0 ([#4465](https://github.com/Altinn/dialogporten/issues/4465)) ([fb83077](https://github.com/Altinn/dialogporten/commit/fb83077be5f78bd36627e0c679846e03e0172d7e))
+* **e2e:** skip container check when DB/Redis are already reachable ([#4469](https://github.com/Altinn/dialogporten/issues/4469)) ([1eb4fbb](https://github.com/Altinn/dialogporten/commit/1eb4fbbc91d0f9c8248160cbc0fc03306e83aa8e))
+* **webapi:** send feature metrics to a dedicated OTLP endpoint on DIS ([#4432](https://github.com/Altinn/dialogporten/issues/4432)) ([11b08d2](https://github.com/Altinn/dialogporten/commit/11b08d2f78e1844e47fdcb77a63c62f15efcd44e))
+
 ## [1.123.0](https://github.com/Altinn/dialogporten/compare/v1.122.0...v1.123.0) (2026-10-06)
 
 

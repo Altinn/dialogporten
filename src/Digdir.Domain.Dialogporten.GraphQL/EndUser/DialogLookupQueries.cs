@@ -1,4 +1,3 @@
-using AutoMapper;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup;
 using MediatR;
@@ -12,7 +11,6 @@ public sealed partial class Queries
 {
     public async Task<DialogLookupPayload> GetDialogLookup(
         [Service] ISender mediator,
-        [Service] IMapper mapper,
         [Argument] string instanceRef,
         [GlobalState(AcceptLanguage)] AcceptedLanguages? acceptLanguage,
         CancellationToken cancellationToken)
@@ -28,7 +26,7 @@ public sealed partial class Queries
         return result.Match(
             success => new DialogLookupPayload
             {
-                Lookup = mapper.Map<DialogLookupModel>(success)
+                Lookup = success.ToDialogLookup()
             },
             notFound => new DialogLookupPayload
             {

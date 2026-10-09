@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -54,10 +55,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                var mappedStatus = Application.GetMapper()
-                    .Map<DialogStatus.Values>(createDto.Status);
-                result.Status.Should().Be(mappedStatus);
-
+                result.Status.Should().Be(DialogStatus.Values.NotApplicable);
                 result.Should().NotBeNull();
                 result.Should().BeEquivalentTo(createDto, options => options
                     .Excluding(x => x.UpdatedAt)
@@ -170,8 +168,9 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(result =>
             {
-                var mappedStatus = Application.GetMapper()
-                    .Map<DialogStatus.Values>(createDto.Status);
+                var mappedStatus = createDto.Status is { } status
+                    ? status.ToDialogStatusValue()
+                    : default;
                 result.Status.Should().Be(mappedStatus);
 
                 result.Should().NotBeNull();

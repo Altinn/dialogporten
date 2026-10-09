@@ -168,6 +168,8 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
             {
                 builder.ToTable($"MassTransit{builder.Metadata.GetTableName()}");
             });
+
+        modelBuilder.ConfigureStorageParameters();
     }
 
     public Task<T> WrapWithRepeatableRead<T>(

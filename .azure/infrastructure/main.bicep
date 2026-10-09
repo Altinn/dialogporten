@@ -83,6 +83,7 @@ param postgresConfiguration {
   enableIndexTuning: bool
   enableQueryPerformanceInsight: bool
   enableTrackIoTiming: bool?
+  additionalExtensions: string[]?
   additionalServerConfigurations: PostgresServerConfiguration[]?
   staticServerConfigurations: PostgresServerConfiguration[]?
   applyStaticServerConfigurations: bool?
@@ -266,6 +267,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     enableIndexTuning: postgresConfiguration.enableIndexTuning
     enableQueryPerformanceInsight: postgresConfiguration.enableQueryPerformanceInsight
     enableTrackIoTiming: postgresConfiguration.?enableTrackIoTiming ?? false
+    additionalExtensions: postgresConfiguration.?additionalExtensions ?? []
     additionalServerConfigurations: postgresConfiguration.?additionalServerConfigurations ?? []
     staticServerConfigurations: postgresConfiguration.?staticServerConfigurations ?? []
     applyStaticServerConfigurations: postgresConfiguration.?applyStaticServerConfigurations ?? false

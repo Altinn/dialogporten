@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <summary>
-    /// Codifies indexes, storage parameters and planner statistics that were tuned by hand in prod.
+    /// Codifies indexes, storage parameters and planner statistics that were tuned by hand in prod, and pins
+    /// n_distinct on foreign key columns whose sampled estimate is off by orders of magnitude (see
+    /// Sql/Configuration/ColumnDistinctOverrides.sql).
     ///
     /// Model-only, deliberately left out of Up/Down: the removed CreatedConcurrently annotation on
     /// IX_Dialog_Party_{CreatedAt,UpdatedAt,DueAt}_Id. It does not change the database, and EF would otherwise drop
@@ -372,7 +374,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
             var scripts = new[]
             {
                 "Configuration/TableAutoVacuum.sql",
-                "Configuration/PlannerStatistics.sql"
+                "Configuration/PlannerStatistics.sql",
+                "Configuration/ColumnDistinctOverrides.sql"
             };
 
             foreach (var sql in MigrationSqlLoader.LoadAll(scripts))
@@ -385,6 +388,16 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql("""
+                ALTER TABLE public."Localization" ALTER COLUMN "LocalizationSetId" RESET (n_distinct);
+                ALTER TABLE public."DialogTransmissionContent" ALTER COLUMN "TransmissionId" RESET (n_distinct);
+                ALTER TABLE public."DialogContent" ALTER COLUMN "DialogId" RESET (n_distinct);
+                ALTER TABLE public."DialogActivity" ALTER COLUMN "DialogId" RESET (n_distinct);
+                ALTER TABLE public."DialogApiAction" ALTER COLUMN "DialogId" RESET (n_distinct);
+                ALTER TABLE public."DialogGuiAction" ALTER COLUMN "DialogId" RESET (n_distinct);
+                ALTER TABLE public."DialogSearchTag" ALTER COLUMN "DialogId" RESET (n_distinct);
+                ALTER TABLE public."LabelAssignmentLog" ALTER COLUMN "ContextId" RESET (n_distinct);
+                ALTER TABLE public."Attachment" ALTER COLUMN "DialogId" RESET (n_distinct);
+                ALTER TABLE public."Attachment" ALTER COLUMN "TransmissionId" RESET (n_distinct);
                 DROP STATISTICS IF EXISTS public."STATS_Dialog_Party_ServiceResource_MCV";
                 ALTER TABLE public."Dialog" ALTER COLUMN "Party" SET STATISTICS -1;
                 ALTER TABLE public."Dialog" ALTER COLUMN "ServiceResource" SET STATISTICS -1;

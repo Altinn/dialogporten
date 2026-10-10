@@ -82,7 +82,7 @@ dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests To
 ```
 5. Start Dialogporten locally:
    - Shell script: [scripts/e2e/run-webapi-e2e.zsh](../scripts/e2e/run-webapi-e2e.zsh)
-   - Rider: use the checked-in `.run` profiles `WebApi (E2E)`, `GraphQL (E2E)`, `Service (E2E)`, or the compound `E2E (WebAPI/GQL/Service)`.
+   - Rider: This repo contains launchSettings.json for each project. These should automatically be loaded by Rider and available in the run-dropdown`. If they are not loaded, right click the files and press "Generate Configurations" 
    - The shell script and Rider E2E profiles set `RUNNING_E2E_TESTS=true`, which prevents `appsettings.local.json` from being loaded for `WebApi`, `GraphQL`, and `Service`. This avoids accidental local overrides during E2E runs.
    - The test-project file `tests/Digdir.Library.Dialogporten.E2E.Common/appsettings.local.json` is unaffected and is still the place to set `ExplicitTests=false` if you want explicit tests to run by default in your IDE.
 

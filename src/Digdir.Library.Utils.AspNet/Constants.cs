@@ -13,7 +13,6 @@ public static class Constants
     public const string DbStatusCode = "db.response.status_code";
 
     public const string FusionCache = "ZiggyCreatures";
-    public const string AspNetCore = "Microsoft.AspNetCore";
     public const string Npgsql = "Npgsql";
     public const string HotChocolateDiagnostics = "HotChocolate.Diagnostics";
 

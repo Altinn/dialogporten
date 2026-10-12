@@ -670,6 +670,17 @@ public class DecisionRequestHelperTests
         Assert.Equal(keys.Count, keys.Distinct(StringComparer.Ordinal).Count());
     }
 
+    [Fact]
+    public void GenerateCacheKeyShouldUseTheVersionedNamespace()
+    {
+        // The cached DialogDetailsAuthorizationResult changed shape (PermittedParties -> PermittedUnits). The
+        // version in the key keeps entries written by the previous shape from being deserialized as the new one;
+        // bump it whenever the cached result type changes.
+        var request = CreateDialogDetailsAuthorizationRequest(GetAsClaims(("pid", "12345678901")), OrgParty);
+
+        Assert.Matches("^auth:details:v2:[0-9a-f]{64}$", request.GenerateCacheKey());
+    }
+
     private static AuthorizationCheck MainCheck(string action, string party) =>
         new(action, AuthorizationResourceSpec.Main, [party]);
 

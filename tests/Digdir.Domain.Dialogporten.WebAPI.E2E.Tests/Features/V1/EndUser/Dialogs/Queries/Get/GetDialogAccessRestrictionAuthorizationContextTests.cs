@@ -77,6 +77,55 @@ public class GetDialogAccessRestrictionAuthorizationContextTests(WebApiE2EFixtur
         response.Content.Transmissions.Single(x => x.Id == transmissionId).IsAuthorized.Should().BeTrue();
     }
 
+    [E2EFact(SkipOnEnvironments = ["yt01"])]
+    public async Task Should_Permit_Client_Delegation_Check_Only_Through_The_Delegating_Firm()
+    {
+        // Arrange: the agent's only access to the client comes from a client delegation through the firm (see
+        // E2EConstants.ClientDelegationFirmOrgNo). Only the check naming that firm may permit; naming another firm,
+        // or requiring access that does not pass through another organization, must deny.
+        var ids = OrderedVersion7Ids(3);
+        var throughFirmId = ids[0];
+        var throughOtherFirmId = ids[1];
+        var directAndHierarchyId = ids[2];
+
+        var dialogId = await Fixture.ServiceownerApi.CreateSimpleDialogAsync(dialog =>
+        {
+            dialog.Party = E2EConstants.ClientDelegationClientOrgUrn;
+            dialog.Transmissions =
+            [
+                CreateTransmission(throughFirmId, new()
+                {
+                    AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.ClientDelegation,
+                    ViaParty = E2EConstants.ClientDelegationFirmOrgUrn
+                }),
+                CreateTransmission(throughOtherFirmId, new()
+                {
+                    AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.ClientDelegation,
+                    ViaParty = E2EConstants.ClientDelegationOtherFirmOrgUrn
+                }),
+                CreateTransmission(directAndHierarchyId, new()
+                {
+                    AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.DirectAndHierarchy
+                })
+            ];
+        });
+
+        using var _ = Fixture.UseEndUserTokenOverrides(ssn: E2EConstants.ClientDelegationAgentSsn);
+
+        // Act
+        var response = await Fixture.EndUserApi.GetDialog(dialogId);
+
+        // Assert
+        response.ShouldHaveStatusCode(HttpStatusCode.OK);
+        response.Content.Should().NotBeNull();
+        response.Content.Transmissions.Single(x => x.Id == throughFirmId).IsAuthorized.Should().BeTrue(
+            "the agent's access to the client is client delegated through this firm");
+        response.Content.Transmissions.Single(x => x.Id == throughOtherFirmId).IsAuthorized.Should().BeFalse(
+            "the agent has no client delegation through the other firm; a permit means the PDP ignored the via party");
+        response.Content.Transmissions.Single(x => x.Id == directAndHierarchyId).IsAuthorized.Should().BeFalse(
+            "the agent's only access to the client is a client delegation; a permit means the PDP ignored the access restriction");
+    }
+
     private static V1ServiceOwnerDialogsCommandsCreate_Transmission CreateTransmission(
         Guid id, V1CommonAuthorizationContexts_DialogPartyCheck dialogPartyCheck) =>
         new()

@@ -1,5 +1,6 @@
 #pragma warning disable CS0618 // Obsolete legacy authorization fields are mapped for backwards compatibility
 using AuthorizationContextDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.AuthorizationContextDto;
+using DialogPartyCheckDto = Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.DialogPartyCheckDto;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -332,7 +333,13 @@ public static class Mappers
                 ServiceResource = source.ServiceResource,
                 AdditionalResourceAttribute = source.AdditionalResourceAttribute,
                 Parties = [.. source.Parties],
-                IncludeDialogParty = source.IncludeDialogParty,
+                DialogPartyChecks = [.. source.DialogPartyChecks.Select(x => new DialogPartyCheckDto
+                {
+                    AccessRestriction = x.AccessRestriction,
+                    ViaParty = x.ViaParty,
+                    ServiceResource = x.ServiceResource,
+                    Action = x.Action
+                })],
                 Action = source.Action,
                 TokenRef = source.TokenRef,
                 UnauthorizedPresentation = source.UnauthorizedPresentation

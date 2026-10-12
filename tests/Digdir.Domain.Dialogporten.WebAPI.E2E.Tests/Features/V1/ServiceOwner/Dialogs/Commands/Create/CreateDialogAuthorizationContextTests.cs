@@ -36,7 +36,7 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
                     {
                         Action = Constants.ReadAction,
                         ServiceResource = "urn:altinn:resource:notavailable",
-                        IncludeDialogParty = true,
+                        DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                         UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                     }
                 }
@@ -78,7 +78,7 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
                     {
                         Action = "write",
                         ServiceResource = E2EConstants.AvailableExternalResource,
-                        IncludeDialogParty = true,
+                        DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                         UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                     }
                 },
@@ -97,7 +97,7 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
                         // action reached the PDP instead of being replaced by the "read" default.
                         Action = "e2eactionwithoutpolicyrule",
                         ServiceResource = E2EConstants.AvailableExternalResource,
-                        IncludeDialogParty = true,
+                        DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                         UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                     }
                 }
@@ -152,7 +152,7 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
                     AuthorizationContext = new V1CommonAuthorizationContexts_AuthorizationContext
                     {
                         ServiceResource = E2EConstants.AvailableExternalResource,
-                        IncludeDialogParty = true,
+                        DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                         TokenRef = "e2e-token-ref",
                         UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                     }
@@ -202,7 +202,7 @@ public class CreateDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E
                     AuthorizationContext = new V1CommonAuthorizationContexts_AuthorizationContext
                     {
                         ServiceResource = E2EConstants.AvailableExternalResource,
-                        IncludeDialogParty = true,
+                        DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                         UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                     },
                     Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent

@@ -77,7 +77,9 @@ public class AuthorizationContextMappingExtensionsTests
         Assert.Equal(expected.ServiceResource, actual.ServiceResource);
         Assert.Equal(expected.AdditionalResourceAttribute, actual.AdditionalResourceAttribute);
         Assert.Equal(expected.Parties, actual.Parties);
-        Assert.Equal(expected.IncludeDialogParty, actual.IncludeDialogParty);
+        AssertSameChecks(
+            expected.DialogPartyChecks.Select(x => (x.AccessRestriction, x.ViaParty, x.ServiceResource, x.Action)),
+            actual.DialogPartyChecks.Select(x => (x.AccessRestriction, x.ViaParty, x.ServiceResource, x.Action)));
         Assert.Equal(expected.Action, actual.Action);
         Assert.Equal(expected.TokenRef, actual.TokenRef);
         Assert.Equal(expected.UnauthorizedPresentation, actual.UnauthorizedPresentation);
@@ -129,7 +131,12 @@ public class AuthorizationContextMappingExtensionsTests
         ServiceResource = "urn:altinn:resource:other",
         AdditionalResourceAttribute = "urn:altinn:task:Task_1",
         Parties = ["urn:altinn:organization:identifier-no:123456789"],
-        IncludeDialogParty = true,
+        DialogPartyChecks =
+        [
+            new() { AccessRestriction = DialogPartyCheckAccessRestriction.DirectAndHierarchy },
+            new() { AccessRestriction = DialogPartyCheckAccessRestriction.ClientDelegation, ViaParty = "urn:altinn:organization:identifier-no:310778737" },
+            new() { AccessRestriction = DialogPartyCheckAccessRestriction.None, ServiceResource = "urn:altinn:resource:r-full", Action = "readall" },
+        ],
         Action = "sign",
         TokenRef = "my-own-reference",
         UnauthorizedPresentation = AuthorizationContextUnauthorizedPresentation.Excluded,
@@ -202,9 +209,18 @@ public class AuthorizationContextMappingExtensionsTests
         Assert.Equal(expected.ServiceResource, actual.ServiceResource);
         Assert.Equal(expected.AdditionalResourceAttribute, actual.AdditionalResourceAttribute);
         Assert.Equal(expected.Parties, actual.Parties);
-        Assert.Equal(expected.IncludeDialogParty, actual.IncludeDialogParty);
+        AssertSameChecks(
+            expected.DialogPartyChecks.Select(x => (x.AccessRestriction, x.ViaParty, x.ServiceResource, x.Action)),
+            actual.DialogPartyChecks.Select(x => (x.AccessRestriction, x.ViaParty, x.ServiceResource, x.Action)));
         Assert.Equal(expected.Action, actual.Action);
         Assert.Equal(expected.TokenRef, actual.TokenRef);
         Assert.Equal(expected.UnauthorizedPresentation, actual.UnauthorizedPresentation);
+    }
+
+    private static void AssertSameChecks<T>(IEnumerable<T> expected, IEnumerable<T> actual)
+    {
+        var expectedList = expected.ToList();
+        Assert.Equal(3, expectedList.Count);
+        Assert.Equal(expectedList, actual);
     }
 }

@@ -10,9 +10,9 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Mapping;
 /// <summary>
 /// Maps the authorization context carried by attachments, transmissions and actions between the read model
 /// (<see cref="AuthorizationContext"/>) and the write model (<see cref="AuthorizationContextInput"/>). Unlike
-/// the shared localization collections elsewhere in this layer, <c>Parties</c> is copied rather than reused by
-/// reference: callers routinely edit the parties of a context they have just read, and aliasing the list would
-/// mutate the source model.
+/// the shared localization collections elsewhere in this layer, <c>Parties</c> and <c>DialogPartyChecks</c> are
+/// copied rather than reused by reference: callers routinely edit a context they have just read, and aliasing the
+/// lists would mutate the source model.
 /// </summary>
 internal static class AuthorizationContextMappingExtensions
 {
@@ -21,7 +21,13 @@ internal static class AuthorizationContextMappingExtensions
         ServiceResource = source.ServiceResource,
         AdditionalResourceAttribute = source.AdditionalResourceAttribute,
         Parties = [.. source.Parties],
-        IncludeDialogParty = source.IncludeDialogParty,
+        DialogPartyChecks = [.. source.DialogPartyChecks.Select(x => new DialogPartyCheckInput
+        {
+            AccessRestriction = x.AccessRestriction,
+            ViaParty = x.ViaParty,
+            ServiceResource = x.ServiceResource,
+            Action = x.Action,
+        })],
         Action = source.Action,
         TokenRef = source.TokenRef,
         UnauthorizedPresentation = source.UnauthorizedPresentation,
@@ -32,7 +38,13 @@ internal static class AuthorizationContextMappingExtensions
         ServiceResource = source.ServiceResource,
         AdditionalResourceAttribute = source.AdditionalResourceAttribute,
         Parties = [.. source.Parties],
-        IncludeDialogParty = source.IncludeDialogParty,
+        DialogPartyChecks = [.. source.DialogPartyChecks.Select(x => new DialogPartyCheck
+        {
+            AccessRestriction = x.AccessRestriction,
+            ViaParty = x.ViaParty,
+            ServiceResource = x.ServiceResource,
+            Action = x.Action,
+        })],
         Action = source.Action,
         TokenRef = source.TokenRef,
         UnauthorizedPresentation = source.UnauthorizedPresentation,

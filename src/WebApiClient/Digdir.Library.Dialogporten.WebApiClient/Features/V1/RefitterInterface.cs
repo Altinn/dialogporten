@@ -2264,17 +2264,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string AdditionalResourceAttribute { get; set; }
 
         /// <summary>
-        /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
-        /// <br/>effective resource for at least one of the parties.
+        /// Other parties than the dialog's that access is evaluated on behalf of, each at its own party and without
+        /// <br/>access restriction. Access is granted if the end user has access to the effective resource for at least
+        /// <br/>one of the parties, or if any of "dialogPartyChecks" permits.
         /// </summary>
         [JsonPropertyName("parties")]
         public ICollection<string> Parties { get; set; }
 
         /// <summary>
-        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+        /// <br/>"parties", permits. Empty when the dialog's party is not evaluated.
         /// </summary>
-        [JsonPropertyName("includeDialogParty")]
-        public bool IncludeDialogParty { get; set; }
+        [JsonPropertyName("dialogPartyChecks")]
+        public ICollection<V1ServiceOwnerDialogsQueriesSearchTransmissions_DialogPartyCheck> DialogPartyChecks { get; set; }
 
         /// <summary>
         /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
@@ -2304,6 +2306,40 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesSearchTransmissions_DialogPartyCheck
+    {
+
+        /// <summary>
+        /// Restricts how the end user's access at the dialog's party must have been obtained for this check to grant
+        /// <br/>access: "none" accepts all access, "directAndHierarchy" only access that does not pass through another
+        /// <br/>organization, and "clientDelegation" only client delegations made through the organization in "viaParty".
+        /// </summary>
+        [JsonPropertyName("accessRestriction")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction>))]
+        public DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction AccessRestriction { get; set; }
+
+        /// <summary>
+        /// The organization the end user's access must have been client delegated through. Only set when
+        /// <br/>"accessRestriction" is "clientDelegation".
+        /// </summary>
+        [JsonPropertyName("viaParty")]
+        public string ViaParty { get; set; }
+
+        /// <summary>
+        /// The service resource evaluated for this check instead of the context's. Null when not overridden.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// The XACML action evaluated for this check instead of the context's. Null when not overridden.
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation
     {
 
@@ -2315,6 +2351,23 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"Excluded")]
         Excluded = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction
+    {
+
+        // Numbered to match the server's domain enum (None = 1, DirectAndHierarchy = 2, ClientDelegation = 3), for
+        // the same reason as DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.
+        [System.Runtime.Serialization.EnumMember(Value = @"None")]
+        None = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"DirectAndHierarchy")]
+        DirectAndHierarchy = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ClientDelegation")]
+        ClientDelegation = 3,
 
     }
 
@@ -3203,17 +3256,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string AdditionalResourceAttribute { get; set; }
 
         /// <summary>
-        /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
-        /// <br/>effective resource for at least one of the parties.
+        /// Other parties than the dialog's that access is evaluated on behalf of, each at its own party and without
+        /// <br/>access restriction. Access is granted if the end user has access to the effective resource for at least
+        /// <br/>one of the parties, or if any of "dialogPartyChecks" permits.
         /// </summary>
         [JsonPropertyName("parties")]
         public ICollection<string> Parties { get; set; }
 
         /// <summary>
-        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+        /// <br/>"parties", permits. Empty when the dialog's party is not evaluated.
         /// </summary>
-        [JsonPropertyName("includeDialogParty")]
-        public bool IncludeDialogParty { get; set; }
+        [JsonPropertyName("dialogPartyChecks")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGetTransmission_DialogPartyCheck> DialogPartyChecks { get; set; }
 
         /// <summary>
         /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
@@ -3239,6 +3294,40 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("unauthorizedPresentation")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
         public DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGetTransmission_DialogPartyCheck
+    {
+
+        /// <summary>
+        /// Restricts how the end user's access at the dialog's party must have been obtained for this check to grant
+        /// <br/>access: "none" accepts all access, "directAndHierarchy" only access that does not pass through another
+        /// <br/>organization, and "clientDelegation" only client delegations made through the organization in "viaParty".
+        /// </summary>
+        [JsonPropertyName("accessRestriction")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction>))]
+        public DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction AccessRestriction { get; set; }
+
+        /// <summary>
+        /// The organization the end user's access must have been client delegated through. Only set when
+        /// <br/>"accessRestriction" is "clientDelegation".
+        /// </summary>
+        [JsonPropertyName("viaParty")]
+        public string ViaParty { get; set; }
+
+        /// <summary>
+        /// The service resource evaluated for this check instead of the context's. Null when not overridden.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// The XACML action evaluated for this check instead of the context's. Null when not overridden.
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
 
     }
 
@@ -3985,17 +4074,19 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string AdditionalResourceAttribute { get; set; }
 
         /// <summary>
-        /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
-        /// <br/>effective resource for at least one of the parties.
+        /// Other parties than the dialog's that access is evaluated on behalf of, each at its own party and without
+        /// <br/>access restriction. Access is granted if the end user has access to the effective resource for at least
+        /// <br/>one of the parties, or if any of "dialogPartyChecks" permits.
         /// </summary>
         [JsonPropertyName("parties")]
         public ICollection<string> Parties { get; set; }
 
         /// <summary>
-        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+        /// <br/>"parties", permits. Empty when the dialog's party is not evaluated.
         /// </summary>
-        [JsonPropertyName("includeDialogParty")]
-        public bool IncludeDialogParty { get; set; }
+        [JsonPropertyName("dialogPartyChecks")]
+        public ICollection<V1ServiceOwnerDialogsQueriesGet_DialogPartyCheck> DialogPartyChecks { get; set; }
 
         /// <summary>
         /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
@@ -4021,6 +4112,40 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("unauthorizedPresentation")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
         public DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerDialogsQueriesGet_DialogPartyCheck
+    {
+
+        /// <summary>
+        /// Restricts how the end user's access at the dialog's party must have been obtained for this check to grant
+        /// <br/>access: "none" accepts all access, "directAndHierarchy" only access that does not pass through another
+        /// <br/>organization, and "clientDelegation" only client delegations made through the organization in "viaParty".
+        /// </summary>
+        [JsonPropertyName("accessRestriction")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction>))]
+        public DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction AccessRestriction { get; set; }
+
+        /// <summary>
+        /// The organization the end user's access must have been client delegated through. Only set when
+        /// <br/>"accessRestriction" is "clientDelegation".
+        /// </summary>
+        [JsonPropertyName("viaParty")]
+        public string ViaParty { get; set; }
+
+        /// <summary>
+        /// The service resource evaluated for this check instead of the context's. Null when not overridden.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// The XACML action evaluated for this check instead of the context's. Null when not overridden.
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
 
     }
 
@@ -4674,18 +4799,22 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         public string AdditionalResourceAttribute { get; set; }
 
         /// <summary>
-        /// The parties to evaluate access on behalf of. Access is granted if the end user has access to the
-        /// <br/>effective resource for at least one of the parties. Must contain at least one party unless
-        /// <br/>"includeDialogParty" is true.
+        /// Other parties than the dialog's to evaluate access on behalf of, each at its own party and without access
+        /// <br/>restriction. Access is granted if the end user has access to the effective resource for at least one of
+        /// <br/>the parties, or if any of "dialogPartyChecks" permits. Cannot contain the dialog's own party; use a
+        /// <br/>"dialogPartyChecks" entry with access restriction "None" for that. Together with "dialogPartyChecks", at
+        /// <br/>least 1 and at most 4 entries.
         /// </summary>
         [JsonPropertyName("parties")]
         public ICollection<string> Parties { get; set; }
 
         /// <summary>
-        /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+        /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+        /// <br/>"parties", permits. An empty list means the dialog's party is not evaluated. Together with "parties",
+        /// <br/>at least 1 and at most 4 entries.
         /// </summary>
-        [JsonPropertyName("includeDialogParty")]
-        public bool IncludeDialogParty { get; set; }
+        [JsonPropertyName("dialogPartyChecks")]
+        public ICollection<V1CommonAuthorizationContexts_DialogPartyCheck> DialogPartyChecks { get; set; }
 
         /// <summary>
         /// The XACML action to evaluate. Optional; defaults to "read" if not supplied.
@@ -4714,6 +4843,46 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [JsonPropertyName("unauthorizedPresentation")]
         [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation>))]
         public DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1CommonAuthorizationContexts_DialogPartyCheck
+    {
+
+        /// <summary>
+        /// Required. Restricts how the end user's access at the dialog's party must have been obtained for this
+        /// <br/>check to grant access: "none" accepts all access, "directAndHierarchy" only access that does not pass
+        /// <br/>through another organization (direct grants, ER roles and their role mappings at the dialog party, and
+        /// <br/>inheritance from its main unit), and "clientDelegation" only client delegations made through the
+        /// <br/>organization given in "viaParty".
+        /// </summary>
+        [JsonPropertyName("accessRestriction")]
+        [JsonConverter(typeof(JsonStringEnumConverter<DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction>))]
+        public DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction AccessRestriction { get; set; }
+
+        /// <summary>
+        /// The organization the end user's access must have been client delegated through. Required when
+        /// <br/>"accessRestriction" is "clientDelegation", and not allowed otherwise. Cannot be the dialog's own party.
+        /// </summary>
+        [JsonPropertyName("viaParty")]
+        public string ViaParty { get; set; }
+
+        /// <summary>
+        /// A service resource to evaluate for this check instead of the context's. If omitted, the context's
+        /// <br/>"serviceResource" is used, or the dialog's own service resource if the context sets none. The same rules
+        /// <br/>apply as for the context's "serviceResource", including that the service owner must have access to it.
+        /// <br/>The context's "additionalResourceAttribute", if any, is layered on the resulting resource.
+        /// </summary>
+        [JsonPropertyName("serviceResource")]
+        public string ServiceResource { get; set; }
+
+        /// <summary>
+        /// The XACML action to evaluate for this check instead of the context's. If omitted, the context's "action"
+        /// <br/>is used, or "read" if the context sets none.
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
 
     }
 

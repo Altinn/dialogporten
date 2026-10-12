@@ -142,22 +142,23 @@ internal sealed class DialogTokenGenerator : IDialogTokenGenerator
     private static string GetAuthorizedActions(DialogDetailsAuthorizationResult authorizationResult)
     {
         var entries = new List<string>();
-        foreach (var authorizedCheck in authorizationResult.AuthorizedChecks)
+        foreach (var unit in authorizationResult.AuthorizedChecks
+                     .SelectMany(x => x.PermittedUnits)
+                     .Where(x => x.AccessRestriction is AuthorizationAccessRestriction.None))
         {
-            var check = authorizedCheck.Check;
             string entry;
-            switch (check.Resource.Kind)
+            switch (unit.Resource.Kind)
             {
                 case AuthorizationResourceSpecKind.Main:
-                    entry = check.Action;
+                    entry = unit.Action;
                     break;
 
                 case AuthorizationResourceSpecKind.Legacy:
                     // Preserve the legacy wire format exactly: a literal "main" attribute is
                     // indistinguishable from the main resource and serializes without a resource part.
-                    entry = check.Resource.LegacyAuthorizationAttribute == Authorization.Constants.MainResource
-                        ? check.Action
-                        : string.Create(CultureInfo.InvariantCulture, $"{check.Action},{check.Resource.LegacyAuthorizationAttribute}");
+                    entry = unit.Resource.LegacyAuthorizationAttribute == Authorization.Constants.MainResource
+                        ? unit.Action
+                        : string.Create(CultureInfo.InvariantCulture, $"{unit.Action},{unit.Resource.LegacyAuthorizationAttribute}");
                     break;
 
                 case AuthorizationResourceSpecKind.Context:

@@ -109,6 +109,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
             return forbiddenResult;
         }
 
+        _domainContext.AddErrors(dialog.ValidateAuthorizationContexts());
+
         var serviceResourceInformation = await _resourceRegistry.GetResourceInformation(dialog.ServiceResource, cancellationToken);
         if (serviceResourceInformation is null)
         {

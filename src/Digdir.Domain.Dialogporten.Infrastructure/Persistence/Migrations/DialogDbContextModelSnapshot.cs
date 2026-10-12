@@ -19,7 +19,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gin");
@@ -768,7 +768,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<bool>("IncludeDialogParty")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.PrimitiveCollection<List<string>>("Parties")
                         .IsRequired()
@@ -784,6 +786,23 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.Property<short>("UnauthorizedPresentation")
                         .HasColumnType("smallint");
+
+                    b.ComplexCollection(typeof(List<Dictionary<string, object>>), "DialogPartyChecks", "Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts.AuthorizationContext.DialogPartyChecks#DialogPartyCheck", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<int>("AccessRestriction");
+
+                            b1.Property<string>("Action");
+
+                            b1.Property<string>("ServiceResource");
+
+                            b1.Property<string>("ViaParty");
+
+                            b1
+                                .ToJson("DialogPartyChecks")
+                                .HasColumnType("jsonb");
+                        });
 
                     b.HasKey("Id");
 

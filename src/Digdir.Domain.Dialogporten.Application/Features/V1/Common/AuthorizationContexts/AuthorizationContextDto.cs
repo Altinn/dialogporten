@@ -26,9 +26,11 @@ public sealed class AuthorizationContextDto
     public string? AdditionalResourceAttribute { get; set; }
 
     /// <summary>
-    /// The parties to evaluate access on behalf of. Access is granted if the end user has access to the
-    /// effective resource for at least one of the parties. Must contain at least one party unless
-    /// "includeDialogParty" is true.
+    /// Other parties than the dialog's to evaluate access on behalf of, each at its own party and without access
+    /// restriction. Access is granted if the end user has access to the effective resource for at least one of
+    /// the parties, or if any of "dialogPartyChecks" permits. Cannot contain the dialog's own party; use a
+    /// "dialogPartyChecks" entry with access restriction "None" for that. Together with "dialogPartyChecks", at
+    /// least 1 and at most 4 entries.
     /// </summary>
     /// <example>urn:altinn:organization:identifier-no:912345678</example>
     public List<string> Parties
@@ -41,9 +43,16 @@ public sealed class AuthorizationContextDto
     } = [];
 
     /// <summary>
-    /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+    /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+    /// "parties", permits. An empty list means the dialog's party is not evaluated. Together with "parties",
+    /// at least 1 and at most 4 entries.
     /// </summary>
-    public bool IncludeDialogParty { get; set; }
+    public List<DialogPartyCheckDto> DialogPartyChecks
+    {
+        get;
+        // See Parties.
+        set => field = value ?? [];
+    } = [];
 
     /// <summary>
     /// The XACML action to evaluate. Optional; defaults to "read" if not supplied.

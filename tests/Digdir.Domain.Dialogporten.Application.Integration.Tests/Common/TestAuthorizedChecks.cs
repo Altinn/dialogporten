@@ -5,6 +5,10 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 internal static class TestAuthorizedChecks
 {
+    // Main and legacy grants are looked up by action and attribute only, but a grant needs at least one
+    // permitted unit to count, as it always has when it comes from the PDP.
+    private const string AnyParty = "urn:altinn:organization:identifier-no:991825827";
+
     /// <summary>
     /// Builds an authorized legacy-style check, mirroring the semantics of the old
     /// AltinnAction(name, authorizationAttribute) test fixtures: a null (or "main")
@@ -15,7 +19,7 @@ internal static class TestAuthorizedChecks
             name,
             AuthorizationResourceSpec.FromLegacyAuthorizationAttribute(
                 authorizationAttribute == Constants.MainResource ? null : authorizationAttribute),
-            []));
+            [AnyParty]));
 
     /// <summary>
     /// Builds an authorized context check for the given carrier entity, using the same normalization

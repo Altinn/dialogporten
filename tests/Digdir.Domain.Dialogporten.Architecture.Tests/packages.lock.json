@@ -106,6 +106,11 @@
         "resolved": "0.1.1",
         "contentHash": "Ln+6W3j06wt3yXA+AQwy6gw4pJllI1vC0+IzUWTy57NccW2Q5cqPz2cxBaJF2Z+eG8fhH3tYShsw0gqM9SEylA=="
       },
+      "Apache.Arrow": {
+        "type": "Transitive",
+        "resolved": "22.1.0",
+        "contentHash": "mTdHWGsNCWpKyQxqyNcSS+q4BtBTSOUfhdG+Lwo6eAOznCLSwrZQ5VKtDG2G8VrUp1ul4DwWHefoBS1umjO/VQ=="
+      },
       "Argon": {
         "type": "Transitive",
         "resolved": "0.35.2",
@@ -257,20 +262,21 @@
       },
       "Azure.Storage.Blobs": {
         "type": "Transitive",
-        "resolved": "12.29.2",
-        "contentHash": "NeZmk7bphspT2BYn8XaNCTV4/9vQG+ea79F85MBTi2o2WiXIIJNsRBtFyeBrzK2HIk476rfSqLNwPt4vXgOEkQ==",
+        "resolved": "12.30.0",
+        "contentHash": "pf6tqkzNANU5Fvfibse3fVRNWJol4jb9iA/wjHu1EHEpWpFHasHaiVNc11fncvOwnphzm4xaZwXzrg34yAI2hw==",
         "dependencies": {
-          "Azure.Core": "1.55.0",
-          "Azure.Storage.Common": "12.28.0"
+          "Apache.Arrow": "22.1.0",
+          "Azure.Core": "1.60.0",
+          "Azure.Storage.Common": "12.29.0"
         }
       },
       "Azure.Storage.Common": {
         "type": "Transitive",
-        "resolved": "12.28.0",
-        "contentHash": "5l8YhNrks38zKLGFW2BBFLwieyamH/xauABSASsdpZv79G0f+n2n22IjkRmUqCmALSupkwRHh2LOhbW3yj5Qgw==",
+        "resolved": "12.29.0",
+        "contentHash": "0VqPcAinzXFJDAELqC+VPFUL6AaU1mmIpDAHarr7DVw3zcJrlo4k3Xc3TCTVBkDgY6YUOjJ00Fd9ZB9En5H2Jg==",
         "dependencies": {
-          "Azure.Core": "1.55.0",
-          "System.IO.Hashing": "10.0.3"
+          "Azure.Core": "1.60.0",
+          "System.IO.Hashing": "10.0.9"
         }
       },
       "BouncyCastle.Cryptography": {
@@ -1063,23 +1069,23 @@
       },
       "MessagePack": {
         "type": "Transitive",
-        "resolved": "3.1.10",
-        "contentHash": "IvYiuLIGLbklU8qZFp0krv1f+0d0kkWbyb+I4Qmk8p5o+JxQsKUp2L5SBHV4vVmBh+DAj3bWDukGAl+87GMwrQ==",
+        "resolved": "3.1.11",
+        "contentHash": "NmWf3ZELELB67gjUFcb2PNO0S2QhohTSd6lTarWUCZlhjXz4bxECxPt6N2GYmtGGgUkvBKEpPT5s6r0wlurDZA==",
         "dependencies": {
-          "MessagePack.Annotations": "3.1.10",
-          "MessagePackAnalyzer": "3.1.10",
+          "MessagePack.Annotations": "3.1.11",
+          "MessagePackAnalyzer": "3.1.11",
           "Microsoft.NET.StringTools": "17.11.4"
         }
       },
       "MessagePack.Annotations": {
         "type": "Transitive",
-        "resolved": "3.1.10",
-        "contentHash": "3XvSeRdiR9ujCcTuijFwn2DRO8+a2S4fkNvwMaMwnXvdUJRaWAVc37scCiFME0AYLXGtnWF+GHMZT/a+i5Vv7g=="
+        "resolved": "3.1.11",
+        "contentHash": "yZaUj+IQBgqE/W5JTgo/ORaM+zt861LkDns/EHBgaMZ0t9rQWtxO/qwkbU5pqvaQhfL/E/en5G/6AHLgDNNFeg=="
       },
       "MessagePackAnalyzer": {
         "type": "Transitive",
-        "resolved": "3.1.10",
-        "contentHash": "t0sPByiRt2ipKUg64M1foAt5uDnJOiOGimE0rKXZ5CdiQw0Sf4TfELiWNjowcCHO0M6gRePrI90kXPc7rN2llw=="
+        "resolved": "3.1.11",
+        "contentHash": "C8dO8dqEkjxwSz8pM6pr1nIRZ6fm6LWtagEOVz/tzJgG8JWNKcUGSSy5tQM+0ALWsh6fFhS8bhzLpnsrPUmSkw=="
       },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",
@@ -2045,8 +2051,8 @@
       },
       "Scalar.AspNetCore": {
         "type": "Transitive",
-        "resolved": "2.16.20",
-        "contentHash": "pSmyME4FCnYocbLmn9lmAUTVVSEPb5E6noqRcmJYpO65eaum68gw17yMORbeckW+gMksiL04m+zXoTxOKv0+kQ=="
+        "resolved": "2.17.13",
+        "contentHash": "+R0eJtJIIHW9owY61rIOgR2lywjZnjqUPAM7ll+lZYML7mZ4LxokG6wpAmkuyaLS1Ml4fI4kdAC2U6KkdrDDiA=="
       },
       "ScottBrady.IdentityModel": {
         "type": "Transitive",
@@ -2260,8 +2266,8 @@
       },
       "System.IO.Hashing": {
         "type": "Transitive",
-        "resolved": "10.0.3",
-        "contentHash": "La6ICwsdTKhVX+LKN+pvFjQRR3LhLwq3uKdi2knjLzRyPYBSydF4cjXidYxIiTcDD6XVYdsBWQEI8ZxiZ/OdIg=="
+        "resolved": "10.0.9",
+        "contentHash": "vixglGnKEexAJDeIRhyayZYzxyrgK1K9GU3K/zRZVwDbaDcMkSqj4WDHoVmQMNfsdUtLALfNSJw6mBIpdxie4A=="
       },
       "System.Memory.Data": {
         "type": "Transitive",
@@ -2524,7 +2530,7 @@
           "HotChocolate.Subscriptions.Redis": "[16.6.7, )",
           "MassTransit.Azure.ServiceBus.Core": "[8.5.7, 9.0.0)",
           "MassTransit.EntityFrameworkCore": "[8.5.7, 9.0.0)",
-          "MessagePack": "[3.1.10, )",
+          "MessagePack": "[3.1.11, )",
           "Microsoft.Extensions.Caching.StackExchangeRedis": "[10.0.12, )",
           "Microsoft.Extensions.Configuration.UserSecrets": "[10.0.12, )",
           "Microsoft.Extensions.Diagnostics.HealthChecks": "[10.0.12, )",
@@ -2542,7 +2548,7 @@
         "type": "Project",
         "dependencies": {
           "Azure.Monitor.Query.Logs": "[1.0.0, )",
-          "Azure.Storage.Blobs": "[12.29.2, )",
+          "Azure.Storage.Blobs": "[12.30.0, )",
           "Cocona": "[2.2.0, )",
           "Digdir.Domain.Dialogporten.Infrastructure": "[1.0.0, )",
           "Digdir.Library.Utils.AspNet": "[1.0.0, )",
@@ -2581,7 +2587,7 @@
           "Microsoft.Azure.AppConfiguration.AspNetCore": "[8.6.0, )",
           "NSwag.AspNetCore": "[14.7.1, )",
           "NSwag.MSBuild": "[14.7.1, )",
-          "Scalar.AspNetCore": "[2.16.20, )",
+          "Scalar.AspNetCore": "[2.17.13, )",
           "Serilog.AspNetCore": "[10.0.0, )",
           "Serilog.Enrichers.Environment": "[3.0.1, )",
           "Serilog.Sinks.OpenTelemetry": "[4.2.0, )"

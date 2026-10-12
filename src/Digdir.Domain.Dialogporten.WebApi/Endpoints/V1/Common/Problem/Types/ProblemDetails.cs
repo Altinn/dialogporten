@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using Digdir.Domain.Dialogporten.WebApi.Common;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Problem.Types;
 
@@ -24,7 +23,7 @@ public interface IDialogportenProblemDetails
 }
 
 [OpenApiTypeName("ProblemDetails")]
-public sealed class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails, IDialogportenProblemDetails
+public class ProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails, IDialogportenProblemDetails
 {
     public string? TraceId { get; set; }
     public string? StatusDescription { get; set; }

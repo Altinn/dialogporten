@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities;
 using Digdir.Domain.Dialogporten.WebApi.Common.Extensions;
+using Digdir.Domain.Dialogporten.WebApi.Common.Swagger;
 using Digdir.Domain.Dialogporten.WebApi.Endpoints.V1.Common.Headers;
 using FastEndpoints;
 using static Digdir.Domain.Dialogporten.WebApi.Common.Swagger.AuthorizationFailureMessageBuilder;
@@ -23,7 +24,9 @@ public sealed class CreateServiceOwnerLabelEndpointSummary : Summary<CreateServi
         Responses[Status401Unauthorized] = Constants.SwaggerSummary.AuthenticationFailure;
         Responses[Status403Forbidden] = DefaultForbiddenFor<CreateServiceOwnerLabelEndpoint>().Build();
         Responses[Status404NotFound] = Constants.SwaggerSummary.DialogNotFound;
-        Responses[Status409Conflict] = Constants.SwaggerSummary.Conflict;
+        Responses[Status409Conflict] = new ConflictMessageBuilder()
+            .ConcurrentOperationRejected()
+            .Build();
         Responses[Status412PreconditionFailed] = Constants.SwaggerSummary.RevisionMismatch;
         Responses[Status422UnprocessableEntity] = Constants.SwaggerSummary.DomainError;
     }

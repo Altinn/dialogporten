@@ -21,3 +21,4 @@ internal static class RouteHandlerBuilderExtensions
         }
     }
 }
+

@@ -8,5 +8,12 @@
     "IdempotentKey": [
       "Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: \u0027duplicate-transmission-key\u0027."
     ]
-  }
+  },
+  "conflicts": [
+    {
+      "code": "DP.CFL-00001",
+      "title": "Idempotent key already exist.",
+      "idempotentKey": "duplicate-transmission-key"
+    }
+  ]
 }

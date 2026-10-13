@@ -235,8 +235,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
                 );
                 dialog.AddResyncActorNameEvent(
                     actorNameId: actorNameId,
-                    reason: $"{nameof(GetDialogQueryHandler)} (EU): Actor name for SeenLog is null {newSeenLog.Id}",
-                    disableUpdateableFilter: true
+                    reason: $"{nameof(GetDialogQueryHandler)} (EU): Actor name for SeenLog is null {newSeenLog.Id}"
                 );
             }
         }

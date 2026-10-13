@@ -15,16 +15,13 @@ public sealed record ResyncActorNameEvent : DomainEvent
     public Guid ActorNameId { get; }
     public string Reason { get; }
 
-    public bool DisableUpdateableFilter { get; }
-
     public ResyncActorNameEvent(
         Guid actorNameId,
-        string reason,
-        bool disableUpdateableFilter = false)
+        string reason
+    )
     {
         ActorNameId = actorNameId;
         Reason = reason;
-        DisableUpdateableFilter = disableUpdateableFilter;
         EventId = actorNameId;
     }
 }

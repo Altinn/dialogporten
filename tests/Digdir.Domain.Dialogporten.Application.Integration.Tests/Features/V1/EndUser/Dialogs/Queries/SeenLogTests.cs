@@ -259,7 +259,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
                 var resyncActorNameEvent = (ResyncActorNameEvent)events[2];
                 resyncActorNameEvent.ActorNameId.Should().NotBeEmpty();
                 resyncActorNameEvent.Reason.Should().NotBeNullOrEmpty();
-                resyncActorNameEvent.DisableUpdateableFilter.Should().Be(true);
             })
             .ResetPartyNameRegistry()
             .ConsumeEvents()

@@ -39,9 +39,8 @@ public sealed class ResyncActorName(
             actorEntity.ActorNameEntity = newActorNameEntity;
         }
 
-        if (resyncActorNameEvent.DisableUpdateableFilter) unitOfWork.DisableUpdatableFilter();
-
         var result = await unitOfWork
+            .DisableUpdatableFilter()
             .DisableAggregateFilter()
             .DisableImmutableFilter()
             .SaveChangesAsync(cancellationToken);

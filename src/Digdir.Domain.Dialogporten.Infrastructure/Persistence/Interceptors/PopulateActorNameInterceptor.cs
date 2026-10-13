@@ -71,17 +71,16 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        await ConsolidateActorNameInstances(dbContext, newActorNameEntities, cancellationToken);
-        MarkActorNamesForResync(newActorNameEntities, dbContext);
+        var finalActorNames = await ConsolidateActorNameInstances(dbContext, newActorNameEntities, cancellationToken);
+        MarkActorNamesForResync(finalActorNames);
         _hasBeenExecuted = true;
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private static void MarkActorNamesForResync(List<ActorName> actorNameEntities, DbContext dbContext)
+    private static void MarkActorNamesForResync(List<ActorName> actorNameEntities)
     {
         var actorNames = actorNameEntities
             .Where(x => x.ActorId is not null && x.Name is null)
-            .Where(x => dbContext.Entry(x).State is EntityState.Added)
             .DistinctBy(x => x.ActorId);
 
         foreach (var actorName in actorNames)
@@ -121,7 +120,11 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return _domainContext.IsValid;
     }
 
-    private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added, CancellationToken cancellationToken)
+    private async Task<List<ActorName>> ConsolidateActorNameInstances(
+        DbContext dbContext,
+        List<ActorName> added,
+        CancellationToken cancellationToken
+    )
     {
         var existing = await GetExistingActorNames(dbContext, added, cancellationToken);
 
@@ -133,6 +136,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 innerKeySelector: x => new { x.ActorId, x.Name },
                 resultSelector: (left, right) => (left.ToList(), right.SingleOrDefault()));
 
+        var finalActorNames = new List<ActorName>();
         foreach (var (newActorNames, existingActorName) in actorNamePairs)
         {
             var (mainActorName, discardActorNames) = newActorNames switch
@@ -144,6 +148,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
             mainActorName.EnsureId();
             mainActorName.Create(_transactionTime.Value);
+            finalActorNames.Add(mainActorName);
+
             foreach (var actor in discardActorNames.SelectMany(x => x.ActorEntities))
             {
                 actor.ActorNameEntity = mainActorName;
@@ -154,6 +160,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 dbContext.Entry(discardInstance).State = EntityState.Detached;
             }
         }
+
+        return finalActorNames;
     }
 
     private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>

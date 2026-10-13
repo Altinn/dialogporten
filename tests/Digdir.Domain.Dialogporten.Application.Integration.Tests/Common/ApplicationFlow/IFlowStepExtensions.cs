@@ -587,11 +587,13 @@ public static class IFlowStepExtensions
     }
 
     public static IFlowExecutor<GetActivityResult> GetActivity<TIn>(
-        this IFlowStep<TIn> step) =>
+        this IFlowStep<TIn> step,
+        Guid? activityId = null
+    ) =>
         step.SendCommand(ctx => new GetActivityQuery
         {
             DialogId = ctx.GetDialogId(),
-            ActivityId = ctx.GetActivityId()
+            ActivityId = activityId ?? ctx.GetActivityId()
         });
 
     public static IFlowExecutor<TIn> Modify<TIn>(

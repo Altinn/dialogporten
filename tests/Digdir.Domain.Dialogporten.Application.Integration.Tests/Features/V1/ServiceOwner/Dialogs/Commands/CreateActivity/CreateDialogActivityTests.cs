@@ -17,6 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
@@ -195,6 +196,107 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                         ActorId = TestUsers.DefaultParty
                     });
                     x.Description.Should().BeNull();
+                }
+            );
+    }
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public Task Can_Create_Activity__On_Existing_Dialog_And_Get_The_Repaired_Activity_Afterwards_When_Null_Actor_Exists_And_Party_Name_Registry_Is_Down(
+        string failHow
+    )
+    {
+        var existingActivityGuid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
+        var newActivityGuid = Guid.Parse("01a11b7f-a2d9-724e-9299-32167e6539a8");
+        return FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Throws(new UpstreamServiceException(""));
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Throws(new HttpRequestException());
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
+            {
+                Id = existingActivityGuid,
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.DialogCreated,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = TestUsers.DefaultParty
+                },
+                Description = []
+            })
+            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(existingActivityGuid))
+            .GetActivity()
+            .AssertResult<ActivityDto>(x =>
+                {
+                    x.Id.Should().Be(existingActivityGuid);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorName.Should().BeNull();
+                }
+            )
+            .Do(_ => Application.PurgeEvents()) // Purge application events to simulate an existing null actor
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
+            {
+                Id = newActivityGuid,
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 2, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.Information,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = TestUsers.DefaultParty
+                },
+                Description = [new LocalizationDto
+                    {
+                        Value = "test",
+                        LanguageCode = "nb"
+                    }
+                ]
+            })
+            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(newActivityGuid))
+            .GetActivity()
+            .AssertResult<ActivityDto>(x =>
+                {
+                    x.Id.Should().Be(newActivityGuid);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorName.Should().BeNull();
+                }
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetActivity(existingActivityGuid)
+            .AssertResult<ActivityDto>(x =>
+                {
+                    x.Id.Should().Be(existingActivityGuid);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                }
+            )
+            .GetActivity(newActivityGuid)
+            .ExecuteAndAssert<ActivityDto>(x =>
+                {
+                    x.Id.Should().Be(newActivityGuid);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorName.Should().Be("Brando Sando");
                 }
             );
     }

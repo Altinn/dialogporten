@@ -6,8 +6,6 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
 
 internal static class CommonMapExtensions
 {
-    // The application layer maps an absent optional localization set (activity description, attachment
-    // display name) to null, while every localization list in the GraphQL schema is non-nullable.
     public static List<Localization> ToGraphQlLocalizations(this List<LocalizationDto>? source) =>
         source?.Select(ToGraphQlLocalization).ToList() ?? [];
 

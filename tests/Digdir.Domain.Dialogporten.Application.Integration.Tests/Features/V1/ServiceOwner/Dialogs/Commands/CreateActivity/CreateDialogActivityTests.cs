@@ -215,11 +215,9 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 switch (failHow)
                 {
                     case "InternalServerError":
-                        p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Throws(new UpstreamServiceException(""));
                         p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Returns(TestPartyNameRegistry.InternalServerError);
                         break;
                     case "HttpRequestException":
-                        p.QueryPartyName(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Throws(new HttpRequestException());
                         p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Throws(new HttpRequestException());
                         break;
                     default: throw new UnreachableException($"Uknown failhow {failHow}");

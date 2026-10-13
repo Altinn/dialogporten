@@ -16,10 +16,6 @@ internal interface IPartyNameRegistryTransport
         NameLookup nameLookup,
         CancellationToken cancellationToken
     );
-    Task<NameLookupResult> QueryPartyName(
-        NameLookup nameLookup,
-        CancellationToken cancellationToken
-    );
 
     internal sealed class NameLookup
     {
@@ -52,23 +48,6 @@ internal sealed class PartyNameRegistryTransport : IPartyNameRegistryTransport
     {
         ArgumentNullException.ThrowIfNull(client);
         _client = client;
-    }
-
-    public async Task<NameLookupResult> QueryPartyName(
-        NameLookup nameLookup,
-        CancellationToken cancellationToken
-    )
-    {
-        var response = await _client.PostAsJsonEnsuredAsync(
-            QueryPartiesUrl,
-            nameLookup,
-            serializerOptions: SerializerOptions,
-            cancellationToken: cancellationToken
-        );
-
-        return await response.Content.ReadFromJsonAsync<NameLookupResult>(cancellationToken) ?? throw new JsonException(
-            $"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {QueryPartiesUrl}"
-        );
     }
 
     public async Task<HttpResponseMessage> QueryPartyNameResponse(
@@ -114,16 +93,5 @@ internal sealed class LocalPartyNameRegistryTransport : IPartyNameRegistryTransp
             }),
             StatusCode = HttpStatusCode.OK
         });
-    }
-
-    public async Task<NameLookupResult> QueryPartyName(
-        NameLookup nameLookup,
-        CancellationToken cancellationToken
-    )
-    {
-        var response = await QueryPartyNameResponse(nameLookup, cancellationToken);
-        return await response
-            .Content
-            .ReadFromJsonAsync<NameLookupResult>(cancellationToken) ?? throw new UnreachableException();
     }
 }

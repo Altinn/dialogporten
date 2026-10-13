@@ -58,10 +58,6 @@ internal sealed class RoutedPartyNameRegistryTransport : IPartyNameRegistryTrans
     public Task<HttpResponseMessage> QueryPartyNameResponse(
         NameLookup nameLookup,
         CancellationToken cancellationToken) => Current.QueryPartyNameResponse(nameLookup, cancellationToken);
-
-    public Task<NameLookupResult> QueryPartyName(
-        NameLookup nameLookup,
-        CancellationToken cancellationToken) => Current.QueryPartyName(nameLookup, cancellationToken);
 }
 
 internal static class TestPartyNameRegistryExtensions

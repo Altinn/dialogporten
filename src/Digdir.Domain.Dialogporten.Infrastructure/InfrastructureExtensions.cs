@@ -180,7 +180,6 @@ public static class InfrastructureExtensions
         services.AddFusionCacheStackExchangeRedisBackplane(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
 
         // Party/person/org display names from Altinn Name Registry (slow-moving). Keyed per looked-up id.
-        // FactoryHardTimeout must exceed the system-user retry loop: 3x delays (500+1000+2000ms) + 4 HTTP calls.
         services.ConfigureFusionCache(nameof(Altinn.NameRegistry), new()
         {
             Duration = TimeSpan.FromHours(24),

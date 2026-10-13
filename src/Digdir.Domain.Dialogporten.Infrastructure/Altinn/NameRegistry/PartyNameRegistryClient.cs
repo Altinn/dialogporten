@@ -57,11 +57,21 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return nameFromRegister;
     }
 
-    public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken) =>
-        await _cache.GetOrSetAsync<string?>(
-            GetCacheKey(externalIdWithPrefix),
-            GetNameFactory(externalIdWithPrefix),
-            token: cancellationToken);
+    public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _cache.GetOrSetAsync<string?>(
+                GetCacheKey(externalIdWithPrefix),
+                GetNameFactory(externalIdWithPrefix),
+                token: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{Factory} failed with Exception: {Exception}", nameof(GetNameFactory), e);
+            return null;
+        }
+    }
 
     private Func<FusionCacheFactoryExecutionContext<string?>, CancellationToken, Task<string?>> GetNameFactory(
         string externalIdWithPrefix
@@ -102,35 +112,12 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return name;
         if (!TryCreateNameLookup(partyIdentifier, out var nameLookup)) return null;
 
-        return await GetNameFromRegister(partyIdentifier, nameLookup, ct);
-    }
-
-    private async Task<string?> GetNameFromRegister(
-        IPartyIdentifier partyIdentifier,
-        NameLookup nameLookup,
-        CancellationToken ct
-    )
-    {
-        var nameLookupResult = await PerformPartyNameRequest(nameLookup, ct);
-        if (nameLookupResult is null) return null;
-
-        var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);
-
-        if (name is null)
-        {
-            _logger.LogWarning(
-                "Search in party name registry returned no results for external id {ExternalId}. Response: {@Response}",
-                partyIdentifier.FullId,
-                nameLookupResult
-            );
-        }
-
-        return name;
+        return await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, ct);
     }
 
     private async Task<string> GetNameFromRegisterOrFail(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)
     {
-        var nameLookupResult = await _partyNameRegistryTransport.QueryPartyName(nameLookup, ct);
+        var nameLookupResult = await PerformPartyNameRequest(nameLookup, ct);
         var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);
 
         if (name is not null) return name;
@@ -191,45 +178,20 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return name is not null;
     }
 
-    private async Task<NameLookupResult?> PerformPartyNameRequest(
+    private async Task<NameLookupResult> PerformPartyNameRequest(
         NameLookup nameLookup,
         CancellationToken cancellationToken
     )
     {
-        try
-        {
-            var response = await _partyNameRegistryTransport.QueryPartyNameResponse(nameLookup, cancellationToken);
+        var response = await _partyNameRegistryTransport.QueryPartyNameResponse(nameLookup, cancellationToken);
+        response.EnsureSuccessStatusCode();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError(
-                    "Failed POST {ApiUrl} with: {RequestBody}. Status code: {StatusCode}. ResponseBody: {ResponseBody}",
-                    PartyNameRegistryTransport.QueryPartiesUrl,
-                    nameLookup,
-                    response.StatusCode,
-                    await response.Content.ReadAsStringAsync(cancellationToken)
-                );
-
-                return null;
-            }
-
-            return await response
-                       .Content
-                       .ReadFromJsonAsync<NameLookupResult>(cancellationToken)
-                   ?? throw new JsonException(
-                       $"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}"
-                    );
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(
-                "Failed POST {ApiUrl} with: {RequestBody}. {Exception}",
-                PartyNameRegistryTransport.QueryPartiesUrl,
-                nameLookup,
-                e
-            );
-            return null;
-        }
+        return await response
+                   .Content
+                   .ReadFromJsonAsync<NameLookupResult>(cancellationToken)
+               ?? throw new JsonException(
+                   $"Failed to deserialize JSON to type {typeof(NameLookupResult).FullName} from {PartyNameRegistryTransport.QueryPartiesUrl}"
+               );
     }
 
     private string FlipNameIfPerson(IPartyIdentifier partyIdentifier, string name)

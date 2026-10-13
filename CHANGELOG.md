@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.124.0](https://github.com/Altinn/dialogporten/compare/v1.123.0...v1.124.0) (2026-10-13)
+
+
+### Features
+
+* Return conflicts in 409 problem details ([#4454](https://github.com/Altinn/dialogporten/issues/4454)) ([9aef2b4](https://github.com/Altinn/dialogporten/commit/9aef2b47ac18885b64b73416cc3246bb3d7fc5f5))
+
+
+### Bug Fixes
+
+* replace AutoMapper with static mappers ([#4412](https://github.com/Altinn/dialogporten/issues/4412)) ([b39669d](https://github.com/Altinn/dialogporten/commit/b39669de659ab247180bdbcfe98d730ce26957c7))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency azure.storage.blobs to 12.30.0 ([#4476](https://github.com/Altinn/dialogporten/issues/4476)) ([01a6a57](https://github.com/Altinn/dialogporten/commit/01a6a575dbf2d8afb3f671e73334896739a6d691))
+* **deps:** update dependency messagepack to 3.1.11 ([#4475](https://github.com/Altinn/dialogporten/issues/4475)) ([791e662](https://github.com/Altinn/dialogporten/commit/791e662a4ff4a5dc329d669159380bdc8640a1d7))
+* **deps:** update dependency polly to 8.8.0 ([#4465](https://github.com/Altinn/dialogporten/issues/4465)) ([fb83077](https://github.com/Altinn/dialogporten/commit/fb83077be5f78bd36627e0c679846e03e0172d7e))
+* **deps:** update dependency scalar.aspnetcore to 2.17.13 ([#4477](https://github.com/Altinn/dialogporten/issues/4477)) ([221352d](https://github.com/Altinn/dialogporten/commit/221352d3ab00666944d3a671202ae3cdd282ff22))
+* **deps:** update dependency testcontainers.postgresql to 4.15.0 ([#4478](https://github.com/Altinn/dialogporten/issues/4478)) ([978b6fc](https://github.com/Altinn/dialogporten/commit/978b6fc1dbe8564da427510d75b8e5a056ba2b66))
+* **e2e:** skip container check when DB/Redis are already reachable ([#4469](https://github.com/Altinn/dialogporten/issues/4469)) ([1eb4fbb](https://github.com/Altinn/dialogporten/commit/1eb4fbbc91d0f9c8248160cbc0fc03306e83aa8e))
+* migrate to Altinn.AspNet.HealthChecks ([#4326](https://github.com/Altinn/dialogporten/issues/4326)) ([a02d3bf](https://github.com/Altinn/dialogporten/commit/a02d3bf396d4ec56cffcfa0c7400bdca4262c6b2))
+* **webapi:** send feature metrics to a dedicated OTLP endpoint on DIS ([#4432](https://github.com/Altinn/dialogporten/issues/4432)) ([11b08d2](https://github.com/Altinn/dialogporten/commit/11b08d2f78e1844e47fdcb77a63c62f15efcd44e))
+
 ## [1.123.0](https://github.com/Altinn/dialogporten/compare/v1.122.0...v1.123.0) (2026-10-06)
 
 

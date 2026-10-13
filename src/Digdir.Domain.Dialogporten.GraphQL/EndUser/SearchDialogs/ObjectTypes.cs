@@ -134,8 +134,8 @@ public sealed class SearchDialog
     [GraphQLDescription("The latest entry in the dialog's activity log.")]
     public Activity? LatestActivity { get; set; }
 
-    [GraphQLDescription("The content of the dialog in search results.")]
-    public SearchContent Content { get; set; } = null!;
+    [GraphQLDescription("The content of the dialog in search results. May be null for API-only dialogs.")]
+    public SearchContent? Content { get; set; }
 
     [GraphQLDescription("The list of seen log entries for the dialog newer than the dialog UpdatedAt date.")]
     public List<SeenLog> SeenSinceLastUpdate { get; set; } = [];

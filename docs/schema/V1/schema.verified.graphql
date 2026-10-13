@@ -518,8 +518,8 @@ type SearchDialog {
   fromPartyTransmissionsCount: Int!
   "The latest entry in the dialog's activity log."
   latestActivity: Activity
-  "The content of the dialog in search results."
-  content: SearchContent!
+  "The content of the dialog in search results. May be null for API-only dialogs."
+  content: SearchContent
   "The list of seen log entries for the dialog newer than the dialog UpdatedAt date."
   seenSinceLastUpdate: [SeenLog!]!
   "The list of seen log entries for the dialog newer than the dialog ContentUpdatedAt date."

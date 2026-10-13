@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.124.1](https://github.com/Altinn/dialogporten/compare/v1.124.0...v1.124.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* **graphql:** map absent localization lists to empty lists ([#4484](https://github.com/Altinn/dialogporten/issues/4484)) ([5ee04dd](https://github.com/Altinn/dialogporten/commit/5ee04ddf350ca520b541043c1d21d5a9a627a16b))
+
 ## [1.124.0](https://github.com/Altinn/dialogporten/compare/v1.123.0...v1.124.0) (2026-10-13)
 
 

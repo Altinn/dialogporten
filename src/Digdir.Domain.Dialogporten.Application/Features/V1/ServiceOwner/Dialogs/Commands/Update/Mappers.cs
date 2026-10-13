@@ -305,9 +305,6 @@ public static class Mappers
             SunsetAt = source.SunsetAt
         };
 
-    private static DialogStatusInput ToDialogStatusInput(this DialogStatus.Values source) =>
-        (DialogStatusInput)source;
-
     private static ContentValueDto? Copy(this ContentValueDto? source) =>
         source is null
             ? null

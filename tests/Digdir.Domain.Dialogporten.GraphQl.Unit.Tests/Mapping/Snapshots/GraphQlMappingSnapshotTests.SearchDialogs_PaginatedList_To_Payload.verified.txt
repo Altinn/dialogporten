@@ -318,5 +318,10 @@
     }
   ],
   HasNextPage: true,
-  ContinuationToken: continuation-token
+  ContinuationToken: continuation-token,
+  OrderBy: [
+    {
+      CreatedAt: Desc
+    }
+  ]
 }

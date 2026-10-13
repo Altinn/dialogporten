@@ -125,6 +125,27 @@ public sealed class GraphQlMappingEdgeCaseTests
         return Verify(result).UseParameters(empty).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
+    [Fact]
+    public void Dialog_Null_Localization_Lists_Map_To_Empty_Lists()
+    {
+        // The application layer maps an absent optional localization set to null even though these DTO
+        // properties are declared non-nullable, so the nulls are set explicitly here.
+        var source = ObjectFiller.Fill<Get.DialogDto>();
+        source.Activities.First().Description = null!;
+        source.Attachments.First().DisplayName = null!;
+        source.GuiActions.First().Title = null!;
+        source.Transmissions.First().Attachments.First().DisplayName = null!;
+        source.Transmissions.First().NavigationalActions.First().Title = null!;
+
+        var result = Model.DialogByIdMapExtensions.ToDialog(source);
+
+        result.Activities.First().Description.Should().BeEmpty();
+        result.Attachments.First().DisplayName.Should().BeEmpty();
+        result.GuiActions.First().Title.Should().BeEmpty();
+        result.Transmissions.First().Attachments.First().DisplayName.Should().BeEmpty();
+        result.Transmissions.First().NavigationalActions.First().Title.Should().BeEmpty();
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

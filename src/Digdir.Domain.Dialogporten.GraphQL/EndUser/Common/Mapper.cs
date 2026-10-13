@@ -6,8 +6,8 @@ namespace Digdir.Domain.Dialogporten.GraphQL.EndUser.Common;
 
 internal static class CommonMapExtensions
 {
-    public static List<Localization> ToGraphQlLocalizations(this List<LocalizationDto> source) =>
-        source.Select(ToGraphQlLocalization).ToList();
+    public static List<Localization> ToGraphQlLocalizations(this List<LocalizationDto>? source) =>
+        source?.Select(ToGraphQlLocalization).ToList() ?? [];
 
     public static Localization ToGraphQlLocalization(this LocalizationDto source) => new()
     {

@@ -64,7 +64,7 @@ public sealed class DuplicateActorNameConflictTests(DialogApplication applicatio
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public async Task Save_Recovers_When_Save_ActorName_Races_When_Party_Name_Registry_Is_Down(string failHow)
+    public async Task Save_Recovers_When_Save_ActorName_Races_When_Party_Name_Registry_Is_Down_And_Recovers_Later(string failHow)
     {
         var actorId = "urn:altinn:person:identifier-no:09095614407";
 
@@ -104,7 +104,7 @@ public sealed class DuplicateActorNameConflictTests(DialogApplication applicatio
             })
             .AssertResult<CreateActivitySuccess>()
             .GetActivity()
-            .ExecuteAndAssert<ActivityDto>((result, ctx) =>
+            .AssertResult<ActivityDto>((result, ctx) =>
             {
                 var interceptor = ctx.Application
                     .GetServiceProvider()
@@ -115,6 +115,21 @@ public sealed class DuplicateActorNameConflictTests(DialogApplication applicatio
                 interceptor.HasRaced.Should().Be(true);
                 result.PerformedBy.ActorId.Should().Be(actorId);
                 result.PerformedBy.ActorName.Should().Be(null);
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetActivity()
+            .ExecuteAndAssert<ActivityDto>((result, ctx) =>
+            {
+                var interceptor = ctx.Application
+                    .GetServiceProvider()
+                    .GetServices<ISaveChangesTestInterceptor>()
+                    .OfType<ProvokeActorNameRaceConditionSaveInterceptor>()
+                    .Single();
+
+                interceptor.HasRaced.Should().Be(true);
+                result.PerformedBy.ActorId.Should().Be(actorId);
+                result.PerformedBy.ActorName.Should().Be("Brando Sando");
             });
     }
 }

@@ -84,12 +84,6 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 
 public static class IFlowStepExtensions
 {
-    private const string DialogIdKey = "DialogId";
-    private const string TransmissionIdKey = "TransmissionId";
-    private const string PartyKey = "Party";
-    private const string ActivityIdKey = "ActivityId";
-    private const string ServiceResource = "ServiceResource";
-
     public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)
     {

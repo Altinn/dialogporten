@@ -16,9 +16,19 @@ public sealed class ResyncActorName(
 {
     public async Task Handle(ResyncActorNameEvent resyncActorNameEvent, CancellationToken cancellationToken)
     {
+        var actorNameId = resyncActorNameEvent.ActorNameId;
         var outdatedActorNameEntitiy = await db.ActorName
             .Include(x => x.ActorEntities)
-            .FirstAsync(x => x.Id == resyncActorNameEvent.ActorNameId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == actorNameId, cancellationToken);
+
+        if (outdatedActorNameEntitiy == null)
+        {
+            logger.LogWarning(
+                "No ActorName with Id {Id}. This probably means a new ActorName conflicted on insert and was created with another id",
+                actorNameId
+            );
+            return;
+        }
 
         var actorId = outdatedActorNameEntitiy.ActorId;
         if (actorId == null) return;

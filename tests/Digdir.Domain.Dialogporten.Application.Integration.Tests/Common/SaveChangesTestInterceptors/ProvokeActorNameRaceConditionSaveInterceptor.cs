@@ -1,6 +1,15 @@
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Tool.Dialogporten.GenerateFakeData;
+using MassTransit.Mediator;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.SaveChangesTestInterceptors;
@@ -10,19 +19,13 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.SaveCh
 /// </summary>
 internal sealed class ProvokeActorNameRaceConditionSaveInterceptor : SaveChangesInterceptor, ISaveChangesTestInterceptor
 {
-    private const string InsertActorNameSql =
-        """
-        INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt")
-        VALUES (@id, @actorId, @name, @createdAt)
-        """;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private bool _enabled = true;
 
-    private readonly NpgsqlDataSource _dataSource;
-
-    public ProvokeActorNameRaceConditionSaveInterceptor(NpgsqlDataSource dataSource)
+    public ProvokeActorNameRaceConditionSaveInterceptor(IServiceScopeFactory scopeFactory)
     {
-        ArgumentNullException.ThrowIfNull(dataSource);
-
-        _dataSource = dataSource;
+        ArgumentNullException.ThrowIfNull(scopeFactory);
+        _scopeFactory = scopeFactory;
     }
 
     public bool HasRaced { get; private set; }
@@ -32,7 +35,7 @@ internal sealed class ProvokeActorNameRaceConditionSaveInterceptor : SaveChanges
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        if (HasRaced || eventData.Context is null)
+        if (!_enabled || HasRaced || eventData.Context is null)
         {
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
@@ -48,33 +51,50 @@ internal sealed class ProvokeActorNameRaceConditionSaveInterceptor : SaveChanges
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        foreach (var pendingActorName in pendingActorNames)
-        {
-            await InsertActorName(pendingActorName.ActorId!, pendingActorName.Name, cancellationToken);
-        }
+        await InsertActorNames(pendingActorNames, cancellationToken);
 
         HasRaced = true;
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private async Task InsertActorName(string actorId, string? name, CancellationToken cancellationToken)
+    private async Task InsertActorNames(List<ActorName> actorName, CancellationToken cancellationToken)
     {
-        var id = Guid.CreateVersion7();
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
+        var interceptorForOtherUser = scope.ServiceProvider
+            .GetServices<ISaveChangesTestInterceptor>()
+            .OfType<ProvokeActorNameRaceConditionSaveInterceptor>()
+            .Single();
 
-        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        await using var command = connection.CreateCommand();
-        command.CommandText = InsertActorNameSql;
-        command.Parameters.AddWithValue("id", id);
-        command.Parameters.AddWithValue("actorId", actorId);
-        if (name is null)
+        interceptorForOtherUser._enabled = false;
+        await mediator.Send(new CreateDialogCommand
         {
-            command.Parameters.AddWithValue("name", DBNull.Value);
-        }
-        else
-        {
-            command.Parameters.AddWithValue("name", name);
-        }
-        command.Parameters.AddWithValue("createdAt", DateTimeOffset.UtcNow);
-        await command.ExecuteNonQueryAsync(cancellationToken);
+            IsSilentUpdate = false,
+            Dto = DialogGenerator.GenerateFakeDialog(
+                party: NorwegianPersonIdentifier.PrefixWithSeparator + "04087647795",
+                activities: actorName.Select(x => new ActivityDto
+                {
+                    Id = null,
+                    CreatedAt = null,
+                    ExtendedType = null,
+                    Type = DialogActivityType.Values.Information,
+                    TransmissionId = null,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorId = x.ActorId,
+                        ActorName = x.Name
+                    },
+                    Description =
+                    [
+                        new LocalizationDto
+                        {
+                            Value = $"By {nameof(ProvokeActorNameRaceConditionSaveInterceptor)} to provoke a race",
+                            LanguageCode = "nb"
+                        }
+                    ]
+                }).ToList()
+            )
+        }, cancellationToken);
     }
 }

@@ -105,6 +105,94 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
         updatedDialog.EndUserContext.SystemLabels.FirstOrDefault().Should().Be(expectedSystemLabel);
     }
 
+    public sealed record SystemLabelResetScenario(
+        string DisplayName,
+        Action<UpdateDialogCommand> UpdateDialog) : IClassDataBase
+    {
+        public override string ToString() => DisplayName;
+    }
+
+    private sealed class NonContentUpdateScenarioTestData : TheoryData<SystemLabelResetScenario>
+    {
+        public NonContentUpdateScenarioTestData()
+        {
+            Add(new SystemLabelResetScenario(DisplayName: "external reference changes",
+                UpdateDialog: x => x.Dto.ExternalReference = "I've been updated!"));
+            Add(new SystemLabelResetScenario(DisplayName: "process changes",
+                UpdateDialog: x => x.Dto.Process = "urn:test:process:updated"));
+            Add(new SystemLabelResetScenario(DisplayName: "due at changes",
+                UpdateDialog: x => x.Dto.DueAt = DateTimeOffset.UtcNow.AddDays(5)));
+            Add(new SystemLabelResetScenario(DisplayName: "progress changes",
+                UpdateDialog: x => x.Dto.Progress = 42));
+            Add(new SystemLabelResetScenario(DisplayName: "search tags are added",
+                UpdateDialog: x => x.Dto.SearchTags.Add(new() { Value = "crouching tiger, hidden update" })));
+        }
+    }
+
+    private sealed class ContentUpdateScenarioTestData : TheoryData<SystemLabelResetScenario>
+    {
+        public ContentUpdateScenarioTestData()
+        {
+            Add(new SystemLabelResetScenario(DisplayName: "dialog content is updated",
+                UpdateDialog: x => x.ChangeTitle()));
+            Add(new SystemLabelResetScenario(DisplayName: "attachments are added",
+                UpdateDialog: x => x.AddAttachment()));
+            Add(new SystemLabelResetScenario(DisplayName: "transmissions are added",
+                UpdateDialog: x => x.AddTransmission()));
+            Add(new SystemLabelResetScenario(DisplayName: "GUI actions are added",
+                UpdateDialog: x => x.AddGuiAction()));
+            Add(new SystemLabelResetScenario(DisplayName: "API actions are added",
+                UpdateDialog: x => x.AddApiAction()));
+            Add(new SystemLabelResetScenario(DisplayName: "status changes",
+                UpdateDialog: x => x.Dto.Status = DialogStatusInput.InProgress));
+            Add(new SystemLabelResetScenario(DisplayName: "extended status changes",
+                UpdateDialog: x => x.Dto.ExtendedStatus = "new extended status"));
+        }
+    }
+
+    [Theory, ClassData(typeof(NonContentUpdateScenarioTestData))]
+    public Task UpdateDialogCommand_Should_Keep_SystemLabel_When_Only_NonContent_Fields_Change(
+        SystemLabelResetScenario scenario) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Bin)
+            .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Values.Bin);
+                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.Default);
+            });
+
+    [Theory, ClassData(typeof(ContentUpdateScenarioTestData))]
+    public Task UpdateDialogCommand_Should_Move_To_Default_When_Content_Changes(
+        SystemLabelResetScenario scenario) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Archive)
+            .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Values.Default);
+                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.Archive);
+            });
+
+    [Theory, ClassData(typeof(ContentUpdateScenarioTestData))]
+    public Task UpdateDialogCommand_Should_Keep_SystemLabel_On_Content_Change_When_Silent(
+        SystemLabelResetScenario scenario) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Archive)
+            .AssertSuccessAndUpdateDialog(x =>
+            {
+                scenario.UpdateDialog(x);
+                x.IsSilentUpdate = true;
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Values.Archive);
+                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.Default);
+            });
+
     [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_UpdatedAt_If_IsSilentUpdate_Is_Set()
     {

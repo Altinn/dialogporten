@@ -176,7 +176,13 @@ public sealed class DialogEntity :
         }
     }
 
-    private static bool ContentHasChanged(AggregateNode self)
+    /// <summary>
+    /// Determines whether a change to the dialog aggregate counts as a content change.
+    /// This is the single source of truth for when <see cref="ContentUpdatedAt"/> is bumped,
+    /// and must be reused by any caller that needs the same decision (e.g. resetting end user
+    /// system labels) so the two rules cannot drift apart.
+    /// </summary>
+    public static bool ContentHasChanged(AggregateNode self)
     {
         var childrenChanged = self.Children.Any(x =>
             x.Entity is

@@ -1,9 +1,12 @@
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
+using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
@@ -56,6 +59,55 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
             });
 
 
+
+    [Fact]
+    public Task CreateTransmission_Moves_Archived_Dialog_To_Default() =>
+        // Adding a transmission is always a content change, so a non-silent create
+        // must move an archived dialog back to Default.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Archive)
+            .AssertResult<CreateDialogSuccess>()
+            .CreateTransmission()
+            .AssertResult<CreateTransmissionSuccess>()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Values.Default);
+                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.Archive);
+            });
+
+    [Fact]
+    public Task CreateTransmission_Keeps_SystemLabel_When_Silent() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Archive)
+            .AssertResult<CreateDialogSuccess>()
+            .SendCommand(ctx => new CreateTransmissionCommand
+            {
+                DialogId = ctx.GetDialogId(),
+                IsSilentUpdate = true,
+                Transmissions =
+                [
+                    new CreateTransmissionDto
+                    {
+                        Type = DialogTransmissionType.Values.Information,
+                        Sender = new() { ActorType = ActorType.Values.ServiceOwner },
+                        Content = new()
+                        {
+                            Title = new ContentValueDto
+                            {
+                                Value = [new LocalizationDto { LanguageCode = "nb", Value = "Ny melding" }]
+                            }
+                        }
+                    }
+                ]
+            })
+            .AssertResult<CreateTransmissionSuccess>()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.EndUserContext.SystemLabels.Should().Contain(SystemLabel.Values.Archive);
+                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.Default);
+            });
 
     [Fact]
     public async Task Cannot_Use_Existing_Transmission_IdempotentKey_When_Updating_Dialog()

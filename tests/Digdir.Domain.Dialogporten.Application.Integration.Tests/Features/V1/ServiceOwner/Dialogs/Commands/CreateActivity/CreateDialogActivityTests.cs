@@ -115,8 +115,10 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     }
 
     [Fact]
-    public Task Create_Activity_Always_Restores_Dialog_System_Label()
+    public Task Create_Activity_Does_Not_Reset_Dialog_System_Label()
     {
+        // Activities don't count as a content change, so they must not move an
+        // archived/binned dialog back to Default.
         return FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Bin)
             .AssertResult<CreateDialogSuccess>()
@@ -124,7 +126,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 {
-                    x.EndUserContext.SystemLabels.Should().BeEquivalentTo([SystemLabel.Values.Default]);
+                    x.EndUserContext.SystemLabels.Should().BeEquivalentTo([SystemLabel.Values.Bin]);
                 }
             );
     }

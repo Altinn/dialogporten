@@ -5,14 +5,15 @@ using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 
 /// <summary>
-/// A single (check, party) evaluation unit. <paramref name="ReferenceIndex"/> points into the
+/// A single (check, unit) evaluation. <paramref name="ReferenceIndex"/> points into the
 /// XACML MultiRequests reference list (and thereby the positionally-ordered PDP response).
 /// </summary>
-internal sealed record DecisionRequestTuple(AuthorizationCheck Check, string Party, int ReferenceIndex);
+internal sealed record DecisionRequestTuple(AuthorizationCheck Check, AuthorizationUnit Unit, int ReferenceIndex);
 
 /// <summary>
 /// The XACML request together with the tuple list it was built from. Request construction and
@@ -39,6 +40,10 @@ internal static class DecisionRequestHelper
     private const string AttributeIdResource = "urn:altinn:resource";
     private const string AttributeIdResourceInstance = "urn:altinn:resource:instance-id";
     private const string AttributeIdSubResource = "urn:altinn:subresource";
+
+    // Per-request access restriction (altinn-auth#4292). Absent means "None"; via-party is required for ClientDelegation.
+    private const string AttributeIdAccessRestriction = "urn:altinn:authorization:access-restriction";
+    private const string AttributeIdViaPartyOrganization = "urn:altinn:via-party:organization:identifier-no";
 
     private const string AttributeIdOrg = "urn:altinn:org";
     private const string AttributeIdApp = "urn:altinn:app";
@@ -68,54 +73,61 @@ internal static class DecisionRequestHelper
             rewritablePartyId = $"{PartyIdClaimType}:{partyId}";
         }
 
-        // Expand every check into one evaluation unit per party, deterministically ordered. This ordering
-        // defines the resource/action category numbering and the MultiRequests reference order, which the
-        // (positional) response mapping depends on.
+        // Flatten every check into its evaluation units, deterministically ordered. This ordering defines the
+        // resource/action category numbering and the MultiRequests reference order, which the (positional)
+        // response mapping depends on.
         var expandedTuples = request.Checks
-            .SelectMany(check => check.Parties.Select(party => (Check: check, Party: party)))
+            .SelectMany(check => check.Units.Select(unit => (Check: check, Unit: unit)))
             .Select(x => (
                 x.Check,
-                x.Party,
+                x.Unit,
                 EffectiveParty: rewritablePartyId is not null
-                    && x.Party == (endUserPartyIdentifier ?? throw new UnreachableException(
+                    && x.Unit.Party == (endUserPartyIdentifier ?? throw new UnreachableException(
                         "rewritablePartyId is only ever set when an end-user party identifier is present")).FullId
                     ? rewritablePartyId
-                    : x.Party))
-            .OrderBy(x => x.Check.Action, StringComparer.Ordinal)
-            .ThenBy(x => x.Check.Resource.CanonicalIdentity, StringComparer.Ordinal)
+                    : x.Unit.Party))
+            .OrderBy(x => x.Unit.Action, StringComparer.Ordinal)
+            .ThenBy(x => x.Unit.Resource.CanonicalIdentity, StringComparer.Ordinal)
             .ThenBy(x => x.EffectiveParty, StringComparer.Ordinal)
+            .ThenBy(x => x.Unit.AccessRestriction)
+            .ThenBy(x => x.Unit.ViaParty, StringComparer.Ordinal)
             .ToList();
 
         var accessSubject = CreateAccessSubjectCategory(request.ClaimsPrincipal.Claims);
 
         var actionIdByName = new Dictionary<string, string>(StringComparer.Ordinal);
         var actionCategories = new List<XacmlJsonCategory>();
-        var resourceIdByKey = new Dictionary<(AuthorizationResourceSpec Spec, string EffectiveParty), string>();
+        // The access restriction and via-party are resource attributes, so they are part of the resource category
+        // identity: the same resource and party under different restrictions are different PDP requests.
+        var resourceIdByKey = new Dictionary<(AuthorizationResourceSpec Spec, string EffectiveParty,
+            AuthorizationAccessRestriction AccessRestriction, string? ViaParty), string>();
         var resourceCategories = new List<XacmlJsonCategory>();
         var referenceIndexByIds = new Dictionary<(string ResourceId, string ActionId), int>();
         var references = new List<XacmlJsonRequestReference>();
         var tuples = new List<DecisionRequestTuple>(expandedTuples.Count);
 
-        foreach (var (check, party, effectiveParty) in expandedTuples)
+        foreach (var (check, unit, effectiveParty) in expandedTuples)
         {
-            if (!actionIdByName.TryGetValue(check.Action, out var actionId))
+            if (!actionIdByName.TryGetValue(unit.Action, out var actionId))
             {
                 actionId = $"a{actionIdByName.Count + 1}";
-                actionIdByName.Add(check.Action, actionId);
+                actionIdByName.Add(unit.Action, actionId);
                 actionCategories.Add(new XacmlJsonCategory
                 {
                     Id = actionId,
-                    Attribute = [new() { AttributeId = AttributeIdAction, Value = check.Action }]
+                    Attribute = [new() { AttributeId = AttributeIdAction, Value = unit.Action }]
                 });
             }
 
-            var resourceKey = (check.Resource, effectiveParty);
+            var resourceKey = (unit.Resource, effectiveParty, unit.AccessRestriction, unit.ViaParty);
             if (!resourceIdByKey.TryGetValue(resourceKey, out var resourceId))
             {
                 resourceId = $"r{resourceIdByKey.Count + 1}";
                 resourceIdByKey.Add(resourceKey, resourceId);
-                resourceCategories.Add(CreateResourceCategory(
-                    resourceId, request.ServiceResource, request.InstanceRef, GetPartyAttribute(effectiveParty), check.Resource));
+                var resourceCategory = CreateResourceCategory(
+                    resourceId, request.ServiceResource, request.InstanceRef, GetPartyAttribute(effectiveParty), unit.Resource);
+                resourceCategory.Attribute.AddRange(GetAccessRestrictionAttributes(unit));
+                resourceCategories.Add(resourceCategory);
             }
 
             // Identical (resource, action) pairs collapse to a single PDP request; all tuples sharing
@@ -130,7 +142,7 @@ internal static class DecisionRequestHelper
                 });
             }
 
-            tuples.Add(new DecisionRequestTuple(check, party, referenceIndex));
+            tuples.Add(new DecisionRequestTuple(check, unit, referenceIndex));
         }
 
         var xacmlJsonRequest = new XacmlJsonRequest
@@ -166,7 +178,7 @@ internal static class DecisionRequestHelper
             .GroupBy(tuple => tuple.Check)
             .Select(group => new AuthorizedCheck(
                 group.Key,
-                group.Select(tuple => tuple.Party).Distinct(StringComparer.Ordinal).ToList()))
+                group.Select(tuple => tuple.Unit).Distinct().ToList()))
             .ToList();
 
         return new DialogDetailsAuthorizationResult
@@ -363,6 +375,33 @@ internal static class DecisionRequestHelper
             ? (AttributeIdApp, string.Join('_', parts[2..]), parts[1])
             : (AttributeIdApp, value, null);
     }
+
+    // Nothing is added for None, keeping the wire format of unrestricted requests unchanged. Note that a PDP
+    // without support for these attributes ignores them and evaluates the request as unrestricted; restricted
+    // checks must therefore only be used against a PDP that supports them.
+    private static List<XacmlJsonAttribute> GetAccessRestrictionAttributes(AuthorizationUnit unit) => unit.AccessRestriction switch
+    {
+        AuthorizationAccessRestriction.None => [],
+        AuthorizationAccessRestriction.DirectAndHierarchy =>
+        [
+            new() { AttributeId = AttributeIdAccessRestriction, Value = nameof(AuthorizationAccessRestriction.DirectAndHierarchy) }
+        ],
+        AuthorizationAccessRestriction.ClientDelegation =>
+        [
+            new() { AttributeId = AttributeIdAccessRestriction, Value = nameof(AuthorizationAccessRestriction.ClientDelegation) },
+            // Write-side validation guarantees an organization identifier. Should anything else get through, the
+            // via-party attribute is left out, which the PDP answers with Indeterminate (a deny).
+            .. GetViaPartyOrganizationAttribute(unit.ViaParty)
+        ],
+        _ => throw new UnreachableException($"Unknown access restriction '{unit.AccessRestriction}'.")
+    };
+
+    private static List<XacmlJsonAttribute> GetViaPartyOrganizationAttribute(string? viaParty) =>
+        viaParty is not null
+        && PartyIdentifier.TryParse(viaParty, out var identifier)
+        && identifier is NorwegianOrganizationIdentifier organization
+            ? [new() { AttributeId = AttributeIdViaPartyOrganization, Value = organization.Id }]
+            : [];
 
     private static XacmlJsonAttribute? GetPartyAttribute(string party)
     {

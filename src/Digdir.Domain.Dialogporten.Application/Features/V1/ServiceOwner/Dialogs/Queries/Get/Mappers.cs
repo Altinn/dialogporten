@@ -364,7 +364,13 @@ internal static class AuthorizationContextMapExtensions
                 ServiceResource = source.ServiceResource,
                 AdditionalResourceAttribute = source.AdditionalResourceAttribute,
                 Parties = [.. source.Parties],
-                IncludeDialogParty = source.IncludeDialogParty,
+                DialogPartyChecks = [.. source.DialogPartyChecks.Select(x => new DialogPartyCheckDto
+                {
+                    AccessRestriction = x.AccessRestriction,
+                    ViaParty = x.ViaParty,
+                    ServiceResource = x.ServiceResource,
+                    Action = x.Action
+                })],
                 Action = source.Action,
                 TokenRef = source.TokenReference,
                 UnauthorizedPresentation = source.UnauthorizedPresentation

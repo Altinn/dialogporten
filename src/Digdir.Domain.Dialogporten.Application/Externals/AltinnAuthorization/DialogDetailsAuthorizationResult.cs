@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 public sealed class DialogDetailsAuthorizationResult
 {
     /// <summary>
-    /// The authorized checks, each carrying the subset of its parties the PDP permitted.
+    /// The authorized checks, each carrying the subset of its units the PDP permitted.
     /// A check applies to the main resource, a legacy authorization attribute
     /// (e.g. "urn:altinn:subresource:some-sub-resource", "urn:altinn:task:task_1" or
     /// "urn:altinn:resource:some-other-resource"), or an explicit authorization context.
@@ -30,7 +30,7 @@ public sealed class DialogDetailsAuthorizationResult
 
     /// <summary>
     /// Whether the given check (built by <see cref="AuthorizationCheckBuilder"/> from the same entity/dialog
-    /// pair as the request) was authorized for at least one of its parties.
+    /// pair as the request) was authorized for at least one of its units.
     /// </summary>
     public bool HasAccess(AuthorizationCheck check) =>
         GetIndex().AuthorizedByCheck.ContainsKey(check);
@@ -69,18 +69,24 @@ public sealed class DialogDetailsAuthorizationResult
 
             foreach (var authorizedCheck in authorizedChecks)
             {
-                var check = authorizedCheck.Check;
-                AuthorizedByCheck.TryAdd(check, authorizedCheck);
-                switch (check.Resource)
+                AuthorizedByCheck.TryAdd(authorizedCheck.Check, authorizedCheck);
+
+                // Main and legacy checks are single, unrestricted units. The restriction guard is
+                // defense-in-depth: a restricted grant must never answer an unrestricted question.
+                foreach (var unit in authorizedCheck.PermittedUnits
+                             .Where(x => x.AccessRestriction is AuthorizationAccessRestriction.None))
                 {
-                    case { Kind: AuthorizationResourceSpecKind.Main }:
-                        MainResourceActions.Add(check.Action);
-                        break;
-                    case { Kind: AuthorizationResourceSpecKind.Legacy, LegacyAuthorizationAttribute: { } attribute }:
-                        LegacyAttributeActions.Add((check.Action, attribute));
-                        break;
-                    default:
-                        break;
+                    switch (unit.Resource)
+                    {
+                        case { Kind: AuthorizationResourceSpecKind.Main }:
+                            MainResourceActions.Add(unit.Action);
+                            break;
+                        case { Kind: AuthorizationResourceSpecKind.Legacy, LegacyAuthorizationAttribute: { } attribute }:
+                            LegacyAttributeActions.Add((unit.Action, attribute));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

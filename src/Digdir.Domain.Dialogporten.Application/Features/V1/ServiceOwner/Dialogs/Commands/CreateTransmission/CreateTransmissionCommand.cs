@@ -138,6 +138,8 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             return forbidden;
         }
 
+        _domainContext.AddErrors(dialog.ValidateAuthorizationContexts());
+
         if (!request.IsSilentUpdate)
         {
             _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);

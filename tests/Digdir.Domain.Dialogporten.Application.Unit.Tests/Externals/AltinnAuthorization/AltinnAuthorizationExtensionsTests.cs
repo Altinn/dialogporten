@@ -20,7 +20,7 @@ public class AltinnAuthorizationExtensionsTests
             AuthorizedChecks =
             [
                 AuthorizedCheck.FullyPermitted(new AuthorizationCheck(
-                    Constants.ReadAction, AuthorizationResourceSpec.Main, []))
+                    Constants.ReadAction, AuthorizationResourceSpec.Main, ["urn:altinn:organization:identifier-no:991825827"]))
             ]
         };
         _altinnAuthorization

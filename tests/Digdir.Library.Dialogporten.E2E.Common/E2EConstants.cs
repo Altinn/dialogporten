@@ -99,4 +99,35 @@ public static class E2EConstants
     /// </summary>
     public static readonly string UnrepresentedOrgUrn =
         $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{DefaultServiceOwnerOrgNr}";
+
+    /// <summary>
+    /// Client delegation test data, set up identically in AT23 and TT02 for the access restriction tests:
+    /// <see cref="ClientDelegationAgentSsn"/> holds the access package "regnskapsforer-med-signeringsrettighet" for
+    /// <see cref="ClientDelegationClientOrgNo"/>, client delegated through the accounting firm
+    /// <see cref="ClientDelegationFirmOrgNo"/>, and has no other access to the client. The policy of
+    /// <see cref="DefaultServiceResource"/> grants read to that access package. The delegation is made by the firm's
+    /// daglig leder (08885399984) through the Access Management end user API
+    /// (POST /accessmanagement/api/v2/enduser/clientdelegations/agents, then .../agents/accesspackages), and must be
+    /// redone if the environment is reset. Do not use the firm's clients 213368532/313360210 or agent 14906198453
+    /// instead: Altinn Authorization's own tests depend on those having no agent registered.
+    /// </summary>
+    public const string ClientDelegationFirmOrgNo = "314243994";
+
+    public const string ClientDelegationClientOrgNo = "210142762";
+
+    public const string ClientDelegationAgentSsn = AlternateEndUserSsn;
+
+    /// <summary>
+    /// An accounting/auditing firm that has made no client delegation to <see cref="ClientDelegationAgentSsn"/>.
+    /// </summary>
+    public const string ClientDelegationOtherFirmOrgNo = "310267511";
+
+    public static readonly string ClientDelegationFirmOrgUrn =
+        $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{ClientDelegationFirmOrgNo}";
+
+    public static readonly string ClientDelegationClientOrgUrn =
+        $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{ClientDelegationClientOrgNo}";
+
+    public static readonly string ClientDelegationOtherFirmOrgUrn =
+        $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}{ClientDelegationOtherFirmOrgNo}";
 }

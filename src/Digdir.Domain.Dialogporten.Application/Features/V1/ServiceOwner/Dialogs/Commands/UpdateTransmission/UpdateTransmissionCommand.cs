@@ -41,25 +41,29 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
+    private readonly IDomainContext _domainContext;
 
     public UpdateTransmissionCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
         IUserResourceRegistry userResourceRegistry,
-        ITransmissionHierarchyValidator transmissionHierarchyValidator)
+        ITransmissionHierarchyValidator transmissionHierarchyValidator,
+        IDomainContext domainContext)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(serviceResourceAuthorizer);
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
         ArgumentNullException.ThrowIfNull(transmissionHierarchyValidator);
+        ArgumentNullException.ThrowIfNull(domainContext);
 
         _db = db;
         _unitOfWork = unitOfWork;
         _serviceResourceAuthorizer = serviceResourceAuthorizer;
         _userResourceRegistry = userResourceRegistry;
         _transmissionHierarchyValidator = transmissionHierarchyValidator;
+        _domainContext = domainContext;
     }
 
     public async Task<UpdateTransmissionResult> Handle(UpdateTransmissionCommand request, CancellationToken cancellationToken)
@@ -118,6 +122,8 @@ internal sealed class UpdateTransmissionCommandHandler : IRequestHandler<UpdateT
         {
             return forbidden;
         }
+
+        _domainContext.AddErrors(dialog.ValidateAuthorizationContexts());
 
         var conflict = ValidateIdempotentKeys(dialog, transmission);
         if (conflict is not null)

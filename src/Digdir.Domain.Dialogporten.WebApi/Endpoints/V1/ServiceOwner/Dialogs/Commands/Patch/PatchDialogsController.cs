@@ -46,6 +46,8 @@ public sealed class PatchDialogsController : ControllerBase
     /// Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.
     /// See [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.
     ///
+    /// If the patch changes the dialog's content (transmissions, content, attachments, GUI/API actions, status or extended status), any end user system label of 'Bin' or 'Archive' is reset to 'Default', moving the dialog back to the inbox. Changes to other fields leave the end user's system labels untouched. This reset is suppressed for silent updates.
+    ///
     /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
     /// </remarks>
     /// <response code="204">Patch was successfully applied.</response>

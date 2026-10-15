@@ -66,6 +66,48 @@ public class ServiceResourceAuthorizerTests
         Assert.Contains(UnownedResource, forbidden.Reasons.Single());
     }
 
+    [Theory]
+    [MemberData(nameof(ContextCarriers))]
+    public async Task AuthorizeServiceResources_Should_Forbid_Unowned_Dialog_Party_Check_ServiceResource_On_Any_Carrier(
+        Action<DialogEntity, AuthorizationContext> addCarrier)
+    {
+        var dialog = CreateDialog();
+        addCarrier(dialog, new DialogGuiActionAuthorizationContext
+        {
+            ServiceResource = OwnedResource,
+            DialogPartyChecks =
+            [
+                new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.DirectAndHierarchy },
+                new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.None, ServiceResource = UnownedResource }
+            ]
+        });
+
+        var result = await CreateSut().AuthorizeServiceResources(dialog, CancellationToken.None);
+
+        var forbidden = Assert.IsType<Forbidden>(result.Value);
+        Assert.Contains(UnownedResource, forbidden.Reasons.Single());
+    }
+
+    [Fact]
+    public async Task AuthorizeServiceResources_Should_Allow_Owned_Dialog_Party_Check_ServiceResource()
+    {
+        var dialog = CreateDialog();
+        dialog.Transmissions.Add(new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext
+            {
+                DialogPartyChecks =
+                [
+                    new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.None, ServiceResource = OwnedResource }
+                ]
+            }
+        });
+
+        var result = await CreateSut().AuthorizeServiceResources(dialog, CancellationToken.None);
+
+        Assert.IsType<Success>(result.Value);
+    }
+
     [Fact]
     public async Task AuthorizeServiceResources_Should_Forbid_Resource_Reference_Smuggled_Into_AdditionalResourceAttribute()
     {
@@ -157,7 +199,7 @@ public class ServiceResourceAuthorizerTests
             ServiceResource = source.ServiceResource,
             AdditionalResourceAttribute = source.AdditionalResourceAttribute,
             Parties = source.Parties,
-            IncludeDialogParty = source.IncludeDialogParty,
+            DialogPartyChecks = source.DialogPartyChecks,
             Action = source.Action,
             TokenReference = source.TokenReference
         };

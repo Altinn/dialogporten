@@ -2,6 +2,7 @@ using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
 using FluentValidation;
+using AuthorizationConstants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 
@@ -10,9 +11,7 @@ internal sealed class AuthorizationContextDtoValidator : AbstractValidator<Autho
     public AuthorizationContextDtoValidator()
     {
         RuleFor(x => x.ServiceResource)
-            .IsValidAuthorizationAttribute()
-            .Must(x => x is null || x.StartsWith(Constants.ServiceResourcePrefix, StringComparison.OrdinalIgnoreCase))
-            .WithMessage($"'{{PropertyName}}' must start with '{Constants.ServiceResourcePrefix}'.");
+            .IsValidContextServiceResource();
 
         RuleFor(x => x.AdditionalResourceAttribute)
             .IsValidAuthorizationAttribute()
@@ -31,22 +30,51 @@ internal sealed class AuthorizationContextDtoValidator : AbstractValidator<Autho
             .WithMessage($"'{{PropertyName}}' cannot reference an organization (the '{Constants.OrgResourcePrefix}' namespace); " +
                          "the organization owning the effective resource is derived from the resource itself.");
 
-        RuleFor(x => x.Parties)
-            .Must(x => x.Count <= AuthorizationContext.MaxNumberOfParties)
-            .WithMessage($"'{{PropertyName}}' cannot contain more than {AuthorizationContext.MaxNumberOfParties} parties.");
+        RuleFor(x => x)
+            .Must(x => x.Parties.Count + x.DialogPartyChecks.Count is >= 1 and <= AuthorizationContext.MaxNumberOfEntries)
+            .OverridePropertyName(nameof(AuthorizationContextDto.Parties))
+            .WithMessage($"'{nameof(AuthorizationContextDto.Parties)}' and '{nameof(AuthorizationContextDto.DialogPartyChecks)}' " +
+                         $"must together contain at least 1 and at most {AuthorizationContext.MaxNumberOfEntries} entries.");
 
         RuleFor(x => x.Parties)
             .UniqueBy(x => x);
-
-        RuleFor(x => x.Parties)
-            .NotEmpty()
-            .WithMessage("'{PropertyName}' must contain at least one party when 'IncludeDialogParty' is false.")
-            .When(x => !x.IncludeDialogParty);
 
         RuleForEach(x => x.Parties)
             .NotEmpty()
             .MaximumLength(Constants.DefaultMaxStringLength)
             .IsValidPartyIdentifier();
+
+        // Null entries are rejected here; the aggregate rules below skip them so that they report this failure
+        // instead of throwing.
+        RuleForEach(x => x.DialogPartyChecks)
+            .NotNull()
+            .SetValidator(DialogPartyCheckValidator);
+
+        RuleFor(x => x)
+            .Must(x => x.DialogPartyChecks
+                .OfType<DialogPartyCheckDto>()
+                .Select(check => GetNormalizedIdentity(x, check))
+                .Distinct()
+                .Count() == x.DialogPartyChecks.OfType<DialogPartyCheckDto>().Count())
+            .OverridePropertyName(nameof(AuthorizationContextDto.DialogPartyChecks))
+            .WithMessage($"'{nameof(AuthorizationContextDto.DialogPartyChecks)}' cannot contain duplicate checks " +
+                         "(same access restriction, via party, effective service resource and effective action).");
+
+        // A None check already permits everything a restricted check for the same right would.
+        RuleFor(x => x)
+            .Must(x => !x.DialogPartyChecks
+                .OfType<DialogPartyCheckDto>()
+                .Where(check => check.AccessRestriction
+                    is DialogPartyCheckAccessRestriction.Values.DirectAndHierarchy
+                    or DialogPartyCheckAccessRestriction.Values.ClientDelegation)
+                .Any(check => x.DialogPartyChecks.OfType<DialogPartyCheckDto>().Any(other =>
+                    other.AccessRestriction is DialogPartyCheckAccessRestriction.Values.None
+                    && GetNormalizedRight(x, other) == GetNormalizedRight(x, check))))
+            .OverridePropertyName(nameof(AuthorizationContextDto.DialogPartyChecks))
+            .WithMessage($"'{nameof(AuthorizationContextDto.DialogPartyChecks)}' cannot contain a " +
+                         $"'{DialogPartyCheckAccessRestriction.Values.DirectAndHierarchy}' or " +
+                         $"'{DialogPartyCheckAccessRestriction.Values.ClientDelegation}' check for the same effective service " +
+                         $"resource and action as a '{DialogPartyCheckAccessRestriction.Values.None}' check, which already covers it.");
 
         RuleFor(x => x.Action)
             .NotEmpty()
@@ -64,6 +92,19 @@ internal sealed class AuthorizationContextDtoValidator : AbstractValidator<Autho
                          $"'{AuthorizationContextUnauthorizedPresentation.Values.Disabled}' or " +
                          $"'{AuthorizationContextUnauthorizedPresentation.Values.Excluded}'.");
     }
+
+    private static readonly DialogPartyCheckDtoValidator DialogPartyCheckValidator = new();
+
+    // The dialog's own service resource is deliberately not resolved here: a check explicitly naming it is
+    // rendered without the dialog's instance reference, so it is a different PDP request than one inheriting it.
+    private static (string? ServiceResource, string Action) GetNormalizedRight(
+        AuthorizationContextDto context, DialogPartyCheckDto check) =>
+        (check.ServiceResource ?? context.ServiceResource,
+            check.Action ?? context.Action ?? AuthorizationConstants.ReadAction);
+
+    private static (DialogPartyCheckAccessRestriction.Values, string?, (string?, string)) GetNormalizedIdentity(
+        AuthorizationContextDto context, DialogPartyCheckDto check) =>
+        (check.AccessRestriction, check.ViaParty, GetNormalizedRight(context, check));
 
     // Downstream PDP request construction reinterprets the segment after the last colon as an Altinn app
     // identity whenever it starts with the app id prefix, regardless of the namespace the caller stated (e.g.

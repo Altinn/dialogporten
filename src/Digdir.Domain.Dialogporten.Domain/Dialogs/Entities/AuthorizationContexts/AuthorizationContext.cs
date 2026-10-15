@@ -9,7 +9,10 @@ namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContex
 
 public abstract class AuthorizationContext : IIdentifiableEntity, ICreatableEntity
 {
-    public const int MaxNumberOfParties = 3;
+    /// <summary>
+    /// The maximum number of <see cref="Parties"/> and <see cref="DialogPartyChecks"/> combined.
+    /// </summary>
+    public const int MaxNumberOfEntries = 4;
     public const int MaxTokenReferenceLength = 50;
 
     public Guid Id { get; set; }
@@ -27,14 +30,17 @@ public abstract class AuthorizationContext : IIdentifiableEntity, ICreatableEnti
     public string? AdditionalResourceAttribute { get; set; }
 
     /// <summary>
-    /// The parties to evaluate access for. Access is granted if any party permits.
+    /// Other parties than the dialog's to evaluate access for, without access restriction. Access is granted if
+    /// any party, or any of <see cref="DialogPartyChecks"/>, permits.
     /// </summary>
     public List<string> Parties { get; set; } = [];
 
     /// <summary>
-    /// Whether the dialog's party is included in the evaluation in addition to <see cref="Parties"/>.
+    /// Checks evaluated on behalf of the dialog's own party, each with an access restriction and optionally its
+    /// own service resource and/or action. Access is granted if any check, or any entry in <see cref="Parties"/>,
+    /// permits. Stored as a JSON column.
     /// </summary>
-    public bool IncludeDialogParty { get; set; }
+    public List<DialogPartyCheck> DialogPartyChecks { get; set; } = [];
 
     /// <summary>
     /// The XACML action to evaluate. Optional; null means "read".

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -91,8 +92,40 @@ public static class AuthorizationCheckBuilder
                 [dialogEntity.Party]);
     }
 
-    private static AuthorizationCheck FromContext(AuthorizationContext context, DialogEntity dialogEntity) =>
-        new(context.Action ?? Constants.ReadAction,
-            AuthorizationResourceSpec.FromContext(context.ServiceResource, context.AdditionalResourceAttribute),
-            context.IncludeDialogParty ? context.Parties.Append(dialogEntity.Party) : context.Parties);
+    // Each "parties" entry is evaluated at its own party with the context's right and no access restriction.
+    // Each dialog party check is evaluated at the dialog's party with its own access restriction and its own
+    // right, falling back to the context's: resource -> context's (-> the dialog's, when rendered), action ->
+    // context's -> "read". The context's additional resource attribute is layered on every unit's resource.
+    private static AuthorizationCheck FromContext(AuthorizationContext context, DialogEntity dialogEntity)
+    {
+        var contextAction = context.Action ?? Constants.ReadAction;
+        var contextResource = AuthorizationResourceSpec.FromContext(context.ServiceResource, context.AdditionalResourceAttribute);
+
+        var partyUnits = context.Parties
+            .Select(party => new AuthorizationUnit(contextAction, contextResource, party));
+
+        var dialogPartyUnits = context.DialogPartyChecks
+            .Select(check => new AuthorizationUnit(
+                check.Action ?? contextAction,
+                AuthorizationResourceSpec.FromContext(
+                    check.ServiceResource ?? context.ServiceResource,
+                    context.AdditionalResourceAttribute),
+                dialogEntity.Party,
+                check.AccessRestriction.ToAuthorizationAccessRestriction(),
+                check.ViaParty));
+
+        return new AuthorizationCheck(partyUnits.Concat(dialogPartyUnits));
+    }
+
+    extension(DialogPartyCheckAccessRestriction.Values accessRestriction)
+    {
+        // Never default to None: an unknown restriction must not silently widen access.
+        private AuthorizationAccessRestriction ToAuthorizationAccessRestriction() => accessRestriction switch
+        {
+            DialogPartyCheckAccessRestriction.Values.None => AuthorizationAccessRestriction.None,
+            DialogPartyCheckAccessRestriction.Values.DirectAndHierarchy => AuthorizationAccessRestriction.DirectAndHierarchy,
+            DialogPartyCheckAccessRestriction.Values.ClientDelegation => AuthorizationAccessRestriction.ClientDelegation,
+            _ => throw new UnreachableException($"Unknown dialog party check access restriction '{accessRestriction}'.")
+        };
+    }
 }

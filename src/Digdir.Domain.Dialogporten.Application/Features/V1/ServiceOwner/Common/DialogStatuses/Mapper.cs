@@ -24,4 +24,18 @@ internal static class DialogStatusInputMapExtensions
             (source ?? DialogStatusInput.NotApplicable)
             .ToDialogStatusValue();
     }
+
+    extension(DialogStatus.Values source)
+    {
+        internal DialogStatusInput ToDialogStatusInput() => source switch
+        {
+            DialogStatus.Values.NotApplicable => DialogStatusInput.NotApplicable,
+            DialogStatus.Values.InProgress => DialogStatusInput.InProgress,
+            DialogStatus.Values.Draft => DialogStatusInput.Draft,
+            DialogStatus.Values.Awaiting => DialogStatusInput.Awaiting,
+            DialogStatus.Values.RequiresAttention => DialogStatusInput.RequiresAttention,
+            DialogStatus.Values.Completed => DialogStatusInput.Completed,
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+        };
+    }
 }

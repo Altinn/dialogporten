@@ -93,12 +93,17 @@
             "nullable": true,
             "type": "string"
           },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
+          "dialogPartyChecks": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nChecks evaluated on behalf of the dialog\u0027s own party. Access is granted if any check, or any entry in\n\u0022parties\u0022, permits. Empty when the dialog\u0027s party is not evaluated.",
+            "items": {
+              "$ref": "#/components/schemas/DialogPartyCheck"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "parties": {
-            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "description": "Other parties than the dialog\u0027s that access is evaluated on behalf of, each at its own party and without\naccess restriction. Access is granted if the end user has access to the effective resource for at least\none of the parties, or if any of \u0022dialogPartyChecks\u0022 permits.",
             "example": "urn:altinn:organization:identifier-no:912345678",
             "items": {
               "type": "string"
@@ -146,12 +151,17 @@
             "nullable": true,
             "type": "string"
           },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
+          "dialogPartyChecks": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nChecks evaluated on behalf of the dialog\u0027s own party. Access is granted if any check, or any entry in\n\u0022parties\u0022, permits. Empty when the dialog\u0027s party is not evaluated.",
+            "items": {
+              "$ref": "#/components/schemas/DialogPartyCheckDetails"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "parties": {
-            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "description": "Other parties than the dialog\u0027s that access is evaluated on behalf of, each at its own party and without\naccess restriction. Access is granted if the end user has access to the effective resource for at least\none of the parties, or if any of \u0022dialogPartyChecks\u0022 permits.",
             "example": "urn:altinn:organization:identifier-no:912345678",
             "items": {
               "type": "string"
@@ -199,12 +209,17 @@
             "nullable": true,
             "type": "string"
           },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
+          "dialogPartyChecks": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nChecks evaluated on behalf of the dialog\u0027s own party. Access is granted if any check, or any entry in\n\u0022parties\u0022, permits. An empty list means the dialog\u0027s party is not evaluated. Together with \u0022parties\u0022,\nat least 1 and at most 4 entries.",
+            "items": {
+              "$ref": "#/components/schemas/DialogPartyCheckInput"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "parties": {
-            "description": "The parties to evaluate access on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties. Must contain at least one party unless\n\u0022includeDialogParty\u0022 is true.",
+            "description": "Other parties than the dialog\u0027s to evaluate access on behalf of, each at its own party and without access\nrestriction. Access is granted if the end user has access to the effective resource for at least one of\nthe parties, or if any of \u0022dialogPartyChecks\u0022 permits. Cannot contain the dialog\u0027s own party; use a\n\u0022dialogPartyChecks\u0022 entry with access restriction \u0022None\u0022 for that. Together with \u0022dialogPartyChecks\u0022, at\nleast 1 and at most 4 entries.",
             "example": "urn:altinn:organization:identifier-no:912345678",
             "items": {
               "type": "string"
@@ -2718,6 +2733,122 @@
         },
         "type": "object"
       },
+      "DialogPartyCheck": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "accessRestriction": {
+            "description": "Restricts how the end user\u0027s access at the dialog\u0027s party must have been obtained for this check to grant\naccess: \u0022none\u0022 accepts all access, \u0022directAndHierarchy\u0022 only access that does not pass through another\norganization, and \u0022clientDelegation\u0022 only client delegations made through the organization in \u0022viaParty\u0022.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogPartyCheckAccessRestriction"
+              }
+            ]
+          },
+          "action": {
+            "description": "The XACML action evaluated for this check instead of the context\u0027s. Null when not overridden.",
+            "example": "readall",
+            "nullable": true,
+            "type": "string"
+          },
+          "serviceResource": {
+            "description": "The service resource evaluated for this check instead of the context\u0027s. Null when not overridden.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "viaParty": {
+            "description": "The organization the end user\u0027s access must have been client delegated through. Only set when\n\u0022accessRestriction\u0022 is \u0022clientDelegation\u0022.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "DialogPartyCheckAccessRestriction": {
+        "description": "",
+        "enum": [
+          "None",
+          "DirectAndHierarchy",
+          "ClientDelegation"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "None",
+          "DirectAndHierarchy",
+          "ClientDelegation"
+        ]
+      },
+      "DialogPartyCheckDetails": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "accessRestriction": {
+            "description": "Restricts how the end user\u0027s access at the dialog\u0027s party must have been obtained for this check to grant\naccess: \u0022none\u0022 accepts all access, \u0022directAndHierarchy\u0022 only access that does not pass through another\norganization, and \u0022clientDelegation\u0022 only client delegations made through the organization in \u0022viaParty\u0022.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogPartyCheckAccessRestriction"
+              }
+            ]
+          },
+          "action": {
+            "description": "The XACML action evaluated for this check instead of the context\u0027s. Null when not overridden.",
+            "example": "readall",
+            "nullable": true,
+            "type": "string"
+          },
+          "serviceResource": {
+            "description": "The service resource evaluated for this check instead of the context\u0027s. Null when not overridden.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "viaParty": {
+            "description": "The organization the end user\u0027s access must have been client delegated through. Only set when\n\u0022accessRestriction\u0022 is \u0022clientDelegation\u0022.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
+      "DialogPartyCheckInput": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "accessRestriction": {
+            "description": "Required. Restricts how the end user\u0027s access at the dialog\u0027s party must have been obtained for this\ncheck to grant access: \u0022none\u0022 accepts all access, \u0022directAndHierarchy\u0022 only access that does not pass\nthrough another organization (direct grants, ER roles and their role mappings at the dialog party, and\ninheritance from its main unit), and \u0022clientDelegation\u0022 only client delegations made through the\norganization given in \u0022viaParty\u0022.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogPartyCheckAccessRestriction"
+              }
+            ]
+          },
+          "action": {
+            "description": "The XACML action to evaluate for this check instead of the context\u0027s. If omitted, the context\u0027s \u0022action\u0022\nis used, or \u0022read\u0022 if the context sets none.",
+            "example": "readall",
+            "nullable": true,
+            "type": "string"
+          },
+          "serviceResource": {
+            "description": "A service resource to evaluate for this check instead of the context\u0027s. If omitted, the context\u0027s\n\u0022serviceResource\u0022 is used, or the dialog\u0027s own service resource if the context sets none. The same rules\napply as for the context\u0027s \u0022serviceResource\u0022, including that the service owner must have access to it.\nThe context\u0027s \u0022additionalResourceAttribute\u0022, if any, is layered on the resulting resource.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "viaParty": {
+            "description": "The organization the end user\u0027s access must have been client delegated through. Required when\n\u0022accessRestriction\u0022 is \u0022clientDelegation\u0022, and not allowed otherwise. Cannot be the dialog\u0027s own party.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "x-experimental": true
+      },
       "DialogRevision": {
         "additionalProperties": false,
         "properties": {
@@ -3569,12 +3700,17 @@
             "nullable": true,
             "type": "string"
           },
-          "includeDialogParty": {
-            "description": "Whether the dialog\u0027s own party is included in the evaluation in addition to \u0022parties\u0022.",
-            "type": "boolean"
+          "dialogPartyChecks": {
+            "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.\n\nChecks evaluated on behalf of the dialog\u0027s own party. Access is granted if any check, or any entry in\n\u0022parties\u0022, permits. Empty when the dialog\u0027s party is not evaluated.",
+            "items": {
+              "$ref": "#/components/schemas/DialogTransmissionSearchDialogPartyCheck"
+            },
+            "nullable": true,
+            "type": "array",
+            "x-experimental": true
           },
           "parties": {
-            "description": "The parties access is evaluated on behalf of. Access is granted if the end user has access to the\neffective resource for at least one of the parties.",
+            "description": "Other parties than the dialog\u0027s that access is evaluated on behalf of, each at its own party and without\naccess restriction. Access is granted if the end user has access to the effective resource for at least\none of the parties, or if any of \u0022dialogPartyChecks\u0022 permits.",
             "example": "urn:altinn:organization:identifier-no:912345678",
             "items": {
               "type": "string"
@@ -3637,6 +3773,40 @@
           }
         },
         "type": "object"
+      },
+      "DialogTransmissionSearchDialogPartyCheck": {
+        "additionalProperties": false,
+        "description": "**Experimental:** This is part of an experimental feature that may change or be removed without a major version bump. See https://github.com/Altinn/dialogporten/issues/3978 for details.",
+        "properties": {
+          "accessRestriction": {
+            "description": "Restricts how the end user\u0027s access at the dialog\u0027s party must have been obtained for this check to grant\naccess: \u0022none\u0022 accepts all access, \u0022directAndHierarchy\u0022 only access that does not pass through another\norganization, and \u0022clientDelegation\u0022 only client delegations made through the organization in \u0022viaParty\u0022.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogPartyCheckAccessRestriction"
+              }
+            ]
+          },
+          "action": {
+            "description": "The XACML action evaluated for this check instead of the context\u0027s. Null when not overridden.",
+            "example": "readall",
+            "nullable": true,
+            "type": "string"
+          },
+          "serviceResource": {
+            "description": "The service resource evaluated for this check instead of the context\u0027s. Null when not overridden.",
+            "example": "urn:altinn:resource:some-other-service-identifier",
+            "nullable": true,
+            "type": "string"
+          },
+          "viaParty": {
+            "description": "The organization the end user\u0027s access must have been client delegated through. Only set when\n\u0022accessRestriction\u0022 is \u0022clientDelegation\u0022.",
+            "example": "urn:altinn:organization:identifier-no:912345678",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "x-experimental": true
       },
       "DialogTransmissionSearchItem": {
         "additionalProperties": false,

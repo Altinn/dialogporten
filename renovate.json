@@ -74,6 +74,10 @@
       "groupName": "Altinn dependencies"
     },
     {
+      "matchPackageNames": ["/^AspNetCore\\.HealthChecks/"],
+      "groupName": "AspNetCore.HealthChecks dependencies"
+    },
+    {
       "matchPackageNames": ["/^Refit/", "/^Refitter/"],
       "groupName": "Refit dependencies"
     },

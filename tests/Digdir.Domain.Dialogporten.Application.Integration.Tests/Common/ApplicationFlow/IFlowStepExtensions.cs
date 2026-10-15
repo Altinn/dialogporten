@@ -358,7 +358,7 @@ public static class IFlowStepExtensions
                             ServiceResource = transmission.AuthorizationContext.ServiceResource,
                             AdditionalResourceAttribute = transmission.AuthorizationContext.AdditionalResourceAttribute,
                             Parties = [.. transmission.AuthorizationContext.Parties],
-                            IncludeDialogParty = transmission.AuthorizationContext.IncludeDialogParty,
+                            DialogPartyChecks = [.. transmission.AuthorizationContext.DialogPartyChecks.Select(x => x.ToUpdateDialogPartyCheck())],
                             Action = transmission.AuthorizationContext.Action,
                             TokenRef = transmission.AuthorizationContext.TokenRef,
                             UnauthorizedPresentation = transmission.AuthorizationContext.UnauthorizedPresentation
@@ -732,7 +732,7 @@ public static class IFlowStepExtensions
 
     public static UpdateDialogCommand CreateUpdateDialogCommand(DialogDtoEU dto, FlowContext ctx)
     {
-        var updateDto = ctx.Application.GetMapper().Map<UpdateDialogDto>(dto);
+        var updateDto = dto.ToUpdateDialogDto();
         return new UpdateDialogCommand
         {
             IfMatchDialogRevision = dto.Revision,
@@ -752,10 +752,18 @@ public static class IFlowStepExtensions
                 ServiceResource = source.ServiceResource,
                 AdditionalResourceAttribute = source.AdditionalResourceAttribute,
                 Parties = [.. source.Parties],
-                IncludeDialogParty = source.IncludeDialogParty,
+                DialogPartyChecks = [.. source.DialogPartyChecks.Select(x => x.ToUpdateDialogPartyCheck())],
                 Action = source.Action,
                 TokenRef = source.TokenRef,
                 UnauthorizedPresentation = source.UnauthorizedPresentation
             };
 
+    private static Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.DialogPartyCheckDto ToUpdateDialogPartyCheck(
+        this Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogPartyCheckDto source) => new()
+        {
+            AccessRestriction = source.AccessRestriction,
+            ViaParty = source.ViaParty,
+            ServiceResource = source.ServiceResource,
+            Action = source.Action
+        };
 }

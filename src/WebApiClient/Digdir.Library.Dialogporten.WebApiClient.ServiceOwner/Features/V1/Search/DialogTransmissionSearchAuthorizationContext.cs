@@ -20,17 +20,19 @@ public class DialogTransmissionSearchAuthorizationContext
     public string? AdditionalResourceAttribute { get; set; }
 
     /// <summary>
-    /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
-    /// <br/>effective resource for at least one of the parties.
+    /// Other parties than the dialog's that access is evaluated on behalf of, each at its own party and without
+    /// <br/>access restriction. Access is granted if the end user has access to the effective resource for at least
+    /// <br/>one of the parties, or if any of "dialogPartyChecks" permits.
     /// </summary>
     [JsonPropertyName("parties")]
     public ICollection<string> Parties { get; set; } = [];
 
     /// <summary>
-    /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+    /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+    /// <br/>"parties", permits. Empty when the dialog's party is not evaluated.
     /// </summary>
-    [JsonPropertyName("includeDialogParty")]
-    public bool IncludeDialogParty { get; set; }
+    [JsonPropertyName("dialogPartyChecks")]
+    public ICollection<DialogTransmissionSearchDialogPartyCheck> DialogPartyChecks { get; set; } = [];
 
     /// <summary>
     /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".

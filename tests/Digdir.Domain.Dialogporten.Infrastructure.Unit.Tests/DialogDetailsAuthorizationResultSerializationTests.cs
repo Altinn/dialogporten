@@ -32,4 +32,30 @@ public class DialogDetailsAuthorizationResultSerializationTests
         Assert.True(roundTripped.HasAccess(check));
         Assert.True(roundTripped.HasReadAccessToMainResource());
     }
+
+    [Fact]
+    public void Should_Round_Trip_Restricted_Units_Through_The_Pdp_Cache_Resolver()
+    {
+        const string party = "urn:altinn:organization:identifier-no:713330310";
+        var check = new AuthorizationCheck(
+        [
+            new AuthorizationUnit("read", AuthorizationResourceSpec.FromContext("urn:altinn:resource:r", "urn:altinn:task:Task_1"), party),
+            new AuthorizationUnit("readall", AuthorizationResourceSpec.FromContext(null, null), party,
+                AuthorizationAccessRestriction.ClientDelegation, "urn:altinn:organization:identifier-no:991825827")
+        ]);
+        var result = new DialogDetailsAuthorizationResult
+        {
+            AuthorizedChecks = [new AuthorizedCheck(check, [check.Units[1]])]
+        };
+
+        var testToken = TestContext.Current.CancellationToken;
+        var bytes = MessagePackSerializer.Serialize(result, ContractlessStandardResolverAllowPrivate.Options, testToken);
+        var roundTripped = MessagePackSerializer.Deserialize<DialogDetailsAuthorizationResult>(
+            bytes, ContractlessStandardResolverAllowPrivate.Options, testToken);
+
+        Assert.True(roundTripped.HasAccess(check));
+        var authorizedCheck = Assert.Single(roundTripped.AuthorizedChecks);
+        Assert.Equal(check, authorizedCheck.Check);
+        Assert.Equal([check.Units[1]], authorizedCheck.PermittedUnits);
+    }
 }

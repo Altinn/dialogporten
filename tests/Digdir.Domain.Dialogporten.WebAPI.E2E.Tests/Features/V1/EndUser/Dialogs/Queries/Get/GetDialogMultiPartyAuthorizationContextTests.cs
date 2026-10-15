@@ -182,7 +182,7 @@ public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixtu
                     {
                         Action = Constants.ReadAction,
                         Parties = [E2EConstants.DefaultEndUserOrgUrn],
-                        IncludeDialogParty = false,
+                        DialogPartyChecks = [],
                         UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                     }
                 }
@@ -241,7 +241,7 @@ public class GetDialogMultiPartyAuthorizationContextTests(WebApiE2EFixture fixtu
                 // No ServiceResource: the effective resource is the dialog's own, which the baseline test
                 // proves the end user can read as the org party.
                 Parties = [.. parties],
-                IncludeDialogParty = false,
+                DialogPartyChecks = [],
                 UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
             }
         };

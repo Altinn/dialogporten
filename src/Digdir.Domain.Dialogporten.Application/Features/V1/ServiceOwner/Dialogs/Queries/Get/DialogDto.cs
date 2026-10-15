@@ -922,16 +922,18 @@ public sealed class AuthorizationContextDto
     public string? AdditionalResourceAttribute { get; set; }
 
     /// <summary>
-    /// The parties access is evaluated on behalf of. Access is granted if the end user has access to the
-    /// effective resource for at least one of the parties.
+    /// Other parties than the dialog's that access is evaluated on behalf of, each at its own party and without
+    /// access restriction. Access is granted if the end user has access to the effective resource for at least
+    /// one of the parties, or if any of "dialogPartyChecks" permits.
     /// </summary>
     /// <example>urn:altinn:organization:identifier-no:912345678</example>
     public List<string> Parties { get; set; } = [];
 
     /// <summary>
-    /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+    /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+    /// "parties", permits. Empty when the dialog's party is not evaluated.
     /// </summary>
-    public bool IncludeDialogParty { get; set; }
+    public List<DialogPartyCheckDto> DialogPartyChecks { get; set; } = [];
 
     /// <summary>
     /// The XACML action to evaluate. Null when not overridden; the effective action is then "read".
@@ -956,4 +958,34 @@ public sealed class AuthorizationContextDto
     /// "transmissions").
     /// </summary>
     public AuthorizationContextUnauthorizedPresentation.Values UnauthorizedPresentation { get; set; }
+}
+
+[ExperimentalFeature(ExperimentalFeatures.AuthorizationContext)]
+public sealed class DialogPartyCheckDto
+{
+    /// <summary>
+    /// Restricts how the end user's access at the dialog's party must have been obtained for this check to grant
+    /// access: "none" accepts all access, "directAndHierarchy" only access that does not pass through another
+    /// organization, and "clientDelegation" only client delegations made through the organization in "viaParty".
+    /// </summary>
+    public DialogPartyCheckAccessRestriction.Values AccessRestriction { get; set; }
+
+    /// <summary>
+    /// The organization the end user's access must have been client delegated through. Only set when
+    /// "accessRestriction" is "clientDelegation".
+    /// </summary>
+    /// <example>urn:altinn:organization:identifier-no:912345678</example>
+    public string? ViaParty { get; set; }
+
+    /// <summary>
+    /// The service resource evaluated for this check instead of the context's. Null when not overridden.
+    /// </summary>
+    /// <example>urn:altinn:resource:some-other-service-identifier</example>
+    public string? ServiceResource { get; set; }
+
+    /// <summary>
+    /// The XACML action evaluated for this check instead of the context's. Null when not overridden.
+    /// </summary>
+    /// <example>readall</example>
+    public string? Action { get; set; }
 }

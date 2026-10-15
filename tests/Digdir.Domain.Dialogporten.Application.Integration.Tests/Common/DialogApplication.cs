@@ -1,7 +1,5 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Reflection;
-using AutoMapper;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
@@ -50,7 +48,6 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 // ReSharper disable once ClassNeverInstantiated.Global
 public class DialogApplication : IAsyncLifetime
 {
-    private IMapper? _mapper;
     private Respawner _respawner = null!;
     private ServiceProvider _rootProvider = null!;
     private ServiceProvider _fixtureRootProvider = null!;
@@ -69,12 +66,6 @@ public class DialogApplication : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.AddMaps(Assembly.GetAssembly(typeof(ApplicationSettings)));
-        });
-        _mapper = config.CreateMapper();
-
         var timeSpanAllowance = TimeSpan.FromMicroseconds(5);
         AssertionConfiguration.Current.Equivalency.Modify(options => options
             .Using<DateTimeOffset>(ctx =>
@@ -286,8 +277,6 @@ public class DialogApplication : IAsyncLifetime
 
         return cacheProviderSubstitute;
     }
-
-    public IMapper GetMapper() => _mapper!;
 
     public async ValueTask DisposeAsync()
     {

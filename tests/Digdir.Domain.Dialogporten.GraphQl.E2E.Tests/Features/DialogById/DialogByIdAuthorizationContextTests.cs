@@ -215,7 +215,7 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
         {
             Action = Constants.ReadAction,
             ServiceResource = serviceResource,
-            IncludeDialogParty = true,
+            DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
             UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
         };
 
@@ -223,7 +223,7 @@ public class DialogByIdAuthorizationContextTests(GraphQlE2EFixture fixture) : E2
         new()
         {
             ServiceResource = serviceResource,
-            IncludeDialogParty = true,
+            DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
             UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
         };
 }

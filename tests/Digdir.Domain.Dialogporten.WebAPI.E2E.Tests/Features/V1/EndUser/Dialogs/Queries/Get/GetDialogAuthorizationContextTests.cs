@@ -38,21 +38,21 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                 {
                     ServiceResource = E2EConstants.AvailableExternalResource,
                     Parties = [ForeignOrgParty],
-                    IncludeDialogParty = true,
+                    DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                     UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                 }),
                 CreateAttachment("denied-disabled-attachment", new V1CommonAuthorizationContexts_AuthorizationContext
                 {
                     ServiceResource = E2EConstants.UnavailableExternalResource,
                     Parties = [ForeignOrgParty],
-                    IncludeDialogParty = true,
+                    DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                     UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                 }),
                 CreateAttachment("denied-excluded-attachment", new V1CommonAuthorizationContexts_AuthorizationContext
                 {
                     ServiceResource = E2EConstants.UnavailableExternalResource,
                     Parties = [ForeignOrgParty],
-                    IncludeDialogParty = true,
+                    DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                     UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Excluded
                 })
             ];
@@ -100,7 +100,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                     AuthorizationContext = new V1CommonAuthorizationContexts_AuthorizationContext
                     {
                         ServiceResource = E2EConstants.UnavailableExternalResource,
-                        IncludeDialogParty = true,
+                        DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                         UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                     },
                     Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
@@ -125,7 +125,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
                             AuthorizationContext = new V1CommonAuthorizationContexts_AuthorizationContext
                             {
                                 ServiceResource = E2EConstants.AvailableExternalResource,
-                                IncludeDialogParty = true,
+                                DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                                 UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
                             }
                         }
@@ -492,7 +492,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         new()
         {
             ServiceResource = serviceResource,
-            IncludeDialogParty = true,
+            DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
             UnauthorizedPresentation = unauthorizedPresentation
         };
 
@@ -512,7 +512,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
             {
                 Action = Constants.ReadAction,
                 ServiceResource = serviceResource,
-                IncludeDialogParty = true,
+                DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                 UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
             }
         };
@@ -531,7 +531,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
             AuthorizationContext = new V1CommonAuthorizationContexts_AuthorizationContext
             {
                 ServiceResource = serviceResource,
-                IncludeDialogParty = true,
+                DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                 UnauthorizedPresentation = unauthorizedPresentation
             },
             Content = new V1ServiceOwnerDialogsCommandsCreate_TransmissionContent
@@ -611,7 +611,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
             {
                 Action = Constants.ReadAction,
                 ServiceResource = serviceResource,
-                IncludeDialogParty = true,
+                DialogPartyChecks = [new() { AccessRestriction = DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction.None }],
                 UnauthorizedPresentation = DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation.Disabled
             }
         };

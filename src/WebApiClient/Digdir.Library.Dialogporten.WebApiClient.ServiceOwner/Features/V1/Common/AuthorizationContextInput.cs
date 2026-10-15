@@ -23,18 +23,22 @@ public class AuthorizationContextInput
     public string? AdditionalResourceAttribute { get; set; }
 
     /// <summary>
-    /// The parties to evaluate access on behalf of. Access is granted if the end user has access to the
-    /// <br/>effective resource for at least one of the parties. Must contain at least one party unless
-    /// <br/>"includeDialogParty" is true.
+    /// Other parties than the dialog's to evaluate access on behalf of, each at its own party and without access
+    /// <br/>restriction. Access is granted if the end user has access to the effective resource for at least one of
+    /// <br/>the parties, or if any of "dialogPartyChecks" permits. Cannot contain the dialog's own party; use a
+    /// <br/>"dialogPartyChecks" entry with access restriction "None" for that. Together with "dialogPartyChecks", at
+    /// <br/>least 1 and at most 4 entries.
     /// </summary>
     [JsonPropertyName("parties")]
     public ICollection<string> Parties { get; set; } = [];
 
     /// <summary>
-    /// Whether the dialog's own party is included in the evaluation in addition to "parties".
+    /// Checks evaluated on behalf of the dialog's own party. Access is granted if any check, or any entry in
+    /// <br/>"parties", permits. An empty list means the dialog's party is not evaluated. Together with "parties",
+    /// <br/>at least 1 and at most 4 entries.
     /// </summary>
-    [JsonPropertyName("includeDialogParty")]
-    public bool IncludeDialogParty { get; set; }
+    [JsonPropertyName("dialogPartyChecks")]
+    public ICollection<DialogPartyCheckInput> DialogPartyChecks { get; set; } = [];
 
     /// <summary>
     /// The XACML action to evaluate. Optional; defaults to "read" if not supplied.

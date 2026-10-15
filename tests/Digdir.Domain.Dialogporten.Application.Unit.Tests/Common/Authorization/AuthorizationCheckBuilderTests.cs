@@ -53,19 +53,21 @@ public class AuthorizationCheckBuilderTests
         // Assert
         Assert.NotNull(checks);
         Assert.Equal(10, checks.Count);
-        Assert.All(checks, c => Assert.Equal([DialogParty], c.Parties));
-        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.Kind: AuthorizationResourceSpecKind.Main });
-        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "foo" });
+        Assert.All(checks, c => Assert.Equal([DialogParty], c.Units.Select(u => u.Party)));
+        Assert.All(checks, c => Assert.Equal(AuthorizationAccessRestriction.None, Assert.Single(c.Units).AccessRestriction));
+        var units = checks.SelectMany(c => c.Units).ToList();
+        Assert.Contains(units, c => c is { Action: Constants.ReadAction, Resource.Kind: AuthorizationResourceSpecKind.Main });
+        Assert.Contains(units, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "foo" });
         // Explicit legacy actions on api/gui actions are preserved verbatim...
-        Assert.Contains(checks, c => c is { Action: "transmissionread", Resource.LegacyAuthorizationAttribute: "bar" });
-        Assert.Contains(checks, c => c is { Action: "apiread", Resource.Kind: AuthorizationResourceSpecKind.Main });
-        Assert.Contains(checks, c => c is { Action: "guiread", Resource.Kind: AuthorizationResourceSpecKind.Main });
+        Assert.Contains(units, c => c is { Action: "transmissionread", Resource.LegacyAuthorizationAttribute: "bar" });
+        Assert.Contains(units, c => c is { Action: "apiread", Resource.Kind: AuthorizationResourceSpecKind.Main });
+        Assert.Contains(units, c => c is { Action: "guiread", Resource.Kind: AuthorizationResourceSpecKind.Main });
         // ...while transmissions always derive "read", whatever the attribute type
-        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "bar" });
-        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:subresource:bar" });
-        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:task:Task_1" });
-        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:resource:some-service:element1" });
-        Assert.Contains(checks, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:resource:app_ttd_some-app" });
+        Assert.Contains(units, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "bar" });
+        Assert.Contains(units, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:subresource:bar" });
+        Assert.Contains(units, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:task:Task_1" });
+        Assert.Contains(units, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:resource:some-service:element1" });
+        Assert.Contains(units, c => c is { Action: Constants.ReadAction, Resource.LegacyAuthorizationAttribute: "urn:altinn:resource:app_ttd_some-app" });
     }
 
     [Fact]
@@ -77,9 +79,11 @@ public class AuthorizationCheckBuilderTests
 
         var check = Assert.Single(checks);
         Assert.Equal(dialogEntity.GetMainResourceReadCheck(), check);
-        Assert.Equal(Constants.ReadAction, check.Action);
-        Assert.Equal(AuthorizationResourceSpecKind.Main, check.Resource.Kind);
-        Assert.Equal([DialogParty], check.Parties);
+        var unit = Assert.Single(check.Units);
+        Assert.Equal(Constants.ReadAction, unit.Action);
+        Assert.Equal(AuthorizationResourceSpecKind.Main, unit.Resource.Kind);
+        Assert.Equal(DialogParty, unit.Party);
+        Assert.Equal(AuthorizationAccessRestriction.None, unit.AccessRestriction);
     }
 
     [Fact]
@@ -110,7 +114,7 @@ public class AuthorizationCheckBuilderTests
                         Action = "sign",
                         AdditionalResourceAttribute = "urn:altinn:task:Task_1",
                         Parties = [OtherParty],
-                        IncludeDialogParty = true
+                        DialogPartyChecks = [new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.None }]
                     }
                 }
             ],
@@ -169,41 +173,49 @@ public class AuthorizationCheckBuilderTests
         Assert.Equal(7, checks.Count);
 
         // Api action: explicit action, context parties only
-        Assert.Contains(checks, c => c is
+        Assert.Contains(checks, c => c.Units is [
         {
             Action: "write",
-            Resource: { Kind: AuthorizationResourceSpecKind.Context, ServiceResource: "urn:altinn:resource:other-service" }
-        } && c.Parties.SequenceEqual([OtherParty]));
+            Resource: { Kind: AuthorizationResourceSpecKind.Context, ServiceResource: "urn:altinn:resource:other-service" },
+            Party: OtherParty
+        }]);
 
-        // Gui action: includeDialogParty merges the dialog party into the (sorted) party set
-        var guiCheck = Assert.Single(checks, c => c.Action == "sign");
-        Assert.Equal(AuthorizationResourceSpecKind.Context, guiCheck.Resource.Kind);
-        Assert.Equal("urn:altinn:task:Task_1", guiCheck.Resource.AdditionalResourceAttribute);
-        Assert.Equal(new[] { DialogParty, OtherParty }.Order(StringComparer.Ordinal), guiCheck.Parties);
+        // Gui action: an unrestricted dialog party check adds the dialog party with the context's right
+        var guiCheck = Assert.Single(checks, c => c.Units.Any(u => u.Action == "sign"));
+        Assert.All(guiCheck.Units, u =>
+        {
+            Assert.Equal("sign", u.Action);
+            Assert.Equal(AuthorizationResourceSpecKind.Context, u.Resource.Kind);
+            Assert.Equal("urn:altinn:task:Task_1", u.Resource.AdditionalResourceAttribute);
+            Assert.Equal(AuthorizationAccessRestriction.None, u.AccessRestriction);
+        });
+        Assert.Equal(new[] { DialogParty, OtherParty }.Order(StringComparer.Ordinal), guiCheck.Units.Select(u => u.Party));
+
+        var contextUnits = checks.SelectMany(c => c.Units).ToList();
 
         // Dialog attachment: explicit action override is honored
-        Assert.Contains(checks, c => c is
+        Assert.Contains(contextUnits, c => c is
         {
             Action: "attachmentread",
             Resource.AdditionalResourceAttribute: "urn:altinn:subresource:secret"
         });
 
         // Transmission: no explicit action => defaults to read
-        Assert.Contains(checks, c => c is
+        Assert.Contains(contextUnits, c => c is
         {
             Action: Constants.ReadAction,
             Resource: { Kind: AuthorizationResourceSpecKind.Context, ServiceResource: "urn:altinn:resource:other-service" }
         });
 
         // Transmission attachment: no explicit action => defaults to read
-        Assert.Contains(checks, c => c is
+        Assert.Contains(contextUnits, c => c is
         {
             Action: Constants.ReadAction,
             Resource.AdditionalResourceAttribute: "urn:altinn:task:Task_2"
         });
 
         // Navigational action: no explicit action => defaults to read
-        Assert.Contains(checks, c => c is
+        Assert.Contains(contextUnits, c => c is
         {
             Action: Constants.ReadAction,
             Resource.ServiceResource: "urn:altinn:resource:third-service"
@@ -230,7 +242,7 @@ public class AuthorizationCheckBuilderTests
         var check = transmission.GetAuthorizationCheck(new DialogEntity { Party = DialogParty });
 
         Assert.NotNull(check);
-        Assert.Equal(Constants.ReadAction, check.Action);
+        Assert.Equal(Constants.ReadAction, Assert.Single(check.Units).Action);
     }
 
     [Fact]
@@ -249,11 +261,11 @@ public class AuthorizationCheckBuilderTests
         var check = transmission.GetAuthorizationCheck(new DialogEntity { Party = DialogParty });
 
         Assert.NotNull(check);
-        Assert.Equal("customread", check.Action);
+        Assert.Equal("customread", Assert.Single(check.Units).Action);
     }
 
     [Fact]
-    public void ContextWithEmptyPartiesAndNoDialogPartyShouldProduceCheckWithNoParties()
+    public void ContextWithEmptyPartiesAndNoDialogPartyChecksShouldProduceCheckWithNoUnits()
     {
         // Write-side validation rejects this shape; if it ever occurs anyway, the check must
         // fail closed (no parties => no evaluation units => never authorized), never silently
@@ -264,14 +276,14 @@ public class AuthorizationCheckBuilderTests
             {
                 ServiceResource = "urn:altinn:resource:other-service",
                 Parties = [],
-                IncludeDialogParty = false
+                DialogPartyChecks = []
             }
         };
 
         var check = transmission.GetAuthorizationCheck(new DialogEntity { Party = DialogParty });
 
         Assert.NotNull(check);
-        Assert.Empty(check.Parties);
+        Assert.Empty(check.Units);
     }
 
     [Fact]
@@ -331,4 +343,136 @@ public class AuthorizationCheckBuilderTests
         Assert.False(result.HasAccessToMainResource());
         Assert.False(result.HasReadAccessToMainResource());
     }
+
+    private const string ViaParty = "urn:altinn:organization:identifier-no:310778737";
+
+    [Fact]
+    public void DialogPartyChecksShouldExpandIntoUnitsAtTheDialogPartyWithTheirAccessRestriction()
+    {
+        var transmission = new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext
+            {
+                Parties = [OtherParty],
+                DialogPartyChecks =
+                [
+                    new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.DirectAndHierarchy },
+                    new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.ClientDelegation, ViaParty = ViaParty },
+                    new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.None, ServiceResource = "urn:altinn:resource:r-full" }
+                ]
+            }
+        };
+
+        var check = transmission.GetAuthorizationCheck(new DialogEntity { Party = DialogParty });
+
+        Assert.NotNull(check);
+        Assert.Equal(4, check.Units.Count);
+        Assert.Contains(check.Units, u => u is
+        {
+            Party: OtherParty, AccessRestriction: AuthorizationAccessRestriction.None, ViaParty: null,
+            Resource.ServiceResource: null
+        });
+        Assert.Contains(check.Units, u => u is
+        {
+            Party: DialogParty, AccessRestriction: AuthorizationAccessRestriction.DirectAndHierarchy, ViaParty: null,
+            Resource.ServiceResource: null
+        });
+        Assert.Contains(check.Units, u => u is
+        {
+            Party: DialogParty, AccessRestriction: AuthorizationAccessRestriction.ClientDelegation, ViaParty: ViaParty,
+            Resource.ServiceResource: null
+        });
+        Assert.Contains(check.Units, u => u is
+        {
+            Party: DialogParty, AccessRestriction: AuthorizationAccessRestriction.None, ViaParty: null,
+            Resource.ServiceResource: "urn:altinn:resource:r-full"
+        });
+        Assert.All(check.Units, u => Assert.Equal(Constants.ReadAction, u.Action));
+    }
+
+    [Theory]
+    // Action falls back to the context's, then "read"; resource falls back to the context's (null = the dialog's)
+    [InlineData(null, null, null, null, Constants.ReadAction, null)]
+    [InlineData("readall", null, null, null, "readall", null)]
+    [InlineData("readall", null, null, "urn:altinn:resource:context-resource", "readall", "urn:altinn:resource:context-resource")]
+    [InlineData(null, "urn:altinn:resource:r-full", "sign", null, "sign", "urn:altinn:resource:r-full")]
+    [InlineData("readall", "urn:altinn:resource:r-full", "sign", "urn:altinn:resource:context-resource", "readall", "urn:altinn:resource:r-full")]
+    public void DialogPartyCheckShouldFallBackToTheContextsRight(
+        string? checkAction, string? checkResource, string? contextAction, string? contextResource,
+        string expectedAction, string? expectedResource)
+    {
+        var transmission = new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext
+            {
+                Action = contextAction,
+                ServiceResource = contextResource,
+                AdditionalResourceAttribute = "urn:altinn:task:Task_1",
+                DialogPartyChecks =
+                [
+                    new()
+                    {
+                        AccessRestriction = DialogPartyCheckAccessRestriction.Values.None,
+                        Action = checkAction,
+                        ServiceResource = checkResource
+                    }
+                ]
+            }
+        };
+
+        var check = transmission.GetAuthorizationCheck(new DialogEntity { Party = DialogParty });
+
+        Assert.NotNull(check);
+        var unit = Assert.Single(check.Units);
+        Assert.Equal(expectedAction, unit.Action);
+        Assert.Equal(AuthorizationResourceSpecKind.Context, unit.Resource.Kind);
+        Assert.Equal(expectedResource, unit.Resource.ServiceResource);
+        // The context's additional resource attribute is layered on every unit's effective resource
+        Assert.Equal("urn:altinn:task:Task_1", unit.Resource.AdditionalResourceAttribute);
+        Assert.Equal(DialogParty, unit.Party);
+    }
+
+    [Fact]
+    public void ChecksDifferingOnlyInAccessRestrictionShouldNotBeEqual()
+    {
+        var dialog = new DialogEntity { Party = DialogParty };
+        var checks = new[]
+        {
+            TransmissionWithCheck(DialogPartyCheckAccessRestriction.Values.None, null).GetAuthorizationCheck(dialog),
+            TransmissionWithCheck(DialogPartyCheckAccessRestriction.Values.DirectAndHierarchy, null).GetAuthorizationCheck(dialog),
+            TransmissionWithCheck(DialogPartyCheckAccessRestriction.Values.ClientDelegation, ViaParty).GetAuthorizationCheck(dialog),
+            TransmissionWithCheck(DialogPartyCheckAccessRestriction.Values.ClientDelegation, OtherParty).GetAuthorizationCheck(dialog)
+        };
+
+        Assert.Equal(checks.Length, checks.Distinct().Count());
+        Assert.Equal(checks.Length, checks.Select(x => x!.CanonicalIdentity).Distinct(StringComparer.Ordinal).Count());
+    }
+
+    [Fact]
+    public void UnrestrictedDialogPartyCheckShouldEqualTheEquivalentPartiesCheck()
+    {
+        // A [None] check is the replacement for the former includeDialogParty: true
+        var dialog = new DialogEntity { Party = DialogParty };
+        var viaCheck = new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext
+            {
+                DialogPartyChecks = [new() { AccessRestriction = DialogPartyCheckAccessRestriction.Values.None }]
+            }
+        }.GetAuthorizationCheck(dialog);
+        var viaParties = new DialogTransmission
+        {
+            AuthorizationContext = new DialogTransmissionAuthorizationContext { Parties = [DialogParty] }
+        }.GetAuthorizationCheck(dialog);
+
+        Assert.Equal(viaParties, viaCheck);
+    }
+
+    private static DialogTransmission TransmissionWithCheck(DialogPartyCheckAccessRestriction.Values restriction, string? viaParty) => new()
+    {
+        AuthorizationContext = new DialogTransmissionAuthorizationContext
+        {
+            DialogPartyChecks = [new() { AccessRestriction = restriction, ViaParty = viaParty }]
+        }
+    };
 }

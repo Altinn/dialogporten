@@ -14,6 +14,9 @@ public class DecisionRequestHelperTests
     private const string AuthorizationDetailsClaimValue = /*lang=json,strict*/"[{\"type\":\"urn:altinn:systemuser\",\"systemuser_id\":[\"unique_systemuser_id\"]}]";
     private static readonly string OrgParty = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}713330310";
     private static readonly string OtherOrgParty = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}991825827";
+    private static readonly string ViaOrgParty = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}310778737";
+    private const string AccessRestrictionAttributeId = "urn:altinn:authorization:access-restriction";
+    private const string ViaPartyAttributeId = "urn:altinn:via-party:organization:identifier-no";
 
     [Fact]
     public void CreateDialogDetailsRequestShouldReturnCorrectRequest()
@@ -47,8 +50,10 @@ public class DecisionRequestHelperTests
 
         // Check Action attributes.
         var actionIdsByName = new Dictionary<string, string>();
-        Assert.Equal(request.Checks.Select(x => x.Action).Distinct().Count(), result.Request.Request.Action.Count);
-        foreach (var action in request.Checks.Select(x => x.Action))
+        // Every check in the fixture is a single, unrestricted unit
+        var units = request.Checks.Select(x => x.Units.Single()).ToList();
+        Assert.Equal(units.Select(x => x.Action).Distinct().Count(), result.Request.Request.Action.Count);
+        foreach (var action in units.Select(x => x.Action))
         {
             var actionElement = result.Request.Request.Action.FirstOrDefault(a => a.Attribute.Any(attr => attr.AttributeId == "urn:oasis:names:tc:xacml:1.0:action:action-id" && attr.Value == action));
             Assert.NotNull(actionElement);
@@ -58,7 +63,7 @@ public class DecisionRequestHelperTests
         // Check Resource attributes: the main resource is rendered with the legacy "main" sentinel as a
         // subresource attribute, so every check in the fixture resolves via urn:altinn:subresource.
         var resourceIdsBySubresource = new Dictionary<string, string>();
-        Assert.Equal(request.Checks.Select(x => x.Resource).Distinct().Count(), result.Request.Request.Resource.Count);
+        Assert.Equal(units.Select(x => x.Resource).Distinct().Count(), result.Request.Request.Resource.Count);
         foreach (var subresource in request.Checks.Select(GetExpectedSubresource))
         {
             var resource = result.Request.Request.Resource.FirstOrDefault(r => r.Attribute.Any(a => a.AttributeId == "urn:altinn:subresource" && a.Value == subresource));
@@ -66,6 +71,9 @@ public class DecisionRequestHelperTests
             Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:resource" && a.Value == "some-service");
             Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:organization:identifier-no" && a.Value == "713330310");
             Assert.Contains(resource.Attribute, a => a.AttributeId == "urn:altinn:resource:instance-id" && a.Value == instanceRef.Value);
+            // Unrestricted units keep the wire format unchanged
+            Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == AccessRestrictionAttributeId);
+            Assert.DoesNotContain(resource.Attribute, a => a.AttributeId == ViaPartyAttributeId);
             resourceIdsBySubresource[subresource] = resource.Id;
         }
 
@@ -76,7 +84,7 @@ public class DecisionRequestHelperTests
         foreach (var check in request.Checks)
         {
             Assert.Contains(result.Request.Request.MultiRequests.RequestReference, rr
-                => ContainsSameElements(rr.ReferenceId, new List<string> { "s1", resourceIdsBySubresource[GetExpectedSubresource(check)], actionIdsByName[check.Action] }));
+                => ContainsSameElements(rr.ReferenceId, new List<string> { "s1", resourceIdsBySubresource[GetExpectedSubresource(check)], actionIdsByName[check.Units.Single().Action] }));
         }
     }
 
@@ -391,6 +399,120 @@ public class DecisionRequestHelperTests
     }
 
     [Fact]
+    public void CreateDialogDetailsRequestShouldRenderAccessRestrictionAttributesPerUnit()
+    {
+        // Arrange: the same right and party under all three access restrictions
+        var request = CreateDialogDetailsAuthorizationRequest(GetAsClaims(("pid", "12345678901")), OrgParty);
+        var resource = AuthorizationResourceSpec.FromContext(null, null);
+        var check = new AuthorizationCheck(
+        [
+            new AuthorizationUnit("read", resource, OrgParty),
+            new AuthorizationUnit("read", resource, OrgParty, AuthorizationAccessRestriction.DirectAndHierarchy),
+            new AuthorizationUnit("read", resource, OrgParty, AuthorizationAccessRestriction.ClientDelegation, ViaOrgParty)
+        ]);
+        request.Checks.Clear();
+        request.Checks.Add(check);
+
+        // Act
+        var result = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+
+        // Assert: one multirequest, one resource category and one reference per unit
+        Assert.Equal(3, result.Request.Request.Resource.Count);
+        Assert.Equal(3, result.Request.Request.MultiRequests.RequestReference.Count);
+        Assert.Equal(3, result.ExpectedResults);
+        Assert.Equal(3, result.Tuples.Select(x => x.ReferenceIndex).Distinct().Count());
+
+        var categories = result.Request.Request.Resource;
+        Assert.All(categories, c =>
+        {
+            Assert.Contains(c.Attribute, a => a.AttributeId == "urn:altinn:resource" && a.Value == "some-service");
+            Assert.Contains(c.Attribute, a => a.AttributeId == "urn:altinn:organization:identifier-no" && a.Value == "713330310");
+        });
+
+        Assert.Single(categories, c => c.Attribute.All(a => a.AttributeId is not (AccessRestrictionAttributeId or ViaPartyAttributeId)));
+
+        var directAndHierarchy = Assert.Single(categories, c => c.Attribute.Any(a => a is { AttributeId: AccessRestrictionAttributeId, Value: "DirectAndHierarchy" }));
+        Assert.DoesNotContain(directAndHierarchy.Attribute, a => a.AttributeId == ViaPartyAttributeId);
+
+        var clientDelegation = Assert.Single(categories, c => c.Attribute.Any(a => a is { AttributeId: AccessRestrictionAttributeId, Value: "ClientDelegation" }));
+        // The bare organization number, never the URN
+        Assert.Single(clientDelegation.Attribute, a => a is { AttributeId: ViaPartyAttributeId, Value: "310778737" });
+    }
+
+    [Fact]
+    public void CreateDialogDetailsRequestShouldNotShareResourceCategoriesAcrossViaParties()
+    {
+        var request = CreateDialogDetailsAuthorizationRequest(GetAsClaims(("pid", "12345678901")), OrgParty);
+        var resource = AuthorizationResourceSpec.FromContext(null, null);
+        request.Checks.Add(new AuthorizationCheck([new AuthorizationUnit("read", resource, OrgParty, AuthorizationAccessRestriction.ClientDelegation, ViaOrgParty)]));
+        request.Checks.Add(new AuthorizationCheck([new AuthorizationUnit("read", resource, OrgParty, AuthorizationAccessRestriction.ClientDelegation, OtherOrgParty)]));
+        // Identical to the first: collapses into the same evaluation
+        request.Checks.Add(new AuthorizationCheck(
+        [
+            new AuthorizationUnit("read", resource, OrgParty, AuthorizationAccessRestriction.ClientDelegation, ViaOrgParty),
+            new AuthorizationUnit("read", resource, OtherOrgParty)
+        ]));
+
+        var result = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+
+        var viaPartyValues = result.Request.Request.Resource
+            .SelectMany(c => c.Attribute)
+            .Where(a => a.AttributeId == ViaPartyAttributeId)
+            .Select(a => a.Value)
+            .ToList();
+        Assert.Equal(2, viaPartyValues.Count);
+        Assert.Contains("310778737", viaPartyValues);
+        Assert.Contains("991825827", viaPartyValues);
+
+        var viaOrgTuples = result.Tuples.Where(t => t.Unit.ViaParty == ViaOrgParty).ToList();
+        Assert.Equal(2, viaOrgTuples.Count);
+        Assert.Single(viaOrgTuples.Select(t => t.ReferenceIndex).Distinct());
+    }
+
+    [Fact]
+    public void CreateDialogDetailsResponseShouldOnlyPermitTheUnitsThePdpPermitted()
+    {
+        // Arrange: the PDP denies the restricted units and permits the unrestricted one
+        var request = CreateDialogDetailsAuthorizationRequest(GetAsClaims(("pid", "12345678901")), OrgParty);
+        var resource = AuthorizationResourceSpec.FromContext(null, null);
+        var unrestricted = new AuthorizationUnit("read", resource, OrgParty);
+        var restrictedOnly = new AuthorizationCheck(
+        [
+            new AuthorizationUnit("read", resource, OrgParty, AuthorizationAccessRestriction.DirectAndHierarchy),
+            new AuthorizationUnit("read", resource, OrgParty, AuthorizationAccessRestriction.ClientDelegation, ViaOrgParty)
+        ]);
+        var mixed = new AuthorizationCheck([unrestricted, .. restrictedOnly.Units]);
+        request.Checks.Add(restrictedOnly);
+        request.Checks.Add(mixed);
+
+        var preparedRequest = DecisionRequestHelper.CreateDialogDetailsRequest(request);
+        var jsonResponse = CreateMockedXamlJsonResponse(preparedRequest.Request, denyResourceCategoryPredicate:
+            r => r.Attribute.Any(a => a.AttributeId == AccessRestrictionAttributeId));
+
+        // Act
+        var response = DecisionRequestHelper.CreateDialogDetailsResponse(preparedRequest, jsonResponse);
+
+        // Assert
+        Assert.False(response.HasAccess(restrictedOnly));
+        Assert.True(response.HasAccess(mixed));
+        var authorizedMixed = Assert.Single(response.AuthorizedChecks, x => x.Check == mixed);
+        Assert.Equal([unrestricted], authorizedMixed.PermittedUnits);
+    }
+
+    [Fact]
+    public void RestrictedMainResourceShapedUnitsMustNotSatisfyMainResourcePredicates()
+    {
+        // Defense in depth: only unrestricted units can answer the dialog-level predicates.
+        var restricted = new AuthorizationCheck(
+            [new AuthorizationUnit("read", AuthorizationResourceSpec.Main, OrgParty, AuthorizationAccessRestriction.DirectAndHierarchy)]);
+        var result = new DialogDetailsAuthorizationResult { AuthorizedChecks = [AuthorizedCheck.FullyPermitted(restricted)] };
+
+        Assert.True(result.HasAccess(restricted));
+        Assert.False(result.HasAccessToMainResource());
+        Assert.False(result.HasReadAccessToMainResource());
+    }
+
+    [Fact]
     public void CreateDialogDetailsResponseShouldReturnCorrectResponse()
     {
         // Arrange
@@ -419,9 +541,9 @@ public class DecisionRequestHelperTests
         Assert.False(response.HasAccess(LegacyCheck("elementread", "element3", request.Party)));
         Assert.False(response.HasAccess(MainCheck("failaction", request.Party)));
 
-        // The authorized checks carry the parties the PDP permitted
+        // The authorized checks carry the units the PDP permitted
         var authorizedCheck = response.AuthorizedChecks.First(x => x.Check == MainCheck("read", request.Party));
-        Assert.Equal([request.Party], authorizedCheck.PermittedParties);
+        Assert.Equal([request.Party], authorizedCheck.PermittedUnits.Select(x => x.Party));
     }
 
     [Fact]
@@ -450,7 +572,7 @@ public class DecisionRequestHelperTests
         // Assert: the check is authorized (OR over parties), and only the permitted party is echoed
         Assert.True(response.HasAccess(multiPartyCheck));
         var authorizedCheck = response.AuthorizedChecks.First(x => x.Check == multiPartyCheck);
-        Assert.Equal([OtherOrgParty], authorizedCheck.PermittedParties);
+        Assert.Equal([OtherOrgParty], authorizedCheck.PermittedUnits.Select(x => x.Party));
     }
 
     [Fact]
@@ -522,7 +644,14 @@ public class DecisionRequestHelperTests
             // Different party set
             new("read", AuthorizationResourceSpec.FromContext("urn:altinn:resource:x", null), [OrgParty, OtherOrgParty]),
             // Legacy attribute expressing the same resource must not collide with the context form
-            LegacyCheck("read", "urn:altinn:resource:x", OrgParty)
+            LegacyCheck("read", "urn:altinn:resource:x", OrgParty),
+            // Different access restriction / via party for the same right and party
+            new([new AuthorizationUnit("read", AuthorizationResourceSpec.FromContext("urn:altinn:resource:x", null), OrgParty,
+                AuthorizationAccessRestriction.DirectAndHierarchy)]),
+            new([new AuthorizationUnit("read", AuthorizationResourceSpec.FromContext("urn:altinn:resource:x", null), OrgParty,
+                AuthorizationAccessRestriction.ClientDelegation, OtherOrgParty)]),
+            new([new AuthorizationUnit("read", AuthorizationResourceSpec.FromContext("urn:altinn:resource:x", null), OrgParty,
+                AuthorizationAccessRestriction.ClientDelegation, ViaOrgParty)])
         };
 
         var keys = new List<string> { baselineKey };
@@ -541,6 +670,17 @@ public class DecisionRequestHelperTests
         Assert.Equal(keys.Count, keys.Distinct(StringComparer.Ordinal).Count());
     }
 
+    [Fact]
+    public void GenerateCacheKeyShouldUseTheVersionedNamespace()
+    {
+        // The cached DialogDetailsAuthorizationResult changed shape (PermittedParties -> PermittedUnits). The
+        // version in the key keeps entries written by the previous shape from being deserialized as the new one;
+        // bump it whenever the cached result type changes.
+        var request = CreateDialogDetailsAuthorizationRequest(GetAsClaims(("pid", "12345678901")), OrgParty);
+
+        Assert.Matches("^auth:details:v2:[0-9a-f]{64}$", request.GenerateCacheKey());
+    }
+
     private static AuthorizationCheck MainCheck(string action, string party) =>
         new(action, AuthorizationResourceSpec.Main, [party]);
 
@@ -548,9 +688,9 @@ public class DecisionRequestHelperTests
         new(action, AuthorizationResourceSpec.FromLegacyAuthorizationAttribute(authorizationAttribute), [party]);
 
     private static string GetExpectedSubresource(AuthorizationCheck check) =>
-        check.Resource.Kind == AuthorizationResourceSpecKind.Main
+        check.Units.Single().Resource is { Kind: AuthorizationResourceSpecKind.Main }
             ? Constants.MainResource
-            : check.Resource.LegacyAuthorizationAttribute!;
+            : check.Units.Single().Resource.LegacyAuthorizationAttribute!;
 
     private static DialogDetailsAuthorizationRequest CreateDialogDetailsAuthorizationRequest(List<Claim> principalClaims, string party, bool isApp = false)
     {

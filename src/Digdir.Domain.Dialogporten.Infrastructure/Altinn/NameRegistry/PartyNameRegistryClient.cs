@@ -129,7 +129,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         );
 
         throw new InvalidOperationException("Search in party name registry returned no results");
-
     }
 
     private string? ProcessPartyNameResponse(

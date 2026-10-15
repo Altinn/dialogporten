@@ -4,6 +4,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 
 /// <summary>
 /// Used to re-sync actor names after the party name registry fails to answer, or returns no results for any reason.
+/// Note that for a name-fetch to fail, there should be no cache-entry or the fallback cache-entry should be expired.
 ///
 /// Note that system users synchronize periodically in the party name registry.
 /// This process may take up to 1 minute + processing time.

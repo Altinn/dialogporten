@@ -234,9 +234,9 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 };
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
-            // .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
-            // .AssertResult<DialogDto>(x =>
-            //     x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive))
+            .SendCommand((_, ctx) => GetDialog(ctx.GetDialogId()))
+            .AssertResult<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Archive))
             .GetLabelAssignmentLogs()
             .AssertResult<List<LabelAssignmentLogDto>>(x =>
             {

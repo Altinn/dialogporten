@@ -19,8 +19,13 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
+using Microsoft.Testing.Platform.Services;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using ZiggyCreatures.Caching.Fusion;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
@@ -591,8 +596,100 @@ public class CreateDialogTests : ApplicationCollectionFixture
     public Task CreateDialogCommand_Should_Return_Revision() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
-            .ExecuteAndAssert<CreateDialogSuccess>(x =>
-                x.Revision.Should().NotBeEmpty());
+            .ExecuteAndAssert<CreateDialogSuccess>(x => x.Revision.Should().NotBeEmpty());
+
+    [Fact]
+    public Task Can_Create_With_Transmission_And_Actor_Name_When_PartyNameRegistry_Fails() =>
+        FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(
+                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
+                        Arg.Any<CancellationToken>()
+                    )
+                    .Throws(new HttpRequestException());
+            })
+            .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = new ActorDto
+            {
+                ActorType = ActorType.Values.PartyRepresentative,
+                ActorId = TestUsers.DefaultParty
+            }))
+            .AssertResult<CreateDialogSuccess>()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().BeNull()
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().Be("Brando Sando")
+            );
+
+    [Fact]
+    public Task Can_Create_With_Transmission_Using_Cache_With_Transmission_When_PartyNameRegistry_Fails()
+    {
+        var sender = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorId = TestUsers.DefaultParty
+        };
+        return FlowBuilder.For(Application)
+            .EnableCaching()
+            .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = sender))
+            .AssertResult<CreateDialogSuccess>()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().Be("Brando Sando")
+            )
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(
+                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
+                        Arg.Any<CancellationToken>()
+                    )
+                    .Throws(new HttpRequestException());
+            })
+            .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = sender))
+            .AssertResult<CreateDialogSuccess>()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().Be("Brando Sando")
+            );
+    }
+
+    [Fact]
+    public Task Can_Create_And_Use_Cache_FailSafe_If_Expired_And_PartyNameRegistry_Fails()
+    {
+        var sender = new ActorDto
+        {
+            ActorType = ActorType.Values.PartyRepresentative,
+            ActorId = TestUsers.DefaultParty
+        };
+        return FlowBuilder.For(Application)
+            .EnableCaching()
+            .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = sender))
+            .AssertResult<CreateDialogSuccess>()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().Be("Brando Sando")
+            )
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(
+                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
+                        Arg.Any<CancellationToken>()
+                    )
+                    .Throws(new HttpRequestException());
+            })
+            .ExpireAllCaches()
+            .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = sender))
+            .AssertResult<CreateDialogSuccess>()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().Be("Brando Sando")
+            );
+    }
 
     [Fact]
     public async Task Can_Create_Actors_With_Same_Name_Without_ActorId()

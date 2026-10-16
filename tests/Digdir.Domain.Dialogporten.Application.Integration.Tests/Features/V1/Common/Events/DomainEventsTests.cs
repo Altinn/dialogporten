@@ -1,22 +1,22 @@
-using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
-using Digdir.Tool.Dialogporten.GenerateFakeData;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Delete;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Purge;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Restore;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Attachments;
 using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities;
+using Digdir.Tool.Dialogporten.GenerateFakeData;
 using OneOf.Types;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 using AttachmentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.AttachmentDto;
@@ -35,6 +35,7 @@ public class DomainEventsTests(DialogApplication application) : ApplicationColle
                            // DialogActivityCreatedDomainEvent maps based on activity type
                            // See All_DialogActivityTypes_Must_Have_A_Mapping_In_CloudEventTypes
                            && type != typeof(DialogActivityCreatedDomainEvent)
+                           && type != typeof(ResyncActorNameEvent)
                            && type != typeof(DomainEvent))
             .ToList();
 

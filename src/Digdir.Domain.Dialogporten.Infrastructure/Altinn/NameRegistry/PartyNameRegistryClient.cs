@@ -40,6 +40,31 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         _useCorrectPersonNameOrdering = applicationSettings.Value.FeatureToggle.UseCorrectPersonNameOrdering;
     }
 
+    public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken ct)
+    {
+        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
+        {
+            return null;
+        }
+
+        if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return name;
+        if (!TryCreateNameLookup(partyIdentifier, out var nameLookup)) return null;
+
+        try
+        {
+            return await _cache.GetOrSetAsync<string>(
+                GetCacheKey(externalIdWithPrefix),
+                cancellationToken => GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken),
+                token: ct
+            );
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Cache Factory failed with Exception: {Exception}", e);
+            return null;
+        }
+    }
+
     public async Task<string> GetNameOrFail(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
@@ -52,41 +77,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
 
         var nameFromRegister = await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken);
-        var cacheKey = GetCacheKey(externalIdWithPrefix);
-        await _cache.SetAsync(cacheKey, nameFromRegister, token: cancellationToken);
+        await _cache.SetAsync(GetCacheKey(externalIdWithPrefix), nameFromRegister, token: cancellationToken);
         return nameFromRegister;
-    }
-
-    public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
-    {
-        try
-        {
-            return await _cache.GetOrSetAsync<string?>(
-                GetCacheKey(externalIdWithPrefix),
-                GetNameFactory(externalIdWithPrefix),
-                token: cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("{Factory} failed with Exception: {Exception}", nameof(GetNameFactory), e);
-            return null;
-        }
-    }
-
-    private Func<FusionCacheFactoryExecutionContext<string?>, CancellationToken, Task<string?>> GetNameFactory(
-        string externalIdWithPrefix
-    )
-    {
-        return async (ctx, ct) =>
-        {
-            var name = await GetNameFromRegister(externalIdWithPrefix, ct);
-            if (name is not null) return name;
-
-            ctx.Options.SkipMemoryCacheWrite = true;
-            ctx.Options.SkipDistributedCacheWrite = true;
-
-            return null;
-        };
     }
 
     public void CacheName(string actorId, string name)
@@ -100,19 +92,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
     private string GetCacheKey(string externalIdWithPrefix)
     {
         return $"Name{(_useCorrectPersonNameOrdering ? "_v2" : "")}_{externalIdWithPrefix}";
-    }
-
-    private async Task<string?> GetNameFromRegister(string externalIdWithPrefix, CancellationToken ct)
-    {
-        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
-        {
-            return null;
-        }
-
-        if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return name;
-        if (!TryCreateNameLookup(partyIdentifier, out var nameLookup)) return null;
-
-        return await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, ct);
     }
 
     private async Task<string> GetNameFromRegisterOrFail(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)

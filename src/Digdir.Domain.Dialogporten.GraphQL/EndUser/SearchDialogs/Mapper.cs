@@ -62,7 +62,7 @@ internal static class SearchDialogsMapExtensions
         FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
         FromPartyTransmissionsCount = source.FromPartyTransmissionsCount,
         LatestActivity = source.LatestActivity is null ? null : ToActivity(source.LatestActivity),
-        Content = source.Content is null ? null! : ToSearchContent(source.Content),
+        Content = source.Content is null ? null : ToSearchContent(source.Content),
         SeenSinceLastUpdate = source.SeenSinceLastUpdate.Select(ToSeenLog).ToList(),
         SeenSinceLastContentUpdate = source.SeenSinceLastContentUpdate.Select(ToSeenLog).ToList(),
         IsContentSeen = source.IsContentSeen,

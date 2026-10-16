@@ -133,6 +133,9 @@ jobs:
               - 'src/**/*'
               - '.azure/applications/**/*'
               - '.azure/modules/containerApp/**/*'
+              # The db-provisioner image embeds these, so a change here must rebuild and redeploy it
+              - '.azure/modules/postgreSql/provisioner/**/*'
+              - '.azure/modules/postgreSql/sql/**/*'
             tests:
               - 'tests/**/*'
             web_api_client:
@@ -182,6 +185,8 @@ jobs:
             docker:
               - '**/Dockerfile'
               - '**/*.dockerfile'
+              - '.azure/modules/postgreSql/provisioner/**/*'
+              - '.azure/modules/postgreSql/sql/**/*'
               - '.dockerignore'
               - '.editorconfig'
               - '.github/workflows/workflow-publish-docker-images.yml'

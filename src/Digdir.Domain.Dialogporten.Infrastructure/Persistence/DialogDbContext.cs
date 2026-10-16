@@ -137,6 +137,12 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
                 .ToListAsync(cancellationToken);
     }
 
+    public async Task<bool> HasContentChanges(DialogEntity dialog, CancellationToken cancellationToken = default)
+    {
+        var node = await ChangeTracker.GetAggregateNodeAsync(dialog, cancellationToken);
+        return node is not null && DialogEntity.ContentHasChanged(node);
+    }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Properties<string>(x => x.HaveMaxLength(Domain.Common.Constants.DefaultMaxStringLength));

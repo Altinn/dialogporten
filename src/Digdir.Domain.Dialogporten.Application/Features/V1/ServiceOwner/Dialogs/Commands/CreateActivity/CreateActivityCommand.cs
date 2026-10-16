@@ -8,9 +8,7 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
-using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Domain.Common;
-using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
@@ -57,7 +55,6 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
     private readonly IUser _user;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
-    private readonly ISystemLabelAdder _systemLabelAdder;
 
     public CreateActivityCommandHandler(
         IDomainContext domainContext,
@@ -65,15 +62,13 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         IDialogDbContext db,
         IUser user,
         IUserResourceRegistry userResourceRegistry,
-        IServiceResourceAuthorizer serviceResourceAuthorizer,
-        ISystemLabelAdder systemLabelAdder)
+        IServiceResourceAuthorizer serviceResourceAuthorizer)
     {
         _domainContext = domainContext;
         _unitOfWork = unitOfWork;
         _db = db;
         _user = user;
         _userResourceRegistry = userResourceRegistry;
-        _systemLabelAdder = systemLabelAdder;
         _serviceResourceAuthorizer = serviceResourceAuthorizer;
     }
 
@@ -121,11 +116,6 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         {
             _domainContext.Pop();
             return forbidden;
-        }
-
-        if (!request.IsSilentUpdate)
-        {
-            _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);
         }
 
         var saveResult = await _unitOfWork

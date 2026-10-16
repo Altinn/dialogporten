@@ -1,6 +1,7 @@
 using System.Net;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1;
 using Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
+using Altinn.ApiClients.Dialogporten.Features.V1;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.WebAPI.E2E.Tests.Extensions;
@@ -224,7 +225,7 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
     {
         // Arrange
         var dialogId = await Fixture.ServiceownerApi
-            .CreateSimpleDialogAsync(x => x.Progress = 68);
+            .CreateSimpleDialogAsync(x => x.Status = V1ServiceOwnerCommonDialogStatuses_DialogStatusInput.New);
 
         // Set Archive label
         await Fixture.EndUserApi
@@ -232,15 +233,17 @@ public class SetSystemLabelTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE
                 dialogId,
                 request => request.AddLabels = [Archive]);
 
-        // Act - Service owner patches dialog
+        // Act - Service owner patches dialog with a content change (status), which resets
+        // the end user's system label to Default. Non-content changes no longer reset it
+        // so this must be a content change to produce the label log entry.
         var patchResponse = await Fixture.ServiceownerApi
             .PatchDialogAsync(
                 dialogId,
                 ops => ops.Add(new()
                 {
                     Op = "replace",
-                    Path = "/progress",
-                    Value = 69
+                    Path = "/status",
+                    Value = "InProgress"
                 }));
 
         // Assert

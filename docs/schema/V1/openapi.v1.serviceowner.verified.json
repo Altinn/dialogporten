@@ -6710,7 +6710,7 @@
         ]
       },
       "put": {
-        "description": "Replaces a given dialog with the supplied model.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "Replaces a given dialog with the supplied model.\n\nIf the update changes the dialog\u0027s content (transmissions, content, attachments, GUI/API actions, status or extended status), \nany end user system label of \u0027Bin\u0027 or \u0027Archive\u0027 is reset to \u0027Default\u0027, moving the dialog back to the inbox. \nChanges to other fields leave the end user\u0027s system labels untouched. \nThis reset is suppressed for silent updates.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "UpdateDialog",
         "parameters": [
           {
@@ -7475,7 +7475,7 @@
         ]
       },
       "post": {
-        "description": "The activity is created with the given configuration.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "The activity is created with the given configuration.\n\nCreating an activity does not count as a content change, \nso it leaves the end user\u0027s system labels untouched; a dialog in \u0027Bin\u0027 or \u0027Archive\u0027 stays there.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "CreateDialogActivity",
         "parameters": [
           {

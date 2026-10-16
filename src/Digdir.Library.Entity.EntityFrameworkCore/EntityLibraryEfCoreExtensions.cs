@@ -64,6 +64,29 @@ public static class EntityLibraryEfCoreExtensions
         return changeTracker.HandleAggregateEntities(utcNow, options, cancellationToken);
     }
 
+    /// <summary>
+    /// Builds the aggregate node for <paramref name="entity"/> from the current <see cref="ChangeTracker"/>
+    /// state, using the exact same traversal and state-collapsing logic that runs during save. This lets
+    /// callers evaluate aggregate-level change decisions (e.g. <see cref="IAggregateUpdatedHandler"/> rules)
+    /// before <see cref="DbContext.SaveChangesAsync(CancellationToken)"/> is called.
+    /// </summary>
+    /// <param name="changeTracker">The change tracker.</param>
+    /// <param name="entity">The aggregate root entity to build the node for.</param>
+    /// <param name="cancellationToken">A token for requesting cancellation of the operation.</param>
+    /// <returns>The <see cref="AggregateNode"/> for <paramref name="entity"/>, or <c>null</c> if the entity is not part of any tracked change.</returns>
+    public static async Task<AggregateNode?> GetAggregateNodeAsync(
+        this ChangeTracker changeTracker,
+        object entity,
+        CancellationToken cancellationToken = default)
+    {
+        var nodeByEntry = await changeTracker
+            .Entries()
+            .Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+            .GetAggregateNodeByEntry(cancellationToken);
+
+        return nodeByEntry.Values.FirstOrDefault(x => ReferenceEquals(x.Entity, entity));
+    }
+
     private static ChangeTracker DoIf(this ChangeTracker changeTracker, bool predicate, Func<ChangeTracker, ChangeTracker> action)
         => predicate ? action(changeTracker) : changeTracker;
 

@@ -94,7 +94,7 @@ internal static class AggregateExtensions
         return modelBuilder;
     }
 
-    private static async Task<IReadOnlyDictionary<EntityEntry, AggregateNode>> GetAggregateNodeByEntry(
+    internal static async Task<IReadOnlyDictionary<EntityEntry, AggregateNode>> GetAggregateNodeByEntry(
         this IEnumerable<EntityEntry> entries,
         CancellationToken cancellationToken)
     {

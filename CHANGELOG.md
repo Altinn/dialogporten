@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.125.0](https://github.com/Altinn/dialogporten/compare/v1.124.1...v1.125.0) (2026-10-16)
+
+
+### Features
+
+* support access restrictions and dialog party checks in authorizationContext ([#4482](https://github.com/Altinn/dialogporten/issues/4482)) ([2561a85](https://github.com/Altinn/dialogporten/commit/2561a8543ed14d8567aa79b289da33db590cf83e))
+
+
+### Bug Fixes
+
+* **dialogs:** only reset system labels to Default on content changes ([#4496](https://github.com/Altinn/dialogporten/issues/4496)) ([0946da8](https://github.com/Altinn/dialogporten/commit/0946da81c676b928db98780afa01fe50943af609))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency azure.storage.blobs to 12.30.1 ([#4486](https://github.com/Altinn/dialogporten/issues/4486)) ([9ec1c7a](https://github.com/Altinn/dialogporten/commit/9ec1c7a4cf4eaf53f62087e8dc462b372c8f5b7c))
+* **deps:** update dependency scalar.aspnetcore to 2.17.14 ([#4487](https://github.com/Altinn/dialogporten/issues/4487)) ([4a97d7d](https://github.com/Altinn/dialogporten/commit/4a97d7d5dd39a4df03af2bfd81cadacee35691c4))
+* **deps:** update docker/build-push-action action to v7.4.0 ([#4490](https://github.com/Altinn/dialogporten/issues/4490)) ([1363a02](https://github.com/Altinn/dialogporten/commit/1363a02ef92dae6cd345827f27e433271377f083))
+* **deps:** update docker/setup-buildx-action action to v4.4.1 ([#4491](https://github.com/Altinn/dialogporten/issues/4491)) ([e4f5f38](https://github.com/Altinn/dialogporten/commit/e4f5f38e938ddf290600f24ee626ec7241a2e40b))
+
 ## [1.124.1](https://github.com/Altinn/dialogporten/compare/v1.124.0...v1.124.1) (2026-10-13)
 
 

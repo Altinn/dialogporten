@@ -56,6 +56,16 @@ param postgresConfiguration = {
   enableIndexTuning: false
   enableQueryPerformanceInsight: false
   enableTrackIoTiming: true
+  // Diagnostic and maintenance extensions installed by hand; allow-listed so they survive deploys.
+  additionalExtensions: [
+    'HYPOPG'
+    'PAGEINSPECT'
+    'PG_HINT_PLAN'
+    'PG_REPACK'
+    'PG_VISIBILITY'
+    'PGAUDIT'
+    'PGSTATTUPLE'
+  ]
   additionalServerConfigurations: [
     {
       name: 'logfiles.retention_days'
@@ -105,6 +115,42 @@ param postgresConfiguration = {
       name: 'vacuum_cost_limit'
       value: '10000'
     }
+    // Freeze and wraparound tuning. The static
+    // autovacuum_*freeze_max_age counterparts are in staticServerConfigurations.
+    {
+      name: 'vacuum_freeze_min_age'
+      value: '100000000'
+    }
+    {
+      name: 'vacuum_freeze_table_age'
+      value: '800000000'
+    }
+    {
+      name: 'vacuum_multixact_freeze_min_age'
+      value: '10000000'
+    }
+    {
+      name: 'vacuum_multixact_freeze_table_age'
+      value: '600000000'
+    }
+    {
+      name: 'vacuum_failsafe_age'
+      value: '1500000000'
+    }
+    {
+      name: 'vacuum_multixact_failsafe_age'
+      value: '1300000000'
+    }
+    {
+      name: 'log_autovacuum_min_duration'
+      value: '20000'
+    }
+    // Set directly rather than through enableQueryPerformanceInsight, which would also set
+    // pg_qs.query_capture_mode to all.
+    {
+      name: 'pgms_wait_sampling.query_capture_mode'
+      value: 'all'
+    }
   ]
   applyStaticServerConfigurations: false
   staticServerConfigurations: [
@@ -118,7 +164,7 @@ param postgresConfiguration = {
     }
     {
       name: 'shared_preload_libraries'
-      value: 'pg_cron,pg_stat_statements,pg_hint_plan,auto_explain,pgaudit,pg_squeeze'
+      value: 'pg_cron,pg_stat_statements,auto_explain,pg_squeeze,pgaudit,pg_hint_plan'
     }
     {
       name: 'subtransaction_buffers'
@@ -127,6 +173,22 @@ param postgresConfiguration = {
     {
       name: 'transaction_buffers'
       value: '1024'
+    }
+    {
+      name: 'autovacuum_freeze_max_age'
+      value: '1000000000'
+    }
+    {
+      name: 'autovacuum_multixact_freeze_max_age'
+      value: '800000000'
+    }
+    {
+      name: 'multixact_member_buffers'
+      value: '512'
+    }
+    {
+      name: 'multixact_offset_buffers'
+      value: '256'
     }
   ]
   backupRetentionDays: 32

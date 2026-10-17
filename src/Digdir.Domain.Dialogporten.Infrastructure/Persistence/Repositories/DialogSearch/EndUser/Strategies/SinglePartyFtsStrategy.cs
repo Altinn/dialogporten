@@ -73,7 +73,7 @@ internal sealed class SinglePartyFtsStrategy : IQueryStrategy<EndUserSearchConte
     }
 
     // Term-driven: GIN(Party, SearchVector) gives the party's term matches (fast-scans from a rare
-    // term's small posting list), then the covering index IX_Dialog_Id_Covering_V2 applies the
+    // term's small posting list), then the covering index IX_Dialog_Id_Covering applies the
     // auth/filters/sort index-only (no heap) for the page. Produces CTE `candidates(Id, <order cols>)`.
     private static PostgresFormattableStringBuilder BuildTermDrivenCandidates(
         GetDialogsQuery query,
@@ -96,7 +96,7 @@ internal sealed class SinglePartyFtsStrategy : IQueryStrategy<EndUserSearchConte
                     JOIN "Dialog" d ON d."Id" = fts."Id"
                     WHERE TRUE
                 """)
-            // No d."Party" predicate here: Party is not in IX_Dialog_Id_Covering_V2, and the GIN probe
+            // No d."Party" predicate here: Party is not in IX_Dialog_Id_Covering, and the GIN probe
             // already scoped to the party -- re-asserting it would force heap fetches.
             .AppendManyFilter([.. authorization.Services], nameof(GetDialogsQuery.ServiceResource))
             .Append($"{dialogFilters}")

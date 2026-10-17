@@ -13,7 +13,7 @@
 - [ ] **Your** code builds clean without any errors or warnings
 - [ ] Manual testing done (required)
 - [ ] Relevant automated test added 
-- [ ] Database changes manually applied to prod/YT01 (if relevant)
+- [ ] Long-running or locking database changes (e.g. new indexes on large tables) manually applied to prod/YT01 (if relevant)
 
 ## Documentation
 

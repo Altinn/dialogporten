@@ -267,5 +267,5 @@ public static class IServiceCollectionExtensions
         public bool SkipDistributedCache { get; set; }
     }
 
-    public record FusionCacheRegistration(string CacheName);
+    public sealed record FusionCacheRegistration(string CacheName);
 }

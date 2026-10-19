@@ -1,0 +1,59 @@
+name: Run E2E tests
+run-name: Run E2E tests (${{ inputs.suite }} on ${{ inputs.environment }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - staging
+          - yt01
+      suite:
+        description: 'Test suite'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - webapi
+          - graphql
+      ref:
+        description: 'The branch or tag ref to run the tests from. Should match the version deployed to the environment.'
+        required: true
+        default: 'main'
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.environment }}
+  queue: max
+
+permissions:
+  contents: read
+
+jobs:
+  run-webapi-e2e-tests:
+    name: "Run WebAPI E2E tests"
+    if: ${{ inputs.suite == 'both' || inputs.suite == 'webapi' }}
+    uses: ./.github/workflows/workflow-run-webapi-e2e-tests.yml
+    secrets:
+      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+    with:
+      environment: ${{ inputs.environment }}
+      ref: ${{ inputs.ref }}
+
+  run-graphql-e2e-tests:
+    name: "Run GraphQL E2E tests"
+    if: ${{ inputs.suite == 'both' || inputs.suite == 'graphql' }}
+    uses: ./.github/workflows/workflow-run-graphql-e2e-tests.yml
+    secrets:
+      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+    with:
+      environment: ${{ inputs.environment }}
+      ref: ${{ inputs.ref }}

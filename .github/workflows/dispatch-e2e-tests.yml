@@ -30,6 +30,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.environment }}
+  queue: max
 
 permissions:
   contents: read

@@ -56,6 +56,10 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                 token: ct
             );
         }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception e)
         {
             _logger.LogError(e, "Cache Factory failed");

@@ -35,8 +35,6 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         _logger = logger;
         _cache = cache;
         _partyNameRegistryTransport = partyNameRegistryTransport;
-
-        // Fixing the flag at construct-time. Application must be restarted for changes to take effect.
         _useCorrectPersonNameOrdering = applicationSettings.Value.FeatureToggle.UseCorrectPersonNameOrdering;
     }
 

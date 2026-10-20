@@ -452,7 +452,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Put("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/systemlabels")]
-        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Query] string? enduserId = default, [Header("if-Match")] System.Guid? if_Match = default, CancellationToken cancellationToken = default);
+        Task<IApiResponse> SetDialogSystemLabels(System.Guid dialogId, [Body, AliasAs("SetDialogSystemLabelRequest")] SetDialogSystemLabelRequest setDialogSystemLabelRequest, [Query] string enduserId, [Header("if-Match")] System.Guid? if_Match = default, CancellationToken cancellationToken = default);
 
         /// <summary>Sets system labels for multiple dialogs</summary>
         /// <remarks>Sets the system labels for a list of dialogs, optionally including a end user context revision for each dialog.</remarks>
@@ -502,7 +502,7 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1
         /// </returns>
         [Headers("Accept: application/problem+json, text/plain", "Content-Type: application/json")]
         [Post("/api/v1/serviceowner/dialogs/endusercontext/systemlabels/actions/bulkset")]
-        Task<IApiResponse> BulkSetDialogSystemLabels([Body] BulkSetSystemLabel dto, [Query] string? enduserId = default, CancellationToken cancellationToken = default);
+        Task<IApiResponse> BulkSetDialogSystemLabels([Body] BulkSetSystemLabel dto, [Query] string enduserId, CancellationToken cancellationToken = default);
 
         /// <summary>Gets a list of dialog transmissions</summary>
         /// <remarks>Gets the list of transmissions belonging to a dialog</remarks>

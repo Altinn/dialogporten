@@ -60,7 +60,7 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<LabelAssignmentLog> LabelAssignmentLogs => Set<LabelAssignmentLog>();
     public DbSet<NotificationAcknowledgement> NotificationAcknowledgements => Set<NotificationAcknowledgement>();
     public DbSet<ResourcePolicyInformation> ResourcePolicyInformation => Set<ResourcePolicyInformation>();
-    public DbSet<Actor> Actors => Set<Actor>();
+    public DbSet<Actor> Actor => Set<Actor>();
     public DbSet<ActorName> ActorName => Set<ActorName>();
     public DbSet<AttachmentUrl> AttachmentUrls => Set<AttachmentUrl>();
     public DbSet<DialogAttachment> DialogAttachments => Set<DialogAttachment>();

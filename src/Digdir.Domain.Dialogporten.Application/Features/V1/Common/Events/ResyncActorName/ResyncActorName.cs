@@ -36,7 +36,7 @@ public sealed class ResyncActorName(
         var newActorNameId = await actorNameRepository.EnsureActorName(actorId, newName, cancellationToken);
         if (newActorNameId == actorNameId) return;
 
-        await db.Actors
+        await db.Actor
             .Where(x => x.ActorNameEntityId == actorNameId)
             .ExecuteUpdateAsync(
                 setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),

@@ -12,7 +12,8 @@ internal sealed class DialogSeenLogWriter(
     DialogDbContext db,
     IPartyNameRegistry partyNameRegistry,
     ITransactionTime transactionTime,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IActorNameRepository actorNameRepository
 ) : IDialogSeenLogWriter
 {
 
@@ -113,7 +114,7 @@ internal sealed class DialogSeenLogWriter(
     {
         var normalizedActorId = actorId.ToLowerInvariant();
         var actorName = await partyNameRegistry.GetName(normalizedActorId, cancellationToken);
-        var actorNameId = await EnsureActorName(normalizedActorId, actorName, cancellationToken);
+        var actorNameId = await actorNameRepository.EnsureActorName(normalizedActorId, actorName, cancellationToken);
         var actorType = ActorType.Values.PartyRepresentative;
 
         var rowsUpdated = await EnsureSeenLog(seenLogId, dialogId, userType, seenAt, cancellationToken);
@@ -141,29 +142,6 @@ internal sealed class DialogSeenLogWriter(
                 },
             OutOfSyncActorNameId: actorName == null
         );
-    }
-
-    private async Task<Guid> EnsureActorName(string actorId, string? actorName, CancellationToken cancellationToken)
-    {
-        await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                       INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt")
-                                                       VALUES ({Guid.CreateVersion7()}, {actorId}, {actorName}, {transactionTime.Value})
-                                                       ON CONFLICT ("ActorId", "Name") DO NOTHING
-                                                       """, cancellationToken);
-
-        var query = new PostgresFormattableStringBuilder()
-            .Append($"""
-                      SELECT "Id" AS "Value"
-                      FROM "ActorName"
-                      WHERE "ActorId" = {actorId}
-                     """)
-            .AppendIf(actorName != null, $""" AND "Name" = {actorName}""")
-            .AppendIf(actorName == null, """ AND "Name" IS NULL""")
-            .Append(" LIMIT 1");
-
-        return await db.Database
-            .SqlQuery<Guid>(query.ToFormattableString())
-            .SingleAsync(cancellationToken);
     }
 
     private async Task<int> EnsureSeenLog(

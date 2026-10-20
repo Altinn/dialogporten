@@ -1,5 +1,4 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +8,8 @@ namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.Resyn
 
 public sealed class ResyncActorName(
     IDialogDbContext db,
-    IUnitOfWork unitOfWork,
     IPartyNameRegistry partyNameRegistry,
+    IActorNameRepository actorNameRepository,
     ILogger<ResyncActorName> logger
 ) : INotificationHandler<ResyncActorNameEvent>
 {
@@ -18,7 +17,7 @@ public sealed class ResyncActorName(
     {
         var actorNameId = resyncActorNameEvent.ActorNameId;
         var outdatedActorNameEntity = await db.ActorName
-            .Include(x => x.ActorEntities)
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == actorNameId, cancellationToken);
 
         if (outdatedActorNameEntity is null)
@@ -34,61 +33,14 @@ public sealed class ResyncActorName(
         if (actorId is null) return;
 
         var newName = await partyNameRegistry.GetNameOrFail(actorId, cancellationToken);
-        var existingActorNewNameEntity = await db.ActorName
-            .FirstOrDefaultAsync(x => x.ActorId == actorId && x.Name == newName, cancellationToken);
+        var newActorNameId = await actorNameRepository.EnsureActorName(actorId, newName, cancellationToken);
+        if (newActorNameId == actorNameId) return;
 
-        var newActorNameEntity = existingActorNewNameEntity ?? new ActorName
-        {
-            ActorId = actorId,
-            Name = newName
-        };
-        if (existingActorNewNameEntity is null) db.ActorName.Add(newActorNameEntity);
-
-        foreach (var actorEntity in outdatedActorNameEntity.ActorEntities)
-        {
-            actorEntity.ActorNameEntity = newActorNameEntity;
-        }
-
-        var result = await unitOfWork
-            .DisableUpdatableFilter()
-            .DisableAggregateFilter()
-            .DisableImmutableFilter()
-            .SaveChangesAsync(cancellationToken);
-
-        result.Match<SaveChangesResult>(
-            success => success,
-            domainError =>
-            {
-                var errors = domainError.Errors.Select(error => $"{error.PropertyName} = {error.ErrorMessage}");
-                var errorsString = string.Join(", ", errors);
-                logger.LogError(
-                    "Domain error on {Class}, for {Event}. With errors: {Errors}",
-                    nameof(ResyncActorName),
-                    resyncActorNameEvent.EventId,
-                    errorsString
-                );
-                throw new InvalidOperationException($"Failed to save changes for {nameof(ResyncActorName)}");
-            },
-            concurrencyError =>
-            {
-                logger.LogError(
-                    "Concurrency error on {Class}, for {Event}",
-                    nameof(ResyncActorName),
-                    resyncActorNameEvent.EventId
-                );
-                throw new InvalidOperationException($"Failed to save changes for {nameof(ResyncActorName)}");
-            },
-            conflict =>
-            {
-                logger.LogError(
-                    "Conflict on error on {Class}, for {Event}: {PropertyName} = {ErrorMessage}",
-                    nameof(ResyncActorName),
-                    resyncActorNameEvent.EventId,
-                    conflict.PropertyName,
-                    conflict.ErrorMessage
-                );
-                throw new InvalidOperationException($"Failed to save changes for {nameof(ResyncActorName)}");
-            }
-        );
+        await db.Actors
+            .Where(x => x.ActorNameEntityId == actorNameId)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),
+                cancellationToken
+            );
     }
 }

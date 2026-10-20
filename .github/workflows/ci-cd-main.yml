@@ -275,3 +275,39 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}
+
+  update-deploy-badge:
+    name: Update deploy badge
+    # needs lists every job so the badge color covers the whole run
+    needs:
+      [
+        generate-git-short-sha,
+        get-current-version,
+        check-for-changes,
+        build-and-test,
+        publish-docker-images,
+        update-manifests,
+        deploy-infra,
+        deploy-apps,
+        get-previous-deployed-sha,
+        tag-issues-with-environment,
+        store-latest-deployed-sha,
+        generate-timestamp,
+        publish-sdk-to-nuget,
+        publish-enduser-sdk-to-nuget,
+        publish-serviceowner-sdk-to-nuget,
+        run-e2e-tests,
+        run-graphql-e2e-tests,
+        run-webapi-e2e-tests,
+        send-slack-message-on-failure,
+        send-deployment-to-swarmia,
+      ]
+    if: ${{ always() && !cancelled() }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: test
+      label: CI/CD Main
+      status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+      version: ${{ (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') && format('{0}-{1}', needs.get-current-version.outputs.version, needs.generate-git-short-sha.outputs.gitShortSha) || '' }}

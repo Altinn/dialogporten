@@ -177,3 +177,31 @@ jobs:
       version: ${{ inputs.version }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}
+
+  update-deploy-badge:
+    name: Update deploy badge
+    # needs lists every job so the badge color covers the whole run
+    needs:
+      [
+        check-if-version-exists,
+        get-versions-from-github,
+        check-for-changes,
+        deploy-infra,
+        store-infra-version,
+        deploy-apps,
+        update-manifests,
+        tag-issues-with-environment,
+        publish-sdk-to-nuget,
+        store-apps-version,
+        send-slack-message-on-failure,
+        send-deployment-to-swarmia,
+      ]
+    if: ${{ always() && !cancelled() }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: prod
+      label: CI/CD Production
+      status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+      version: ${{ (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') && inputs.version || '' }}

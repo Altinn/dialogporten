@@ -161,7 +161,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         CancellationToken cancellationToken
     )
     {
-        var response = await _partyNameRegistryTransport.QueryPartyNameResponse(nameLookup, cancellationToken);
+        using var response = await _partyNameRegistryTransport.QueryPartyNameResponse(nameLookup, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         return await response

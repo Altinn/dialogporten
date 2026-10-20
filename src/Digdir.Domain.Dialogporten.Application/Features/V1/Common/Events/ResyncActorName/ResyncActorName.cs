@@ -17,11 +17,11 @@ public sealed class ResyncActorName(
     public async Task Handle(ResyncActorNameEvent resyncActorNameEvent, CancellationToken cancellationToken)
     {
         var actorNameId = resyncActorNameEvent.ActorNameId;
-        var outdatedActorNameEntitiy = await db.ActorName
+        var outdatedActorNameEntity = await db.ActorName
             .Include(x => x.ActorEntities)
             .FirstOrDefaultAsync(x => x.Id == actorNameId, cancellationToken);
 
-        if (outdatedActorNameEntitiy == null)
+        if (outdatedActorNameEntity == null)
         {
             logger.LogWarning(
                 "No ActorName with Id {Id}. This probably means a new ActorName conflicted on insert and was created with another id",
@@ -30,7 +30,7 @@ public sealed class ResyncActorName(
             return;
         }
 
-        var actorId = outdatedActorNameEntitiy.ActorId;
+        var actorId = outdatedActorNameEntity.ActorId;
         if (actorId == null) return;
 
         var newName = await partyNameRegistry.GetNameOrFail(actorId, cancellationToken);
@@ -44,7 +44,7 @@ public sealed class ResyncActorName(
         };
         if (existingActorNewNameEntity == null) db.ActorName.Add(newActorNameEntity);
 
-        foreach (var actorEntity in outdatedActorNameEntitiy.ActorEntities)
+        foreach (var actorEntity in outdatedActorNameEntity.ActorEntities)
         {
             actorEntity.ActorNameEntity = newActorNameEntity;
         }

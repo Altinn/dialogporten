@@ -39,12 +39,9 @@ public sealed class UserRegistry : IUserRegistry
 {
     private readonly IUser _user;
 
-    public UserRegistry(
-        IUser user,
-        IPartyNameRegistry partyNameRegistry)
+    public UserRegistry(IUser user)
     {
         ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
         _user = user;
     }

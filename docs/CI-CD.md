@@ -86,6 +86,7 @@ four parallel workflows consume:
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)
 - Requires specific version input
+- Only moves forward: fails if the version is older than the one in production. See [Rolling back production](#rolling-back-production)
 - Full deployment process:
   - Version verification
   - Infrastructure deployment
@@ -214,7 +215,9 @@ releases.
    git commit -am "fix: <desc>"
    git push -u origin hotfix/<desc>
    ```
-   Branching from the prod tag (not `main`) keeps unreleased work off the hotfix.
+   Branching from the prod tag (not `main`) keeps unreleased work off the hotfix. If prod already runs
+   a hotfix, branch from that hotfix tag. CI/CD Production refuses a hotfix that does not build on the
+   deployed version.
 2. Run **Build Production Hotfix Release** from `main` with **ref** = `hotfix/<desc>`. It builds and
    pushes images, creates tag `v<base>-hotfix<shortsha>` and a GitHub **prerelease**, and prints the
    resulting hotfix version in the run summary.
@@ -224,8 +227,37 @@ releases.
 4. **Back-merge (mandatory):** open a PR to merge `hotfix/<desc>` into `main` so the fix is not lost on
    the next release.
 
-**Rollback:** redeploy the previous prod version by running **CI/CD Production** with the prior
-`version = <x.y.z>` (same input format as step 3, without a leading `v`).
+**Rollback:** CI/CD Production does not deploy the release below a hotfix. Use the manual workflows,
+see [Rolling back production](#rolling-back-production).
+
+## Rolling back production
+
+**CI/CD Production** (`ci-cd-prod.yml`) only moves forward. It compares the version with the apps and
+infrastructure versions stored for prod (`LATEST_DEPLOYED_APPS_VERSION` and
+`LATEST_DEPLOYED_INFRA_VERSION`) and fails before deploying anything if it is older than either one:
+
+- A newer release, e.g. `1.23.4` → `1.23.5`, is allowed.
+- The same version is allowed, so a partly failed deploy can be retried.
+- A hotfix on the same release is allowed when its tag builds on the deployed one, e.g.
+  `1.23.4` → `1.23.4-hotfixabc1234`, or a second hotfix branched from the first.
+- Going back, e.g. `1.23.5` → `1.23.4` or `1.23.4-hotfixabc1234` → `1.23.4`, is refused.
+
+To roll back, run the manual workflows with environment `prod` and the previous version, without the
+leading `v`:
+
+- **Dispatch Apps** (`dispatch-apps.yml`). It deploys the apps from the tag `v<version>`.
+- **Dispatch infrastructure** (`dispatch-infrastructure.yml`), if the release you roll back from
+  changed infrastructure.
+
+The manual workflows do not update `dialogporten-manifests` or the stored deployed version. After a
+rollback:
+
+- The stored version is still the release you rolled back from, so the next CI/CD Production deploy
+  must use that version or a newer one.
+- Change detection in that deploy compares the branch it runs from (normally `main`) against the
+  release you rolled back from, not the version running in prod. If nothing relevant changed since
+  then, apps or infrastructure are skipped and prod stays on the rolled-back version. Check in the run
+  that "Deploy apps to prod" ran.
 
 ## Version Tracking and Change Detection
 

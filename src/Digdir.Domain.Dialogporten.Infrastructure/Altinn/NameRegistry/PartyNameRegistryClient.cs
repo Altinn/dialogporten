@@ -58,7 +58,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
         catch (Exception e)
         {
-            _logger.LogError("Cache Factory failed with Exception: {Exception}", e);
+            _logger.LogError(e, "Cache Factory failed");
             return null;
         }
     }

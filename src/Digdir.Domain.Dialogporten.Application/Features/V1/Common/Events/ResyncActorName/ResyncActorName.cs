@@ -21,7 +21,7 @@ public sealed class ResyncActorName(
             .Include(x => x.ActorEntities)
             .FirstOrDefaultAsync(x => x.Id == actorNameId, cancellationToken);
 
-        if (outdatedActorNameEntity == null)
+        if (outdatedActorNameEntity is null)
         {
             logger.LogWarning(
                 "No ActorName with Id {Id}. This probably means a new ActorName conflicted on insert and was created with another id",
@@ -31,7 +31,7 @@ public sealed class ResyncActorName(
         }
 
         var actorId = outdatedActorNameEntity.ActorId;
-        if (actorId == null) return;
+        if (actorId is null) return;
 
         var newName = await partyNameRegistry.GetNameOrFail(actorId, cancellationToken);
         var existingActorNewNameEntity = await db.ActorName
@@ -42,7 +42,7 @@ public sealed class ResyncActorName(
             ActorId = actorId,
             Name = newName
         };
-        if (existingActorNewNameEntity == null) db.ActorName.Add(newActorNameEntity);
+        if (existingActorNewNameEntity is null) db.ActorName.Add(newActorNameEntity);
 
         foreach (var actorEntity in outdatedActorNameEntity.ActorEntities)
         {

@@ -156,6 +156,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IPartyNameRegistryTransport, RoutedPartyNameRegistryTransport>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
+            .AddTransient<IActorNameRepository, ActorNameRepository>()
             .AddSingleton(AltinnAuthorization)
             .AddSingleton(PartyNameRegistry)
             .AddScoped<LocalDevelopmentAltinnAuthorization>()

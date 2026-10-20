@@ -3,8 +3,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Library.Entity.Abstractions.Features.Creatable;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using static System.StringComparison;
@@ -15,25 +14,20 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
-    private readonly ITransactionTime _transactionTime;
     private readonly IUserRegistry _userRegistry;
-    private bool _hasBeenExecuted;
 
     public PopulateActorNameInterceptor(
-        ITransactionTime transactionTime,
         IDomainContext domainContext,
         IPartyNameRegistry partyNameRegistry,
         IUserRegistry userRegistry
     )
     {
-        ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(domainContext);
         ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
         _domainContext = domainContext;
         _partyNameRegistry = partyNameRegistry;
         _userRegistry = userRegistry;
-        _transactionTime = transactionTime;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -41,13 +35,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        // If the interceptor has already run during this transaction, we don't want to run it again.
-        // This is to avoid doing the same work over multiple retries.
-        if (_hasBeenExecuted)
-        {
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
-        }
-
         var dbContext = eventData.Context;
         if (dbContext is null)
         {
@@ -73,26 +60,25 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         if (!await TrySetMissingActorNames(addedActorNameEntities, cancellationToken))
         {
-            _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        var finalActorNames = await ConsolidateActorNameInstances(dbContext, addedActorNameEntities, cancellationToken);
-        MarkActorNamesForResync(finalActorNames);
-        _hasBeenExecuted = true;
+        // We order the entities to prevent deadlocks when concurrently inserting the same ActorName
+        var distinctOrderedActorNameEntities = addedActorNameEntities
+            .OrderBy(x => x.ActorId, StringComparer.Ordinal)
+            .ThenBy(x => x.Name, StringComparer.Ordinal)
+            .DistinctBy(x => (x.ActorId, x.Name))
+            .ToList();
+
+        await InsertActorNamesIgnoreConflicts(dbContext, distinctOrderedActorNameEntities, cancellationToken);
+
+        var newActorNameRows = await GetActorNameRows(dbContext, distinctOrderedActorNameEntities, cancellationToken);
+        var newActorNameRowsByActorIdAndName = newActorNameRows.ToDictionary(x => (x.ActorId, x.Name), x => x);
+
+        ConsolidateEfActorNameEntityIds(addedActorNameEntities, newActorNameRowsByActorIdAndName, dbContext);
+        PublishResyncEventsForMissingActorNames(distinctOrderedActorNameEntities, newActorNameRowsByActorIdAndName);
+
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
-    }
-
-    private static void MarkActorNamesForResync(List<ActorName> actorNameEntities)
-    {
-        var actorNames = actorNameEntities
-            .Where(x => x.ActorId is not null && x.Name is null)
-            .DistinctBy(x => x.ActorId);
-
-        foreach (var actorName in actorNames)
-        {
-            actorName.AddResyncActorNameEvent($"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name");
-        }
     }
 
     private async Task<bool> TrySetMissingActorNames(
@@ -151,6 +137,25 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return _domainContext.IsValid;
     }
 
+    private static void ConsolidateEfActorNameEntityIds(
+        List<ActorName> addedActorNameEntities,
+        Dictionary<(string? ActorId, string? Name), ActorNameRow> newActorNameRowsByActorIdAndName,
+        DbContext dbContext
+    )
+    {
+        foreach (var entity in addedActorNameEntities)
+        {
+            dbContext.Entry(entity).State = EntityState.Unchanged;
+            var newActorNameRow = newActorNameRowsByActorIdAndName.GetValueOrDefault((entity.ActorId, entity.Name))
+                                  ?? throw new UnreachableException("We should find all rows we just inserted");
+
+            foreach (var actorEntity in entity.ActorEntities)
+            {
+                actorEntity.ActorNameEntityId = newActorNameRow.Id;
+            }
+        }
+    }
+
     /// <summary>
     /// Fast test for whether we can trust that the user behind the ID exists.
     /// We cant allow null names otherwise.
@@ -176,48 +181,96 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                && UserIsGuaranteedToExist(currentUserId, externalIdWithPrefixInQuestion);
     }
 
-    private async Task<List<ActorName>> ConsolidateActorNameInstances(
+    private static void PublishResyncEventsForMissingActorNames(
+        List<ActorName> actorNameEntities,
+        Dictionary<(string? ActorId, string? Name), ActorNameRow> newActorNameRowsByActorIdAndName
+    )
+    {
+        foreach (var entity in actorNameEntities)
+        {
+            var newActorNameRow = newActorNameRowsByActorIdAndName.GetValueOrDefault((entity.ActorId, entity.Name))
+                                  ?? throw new UnreachableException("We should find all rows we just inserted");
+
+            if (newActorNameRow.ActorId is not null && newActorNameRow.Name is null)
+            {
+                entity.AddResyncActorNameEvent(
+                    reason: $"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name",
+                    overrideId: newActorNameRow.Id
+                );
+            }
+        }
+    }
+
+    /// <summary>
+    /// Inserts ActorNames and ignores all conflicts on ActorId and Name.
+    /// This method blocks on concurrent writes of the same ActorId and Name combination.
+
+    /// Input must be ordered by (ActorId, Name) to prevent deadlocks.
+    /// An inserted but uncommitted (ActorId, Name) row makes other transactions inserting the same value wait until
+    /// this transaction ends. Rows are inserted, sorted by (ActorId, Name), so two transactions never wait on each
+    /// other in opposite order (deadlock). This only holds if a transaction inserts all its ActorNames in a single call
+    /// (or in calls whose keys are strictly increasing)
+    ///
+    /// About Isolation Levels:
+    /// - Read Committed: Conflicts are ignored, no exception is thrown
+    /// - Repeatable Read and stricter: Conflicts are ignored, but an exception is thrown
+    /// </summary>
+    private static async Task InsertActorNamesIgnoreConflicts(
         DbContext dbContext,
         List<ActorName> added,
         CancellationToken cancellationToken
     )
     {
-        var existing = await GetExistingActorNames(dbContext, added, cancellationToken);
+        if (added.Count == 0) return;
+        var sql = new PostgresFormattableStringBuilder();
 
-        var actorNamePairs = added
-            .GroupBy(x => new { x.ActorId, x.Name })
-            .GroupJoin(
-                inner: existing,
-                outerKeySelector: x => x.Key,
-                innerKeySelector: x => new { x.ActorId, x.Name },
-                resultSelector: (left, right) => (left.ToList(), right.SingleOrDefault()));
-
-        var finalActorNames = new List<ActorName>();
-        foreach (var (newActorNames, existingActorName) in actorNamePairs)
+        sql.Append("""INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt") VALUES """);
+        for (var i = 0; i < added.Count; i++)
         {
-            var (mainActorName, discardActorNames) = newActorNames switch
-            {
-                _ when existingActorName is not null => (existingActorName, newActorNames),
-                [var first, ..] => (first, newActorNames.Except([first]).ToList()),
-                _ => throw new UnreachableException()
-            };
-
-            mainActorName.EnsureId();
-            mainActorName.Create(_transactionTime.Value);
-            finalActorNames.Add(mainActorName);
-
-            foreach (var actor in discardActorNames.SelectMany(x => x.ActorEntities))
-            {
-                actor.ActorNameEntity = mainActorName;
-            }
-
-            foreach (var discardInstance in discardActorNames)
-            {
-                dbContext.Entry(discardInstance).State = EntityState.Detached;
-            }
+            var entity = added[i];
+            sql.Append($"({entity.Id}, {entity.ActorId}, {entity.Name}, {entity.CreatedAt})");
+            sql.AppendIf(i != added.Count - 1, ",");
         }
 
-        return finalActorNames;
+        sql.Append(""" ON CONFLICT ("ActorId", "Name") DO NOTHING;""");
+        await dbContext.Database.ExecuteSqlAsync(sql.ToFormattableString(), cancellationToken);
+    }
+
+    private static async Task<List<ActorNameRow>> GetActorNameRows(
+        DbContext dbContext,
+        List<ActorName> added,
+        CancellationToken cancellationToken
+    )
+    {
+        if (added.Count == 0) return [];
+        var query = new PostgresFormattableStringBuilder()
+            .Append($"""
+                      SELECT "Id",
+                             "ActorId",
+                             "Name"
+                      FROM "ActorName"
+                      WHERE
+                     """);
+        for (var i = 0; i < added.Count; i++)
+        {
+            var e = added[i];
+            query.Append("(");
+
+            if (e.ActorId is null) query.Append(""" "ActorId" IS NULL""");
+            else query.Append($""" "ActorId" = {e.ActorId}""");
+
+            query.Append(" AND ");
+
+            if (e.Name is null) query.Append(""" "Name" IS NULL""");
+            else query.Append($""" "Name" = {e.Name}""");
+
+            query.Append(")");
+            query.AppendIf(i != added.Count - 1, " OR ");
+        }
+
+        return await dbContext.Database
+            .SqlQuery<ActorNameRow>(query.ToFormattableString())
+            .ToListAsync(cancellationToken);
     }
 
     private async Task<(string ActorId, GetPartyNameResult Result)> ActorNameByActorId(string actorId,
@@ -242,5 +295,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return existingActorNames
             .Where(x => distinctIdNameTupples.Any(xx => xx.ActorId == x.ActorId && xx.Name == x.Name))
             .ToList();
+    }
+
+    private sealed class ActorNameRow
+    {
+        public Guid Id { get; set; }
+        public string? ActorId { get; set; }
+        public string? Name { get; set; }
     }
 }

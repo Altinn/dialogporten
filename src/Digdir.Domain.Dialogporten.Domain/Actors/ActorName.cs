@@ -24,8 +24,8 @@ public sealed class ActorName : IImmutableEntity, IIdentifiableEntity, ICreatabl
     }
     public bool HasEvents() => _domainEvents.Count != 0;
 
-    public void AddResyncActorNameEvent(string reason)
+    public void AddResyncActorNameEvent(string reason, Guid? overrideId = null)
     {
-        _domainEvents.Add(new ResyncActorNameEvent(Id, reason));
+        _domainEvents.Add(new ResyncActorNameEvent(overrideId ?? Id, reason));
     }
 }

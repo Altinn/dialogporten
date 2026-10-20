@@ -22,7 +22,7 @@ public static class IServiceCollectionExtensions
             services
                 .ConfigureFusionCache(nameof(Altinn.NameRegistry), new()
                 {
-                    Duration = TimeSpan.FromMinutes(1),
+                    Duration = TimeSpan.FromHours(24),
                     IsFailSafeEnabled = true,
                     FailSafeMaxDuration = TimeSpan.FromHours(26),
                     FactoryHardTimeout = TimeSpan.FromSeconds(20)

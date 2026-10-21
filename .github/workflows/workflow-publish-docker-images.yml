@@ -45,6 +45,8 @@ jobs:
             imageName: migration-bundle
           - dockerfile: ./src/Digdir.Domain.Dialogporten.Janitor/Dockerfile
             imageName: janitor
+          - dockerfile: ./.azure/modules/postgreSql/provisioner/Dockerfile
+            imageName: db-provisioner
 
     permissions:
       contents: read

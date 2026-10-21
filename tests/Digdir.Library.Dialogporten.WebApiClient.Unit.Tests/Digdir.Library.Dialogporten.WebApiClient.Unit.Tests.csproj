@@ -32,7 +32,7 @@
              explicit PackageDownload survives locked mode. The version must match the net8.0
              AppHostPackVersion in the SDK's Microsoft.NETCoreSdk.BundledVersions.props, and so
              moves together with the dotnet-sdk pin in global.json. -->
-        <PackageDownload Include="Microsoft.NETCore.App.Host.$(NETCoreSdkPortableRuntimeIdentifier)" Version="[8.0.31]" />
+        <PackageDownload Include="Microsoft.NETCore.App.Host.$(NETCoreSdkPortableRuntimeIdentifier)" Version="[8.0.32]" />
     </ItemGroup>
 
     <ItemGroup>

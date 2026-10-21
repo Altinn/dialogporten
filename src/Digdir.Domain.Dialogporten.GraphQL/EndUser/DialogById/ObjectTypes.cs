@@ -125,8 +125,8 @@ public sealed class Dialog
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans")]
     public bool IsApiOnly { get; set; }
 
-    [GraphQLDescription("The dialog unstructured text content.")]
-    public Content Content { get; set; } = null!;
+    [GraphQLDescription("The dialog unstructured text content. May be null for API-only dialogs.")]
+    public Content? Content { get; set; }
 
     [GraphQLDescription("The attachments associated with the dialog (on an aggregate level).")]
     public List<Attachment> Attachments { get; set; } = [];

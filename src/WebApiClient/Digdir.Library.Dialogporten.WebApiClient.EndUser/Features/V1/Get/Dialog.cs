@@ -156,10 +156,10 @@ public class Dialog
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
-    /// The dialog unstructured text content.
+    /// The dialog unstructured text content. May be null for API-only dialogs, which are not required to have content.
     /// </summary>
     [JsonPropertyName("content")]
-    public required Content Content { get; set; }
+    public Content? Content { get; set; }
 
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,

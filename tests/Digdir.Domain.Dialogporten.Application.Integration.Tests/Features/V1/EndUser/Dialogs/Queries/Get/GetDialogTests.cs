@@ -646,6 +646,44 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
         });
 
     [Fact]
+    public Task Get_Should_Resync_LabelLog_ActorName_When_SeenLog_Already_Exists_And_PartyNameRegistry_Fails() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .GetEndUserDialog() // Make the first SeenLog (IsSeenSinceLastContentUpdate=false)
+            .AssertSuccess()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .GetEndUserDialog() // Make a second seen-log, (IsSeenSinceLastContentUpdate=true)
+            .AssertSuccess()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.MarkedAsUnopened])
+            .ConsumeEvents()
+            .ConfigurePartyNameRegistry(p =>
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError))
+            .GetEndUserDialog() // Seen-log already exists, skip (IsSeenSinceLastContentUpdate=true)
+            .AssertResult<DialogDto>(x =>
+                x.EndUserContext.SystemLabels.Should().NotContain(SystemLabel.Values.MarkedAsUnopened))
+            .GetLabelAssignmentLogs()
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Count.Should().Be(4);
+                x[3].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[3].Action.Should().Be("remove");
+                x[3].PerformedBy.ActorName.Should().BeNull();
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Count.Should().Be(4);
+                x[3].Name.Should().Be($"systemlabel:{SystemLabel.Values.MarkedAsUnopened}");
+                x[3].Action.Should().Be("remove");
+                x[3].PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
+                x[3].PerformedBy.ActorName.Should().Be("Brando Sando");
+                x[3].PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+            });
+
+    [Fact]
     public Task Get_Should_Set_IsContentSeen_To_True() =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()

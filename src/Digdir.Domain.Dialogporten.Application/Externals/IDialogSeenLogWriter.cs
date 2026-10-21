@@ -12,5 +12,5 @@ public sealed record DialogSeenResult(
     DialogSeenLog? NewSeenLog,
     bool CausedChangesOutsideEf,
     bool IsContentSeen,
-    bool OutOfSyncActorNameId
+    Guid? OutOfSyncActorNameEntityId
 );

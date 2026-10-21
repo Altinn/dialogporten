@@ -57,7 +57,7 @@ internal sealed class DialogSeenLogWriter(
         var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
 
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
-        var seenLogWriteResult = await EnsureSeenLog(
+        var newSeenLog = await EnsureSeenLog(
             seenLogId,
             dialog.Id,
             actorNameEntity,
@@ -76,14 +76,13 @@ internal sealed class DialogSeenLogWriter(
             }
         );
 
-        var newSeenLog = seenLogWriteResult.NewDialogSeenLog;
         var isSeenSinceLastContentUpdateSetToTrue = (await MarkThisRevisionAsSeen(dialog, cancellationToken)) > 0;
 
         return new DialogSeenResult(
             NewSeenLog: newSeenLog,
             CausedChangesOutsideEf: isSeenSinceLastContentUpdateSetToTrue || newSeenLog is not null,
             IsContentSeen: isSeenSinceLastContentUpdateSetToTrue || dialog.IsSeenSinceLastContentUpdate,
-            OutOfSyncActorNameId: seenLogWriteResult.OutOfSyncActorNameId
+            OutOfSyncActorNameEntityId: actorNameEntity.Name is null ? actorNameEntity.Id : null
         );
     }
 
@@ -103,7 +102,7 @@ internal sealed class DialogSeenLogWriter(
         bool OutOfSyncActorNameId
     );
 
-    private async Task<EnsureSeenLogResult> EnsureSeenLog(
+    private async Task<DialogSeenLog?> EnsureSeenLog(
         Guid seenLogId,
         Guid dialogId,
         ActorName actorNameEntity,
@@ -116,23 +115,19 @@ internal sealed class DialogSeenLogWriter(
         var rowsUpdated = await EnsureSeenLog(seenLogId, dialogId, userType, seenAt, cancellationToken);
         await EnsureSeenByActor(seenLogId, actorNameEntity.Id, actorType, cancellationToken);
 
-        return new EnsureSeenLogResult
-        (
-            NewDialogSeenLog: rowsUpdated == 0
-                ? null
-                : new DialogSeenLog
+        return rowsUpdated == 0
+            ? null
+            : new DialogSeenLog
+            {
+                Id = seenLogId,
+                CreatedAt = seenAt,
+                SeenBy = new DialogSeenLogSeenByActor
                 {
-                    Id = seenLogId,
-                    CreatedAt = seenAt,
-                    SeenBy = new DialogSeenLogSeenByActor
-                    {
-                        ActorNameEntityId = actorNameEntity.Id,
-                        ActorNameEntity = actorNameEntity,
-                        ActorTypeId = actorType
-                    }
-                },
-            OutOfSyncActorNameId: actorNameEntity.Name == null
-        );
+                    ActorNameEntityId = actorNameEntity.Id,
+                    ActorNameEntity = actorNameEntity,
+                    ActorTypeId = actorType
+                }
+            };
     }
 
     private async Task<ActorName> CreateActorNameEntity(string actorId, CancellationToken cancellationToken)

@@ -183,11 +183,11 @@ public class DialogApplication : IAsyncLifetime
         var nameRegistrySubstitute = Substitute.For<IPartyNameRegistry>();
 
         nameRegistrySubstitute
-            .GetName(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .TryGetName(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Brando Sando");
 
         nameRegistrySubstitute
-            .GetName(Arg.Is(TestUsers.DefaultSystemUserUrn), Arg.Any<CancellationToken>())
+            .TryGetName(Arg.Is(TestUsers.DefaultSystemUserUrn), Arg.Any<CancellationToken>())
             .Returns("Mock system user name");
 
         return nameRegistrySubstitute;

@@ -165,7 +165,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     }
 
     private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
-        (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
+        (actorId, await _partyNameRegistry.TryGetName(actorId, cancellationToken));
 
     private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {

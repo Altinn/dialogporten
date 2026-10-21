@@ -113,7 +113,7 @@ internal sealed class DialogSeenLogWriter(
         CancellationToken cancellationToken)
     {
         var normalizedActorId = actorId.ToLowerInvariant();
-        var actorName = await partyNameRegistry.GetName(normalizedActorId, cancellationToken);
+        var actorName = await partyNameRegistry.TryGetName(normalizedActorId, cancellationToken);
         var actorNameId = await actorNameRepository.EnsureActorName(normalizedActorId, actorName, cancellationToken);
         var actorType = ActorType.Values.PartyRepresentative;
 

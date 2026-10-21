@@ -38,7 +38,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         _useCorrectPersonNameOrdering = applicationSettings.Value.FeatureToggle.UseCorrectPersonNameOrdering;
     }
 
-    public async Task<string?> GetName(string externalIdWithPrefix, CancellationToken ct)
+    public async Task<string?> TryGetName(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
         {
@@ -52,11 +52,11 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         {
             return await _cache.GetOrSetAsync<string>(
                 GetCacheKey(externalIdWithPrefix),
-                cancellationToken => GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken),
-                token: ct
+                ct => GetNameFromRegister(partyIdentifier, nameLookup, ct),
+                token: cancellationToken
             );
         }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
@@ -67,7 +67,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
     }
 
-    public async Task<string> GetNameOrFail(string externalIdWithPrefix, CancellationToken cancellationToken)
+    public async Task<string> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
             throw new ArgumentException($"Unable to parse PartyIdentifier {externalIdWithPrefix}");
@@ -78,9 +78,11 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
             throw new InvalidOperationException($"Unable to create lookup for party id {partyIdentifier.FullId}");
         }
 
-        var nameFromRegister = await GetNameFromRegisterOrFail(partyIdentifier, nameLookup, cancellationToken);
-        await _cache.SetAsync(GetCacheKey(externalIdWithPrefix), nameFromRegister, token: cancellationToken);
-        return nameFromRegister;
+        return await _cache.GetOrSetAsync<string>(
+            GetCacheKey(externalIdWithPrefix),
+            ct => GetNameFromRegister(partyIdentifier, nameLookup, ct),
+            token: cancellationToken
+        );
     }
 
     public void CacheName(string actorId, string name)
@@ -96,7 +98,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return $"Name{(_useCorrectPersonNameOrdering ? "_v2" : "")}_{externalIdWithPrefix}";
     }
 
-    private async Task<string> GetNameFromRegisterOrFail(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)
+    private async Task<string> GetNameFromRegister(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)
     {
         var nameLookupResult = await PerformPartyNameRequest(nameLookup, ct);
         var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);

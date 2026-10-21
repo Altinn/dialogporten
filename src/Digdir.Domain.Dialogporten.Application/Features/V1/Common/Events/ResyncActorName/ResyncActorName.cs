@@ -32,7 +32,7 @@ public sealed class ResyncActorName(
         var actorId = outdatedActorNameEntity.ActorId;
         if (actorId is null) return;
 
-        var newName = await partyNameRegistry.GetNameOrFail(actorId, cancellationToken);
+        var newName = await partyNameRegistry.GetName(actorId, cancellationToken);
         var newActorNameId = await actorNameRepository.EnsureActorName(actorId, newName, cancellationToken);
         if (newActorNameId == actorNameId) return;
 

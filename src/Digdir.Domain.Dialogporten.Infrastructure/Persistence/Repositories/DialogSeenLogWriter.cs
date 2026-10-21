@@ -54,15 +54,17 @@ internal sealed class DialogSeenLogWriter(
         {
             return null;
         }
+        var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
 
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
         var seenLogWriteResult = await EnsureSeenLog(
             seenLogId,
             dialog.Id,
-            userId.ExternalIdWithPrefix,
+            actorNameEntity,
             userId.Type,
             transactionTime.Value,
-            cancellationToken);
+            cancellationToken
+        );
 
         dialog.EndUserContext.UpdateSystemLabels(
             addLabels: [],
@@ -70,10 +72,7 @@ internal sealed class DialogSeenLogWriter(
             new LabelAssignmentLogActor
             {
                 ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntity = new ActorName
-                {
-                    ActorId = userId.ExternalIdWithPrefix,
-                }
+                ActorNameEntityId = actorNameEntity.Id,
             }
         );
 
@@ -107,18 +106,15 @@ internal sealed class DialogSeenLogWriter(
     private async Task<EnsureSeenLogResult> EnsureSeenLog(
         Guid seenLogId,
         Guid dialogId,
-        string actorId,
+        ActorName actorNameEntity,
         DialogUserType.Values userType,
         DateTimeOffset seenAt,
         CancellationToken cancellationToken)
     {
-        var normalizedActorId = actorId.ToLowerInvariant();
-        var actorName = await partyNameRegistry.TryGetName(normalizedActorId, cancellationToken);
-        var actorNameId = await actorNameRepository.EnsureActorName(normalizedActorId, actorName, cancellationToken);
         var actorType = ActorType.Values.PartyRepresentative;
 
         var rowsUpdated = await EnsureSeenLog(seenLogId, dialogId, userType, seenAt, cancellationToken);
-        await EnsureSeenByActor(seenLogId, actorNameId, actorType, cancellationToken);
+        await EnsureSeenByActor(seenLogId, actorNameEntity.Id, actorType, cancellationToken);
 
         return new EnsureSeenLogResult
         (
@@ -130,18 +126,26 @@ internal sealed class DialogSeenLogWriter(
                     CreatedAt = seenAt,
                     SeenBy = new DialogSeenLogSeenByActor
                     {
-                        ActorNameEntityId = actorNameId,
-                        ActorNameEntity = new ActorName
-                        {
-                            Id = actorNameId,
-                            ActorId = normalizedActorId,
-                            Name = actorName
-                        },
+                        ActorNameEntityId = actorNameEntity.Id,
+                        ActorNameEntity = actorNameEntity,
                         ActorTypeId = actorType
                     }
                 },
-            OutOfSyncActorNameId: actorName == null
+            OutOfSyncActorNameId: actorNameEntity.Name == null
         );
+    }
+
+    private async Task<ActorName> CreateActorNameEntity(string actorId, CancellationToken cancellationToken)
+    {
+        var normalizedActorId = actorId.ToLowerInvariant();
+        var actorName = await partyNameRegistry.TryGetName(normalizedActorId, cancellationToken);
+        var actorNameId = await actorNameRepository.EnsureActorName(normalizedActorId, actorName, cancellationToken);
+        return new ActorName
+        {
+            Id = actorNameId,
+            ActorId = normalizedActorId,
+            Name = actorName
+        };
     }
 
     private async Task<int> EnsureSeenLog(

@@ -178,21 +178,6 @@ public class DialogApplication : IAsyncLifetime
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
     }
 
-    private static IPartyNameRegistry CreateNameRegistrySubstitute()
-    {
-        var nameRegistrySubstitute = Substitute.For<IPartyNameRegistry>();
-
-        nameRegistrySubstitute
-            .TryGetName(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns("Brando Sando");
-
-        nameRegistrySubstitute
-            .TryGetName(Arg.Is(TestUsers.DefaultSystemUserUrn), Arg.Any<CancellationToken>())
-            .Returns("Mock system user name");
-
-        return nameRegistrySubstitute;
-    }
-
     private static IServiceOwnerNameRegistry CreateServiceOwnerNameRegistrySubstitute()
     {
         var organizationRegistrySubstitute = Substitute.For<IServiceOwnerNameRegistry>();

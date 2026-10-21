@@ -4,6 +4,8 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -130,11 +132,26 @@ internal sealed class DialogSeenLogWriter(
             };
     }
 
-    private async Task<ActorName> CreateActorNameEntity(string actorId, CancellationToken cancellationToken)
+    private async Task<ActorName> CreateActorNameEntity(string actorId, CancellationToken ct)
     {
         var normalizedActorId = actorId.ToLowerInvariant();
-        var actorName = await partyNameRegistry.TryGetName(normalizedActorId, cancellationToken);
-        var actorNameId = await actorNameRepository.EnsureActorName(normalizedActorId, actorName, cancellationToken);
+        var result = await partyNameRegistry.GetName(normalizedActorId, ct);
+        var actorName = result.Match<string?>(
+            found => found.Name,
+            notFound =>
+            {
+                if (PartyIdentifier.TryParse(actorId, out var partyId) && partyId is SystemUserIdentifier)
+                {
+                    return null;
+                }
+
+                throw new InvalidOperationException($"Actor {actorId} not found");
+            },
+            unsupported => throw new InvalidOperationException($"Unable to parse actor {actorId}"),
+            unavailable => null
+        );
+
+        var actorNameId = await actorNameRepository.EnsureActorName(normalizedActorId, actorName, ct);
         return new ActorName
         {
             Id = actorNameId,

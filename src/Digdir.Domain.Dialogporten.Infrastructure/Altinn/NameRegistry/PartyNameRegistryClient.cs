@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application;
@@ -7,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OneOf;
 using ZiggyCreatures.Caching.Fusion;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 
@@ -38,51 +40,44 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         _useCorrectPersonNameOrdering = applicationSettings.Value.FeatureToggle.UseCorrectPersonNameOrdering;
     }
 
-    public async Task<string?> TryGetName(string externalIdWithPrefix, CancellationToken cancellationToken)
+    public async Task<GetPartyNameResult> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
     {
         if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
         {
-            return null;
+            return new PartyNameUnsupported(externalIdWithPrefix, "Unable to parse party identifier");
         }
 
-        if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return name;
-        if (!TryCreateNameLookup(partyIdentifier, out var nameLookup)) return null;
+        if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return new PartyNameFound(name);
+        if (!TryCreateNameLookup(partyIdentifier, out var nameLookup))
+        {
+            return new PartyNameUnsupported(
+                externalIdWithPrefix,
+                $"Name lookup is not supported for identifier type {partyIdentifier.GetType().Name}");
+        }
 
         try
         {
-            return await _cache.GetOrSetAsync<string>(
+            var registryName = await _cache.GetOrSetAsync<string?>(
                 GetCacheKey(externalIdWithPrefix),
-                ct => GetNameFromRegister(partyIdentifier, nameLookup, ct),
+                (ctx, ct) => GetNameCacheFactory(ctx, partyIdentifier, nameLookup, ct),
                 token: cancellationToken
             );
+
+            return registryName is null ? new PartyNameNotFound(externalIdWithPrefix) : new PartyNameFound(registryName);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
+        catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest)
+        {
+            return new PartyNameUnsupported(externalIdWithPrefix, "Party name registry rejected the lookup as a bad request");
+        }
         catch (Exception e)
         {
-            _logger.LogError(e, "Cache Factory failed");
-            return null;
+            _logger.LogWarning(e, "Party name registry unavailable for external id {ExternalId}", externalIdWithPrefix);
+            return new PartyNameUnavailable(externalIdWithPrefix, e);
         }
-    }
-
-    public async Task<string> GetName(string externalIdWithPrefix, CancellationToken cancellationToken)
-    {
-        if (!PartyIdentifier.TryParse(externalIdWithPrefix, out var partyIdentifier))
-            throw new ArgumentException($"Unable to parse PartyIdentifier {externalIdWithPrefix}");
-
-        if (TryGetNameForUnsupportedIdentifiers(partyIdentifier, out var name)) return name;
-        if (!TryCreateNameLookup(partyIdentifier, out var nameLookup))
-        {
-            throw new InvalidOperationException($"Unable to create lookup for party id {partyIdentifier.FullId}");
-        }
-
-        return await _cache.GetOrSetAsync<string>(
-            GetCacheKey(externalIdWithPrefix),
-            ct => GetNameFromRegister(partyIdentifier, nameLookup, ct),
-            token: cancellationToken
-        );
     }
 
     public void CacheName(string actorId, string name)
@@ -98,20 +93,22 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return $"Name{(_useCorrectPersonNameOrdering ? "_v2" : "")}_{externalIdWithPrefix}";
     }
 
-    private async Task<string> GetNameFromRegister(IPartyIdentifier partyIdentifier, NameLookup nameLookup, CancellationToken ct)
+    private async Task<string?> GetNameCacheFactory(
+        FusionCacheFactoryExecutionContext<string?> ctx,
+        IPartyIdentifier partyIdentifier,
+        NameLookup nameLookup,
+        CancellationToken ct
+    )
     {
         var nameLookupResult = await PerformPartyNameRequest(nameLookup, ct);
         var name = ProcessPartyNameResponse(partyIdentifier, nameLookupResult);
 
-        if (name is not null) return name;
-
-        _logger.LogError(
-            "Search in party name registry returned no results for external id {ExternalId}. Response: {@Response}",
-            partyIdentifier.FullId,
-            nameLookupResult
-        );
-
-        throw new InvalidOperationException("Search in party name registry returned no results");
+        if (name is null)
+        {
+            ctx.Options.SkipMemoryCacheWrite = true;
+            ctx.Options.SkipDistributedCacheWrite = true;
+        }
+        return name;
     }
 
     private string? ProcessPartyNameResponse(

@@ -2,17 +2,17 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
 internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
-    private readonly ILogger<PopulateActorNameInterceptor> _logger;
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
     private readonly ITransactionTime _transactionTime;
@@ -21,17 +21,14 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     public PopulateActorNameInterceptor(
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IPartyNameRegistry partyNameRegistry,
-        ILogger<PopulateActorNameInterceptor> logger)
+        IPartyNameRegistry partyNameRegistry)
     {
-        ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(domainContext);
         ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
         _domainContext = domainContext;
         _partyNameRegistry = partyNameRegistry;
-        _logger = logger;
         _transactionTime = transactionTime;
     }
 
@@ -89,7 +86,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
     }
 
-    private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities,
+    private async Task<bool> TrySetActorNames(
+        IEnumerable<ActorName> actorNameEntities,
         CancellationToken cancellationToken)
     {
         var relevantActorNameEntities = actorNameEntities
@@ -100,21 +98,33 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 .Select(x => x.ActorId!)
                 .Distinct()
                 .Select(x => ActorNameByActorId(x, cancellationToken))))
-            .ToDictionary(x => x.ActorId, x => x.ActorName);
+            .ToDictionary(x => x.ActorId, x => x.Result);
 
         foreach (var actorName in relevantActorNameEntities)
         {
             var newActorName = actorNameById[actorName.ActorId!];
 
-            if (newActorName == null)
-            {
-                _logger.LogWarning("Unable to look up name for actor id: {ActorId}", actorName.ActorId);
-                actorName.Name = null;
-            }
-            else
-            {
-                actorName.Name = newActorName;
-            }
+            newActorName.Switch(
+                found => actorName.Name = found.Name,
+                notFound =>
+                {
+                    if (PartyIdentifier.TryParse(actorName.ActorId, out var partyId) && partyId is SystemUserIdentifier)
+                    {
+                        actorName.Name = null;
+                        return;
+                    }
+
+                    _domainContext.AddError(
+                        nameof(Actor.ActorNameEntity.ActorId),
+                        $"Unable to look up name for actor id: {actorName.ActorId}"
+                    );
+                },
+                unsupported => _domainContext.AddError(
+                    nameof(Actor.ActorNameEntity.ActorId),
+                    $"Unable to look up name for actor id: {actorName.ActorId}"
+                ),
+                unavailable => actorName.Name = null
+            );
         }
 
         return _domainContext.IsValid;
@@ -164,10 +174,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return finalActorNames;
     }
 
-    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
-        (actorId, await _partyNameRegistry.TryGetName(actorId, cancellationToken));
+    private async Task<(string ActorId, GetPartyNameResult Result)> ActorNameByActorId(string actorId,
+        CancellationToken cancellationToken) =>
+        (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
 
-    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
+    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext,
+        IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         // Why are we doing "composite key contains" this way, you ask?
         // See https://stackoverflow.com/a/26201371/2301766

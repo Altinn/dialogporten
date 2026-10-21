@@ -352,8 +352,8 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             );
 
     [Fact]
-    public Task Party_Name_Register_Returns_No_Results_Should_Fallback_To_Async_Name_Fetch() =>
-        FlowBuilder.For(Application)
+    public Task Party_Name_Register_Returns_No_Results_Should_Error() =>
+        Assert.ThrowsAsync<InvalidOperationException>(() => FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
                 p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
@@ -365,6 +365,28 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .ConsumeEvents()
             .CreateSimpleDialog()
             .GetServiceOwnerDialogAsEndUser()
+            .ExecuteAndAssert<DialogDtoSO>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
+                }
+            )
+        );
+
+    [Fact]
+    public Task Party_Name_Register_Returns_No_Results_Should_Fallback_To_Async_Name_Fetch_For_System_User() =>
+        FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.Ok(new NameLookupResult
+                    {
+                        Data = []
+                    }));
+            })
+            .ConsumeEvents()
+            .CreateSimpleDialog()
+            .AsSystemUser()
+            .GetServiceOwnerDialogAsEndUser()
             .AssertResult<DialogDtoSO>(x =>
                 {
                     x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
@@ -375,7 +397,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .GetServiceOwnerDialogAsEndUser()
             .ExecuteAndAssert<DialogDtoSO>(x =>
                 {
-                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando");
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Systembruker");
                 }
             );
 

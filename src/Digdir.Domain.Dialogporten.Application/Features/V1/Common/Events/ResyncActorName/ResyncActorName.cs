@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using MediatR;
@@ -23,15 +24,23 @@ public sealed class ResyncActorName(
         var actorId = outdatedActorNameEntity.ActorId;
         if (actorId is null) return;
 
-        var newName = await partyNameRegistry.GetName(actorId, cancellationToken);
-        var newActorNameId = await actorNameRepository.EnsureActorName(actorId, newName, cancellationToken);
-        if (newActorNameId == actorNameId) return;
+        var getNameResult = await partyNameRegistry.GetName(actorId, cancellationToken);
+        await getNameResult.Match(
+            async result =>
+            {
+                var newActorNameId = await actorNameRepository.EnsureActorName(actorId, result.Name, cancellationToken);
+                if (newActorNameId == actorNameId) return;
 
-        await db.Actor
-            .Where(x => x.ActorNameEntityId == actorNameId)
-            .ExecuteUpdateAsync(
-                setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),
-                cancellationToken
-            );
+                await db.Actor
+                    .Where(x => x.ActorNameEntityId == actorNameId)
+                    .ExecuteUpdateAsync(
+                        setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),
+                        cancellationToken
+                    );
+            },
+            notFound => throw new InvalidOperationException($"Actor name not found for ActorId: {notFound.ExternalIdWithPrefix}"),
+            unsupported => throw new UnreachableException($"Unable to parse ActorId: {unsupported.ExternalIdWithPrefix}. Reason: {unsupported.Reason}"),
+            unavailable => throw new InvalidOperationException($"Party name registry unavailable. ActorId: {unavailable.ExternalIdWithPrefix}")
+        );
     }
 }

@@ -156,6 +156,13 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true,
+    /// the relations can be fetched from the dialog's relations endpoint. The flag does not depend on the caller's
+    /// access, so the caller may not be able to see any of the related dialogs.
+    /// </summary>
+    public bool HasRelations { get; set; }
+
+    /// <summary>
     /// Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.
     /// A Transmission is considered "sent from the service owner" if the DialogTransmissionType is not one of <see cref="DialogTransmissionType.Values.Submission"/> or <see cref="DialogTransmissionType.Values.Correction"/>.
     ///

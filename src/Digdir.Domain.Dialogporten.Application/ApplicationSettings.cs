@@ -89,6 +89,21 @@ public sealed class LimitsSettings
     public ServiceOwnerSearchQueryLimits ServiceOwnerSearch { get; init; } = new();
     public PartyResourcePruningLimits PartyResourcePruning { get; init; } = new();
     public AuthorizedServiceResourceLimits AuthorizedServiceResources { get; init; } = new();
+    public DialogRelationLimits DialogRelations { get; init; } = new();
+}
+
+public sealed class DialogRelationLimits
+{
+    /// <summary>
+    /// The maximum depth of a parent/child hierarchy, counted as the number of parent/child relations from the root
+    /// to the deepest descendant. 2 allows grandchildren, but not great-grandchildren.
+    /// </summary>
+    public int MaxHierarchyDepth { get; init; } = 2;
+
+    /// <summary>
+    /// The maximum number of relations (of any type) a dialog can have.
+    /// </summary>
+    public int MaxRelationsPerDialog { get; init; } = 1000;
 }
 
 public sealed class PartyResourcePruningLimits
@@ -167,8 +182,13 @@ internal sealed class LimitsSettingsValidator : AbstractValidator<LimitsSettings
         IValidator<EndUserSearchQueryLimits> endUserSearchValidator,
         IValidator<ServiceOwnerSearchQueryLimits> serviceOwnerSearchValidator,
         IValidator<PartyResourcePruningLimits> partyResourcePruningValidator,
-        IValidator<AuthorizedServiceResourceLimits> authorizedServiceResourceValidator)
+        IValidator<AuthorizedServiceResourceLimits> authorizedServiceResourceValidator,
+        IValidator<DialogRelationLimits> dialogRelationLimitsValidator)
     {
+        RuleFor(x => x.DialogRelations)
+            .NotEmpty()
+            .SetValidator(dialogRelationLimitsValidator);
+
         RuleFor(x => x.EndUserSearch)
             .NotEmpty()
             .SetValidator(endUserSearchValidator);
@@ -190,6 +210,15 @@ internal sealed class LimitsSettingsValidator : AbstractValidator<LimitsSettings
         // reconciles them at runtime by clamping the fallback limit down to the (lower) caching threshold, so a
         // misordered configuration cannot reopen the uncached multi-party path. See AuthorizedServiceResourceLimits
         // and AuthorizedServiceResourcesProvider.
+    }
+}
+
+internal sealed class DialogRelationLimitsValidator : AbstractValidator<DialogRelationLimits>
+{
+    public DialogRelationLimitsValidator()
+    {
+        RuleFor(x => x.MaxHierarchyDepth).GreaterThan(0).LessThanOrEqualTo(10);
+        RuleFor(x => x.MaxRelationsPerDialog).GreaterThan(0).LessThanOrEqualTo(10_000);
     }
 }
 

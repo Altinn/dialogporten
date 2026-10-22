@@ -31,12 +31,15 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
     private readonly IDialogDbContext _db;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserResourceRegistry _userResourceRegistry;
+    private readonly IDialogRelationRepository _relationRepository;
 
     public PurgeDialogCommandHandler(
         IDialogDbContext db,
         IUnitOfWork unitOfWork,
-        IUserResourceRegistry userResourceRegistry)
+        IUserResourceRegistry userResourceRegistry,
+        IDialogRelationRepository relationRepository)
     {
+        _relationRepository = relationRepository ?? throw new ArgumentNullException(nameof(relationRepository));
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
@@ -68,6 +71,18 @@ internal sealed class PurgeDialogCommandHandler : IRequestHandler<PurgeDialogCom
         if (request.IfMatchDialogRevision is { } revision && revision != dialog.Revision)
         {
             return new ConcurrencyError();
+        }
+
+        if (dialog.HasRelations)
+        {
+            // The relation rows cascade with the dialog. The related dialogs are not bumped, but those losing
+            // their last relation get HasRelations cleared, in the same transaction.
+            await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
+            var relatedDialogIds = (await _relationRepository.GetRelations(dialog.Id, type: null, after: null, int.MaxValue, cancellationToken))
+                .Select(x => x.RelatedDialogId)
+                .ToList();
+            await _relationRepository.LockDialogs([dialog.Id, .. relatedDialogIds], cancellationToken);
+            await _relationRepository.ClearHasRelationsWhereNoneLeft(relatedDialogIds, ignoredDialogId: dialog.Id, cancellationToken);
         }
 
         _db.Dialogs.HardRemove(dialog);

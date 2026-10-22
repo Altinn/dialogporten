@@ -20,6 +20,7 @@ internal static class OpenApiTypeNameOverrides
         ["DialogsEntitiesActivities_DialogActivityType"] = "DialogActivityType",
         ["DialogsEntitiesAuthorizationContexts_AuthorizationContextUnauthorizedPresentation"] = "AuthorizationContextUnauthorizedPresentation",
         ["DialogsEntitiesAuthorizationContexts_DialogPartyCheckAccessRestriction"] = "DialogPartyCheckAccessRestriction",
+        ["DialogsEntitiesRelations_DialogRelationType"] = "DialogRelationType",
         ["DialogsEntitiesTransmissions_DialogTransmissionType"] = "DialogTransmissionType",
         ["DigdirDomainDialogportenApplicationCommon_Link"] = "Links",
         ["Http_HttpVerb"] = "HttpVerb",
@@ -47,6 +48,9 @@ internal static class OpenApiTypeNameOverrides
     private static readonly FrozenDictionary<string, string> EndUserOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["PaginatedListOfV1EndUserDialogsQueriesSearch_Dialog"] = "PaginatedListOfDialogListItem",
+        ["PaginatedListOfV1EndUserDialogsQueriesSearchRelations_DialogRelation"] = "PaginatedListOfDialogRelation",
+        ["V1EndUserDialogsQueriesSearchRelations_DialogRelation"] = "DialogRelation",
+        ["V1EndUserDialogsQueriesSearchRelations_RelatedDialog"] = "RelatedDialog",
         ["V1AccessManagementQueriesGetParties_AuthorizedParty"] = "AuthorizedParty",
         ["V1AccessManagementQueriesGetParties_Parties"] = "Parties",
         ["V1CommonIdentifierLookup_EndUserIdentifierLookup"] = "EndUserIdentifierLookup",
@@ -104,6 +108,10 @@ internal static class OpenApiTypeNameOverrides
         ["JsonPatchOperations_Operation"] = "JsonPatchOperation",
         ["JsonPatchOperations_OperationType"] = "JsonPatchOperationType",
         ["PaginatedListOfV1ServiceOwnerDialogsQueriesSearch_Dialog"] = "PaginatedListOfDialogListItem",
+        ["PaginatedListOfV1ServiceOwnerDialogsQueriesSearchRelations_DialogRelation"] = "PaginatedListOfDialogRelation",
+        ["V1ServiceOwnerDialogsQueriesSearchRelations_DialogRelation"] = "DialogRelation",
+        ["V1ServiceOwnerDialogsQueriesSearchRelations_DialogRelationsQuery"] = "SearchDialogRelationsRequest",
+        ["V1ServiceOwnerDialogsCommandsCreate_DialogRelation"] = "CreateDialogRelationInput",
         ["PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem"] = "PaginatedListOfDialogEndUserContextItem",
         ["V1Common_DeletedFilter"] = "DeletedFilter",
         ["V1CommonIdentifierLookup_IdentifierLookupServiceOwner"] = "IdentifierLookupServiceOwner",

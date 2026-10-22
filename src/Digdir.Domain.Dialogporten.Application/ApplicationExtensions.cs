@@ -13,6 +13,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceM
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Relations;
 using FluentValidation;
 using MediatR;
 using MediatR.NotificationPublishers;
@@ -77,6 +78,8 @@ public static class ApplicationExtensions
             .AddTransient<IIdentifierLookupAuthorizationResolver, IdentifierLookupAuthorizationResolver>()
             .AddTransient<IDialogTransmissionAppender, DialogTransmissionAppender>()
             .AddTransient<ITransmissionHierarchyValidator, TransmissionHierarchyValidator>()
+            .AddTransient<IDialogRelationWriter, DialogRelationWriter>()
+            .AddTransient<IServiceOwnerDialogLoader, ServiceOwnerDialogLoader>()
             .AddTransient<ISystemLabelAdder, SystemLabelAdder>()
             .AddTransient<LocalizationDtosValidatorFactory>()
             .AddDataLoaders()

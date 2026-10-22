@@ -8,6 +8,12 @@ type Queries @authorize(policy: "enduser") {
   dialogLookup(instanceRef: String!): DialogLookupPayload!
   dialogById(dialogId: UUID!): DialogByIdPayload!
   searchDialogs(input: SearchDialogInput!): SearchDialogsPayload!
+  """
+  Gets the dialogs related to a dialog (its parent, children and related dialogs), as a subset of the search
+  list items. Related dialogs the user cannot access are left out silently. Ordered by the related dialog's id,
+  which follows creation order.
+  """
+  dialogRelations(dialogId: UUID!, input: DialogRelationsInput): DialogRelationsPayload!
   labelAssignmentLog(dialogId: UUID!): LabelAssignmentLogPayload!
   limits: Limits!
   parties: [AuthorizedParty!]!
@@ -237,6 +243,8 @@ type Dialog {
   fromPartyTransmissionsCount: Int!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
+  "Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true, the relations can be fetched with dialogRelations. The flag does not depend on the caller's access, so the caller may not be able to see any of the related dialogs."
+  hasRelations: Boolean!
   "The dialog unstructured text content."
   content: Content!
   "The attachments associated with the dialog (on an aggregate level)."
@@ -370,6 +378,31 @@ type DialogLookupValidationError implements DialogLookupError {
   message: String!
 }
 
+type DialogRelation {
+  "The type of the relation, as seen from the dialog the relations were fetched for."
+  relationType: DialogRelationType!
+  "The related dialog."
+  dialog: RelatedDialog!
+}
+
+type DialogRelationsNotFound implements DialogRelationsError {
+  message: String!
+}
+
+type DialogRelationsPayload {
+  "The related dialogs the user may see. Relations to dialogs the user cannot access are left out silently."
+  items: [DialogRelation!]
+  "Whether there are more items available that can be fetched by supplying the continuation token."
+  hasNextPage: Boolean!
+  "The continuation token to be used to fetch the next page of items."
+  continuationToken: String
+  errors: [DialogRelationsError!]!
+}
+
+type DialogRelationsValidationError implements DialogRelationsError {
+  message: String!
+}
+
 type EndUserContext {
   revision: UUID!
   systemLabels: [SystemLabel!]!
@@ -454,6 +487,38 @@ type Localization {
   languageCode: String!
 }
 
+"A related dialog. A subset of the dialog search list item."
+type RelatedDialog {
+  "The unique identifier for the dialog in UUIDv7 format."
+  id: UUID!
+  "The service owner code representing the organization (service owner) related to this dialog."
+  org: String!
+  "The service identifier for the service that the dialog is related to in URN-format."
+  serviceResource: String!
+  "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType)."
+  serviceResourceType: String!
+  "The party code representing the organization or person that the dialog belongs to in URN format."
+  party: String!
+  "The aggregated status of the dialog."
+  status: DialogStatus!
+  "Arbitrary string with a service-specific indicator of status."
+  extendedStatus: String
+  "The date and time when the dialog was created."
+  createdAt: DateTime!
+  "The date and time when the dialog was last updated."
+  updatedAt: DateTime!
+  "The date and time when the dialog content was last updated."
+  contentUpdatedAt: DateTime!
+  "The due date for the dialog. This is the last date when the dialog is expected to be completed."
+  dueAt: DateTime
+  "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans."
+  isApiOnly: Boolean!
+  "Indicates whether the related dialog has relations of its own."
+  hasRelations: Boolean!
+  "The content of the dialog, as in search results."
+  content: SearchContent!
+}
+
 type SearchContent {
   "The title of the dialog."
   title: ContentValue!
@@ -512,6 +577,8 @@ type SearchDialog {
   hasUnopenedContent: Boolean!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans."
   isApiOnly: Boolean!
+  "Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true, the relations can be fetched with dialogRelations. The flag does not depend on the caller's access, so the caller may not be able to see any of the related dialogs."
+  hasRelations: Boolean!
   "The number of transmissions sent by the service owner"
   fromServiceOwnerTransmissionsCount: Int!
   "The number of transmissions sent by a party representative"
@@ -735,6 +802,10 @@ interface DialogLookupError {
   message: String!
 }
 
+interface DialogRelationsError {
+  message: String!
+}
+
 interface LabelAssignmentLogError {
   message: String!
 }
@@ -753,6 +824,23 @@ input BulkSetSystemLabelInput {
   addLabels: [SystemLabel!]!
   "List of system labels to remove from the target dialogs. If 'bin' or 'archive' is removed, the 'default' label will be added automatically unless 'bin' or 'archive' is also in the AddLabels list."
   removeLabels: [SystemLabel!]!
+}
+
+input DialogRelationsInput {
+  "Only return relations of this type, as seen from the dialog."
+  type: DialogRelationType
+  "Filter by one or more parties owning the related dialogs."
+  party: [String!]
+  "Filter by one or more service resources of the related dialogs."
+  serviceResource: [String!]
+  "Filter by one or more statuses of the related dialogs."
+  status: [DialogStatus!]
+  "Whether to exclude API-only dialogs from the results. Defaults to false."
+  excludeApiOnly: Boolean
+  "Limit the number of results returned. Defaults to 100, maximum 1000."
+  limit: Int
+  "Continuation token for pagination."
+  continuationToken: String
 }
 
 input DialogRevisionInput {
@@ -892,6 +980,15 @@ enum DialogLookupGrantType {
   ACCESS_PACKAGE
   RESOURCE_DELEGATION
   INSTANCE_DELEGATION
+}
+
+enum DialogRelationType {
+  "The related dialog is the parent of the dialog."
+  PARENT
+  "The related dialog is a child of the dialog."
+  CHILD
+  "The dialogs are related, without a hierarchy."
+  RELATED
 }
 
 enum DialogStatus {

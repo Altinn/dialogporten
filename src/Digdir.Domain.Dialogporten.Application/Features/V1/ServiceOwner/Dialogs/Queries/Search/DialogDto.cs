@@ -140,6 +140,13 @@ public sealed class DialogDto
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true,
+    /// the relations can be fetched from the dialog's relations endpoint. The flag does not depend on the caller's
+    /// access, so the caller may not be able to see any of the related dialogs.
+    /// </summary>
+    public bool HasRelations { get; set; }
+
+    /// <summary>
     /// The number of transmissions sent by a service owner
     /// </summary>
     public int FromServiceOwnerTransmissionsCount { get; set; }

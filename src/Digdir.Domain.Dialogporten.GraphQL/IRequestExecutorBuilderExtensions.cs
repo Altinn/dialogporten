@@ -1,5 +1,6 @@
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogLookup;
+using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogRelations;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.LabelAssignmentLog;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.SearchDialogs;
@@ -18,7 +19,8 @@ internal static class IRequestExecutorBuilderExtensions
             typeof(ISearchDialogError),
             typeof(IDialogByIdError),
             typeof(IDialogLookupError),
-            typeof(ILabelAssignmentLogError)
+            typeof(ILabelAssignmentLogError),
+            typeof(IDialogRelationsError)
         };
 
         var errorTypes = typeof(ServiceCollectionExtensions).Assembly

@@ -9,6 +9,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.AuthorizationContexts;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Relations;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Http;
 
@@ -162,6 +163,27 @@ public sealed class CreateDialogDto
     /// An immutable list of activities associated with the dialog.
     /// </summary>
     public List<ActivityDto> Activities { get; set; } = [];
+
+    /// <summary>
+    /// Relations to other dialogs to set up when the dialog is created. The type is seen from this dialog, e.g.
+    /// "Parent" means that the related dialog is the parent of this dialog. Relations can later be added or removed
+    /// through the relations endpoints. They are not part of the update model.
+    /// </summary>
+    public List<DialogRelationDto> Relations { get; set; } = [];
+}
+
+public sealed class DialogRelationDto
+{
+    /// <summary>
+    /// The id of the related dialog. It must exist and not be deleted.
+    /// </summary>
+    /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
+    public Guid RelatedDialogId { get; set; }
+
+    /// <summary>
+    /// The type of the relation, as seen from this dialog.
+    /// </summary>
+    public DialogRelationType.Values Type { get; set; }
 }
 
 public sealed class DialogServiceOwnerContextDto

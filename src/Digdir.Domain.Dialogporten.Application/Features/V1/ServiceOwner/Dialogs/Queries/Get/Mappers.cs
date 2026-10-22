@@ -47,6 +47,7 @@ internal static class DialogMapExtensions
                 .First(l => SystemLabel.IsDefaultArchiveBinGroup(l.SystemLabelId))
                 .SystemLabelId,
             IsApiOnly = source.IsApiOnly,
+            HasRelations = source.HasRelations,
             HasUnopenedContent = source.HasUnopenedContent,
             Content = source.Content.ToContentDto(),
             FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,

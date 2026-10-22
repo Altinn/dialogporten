@@ -264,6 +264,7 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
                 SystemLabel = endUserContextByDialogIdTask.Result[dialog.Id].SystemLabels
                     .FirstOrDefault(SystemLabel.DefaultArchiveBinGroup.Contains),
                 IsApiOnly = dialog.IsApiOnly,
+                HasRelations = dialog.HasRelations,
                 FromServiceOwnerTransmissionsCount = dialog.FromServiceOwnerTransmissionsCount,
                 FromPartyTransmissionsCount = dialog.FromPartyTransmissionsCount,
                 LatestActivity = latestActivitiesByDialogIdTask.Result.GetValueOrDefault(dialog.Id),

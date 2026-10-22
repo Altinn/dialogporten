@@ -125,6 +125,9 @@ public sealed class SearchDialog
     [GraphQLDescription("Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.")]
     public bool IsApiOnly { get; set; }
 
+    [GraphQLDescription("Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true, the relations can be fetched with dialogRelations. The flag does not depend on the caller's access, so the caller may not be able to see any of the related dialogs.")]
+    public bool HasRelations { get; set; }
+
     [GraphQLDescription("The number of transmissions sent by the service owner")]
     public int FromServiceOwnerTransmissionsCount { get; set; }
 

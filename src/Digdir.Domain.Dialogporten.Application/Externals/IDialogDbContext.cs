@@ -1,4 +1,5 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Relations;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
@@ -40,6 +41,8 @@ public interface IDialogDbContext
     DbSet<DialogUserType> DialogUserTypes { get; }
 
     DbSet<DialogSearchTag> DialogSearchTags { get; }
+    DbSet<DialogRelation> DialogRelations { get; }
+    DbSet<DialogRelationType> DialogRelationTypes { get; }
 
     DbSet<DialogContent> DialogContents { get; }
     DbSet<DialogContentType> DialogContentTypes { get; }

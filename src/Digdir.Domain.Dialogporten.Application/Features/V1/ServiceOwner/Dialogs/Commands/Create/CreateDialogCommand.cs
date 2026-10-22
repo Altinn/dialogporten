@@ -13,6 +13,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.DialogStatuses;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
+using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common.Relations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
@@ -46,6 +47,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
     private readonly ISystemLabelAdder _systemLabelAdder;
     private readonly IServiceResourceAuthorizer _serviceResourceAuthorizer;
     private readonly ITransmissionHierarchyValidator _transmissionHierarchyValidator;
+    private readonly IDialogRelationWriter _relationWriter;
     private readonly IUser _user;
     private readonly IClock _clock;
     private readonly IUserResourceRegistry _userResourceRegistry;
@@ -60,7 +62,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         ISystemLabelAdder systemLabelAdder,
         IUserResourceRegistry userResourceRegistry,
         IServiceResourceAuthorizer serviceResourceAuthorizer,
-        ITransmissionHierarchyValidator transmissionHierarchyValidator
+        ITransmissionHierarchyValidator transmissionHierarchyValidator,
+        IDialogRelationWriter relationWriter
     )
     {
         ArgumentNullException.ThrowIfNull(user);
@@ -84,6 +87,7 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         _serviceResourceAuthorizer = serviceResourceAuthorizer;
         _clock = clock;
         _transmissionHierarchyValidator = transmissionHierarchyValidator;
+        _relationWriter = relationWriter ?? throw new ArgumentNullException(nameof(relationWriter));
     }
 
     public async Task<CreateDialogResult> Handle(CreateDialogCommand request, CancellationToken cancellationToken)
@@ -187,6 +191,19 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         }
 
         _db.Dialogs.Add(dialog);
+
+        if (request.Dto.Relations.Count > 0)
+        {
+            // The relations need the dialog's id, and are validated against the related dialogs while they are
+            // locked, in the same transaction that inserts the dialog.
+            dialog.Id = dialog.Id.CreateVersion7IfDefault();
+            await _unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
+            await _relationWriter.Add(
+                dialog,
+                isNewDialog: true,
+                request.Dto.Relations.Select(x => new NewDialogRelation(x.RelatedDialogId, x.Type)).ToList(),
+                cancellationToken);
+        }
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
         return saveResult.Match<CreateDialogResult>(

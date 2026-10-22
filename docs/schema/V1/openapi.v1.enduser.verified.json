@@ -489,6 +489,10 @@
             "nullable": true,
             "type": "array"
           },
+          "hasRelations": {
+            "description": "Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true,\nthe relations can be fetched from the dialog\u0027s relations endpoint. The flag does not depend on the caller\u0027s\naccess, so the caller may not be able to see any of the related dialogs.",
+            "type": "boolean"
+          },
           "hasUnopenedContent": {
             "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
             "type": "boolean"
@@ -1223,6 +1227,10 @@
             "nullable": true,
             "type": "integer"
           },
+          "hasRelations": {
+            "description": "Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true,\nthe relations can be fetched from the dialog\u0027s relations endpoint. The flag does not depend on the caller\u0027s\naccess, so the caller may not be able to see any of the related dialogs.",
+            "type": "boolean"
+          },
           "hasUnopenedContent": {
             "description": "Whether the service owner has not yet reported all dialog Transmissions they sent as seen by the end user.\nA Transmission is considered \u0022sent from the service owner\u0022 if the DialogTransmissionType is not one of Submission or Correction.\n            \nThe value of this field is:\n- true when there are any new unopened Transmissions sent from the service owner.\n- false when the service owner has created an Activity of type TransmissionOpened for all Transmissions sent from the service owner. The Activities must each contain the relevant Id for all relevant Transmissions.\n            \nNote that the value is\n- determined by the service owner and not to be confused with IsContentSeen\n- not affected by SystemLabels\n            \nFor correspondence: HasUnopenedContent is still true until the service owner also adds a Dialog level Activity (no transmission id) of type CorrespondenceOpened",
             "type": "boolean"
@@ -1327,6 +1335,42 @@
           }
         },
         "type": "object"
+      },
+      "DialogRelation": {
+        "additionalProperties": false,
+        "properties": {
+          "dialog": {
+            "description": "The related dialog.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RelatedDialog"
+              }
+            ]
+          },
+          "relationType": {
+            "description": "The type of the relation, as seen from the dialog in the path. \u0022Parent\u0022 means that the related dialog is\nthe parent of that dialog, and \u0022Child\u0022 that it is one of its children.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogRelationType"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DialogRelationType": {
+        "description": "",
+        "enum": [
+          "Parent",
+          "Child",
+          "Related"
+        ],
+        "type": "string",
+        "x-enumNames": [
+          "Parent",
+          "Child",
+          "Related"
+        ]
       },
       "DialogRevision": {
         "additionalProperties": false,
@@ -2619,6 +2663,35 @@
         },
         "type": "object"
       },
+      "PaginatedListOfDialogRelation": {
+        "additionalProperties": false,
+        "properties": {
+          "continuationToken": {
+            "description": "The continuation token to be used to fetch the next page of items",
+            "example": "createdat_2024-07-31T09:09:03.0257090Z,id_0c089101-b7cf-a476-955c-f00a78d74a4e",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasNextPage": {
+            "description": "Whether there are more items available that can be fetched by supplying the continuation token",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "The paginated list of items",
+            "items": {
+              "$ref": "#/components/schemas/DialogRelation"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "orderBy": {
+            "description": "The current sorting order of the items",
+            "example": "contentupdatedat_desc,id_desc",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Parties": {
         "additionalProperties": false,
         "properties": {
@@ -2730,6 +2803,88 @@
         },
         "type": "object"
       },
+      "RelatedDialog": {
+        "additionalProperties": false,
+        "description": "A subset of the dialog search list item.",
+        "properties": {
+          "content": {
+            "description": "The content of the dialog in search results.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogContentSummary"
+              }
+            ]
+          },
+          "contentUpdatedAt": {
+            "description": "The date and time when the dialog content was last updated.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "The date and time when the dialog was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dueAt": {
+            "description": "The due date for the dialog. This is the last date when the dialog is expected to be completed.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "extendedStatus": {
+            "description": "Arbitrary string with a service-specific indicator of status, typically used to indicate a fine-grained state of\nthe dialog to further specify the \u0022status\u0022 enum.",
+            "nullable": true,
+            "type": "string"
+          },
+          "hasRelations": {
+            "description": "Indicates whether the related dialog has relations of its own.",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "The unique identifier for the dialog in UUIDv7 format.",
+            "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
+            "format": "guid",
+            "type": "string"
+          },
+          "isApiOnly": {
+            "description": "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans.",
+            "type": "boolean"
+          },
+          "org": {
+            "description": "The service owner code representing the organization (service owner) related to this dialog.",
+            "example": "ske",
+            "type": "string"
+          },
+          "party": {
+            "description": "The party code representing the organization or person that the dialog belongs to in URN format.",
+            "example": "urn:altinn:person:identifier-no:01125512345",
+            "type": "string"
+          },
+          "serviceResource": {
+            "description": "The service identifier for the service that the dialog is related to in URN-format.",
+            "example": "urn:altinn:resource:some-service-identifier",
+            "type": "string"
+          },
+          "serviceResourceType": {
+            "description": "The ServiceResource type, as defined in Altinn Resource Registry (see ResourceType).",
+            "type": "string"
+          },
+          "status": {
+            "description": "The aggregated status of the dialog.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DialogStatus"
+              }
+            ]
+          },
+          "updatedAt": {
+            "description": "The date and time when the dialog was last updated.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SearchAuthorizedServiceResourcesRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2745,6 +2900,20 @@
         "type": "object"
       },
       "SearchDialogActivitiesRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "acceptedLanguages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AcceptedLanguages"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "SearchDialogRelationsRequest": {
         "additionalProperties": false,
         "properties": {
           "acceptedLanguages": {
@@ -4120,6 +4289,205 @@
           }
         ],
         "summary": "Sets the system labels of a dialog",
+        "tags": [
+          "Enduser"
+        ]
+      }
+    },
+    "/api/v1/enduser/dialogs/{dialogId}/relations": {
+      "get": {
+        "description": "Gets the dialogs related to a dialog (its parent, children and related dialogs), with the relation type seen from the dialog, as a subset of the dialog search list items. Ordered by the related dialog\u0027s id, which follows creation order.\n\nAuthorization follows the dialog search: a related dialog is included exactly when it would appear in the user\u0027s own search. Related dialogs the user cannot access are left out silently, so a dialog with hasRelations set may return an empty list. Opening a related dialog goes through the normal dialog details endpoint.",
+        "operationId": "SearchDialogRelations",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return relations of this type, as seen from the dialog.",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/DialogRelationType"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          {
+            "description": "Filter by one or more parties owning the related dialogs.",
+            "explode": true,
+            "in": "query",
+            "name": "party",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by one or more service resources of the related dialogs.",
+            "explode": true,
+            "in": "query",
+            "name": "serviceResource",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Filter by one or more statuses of the related dialogs.",
+            "explode": true,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/DialogStatus"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Whether to exclude API-only dialogs from the results. Defaults to false.",
+            "in": "query",
+            "name": "excludeApiOnly",
+            "schema": {
+              "nullable": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Continuation token for pagination.",
+            "in": "query",
+            "name": "continuationToken",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Limit the number of results returned. Defaults to 100, maximum 1000.",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "nullable": true,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "accept-Language",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AcceptedLanguages"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfDialogRelation"
+                }
+              }
+            },
+            "description": "The related dialogs the user may see."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
+          },
+          "403": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from ID-porten or Maskinporten with the scope(s) \u0022digdir:dialogporten\u0022."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "maskinporten": [
+              "digdir:dialogporten"
+            ]
+          },
+          {
+            "idporten": [
+              "digdir:dialogporten"
+            ]
+          }
+        ],
+        "summary": "Gets the related dialogs of a dialog",
         "tags": [
           "Enduser"
         ]

@@ -59,6 +59,7 @@ internal static class SearchDialogsMapExtensions
         Status = source.Status.ToGraphQl(),
         HasUnopenedContent = source.HasUnopenedContent,
         IsApiOnly = source.IsApiOnly,
+        HasRelations = source.HasRelations,
         FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
         FromPartyTransmissionsCount = source.FromPartyTransmissionsCount,
         LatestActivity = source.LatestActivity is null ? null : ToActivity(source.LatestActivity),

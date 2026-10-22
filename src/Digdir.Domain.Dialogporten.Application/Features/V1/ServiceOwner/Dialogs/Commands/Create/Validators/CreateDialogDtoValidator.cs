@@ -150,6 +150,16 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
                 principalKeySelector: transmission => transmission.Id)
             .SetValidator(activityValidator);
 
+        RuleFor(x => x.Relations)
+            .UniqueBy(x => x.RelatedDialogId);
+
+        RuleForEach(x => x.Relations)
+            .ChildRules(relation =>
+            {
+                relation.RuleFor(x => x.RelatedDialogId).NotEmpty();
+                relation.RuleFor(x => x.Type).IsInEnum();
+            });
+
         RuleFor(x => x.Process)
             .IsValidUri()
             .MaximumLength(Constants.DefaultMaxUriLength)

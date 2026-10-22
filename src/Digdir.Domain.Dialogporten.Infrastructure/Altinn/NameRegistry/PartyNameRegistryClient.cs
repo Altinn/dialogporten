@@ -63,17 +63,20 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
                 token: cancellationToken
             );
 
-            return registryName is null ? new PartyNameNotFound(externalIdWithPrefix) : new PartyNameFound(registryName);
+            return registryName is null
+                ? new PartyNameNotFound(externalIdWithPrefix)
+                : new PartyNameFound(registryName);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            // User cancelled the request, rethrow to stop immediately.
             throw;
         }
         catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest)
         {
-            return new PartyNameUnsupported(externalIdWithPrefix, "Party name registry rejected the lookup as a bad request");
+            return new PartyNameUnsupported(externalIdWithPrefix, "Party name registry returned bad request");
         }
-        catch (Exception e)
+        catch (Exception e) when (e is HttpRequestException or TimeoutException or OperationCanceledException)
         {
             _logger.LogWarning(e, "Party name registry unavailable for external id {ExternalId}", externalIdWithPrefix);
             return new PartyNameUnavailable(externalIdWithPrefix, e);
@@ -116,7 +119,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         NameLookupResult nameLookupResult
     )
     {
-        var name = nameLookupResult.Data.FirstOrDefault()?.DisplayName;
+        var name = nameLookupResult.Data?.FirstOrDefault()?.DisplayName;
         if (name is null) return null;
 
         // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does
@@ -124,7 +127,10 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         return FlipNameIfPerson(partyIdentifier, name);
     }
 
-    private static bool TryCreateNameLookup(IPartyIdentifier partyIdentifier, [NotNullWhen(true)] out NameLookup? nameLookup)
+    private static bool TryCreateNameLookup(
+        IPartyIdentifier partyIdentifier,
+        [NotNullWhen(true)] out NameLookup? nameLookup
+    )
     {
 
         nameLookup = partyIdentifier switch

@@ -136,6 +136,13 @@ public class DialogListItem
     public bool IsApiOnly { get; set; }
 
     /// <summary>
+    /// Indicates whether the dialog has relations to other dialogs (parent, children or related dialogs). When true,
+    /// <br/>the relations can be fetched from the dialog's relations endpoint.
+    /// </summary>
+    [JsonPropertyName("hasRelations")]
+    public bool HasRelations { get; set; }
+
+    /// <summary>
     /// The number of transmissions sent by a service owner
     /// </summary>
     [JsonPropertyName("fromServiceOwnerTransmissionsCount")]

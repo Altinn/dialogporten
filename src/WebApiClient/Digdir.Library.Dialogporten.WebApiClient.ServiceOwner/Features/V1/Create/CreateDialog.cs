@@ -167,4 +167,27 @@ public class CreateDialog
     /// </summary>
     [JsonPropertyName("activities")]
     public ICollection<CreateDialogActivity> Activities { get; set; } = [];
+
+    /// <summary>
+    /// Relations to other dialogs to set up when the dialog is created. The type is seen from this dialog, e.g.
+    /// <br/>"Parent" means that the related dialog is the parent of this dialog.
+    /// </summary>
+    [JsonPropertyName("relations")]
+    public ICollection<CreateDialogRelation> Relations { get; set; } = [];
+}
+
+public sealed class CreateDialogRelation
+{
+    /// <summary>
+    /// The id of the related dialog. It must exist and not be deleted.
+    /// </summary>
+    [JsonPropertyName("relatedDialogId")]
+    public Guid RelatedDialogId { get; set; }
+
+    /// <summary>
+    /// The type of the relation, as seen from this dialog.
+    /// </summary>
+    [JsonPropertyName("type")]
+    [JsonConverter(typeof(JsonStringEnumConverter<DialogRelationType>))]
+    public DialogRelationType Type { get; set; }
 }

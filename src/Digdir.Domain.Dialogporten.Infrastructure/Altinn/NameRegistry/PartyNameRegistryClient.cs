@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
@@ -74,7 +75,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         }
         catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.BadRequest)
         {
-            return new PartyNameUnsupported(externalIdWithPrefix, "Party name registry returned bad request");
+            throw;
         }
         catch (Exception e) when (e is HttpRequestException or TimeoutException or OperationCanceledException)
         {
@@ -108,8 +109,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
 
         if (name is null)
         {
-            ctx.Options.SkipMemoryCacheWrite = true;
             ctx.Options.SkipDistributedCacheWrite = true;
+            ctx.Options.Duration = TimeSpan.FromSeconds(1);
         }
         return name;
     }
@@ -119,7 +120,7 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         NameLookupResult nameLookupResult
     )
     {
-        var data = nameLookupResult.Data ?? throw new JsonException($"data must never be null. Id: {partyIdentifier}");
+        var data = nameLookupResult.Data ?? throw new UnreachableException($"data cant be null. Id: {partyIdentifier}");
         var name = data.FirstOrDefault()?.DisplayName;
         if (name is null) return null;
 

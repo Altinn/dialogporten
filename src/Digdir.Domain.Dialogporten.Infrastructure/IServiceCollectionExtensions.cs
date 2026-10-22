@@ -267,5 +267,5 @@ internal static class IServiceCollectionExtensions
         public bool SkipDistributedCache { get; set; }
     }
 
-    public sealed record FusionCacheRegistration(string CacheName);
+    internal sealed record FusionCacheRegistration(string CacheName);
 }

@@ -119,7 +119,8 @@ internal sealed class PartyNameRegistryClient : IPartyNameRegistry
         NameLookupResult nameLookupResult
     )
     {
-        var name = nameLookupResult.Data?.FirstOrDefault()?.DisplayName;
+        var data = nameLookupResult.Data ?? throw new JsonException($"data must never be null. Id: {partyIdentifier}");
+        var name = data.FirstOrDefault()?.DisplayName;
         if (name is null) return null;
 
         // TODO! Currently, arbeidsflate expects the name ordering to be "Last First" for Norwegian persons, and does

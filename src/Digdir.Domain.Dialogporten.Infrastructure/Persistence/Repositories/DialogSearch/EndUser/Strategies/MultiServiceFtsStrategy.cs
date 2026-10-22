@@ -28,7 +28,7 @@ internal sealed class MultiServiceFtsStrategy : IQueryStrategy<EndUserSearchCont
     // filter and no party → authorization fans out to tens of thousands of parties). Per-party GIN
     // probing that many parties is the catastrophe; instead we drive by service resource. The candidate
     // lateral scans each service's dialogs **recency-first** (the
-    // IX_Dialog_ServiceResource_ContentUpdatedAt_Party_Id_NotDeleted index), rechecks the FTS predicate
+    // IX_Dialog_ServiceResource_ContentUpdatedAt_Id_NotDeleted index), rechecks the FTS predicate
     // per row by PK-probing DialogSearch, and stops at the page limit — so for terms dense within the
     // service it touches only a page's worth, not the whole service. A date range bounds the scan window
     // for sparse-within-service terms; statement_timeout bounds the rest.

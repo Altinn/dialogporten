@@ -100,6 +100,9 @@ type ServerConfiguration = {
   value: string
 }
 
+@description('Extensions to allow-list in azure.extensions in addition to the ones the application schema needs (PG_TRGM, BTREE_GIN). Use upper case, as Azure reports them.')
+param additionalExtensions string[] = []
+
 @description('Additional PostgreSQL server parameters to persist as user overrides. Values must not duplicate the module-managed base/query-store settings.')
 param additionalServerConfigurations ServerConfiguration[] = []
 
@@ -344,7 +347,7 @@ resource enable_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
     parent: postgres
     name: 'azure.extensions'
     properties: {
-      value: 'PG_TRGM,BTREE_GIN'
+      value: join(union(['PG_TRGM', 'BTREE_GIN'], additionalExtensions), ',')
       source: 'user-override'
     }
     dependsOn: [postgresAdministrators]

@@ -19,28 +19,25 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.HasIndex(x => new { x.Party, x.ContentUpdatedAt, x.Id })
             .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering")
             .IsDescending(false, true, true)
-            .IncludeProperties(x => new { x.ServiceResource, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt })
+            .IncludeProperties(x => new { x.ServiceResource, x.StatusId, x.VisibleFrom, x.ExpiresAt, x.IsApiOnly, x.SystemLabelsMask, x.IsSeenSinceLastContentUpdate })
             .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
 
         // Index specially optimized for querying dialogs with FTS in Arbeidsflate / SO-API
         builder.HasIndex(x => new { x.Id })
             .HasDatabaseName("IX_Dialog_Id_Covering")
-            .IncludeProperties(x => new { x.ServiceResource, x.Deleted, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt, x.ContentUpdatedAt });
+            .IncludeProperties(x => new { x.ServiceResource, x.Deleted, x.IsApiOnly, x.StatusId, x.Org, x.VisibleFrom, x.ExpiresAt, x.ContentUpdatedAt, x.SystemLabelsMask });
 
         builder.HasIndex(x => new { x.Party, x.CreatedAt, x.Id })
             .IsDescending(false, true, true)
-            .IncludeProperties(x => x.ServiceResource)
-            .IsCreatedConcurrently();
+            .IncludeProperties(x => x.ServiceResource);
 
         builder.HasIndex(x => new { x.Party, x.UpdatedAt, x.Id })
             .IsDescending(false, true, true)
-            .IncludeProperties(x => x.ServiceResource)
-            .IsCreatedConcurrently();
+            .IncludeProperties(x => x.ServiceResource);
 
         builder.HasIndex(x => new { x.Party, x.DueAt, x.Id })
             .IsDescending(false, true, true)
-            .IncludeProperties(x => x.ServiceResource)
-            .IsCreatedConcurrently();
+            .IncludeProperties(x => x.ServiceResource);
 
         builder.HasIndex(x => new { x.Org, x.Party, x.ContentUpdatedAt, x.Id })
             .IsDescending(false, false, true, true);
@@ -60,7 +57,21 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.HasIndex(x => new { x.ServiceResource, x.Party, x.ContentUpdatedAt, x.Id })
             .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
             .IsDescending(false, false, true, true)
-            .IncludeProperties(x => new { x.StatusId, x.VisibleFrom, x.ExpiresAt, x.IsApiOnly, x.SystemLabelsMask })
+            .IncludeProperties(x => new { x.StatusId, x.VisibleFrom, x.ExpiresAt, x.IsApiOnly, x.SystemLabelsMask, x.IsSeenSinceLastContentUpdate })
+            .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
+
+        // Range-driven single-party FTS (SinglePartyFtsStrategy)
+        builder.HasIndex(x => new { x.Party, x.ServiceResource, x.ContentUpdatedAt, x.Id })
+            .HasDatabaseName("IX_Dialog_Party_ServiceResource_ContentUpdatedAt_Id_NotDeleted")
+            .IsDescending(false, false, true, true)
+            .IncludeProperties(x => new { x.StatusId, x.VisibleFrom, x.ExpiresAt, x.IsApiOnly, x.SystemLabelsMask, x.IsSeenSinceLastContentUpdate })
+            .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
+
+        // Service-driven FTS (SingleServiceFtsStrategy, MultiServiceFtsStrategy)
+        builder.HasIndex(x => new { x.ServiceResource, x.ContentUpdatedAt, x.Id })
+            .HasDatabaseName("IX_Dialog_ServiceResource_ContentUpdatedAt_Id_NotDeleted")
+            .IsDescending(false, true, true)
+            .IncludeProperties(x => new { x.Party, x.StatusId, x.VisibleFrom, x.ExpiresAt, x.IsApiOnly, x.SystemLabelsMask, x.IsSeenSinceLastContentUpdate })
             .HasFilter($"\"{nameof(DialogEntity.Deleted)}\" = false");
 
         builder.Property(x => x.Org).UseCollation("C");

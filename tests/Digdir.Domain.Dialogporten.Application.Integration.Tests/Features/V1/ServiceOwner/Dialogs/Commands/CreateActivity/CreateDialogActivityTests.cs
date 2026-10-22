@@ -203,7 +203,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public Task Can_Create_Activity__On_Existing_Dialog_And_Get_The_Repaired_Activity_Afterwards_When_Null_Actor_Exists_And_Party_Name_Registry_Is_Down(
+    public Task Can_Create_Activity_On_Existing_Dialog_And_Get_The_Repaired_Activity_Afterwards_When_Null_Actor_Exists_And_Party_Name_Registry_Is_Down(
         string failHow
     )
     {

@@ -19,6 +19,7 @@
       HasUnopenedContent: true,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
         Id: Guid_2,
@@ -75,6 +76,7 @@
       HasUnopenedContent: true,
       SystemLabel: Archive,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
         Id: Guid_5,
@@ -131,6 +133,7 @@
       HasUnopenedContent: false,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       LatestActivity: {
         Id: Guid_8,
         CreatedAt: DateTimeOffset_6,
@@ -186,6 +189,7 @@
       HasUnopenedContent: true,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       LatestActivity: {
         Id: Guid_11,
@@ -242,6 +246,7 @@
       HasUnopenedContent: true,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       SeenSinceLastUpdate: [
         {

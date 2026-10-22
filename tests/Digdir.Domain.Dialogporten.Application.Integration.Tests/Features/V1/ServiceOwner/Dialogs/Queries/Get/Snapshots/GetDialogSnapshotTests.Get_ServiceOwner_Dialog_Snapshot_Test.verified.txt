@@ -15,6 +15,7 @@
   Status: NotApplicable,
   SystemLabel: Default,
   IsApiOnly: false,
+  HasRelations: false,
   HasUnopenedContent: true,
   Content: {
     Title: {

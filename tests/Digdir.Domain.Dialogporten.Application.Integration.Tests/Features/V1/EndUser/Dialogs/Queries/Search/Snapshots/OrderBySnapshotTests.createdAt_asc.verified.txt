@@ -21,6 +21,7 @@
         HasUnopenedContent: true,
         SystemLabel: Default,
         IsApiOnly: false,
+        HasRelations: false,
         FromServiceOwnerTransmissionsCount: 1,
         IsContentSeen: true,
         EndUserContext: {
@@ -70,6 +71,7 @@
         HasUnopenedContent: true,
         SystemLabel: Default,
         IsApiOnly: false,
+        HasRelations: false,
         FromServiceOwnerTransmissionsCount: 1,
         IsContentSeen: true,
         EndUserContext: {
@@ -125,6 +127,7 @@
         HasUnopenedContent: true,
         SystemLabel: Default,
         IsApiOnly: false,
+        HasRelations: false,
         FromServiceOwnerTransmissionsCount: 1,
         IsContentSeen: true,
         EndUserContext: {
@@ -174,6 +177,7 @@
         HasUnopenedContent: true,
         SystemLabel: Default,
         IsApiOnly: false,
+        HasRelations: false,
         FromServiceOwnerTransmissionsCount: 1,
         IsContentSeen: true,
         EndUserContext: {
@@ -229,6 +233,7 @@
         HasUnopenedContent: true,
         SystemLabel: Default,
         IsApiOnly: false,
+        HasRelations: false,
         FromServiceOwnerTransmissionsCount: 1,
         IsContentSeen: true,
         EndUserContext: {

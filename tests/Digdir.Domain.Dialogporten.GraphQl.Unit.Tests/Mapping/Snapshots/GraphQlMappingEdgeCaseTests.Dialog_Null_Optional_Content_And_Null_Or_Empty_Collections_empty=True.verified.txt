@@ -13,24 +13,25 @@
   UpdatedAt: 2020-01-01 00:00:15 +0,
   ContentUpdatedAt: 2020-01-01 00:00:16 +0,
   Status: Awaiting,
-  HasUnopenedContent: false,
-  FromServiceOwnerTransmissionsCount: 58,
-  FromPartyTransmissionsCount: 59,
+  HasUnopenedContent: true,
+  FromServiceOwnerTransmissionsCount: 59,
+  FromPartyTransmissionsCount: 60,
   IsApiOnly: true,
+  HasRelations: false,
   Content: {
     Title: {
       Value: [
         {
-          Value: str-21,
-          LanguageCode: lang22
+          Value: str-22,
+          LanguageCode: lang23
         },
         {
-          Value: str-23,
-          LanguageCode: lang24
+          Value: str-24,
+          LanguageCode: lang25
         }
       ],
-      MediaType: str-25,
-      IsAuthorized: false
+      MediaType: str-26,
+      IsAuthorized: true
     }
   },
   Attachments: [],
@@ -51,7 +52,7 @@
   Activities: [],
   SeenSinceLastUpdate: [],
   SeenSinceLastContentUpdate: [],
-  IsContentSeen: false,
+  IsContentSeen: true,
   Transmissions: [
     {
       IsAuthorized: false,
@@ -74,10 +75,10 @@
   ],
   ExcludedTransmissions: [],
   EndUserContext: {
-    Revision: 0000019b-0000-0000-0000-000000000000,
+    Revision: 0000019c-0000-0000-0000-000000000000,
     SystemLabels: [
-      Archive,
-      MarkedAsUnopened
+      MarkedAsUnopened,
+      Sent
     ]
   }
 }

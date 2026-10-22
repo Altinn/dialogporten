@@ -15,780 +15,781 @@
   CreatedAt: 2020-01-01 00:00:14 +0,
   UpdatedAt: 2020-01-01 00:00:15 +0,
   ContentUpdatedAt: 2020-01-01 00:00:16 +0,
-  DialogToken: str-57,
+  DialogToken: str-58,
   Status: Awaiting,
-  HasUnopenedContent: false,
-  FromServiceOwnerTransmissionsCount: 58,
-  FromPartyTransmissionsCount: 59,
+  HasUnopenedContent: true,
+  FromServiceOwnerTransmissionsCount: 59,
+  FromPartyTransmissionsCount: 60,
   IsApiOnly: true,
+  HasRelations: false,
   Content: {
     Title: {
       Value: [
         {
-          Value: str-21,
-          LanguageCode: lang22
+          Value: str-22,
+          LanguageCode: lang23
         },
         {
-          Value: str-23,
-          LanguageCode: lang24
+          Value: str-24,
+          LanguageCode: lang25
         }
       ],
-      MediaType: str-25,
-      IsAuthorized: false
+      MediaType: str-26,
+      IsAuthorized: true
     },
     Summary: {
       Value: [
         {
-          Value: str-27,
-          LanguageCode: lang28
+          Value: str-28,
+          LanguageCode: lang29
         },
         {
-          Value: str-29,
-          LanguageCode: lang30
+          Value: str-30,
+          LanguageCode: lang31
         }
       ],
-      MediaType: str-31,
-      IsAuthorized: false
+      MediaType: str-32,
+      IsAuthorized: true
     },
     SenderName: {
       Value: [
         {
-          Value: str-33,
-          LanguageCode: lang34
+          Value: str-34,
+          LanguageCode: lang35
         },
         {
-          Value: str-35,
-          LanguageCode: lang36
+          Value: str-36,
+          LanguageCode: lang37
         }
       ],
-      MediaType: str-37,
-      IsAuthorized: false
+      MediaType: str-38,
+      IsAuthorized: true
     },
     AdditionalInfo: {
       Value: [
         {
-          Value: str-39,
-          LanguageCode: lang40
+          Value: str-40,
+          LanguageCode: lang41
         },
         {
-          Value: str-41,
-          LanguageCode: lang42
+          Value: str-42,
+          LanguageCode: lang43
         }
       ],
-      MediaType: str-43,
-      IsAuthorized: false
+      MediaType: str-44,
+      IsAuthorized: true
     },
     ExtendedStatus: {
       Value: [
         {
-          Value: str-45,
-          LanguageCode: lang46
+          Value: str-46,
+          LanguageCode: lang47
         },
         {
-          Value: str-47,
-          LanguageCode: lang48
+          Value: str-48,
+          LanguageCode: lang49
         }
       ],
-      MediaType: str-49,
-      IsAuthorized: false
+      MediaType: str-50,
+      IsAuthorized: true
     },
     MainContentReference: {
       Value: [
         {
-          Value: str-51,
-          LanguageCode: lang52
+          Value: str-52,
+          LanguageCode: lang53
         },
         {
-          Value: str-53,
-          LanguageCode: lang54
+          Value: str-54,
+          LanguageCode: lang55
         }
       ],
-      MediaType: str-55,
-      IsAuthorized: false
+      MediaType: str-56,
+      IsAuthorized: true
     }
   },
   Attachments: [
     {
-      Id: 0000003c-0000-0000-0000-000000000000,
+      Id: 0000003d-0000-0000-0000-000000000000,
       DisplayName: [
         {
-          Value: str-61,
-          LanguageCode: lang62
+          Value: str-62,
+          LanguageCode: lang63
         },
         {
-          Value: str-63,
-          LanguageCode: lang64
+          Value: str-64,
+          LanguageCode: lang65
         }
       ],
-      Name: str-65,
+      Name: str-66,
       Urls: [
         {
-          Id: 00000042-0000-0000-0000-000000000000,
-          Url: https://example.com/67,
-          MediaType: str-68,
-          ConsumerType: Api
+          Id: 00000043-0000-0000-0000-000000000000,
+          Url: https://example.com/68,
+          MediaType: str-69,
+          ConsumerType: Gui
         },
         {
-          Id: 00000046-0000-0000-0000-000000000000,
-          Url: https://example.com/71,
-          MediaType: str-72,
-          ConsumerType: Api
+          Id: 00000047-0000-0000-0000-000000000000,
+          Url: https://example.com/72,
+          MediaType: str-73,
+          ConsumerType: Gui
         }
       ],
-      ExpiresAt: 2020-01-01 00:01:14 +0,
-      IsAuthorized: true
+      ExpiresAt: 2020-01-01 00:01:15 +0,
+      IsAuthorized: false
     },
     {
-      Id: 0000004c-0000-0000-0000-000000000000,
+      Id: 0000004d-0000-0000-0000-000000000000,
       DisplayName: [
         {
-          Value: str-77,
-          LanguageCode: lang78
+          Value: str-78,
+          LanguageCode: lang79
         },
         {
-          Value: str-79,
-          LanguageCode: lang80
+          Value: str-80,
+          LanguageCode: lang81
         }
       ],
-      Name: str-81,
+      Name: str-82,
       Urls: [
         {
-          Id: 00000052-0000-0000-0000-000000000000,
-          Url: https://example.com/83,
-          MediaType: str-84,
-          ConsumerType: Api
+          Id: 00000053-0000-0000-0000-000000000000,
+          Url: https://example.com/84,
+          MediaType: str-85,
+          ConsumerType: Gui
         },
         {
-          Id: 00000056-0000-0000-0000-000000000000,
-          Url: https://example.com/87,
-          MediaType: str-88,
-          ConsumerType: Api
+          Id: 00000057-0000-0000-0000-000000000000,
+          Url: https://example.com/88,
+          MediaType: str-89,
+          ConsumerType: Gui
         }
       ],
-      ExpiresAt: 2020-01-01 00:01:30 +0,
-      IsAuthorized: true
+      ExpiresAt: 2020-01-01 00:01:31 +0,
+      IsAuthorized: false
     }
   ],
   ExcludedAttachments: [
     {
-      Id: 0000005c-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:01:33 +0
+      Id: 0000005d-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:01:34 +0
     },
     {
-      Id: 0000005e-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:01:35 +0
+      Id: 0000005f-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:01:36 +0
     }
   ],
   GuiActions: [
     {
-      Id: 00000110-0000-0000-0000-000000000000,
-      Action: str-273,
-      Url: https://example.com/274,
-      AuthorizationAttribute: str-275,
-      IsAuthorized: false,
-      IsDeleteDialogAction: true,
-      Priority: Tertiary,
-      HttpMethod: GET,
+      Id: 00000111-0000-0000-0000-000000000000,
+      Action: str-274,
+      Url: https://example.com/275,
+      AuthorizationAttribute: str-276,
+      IsAuthorized: true,
+      IsDeleteDialogAction: false,
+      Priority: Primary,
+      HttpMethod: POST,
       Title: [
         {
-          Value: str-280,
-          LanguageCode: lang281
+          Value: str-281,
+          LanguageCode: lang282
         },
         {
-          Value: str-282,
-          LanguageCode: lang283
+          Value: str-283,
+          LanguageCode: lang284
         }
       ],
       Prompt: [
         {
-          Value: str-284,
-          LanguageCode: lang285
+          Value: str-285,
+          LanguageCode: lang286
         },
         {
-          Value: str-286,
-          LanguageCode: lang287
+          Value: str-287,
+          LanguageCode: lang288
         }
       ]
     },
     {
-      Id: 00000120-0000-0000-0000-000000000000,
-      Action: str-289,
-      Url: https://example.com/290,
-      AuthorizationAttribute: str-291,
-      IsAuthorized: false,
-      IsDeleteDialogAction: true,
-      Priority: Primary,
-      HttpMethod: TRACE,
+      Id: 00000121-0000-0000-0000-000000000000,
+      Action: str-290,
+      Url: https://example.com/291,
+      AuthorizationAttribute: str-292,
+      IsAuthorized: true,
+      IsDeleteDialogAction: false,
+      Priority: Secondary,
+      HttpMethod: CONNECT,
       Title: [
         {
-          Value: str-296,
-          LanguageCode: lang297
+          Value: str-297,
+          LanguageCode: lang298
         },
         {
-          Value: str-298,
-          LanguageCode: lang299
+          Value: str-299,
+          LanguageCode: lang300
         }
       ],
       Prompt: [
         {
-          Value: str-300,
-          LanguageCode: lang301
+          Value: str-301,
+          LanguageCode: lang302
         },
         {
-          Value: str-302,
-          LanguageCode: lang303
+          Value: str-303,
+          LanguageCode: lang304
         }
       ]
     }
   ],
   ExcludedGuiActions: [
     {
-      Id: 00000130-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:05:05 +0
+      Id: 00000131-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:06 +0
     },
     {
-      Id: 00000132-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:05:07 +0
+      Id: 00000133-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:08 +0
     }
   ],
   ApiActions: [
     {
-      Id: 00000134-0000-0000-0000-000000000000,
-      Action: str-309,
-      AuthorizationAttribute: str-310,
-      IsAuthorized: true,
-      Name: str-312,
+      Id: 00000135-0000-0000-0000-000000000000,
+      Action: str-310,
+      AuthorizationAttribute: str-311,
+      IsAuthorized: false,
+      Name: str-313,
       Endpoints: [
         {
-          Id: 00000139-0000-0000-0000-000000000000,
-          Version: str-314,
-          Url: https://example.com/315,
-          HttpMethod: POST,
-          DocumentationUrl: https://example.com/317,
-          RequestSchema: https://example.com/318,
-          ResponseSchema: https://example.com/319,
-          Deprecated: false,
-          SunsetAt: 2020-01-01 00:05:21 +0
+          Id: 0000013a-0000-0000-0000-000000000000,
+          Version: str-315,
+          Url: https://example.com/316,
+          HttpMethod: PUT,
+          DocumentationUrl: https://example.com/318,
+          RequestSchema: https://example.com/319,
+          ResponseSchema: https://example.com/320,
+          Deprecated: true,
+          SunsetAt: 2020-01-01 00:05:22 +0
         },
         {
-          Id: 00000142-0000-0000-0000-000000000000,
-          Version: str-323,
-          Url: https://example.com/324,
-          HttpMethod: POST,
-          DocumentationUrl: https://example.com/326,
-          RequestSchema: https://example.com/327,
-          ResponseSchema: https://example.com/328,
-          Deprecated: true,
-          SunsetAt: 2020-01-01 00:05:30 +0
+          Id: 00000143-0000-0000-0000-000000000000,
+          Version: str-324,
+          Url: https://example.com/325,
+          HttpMethod: PUT,
+          DocumentationUrl: https://example.com/327,
+          RequestSchema: https://example.com/328,
+          ResponseSchema: https://example.com/329,
+          Deprecated: false,
+          SunsetAt: 2020-01-01 00:05:31 +0
         }
       ]
     },
     {
-      Id: 0000014b-0000-0000-0000-000000000000,
-      Action: str-332,
-      AuthorizationAttribute: str-333,
-      IsAuthorized: false,
-      Name: str-335,
+      Id: 0000014c-0000-0000-0000-000000000000,
+      Action: str-333,
+      AuthorizationAttribute: str-334,
+      IsAuthorized: true,
+      Name: str-336,
       Endpoints: [
         {
-          Id: 00000150-0000-0000-0000-000000000000,
-          Version: str-337,
-          Url: https://example.com/338,
-          HttpMethod: OPTIONS,
-          DocumentationUrl: https://example.com/340,
-          RequestSchema: https://example.com/341,
-          ResponseSchema: https://example.com/342,
-          Deprecated: true,
-          SunsetAt: 2020-01-01 00:05:44 +0
+          Id: 00000151-0000-0000-0000-000000000000,
+          Version: str-338,
+          Url: https://example.com/339,
+          HttpMethod: TRACE,
+          DocumentationUrl: https://example.com/341,
+          RequestSchema: https://example.com/342,
+          ResponseSchema: https://example.com/343,
+          Deprecated: false,
+          SunsetAt: 2020-01-01 00:05:45 +0
         },
         {
-          Id: 00000159-0000-0000-0000-000000000000,
-          Version: str-346,
-          Url: https://example.com/347,
-          HttpMethod: OPTIONS,
-          DocumentationUrl: https://example.com/349,
-          RequestSchema: https://example.com/350,
-          ResponseSchema: https://example.com/351,
-          Deprecated: false,
-          SunsetAt: 2020-01-01 00:05:53 +0
+          Id: 0000015a-0000-0000-0000-000000000000,
+          Version: str-347,
+          Url: https://example.com/348,
+          HttpMethod: TRACE,
+          DocumentationUrl: https://example.com/350,
+          RequestSchema: https://example.com/351,
+          ResponseSchema: https://example.com/352,
+          Deprecated: true,
+          SunsetAt: 2020-01-01 00:05:54 +0
         }
       ]
     }
   ],
   ExcludedApiActions: [
     {
-      Id: 00000162-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:05:55 +0
+      Id: 00000163-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:56 +0
     },
     {
-      Id: 00000164-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:05:57 +0
+      Id: 00000165-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:05:58 +0
     }
   ],
   Activities: [
     {
-      Id: 00000166-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:05:59 +0,
-      ExtendedType: https://example.com/360,
-      Type: PaymentMade,
-      TransmissionId: 0000016a-0000-0000-0000-000000000000,
+      Id: 00000167-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:06 +0,
+      ExtendedType: https://example.com/361,
+      Type: SignatureProvided,
+      TransmissionId: 0000016b-0000-0000-0000-000000000000,
       PerformedBy: {
-        ActorType: ServiceOwner,
-        ActorId: str-365,
-        ActorName: str-364
+        ActorType: PartyRepresentative,
+        ActorId: str-366,
+        ActorName: str-365
       },
       Description: [
         {
-          Value: str-366,
-          LanguageCode: lang367
+          Value: str-367,
+          LanguageCode: lang368
         },
         {
-          Value: str-368,
-          LanguageCode: lang369
+          Value: str-369,
+          LanguageCode: lang370
         }
       ]
     },
     {
-      Id: 00000172-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:06:11 +0,
-      ExtendedType: https://example.com/372,
-      Type: CorrespondenceConfirmed,
-      TransmissionId: 00000176-0000-0000-0000-000000000000,
+      Id: 00000173-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:06:12 +0,
+      ExtendedType: https://example.com/373,
+      Type: DialogCreated,
+      TransmissionId: 00000177-0000-0000-0000-000000000000,
       PerformedBy: {
-        ActorType: ServiceOwner,
-        ActorId: str-377,
-        ActorName: str-376
+        ActorType: PartyRepresentative,
+        ActorId: str-378,
+        ActorName: str-377
       },
       Description: [
         {
-          Value: str-378,
-          LanguageCode: lang379
+          Value: str-379,
+          LanguageCode: lang380
         },
         {
-          Value: str-380,
-          LanguageCode: lang381
+          Value: str-381,
+          LanguageCode: lang382
         }
       ]
     }
   ],
   SeenSinceLastUpdate: [
     {
-      Id: 0000017e-0000-0000-0000-000000000000,
-      SeenAt: 2020-01-01 00:06:23 +0,
-      SeenBy: {
-        ActorType: PartyRepresentative,
-        ActorId: str-386,
-        ActorName: str-385
-      },
-      IsViaServiceOwner: true,
-      IsCurrentEndUser: false
-    },
-    {
-      Id: 00000185-0000-0000-0000-000000000000,
-      SeenAt: 2020-01-01 00:06:30 +0,
+      Id: 0000017f-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:24 +0,
       SeenBy: {
         ActorType: ServiceOwner,
-        ActorId: str-393,
-        ActorName: str-392
+        ActorId: str-387,
+        ActorName: str-386
       },
       IsViaServiceOwner: false,
       IsCurrentEndUser: true
+    },
+    {
+      Id: 00000186-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:31 +0,
+      SeenBy: {
+        ActorType: PartyRepresentative,
+        ActorId: str-394,
+        ActorName: str-393
+      },
+      IsViaServiceOwner: true,
+      IsCurrentEndUser: false
     }
   ],
   SeenSinceLastContentUpdate: [
     {
-      Id: 0000018c-0000-0000-0000-000000000000,
-      SeenAt: 2020-01-01 00:06:37 +0,
-      SeenBy: {
-        ActorType: PartyRepresentative,
-        ActorId: str-400,
-        ActorName: str-399
-      },
-      IsViaServiceOwner: true,
-      IsCurrentEndUser: false
-    },
-    {
-      Id: 00000193-0000-0000-0000-000000000000,
-      SeenAt: 2020-01-01 00:06:44 +0,
+      Id: 0000018d-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:38 +0,
       SeenBy: {
         ActorType: ServiceOwner,
-        ActorId: str-407,
-        ActorName: str-406
+        ActorId: str-401,
+        ActorName: str-400
       },
       IsViaServiceOwner: false,
       IsCurrentEndUser: true
+    },
+    {
+      Id: 00000194-0000-0000-0000-000000000000,
+      SeenAt: 2020-01-01 00:06:45 +0,
+      SeenBy: {
+        ActorType: PartyRepresentative,
+        ActorId: str-408,
+        ActorName: str-407
+      },
+      IsViaServiceOwner: true,
+      IsCurrentEndUser: false
     }
   ],
-  IsContentSeen: false,
+  IsContentSeen: true,
   Transmissions: [
     {
-      Id: 00000060-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:01:37 +0,
-      AuthorizationAttribute: str-98,
-      IsAuthorized: true,
-      ExtendedType: https://example.com/100,
-      ExternalReference: str-101,
-      RelatedTransmissionId: 00000066-0000-0000-0000-000000000000,
-      Type: Correction,
+      Id: 00000061-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:01:38 +0,
+      AuthorizationAttribute: str-99,
+      IsAuthorized: false,
+      ExtendedType: https://example.com/101,
+      ExternalReference: str-102,
+      RelatedTransmissionId: 00000067-0000-0000-0000-000000000000,
+      Type: Information,
       Sender: {
-        ActorType: PartyRepresentative,
-        ActorId: str-106,
-        ActorName: str-105
+        ActorType: ServiceOwner,
+        ActorId: str-107,
+        ActorName: str-106
       },
-      IsOpened: true,
+      IsOpened: false,
       Content: {
         Title: {
           Value: [
             {
-              Value: str-108,
-              LanguageCode: lang109
+              Value: str-109,
+              LanguageCode: lang110
             },
             {
-              Value: str-110,
-              LanguageCode: lang111
+              Value: str-111,
+              LanguageCode: lang112
             }
           ],
-          MediaType: str-112,
-          IsAuthorized: true
+          MediaType: str-113,
+          IsAuthorized: false
         },
         Summary: {
           Value: [
             {
-              Value: str-114,
-              LanguageCode: lang115
+              Value: str-115,
+              LanguageCode: lang116
             },
             {
-              Value: str-116,
-              LanguageCode: lang117
+              Value: str-117,
+              LanguageCode: lang118
             }
           ],
-          MediaType: str-118,
-          IsAuthorized: true
+          MediaType: str-119,
+          IsAuthorized: false
         },
         ContentReference: {
           Value: [
             {
-              Value: str-120,
-              LanguageCode: lang121
+              Value: str-121,
+              LanguageCode: lang122
             },
             {
-              Value: str-122,
-              LanguageCode: lang123
+              Value: str-123,
+              LanguageCode: lang124
             }
           ],
-          MediaType: str-124,
-          IsAuthorized: true
+          MediaType: str-125,
+          IsAuthorized: false
         }
       },
       Attachments: [
         {
-          Id: 0000007e-0000-0000-0000-000000000000,
+          Id: 0000007f-0000-0000-0000-000000000000,
           DisplayName: [
             {
-              Value: str-127,
-              LanguageCode: lang128
+              Value: str-128,
+              LanguageCode: lang129
             },
             {
-              Value: str-129,
-              LanguageCode: lang130
+              Value: str-130,
+              LanguageCode: lang131
             }
           ],
-          Name: str-131,
+          Name: str-132,
           Urls: [
             {
-              Id: 00000084-0000-0000-0000-000000000000,
-              Url: https://example.com/133,
-              MediaType: str-134,
-              ConsumerType: Api
+              Id: 00000085-0000-0000-0000-000000000000,
+              Url: https://example.com/134,
+              MediaType: str-135,
+              ConsumerType: Gui
             },
             {
-              Id: 00000088-0000-0000-0000-000000000000,
-              Url: https://example.com/137,
-              MediaType: str-138,
-              ConsumerType: Api
+              Id: 00000089-0000-0000-0000-000000000000,
+              Url: https://example.com/138,
+              MediaType: str-139,
+              ConsumerType: Gui
             }
           ],
-          ExpiresAt: 2020-01-01 00:02:20 +0,
-          IsAuthorized: true
+          ExpiresAt: 2020-01-01 00:02:21 +0,
+          IsAuthorized: false
         },
         {
-          Id: 0000008e-0000-0000-0000-000000000000,
+          Id: 0000008f-0000-0000-0000-000000000000,
           DisplayName: [
             {
-              Value: str-143,
-              LanguageCode: lang144
+              Value: str-144,
+              LanguageCode: lang145
             },
             {
-              Value: str-145,
-              LanguageCode: lang146
+              Value: str-146,
+              LanguageCode: lang147
             }
           ],
-          Name: str-147,
+          Name: str-148,
           Urls: [
             {
-              Id: 00000094-0000-0000-0000-000000000000,
-              Url: https://example.com/149,
-              MediaType: str-150,
-              ConsumerType: Api
+              Id: 00000095-0000-0000-0000-000000000000,
+              Url: https://example.com/150,
+              MediaType: str-151,
+              ConsumerType: Gui
             },
             {
-              Id: 00000098-0000-0000-0000-000000000000,
-              Url: https://example.com/153,
-              MediaType: str-154,
-              ConsumerType: Api
+              Id: 00000099-0000-0000-0000-000000000000,
+              Url: https://example.com/154,
+              MediaType: str-155,
+              ConsumerType: Gui
             }
           ],
-          ExpiresAt: 2020-01-01 00:02:36 +0,
-          IsAuthorized: true
+          ExpiresAt: 2020-01-01 00:02:37 +0,
+          IsAuthorized: false
         }
       ],
       ExcludedAttachments: [
         {
-          Id: 0000009e-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:02:39 +0
+          Id: 0000009f-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:02:40 +0
         },
         {
-          Id: 000000a0-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:02:41 +0
+          Id: 000000a1-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:02:42 +0
         }
       ],
       NavigationalActions: [
         {
-          Id: 000000a2-0000-0000-0000-000000000000,
+          Id: 000000a3-0000-0000-0000-000000000000,
           Title: [
             {
-              Value: str-163,
-              LanguageCode: lang164
+              Value: str-164,
+              LanguageCode: lang165
             },
             {
-              Value: str-165,
-              LanguageCode: lang166
+              Value: str-166,
+              LanguageCode: lang167
             }
           ],
-          Url: https://example.com/167,
-          ExpiresAt: 2020-01-01 00:02:48 +0,
-          IsAuthorized: true
+          Url: https://example.com/168,
+          ExpiresAt: 2020-01-01 00:02:49 +0,
+          IsAuthorized: false
         },
         {
-          Id: 000000aa-0000-0000-0000-000000000000,
+          Id: 000000ab-0000-0000-0000-000000000000,
           Title: [
             {
-              Value: str-171,
-              LanguageCode: lang172
+              Value: str-172,
+              LanguageCode: lang173
             },
             {
-              Value: str-173,
-              LanguageCode: lang174
+              Value: str-174,
+              LanguageCode: lang175
             }
           ],
-          Url: https://example.com/175,
-          ExpiresAt: 2020-01-01 00:02:56 +0,
-          IsAuthorized: true
+          Url: https://example.com/176,
+          ExpiresAt: 2020-01-01 00:02:57 +0,
+          IsAuthorized: false
         }
       ],
       ExcludedNavigationalActions: [
         {
-          Id: 000000b2-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:02:59 +0
+          Id: 000000b3-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:03 +0
         },
         {
-          Id: 000000b4-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:03:01 +0
+          Id: 000000b5-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:03:02 +0
         }
       ]
     },
     {
-      Id: 000000b6-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:03:03 +0,
-      AuthorizationAttribute: str-184,
-      IsAuthorized: true,
-      ExtendedType: https://example.com/186,
-      ExternalReference: str-187,
-      RelatedTransmissionId: 000000bc-0000-0000-0000-000000000000,
-      Type: Decision,
+      Id: 000000b7-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:03:04 +0,
+      AuthorizationAttribute: str-185,
+      IsAuthorized: false,
+      ExtendedType: https://example.com/187,
+      ExternalReference: str-188,
+      RelatedTransmissionId: 000000bd-0000-0000-0000-000000000000,
+      Type: Submission,
       Sender: {
-        ActorType: PartyRepresentative,
-        ActorId: str-192,
-        ActorName: str-191
+        ActorType: ServiceOwner,
+        ActorId: str-193,
+        ActorName: str-192
       },
-      IsOpened: true,
+      IsOpened: false,
       Content: {
         Title: {
           Value: [
             {
-              Value: str-194,
-              LanguageCode: lang195
+              Value: str-195,
+              LanguageCode: lang196
             },
             {
-              Value: str-196,
-              LanguageCode: lang197
+              Value: str-197,
+              LanguageCode: lang198
             }
           ],
-          MediaType: str-198,
-          IsAuthorized: true
+          MediaType: str-199,
+          IsAuthorized: false
         },
         Summary: {
           Value: [
             {
-              Value: str-200,
-              LanguageCode: lang201
+              Value: str-201,
+              LanguageCode: lang202
             },
             {
-              Value: str-202,
-              LanguageCode: lang203
+              Value: str-203,
+              LanguageCode: lang204
             }
           ],
-          MediaType: str-204,
-          IsAuthorized: true
+          MediaType: str-205,
+          IsAuthorized: false
         },
         ContentReference: {
           Value: [
             {
-              Value: str-206,
-              LanguageCode: lang207
+              Value: str-207,
+              LanguageCode: lang208
             },
             {
-              Value: str-208,
-              LanguageCode: lang209
+              Value: str-209,
+              LanguageCode: lang210
             }
           ],
-          MediaType: str-210,
-          IsAuthorized: true
+          MediaType: str-211,
+          IsAuthorized: false
         }
       },
       Attachments: [
         {
-          Id: 000000d4-0000-0000-0000-000000000000,
+          Id: 000000d5-0000-0000-0000-000000000000,
           DisplayName: [
             {
-              Value: str-213,
-              LanguageCode: lang214
+              Value: str-214,
+              LanguageCode: lang215
             },
             {
-              Value: str-215,
-              LanguageCode: lang216
+              Value: str-216,
+              LanguageCode: lang217
             }
           ],
-          Name: str-217,
+          Name: str-218,
           Urls: [
             {
-              Id: 000000da-0000-0000-0000-000000000000,
-              Url: https://example.com/219,
-              MediaType: str-220,
-              ConsumerType: Api
+              Id: 000000db-0000-0000-0000-000000000000,
+              Url: https://example.com/220,
+              MediaType: str-221,
+              ConsumerType: Gui
             },
             {
-              Id: 000000de-0000-0000-0000-000000000000,
-              Url: https://example.com/223,
-              MediaType: str-224,
-              ConsumerType: Api
+              Id: 000000df-0000-0000-0000-000000000000,
+              Url: https://example.com/224,
+              MediaType: str-225,
+              ConsumerType: Gui
             }
           ],
-          ExpiresAt: 2020-01-01 00:03:46 +0,
-          IsAuthorized: true
+          ExpiresAt: 2020-01-01 00:03:47 +0,
+          IsAuthorized: false
         },
         {
-          Id: 000000e4-0000-0000-0000-000000000000,
+          Id: 000000e5-0000-0000-0000-000000000000,
           DisplayName: [
             {
-              Value: str-229,
-              LanguageCode: lang230
+              Value: str-230,
+              LanguageCode: lang231
             },
             {
-              Value: str-231,
-              LanguageCode: lang232
+              Value: str-232,
+              LanguageCode: lang233
             }
           ],
-          Name: str-233,
+          Name: str-234,
           Urls: [
             {
-              Id: 000000ea-0000-0000-0000-000000000000,
-              Url: https://example.com/235,
-              MediaType: str-236,
-              ConsumerType: Api
+              Id: 000000eb-0000-0000-0000-000000000000,
+              Url: https://example.com/236,
+              MediaType: str-237,
+              ConsumerType: Gui
             },
             {
-              Id: 000000ee-0000-0000-0000-000000000000,
-              Url: https://example.com/239,
-              MediaType: str-240,
-              ConsumerType: Api
+              Id: 000000ef-0000-0000-0000-000000000000,
+              Url: https://example.com/240,
+              MediaType: str-241,
+              ConsumerType: Gui
             }
           ],
-          ExpiresAt: 2020-01-01 00:04:02 +0,
-          IsAuthorized: true
+          ExpiresAt: 2020-01-01 00:04:03 +0,
+          IsAuthorized: false
         }
       ],
       ExcludedAttachments: [
         {
-          Id: 000000f4-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:04:05 +0
+          Id: 000000f5-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:06 +0
         },
         {
-          Id: 000000f6-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:04:07 +0
+          Id: 000000f7-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:08 +0
         }
       ],
       NavigationalActions: [
         {
-          Id: 000000f8-0000-0000-0000-000000000000,
+          Id: 000000f9-0000-0000-0000-000000000000,
           Title: [
             {
-              Value: str-249,
-              LanguageCode: lang250
+              Value: str-250,
+              LanguageCode: lang251
             },
             {
-              Value: str-251,
-              LanguageCode: lang252
+              Value: str-252,
+              LanguageCode: lang253
             }
           ],
-          Url: https://example.com/253,
-          ExpiresAt: 2020-01-01 00:04:14 +0,
-          IsAuthorized: true
+          Url: https://example.com/254,
+          ExpiresAt: 2020-01-01 00:04:15 +0,
+          IsAuthorized: false
         },
         {
-          Id: 00000100-0000-0000-0000-000000000000,
+          Id: 00000101-0000-0000-0000-000000000000,
           Title: [
             {
-              Value: str-257,
-              LanguageCode: lang258
+              Value: str-258,
+              LanguageCode: lang259
             },
             {
-              Value: str-259,
-              LanguageCode: lang260
+              Value: str-260,
+              LanguageCode: lang261
             }
           ],
-          Url: https://example.com/261,
-          ExpiresAt: 2020-01-01 00:04:22 +0,
-          IsAuthorized: true
+          Url: https://example.com/262,
+          ExpiresAt: 2020-01-01 00:04:23 +0,
+          IsAuthorized: false
         }
       ],
       ExcludedNavigationalActions: [
         {
-          Id: 00000108-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:04:25 +0
+          Id: 00000109-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:26 +0
         },
         {
-          Id: 0000010a-0000-0000-0000-000000000000,
-          CreatedAt: 2020-01-01 00:04:27 +0
+          Id: 0000010b-0000-0000-0000-000000000000,
+          CreatedAt: 2020-01-01 00:04:28 +0
         }
       ]
     }
   ],
   ExcludedTransmissions: [
     {
-      Id: 0000010c-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:04:29 +0
+      Id: 0000010d-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:04:30 +0
     },
     {
-      Id: 0000010e-0000-0000-0000-000000000000,
-      CreatedAt: 2020-01-01 00:04:31 +0
+      Id: 0000010f-0000-0000-0000-000000000000,
+      CreatedAt: 2020-01-01 00:04:32 +0
     }
   ],
   EndUserContext: {
-    Revision: 0000019b-0000-0000-0000-000000000000,
+    Revision: 0000019c-0000-0000-0000-000000000000,
     SystemLabels: [
-      Archive,
-      MarkedAsUnopened
+      MarkedAsUnopened,
+      Sent
     ]
   }
 }

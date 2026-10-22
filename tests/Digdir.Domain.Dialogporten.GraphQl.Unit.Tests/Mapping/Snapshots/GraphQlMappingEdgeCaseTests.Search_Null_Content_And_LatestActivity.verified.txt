@@ -19,62 +19,63 @@
       Status: NotApplicable,
       HasUnopenedContent: true,
       IsApiOnly: true,
-      FromServiceOwnerTransmissionsCount: 20,
-      FromPartyTransmissionsCount: 21,
+      HasRelations: false,
+      FromServiceOwnerTransmissionsCount: 21,
+      FromPartyTransmissionsCount: 22,
       SeenSinceLastUpdate: [
         {
-          Id: 00000022-0000-0000-0000-000000000000,
-          SeenAt: 2020-01-01 00:00:35 +0,
-          SeenBy: {
-            ActorType: PartyRepresentative,
-            ActorId: str-38,
-            ActorName: str-37
-          },
-          IsViaServiceOwner: true,
-          IsCurrentEndUser: false
-        },
-        {
-          Id: 00000029-0000-0000-0000-000000000000,
-          SeenAt: 2020-01-01 00:00:42 +0,
+          Id: 00000023-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:36 +0,
           SeenBy: {
             ActorType: ServiceOwner,
-            ActorId: str-45,
-            ActorName: str-44
+            ActorId: str-39,
+            ActorName: str-38
           },
           IsViaServiceOwner: false,
           IsCurrentEndUser: true
+        },
+        {
+          Id: 0000002a-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:43 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-46,
+            ActorName: str-45
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
         }
       ],
       SeenSinceLastContentUpdate: [
         {
-          Id: 00000030-0000-0000-0000-000000000000,
-          SeenAt: 2020-01-01 00:00:49 +0,
-          SeenBy: {
-            ActorType: PartyRepresentative,
-            ActorId: str-52,
-            ActorName: str-51
-          },
-          IsViaServiceOwner: true,
-          IsCurrentEndUser: false
-        },
-        {
-          Id: 00000037-0000-0000-0000-000000000000,
-          SeenAt: 2020-01-01 00:00:56 +0,
+          Id: 00000031-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:50 +0,
           SeenBy: {
             ActorType: ServiceOwner,
-            ActorId: str-59,
-            ActorName: str-58
+            ActorId: str-53,
+            ActorName: str-52
           },
           IsViaServiceOwner: false,
           IsCurrentEndUser: true
+        },
+        {
+          Id: 00000038-0000-0000-0000-000000000000,
+          SeenAt: 2020-01-01 00:00:57 +0,
+          SeenBy: {
+            ActorType: PartyRepresentative,
+            ActorId: str-60,
+            ActorName: str-59
+          },
+          IsViaServiceOwner: true,
+          IsCurrentEndUser: false
         }
       ],
-      IsContentSeen: false,
+      IsContentSeen: true,
       EndUserContext: {
-        Revision: 0000003f-0000-0000-0000-000000000000,
+        Revision: 00000040-0000-0000-0000-000000000000,
         SystemLabels: [
-          Sent,
-          Default
+          Default,
+          Bin
         ]
       }
     }

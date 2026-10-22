@@ -149,6 +149,7 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
+            .AddTransient<IDialogRelationRepository, DialogRelationRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddSingleton(AltinnAuthorization)
             .AddScoped<LocalDevelopmentAltinnAuthorization>()

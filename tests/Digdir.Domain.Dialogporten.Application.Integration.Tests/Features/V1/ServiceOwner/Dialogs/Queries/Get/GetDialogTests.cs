@@ -62,6 +62,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     .Excluding(x => x.CreatedAt)
                     .Excluding(x => x.SystemLabel)
                     .Excluding(x => x.Status)
+                    .Excluding(x => x.Relations)
                 );
             });
     }
@@ -178,7 +179,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                     .Excluding(x => x.UpdatedAt)
                     .Excluding(x => x.CreatedAt)
                     .Excluding(x => x.SystemLabel)
-                    .Excluding(x => x.Status));
+                    .Excluding(x => x.Status)
+                    .Excluding(x => x.Relations));
             });
     }
 

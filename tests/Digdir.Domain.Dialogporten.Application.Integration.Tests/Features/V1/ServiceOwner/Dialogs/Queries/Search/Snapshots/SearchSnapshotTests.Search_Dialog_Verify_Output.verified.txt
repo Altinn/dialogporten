@@ -19,6 +19,7 @@
       Status: NotApplicable,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       HasUnopenedContent: true,
       LatestActivity: {
@@ -110,6 +111,7 @@
       Status: NotApplicable,
       SystemLabel: Archive,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       HasUnopenedContent: true,
       LatestActivity: {
@@ -170,6 +172,7 @@
       Status: NotApplicable,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       HasUnopenedContent: false,
       LatestActivity: {
         Id: Guid_14,
@@ -229,6 +232,7 @@
       Status: NotApplicable,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       HasUnopenedContent: true,
       LatestActivity: {
@@ -289,6 +293,7 @@
       Status: NotApplicable,
       SystemLabel: Default,
       IsApiOnly: false,
+      HasRelations: false,
       FromServiceOwnerTransmissionsCount: 1,
       HasUnopenedContent: true,
       SeenSinceLastUpdate: [

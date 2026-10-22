@@ -12,7 +12,7 @@ using ZiggyCreatures.Caching.Fusion.Locking.AsyncKeyed;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 
-public static class IServiceCollectionExtensions
+internal static class IServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {

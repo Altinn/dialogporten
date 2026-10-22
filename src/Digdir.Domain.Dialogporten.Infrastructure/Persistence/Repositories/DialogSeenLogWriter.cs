@@ -151,7 +151,7 @@ internal sealed class DialogSeenLogWriter(
             unavailable => null
         );
 
-        var actorNameId = await actorNameRepository.EnsureActorName(normalizedActorId, actorName, ct);
+        var actorNameId = await actorNameRepository.GetOrCreateActorName(normalizedActorId, actorName, ct);
         return new ActorName
         {
             Id = actorNameId,

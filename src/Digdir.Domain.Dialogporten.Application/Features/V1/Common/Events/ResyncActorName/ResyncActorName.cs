@@ -43,7 +43,7 @@ public sealed class ResyncActorName(
         CancellationToken cancellationToken
     )
     {
-        var newActorNameId = await actorNameRepository.EnsureActorName(actorId, result.Name, cancellationToken);
+        var newActorNameId = await actorNameRepository.GetOrCreateActorName(actorId, result.Name, cancellationToken);
         if (newActorNameId == actorNameId) return;
 
         int updated;

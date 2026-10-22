@@ -6,7 +6,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime transactionTime) : IActorNameRepository
 {
-    public async Task<Guid> EnsureActorName(string actorId, string? actorName, CancellationToken cancellationToken)
+    public async Task<Guid> GetOrCreateActorName(string actorId, string? actorName, CancellationToken cancellationToken)
     {
         await db.Database.ExecuteSqlInterpolatedAsync($"""
                                                        INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt")

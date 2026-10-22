@@ -145,8 +145,26 @@ param postgresConfiguration = {
       name: 'log_autovacuum_min_duration'
       value: '20000'
     }
-    // Set directly rather than through enableQueryPerformanceInsight, which would also set
-    // pg_qs.query_capture_mode to all.
+    // Query Store, capturing top-level statements only. If its overhead ever becomes a concern,
+    // set pg_qs.query_capture_mode to none (dynamic, no restart); that also disables
+    // pgms_wait_sampling. Set directly rather than through enableQueryPerformanceInsight,
+    // which would set pg_qs.query_capture_mode to all.
+    {
+      name: 'pg_qs.query_capture_mode'
+      value: 'top'
+    }
+    {
+      name: 'pg_qs.store_query_plans'
+      value: 'on'
+    }
+    {
+      name: 'pg_qs.max_plan_size'
+      value: '10000'
+    }
+    {
+      name: 'pg_qs.max_query_text_length'
+      value: '10000'
+    }
     {
       name: 'pgms_wait_sampling.query_capture_mode'
       value: 'all'

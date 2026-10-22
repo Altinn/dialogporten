@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Relations;
+using System.Data;
 using System.Linq.Expressions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
@@ -49,6 +50,8 @@ internal sealed class DialogDbContext : DbContext, IDialogDbContext
     public DbSet<DialogSeenLog> DialogSeenLog => Set<DialogSeenLog>();
     public DbSet<DialogUserType> DialogUserTypes => Set<DialogUserType>();
     public DbSet<DialogSearchTag> DialogSearchTags => Set<DialogSearchTag>();
+    public DbSet<DialogRelation> DialogRelations => Set<DialogRelation>();
+    public DbSet<DialogRelationType> DialogRelationTypes => Set<DialogRelationType>();
     public DbSet<DialogContent> DialogContents => Set<DialogContent>();
     public DbSet<DialogContentType> DialogContentTypes => Set<DialogContentType>();
     public DbSet<SubjectResource> SubjectResources => Set<SubjectResource>();

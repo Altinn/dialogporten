@@ -1117,6 +1117,11 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Property<bool>("Frozen")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("HasRelations")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<bool>("HasUnopenedContent")
                         .HasColumnType("boolean");
 
@@ -1457,6 +1462,66 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         {
                             Id = 7,
                             Name = "FeideUser"
+                        });
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Relations.DialogRelation", b =>
+                {
+                    b.Property<Guid>("DialogId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RelatedDialogId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp at time zone 'utc'");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("DialogId", "RelatedDialogId");
+
+                    b.HasIndex("TypeId");
+
+                    b.HasIndex("RelatedDialogId", "DialogId");
+
+                    b.ToTable("DialogRelation", t =>
+                        {
+                            t.HasCheckConstraint("CK_DialogRelation_DialogId_LessThan_RelatedDialogId", "\"DialogId\" < \"RelatedDialogId\"");
+                        });
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Relations.DialogRelationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DialogRelationType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Parent"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Child"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Related"
                         });
                 });
 
@@ -2835,6 +2900,33 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Navigation("Dialog");
 
                     b.Navigation("EndUserType");
+                });
+
+            modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Relations.DialogRelation", b =>
+                {
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "Dialog")
+                        .WithMany()
+                        .HasForeignKey("DialogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogEntity", "RelatedDialog")
+                        .WithMany()
+                        .HasForeignKey("RelatedDialogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Relations.DialogRelationType", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Dialog");
+
+                    b.Navigation("RelatedDialog");
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContent", b =>

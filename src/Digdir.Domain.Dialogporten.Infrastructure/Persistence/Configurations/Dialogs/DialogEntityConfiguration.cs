@@ -83,5 +83,6 @@ internal sealed class DialogEntityConfiguration : IEntityTypeConfiguration<Dialo
         builder.Property(x => x.IsApiOnly).HasDefaultValue(false);
         builder.Property(x => x.SystemLabelsMask).HasDefaultValue((short)1);
         builder.Property(x => x.IsSeenSinceLastContentUpdate).HasDefaultValue(true);
+        builder.Property(x => x.HasRelations).HasDefaultValue(false);
     }
 }

@@ -80,6 +80,12 @@ public sealed class DialogEntity :
     /// </summary>
     public bool Frozen { get; set; }
 
+    /// <summary>
+    /// Indicates whether the dialog has at least one relation to another dialog, regardless of whether the caller
+    /// can access the related dialogs. Only changes when the first relation is added or the last one is removed.
+    /// </summary>
+    public bool HasRelations { get; set; }
+
 
     // === Dependent relationships ===
     public DialogStatus.Values StatusId { get; set; }

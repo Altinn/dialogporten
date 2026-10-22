@@ -155,6 +155,7 @@ public static class InfrastructureExtensions
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
+            .AddTransient<IDialogRelationRepository, DialogRelationRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
             .AddTransient<IResourcePolicyInformationRepository, ResourcePolicyInformationRepository>()
             .AddTransient<IMetadataLinkProvider, MetadataLinkProvider>()

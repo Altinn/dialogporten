@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal class ActorNameRepository(DialogDbContext db, ITransactionTime transactionTime) : IActorNameRepository
+internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime transactionTime) : IActorNameRepository
 {
     public async Task<Guid> EnsureActorName(string actorId, string? actorName, CancellationToken cancellationToken)
     {

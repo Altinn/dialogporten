@@ -22,6 +22,12 @@ internal sealed class TestPartyNameRegistry
         StatusCode = HttpStatusCode.OK
     };
 
+    public static Func<CallInfo, HttpResponseMessage> OkNoMatch() => _ => new()
+    {
+        Content = JsonContent.Create(new NameLookupResult { Data = [] }),
+        StatusCode = HttpStatusCode.OK
+    };
+
     internal IPartyNameRegistryTransport? Override { get; private set; }
 
     internal void Configure(Action<IPartyNameRegistryTransport> configure)

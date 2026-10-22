@@ -2,10 +2,9 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using HotChocolate.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -16,12 +15,15 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
     private readonly ITransactionTime _transactionTime;
+    private readonly IUserRegistry _userRegistry;
     private bool _hasBeenExecuted;
 
     public PopulateActorNameInterceptor(
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IPartyNameRegistry partyNameRegistry)
+        IPartyNameRegistry partyNameRegistry,
+        IUserRegistry userRegistry
+    )
     {
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(domainContext);
@@ -29,6 +31,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         _domainContext = domainContext;
         _partyNameRegistry = partyNameRegistry;
+        _userRegistry = userRegistry;
         _transactionTime = transactionTime;
     }
 
@@ -108,12 +111,13 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 found => actorName.Name = found.Name,
                 notFound =>
                 {
-                    if (PartyIdentifier.TryParse(actorName.ActorId, out var partyId) && partyId is SystemUserIdentifier)
+                    var currentUserExternalIdWithPrefix = _userRegistry.GetCurrentUserId().ExternalIdWithPrefix;
+                    if (currentUserExternalIdWithPrefix.EqualsInvariantIgnoreCase(notFound.ExternalIdWithPrefix))
                     {
+                        // We know the identifier exists and can allow re-sync later.
                         actorName.Name = null;
                         return;
                     }
-
                     _domainContext.AddError(
                         nameof(Actor.ActorNameEntity.ActorId),
                         $"Unable to look up name for actor id: {actorName.ActorId}"

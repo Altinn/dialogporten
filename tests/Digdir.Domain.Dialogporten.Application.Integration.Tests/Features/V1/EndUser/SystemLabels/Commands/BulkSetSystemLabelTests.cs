@@ -96,6 +96,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
+    [InlineData("NotFound")]
     public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down(string failHow)
     {
         Guid? dialogId1 = NewUuidV7();
@@ -114,6 +115,10 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                         p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                             .Throws(new HttpRequestException());
                         break;
+                    case "NotFound":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
                     default: throw new UnreachableException($"Uknown failhow {failHow}");
                 }
             })
@@ -128,6 +133,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                 ],
                 AddLabels = [SystemLabel.Values.Bin]
             })
+            .AssertResult<BulkSetSystemLabelSuccess>()
             .GetLabelAssignmentLogs(dialogId1)
             .AssertResult<List<LabelAssignmentLogDto>>(x =>
             {

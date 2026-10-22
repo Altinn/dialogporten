@@ -19,6 +19,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -625,6 +626,25 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<DialogDto>(x => x.Transmissions.Should().ContainSingle()
                 .Which.Sender.ActorName.Should().Be("Brando Sando")
             );
+
+    [Fact]
+    public Task Can_Not_Create_With_Transmission_And_Actor_Name_When_PartyNameRegistry_Returns_No_Results() =>
+        FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(
+                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
+                        Arg.Any<CancellationToken>()
+                    )
+                    .Returns(TestPartyNameRegistry.OkNoMatch());
+            })
+            .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = new ActorDto
+            {
+                ActorType = ActorType.Values.PartyRepresentative,
+                ActorId = $"{NorwegianPersonIdentifier.PrefixWithSeparator}01254234636"
+
+            }))
+            .ExecuteAndAssert<DomainError>();
 
     [Fact]
     public Task Can_Create_With_Transmission_Using_Cache_With_Transmission_When_PartyNameRegistry_Fails()

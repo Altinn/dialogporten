@@ -201,6 +201,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
     public Task Set_Adds_LabelLog_Even_When_Party_Name_Registry_Is_Down(string failHow) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -216,10 +217,15 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                         p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                             .Throws(new HttpRequestException());
                         break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
                     default: throw new UnreachableException($"Uknown failhow {failHow}");
                 }
             })
             .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .AssertResult<SetSystemLabelSuccess>()
             .GetLabelAssignmentLogs()
             .AssertResult<List<LabelAssignmentLogDto>>(x =>
             {

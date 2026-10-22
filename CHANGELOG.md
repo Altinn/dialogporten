@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.125.0](https://github.com/Altinn/dialogporten/compare/v1.124.1...v1.125.0) (2026-10-22)
+
+
+### Features
+
+* support access restrictions and dialog party checks in authorizationContext ([#4482](https://github.com/Altinn/dialogporten/issues/4482)) ([2561a85](https://github.com/Altinn/dialogporten/commit/2561a8543ed14d8567aa79b289da33db590cf83e))
+
+
+### Bug Fixes
+
+* **dialogs:** only reset system labels to Default on content changes ([#4496](https://github.com/Altinn/dialogporten/issues/4496)) ([0946da8](https://github.com/Altinn/dialogporten/commit/0946da81c676b928db98780afa01fe50943af609))
+* **graphql:** make SearchDialog.Content nullable ([#4483](https://github.com/Altinn/dialogporten/issues/4483)) ([7162fd9](https://github.com/Altinn/dialogporten/commit/7162fd90d07b809c97eb5977d80125bef0050dca))
+
+
+### Miscellaneous Chores
+
+* **ci:** skip cross-repo refs and warn instead of failing when tagging issues ([#4497](https://github.com/Altinn/dialogporten/issues/4497)) ([ec333e4](https://github.com/Altinn/dialogporten/commit/ec333e4b4742344dd303785f5fc15f0cb5d821f6))
+* **deps:** update actions/download-artifact action to v8.0.2 ([#4500](https://github.com/Altinn/dialogporten/issues/4500)) ([5838f89](https://github.com/Altinn/dialogporten/commit/5838f8946ae703be0efeaae73a03eef4b6d31138))
+* **deps:** update actions/setup-node action to v7.1.0 ([#4503](https://github.com/Altinn/dialogporten/issues/4503)) ([2ff88b1](https://github.com/Altinn/dialogporten/commit/2ff88b194edd4d9a4b6b48f5e74e005b8601a9ff))
+* **deps:** update actions/upload-artifact action to v7.0.2 ([#4501](https://github.com/Altinn/dialogporten/issues/4501)) ([43875ea](https://github.com/Altinn/dialogporten/commit/43875ea7d84adfdfa88ff0a49fabee67bc4109e5))
+* **deps:** update dependency azure.storage.blobs to 12.30.1 ([#4486](https://github.com/Altinn/dialogporten/issues/4486)) ([9ec1c7a](https://github.com/Altinn/dialogporten/commit/9ec1c7a4cf4eaf53f62087e8dc462b372c8f5b7c))
+* **deps:** update dependency dotnet-sdk to v10.0.402 ([#4510](https://github.com/Altinn/dialogporten/issues/4510)) ([75952d5](https://github.com/Altinn/dialogporten/commit/75952d5c160440b7ae4b96c27b35d15d2aaf1297))
+* **deps:** update dependency htmlagilitypack to 1.13.1 ([#4511](https://github.com/Altinn/dialogporten/issues/4511)) ([ee8a9c1](https://github.com/Altinn/dialogporten/commit/ee8a9c1d8d2390c3c84597f424f1a48731fb6900))
+* **deps:** update dependency scalar.aspnetcore to 2.17.14 ([#4487](https://github.com/Altinn/dialogporten/issues/4487)) ([4a97d7d](https://github.com/Altinn/dialogporten/commit/4a97d7d5dd39a4df03af2bfd81cadacee35691c4))
+* **deps:** update docker/build-push-action action to v7.4.0 ([#4490](https://github.com/Altinn/dialogporten/issues/4490)) ([1363a02](https://github.com/Altinn/dialogporten/commit/1363a02ef92dae6cd345827f27e433271377f083))
+* **deps:** update docker/setup-buildx-action action to v4.4.1 ([#4491](https://github.com/Altinn/dialogporten/issues/4491)) ([e4f5f38](https://github.com/Altinn/dialogporten/commit/e4f5f38e938ddf290600f24ee626ec7241a2e40b))
+* **deps:** update hotchocolate dependencies to 16.6.8 ([#4502](https://github.com/Altinn/dialogporten/issues/4502)) ([be80f3b](https://github.com/Altinn/dialogporten/commit/be80f3b27726f8607db2c13d9cbdd6abe01d207e))
+* **infra:** sample traces by trace id instead of the incoming sampled flag ([#4513](https://github.com/Altinn/dialogporten/issues/4513)) ([3039bc8](https://github.com/Altinn/dialogporten/commit/3039bc8a93d95947beb6caa5909941cb6427a4e6))
+
 ## [1.124.1](https://github.com/Altinn/dialogporten/compare/v1.124.0...v1.124.1) (2026-10-13)
 
 

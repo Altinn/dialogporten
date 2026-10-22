@@ -50,7 +50,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        var newActorNameEntities = dbContext.ChangeTracker
+        var addedActorNameEntities = dbContext.ChangeTracker
             .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
             .Where(e => e.Entity.ActorId is not null || e.Entity.Name is not null)
@@ -62,13 +62,13 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             })
             .ToList();
 
-        if (!await TrySetActorNames(newActorNameEntities, cancellationToken))
+        if (!await TrySetActorNames(addedActorNameEntities, cancellationToken))
         {
             _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        var finalActorNames = await ConsolidateActorNameInstances(dbContext, newActorNameEntities, cancellationToken);
+        var finalActorNames = await ConsolidateActorNameInstances(dbContext, addedActorNameEntities, cancellationToken);
         MarkActorNamesForResync(finalActorNames);
         _hasBeenExecuted = true;
         return await base.SavingChangesAsync(eventData, result, cancellationToken);

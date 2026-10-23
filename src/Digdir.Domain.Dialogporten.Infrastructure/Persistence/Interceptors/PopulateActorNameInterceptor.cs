@@ -66,7 +66,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             })
             .ToList();
 
-        if (!await TrySetActorNames(addedActorNameEntities, cancellationToken))
+        if (!await TrySetMissingActorNames(addedActorNameEntities, cancellationToken))
         {
             _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
@@ -90,7 +90,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
     }
 
-    private async Task<bool> TrySetActorNames(
+    private async Task<bool> TrySetMissingActorNames(
         IEnumerable<ActorName> actorNameEntities,
         CancellationToken cancellationToken)
     {

@@ -111,8 +111,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 found => actorName.Name = found.Name,
                 notFound =>
                 {
-                    var currentUserExternalIdWithPrefix = _userRegistry.GetCurrentUserId().ExternalIdWithPrefix;
-                    if (currentUserExternalIdWithPrefix.EqualsInvariantIgnoreCase(notFound.ExternalIdWithPrefix))
+                    var currentUserId = _userRegistry.GetCurrentUserId().ExternalIdWithPrefix;
+                    if (string.Equals(currentUserId, notFound.ExternalIdWithPrefix, StringComparison.OrdinalIgnoreCase))
                     {
                         // We know the identifier exists and can allow re-sync later.
                         actorName.Name = null;

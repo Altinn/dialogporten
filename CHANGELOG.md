@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.125.1](https://github.com/Altinn/dialogporten/compare/v1.125.0...v1.125.1) (2026-10-23)
+
+
+### Bug Fixes
+
+* **dialogs:** return 200 for API-only end user dialogs without content ([#4515](https://github.com/Altinn/dialogporten/issues/4515)) ([a11e9fd](https://github.com/Altinn/dialogporten/commit/a11e9fd628f7f77c8f9aeff193189b9c8d18ce9a))
+
+
+### Miscellaneous Chores
+
+* **db:** codify hand-tuned prod indexes, storage parameters and server settings ([#4466](https://github.com/Altinn/dialogporten/issues/4466)) ([fd73899](https://github.com/Altinn/dialogporten/commit/fd738998a33280604c34444915a0b2530b0cecfe))
+
 ## [1.125.0](https://github.com/Altinn/dialogporten/compare/v1.124.1...v1.125.0) (2026-10-22)
 
 

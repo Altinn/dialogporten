@@ -1,11 +1,11 @@
 # Dialogporten
 
-[![CI/CD Main](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-main.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-main.yml)
-[![CI/CD Staging](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-staging.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-staging.yml)
-[![CI/CD YT01](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml)  
+[![CI/CD Main](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Altinn/dialogporten/badges/test.json)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-main.yml)
+[![CI/CD Staging](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Altinn/dialogporten/badges/staging.json)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-staging.yml)
+[![CI/CD YT01](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Altinn/dialogporten/badges/yt01.json)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml)  
 
-[![CI/CD Production Dry Run](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml)
-[![CI/CD Production](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml/badge.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml)  
+[![CI/CD Production Dry Run](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Altinn/dialogporten/badges/prod-dry-run.json)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml)
+[![CI/CD Production](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Altinn/dialogporten/badges/prod.json)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml)  
 
 ![NuGet Version](https://img.shields.io/nuget/v/Altinn.ApiClients.Dialogporten)
 ![NPM Version](https://img.shields.io/npm/v/%40digdir%2Fdialogporten-schema)

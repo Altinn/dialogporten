@@ -205,3 +205,35 @@ jobs:
       version: ${{ github.event.client_payload.version }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}
+
+  update-deploy-badge:
+    name: Update deploy badge
+    # needs lists every job so the badge color covers the whole run
+    needs:
+      [
+        generate-git-short-sha,
+        get-versions-from-github,
+        check-for-changes,
+        deploy-infra,
+        store-infra-version,
+        deploy-apps,
+        update-manifests,
+        tag-issues-with-environment,
+        publish-sdk-to-nuget,
+        store-apps-version,
+        run-e2e-tests,
+        run-graphql-e2e-tests,
+        run-webapi-e2e-tests,
+        send-slack-message-on-failure,
+        send-deployment-to-swarmia,
+      ]
+    if: ${{ always() && !cancelled() }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: staging
+      label: CI/CD Staging
+      status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+      # The badge shows the app version, so it only moves when the apps deploy. An infra-only or failed app deployment keeps it.
+      version: ${{ needs.deploy-apps.outputs.deployment_executed == 'true' && github.event.client_payload.version || '' }}

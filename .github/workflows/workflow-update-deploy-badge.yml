@@ -1,0 +1,47 @@
+name: Update Deploy Badge
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: "Badge name, written to <name>.json on the badges branch"
+        required: true
+        type: string
+      label:
+        description: "Badge label (e.g., CI/CD Staging)"
+        required: true
+        type: string
+      status:
+        description: "Run result shown as the badge color: success or failure"
+        required: true
+        type: string
+      version:
+        description: "Deployed version. Leave empty to keep the version the badge already shows"
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  update-badge:
+    name: Update deploy badge
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # A badge that cannot be written must not fail the deploy run.
+      - name: Checkout
+        continue-on-error: true
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Write badge to the badges branch
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          NAME: ${{ inputs.name }}
+          LABEL: ${{ inputs.label }}
+          STATUS: ${{ inputs.status }}
+          VERSION: ${{ inputs.version }}
+        run: bash .github/scripts/update-deploy-badge.sh "$NAME" "$LABEL" "$STATUS" "$VERSION"

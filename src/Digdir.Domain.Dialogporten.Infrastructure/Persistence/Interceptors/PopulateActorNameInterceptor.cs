@@ -66,6 +66,11 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             })
             .ToList();
 
+        if (addedActorNameEntities.Count == 0)
+        {
+            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        }
+
         if (!await TrySetMissingActorNames(addedActorNameEntities, cancellationToken))
         {
             _hasBeenExecuted = true;

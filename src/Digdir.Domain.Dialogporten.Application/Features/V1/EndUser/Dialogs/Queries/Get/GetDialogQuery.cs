@@ -327,7 +327,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             authorizedContextReferences.AddIfAuthorized(guiAction, g.IsAuthorized);
         }
 
-        dto.Content.MainContentReference?.IsAuthorized = authorization.HasReadAccessToMainResource();
+        dto.Content?.MainContentReference?.IsAuthorized = authorization.HasReadAccessToMainResource();
 
         foreach (var (a, attachment) in dto.Attachments.Zip(dialog.Attachments))
         {
@@ -399,7 +399,7 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
             }
         }
 
-        if (dto.Content.MainContentReference?.IsAuthorized == false)
+        if (dto.Content?.MainContentReference?.IsAuthorized == false)
         {
             dto.Content.MainContentReference.ReplaceUnauthorizedContentReference();
         }

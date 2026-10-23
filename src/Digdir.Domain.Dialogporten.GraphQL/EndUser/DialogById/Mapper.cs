@@ -31,7 +31,7 @@ internal static class DialogByIdMapExtensions
         FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
         FromPartyTransmissionsCount = source.FromPartyTransmissionsCount,
         IsApiOnly = source.IsApiOnly,
-        Content = source.Content.ToContent(),
+        Content = source.Content?.ToContent(),
         Attachments = source.Attachments.Select(ToAttachment).ToList(),
         ExcludedAttachments = source.ExcludedAttachments?.Select(ToExcludedElement).ToList() ?? [],
         GuiActions = source.GuiActions.Select(ToGuiAction).ToList(),

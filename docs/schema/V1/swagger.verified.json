@@ -1169,7 +1169,8 @@
             "type": "array"
           },
           "content": {
-            "description": "The dialog unstructured text content.",
+            "description": "The dialog unstructured text content. May be null for API-only dialogs, which are not required to have content.",
+            "nullable": true,
             "oneOf": [
               {
                 "$ref": "#/components/schemas/V1EndUserDialogsQueriesGet_Content"

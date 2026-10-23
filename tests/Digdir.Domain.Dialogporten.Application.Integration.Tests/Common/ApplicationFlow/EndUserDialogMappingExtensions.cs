@@ -33,7 +33,7 @@ internal static class EndUserDialogMappingExtensions
         Activities = source.Activities.Select(ToActivityDto).ToList()
     };
 
-    private static Up.ContentDto ToContentDto(Eu.ContentDto source) => new()
+    private static Up.ContentDto? ToContentDto(Eu.ContentDto? source) => source is null ? null : new()
     {
         Title = source.Title,
         Summary = source.Summary,

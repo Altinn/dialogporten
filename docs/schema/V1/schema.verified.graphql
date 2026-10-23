@@ -237,8 +237,8 @@ type Dialog {
   fromPartyTransmissionsCount: Int!
   "Indicates if this dialog is intended for API consumption only and should not be shown in frontends aimed at humans"
   isApiOnly: Boolean!
-  "The dialog unstructured text content."
-  content: Content!
+  "The dialog unstructured text content. May be null for API-only dialogs."
+  content: Content
   "The attachments associated with the dialog (on an aggregate level)."
   attachments: [Attachment!]!
   "Dialog-level attachments that exist but are withheld from the authenticated user, listed by id and creation time only. An attachment is excluded rather than shown with masked URLs when its authorization context sets unauthorizedPresentation to 'excluded'. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."

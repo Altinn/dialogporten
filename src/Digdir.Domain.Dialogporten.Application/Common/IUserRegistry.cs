@@ -10,7 +10,6 @@ namespace Digdir.Domain.Dialogporten.Application.Common;
 public interface IUserRegistry
 {
     UserId GetCurrentUserId();
-    Task<UserInformation> GetCurrentUserInformation(CancellationToken cancellationToken);
 }
 
 public sealed class UserId
@@ -39,17 +38,12 @@ public sealed class UserInformation
 public sealed class UserRegistry : IUserRegistry
 {
     private readonly IUser _user;
-    private readonly IPartyNameRegistry _partyNameRegistry;
 
-    public UserRegistry(
-        IUser user,
-        IPartyNameRegistry partyNameRegistry)
+    public UserRegistry(IUser user)
     {
         ArgumentNullException.ThrowIfNull(user);
-        ArgumentNullException.ThrowIfNull(partyNameRegistry);
 
         _user = user;
-        _partyNameRegistry = partyNameRegistry;
     }
 
     public UserId GetCurrentUserId()
@@ -62,28 +56,6 @@ public sealed class UserRegistry : IUserRegistry
         }
 
         return new() { Type = userType, ExternalId = externalId };
-    }
-
-    public async Task<UserInformation> GetCurrentUserInformation(CancellationToken cancellationToken)
-    {
-        var userId = GetCurrentUserId();
-        var name = userId.Type switch
-        {
-            UserIdType.Person
-                or UserIdType.ServiceOwnerOnBehalfOfPerson
-                or UserIdType.IdportenEmailIdentifiedUser
-                or UserIdType.SystemUser => await _partyNameRegistry.GetName(userId.ExternalIdWithPrefix, cancellationToken),
-            UserIdType.AltinnSelfIdentifiedUser => throw new UnreachableException(),
-            UserIdType.FeideUser => throw new UnreachableException(),
-            UserIdType.Unknown => throw new UnreachableException(),
-            UserIdType.ServiceOwner => throw new UnreachableException(),
-            _ => throw new UnreachableException()
-        };
-        return new()
-        {
-            UserId = userId,
-            Name = name
-        };
     }
 }
 
@@ -100,11 +72,4 @@ internal sealed class LocalDevelopmentUserRegistryDecorator : IUserRegistry
     }
 
     public UserId GetCurrentUserId() => _userRegistry.GetCurrentUserId();
-
-    public Task<UserInformation> GetCurrentUserInformation(CancellationToken cancellationToken)
-        => Task.FromResult(new UserInformation
-        {
-            UserId = GetCurrentUserId(),
-            Name = LocalDevelopmentUserName
-        });
 }

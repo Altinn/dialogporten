@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using static Digdir.Domain.Dialogporten.Domain.Actors.ActorType.Values;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Commands.SetSystemLabels;
 
@@ -85,7 +86,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return new EntityDeleted<DialogEntity>(request.DialogId);
         }
 
-        var (performedBy, forbidden) = await TryCreatePerformedByActor(request, cancellationToken);
+        var (performedBy, forbidden) = TryCreatePerformedByActor(request);
         if (forbidden is not null)
         {
             return forbidden;
@@ -118,9 +119,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             conflict => conflict);
     }
 
-    private async Task<(LabelAssignmentLogActor? Actor, Forbidden? Error)> TryCreatePerformedByActor(
-        SetSystemLabelCommand request,
-        CancellationToken cancellationToken)
+    private (LabelAssignmentLogActor? Actor, Forbidden? Error) TryCreatePerformedByActor(SetSystemLabelCommand request)
     {
         if (request.PerformedBy is not null)
         {
@@ -136,7 +135,7 @@ internal sealed class SetSystemLabelCommandHandler : IRequestHandler<SetSystemLa
             return (actor, null);
         }
 
-        var currentUserInformation = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        return (LabelAssignmentLogActorFactory.FromUserInformation(currentUserInformation), null);
+        var userId = _userRegistry.GetCurrentUserId();
+        return (LabelAssignmentLogActorFactory.Create(PartyRepresentative, userId.ExternalIdWithPrefix), null);
     }
 }

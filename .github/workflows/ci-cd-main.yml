@@ -310,4 +310,5 @@ jobs:
       name: test
       label: CI/CD Main
       status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
-      version: ${{ (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') && format('{0}-{1}', needs.get-current-version.outputs.version, needs.generate-git-short-sha.outputs.gitShortSha) || '' }}
+      # The badge shows the app version, so it only moves when the apps deploy. An infra-only or failed app deployment keeps it.
+      version: ${{ needs.deploy-apps.outputs.deployment_executed == 'true' && format('{0}-{1}', needs.get-current-version.outputs.version, needs.generate-git-short-sha.outputs.gitShortSha) || '' }}

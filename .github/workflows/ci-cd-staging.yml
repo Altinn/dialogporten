@@ -235,4 +235,5 @@ jobs:
       name: staging
       label: CI/CD Staging
       status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
-      version: ${{ (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') && github.event.client_payload.version || '' }}
+      # The badge shows the app version, so it only moves when the apps deploy. An infra-only or failed app deployment keeps it.
+      version: ${{ needs.deploy-apps.outputs.deployment_executed == 'true' && github.event.client_payload.version || '' }}

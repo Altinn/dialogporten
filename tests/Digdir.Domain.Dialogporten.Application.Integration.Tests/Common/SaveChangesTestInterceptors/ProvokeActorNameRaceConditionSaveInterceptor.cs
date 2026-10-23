@@ -5,12 +5,10 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
-using MassTransit.Mediator;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.SaveChangesTestInterceptors;
 
@@ -42,7 +40,7 @@ internal sealed class ProvokeActorNameRaceConditionSaveInterceptor : SaveChanges
 
         var pendingActorNames = eventData.Context.ChangeTracker
             .Entries<ActorName>()
-            .Where(x => x.State is EntityState.Added)
+            .Where(x => x.State is EntityState.Unchanged)
             .Select(x => x.Entity)
             .ToList();
 

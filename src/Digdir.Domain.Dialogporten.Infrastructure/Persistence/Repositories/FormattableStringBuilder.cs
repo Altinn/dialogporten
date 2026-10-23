@@ -134,8 +134,7 @@ internal class FormattableStringBuilder
 
 internal sealed class PostgresFormattableStringBuilder : FormattableStringBuilder
 {
-    private static readonly NpgsqlParameter NullValue = new NpgsqlParameter<string?>("__null__", null);
-    protected override object GetNullValue() => NullValue;
+    protected override object GetNullValue() => new NpgsqlParameter<string?>("__null__", null);
     protected override object? SomethingValue(object? value) => value switch
     {
         DateTime dateTime => (DateTimeOffset)dateTime.ToUniversalTime(),

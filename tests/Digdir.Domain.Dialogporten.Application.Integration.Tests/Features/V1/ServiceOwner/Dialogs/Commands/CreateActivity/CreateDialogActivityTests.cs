@@ -17,6 +17,7 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -123,12 +124,13 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public Task Can_Create_Activity_On_Existing_Dialog_And_Get_The_Activity_Afterwards_Even_When_Party_Name_Registry_Is_Down(
+    public Task Can_Create_Activity_On_Existing_Dialog_As_Self_And_Get_The_Activity_Afterwards_Even_When_Party_Name_Registry_Is_Down(
         string failHow
     )
     {
         var guid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
         return FlowBuilder.For(Application)
+            .AsServiceOwner()
             .ConfigurePartyNameRegistry(p =>
             {
                 switch (failHow)
@@ -157,7 +159,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
                     ActorName = null,
-                    ActorId = TestUsers.DefaultParty
+                    ActorId = TestUsers.DefaultServiceOwner
                 },
                 Description = []
             })
@@ -174,7 +176,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
                         ActorName = null,
-                        ActorId = TestUsers.DefaultParty
+                        ActorId = TestUsers.DefaultServiceOwner
                     });
                     x.Description.Should().BeNull();
                 }
@@ -193,7 +195,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
                         ActorName = "Brando Sando",
-                        ActorId = TestUsers.DefaultParty
+                        ActorId = TestUsers.DefaultServiceOwner
                     });
                     x.Description.Should().BeNull();
                 }
@@ -203,13 +205,14 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public Task Can_Create_Activity_On_Existing_Dialog_And_Get_The_Repaired_Activity_Afterwards_When_Null_Actor_Exists_And_Party_Name_Registry_Is_Down(
+    public Task Can_Create_Activity_On_Existing_Dialog_As_Self_And_Get_The_Repaired_Activity_Afterwards_When_Null_Actor_Exists_And_Party_Name_Registry_Is_Down(
         string failHow
     )
     {
         var existingActivityGuid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
         var newActivityGuid = Guid.Parse("01a11b7f-a2d9-724e-9299-32167e6539a8");
         return FlowBuilder.For(Application)
+            .AsServiceOwner()
             .ConfigurePartyNameRegistry(p =>
             {
                 switch (failHow)
@@ -236,7 +239,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
                     ActorName = null,
-                    ActorId = TestUsers.DefaultParty
+                    ActorId = TestUsers.DefaultServiceOwner
                 },
                 Description = []
             })
@@ -245,7 +248,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .AssertResult<ActivityDto>(x =>
                 {
                     x.Id.Should().Be(existingActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
                     x.PerformedBy.ActorName.Should().BeNull();
                 }
             )
@@ -261,7 +264,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
                     ActorName = null,
-                    ActorId = TestUsers.DefaultParty
+                    ActorId = TestUsers.DefaultServiceOwner
                 },
                 Description = [new LocalizationDto
                     {
@@ -275,7 +278,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .AssertResult<ActivityDto>(x =>
                 {
                     x.Id.Should().Be(newActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
                     x.PerformedBy.ActorName.Should().BeNull();
                 }
             )
@@ -285,7 +288,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .AssertResult<ActivityDto>(x =>
                 {
                     x.Id.Should().Be(existingActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
                     x.PerformedBy.ActorName.Should().Be("Brando Sando");
                 }
             )
@@ -293,10 +296,57 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
             .ExecuteAndAssert<ActivityDto>(x =>
                 {
                     x.Id.Should().Be(newActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
+                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
                     x.PerformedBy.ActorName.Should().Be("Brando Sando");
                 }
             );
+    }
+
+
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public Task Can_Not_Create_Activity_On_Existing_Dialog_With_Unknown_Actor_And_Get_The_Activity_Afterwards_Even_When_Party_Name_Registry_Is_Down(
+            string failHow
+        )
+    {
+        var guid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
+        return FlowBuilder.For(Application)
+            .AsServiceOwner()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
+            {
+                Id = guid,
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.DialogCreated,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}799461455"
+                },
+                Description = []
+            })
+            .ExecuteAndAssert<DomainError>();
     }
 
     [Fact]

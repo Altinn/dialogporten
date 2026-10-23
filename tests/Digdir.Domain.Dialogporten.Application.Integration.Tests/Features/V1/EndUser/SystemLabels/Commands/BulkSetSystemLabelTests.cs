@@ -96,7 +96,6 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    [InlineData("NotFound")]
     public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down(string failHow)
     {
         Guid? dialogId1 = NewUuidV7();
@@ -181,6 +180,126 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                         x.PerformedBy.Should().NotBeNull();
                         x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
                         x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            });
+    }
+
+    [Fact]
+    public async Task BulkSet_Returns_Domain_Error_When_Party_Name_Registry_Returns_No_Results()
+    {
+        Guid? dialogId1 = NewUuidV7();
+        Guid? dialogId2 = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.OkNoMatch());
+            })
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
+            .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
+            {
+                Dialogs =
+                [
+                    new() { DialogId = dialogId1.Value },
+                    new() { DialogId = dialogId2.Value }
+                ],
+                AddLabels = [SystemLabel.Values.Bin]
+            })
+            .ExecuteAndAssert<DomainError>();
+    }
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NotFound")]
+    public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down_For_A_SystemUser(string failHow)
+    {
+        Guid? dialogId1 = NewUuidV7();
+        Guid? dialogId2 = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NotFound":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .AsSystemUser()
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
+            .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
+            {
+                Dialogs =
+                [
+                    new() { DialogId = dialogId1.Value },
+                    new() { DialogId = dialogId2.Value }
+                ],
+                AddLabels = [SystemLabel.Values.Bin]
+            })
+            .AssertResult<BulkSetSystemLabelSuccess>()
+            .GetLabelAssignmentLogs(dialogId1)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:systemuser:uuid:");
+                        x.PerformedBy.ActorName.Should().BeNull();
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .GetLabelAssignmentLogs(dialogId2)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:systemuser:uuid:");
+                        x.PerformedBy.ActorName.Should().BeNull();
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs(dialogId1)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:systemuser:uuid:");
+                        x.PerformedBy.ActorName.Should().Be("Systembruker");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .GetLabelAssignmentLogs(dialogId2)
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:systemuser:uuid:");
+                        x.PerformedBy.ActorName.Should().Be("Systembruker");
                         x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
                     });
             });

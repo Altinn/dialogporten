@@ -66,7 +66,6 @@ public sealed class DuplicateActorNameConflictTests(DialogApplication applicatio
     [InlineData("HttpRequestException")]
     public async Task Save_Recovers_When_Save_ActorName_Races_When_Party_Name_Registry_Is_Down_And_Recovers_Later(string failHow)
     {
-        var actorId = "urn:altinn:person:identifier-no:09095614407";
 
         await FlowBuilder.For(Application)
             .WithSaveChangesInterceptor<ProvokeActorNameRaceConditionSaveInterceptor>()
@@ -98,7 +97,7 @@ public sealed class DuplicateActorNameConflictTests(DialogApplication applicatio
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
                     ActorName = null,
-                    ActorId = actorId
+                    ActorId = TestUsers.DefaultParty
                 },
                 Description = []
             })
@@ -113,7 +112,7 @@ public sealed class DuplicateActorNameConflictTests(DialogApplication applicatio
                     .Single();
 
                 interceptor.HasRaced.Should().Be(true);
-                result.PerformedBy.ActorId.Should().Be(actorId);
+                result.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
                 result.PerformedBy.ActorName.Should().Be(null);
             })
             .ResetPartyNameRegistry()
@@ -128,7 +127,7 @@ public sealed class DuplicateActorNameConflictTests(DialogApplication applicatio
                     .Single();
 
                 interceptor.HasRaced.Should().Be(true);
-                result.PerformedBy.ActorId.Should().Be(actorId);
+                result.PerformedBy.ActorId.Should().Be(TestUsers.DefaultParty);
                 result.PerformedBy.ActorName.Should().Be("Brando Sando");
             });
     }

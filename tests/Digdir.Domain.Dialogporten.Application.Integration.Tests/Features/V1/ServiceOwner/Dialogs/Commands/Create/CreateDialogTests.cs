@@ -508,13 +508,13 @@ public class CreateDialogTests : ApplicationCollectionFixture
         public HtmlContentTestData()
         {
             var legacyHtmlScopeUser = TestUsers
-                .FromDefault()
+                .FromDefaultPidUser()
                 .WithScope(AuthorizationScope.LegacyHtmlScope)
                 .Build();
 
             Add(new HtmlContentScenario(
                 DisplayName: "Cannot create dialog with HTML content without valid html scope",
-                User: TestUsers.FromDefault(), // No change in user scopes
+                User: TestUsers.FromDefaultPidUser(), // No change in user scopes
                 ModifyCommand: (x, _) => x.Dto.Content!.AdditionalInfo = CreateHtmlContentValueDto(MediaTypes.LegacyHtml),
                 ExpectedResultType: typeof(ValidationError)));
 

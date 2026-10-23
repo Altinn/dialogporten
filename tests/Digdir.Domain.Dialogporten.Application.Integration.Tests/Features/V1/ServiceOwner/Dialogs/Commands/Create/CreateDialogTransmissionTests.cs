@@ -235,10 +235,10 @@ public class CreateTransmissionTests : ApplicationCollectionFixture
 
         public HtmlContentTestData()
         {
-            var legacyHtmlScopeUser = TestUsers.FromDefault()
+            var legacyHtmlScopeUser = TestUsers.FromDefaultPidUser()
                 .WithScope(AuthorizationScope.LegacyHtmlScope)
                 .Build();
-            var defaultUser = TestUsers.FromDefault().Build();
+            var defaultUser = TestUsers.FromDefaultPidUser().Build();
 
             Add(new HtmlContentScenario(
                 DisplayName: "Cannot create transmission with HTML content without valid html scope",

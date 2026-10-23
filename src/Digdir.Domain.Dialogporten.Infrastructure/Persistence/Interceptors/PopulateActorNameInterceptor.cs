@@ -2,11 +2,12 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
-using HotChocolate.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using static System.StringComparison;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
@@ -111,13 +112,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 found => actorName.Name = found.Name,
                 notFound =>
                 {
-                    var currentUserId = _userRegistry.GetCurrentUserId().ExternalIdWithPrefix;
-                    if (string.Equals(currentUserId, notFound.ExternalIdWithPrefix, StringComparison.OrdinalIgnoreCase))
+                    if (SystemUserIsGuaranteedToExist(notFound.ExternalIdWithPrefix))
                     {
-                        // We know the identifier exists and can allow re-sync later.
                         actorName.Name = null;
                         return;
                     }
+
                     _domainContext.AddError(
                         nameof(Actor.ActorNameEntity.ActorId),
                         $"Unable to look up name for actor id: {actorName.ActorId}"
@@ -127,11 +127,48 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                     nameof(Actor.ActorNameEntity.ActorId),
                     $"Unable to look up name for actor id: {actorName.ActorId}"
                 ),
-                unavailable => actorName.Name = null
+                unavailable =>
+                {
+                    if (UserIsGuaranteedToExist(_userRegistry.GetCurrentUserId(), unavailable.ExternalIdWithPrefix))
+                    {
+                        actorName.Name = null;
+                        return;
+                    }
+
+                    _domainContext.AddError(
+                        nameof(Actor.ActorNameEntity.ActorId),
+                        $"Unable to look up name for actor id: {actorName.ActorId}"
+                    );
+                }
             );
         }
 
         return _domainContext.IsValid;
+    }
+
+    /// <summary>
+    /// Fast test for whether we can trust that the user behind the ID exists.
+    /// We cant allow null names otherwise.
+    /// </summary>
+    private static bool UserIsGuaranteedToExist(UserId currentUserId, string externalIdWithPrefixInQuestion)
+    {
+        if (currentUserId.Type is DialogUserType.Values.ServiceOwnerOnBehalfOfPerson) return false;
+
+        return string.Equals(currentUserId.ExternalIdWithPrefix, externalIdWithPrefixInQuestion, OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// We see up to 1 minute delay before newly created system users are visible in PartyNameRegistry
+    /// We can allow null names just in this case.
+    /// </summary>
+    /// <param name="externalIdWithPrefixInQuestion"></param>
+    /// <returns></returns>
+    private bool SystemUserIsGuaranteedToExist(string externalIdWithPrefixInQuestion)
+    {
+        var currentUserId = _userRegistry.GetCurrentUserId();
+
+        return currentUserId.Type is DialogUserType.Values.SystemUser
+               && UserIsGuaranteedToExist(currentUserId, externalIdWithPrefixInQuestion);
     }
 
     private async Task<List<ActorName>> ConsolidateActorNameInstances(

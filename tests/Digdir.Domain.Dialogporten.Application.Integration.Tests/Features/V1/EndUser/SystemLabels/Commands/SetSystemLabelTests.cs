@@ -201,7 +201,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    [InlineData("NoMatch")]
     public Task Set_Adds_LabelLog_Even_When_Party_Name_Registry_Is_Down(string failHow) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -249,6 +248,74 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                         x.PerformedBy.Should().NotBeNull();
                         x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
                         x.PerformedBy.ActorName.Should().Be("Brando Sando");
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            });
+
+    [Fact]
+    public Task Set_Returns_DomainError_When_Party_Name_Is_Not_Found_For_A_Regular_User() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.OkNoMatch());
+            })
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .ExecuteAndAssert<DomainError>();
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Set_Adds_LabelLog_Even_When_Party_Name_Registry_Is_Down_As_SystemUser(string failHow) =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .AsSystemUser()
+            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
+            .AssertResult<SetSystemLabelSuccess>()
+            .GetLabelAssignmentLogs()
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:systemuser:uuid:");
+                        x.PerformedBy.ActorName.Should().BeNull();
+                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
+                    });
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(1)
+                    .And.AllSatisfy(x =>
+                    {
+                        x.PerformedBy.Should().NotBeNull();
+                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:systemuser:uuid:");
+                        x.PerformedBy.ActorName.Should().Be("Systembruker");
                         x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
                     });
             });

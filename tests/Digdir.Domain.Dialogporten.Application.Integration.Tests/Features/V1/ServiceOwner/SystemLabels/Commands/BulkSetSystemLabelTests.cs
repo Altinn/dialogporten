@@ -112,12 +112,13 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down(string failHow)
+    public async Task BulkSet_Rejects_Label_Assignment_Logs_With_EndUserId_When_Party_Name_Registry_Is_Down(string failHow)
     {
         Guid? dialogId1 = NewUuidV7();
         Guid? dialogId2 = NewUuidV7();
 
         await FlowBuilder.For(Application)
+            .AsServiceOwnerOnBehalfOfPerson()
             .ConfigurePartyNameRegistry(p =>
             {
                 switch (failHow)
@@ -148,55 +149,63 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     AddLabels = [SystemLabel.Values.Bin]
                 };
             })
+            .AssertResult<DomainError>()
             .GetLabelAssignmentLogs(dialogId1)
-            .AssertResult<List<LabelAssignmentLogDto>>(x =>
-            {
-                x.Should().HaveCount(1)
-                    .And.AllSatisfy(x =>
-                    {
-                        x.PerformedBy.Should().NotBeNull();
-                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
-                        x.PerformedBy.ActorName.Should().BeNull();
-                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
-                    });
-            })
-            .GetLabelAssignmentLogs(dialogId2)
-            .AssertResult<List<LabelAssignmentLogDto>>(x =>
-            {
-                x.Should().HaveCount(1)
-                    .And.AllSatisfy(x =>
-                    {
-                        x.PerformedBy.Should().NotBeNull();
-                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
-                        x.PerformedBy.ActorName.Should().BeNull();
-                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
-                    });
-            })
-            .ResetPartyNameRegistry()
-            .ConsumeEvents()
-            .GetLabelAssignmentLogs(dialogId1)
-            .AssertResult<List<LabelAssignmentLogDto>>(x =>
-            {
-                x.Should().HaveCount(1)
-                    .And.AllSatisfy(x =>
-                    {
-                        x.PerformedBy.Should().NotBeNull();
-                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
-                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
-                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
-                    });
-            })
-            .GetLabelAssignmentLogs(dialogId2)
             .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
             {
-                x.Should().HaveCount(1)
-                    .And.AllSatisfy(x =>
+                x.Should().HaveCount(0);
+            });
+    }
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    public async Task BulkSet_Rejects_Label_Assignment_Logs_With_PerformedBy_When_Party_Name_Registry_Is_Down(string failHow)
+    {
+        Guid? dialogId1 = NewUuidV7();
+        Guid? dialogId2 = NewUuidV7();
+
+        await FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
+            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
+            .AsAdminUser()
+            .BulkSetSystemLabelServiceOwner((x, ctx) =>
+            {
+                x.Dto = new()
+                {
+                    PerformedBy = new ActorDto
                     {
-                        x.PerformedBy.Should().NotBeNull();
-                        x.PerformedBy.ActorId.Should().StartWith("urn:altinn:person:identifier-ephemeral:");
-                        x.PerformedBy.ActorName.Should().Be("Brando Sando");
-                        x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
-                    });
+                        ActorType = ActorType.Values.PartyRepresentative,
+                        ActorId = AdminPerformedByActorId
+                    },
+                    Dialogs =
+                    [
+                        new() { DialogId = dialogId1.Value },
+                        new() { DialogId = dialogId2.Value }
+                    ],
+                    AddLabels = [SystemLabel.Values.Bin]
+                };
+            })
+            .AssertResult<DomainError>()
+            .GetLabelAssignmentLogs(dialogId1)
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+            {
+                x.Should().HaveCount(0);
             });
     }
 

@@ -1,4 +1,6 @@
 ﻿# Deploys the specified version to production
+# Production only moves forward. Roll back with Dispatch Apps / Dispatch infrastructure,
+# see docs/CI-CD.md#rolling-back-production
 name: CI/CD Production
 run-name: CI/CD Production ${{ inputs.version && format('({0})', inputs.version) || '' }}
 
@@ -45,9 +47,84 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
 
+  check-version-is-not-older:
+    name: Check that version is not older than prod
+    needs: [get-versions-from-github]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Compare with deployed versions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ inputs.version }}
+          APPS_VERSION: ${{ needs.get-versions-from-github.outputs.apps_version }}
+          INFRA_VERSION: ${{ needs.get-versions-from-github.outputs.infra_version }}
+        run: |
+          # X.Y.Z, or X.Y.Z-hotfix<sha> from dispatch-build-hotfix-prod.yml
+          version_re='^([0-9]+\.[0-9]+\.[0-9]+)(-hotfix[0-9a-f]+)?$'
+          if [[ ! "$VERSION" =~ $version_re ]]; then
+            echo "::error::Version '$VERSION' must look like 1.23.4 or 1.23.4-hotfixabc1234"
+            exit 1
+          fi
+          base=${BASH_REMATCH[1]}
+
+          older=false
+          check() {
+            local component=$1 deployed=$2
+            if [[ -z "$deployed" ]]; then
+              echo "No $component version stored for prod, skipping"
+              return
+            fi
+            if [[ ! "$deployed" =~ $version_re ]]; then
+              echo "::error::Stored prod $component version '$deployed' must look like 1.23.4 or 1.23.4-hotfixabc1234"
+              exit 1
+            fi
+            local deployed_base=${BASH_REMATCH[1]}
+
+            if [[ "$VERSION" == "$deployed" ]]; then
+              echo "Version $VERSION is already the prod $component version, redeploying"
+              return
+            fi
+
+            if [[ "$base" != "$deployed_base" ]]; then
+              # sort -C succeeds when the lines are already in order, so deployed < requested
+              if printf '%s\n' "$deployed_base" "$base" | sort -V -C; then
+                echo "Version $VERSION is newer than prod $component version $deployed"
+              else
+                echo "::error::Version $VERSION is older than prod $component version $deployed"
+                older=true
+              fi
+              return
+            fi
+
+            # Same base, so one of them is a hotfix. Allow it only if it builds on what is deployed:
+            # 1.23.4 -> 1.23.4-hotfixabc is fine, 1.23.4-hotfixabc -> 1.23.4 is a rollback.
+            local status
+            if ! status=$(gh api "repos/${REPOSITORY}/compare/v${deployed}...v${VERSION}" --jq .status); then
+              echo "::error::Could not compare v$deployed with v$VERSION"
+              exit 1
+            fi
+            if [[ "$status" == "ahead" || "$status" == "identical" ]]; then
+              echo "Version $VERSION builds on prod $component version $deployed"
+            else
+              echo "::error::Version $VERSION does not build on prod $component version $deployed (git compare: $status)"
+              older=true
+            fi
+          }
+
+          check apps "$APPS_VERSION"
+          check infrastructure "$INFRA_VERSION"
+
+          if [[ "$older" == "true" ]]; then
+            echo "::error::CI/CD Production does not deploy older versions. Use Dispatch Apps to roll back, see docs/CI-CD.md."
+            exit 1
+          fi
+
   check-for-changes:
     name: Check for changes
-    needs: [get-versions-from-github]
+    needs: [get-versions-from-github, check-version-is-not-older]
     uses: ./.github/workflows/workflow-check-for-changes.yml
     with:
       infra_base_sha: ${{ needs.get-versions-from-github.outputs.infra_version_sha }}

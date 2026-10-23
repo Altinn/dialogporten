@@ -74,9 +74,8 @@ All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyz
 ### Database migrations and entity configuration
 - Database migration files must be created using Entity Framework Core tools and not edited manually unless absolutely necessary.
 - No use of .HasAnnotation("Npgsql:CreatedConcurrently", true) allowed, as this breaks automation of migrations.
-- Database changes must be backwards compatible to avoid downtime during deployment.
-- Database changes must be applied to production manually, this should be addressed in the PR description. Code reviewers should add a comment to remind the author of this.
-- Only simple field additions with default values can be applied automatically in production.
+- Database changes must be backwards compatible to avoid downtime during deployment: the previous app version keeps running against the migrated schema during a rolling deploy. Drop or rename columns and tables in a follow-up release, once no running version uses them.
+- Migrations are applied automatically as part of deployment, including in YT01 and production. Only changes that hold locks or rewrite a large table for a non-trivial amount of time (typically new indexes on large tables) must be applied manually in YT01 and production before the deploy. Run them from `dotnet ef migrations script` with `CONCURRENTLY` added where applicable, and make the migration a no-op where the change already exists. Call such changes out in the PR description; code reviewers should remind the author if this is missing.
 
 ## SDK Client Files
 

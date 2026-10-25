@@ -36,9 +36,12 @@
       },
       "Altinn.Authorization.ABAC": {
         "type": "Direct",
-        "requested": "[0.1.1, )",
-        "resolved": "0.1.1",
-        "contentHash": "Ln+6W3j06wt3yXA+AQwy6gw4pJllI1vC0+IzUWTy57NccW2Q5cqPz2cxBaJF2Z+eG8fhH3tYShsw0gqM9SEylA=="
+        "requested": "[0.3.0, )",
+        "resolved": "0.3.0",
+        "contentHash": "IRk3fAxcxAuZNQ2mztMF71sCrEdGVSfEq333Oaul8qDsq1eyvtWXkWyXGriyswLEGKYqe+vqb2N4Shgeoo5XDA==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.20"
+        }
       },
       "AspNetCore.HealthChecks.NpgSql": {
         "type": "Direct",

@@ -124,7 +124,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public Task Can_Create_Activity_On_Existing_Dialog_As_Self_And_Get_The_Activity_Afterwards_Even_When_Party_Name_Registry_Is_Down(
+    public Task Can_Not_Create_Activity_On_Existing_Dialog_With_PerformedBy_As_Org_Even_When_Party_Name_Registry_Is_Down(
         string failHow
     )
     {
@@ -159,150 +159,12 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 {
                     ActorType = ActorType.Values.PartyRepresentative,
                     ActorName = null,
-                    ActorId = TestUsers.DefaultServiceOwner
+                    ActorId = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}238837014"
                 },
                 Description = []
             })
-            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(guid))
-            .GetActivity()
-            .AssertResult<ActivityDto>(x =>
-                {
-                    x.Id.Should().Be(guid);
-                    x.CreatedAt.Should().BeBefore(DateTimeOffset.UtcNow);
-                    x.ExtendedType.Should().Be(new Uri("https://altinn.no"));
-                    x.Type.Should().Be(DialogActivityType.Values.DialogCreated);
-                    x.TransmissionId.Should().Be(null);
-                    x.PerformedBy.Should().BeEquivalentTo(new ActorDto
-                    {
-                        ActorType = ActorType.Values.PartyRepresentative,
-                        ActorName = null,
-                        ActorId = TestUsers.DefaultServiceOwner
-                    });
-                    x.Description.Should().BeNull();
-                }
-            )
-            .ResetPartyNameRegistry()
-            .ConsumeEvents()
-            .GetActivity()
-            .ExecuteAndAssert<ActivityDto>(x =>
-                {
-                    x.Id.Should().Be(guid);
-                    x.CreatedAt.Should().BeBefore(DateTimeOffset.UtcNow);
-                    x.ExtendedType.Should().Be(new Uri("https://altinn.no"));
-                    x.Type.Should().Be(DialogActivityType.Values.DialogCreated);
-                    x.TransmissionId.Should().Be(null);
-                    x.PerformedBy.Should().BeEquivalentTo(new ActorDto
-                    {
-                        ActorType = ActorType.Values.PartyRepresentative,
-                        ActorName = "Brando Sando",
-                        ActorId = TestUsers.DefaultServiceOwner
-                    });
-                    x.Description.Should().BeNull();
-                }
-            );
+            .ExecuteAndAssert<DomainError>();
     }
-
-    [Theory]
-    [InlineData("InternalServerError")]
-    [InlineData("HttpRequestException")]
-    public Task Can_Create_Activity_On_Existing_Dialog_As_Self_And_Get_The_Repaired_Activity_Afterwards_When_Null_Actor_Exists_And_Party_Name_Registry_Is_Down(
-        string failHow
-    )
-    {
-        var existingActivityGuid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
-        var newActivityGuid = Guid.Parse("01a11b7f-a2d9-724e-9299-32167e6539a8");
-        return FlowBuilder.For(Application)
-            .AsServiceOwner()
-            .ConfigurePartyNameRegistry(p =>
-            {
-                switch (failHow)
-                {
-                    case "InternalServerError":
-                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Returns(TestPartyNameRegistry.InternalServerError);
-                        break;
-                    case "HttpRequestException":
-                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>()).Throws(new HttpRequestException());
-                        break;
-                    default: throw new UnreachableException($"Uknown failhow {failHow}");
-                }
-            })
-            .CreateSimpleDialog()
-            .AssertResult<CreateDialogSuccess>()
-            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
-            {
-                Id = existingActivityGuid,
-                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
-                ExtendedType = new Uri("https://altinn.no"),
-                Type = DialogActivityType.Values.DialogCreated,
-                TransmissionId = null,
-                PerformedBy = new ActorDto
-                {
-                    ActorType = ActorType.Values.PartyRepresentative,
-                    ActorName = null,
-                    ActorId = TestUsers.DefaultServiceOwner
-                },
-                Description = []
-            })
-            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(existingActivityGuid))
-            .GetActivity()
-            .AssertResult<ActivityDto>(x =>
-                {
-                    x.Id.Should().Be(existingActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
-                    x.PerformedBy.ActorName.Should().BeNull();
-                }
-            )
-            .Do(_ => Application.PurgeEvents()) // Purge application events to simulate an existing null actor
-            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
-            {
-                Id = newActivityGuid,
-                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 2, TimeSpan.Zero),
-                ExtendedType = new Uri("https://altinn.no"),
-                Type = DialogActivityType.Values.Information,
-                TransmissionId = null,
-                PerformedBy = new ActorDto
-                {
-                    ActorType = ActorType.Values.PartyRepresentative,
-                    ActorName = null,
-                    ActorId = TestUsers.DefaultServiceOwner
-                },
-                Description = [new LocalizationDto
-                    {
-                        Value = "test",
-                        LanguageCode = "nb"
-                    }
-                ]
-            })
-            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(newActivityGuid))
-            .GetActivity()
-            .AssertResult<ActivityDto>(x =>
-                {
-                    x.Id.Should().Be(newActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
-                    x.PerformedBy.ActorName.Should().BeNull();
-                }
-            )
-            .ResetPartyNameRegistry()
-            .ConsumeEvents()
-            .GetActivity(existingActivityGuid)
-            .AssertResult<ActivityDto>(x =>
-                {
-                    x.Id.Should().Be(existingActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
-                    x.PerformedBy.ActorName.Should().Be("Brando Sando");
-                }
-            )
-            .GetActivity(newActivityGuid)
-            .ExecuteAndAssert<ActivityDto>(x =>
-                {
-                    x.Id.Should().Be(newActivityGuid);
-                    x.PerformedBy.ActorId.Should().Be(TestUsers.DefaultServiceOwner);
-                    x.PerformedBy.ActorName.Should().Be("Brando Sando");
-                }
-            );
-    }
-
-
 
     [Theory]
     [InlineData("InternalServerError")]

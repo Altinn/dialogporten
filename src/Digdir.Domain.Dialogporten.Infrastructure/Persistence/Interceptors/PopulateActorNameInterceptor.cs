@@ -26,14 +26,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         IUserRegistry userRegistry
     )
     {
-        ArgumentNullException.ThrowIfNull(transactionTime);
-        ArgumentNullException.ThrowIfNull(domainContext);
-        ArgumentNullException.ThrowIfNull(partyNameRegistry);
-
-        _domainContext = domainContext;
-        _partyNameRegistry = partyNameRegistry;
-        _userRegistry = userRegistry;
-        _transactionTime = transactionTime;
+        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
+        _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
+        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
+        _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -123,15 +119,9 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                         return;
                     }
 
-                    _domainContext.AddError(
-                        nameof(Actor.ActorNameEntity.ActorId),
-                        $"Unable to look up name for actor id: {actorName.ActorId}"
-                    );
+                    AddActorNameDomainError(actorName);
                 },
-                unsupported => _domainContext.AddError(
-                    nameof(Actor.ActorNameEntity.ActorId),
-                    $"Unable to look up name for actor id: {actorName.ActorId}"
-                ),
+                unsupported => AddActorNameDomainError(actorName),
                 unavailable =>
                 {
                     if (UserIsGuaranteedToExist(_userRegistry.GetCurrentUserId(), unavailable.ExternalIdWithPrefix))
@@ -140,15 +130,20 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                         return;
                     }
 
-                    _domainContext.AddError(
-                        nameof(Actor.ActorNameEntity.ActorId),
-                        $"Unable to look up name for actor id: {actorName.ActorId}"
-                    );
+                    AddActorNameDomainError(actorName);
                 }
             );
         }
 
         return _domainContext.IsValid;
+    }
+
+    private void AddActorNameDomainError(ActorName actorName)
+    {
+        _domainContext.AddError(
+            nameof(Actor.ActorNameEntity.ActorId),
+            $"Unable to look up name for actor id: {actorName.ActorId}"
+        );
     }
 
     /// <summary>
@@ -158,7 +153,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     private static bool UserIsGuaranteedToExist(UserId currentUserId, string externalIdWithPrefixInQuestion)
     {
         return currentUserId.Type is DialogUserType.Values.Person or DialogUserType.Values.SystemUser
-            && string.Equals(currentUserId.ExternalIdWithPrefix, externalIdWithPrefixInQuestion, OrdinalIgnoreCase);
+               && string.Equals(currentUserId.ExternalIdWithPrefix, externalIdWithPrefixInQuestion, OrdinalIgnoreCase);
     }
 
     /// <summary>

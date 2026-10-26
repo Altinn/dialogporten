@@ -157,9 +157,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     /// </summary>
     private static bool UserIsGuaranteedToExist(UserId currentUserId, string externalIdWithPrefixInQuestion)
     {
-        if (currentUserId.Type is DialogUserType.Values.ServiceOwnerOnBehalfOfPerson) return false;
-
-        return string.Equals(currentUserId.ExternalIdWithPrefix, externalIdWithPrefixInQuestion, OrdinalIgnoreCase);
+        return currentUserId.Type is DialogUserType.Values.Person or DialogUserType.Values.SystemUser
+            && string.Equals(currentUserId.ExternalIdWithPrefix, externalIdWithPrefixInQuestion, OrdinalIgnoreCase);
     }
 
     /// <summary>

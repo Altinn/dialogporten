@@ -575,7 +575,8 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel_And_Create_A_LabelLog_When_PartyNameRegistry_Fails(
+    [InlineData("NoMatch")]
+    public Task Get_Should_Remove_MarkedAsUnopened_SystemLabel_And_Create_A_LabelLog_When_PartyNameRegistry_Fails_Or_Returns_No_Match(
         string failHow
     ) => FlowBuilder.For(Application)
         .CreateSimpleDialog()
@@ -590,6 +591,10 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
                 case "HttpRequestException":
                     p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                         .Throws(new HttpRequestException());
+                    break;
+                case "NoMatch":
+                    p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                        .Returns(TestPartyNameRegistry.OkNoMatch());
                     break;
                 default: throw new UnreachableException($"Uknown failhow {failHow}");
             }

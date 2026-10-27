@@ -91,6 +91,18 @@ public sealed class GraphQlMappingEdgeCaseTests
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
+    [Fact]
+    public Task Transmission_Null_Content()
+    {
+        // API-only transmissions are not required to have content, so the end-user Get DTO maps a
+        // contentless transmission to a null Content. The dialogById transmission mapper must not throw.
+        var source = ObjectFiller.Fill<Get.DialogTransmissionDto>();
+        source.Content = null;
+        var result = Model.DialogByIdMapExtensions.ToTransmission(source);
+        result.Content.Should().BeNull();
+        return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

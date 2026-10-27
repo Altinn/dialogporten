@@ -29,6 +29,7 @@ public class EndUserTransmissionMappingExtensionsTests
 
         // Shared Sender actor and ContentValue title are reused by reference.
         Assert.Same(source.Sender, result.Sender);
+        Assert.NotNull(result.Content);
         Assert.Same(source.Content.Title, result.Content.Title);
 
         var attachment = Assert.Single(result.Attachments);
@@ -49,6 +50,7 @@ public class EndUserTransmissionMappingExtensionsTests
         Assert.Equal(source.Type, result.Type);
         Assert.False(result.IsOpened);
         Assert.Same(source.Sender, result.Sender);
+        Assert.NotNull(result.Content);
         Assert.Same(source.Content.Title, result.Content.Title);
         Assert.Single(result.Attachments.Single().Urls);
         Assert.Single(result.NavigationalActions);

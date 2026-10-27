@@ -689,8 +689,8 @@ type Transmission {
   sender: Actor!
   "Indicates whether the dialog transmission has been opened."
   isOpened: Boolean!
-  "The transmission unstructured text content."
-  content: TransmissionContent!
+  "The transmission unstructured text content. May be null for API-only transmissions."
+  content: TransmissionContent
   "The transmission-level attachments."
   attachments: [Attachment!]!
   "Attachments on this transmission that exist but are withheld from the authenticated user, listed by id and creation time only. An attachment is excluded rather than shown with masked URLs when its authorization context sets unauthorizedPresentation to 'excluded'. Exclusions are reported per collection: the full set for a dialog is 'excludedAttachments', 'excludedTransmissions', 'excludedGuiActions' and 'excludedApiActions' on the dialog, plus 'excludedAttachments' and 'excludedNavigationalActions' on each transmission. Merge all six when answering 'what changed that I am not allowed to see?'; reading only one under-reports silently."

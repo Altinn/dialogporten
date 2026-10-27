@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -17,6 +18,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.EndUser.Dialogs.Queries.SeenLogTests;
 using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
@@ -326,13 +328,30 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
         seenByActors.Should().ContainSingle(x => x.DialogSeenLogId == seenLog.Subject.Id);
     }
 
-    [Fact]
-    public Task Party_Name_Register_Down_Should_Fallback_To_Async_Name_Fetch() =>
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Party_Name_Register_Down_Or_No_Result_Should_Fallback_To_Async_Name_Fetch(string failHow) =>
         FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.InternalServerError);
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
             })
             .ConsumeEvents()
             .CreateSimpleDialog()
@@ -348,63 +367,6 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .ExecuteAndAssert<DialogDtoSO>(x =>
                 {
                     x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando");
-                }
-            );
-
-    [Fact]
-    public Task Party_Name_Register_Returns_No_Results_Should_Fallback_To_Async_Name_Fetch() =>
-        FlowBuilder.For(Application)
-            .ConfigurePartyNameRegistry(p =>
-            {
-                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.Ok(new NameLookupResult
-                    {
-                        Data = []
-                    }));
-            })
-            .ConsumeEvents()
-            .CreateSimpleDialog()
-            .GetServiceOwnerDialogAsEndUser()
-            .AssertResult<DialogDtoSO>(x =>
-                {
-                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
-                }
-            )
-            .ResetPartyNameRegistry()
-            .ConsumeEvents()
-            .GetServiceOwnerDialogAsEndUser()
-            .ExecuteAndAssert<DialogDtoSO>(x =>
-                {
-                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando");
-                }
-            );
-
-    [Fact]
-    public Task Party_Name_Register_Returns_No_Results_Should_Fallback_To_Async_Name_Fetch_For_System_User() =>
-        FlowBuilder.For(Application)
-            .ConfigurePartyNameRegistry(p =>
-            {
-                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.Ok(new NameLookupResult
-                    {
-                        Data = []
-                    }));
-            })
-            .ConsumeEvents()
-            .CreateSimpleDialog()
-            .AsSystemUser()
-            .GetServiceOwnerDialogAsEndUser()
-            .AssertResult<DialogDtoSO>(x =>
-                {
-                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
-                }
-            )
-            .ResetPartyNameRegistry()
-            .ConsumeEvents()
-            .GetServiceOwnerDialogAsEndUser()
-            .ExecuteAndAssert<DialogDtoSO>(x =>
-                {
-                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Systembruker");
                 }
             );
 

@@ -248,6 +248,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
     public async Task Set_Accepts_PerformedBy_For_Admin_When_Party_Name_Registry_Is_Down(string failHow)
     {
         await FlowBuilder.For(Application)
@@ -263,6 +264,10 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                     case "HttpRequestException":
                         p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                             .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
                         break;
                     default: throw new UnreachableException($"Uknown failhow {failHow}");
                 }

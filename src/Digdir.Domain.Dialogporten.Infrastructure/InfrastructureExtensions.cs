@@ -138,8 +138,8 @@ public static class InfrastructureExtensions
             // Scoped
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
             .AddScoped<IUnitOfWork, UnitOfWork>()
-            .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
+            .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
 
             // Transient
             .AddTransient<IPartyNameRegistry, PartyNameRegistryClient>()

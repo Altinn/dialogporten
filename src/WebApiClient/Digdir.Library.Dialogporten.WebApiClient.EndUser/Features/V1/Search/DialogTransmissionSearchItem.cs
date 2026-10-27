@@ -72,10 +72,10 @@ public class DialogTransmissionSearchItem
     public required Actor Sender { get; set; }
 
     /// <summary>
-    /// The content of the transmission.
+    /// The content of the transmission. May be null for API-only transmissions, which are not required to have content.
     /// </summary>
     [JsonPropertyName("content")]
-    public required DialogTransmissionSearchContent Content { get; set; }
+    public DialogTransmissionSearchContent? Content { get; set; }
 
     /// <summary>
     /// The attachments associated with the transmission.

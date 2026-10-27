@@ -29,6 +29,7 @@ public class EndUserTransmissionMappingExtensionsTests
 
         // Shared Sender actor and ContentValue title are reused by reference.
         Assert.Same(source.Sender, result.Sender);
+        Assert.NotNull(source.Content);
         Assert.NotNull(result.Content);
         Assert.Same(source.Content.Title, result.Content.Title);
 
@@ -50,6 +51,7 @@ public class EndUserTransmissionMappingExtensionsTests
         Assert.Equal(source.Type, result.Type);
         Assert.False(result.IsOpened);
         Assert.Same(source.Sender, result.Sender);
+        Assert.NotNull(source.Content);
         Assert.NotNull(result.Content);
         Assert.Same(source.Content.Title, result.Content.Title);
         Assert.Single(result.Attachments.Single().Urls);
@@ -100,6 +102,30 @@ public class EndUserTransmissionMappingExtensionsTests
 
         Assert.Empty(result.Attachments);
         Assert.Empty(result.NavigationalActions);
+    }
+
+    [Fact]
+    public void ToDialogTransmission_FromDetails_NullContentStaysNull()
+    {
+        // API-only transmissions are not required to have content, so a content-less response
+        // must normalize to a null Content rather than throwing in the content converter.
+        var source = FullDetails();
+        source.Content = null;
+
+        var result = source.ToDialogTransmission();
+
+        Assert.Null(result.Content);
+    }
+
+    [Fact]
+    public void ToDialogTransmission_FromSearchItem_NullContentStaysNull()
+    {
+        var source = FullSearchItem();
+        source.Content = null;
+
+        var result = source.ToDialogTransmission();
+
+        Assert.Null(result.Content);
     }
 
     private static ContentValue ContentValueOf(string value) => new()

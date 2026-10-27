@@ -201,6 +201,7 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
     public Task Set_Adds_LabelLog_Even_When_Party_Name_Registry_Is_Down(string failHow) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -251,18 +252,6 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                         x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
                     });
             });
-
-    [Fact]
-    public Task Set_Returns_DomainError_When_Party_Name_Is_Not_Found_For_A_Regular_User() =>
-        FlowBuilder.For(Application)
-            .CreateSimpleDialog()
-            .ConfigurePartyNameRegistry(p =>
-            {
-                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.OkNoMatch());
-            })
-            .SetSystemLabelsEndUser(x => x.AddLabels = [SystemLabel.Values.Bin])
-            .ExecuteAndAssert<DomainError>();
 
     [Theory]
     [InlineData("InternalServerError")]

@@ -204,7 +204,8 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public async Task Set_Rejects_EndUserId_When_Party_Name_Registry_Is_Down(string failHow)
+    [InlineData("NoMatch")]
+    public async Task Set_Accepts_EndUserId_When_Party_Name_Registry_Is_Down_Or_Returns_No_Match(string failHow)
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -221,6 +222,10 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                         p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                             .Throws(new HttpRequestException());
                         break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
                     default: throw new UnreachableException($"Uknown failhow {failHow}");
                 }
             })
@@ -229,13 +234,21 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 command.EndUserId = TestUsers.DefaultParty;
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
-            .ExecuteAndAssert<DomainError>();
+            .AssertResult<SetSystemLabelSuccess>()
+            .GetLabelAssignmentLogs()
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().Be("Brando Sando"));
     }
 
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public async Task Set_Rejects_PerformedBy_For_Admin_When_Party_Name_Registry_Is_Down_For_Unsafe_ActorId(string failHow)
+    public async Task Set_Accepts_PerformedBy_For_Admin_When_Party_Name_Registry_Is_Down(string failHow)
     {
         await FlowBuilder.For(Application)
             .CreateSimpleDialog()
@@ -265,7 +278,15 @@ public class SetSystemLabelTests(DialogApplication application) : ApplicationCol
                 };
                 command.AddLabels = [SystemLabel.Values.Archive];
             })
-            .ExecuteAndAssert<DomainError>();
+            .AssertResult<SetSystemLabelSuccess>()
+            .GetLabelAssignmentLogs()
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetLabelAssignmentLogs()
+            .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().Be("Brando Sando"));
     }
 
     [Fact]

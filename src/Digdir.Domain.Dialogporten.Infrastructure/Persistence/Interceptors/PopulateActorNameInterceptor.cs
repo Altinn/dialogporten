@@ -2,12 +2,10 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using static System.StringComparison;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Interceptors;
 
@@ -16,19 +14,16 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
     private readonly ITransactionTime _transactionTime;
-    private readonly IUserRegistry _userRegistry;
     private bool _hasBeenExecuted;
 
     public PopulateActorNameInterceptor(
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IPartyNameRegistry partyNameRegistry,
-        IUserRegistry userRegistry
+        IPartyNameRegistry partyNameRegistry
     )
     {
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
-        _userRegistry = userRegistry ?? throw new ArgumentNullException(nameof(userRegistry));
         _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
     }
 
@@ -91,6 +86,11 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
     }
 
+    /// <summary>
+    /// Actor names are enrichment, not validation. If the party name registry is unavailable or has no name
+    /// for the actor, we persist the actor with a null name instead of failing the request. Null names are
+    /// filled in later by the ResyncActorNameEvent handler.
+    /// </summary>
     private async Task<bool> TrySetMissingActorNames(
         IEnumerable<ActorName> actorNameEntities,
         CancellationToken cancellationToken)
@@ -107,67 +107,17 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         foreach (var actorName in relevantActorNameEntities)
         {
-            var newActorName = actorNameById[actorName.ActorId!];
-
-            newActorName.Switch(
+            actorNameById[actorName.ActorId!].Switch(
                 found => actorName.Name = found.Name,
-                notFound =>
-                {
-                    if (SystemUserIsGuaranteedToExist(notFound.ExternalIdWithPrefix))
-                    {
-                        actorName.Name = null;
-                        return;
-                    }
-
-                    AddActorNameDomainError(actorName);
-                },
-                unsupported => AddActorNameDomainError(actorName),
-                unavailable =>
-                {
-                    if (UserIsGuaranteedToExist(_userRegistry.GetCurrentUserId(), unavailable.ExternalIdWithPrefix))
-                    {
-                        actorName.Name = null;
-                        return;
-                    }
-
-                    AddActorNameDomainError(actorName);
-                }
+                notFound => actorName.Name = null,
+                unsupported => _domainContext.AddError(
+                    nameof(Actor.ActorNameEntity.ActorId),
+                    $"Unable to look up name for actor id: {actorName.ActorId}. Reason: {unsupported.Reason}"),
+                unavailable => actorName.Name = null
             );
         }
 
         return _domainContext.IsValid;
-    }
-
-    private void AddActorNameDomainError(ActorName actorName)
-    {
-        _domainContext.AddError(
-            nameof(Actor.ActorNameEntity.ActorId),
-            $"Unable to look up name for actor id: {actorName.ActorId}"
-        );
-    }
-
-    /// <summary>
-    /// Fast test for whether we can trust that the user behind the ID exists.
-    /// We cant allow null names otherwise.
-    /// </summary>
-    private static bool UserIsGuaranteedToExist(UserId currentUserId, string externalIdWithPrefixInQuestion)
-    {
-        return (currentUserId.Type is DialogUserType.Values.Person or DialogUserType.Values.SystemUser)
-               && string.Equals(currentUserId.ExternalIdWithPrefix, externalIdWithPrefixInQuestion, OrdinalIgnoreCase);
-    }
-
-    /// <summary>
-    /// We see up to 1 minute delay before newly created system users are visible in PartyNameRegistry
-    /// We can allow null names just in this case.
-    /// </summary>
-    /// <param name="externalIdWithPrefixInQuestion"></param>
-    /// <returns></returns>
-    private bool SystemUserIsGuaranteedToExist(string externalIdWithPrefixInQuestion)
-    {
-        var currentUserId = _userRegistry.GetCurrentUserId();
-
-        return currentUserId.Type is DialogUserType.Values.SystemUser
-               && UserIsGuaranteedToExist(currentUserId, externalIdWithPrefixInQuestion);
     }
 
     private async Task<List<ActorName>> ConsolidateActorNameInstances(

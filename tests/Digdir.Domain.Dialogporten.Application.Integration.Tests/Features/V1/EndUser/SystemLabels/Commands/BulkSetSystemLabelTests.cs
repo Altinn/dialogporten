@@ -96,6 +96,7 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
+    [InlineData("NotFound")]
     public async Task BulkSet_Adds_Label_Assignment_Logs_Even_When_Party_Name_Registry_Is_Down(string failHow)
     {
         Guid? dialogId1 = NewUuidV7();
@@ -183,32 +184,6 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                         x.PerformedBy.ActorType.Should().Be(ActorType.Values.PartyRepresentative);
                     });
             });
-    }
-
-    [Fact]
-    public async Task BulkSet_Returns_Domain_Error_When_Party_Name_Registry_Returns_No_Results()
-    {
-        Guid? dialogId1 = NewUuidV7();
-        Guid? dialogId2 = NewUuidV7();
-
-        await FlowBuilder.For(Application)
-            .ConfigurePartyNameRegistry(p =>
-            {
-                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
-                    .Returns(TestPartyNameRegistry.OkNoMatch());
-            })
-            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId1)
-            .CreateSimpleDialog((x, _) => x.Dto.Id = dialogId2)
-            .BulkSetSystemLabelEndUser((x, _) => x.Dto = new()
-            {
-                Dialogs =
-                [
-                    new() { DialogId = dialogId1.Value },
-                    new() { DialogId = dialogId2.Value }
-                ],
-                AddLabels = [SystemLabel.Values.Bin]
-            })
-            .ExecuteAndAssert<DomainError>();
     }
 
     [Theory]

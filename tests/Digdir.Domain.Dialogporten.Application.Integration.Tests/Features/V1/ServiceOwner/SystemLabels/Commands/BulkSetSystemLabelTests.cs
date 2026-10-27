@@ -112,7 +112,8 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public async Task BulkSet_Rejects_Label_Assignment_Logs_With_EndUserId_When_Party_Name_Registry_Is_Down(string failHow)
+    [InlineData("NoMatch")]
+    public async Task BulkSet_Adds_Label_Assignment_Logs_With_EndUserId_When_Party_Name_Registry_Is_Down_Or_Returns_No_Match(string failHow)
     {
         Guid? dialogId1 = NewUuidV7();
         Guid? dialogId2 = NewUuidV7();
@@ -130,6 +131,10 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     case "HttpRequestException":
                         p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
                             .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
                         break;
                     default: throw new UnreachableException($"Uknown failhow {failHow}");
                 }
@@ -149,18 +154,21 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     AddLabels = [SystemLabel.Values.Bin]
                 };
             })
-            .AssertResult<DomainError>()
+            .AssertResult<BulkSetSystemLabelSuccess>()
+            .GetLabelAssignmentLogs(dialogId1)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
             .GetLabelAssignmentLogs(dialogId1)
             .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
-            {
-                x.Should().HaveCount(0);
-            });
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().Be("Brando Sando"));
     }
 
     [Theory]
     [InlineData("InternalServerError")]
     [InlineData("HttpRequestException")]
-    public async Task BulkSet_Rejects_Label_Assignment_Logs_With_PerformedBy_When_Party_Name_Registry_Is_Down(string failHow)
+    public async Task BulkSet_Adds_Label_Assignment_Logs_With_PerformedBy_When_Party_Name_Registry_Is_Down(string failHow)
     {
         Guid? dialogId1 = NewUuidV7();
         Guid? dialogId2 = NewUuidV7();
@@ -201,12 +209,15 @@ public class BulkSetSystemLabelTests(DialogApplication application) : Applicatio
                     AddLabels = [SystemLabel.Values.Bin]
                 };
             })
-            .AssertResult<DomainError>()
+            .AssertResult<BulkSetSystemLabelSuccess>()
+            .GetLabelAssignmentLogs(dialogId1)
+            .AssertResult<List<LabelAssignmentLogDto>>(x =>
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
             .GetLabelAssignmentLogs(dialogId1)
             .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
-            {
-                x.Should().HaveCount(0);
-            });
+                x.Should().ContainSingle().Which.PerformedBy.ActorName.Should().Be("Brando Sando"));
     }
 
     [Fact]

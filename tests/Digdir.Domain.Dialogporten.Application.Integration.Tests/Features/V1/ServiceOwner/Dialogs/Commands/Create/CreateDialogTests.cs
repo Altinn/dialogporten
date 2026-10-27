@@ -628,7 +628,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             );
 
     [Fact]
-    public Task Can_Not_Create_With_Transmission_And_Actor_Name_When_PartyNameRegistry_Returns_No_Results() =>
+    public Task Can_Create_With_Transmission_And_Actor_Name_When_PartyNameRegistry_Returns_No_Results() =>
         FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
@@ -642,9 +642,18 @@ public class CreateDialogTests : ApplicationCollectionFixture
             {
                 ActorType = ActorType.Values.PartyRepresentative,
                 ActorId = $"{NorwegianPersonIdentifier.PrefixWithSeparator}01254234636"
-
             }))
-            .ExecuteAndAssert<DomainError>();
+            .AssertResult<CreateDialogSuccess>()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().BeNull()
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().Be("Brando Sando")
+            );
 
     [Fact]
     public Task Can_Create_With_Transmission_Using_Cache_With_Transmission_When_PartyNameRegistry_Fails()

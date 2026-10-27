@@ -4,8 +4,6 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.Domain.Parties.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -99,11 +97,6 @@ internal sealed class DialogSeenLogWriter(
                                           """, cancellationToken);
     }
 
-    private sealed record EnsureSeenLogResult(
-        DialogSeenLog? NewDialogSeenLog,
-        bool OutOfSyncActorNameId
-    );
-
     private async Task<DialogSeenLog?> EnsureSeenLog(
         Guid seenLogId,
         Guid dialogId,
@@ -138,16 +131,8 @@ internal sealed class DialogSeenLogWriter(
         var result = await partyNameRegistry.GetName(normalizedActorId, ct);
         var actorName = result.Match<string?>(
             found => found.Name,
-            notFound =>
-            {
-                if (PartyIdentifier.TryParse(actorId, out var partyId) && partyId is SystemUserIdentifier)
-                {
-                    return null;
-                }
-
-                throw new InvalidOperationException($"Actor {actorId} not found");
-            },
-            unsupported => throw new InvalidOperationException($"Unable to parse actor {actorId}"),
+            notFound => null,
+            unsupported => throw new InvalidOperationException($"Unable to look up name for actor {actorId}. Reason: {unsupported.Reason}"),
             unavailable => null
         );
 

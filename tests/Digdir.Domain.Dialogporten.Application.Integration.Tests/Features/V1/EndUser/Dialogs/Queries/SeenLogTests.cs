@@ -251,6 +251,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             {
                 x.Count.Should().Be(1);
                 x[0].Id.Should().NotBeEmpty();
+                x[0].SeenBy.ActorName.Should().BeNull();
                 firstSeenLogId = x[0].Id;
 
                 var events = ctx.Application.GetPublishedEvents();
@@ -270,9 +271,65 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             {
                 x.Count.Should().Be(1);
                 x[0].Id.Should().Be(firstSeenLogId);
+                x[0].SeenBy.ActorName.Should().Be("Brando Sando");
                 var events = ctx.Application.GetPublishedEvents();
                 events.Count.Should().Be(0);
             });
+    }
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Resync_Should_Throw_And_Keep_Null_Name_While_Party_Name_Registry_Is_Still_Failing(string failHow)
+    {
+        ResyncActorNameEvent? resyncEvent = null;
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConsumeEvents()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Unknown failhow {failHow}");
+                }
+            })
+            .GetEndUserDialog()
+            .Do(async ctx =>
+            {
+                resyncEvent = ctx.Application.GetPublishedEvents().OfType<ResyncActorNameEvent>().Single();
+
+                // The handler throws so that the message bus retries the event later
+                var consume = () => ctx.Application.PublishEvents();
+                await consume.Should().ThrowAsync<InvalidOperationException>();
+            })
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(x =>
+                x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .Do(async ctx =>
+            {
+                // Simulate the message bus retrying the failed event once the registry has recovered
+                using var scope = ctx.Application.GetServiceProvider().CreateScope();
+                var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
+                resyncEvent.Should().NotBeNull();
+                await publisher.Publish(resyncEvent);
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando"));
     }
 
     [Fact]

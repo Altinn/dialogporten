@@ -66,5 +66,5 @@ public class AuthorizationContextInput
     /// </summary>
     [JsonPropertyName("unauthorizedPresentation")]
     [JsonConverter(typeof(JsonStringEnumConverter<AuthorizationContextUnauthorizedPresentation>))]
-    public AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
+    public required AuthorizationContextUnauthorizedPresentation UnauthorizedPresentation { get; set; }
 }

@@ -14,7 +14,7 @@ public class DialogPartyCheckInput
     /// </summary>
     [JsonPropertyName("accessRestriction")]
     [JsonConverter(typeof(JsonStringEnumConverter<DialogPartyCheckAccessRestriction>))]
-    public DialogPartyCheckAccessRestriction AccessRestriction { get; set; }
+    public required DialogPartyCheckAccessRestriction AccessRestriction { get; set; }
 
     /// <summary>
     /// The organization the end user's access must have been client delegated through. Required when

@@ -2,56 +2,59 @@ using System.Runtime.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
 
+// Numbered to match the server's domain enum (1-based) rather than the schema-generator's default 0-based
+// numbering: an unset value must serialize as an unnamed number and fail the server's IsInEnum() check,
+// rather than silently deserializing as the first named member.
 public enum DialogActivityType
 {
     [EnumMember(Value = @"DialogCreated")]
-    DialogCreated = 0,
+    DialogCreated = 1,
 
     [EnumMember(Value = @"DialogClosed")]
-    DialogClosed = 1,
+    DialogClosed = 2,
 
     [EnumMember(Value = @"Information")]
-    Information = 2,
+    Information = 3,
 
     [EnumMember(Value = @"TransmissionOpened")]
-    TransmissionOpened = 3,
+    TransmissionOpened = 4,
 
     [EnumMember(Value = @"PaymentMade")]
-    PaymentMade = 4,
+    PaymentMade = 5,
 
     [EnumMember(Value = @"SignatureProvided")]
-    SignatureProvided = 5,
+    SignatureProvided = 6,
 
     [EnumMember(Value = @"DialogOpened")]
-    DialogOpened = 6,
+    DialogOpened = 7,
 
     [EnumMember(Value = @"DialogDeleted")]
-    DialogDeleted = 7,
+    DialogDeleted = 8,
 
     [EnumMember(Value = @"DialogRestored")]
-    DialogRestored = 8,
+    DialogRestored = 9,
 
     [EnumMember(Value = @"SentToSigning")]
-    SentToSigning = 9,
+    SentToSigning = 10,
 
     [EnumMember(Value = @"SentToFormFill")]
-    SentToFormFill = 10,
+    SentToFormFill = 11,
 
     [EnumMember(Value = @"SentToSendIn")]
-    SentToSendIn = 11,
+    SentToSendIn = 12,
 
     [EnumMember(Value = @"SentToPayment")]
-    SentToPayment = 12,
+    SentToPayment = 13,
 
     [EnumMember(Value = @"FormSubmitted")]
-    FormSubmitted = 13,
+    FormSubmitted = 14,
 
     [EnumMember(Value = @"FormSaved")]
-    FormSaved = 14,
+    FormSaved = 15,
 
     [EnumMember(Value = @"CorrespondenceOpened")]
-    CorrespondenceOpened = 15,
+    CorrespondenceOpened = 16,
 
     [EnumMember(Value = @"CorrespondenceConfirmed")]
-    CorrespondenceConfirmed = 16,
+    CorrespondenceConfirmed = 17,
 }

@@ -2,32 +2,35 @@ using System.Runtime.Serialization;
 
 namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
 
+// Numbered to match the server's domain enum (1-based) rather than the schema-generator's default 0-based
+// numbering: an unset value must serialize as an unnamed number and fail the server's IsInEnum() check,
+// rather than silently deserializing as the first named member.
 public enum HttpVerb
 {
     [EnumMember(Value = @"GET")]
-    Get = 0,
+    Get = 1,
 
     [EnumMember(Value = @"POST")]
-    Post = 1,
+    Post = 2,
 
     [EnumMember(Value = @"PUT")]
-    Put = 2,
+    Put = 3,
 
     [EnumMember(Value = @"PATCH")]
-    Patch = 3,
+    Patch = 4,
 
     [EnumMember(Value = @"DELETE")]
-    Delete = 4,
+    Delete = 5,
 
     [EnumMember(Value = @"HEAD")]
-    Head = 5,
+    Head = 6,
 
     [EnumMember(Value = @"OPTIONS")]
-    Options = 6,
+    Options = 7,
 
     [EnumMember(Value = @"TRACE")]
-    Trace = 7,
+    Trace = 8,
 
     [EnumMember(Value = @"CONNECT")]
-    Connect = 8,
+    Connect = 9,
 }

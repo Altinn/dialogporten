@@ -27,7 +27,6 @@ internal static class TestUsers
     public static string DefaultOrg => "991825827";
     private static string DefaultEmail => "TEST@TEST.NO";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
-    public static string DefaultServiceOwner => NorwegianOrganizationIdentifier.PrefixWithSeparator + DefaultOrg;
     public static string DefaultSystemUserId => "2e39badb-fc4e-4d25-ba77-5a9fe8afcae4";
     public static string DefaultSystemUserOrg => "999888777";
     public static string DefaultSystemUserUrn => "urn:altinn:systemuser:uuid:" + DefaultSystemUserId;

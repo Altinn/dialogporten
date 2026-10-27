@@ -228,7 +228,7 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
 
 
     [Fact]
-    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs_And_One_Pair_Of_Events_After_Actor_Name_Resync_Job_Runs()
+    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs_And_One_Pair_Of_Events_Even_When_Party_Name_Registry_Is_Down()
     {
         var firstSeenLogId = Guid.Empty;
         return FlowBuilder.For(Application)

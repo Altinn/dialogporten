@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Claims;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
@@ -20,7 +21,6 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
-using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using Microsoft.Testing.Platform.Services;
@@ -30,6 +30,7 @@ using ZiggyCreatures.Caching.Fusion;
 using TransmissionContentDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create.TransmissionContentDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Search.DialogDto;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 using Constants = Digdir.Domain.Dialogporten.Domain.Common.Constants;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Features.V1.ServiceOwner.Dialogs.Commands.Create;
@@ -599,49 +600,35 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .CreateSimpleDialog()
             .ExecuteAndAssert<CreateDialogSuccess>(x => x.Revision.Should().NotBeEmpty());
 
-    [Fact]
-    public Task Can_Create_With_Transmission_And_Actor_Name_When_PartyNameRegistry_Fails() =>
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Can_Create_With_Transmission_And_Actor_Name_When_PartyNameRegistry_Fails_Or_Returns_No_Result(string failHow) =>
         FlowBuilder.For(Application)
             .ConfigurePartyNameRegistry(p =>
             {
-                p.QueryPartyNameResponse(
-                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
-                        Arg.Any<CancellationToken>()
-                    )
-                    .Throws(new HttpRequestException());
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
             })
             .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = new ActorDto
             {
                 ActorType = ActorType.Values.PartyRepresentative,
                 ActorId = TestUsers.DefaultParty
-            }))
-            .AssertResult<CreateDialogSuccess>()
-            .GetServiceOwnerDialog()
-            .AssertResult<DialogDto>(x => x.Transmissions.Should().ContainSingle()
-                .Which.Sender.ActorName.Should().BeNull()
-            )
-            .ResetPartyNameRegistry()
-            .ConsumeEvents()
-            .GetServiceOwnerDialog()
-            .ExecuteAndAssert<DialogDto>(x => x.Transmissions.Should().ContainSingle()
-                .Which.Sender.ActorName.Should().Be("Brando Sando")
-            );
-
-    [Fact]
-    public Task Can_Create_With_Transmission_And_Actor_Name_When_PartyNameRegistry_Returns_No_Results() =>
-        FlowBuilder.For(Application)
-            .ConfigurePartyNameRegistry(p =>
-            {
-                p.QueryPartyNameResponse(
-                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
-                        Arg.Any<CancellationToken>()
-                    )
-                    .Returns(TestPartyNameRegistry.OkNoMatch());
-            })
-            .CreateSimpleDialog((x, _) => x.AddTransmission(t => t.Sender = new ActorDto
-            {
-                ActorType = ActorType.Values.PartyRepresentative,
-                ActorId = $"{NorwegianPersonIdentifier.PrefixWithSeparator}01254234636"
             }))
             .AssertResult<CreateDialogSuccess>()
             .GetServiceOwnerDialog()
@@ -674,7 +661,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ConfigurePartyNameRegistry(p =>
             {
                 p.QueryPartyNameResponse(
-                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
+                        Arg.Any<NameLookup>(),
                         Arg.Any<CancellationToken>()
                     )
                     .Throws(new HttpRequestException());
@@ -706,7 +693,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ConfigurePartyNameRegistry(p =>
             {
                 p.QueryPartyNameResponse(
-                        Arg.Any<IPartyNameRegistryTransport.NameLookup>(),
+                        Arg.Any<NameLookup>(),
                         Arg.Any<CancellationToken>()
                     )
                     .Throws(new HttpRequestException());

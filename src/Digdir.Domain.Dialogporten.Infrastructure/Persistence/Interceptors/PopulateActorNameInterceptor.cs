@@ -177,11 +177,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             .Select(x => (x.ActorId, x.Name))
             .Distinct()
             .ToList();
-        var hasNull = distinctIdNameTupples.Any(x => x.Name == null);
         var actorIds = distinctIdNameTupples.Select(x => x.ActorId).Distinct();
         var actorNames = distinctIdNameTupples.Select(x => x.Name).Distinct();
         var existingActorNames = await dbContext.Set<ActorName>()
-            .Where(x => actorIds.Contains(x.ActorId) && (actorNames.Contains(x.Name) || (hasNull && x.Name == null)))
+            .Where(x => actorIds.Contains(x.ActorId) && actorNames.Contains(x.Name))
             .ToListAsync(cancellationToken);
         return existingActorNames
             .Where(x => distinctIdNameTupples.Any(xx => xx.ActorId == x.ActorId && xx.Name == x.Name))

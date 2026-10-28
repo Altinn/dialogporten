@@ -62,28 +62,15 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        if (!await TrySetMissingActorNames(addedActorNameEntities, cancellationToken))
+        if (!await TrySetActorNames(addedActorNameEntities, cancellationToken))
         {
             _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        var finalActorNames = await ConsolidateActorNameInstances(dbContext, addedActorNameEntities, cancellationToken);
-        MarkActorNamesForResync(finalActorNames);
+        await ConsolidateActorNameInstances(dbContext, addedActorNameEntities, cancellationToken);
         _hasBeenExecuted = true;
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
-    }
-
-    private static void MarkActorNamesForResync(List<ActorName> actorNameEntities)
-    {
-        var actorNames = actorNameEntities
-            .Where(x => x.ActorId is not null && x.Name is null)
-            .DistinctBy(x => x.ActorId);
-
-        foreach (var actorName in actorNames)
-        {
-            actorName.AddResyncActorNameEvent($"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name");
-        }
     }
 
     /// <summary>
@@ -91,7 +78,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     /// for the actor, we persist the actor with a null name instead of failing the request. Null names are
     /// filled in later by the ResyncActorNameEvent handler.
     /// </summary>
-    private async Task<bool> TrySetMissingActorNames(
+    private async Task<bool> TrySetActorNames(
         IEnumerable<ActorName> actorNameEntities,
         CancellationToken cancellationToken)
     {
@@ -120,7 +107,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         return _domainContext.IsValid;
     }
 
-    private async Task<List<ActorName>> ConsolidateActorNameInstances(
+    private async Task ConsolidateActorNameInstances(
         DbContext dbContext,
         List<ActorName> added,
         CancellationToken cancellationToken
@@ -136,7 +123,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 innerKeySelector: x => new { x.ActorId, x.Name },
                 resultSelector: (left, right) => (left.ToList(), right.SingleOrDefault()));
 
-        var finalActorNames = new List<ActorName>();
         foreach (var (newActorNames, existingActorName) in actorNamePairs)
         {
             var (mainActorName, discardActorNames) = newActorNames switch
@@ -148,7 +134,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
             mainActorName.EnsureId();
             mainActorName.Create(_transactionTime.Value);
-            finalActorNames.Add(mainActorName);
+            mainActorName.RequestActorNameResync($"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name");
 
             foreach (var actor in discardActorNames.SelectMany(x => x.ActorEntities))
             {
@@ -160,8 +146,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 dbContext.Entry(discardInstance).State = EntityState.Detached;
             }
         }
-
-        return finalActorNames;
     }
 
     private async Task<(string ActorId, GetPartyNameResult Result)> ActorNameByActorId(string actorId,

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
@@ -24,8 +25,13 @@ public sealed class ActorName : IImmutableEntity, IIdentifiableEntity, ICreatabl
     }
     public bool HasEvents() => _domainEvents.Count != 0;
 
-    public void AddResyncActorNameEvent(string reason)
+    [NotMapped]
+    public bool NeedsActorNameResync => ActorId is not null && Name is null;
+
+    public void RequestActorNameResync(string reason)
     {
+        if (!NeedsActorNameResync) return;
+        this.EnsureId();
         _domainEvents.Add(new ResyncActorNameEvent(Id, reason));
     }
 }

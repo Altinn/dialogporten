@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

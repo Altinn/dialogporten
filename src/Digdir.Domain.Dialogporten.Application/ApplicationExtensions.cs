@@ -62,6 +62,7 @@ public static class ApplicationExtensions
             .AddScoped<IApplicationContext, ApplicationContext>()
             .AddScoped<IDomainContext, DomainContext>()
             .AddScoped<ITransactionTime, TransactionTime>()
+            .AddScoped<IDomainEventPublisher, DomainEventPublisher>()
             .AddScoped<IDialogTokenGenerator, DialogTokenGenerator>()
 
             // Transient

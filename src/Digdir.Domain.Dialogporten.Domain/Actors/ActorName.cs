@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;

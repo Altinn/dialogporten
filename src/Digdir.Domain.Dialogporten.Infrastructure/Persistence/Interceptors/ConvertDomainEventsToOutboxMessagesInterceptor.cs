@@ -17,6 +17,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private readonly ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> _logger;
     private readonly Lazy<IPublishEndpoint> _publishEndpoint;
     private readonly IApplicationContext _applicationContext;
+    private readonly IDomainEventPublisher _domainEventPublisher;
 
     private List<IDomainEvent> _domainEvents = [];
 
@@ -25,19 +26,22 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         Lazy<ITopicEventSender> topicEventSender,
         ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> logger,
         Lazy<IPublishEndpoint> publishEndpoint,
-        IApplicationContext applicationContext)
+        IApplicationContext applicationContext,
+        IDomainEventPublisher domainEventPublisher)
     {
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(topicEventSender);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(publishEndpoint);
         ArgumentNullException.ThrowIfNull(applicationContext);
+        ArgumentNullException.ThrowIfNull(domainEventPublisher);
 
         _transactionTime = transactionTime;
         _topicEventSender = topicEventSender;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
         _applicationContext = applicationContext;
+        _domainEventPublisher = domainEventPublisher;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -59,6 +63,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
                 x.Entity is IEventPublisher publisher
                     ? publisher.PopDomainEvents()
                     : [])
+            .Concat(_domainEventPublisher.PopDomainEvents())
             .Where(EventShouldBeIncluded)
             .ToList();
 

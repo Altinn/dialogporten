@@ -57,5 +57,9 @@ public sealed class ResyncActorName(
                     cancellationToken
                 );
         } while (updated == BatchSize);
+
+        await db.ActorName
+            .Where(x => x.Id == actorNameId)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 }

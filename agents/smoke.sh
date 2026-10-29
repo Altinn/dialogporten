@@ -23,6 +23,11 @@ podman --version
 agentctl --version
 agentd --version
 
+echo "## container storage"
+# Fails with "'overlay' is not supported over overlayfs" when the storage configuration is missing.
+test "$(sudo podman info --format '{{.Store.GraphDriverName}}')" = overlay \
+    || fail "Podman cannot configure its overlay storage"
+
 echo "## timezone"
 case "$(date +%Z)" in
     CET | CEST) ;;

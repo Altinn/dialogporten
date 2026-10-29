@@ -16,22 +16,27 @@ credentials, the WebApi and GraphQL E2E tests, and opens pull requests that show
 
 ## Set it up
 
-With [agentctl](https://github.com/digdir/digdir-agents) installed and logged in:
+With [agentctl](https://github.com/digdir/digdir-agents) installed and logged in, apply the manifest from a checkout:
 
 ```sh
-agentctl setup --from https://github.com/Altinn/dialogporten
+git clone https://github.com/Altinn/dialogporten
+cd dialogporten/agents/minimal
+cp .env.sample .env
+agentctl apply --wait
 ```
 
-Setup asks for the values in [`minimal/.env.sample`](minimal/.env.sample). Only your Git identity and a GitHub token
-are needed to build and run the non-E2E tests. The E2E tests also need the AT23 credentials the
-[E2E docs](../docs/E2E-Tests.md) list: the token generator user and password and the APIM subscription key stay on
-your machine, and the host puts them only into requests to their hosts. The Maskinporten client's JWK cannot stay
-outside, since the apps sign with it, so use a dedicated AT23 test client for it, or `none`.
+Fill in `.env` before applying; [`minimal/.env.sample`](minimal/.env.sample) explains each value, and Git ignores the
+copy. Only your Git identity and a GitHub token are needed to build and run the non-E2E tests. The E2E tests also need
+the AT23 credentials the [E2E docs](../docs/E2E-Tests.md) list: the token generator user and password and the APIM
+subscription key stay on your machine, and the host puts them only into requests to their hosts. The Maskinporten
+client's JWK cannot stay outside, since the apps sign with it, so use a dedicated AT23 test client for it, or `none`.
 
-Choose the `worktree` variant to work in your own checkout instead of the agent's clone.
+The agent works in its own clone. It cannot mount your checkout instead: agentctl refuses a bind mount that
+contains a `.env` file, and this repository tracks `.env` and `scripts/e2e/.env`.
 
 ## Change it
 
-Change these files in a pull request. The `nested-build` variant builds the image from your checkout, to try a change
-in a nested agent before CI publishes it. Changes to the instructions, skills and secrets reach an agent with
-`agentctl setup` and Update; a new image reaches it when it is created again.
+Change these files in a pull request. The `nested-build` variant builds the image from your checkout, to try a change in
+a nested agent before CI publishes it. Changes to the contents of the instructions and skills, and to secrets, reach an
+agent when you run `agentctl apply` again from an updated checkout. A new image, or a change to which instruction files
+and skills it reads, reaches it only when it is created again.

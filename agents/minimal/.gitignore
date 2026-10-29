@@ -5,4 +5,3 @@ agent.*.yaml
 # The repository's own variants.
 !agent.nested.yaml
 !agent.nested-build.yaml
-!agent.worktree.yaml

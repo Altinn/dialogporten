@@ -98,11 +98,12 @@ lookup() {
     jq -c '.data[] | {partyType, id: (.personIdentifier // .organizationIdentifier // .partyUuid), partyUuid, partyId,
         displayName}' <<<"$found"
     # The register leaves out what it does not know, with 206 Partial Content, rather than failing.
-    jq -r '.data[] | .externalUrn, .urn' <<<"$found" | sort -u >"${TMPDIR:-/tmp}/am-found.$$"
+    local -A known=()
+    local urn
+    while IFS= read -r urn; do known[$urn]=1; done < <(jq -r '.data[] | .externalUrn, .urn' <<<"$found")
     for id in "${urns[@]}"; do
-        grep -qxF "$id" "${TMPDIR:-/tmp}/am-found.$$" || echo "am.sh: the register does not know $id" >&2
+        [[ -n "${known[$id]:-}" ]] || echo "am.sh: the register does not know $id" >&2
     done
-    rm -f "${TMPDIR:-/tmp}/am-found.$$"
 }
 
 whoami() {

@@ -13,16 +13,19 @@ fills in only for the generator's host, so pass them as they are and never print
 ## Tokens the E2E tests use
 
 `token.sh e2e <preset>` mints the token `tests/Digdir.Library.Dialogporten.E2E.Common/TestTokenGenerator.cs` would,
-with the identities in `E2EConstants.cs`:
+with the identities `E2EConstants.cs` picks for the environment in `ALTINN_ENV` (default `at23`):
 
 | preset | kind | identity | scopes |
 |---|---|---|---|
 | `enduser` | personal | pid 08844397713 | `digdir:dialogporten` |
 | `alt-enduser` | personal | pid 13838599936 | `digdir:dialogporten` |
-| `serviceowner` | enterprise | ttd, 991825827 | `digdir:dialogporten.serviceprovider` and `.search` |
-| `serviceowner-admin` | enterprise | ttd, 991825827 | as above and `.admin` |
-| `systemuser` | system user | 51551dd0-…-9b7e3669b364 for 310057223 | `digdir:dialogporten` |
-| `alt-systemuser` | system user | 54cb69df-…-742e40de6211 for 313006425 | `digdir:dialogporten` |
+| `serviceowner` | enterprise | ttd, 991825827 (713431400 in YT01) | `digdir:dialogporten.serviceprovider` and `.search` |
+| `serviceowner-admin` | enterprise | as above | as above and `.admin` |
+| `systemuser` | system user | 51551dd0-…-9b7e3669b364 in AT23, 7633be4c-…-c058b275de7b in TT02, for 310057223 | `digdir:dialogporten` |
+| `alt-systemuser` | system user | 54cb69df-…-742e40de6211 in AT23, 96a46590-…-975f40b985ef in TT02, for 313006425 | `digdir:dialogporten` |
+
+YT01 has no system users, so the system user presets are refused there, as they are in an environment the E2E tests
+do not know.
 
 ```sh
 T=$(bash ~/.claude/skills/altinn-token-generator/token.sh e2e enduser)

@@ -22,15 +22,34 @@ declare -A endpoints=(
     [platform]=GetPlatformToken [platformaccess]=GetPlatformAccessToken
 )
 
-# The presets mirror tests/Digdir.Library.Dialogporten.E2E.Common/E2EConstants.cs for AT23.
+# The presets mirror tests/Digdir.Library.Dialogporten.E2E.Common/E2EConstants.cs, which picks the service owner's
+# orgNo and the system users by environment. Presets it has no identity for are left out.
+env="${ALTINN_ENV:-at23}"
+case "$env" in
+    at23)
+        so_org_no=991825827
+        system_user=51551dd0-b9c5-4f4b-a4a2-9b7e3669b364 alt_system_user=54cb69df-3d8a-4432-804e-742e40de6211 ;;
+    tt02)
+        so_org_no=991825827
+        system_user=7633be4c-dbd5-49f4-bbc4-c058b275de7b alt_system_user=96a46590-1c2a-4e46-a7e7-975f40b985ef ;;
+    yt01) so_org_no=713431400 system_user='' alt_system_user='' ;;
+    *) so_org_no='' system_user='' alt_system_user='' ;;
+esac
+so_scopes='digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search'
 declare -A presets=(
     [enduser]='personal|pid=08844397713|scopes=digdir:dialogporten'
     [alt-enduser]='personal|pid=13838599936|scopes=digdir:dialogporten'
-    [serviceowner]='enterprise|org=ttd|orgNo=991825827|scopes=digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search'
-    [serviceowner-admin]='enterprise|org=ttd|orgNo=991825827|scopes=digdir:dialogporten.serviceprovider digdir:dialogporten.serviceprovider.search digdir:dialogporten.serviceprovider.admin'
-    [systemuser]='systemuser|systemUserId=51551dd0-b9c5-4f4b-a4a2-9b7e3669b364|systemUserOrg=310057223|scopes=digdir:dialogporten'
-    [alt-systemuser]='systemuser|systemUserId=54cb69df-3d8a-4432-804e-742e40de6211|systemUserOrg=313006425|scopes=digdir:dialogporten'
 )
+if [[ -n "$so_org_no" ]]; then
+    presets[serviceowner]="enterprise|org=ttd|orgNo=$so_org_no|scopes=$so_scopes"
+    presets[serviceowner-admin]="enterprise|org=ttd|orgNo=$so_org_no"
+    presets[serviceowner-admin]+="|scopes=$so_scopes digdir:dialogporten.serviceprovider.admin"
+fi
+if [[ -n "$system_user" ]]; then
+    presets[systemuser]="systemuser|systemUserId=$system_user|systemUserOrg=310057223|scopes=digdir:dialogporten"
+    presets[alt-systemuser]="systemuser|systemUserId=$alt_system_user|systemUserOrg=313006425"
+    presets[alt-systemuser]+="|scopes=digdir:dialogporten"
+fi
 
 mint() {
     local kind="$1"; shift
@@ -62,7 +81,10 @@ token() {
     (( $# >= 1 )) || usage
     if [[ "$1" == e2e ]]; then
         (( $# == 2 )) || usage
-        [[ -n "${presets[$2]:-}" ]] || { echo "token.sh: unknown preset '$2'" >&2; usage; }
+        [[ -n "${presets[$2]:-}" ]] || {
+            echo "token.sh: no preset '$2' in $env; this environment has: ${!presets[*]}" >&2
+            exit 2
+        }
         local -a p
         IFS='|' read -r -a p <<<"${presets[$2]}"
         mint "${p[@]}"

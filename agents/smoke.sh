@@ -60,7 +60,9 @@ test "$(jq -r '."Infrastructure:Maskinporten:ClientId"' "$secrets")" = smoke-cli
     || fail "the Maskinporten client was not written to the user secrets"
 
 echo "## dev certificate"
-openssl verify /usr/local/share/ca-certificates/aspnet-dev.crt \
+# Against the system store itself: a container runtime may point SSL_CERT_FILE at a CA bundle it copied when the
+# container started, before the boot unit added the certificate, as the agent's own Podman does.
+openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt /usr/local/share/ca-certificates/aspnet-dev.crt \
     || fail "the HTTPS dev certificate is not trusted system-wide"
 dotnet dev-certs https --check || fail "the agent has no HTTPS dev certificate"
 

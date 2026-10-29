@@ -17,20 +17,24 @@ public sealed class ResyncActorName(
 
     public async Task Handle(ResyncActorNameEvent resyncActorNameEvent, CancellationToken cancellationToken)
     {
-        var actorNameId = resyncActorNameEvent.ActorNameId;
-        var outdatedActorNameEntity = await db.ActorName
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == actorNameId, cancellationToken);
+        var actorName = await db.ActorName
+            .Select(x => new { x.Id, x.ActorId, HasActors = x.ActorEntities.Any() })
+            .FirstOrDefaultAsync(x => x.Id == resyncActorNameEvent.ActorNameId, cancellationToken);
 
-        if (outdatedActorNameEntity is null) return;
+        if (actorName?.ActorId is null)
+        {
+            return;
+        }
 
-        var actorId = outdatedActorNameEntity.ActorId;
-        if (actorId is null) return;
-        if (!await db.Actor.AnyAsync(x => x.ActorNameEntityId == actorNameId, cancellationToken)) return;
+        if (!actorName.HasActors)
+        {
+            await DeleteActorName(actorName.Id, cancellationToken);
+            return;
+        }
 
-        var getNameResult = await partyNameRegistry.GetName(actorId, cancellationToken);
+        var getNameResult = await partyNameRegistry.GetName(actorName.ActorId, cancellationToken);
         await getNameResult.Match(
-            result => UpdateActors(result, actorId, actorNameId, cancellationToken),
+            result => UpdateActors(result, actorName.ActorId, actorName.Id, cancellationToken),
             notFound => throw new InvalidOperationException($"Actor name not found for ActorId: {notFound.ExternalIdWithPrefix}"),
             unsupported =>
             {
@@ -47,27 +51,28 @@ public sealed class ResyncActorName(
     private async Task UpdateActors(
         PartyNameFound result,
         string actorId,
-        Guid actorNameId,
+        Guid nullActorNameId,
         CancellationToken cancellationToken
     )
     {
         var newActorNameId = await actorNameRepository.GetOrCreateActorName(actorId, result.Name, cancellationToken);
-        if (newActorNameId == actorNameId) return;
+        if (newActorNameId == nullActorNameId) return;
 
-        int updated;
+        int updatedRows;
         do
         {
-            updated = await db.Actor
-                .Where(x => x.ActorNameEntityId == actorNameId)
+            updatedRows = await db.Actor
+                .Where(x => x.ActorNameEntityId == nullActorNameId)
                 .Take(BatchSize)
                 .ExecuteUpdateAsync(
                     setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),
                     cancellationToken
                 );
-        } while (updated == BatchSize);
+        } while (updatedRows == BatchSize);
 
-        await db.ActorName
-            .Where(x => x.Id == actorNameId)
-            .ExecuteDeleteAsync(cancellationToken);
+        await DeleteActorName(nullActorNameId, cancellationToken);
     }
+
+    private Task<int> DeleteActorName(Guid actorNameId, CancellationToken cancellationToken) =>
+        db.ActorName.Where(x => x.Id == actorNameId).ExecuteDeleteAsync(cancellationToken);
 }

@@ -13,6 +13,9 @@
   or the Maskinporten client (`Infrastructure:Maskinporten:ClientId` in `dotnet user-secrets list --project
   src/Digdir.Domain.Dialogporten.WebApi`) is missing, the E2E tests cannot run here: say so in the pull request
   rather than working around it, such as with the `LocalDevelopment` switches.
+- The E2E tests depend on test users, delegations and roles in AT23. When they fail with 403s or missing dialogs,
+  check that state with the `altinn-access-management` skill before suspecting the code, and mint tokens to
+  reproduce a request with the `altinn-token-generator` skill.
 - The E2E launcher leaves Postgres and Redis running, as `AGENTS.md` describes. Stop them with
   `docker compose -f docker-compose-db-redis.yml down` when a task is done.
 - Pull request evidence is test output and terminal recordings, as the `pr-evidence` skill describes.

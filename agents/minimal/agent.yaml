@@ -27,6 +27,8 @@ spec:
     - source: ../improving.md
   skills:
     - source: ../_skills/pr-evidence
+    - source: ../_skills/altinn-token-generator
+    - source: ../_skills/altinn-access-management
   harnesses:
     - type: claudeCode
       default: true

@@ -1,0 +1,78 @@
+#!/bin/sh
+# Prepares this computer for running Dialogporten locally, as README.md and docs/E2E-Tests.md ask a developer to:
+#
+# - an ASP.NET HTTPS development certificate, trusted system-wide, for the WebApi at https://localhost:7215 that the
+#   E2E tests call;
+# - a local Ed25519 key pair for signing dialog tokens, which the E2E tests verify against the WebApi's own JWKS, so
+#   it needs no shared key;
+# - the local database connection string, the one in the repository's .env;
+# - the AT23 Maskinporten client from the agent's MASKINPORTEN_AT23_* values, unless they are `none`.
+#
+# They go in the user secrets every runtime project shares (UserSecretsId in Directory.Build.props). Generated values
+# already there are kept, while the Maskinporten client follows the agent's values. The other AT23 credentials are
+# mediated secrets in the agent's environment, as Infrastructure__Altinn__SubscriptionKey and TokenGenerator*.
+#
+# Runs as root at boot; each step is idempotent.
+set -eu
+
+user=agent
+home=/home/agent
+secrets_id=750256a4-f332-4783-8802-8a7d9566f9ca
+secrets_dir="$home/.microsoft/usersecrets/$secrets_id"
+secrets="$secrets_dir/secrets.json"
+connection='Server=localhost;Port=15432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;'
+
+as_agent() {
+    runuser -u "$user" -- env HOME="$home" DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 "$@"
+}
+
+work="$(mktemp -d)"
+chown "$user:$user" "$work"
+trap 'rm -rf "$work"' EXIT
+
+# The certificate lives in the agent's .NET store, and its public part in the system store that .NET's HttpClient,
+# curl and the E2E tests read.
+(cd "$work" && as_agent dotnet dev-certs https >/dev/null)
+(cd "$work" && as_agent dotnet dev-certs https --export-path "$work/aspnet-dev.crt" --format Pem --no-password >/dev/null)
+if ! cmp -s "$work/aspnet-dev.crt" /usr/local/share/ca-certificates/aspnet-dev.crt; then
+    install -m 0644 "$work/aspnet-dev.crt" /usr/local/share/ca-certificates/aspnet-dev.crt
+    update-ca-certificates >/dev/null
+fi
+
+b64url() { base64 -w0 | tr '+/' '-_' | tr -d '='; }
+
+keypair() {
+    openssl genpkey -algorithm ed25519 -out "$work/$1.pem" 2>/dev/null
+    private="$(openssl pkey -in "$work/$1.pem" -outform DER | tail -c 32 | b64url)"
+    public="$(openssl pkey -in "$work/$1.pem" -pubout -outform DER | tail -c 32 | b64url)"
+    jq -n --arg kid "dev-$1-signing-key" --arg private "$private" --arg public "$public" \
+        '{Kid: $kid, PrivateComponent: $private, PublicComponent: $public}'
+}
+
+install -d -m 0700 -o "$user" -g "$user" "$home/.microsoft" "$home/.microsoft/usersecrets" "$secrets_dir"
+[ -s "$secrets" ] || echo '{}' >"$secrets"
+
+# Later values win in jq's object addition, so the existing secrets go last.
+jq --arg connection "$connection" \
+    --argjson primary "$(keypair primary)" \
+    --argjson secondary "$(keypair secondary)" \
+    '{
+        "Infrastructure:DialogDbConnectionString": $connection,
+        "Application:Dialogporten:Ed25519KeyPairs:Primary:Kid": $primary.Kid,
+        "Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent": $primary.PrivateComponent,
+        "Application:Dialogporten:Ed25519KeyPairs:Primary:PublicComponent": $primary.PublicComponent,
+        "Application:Dialogporten:Ed25519KeyPairs:Secondary:Kid": $secondary.Kid,
+        "Application:Dialogporten:Ed25519KeyPairs:Secondary:PrivateComponent": $secondary.PrivateComponent,
+        "Application:Dialogporten:Ed25519KeyPairs:Secondary:PublicComponent": $secondary.PublicComponent
+    } + .' "$secrets" >"$work/secrets.json"
+
+set_secret() {
+    jq --arg key "$1" --arg value "$2" '.[$key] = $value' "$work/secrets.json" >"$work/secrets.next.json"
+    mv "$work/secrets.next.json" "$work/secrets.json"
+}
+client_id="${MASKINPORTEN_AT23_CLIENT_ID:-none}"
+jwk="${MASKINPORTEN_AT23_ENCODED_JWK:-none}"
+[ "$client_id" = none ] || set_secret Infrastructure:Maskinporten:ClientId "$client_id"
+[ "$jwk" = none ] || set_secret Infrastructure:Maskinporten:EncodedJwk "$jwk"
+
+install -m 0600 -o "$user" -g "$user" "$work/secrets.json" "$secrets"

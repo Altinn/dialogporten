@@ -1,0 +1,15 @@
+[Unit]
+Description=Prepare local Dialogporten development: HTTPS dev certificate, Ed25519 key pair and user secrets
+# After the clone, so its CPU-heavy first run of the SDK does not slow the clone and the harness checks at boot.
+After=network-online.target agent-workspace-init.service
+Wants=network-online.target
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+PassEnvironment=MASKINPORTEN_AT23_CLIENT_ID MASKINPORTEN_AT23_ENCODED_JWK
+ExecStart=/usr/local/libexec/agent-dialogporten-dev-init
+
+[Install]
+WantedBy=multi-user.target

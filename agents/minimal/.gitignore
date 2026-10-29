@@ -1,0 +1,8 @@
+# Personal variants and values stay out of Git.
+agent.*.yaml
+.env
+
+# The repository's own variants.
+!agent.nested.yaml
+!agent.nested-build.yaml
+!agent.worktree.yaml

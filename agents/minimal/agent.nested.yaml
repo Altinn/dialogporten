@@ -1,0 +1,17 @@
+apiVersion: agents.platform/v1alpha1
+kind: AgentVariant
+extends: agent.yaml
+
+metadata:
+  name: dialogporten-backend-nested
+
+# Sized to fit inside another agent, yet large enough for the Release build of the solution.
+spec:
+  sandbox:
+    resources:
+      cpu: "3"
+      memory: "6Gi"
+      rootFilesystem:
+        capacity: "32Gi"
+        mode: layered
+      nestedSandboxes: null

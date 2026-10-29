@@ -1,0 +1,78 @@
+apiVersion: agents.platform/v1alpha1
+kind: Agent
+metadata:
+  name: dialogporten-backend
+spec:
+  sandbox:
+    image:
+      type: reference
+      reference: ghcr.io/altinn/dialogporten/agent-minimal:latest
+    platform:
+      os: linux
+    # The Release build of the solution, Postgres and Redis in Podman and the WebApi, GraphQL and Service the E2E
+    # launcher runs side by side.
+    resources:
+      cpu: "4"
+      memory: "8Gi"
+      rootFilesystem:
+        capacity: "64Gi"
+        mode: layered
+      nestedSandboxes: preferred
+    initSystem: image
+  home:
+    source: ../home
+  instructions:
+    - source: ../instructions.md
+    - source: environment.md
+    - source: ../improving.md
+  skills:
+    - source: ../_skills/pr-evidence
+  harnesses:
+    - type: claudeCode
+      default: true
+    # Optional: without a Codex login on the host, the agent starts without Codex. Run `agentctl codex login` and
+    # the next reconcile adds it.
+    - type: codex
+      optional: true
+  environment:
+    - name: GIT_USER_NAME
+    - name: GIT_USER_EMAIL
+    # The AT23 Maskinporten client the local WebApi, GraphQL and Service use for Altinn's APIs, or `none`. The apps
+    # sign their client assertion with the JWK themselves, so the host cannot substitute it in a request: the real
+    # key is in the sandbox. Use a dedicated test client. The boot unit writes them into the shared user secrets.
+    - name: MASKINPORTEN_AT23_CLIENT_ID
+    - name: MASKINPORTEN_AT23_ENCODED_JWK
+  secrets:
+    - environment: GITHUB_TOKEN
+      # gh only attaches files with a token it classifies by prefix, so the inert placeholder carries the
+      # fine-grained token's prefix.
+      placeholder: github_pat_AGENT_MEDIATED_GITHUB_TOKEN
+      allowedHosts:
+        - github.com
+        - api.github.com
+        - gist.github.com
+        - uploads.github.com
+    # Altinn platform APIs in AT23, which the local apps call in Development.
+    - environment: Infrastructure__Altinn__SubscriptionKey
+      source: ALTINN_AT23_SUBSCRIPTION_KEY
+      optional: true
+      allowedHosts:
+        - platform.at23.altinn.cloud
+    # The test token generator the E2E tests get their tokens from, with Basic authentication.
+    - environment: TokenGeneratorUser
+      source: E2E_TOKEN_GENERATOR_USER
+      optional: true
+      allowedHosts:
+        - altinn-testtools-token-generator.azurewebsites.net
+    - environment: TokenGeneratorPassword
+      source: E2E_TOKEN_GENERATOR_PASSWORD
+      optional: true
+      allowedHosts:
+        - altinn-testtools-token-generator.azurewebsites.net
+  access:
+    - type: ssh
+  network:
+    mode: mediated
+    allow: all
+    deny:
+      - metadata.google.internal

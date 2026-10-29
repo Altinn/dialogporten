@@ -1,5 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.ResyncActorName;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using MassTransit;
 
 namespace Digdir.Domain.Dialogporten.Service.Consumers;

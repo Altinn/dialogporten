@@ -21,6 +21,8 @@ public sealed class UpdateDialogEndpointSummary : Summary<UpdateDialogEndpoint>
                        Changes to other fields leave the end user's system labels untouched. 
                        This reset is suppressed for silent updates.
 
+                       {Constants.SwaggerSummary.DuplicateTransmissionOpenedNote}
+
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;
         ResponseHeaders = [HttpResponseHeaderExamples.NewDialogETagHeader(Status204NoContent)];

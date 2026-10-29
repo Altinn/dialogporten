@@ -3327,7 +3327,7 @@
             "type": "string"
           },
           "id": {
-            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of activities. If not provided, a new UUIDv7 will be generated.",
+            "description": "A self-defined UUIDv7 may be provided to support idempotent creation of activities. If not provided, a new UUIDv7 will be generated.\nIf the activity is a duplicate TransmissionOpened activity (see the activities list), it is not stored,\nand this id cannot be used to look up the activity afterwards.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -3633,7 +3633,7 @@
         "additionalProperties": false,
         "properties": {
           "activities": {
-            "description": "An immutable list of activities associated with the dialog.",
+            "description": "An immutable list of activities associated with the dialog.\n            \nA transmission can only be opened once, so only the first TransmissionOpened activity per transmission is stored.\nAny additional TransmissionOpened activities referencing the same transmission are silently skipped\n(regardless of who performed them), but are still validated.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsCreate_Activity"
             },
@@ -4203,7 +4203,7 @@
             "type": "string"
           },
           "id": {
-            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.\nIf the activity is a duplicate TransmissionOpened activity, it is not stored, the id of the existing\nTransmissionOpened activity is returned instead, and this id cannot be used to look up the activity afterwards.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -4507,7 +4507,7 @@
             "type": "string"
           },
           "id": {
-            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.",
+            "description": "A UUIDv7 may be provided to support idempotent additions to the list of activities.\nIf not supplied, a new UUIDv7 will be generated.\nIf the activity is a duplicate TransmissionOpened activity (see the activities list), it is not stored,\nand this id cannot be used to look up the activity afterwards.",
             "example": "01913cd5-784f-7d3b-abef-4c77b1f0972d",
             "format": "guid",
             "nullable": true,
@@ -4814,7 +4814,7 @@
         "additionalProperties": false,
         "properties": {
           "activities": {
-            "description": "An immutable list of activities associated with the dialog. When updating via PUT, any activities added here\nwill be appended to the existing list of activities.",
+            "description": "An immutable list of activities associated with the dialog. When updating via PUT, any activities added here\nwill be appended to the existing list of activities.\n            \nA transmission can only be opened once, so only the first TransmissionOpened activity per transmission is stored.\nAny TransmissionOpened activity referencing a transmission that already has one, either on the dialog or earlier\nin this list, is silently skipped (regardless of who performed it), but is still validated.\nOther changes in the request are applied as normal.",
             "items": {
               "$ref": "#/components/schemas/V1ServiceOwnerDialogsCommandsUpdate_Activity"
             },
@@ -10607,7 +10607,7 @@
         ]
       },
       "post": {
-        "description": "The dialog is created with the given configuration.\n\nFor detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)",
+        "description": "The dialog is created with the given configuration.\n\nA transmission can only be opened once, so only the first \u0027TransmissionOpened\u0027 activity per transmission is stored. Any \u0027TransmissionOpened\u0027 activity referencing a transmission that already has one, either on the dialog or earlier in the same request, is silently skipped regardless of who performed it. Skipped activities are still validated, and their ids are not stored. Other changes in the request are applied as normal.\n\nFor detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)",
         "operationId": "V1ServiceOwnerDialogsCommandsCreate_Dialog",
         "requestBody": {
           "content": {
@@ -10960,7 +10960,7 @@
         ]
       },
       "patch": {
-        "description": "Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.\nSee [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.\n            \nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.\nSee [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.\n            \nA transmission can only be opened once, so only the first \u0027TransmissionOpened\u0027 activity per transmission is stored. Any \u0027TransmissionOpened\u0027 activity referencing a transmission that already has one, either on the dialog or earlier in the same request, is silently skipped regardless of who performed it. Skipped activities are still validated, and their ids are not stored. Other changes in the request are applied as normal.\n            \nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsPatchDialog",
         "parameters": [
           {
@@ -11120,7 +11120,7 @@
         ]
       },
       "put": {
-        "description": "Replaces a given dialog with the supplied model.\n\nIf the update changes the dialog\u0027s content (transmissions, content, attachments, GUI/API actions, status or extended status), \nany end user system label of \u0027Bin\u0027 or \u0027Archive\u0027 is reset to \u0027Default\u0027, moving the dialog back to the inbox. \nChanges to other fields leave the end user\u0027s system labels untouched. \nThis reset is suppressed for silent updates.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "Replaces a given dialog with the supplied model.\n\nIf the update changes the dialog\u0027s content (transmissions, content, attachments, GUI/API actions, status or extended status), \nany end user system label of \u0027Bin\u0027 or \u0027Archive\u0027 is reset to \u0027Default\u0027, moving the dialog back to the inbox. \nChanges to other fields leave the end user\u0027s system labels untouched. \nThis reset is suppressed for silent updates.\n\nA transmission can only be opened once, so only the first \u0027TransmissionOpened\u0027 activity per transmission is stored. Any \u0027TransmissionOpened\u0027 activity referencing a transmission that already has one, either on the dialog or earlier in the same request, is silently skipped regardless of who performed it. Skipped activities are still validated, and their ids are not stored. Other changes in the request are applied as normal.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsCommandsUpdate_Dialog",
         "parameters": [
           {
@@ -11885,7 +11885,7 @@
         ]
       },
       "post": {
-        "description": "The activity is created with the given configuration.\n\nCreating an activity does not count as a content change, \nso it leaves the end user\u0027s system labels untouched; a dialog in \u0027Bin\u0027 or \u0027Archive\u0027 stays there.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
+        "description": "The activity is created with the given configuration.\n\nCreating an activity does not count as a content change, \nso it leaves the end user\u0027s system labels untouched; a dialog in \u0027Bin\u0027 or \u0027Archive\u0027 stays there.\n\nA transmission can only be opened once. If the activity is of type \u0027TransmissionOpened\u0027 and the\nreferenced transmission already has a \u0027TransmissionOpened\u0027 activity (regardless of who performed it),\nthe request is still validated, but no new activity is stored. The response is still a success,\ncontaining the id of the existing \u0027TransmissionOpened\u0027 activity and the dialog\u0027s current, unchanged revision.\nNo new revision or event is produced. A self-supplied activity id is not stored in this case.\n\nOptimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.",
         "operationId": "V1ServiceOwnerDialogsCommandsCreateActivity_DialogActivity",
         "parameters": [
           {

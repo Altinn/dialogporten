@@ -1,6 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
 
-namespace Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+namespace Digdir.Domain.Dialogporten.Domain.Actors.Events;
 
 /// <summary>
 /// Used to re-sync actor names after the party name registry fails to answer, or returns no results for any reason.

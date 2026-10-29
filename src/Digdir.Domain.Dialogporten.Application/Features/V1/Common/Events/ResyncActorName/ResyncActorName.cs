@@ -1,15 +1,16 @@
-using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.ResyncActorName;
 
 public sealed class ResyncActorName(
     IDialogDbContext db,
     IPartyNameRegistry partyNameRegistry,
-    IActorNameRepository actorNameRepository
+    IActorNameRepository actorNameRepository,
+    ILogger<ResyncActorName> logger
 ) : INotificationHandler<ResyncActorNameEvent>
 {
     private const int BatchSize = 1000;
@@ -29,9 +30,16 @@ public sealed class ResyncActorName(
 
         var getNameResult = await partyNameRegistry.GetName(actorId, cancellationToken);
         await getNameResult.Match(
-            async result => await UpdateActors(result, actorId, actorNameId, cancellationToken),
+            result => UpdateActors(result, actorId, actorNameId, cancellationToken),
             notFound => throw new InvalidOperationException($"Actor name not found for ActorId: {notFound.ExternalIdWithPrefix}"),
-            unsupported => throw new UnreachableException($"Unable to parse ActorId: {unsupported.ExternalIdWithPrefix}. Reason: {unsupported.Reason}"),
+            unsupported =>
+            {
+                logger.LogError(
+                    "Unable to parse ActorId: {ExternalIdWithPrefix}. Reason: {Reason}",
+                    unsupported.ExternalIdWithPrefix, unsupported.Reason
+                );
+                return Task.CompletedTask;
+            },
             unavailable => throw new InvalidOperationException($"Party name registry unavailable. ActorId: {unavailable.ExternalIdWithPrefix}")
         );
     }
@@ -57,5 +65,9 @@ public sealed class ResyncActorName(
                     cancellationToken
                 );
         } while (updated == BatchSize);
+
+        await db.ActorName
+            .Where(x => x.Id == actorNameId)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 }

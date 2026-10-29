@@ -11,6 +11,4 @@ public interface IDialogSeenLogWriter
 public sealed record DialogSeenResult(
     DialogSeenLog? NewSeenLog,
     bool CausedChangesOutsideEf,
-    bool IsContentSeen,
-    Guid? OutOfSyncActorNameEntityId
-);
+    bool IsContentSeen);

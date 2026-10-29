@@ -285,6 +285,54 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 error.ShouldHaveErrorWithText(nameof(CreateDialogDto.DueAt)));
     }
 
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Can_Create_Dialog_With_Silent_Update_When_Party_Name_Registry_Is_Down_And_Recover_Later(string failHow) =>
+        FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.IsSilentUpdate = true;
+                x.AddTransmission(d => d.Sender = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorId = TestUsers.DefaultParty
+                });
+            })
+            .AssertResult<CreateDialogSuccess>()
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.Transmissions.Should().ContainSingle()
+                .Which.Sender.ActorName.Should().BeNull()
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x => x.Transmissions
+                .Should()
+                .ContainSingle()
+                .Which.Sender.ActorName.Should().Be("Brando Sando")
+            );
+
     [Fact]
     public Task Can_Create_DueAt_Before_VisibleFrom_When_Admin_Scope()
     {

@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -13,7 +14,8 @@ internal sealed class DialogSeenLogWriter(
     IPartyNameRegistry partyNameRegistry,
     ITransactionTime transactionTime,
     IUnitOfWork unitOfWork,
-    IActorNameRepository actorNameRepository
+    IActorNameRepository actorNameRepository,
+    IDomainEventPublisher domainEventPublisher
 ) : IDialogSeenLogWriter
 {
 
@@ -56,6 +58,16 @@ internal sealed class DialogSeenLogWriter(
         }
         var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
 
+        if (actorNameEntity.ActorId is not null && actorNameEntity.Name is null)
+        {
+            domainEventPublisher.Publish(
+                new ResyncActorNameEvent(
+                    actorNameEntity.Id,
+                    $"Actor name for SeenLog/LabelAssignment is null for dialog {dialog.Id}"
+                )
+            );
+        }
+
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
         var newSeenLog = await EnsureSeenLog(
             seenLogId,
@@ -81,8 +93,7 @@ internal sealed class DialogSeenLogWriter(
         return new DialogSeenResult(
             NewSeenLog: newSeenLog,
             CausedChangesOutsideEf: isSeenSinceLastContentUpdateSetToTrue || newSeenLog is not null,
-            IsContentSeen: isSeenSinceLastContentUpdateSetToTrue || dialog.IsSeenSinceLastContentUpdate,
-            OutOfSyncActorNameEntityId: actorNameEntity.Name is null ? actorNameEntity.Id : null
+            IsContentSeen: isSeenSinceLastContentUpdateSetToTrue || dialog.IsSeenSinceLastContentUpdate
         );
     }
 

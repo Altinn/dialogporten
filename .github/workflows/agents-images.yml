@@ -5,14 +5,14 @@ on:
     types: [opened, reopened, synchronize, ready_for_review, converted_to_draft, closed]
     paths:
       - agents/**
-      - .github/workflows/agents-images.yaml
+      - .github/workflows/agents-images.yml
       - '!agents/**/*.md'
   push:
     branches:
       - main
     paths:
       - agents/**
-      - .github/workflows/agents-images.yaml
+      - .github/workflows/agents-images.yml
       - '!agents/**/*.md'
 
 permissions:
@@ -55,16 +55,17 @@ jobs:
             agents
 
       # The containerd image store keeps the image the build step pushes, so the smoke test runs it
-      # without a second copy on the runner's disk.
-      - name: Set up Docker
-        uses: docker/setup-docker-action@e43656e248c0bd0647d3f5c195d116aacf6fcaf4 # v4.7.0
-        with:
-          daemon-config: |
-            {
-              "features": {
-                "containerd-snapshotter": true
-              }
-            }
+      # without a second copy on the runner's disk. The runner's own Docker is switched to it in place:
+      # docker/setup-docker-action, which would install another, is not on Altinn's allowed list.
+      - name: Use the containerd image store
+        run: |
+          set -eu
+          config=/etc/docker/daemon.json
+          if [ -s "${config}" ]; then current="$(sudo cat "${config}")"; else current='{}'; fi
+          jq '.features["containerd-snapshotter"] = true' <<<"${current}" | sudo tee "${config}" >/dev/null
+          sudo systemctl restart docker
+          docker info --format '{{ .DriverStatus }}' | grep -q 'io.containerd.snapshotter' \
+            || { echo "::error::Docker did not switch to the containerd image store"; exit 1; }
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository

@@ -4,6 +4,7 @@
 #
 #   am.sh parties <pid|orgNo|systemUserUuid> [<orgNo|pid>]   authorized parties, as Dialogporten asks for them;
 #                                                           with a second argument, that party's full detail
+#   am.sh lookup <pid|orgNo|uuid> ...                      party UUID, party ID and name from the register
 #   am.sh whoami <pid>                                     the person's own party UUID and party ID
 #   am.sh enduser-token <pid> [scopes]                     a personal token the end-user APIs accept
 #   am.sh decide <pid|systemUserUuid> <pid|orgNo> <resource> [action]
@@ -18,12 +19,17 @@ set -euo pipefail
 platform="${ALTINN_PLATFORM:-https://platform.at23.altinn.cloud}"
 token_sh="$(dirname "$(readlink -f "$0")")/../altinn-token-generator/token.sh"
 
-usage() { sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2; }
+usage() { sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2; }
 
 # A resource owner token with the scopes Dialogporten's own Maskinporten client has for these two APIs.
 resourceowner_token() {
     bash "$token_sh" enterprise org=digdir orgNo=991825827 \
         "scopes=altinn:accessmanagement/authorizedparties.admin altinn:authorization/authorize.admin"
+}
+
+# A resource owner token for the register's party lookup, which Dialogporten's own client also has.
+register_token() {
+    bash "$token_sh" enterprise org=digdir orgNo=991825827 scopes=altinn:register/partylookup.admin
 }
 
 # Fails with the response body on stderr unless the status is 2xx; prints the body otherwise.
@@ -74,8 +80,34 @@ parties() {
     fi
 }
 
+# The register URN of an identifier. A UUID is a party UUID, which for a system user is its own UUID.
+party_urn() {
+    case "$1" in
+        ????????-????-????-????-????????????) echo "urn:altinn:party:uuid:$1" ;;
+        *) echo "$(urn "$1"):$1" ;;
+    esac
+}
+
+lookup() {
+    local id urns=()
+    for id in "$@"; do urns+=("$(party_urn "$id")"); done
+    local found
+    found="$(jq -n '{Data: $ARGS.positional}' --args "${urns[@]}" |
+        call -X POST -H "Authorization: Bearer $(register_token)" -H 'Content-Type: application/json' -d @- \
+            "$platform/register/api/v1/dialogporten/parties/query")"
+    jq -c '.data[] | {partyType, id: (.personIdentifier // .organizationIdentifier // .partyUuid), partyUuid, partyId,
+        displayName}' <<<"$found"
+    # The register leaves out what it does not know, with 206 Partial Content, rather than failing.
+    jq -r '.data[] | .externalUrn, .urn' <<<"$found" | sort -u >"${TMPDIR:-/tmp}/am-found.$$"
+    for id in "${urns[@]}"; do
+        grep -qxF "$id" "${TMPDIR:-/tmp}/am-found.$$" || echo "am.sh: the register does not know $id" >&2
+    done
+    rm -f "${TMPDIR:-/tmp}/am-found.$$"
+}
+
 whoami() {
-    authorized_parties "$1" | jq -ce --arg pid "$1" '.[] | select(.personId == $pid) | {partyUuid, partyId}'
+    [[ "$(urn "$1")" == urn:altinn:person:identifier-no ]] || { echo "am.sh: whoami takes a pid" >&2; exit 2; }
+    lookup "$1" | jq -ce '{partyUuid, partyId}'
 }
 
 enduser_token() {
@@ -112,6 +144,7 @@ get() {
 
 case "${1:-}" in
     parties) (( $# == 2 || $# == 3 )) || usage; shift; parties "$@" ;;
+    lookup) (( $# >= 2 )) || usage; shift; lookup "$@" ;;
     whoami) (( $# == 2 )) || usage; whoami "$2" ;;
     enduser-token) (( $# == 2 || $# == 3 )) || usage; shift; enduser_token "$@" ;;
     decide) (( $# == 4 || $# == 5 )) || usage; shift; decide "$@" ;;

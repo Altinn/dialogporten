@@ -40,14 +40,39 @@ What it should show in AT23, as of October 2026:
 - `parties 13838599936`: client `210142762` with `regnskapsforer-med-signeringsrettighet`, from the client delegation
   below.
 
+## Party identifiers from a pid or orgNo
+
+Altinn knows each party by a pid or orgNo, a party UUID and an integer party ID, and its APIs want different ones.
+The register maps between them. Ask it with an enterprise token with `altinn:register/partylookup.admin`, as
+Dialogporten's own party name lookup does:
+
+```sh
+bash $S/am.sh lookup 08885399984 314243994 e3370464-b001-4a5e-b375-f25b36dc87ab 51551dd0-b9c5-4f4b-a4a2-9b7e3669b364
+```
+
+Without the helper, the request is:
+
+```sh
+T=$(bash ~/.claude/skills/altinn-token-generator/token.sh enterprise org=digdir orgNo=991825827 scopes=altinn:register/partylookup.admin)
+curl -s -X POST https://platform.at23.altinn.cloud/register/api/v1/dialogporten/parties/query \
+  -H "Authorization: Bearer $T" -H "Ocp-Apim-Subscription-Key: $Infrastructure__Altinn__SubscriptionKey" \
+  -H 'Content-Type: application/json' -d '{"Data":["urn:altinn:person:identifier-no:08844397713"]}' | jq -c '.data[]'
+```
+
+`Data` takes `urn:altinn:person:identifier-no:<pid>`, `urn:altinn:organization:identifier-no:<orgNo>`,
+`urn:altinn:party:uuid:<uuid>` and `urn:altinn:systemuser:uuid:<uuid>`, several at once. Each answer has
+`partyType`, `personIdentifier` or `organizationIdentifier`, `partyUuid`, `partyId` and `displayName`, but no user
+ID.
+
 ## Commands
 
 | command | answers |
 |---|---|
 | `parties <pid\|orgNo\|systemUserUuid>` | one line per party the subject may act for, with counts. This is the call Dialogporten makes. |
 | `parties <subject> <orgNo\|pid>` | that one party's roles, access packages, resources and instance count |
+| `lookup <pid\|orgNo\|uuid> ...` | each party's type, `partyUuid`, `partyId` and name, from the register |
 | `whoami <pid>` | the person's own `partyUuid` and `partyId` |
-| `enduser-token <pid> [scopes]` | a personal token with `partyId` and `partyuuid`, default scope `altinn:portal/enduser` |
+| `enduser-token <pid> [scopes]` | a personal token with the `partyId` and `partyuuid` `lookup` finds, default scope `altinn:portal/enduser` |
 | `decide <pid\|systemUserUuid> <pid\|orgNo> <resource> [action]` | the PDP's decision, default action `read` |
 | `policy <resource>` | the roles, access packages and orgs the resource's policy grants to |
 | `get <pid> <path>` | GET an end-user API as that person |
@@ -57,8 +82,8 @@ What it should show in AT23, as of October 2026:
 ## End-user APIs
 
 Connections, client delegations and other end-user APIs take party UUIDs in the query (`party`, `from`, `to`,
-`agent`, `client`). Get them from the `partyUuid` column of `parties`. The caller needs the right to administer
-access for `party`, such as daglig leder.
+`agent`, `client`). Get them with `lookup`, or from the `partyUuid` column of `parties`. The caller needs the right
+to administer access for `party`, such as daglig leder.
 
 ```sh
 bash $S/am.sh get 08885399984 '/accessmanagement/api/v2/enduser/clientdelegations/agents?party=49c48d6e-d8a5-4903-ae32-481e68ab6794' | jq -c '.data[] | {agent: .agent.personIdentifier, name: .agent.name, access: [.access[] | {role: .role.code, packages: [.packages[]?.urn]}]}'
@@ -94,15 +119,22 @@ altinn-auth. Send them with `curl -X POST` and a token from `am.sh enduser-token
 - **End-user APIs reject pid-only tokens.** They answer 403 with an empty body unless the personal token carries
   `partyId` and `partyuuid`, which the generator does not look up. Use `am.sh enduser-token` or `am.sh get`.
 - **Three identifier kinds.** Request bodies take URNs with a pid or orgNo, end-user query parameters take party
-  UUIDs, and the system user API in Authentication takes the integer party ID. `parties` shows all of them.
+  UUIDs, and the system user API in Authentication takes the integer party ID. `lookup` maps between them.
+- **The register leaves out what it does not know.** A pid or orgNo with no party gives 206 Partial Content and no
+  entry for it, not an error; `am.sh lookup` names what is missing. One that fails its checksum, such as
+  `01010199999`, fails the whole request with 400 `Invalid PartyUrn`. Answers do not come back in the order asked.
+- **System users have no party ID.** The register gives a system user `partyType` `system-user`, its own UUID as
+  `partyUuid` and a `partyId` of null.
 - **`NotApplicable` is a no.** The PDP answers `NotApplicable`, not `Deny`, when no rule matches, such as for a
   party the user does not represent.
 - **Resource ids.** The PDP and the resource registry take the id without `urn:altinn:resource:`; `am.sh` strips it.
-- **Subscription key.** In AT23 the PDP returns 401 without `Ocp-Apim-Subscription-Key`, while authorized parties,
-  connections, metadata and the resource registry answer without it. `am.sh` always sends it, as Dialogporten does.
+- **Subscription key.** In AT23 the PDP and the register return 401 without `Ocp-Apim-Subscription-Key`, while
+  authorized parties, connections, metadata and the resource registry answer without it. `am.sh` always sends it, as
+  Dialogporten does.
 - **Scopes.** Resource-owner authorized parties needs `altinn:accessmanagement/authorizedparties.admin` or
   `.resourceowner` and answers 403 without; the PDP needs `altinn:authorization/authorize` or `.admin`. `am.sh` mints
-  a digdir enterprise token with both `.admin` scopes, which Dialogporten's own client has.
+  a digdir enterprise token with both `.admin` scopes, which Dialogporten's own client has. The register's party
+  query needs `altinn:register/partylookup.admin` and answers 403 without.
 - **Caching after a change.** Dialogporten caches authorized parties for 15 minutes and may serve stale data for up
   to 30 if Altinn is slow (`InfrastructureExtensions.cs`), so a repair can take that long to reach the tests.
 
@@ -110,5 +142,6 @@ altinn-auth. Send them with `curl -X POST` and a token from `am.sh enduser-token
 
 - **`am.sh: 403 from …/enduser/…` with an empty body**: either the token lacks the party claims (use `am.sh get`, not
   your own token) or the person may not administer access for `party`.
+- **`am.sh: the register does not know urn:altinn:person:identifier-no:<pid>`**: no such party in AT23.
 - **`am.sh: '<id>' is neither an 11-digit pid, a 9-digit orgNo nor a system user UUID`**: as it says. Party UUIDs are
   not accepted as subjects.

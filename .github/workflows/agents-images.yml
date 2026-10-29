@@ -17,7 +17,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 # A newer push to main must not cancel a run between its two publish jobs, which would leave the
 # images' latest tags on different commits.
@@ -34,6 +33,9 @@ jobs:
     name: Build ${{ matrix.variant }} Agent (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -69,7 +71,11 @@ jobs:
 
       - name: Login to GHCR
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # The docker driver cannot push by digest, so each architecture's image is pushed under its own
       # tag, and the publish job joins them by digest.
@@ -143,6 +149,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -158,7 +166,11 @@ jobs:
           path: ${{ runner.temp }}/digests
 
       - name: Login to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Tag multi-platform image
         env:

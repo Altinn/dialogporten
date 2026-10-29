@@ -42,10 +42,16 @@ grep -qxF 'PassEnvironment=MASKINPORTEN_AT23_CLIENT_ID MASKINPORTEN_AT23_ENCODED
     || fail "the development unit does not receive the Maskinporten values"
 
 secrets=/home/agent/.microsoft/usersecrets/750256a4-f332-4783-8802-8a7d9566f9ca/secrets.json
+# The unit runs after the workspace clone and takes the database credentials from the repository's .env.
+clone=/home/agent/code/dialogporten
+test ! -e "$clone" || fail "$clone exists: run this in a freshly built image, not in a booted agent"
+sudo install -d -o agent -g agent /home/agent/code "$clone"
+printf '%s\n' POSTGRES_USER=smoke-user POSTGRES_PASSWORD=smoke-password POSTGRES_DB=smoke-db >"$clone/.env"
 sudo env MASKINPORTEN_AT23_CLIENT_ID=none MASKINPORTEN_AT23_ENCODED_JWK=none \
     /usr/local/libexec/agent-dialogporten-dev-init
-jq -e '."Infrastructure:DialogDbConnectionString" | contains("Port=15432")' "$secrets" >/dev/null \
-    || fail "the connection string is not in the user secrets"
+test "$(jq -r '."Infrastructure:DialogDbConnectionString"' "$secrets")" = \
+    'Server=localhost;Port=15432;Database=smoke-db;User ID=smoke-user;Password=smoke-password;Include Error Detail=True;' \
+    || fail "the connection string from the repository's .env is not in the user secrets"
 jq -e 'has("Infrastructure:Maskinporten:ClientId") | not' "$secrets" >/dev/null \
     || fail "a Maskinporten client of none was written to the user secrets"
 private="$(jq -r '."Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent"' "$secrets")"

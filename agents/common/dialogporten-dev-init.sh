@@ -5,7 +5,8 @@
 #   E2E tests call;
 # - a local Ed25519 key pair for signing dialog tokens, which the E2E tests verify against the WebApi's own JWKS, so
 #   it needs no shared key;
-# - the local database connection string, the one in the repository's .env;
+# - the local database connection string, from the credentials in the repository's .env that
+#   docker-compose-db-redis.yml starts Postgres with;
 # - the AT23 Maskinporten client from the agent's MASKINPORTEN_AT23_* values, unless they are `none`.
 #
 # They go in the user secrets every runtime project shares (UserSecretsId in Directory.Build.props). Generated values
@@ -20,7 +21,7 @@ home=/home/agent
 secrets_id=750256a4-f332-4783-8802-8a7d9566f9ca
 secrets_dir="$home/.microsoft/usersecrets/$secrets_id"
 secrets="$secrets_dir/secrets.json"
-connection='Server=localhost;Port=15432;Database=dialogporten;User ID=postgres;Password=supersecret;Include Error Detail=True;'
+dotenv=/home/agent/code/dialogporten/.env
 
 as_agent() {
     runuser -u "$user" -- env HOME="$home" DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 "$@"
@@ -37,6 +38,20 @@ trap 'rm -rf "$work"' EXIT
 if ! cmp -s "$work/aspnet-dev.crt" /usr/local/share/ca-certificates/aspnet-dev.crt; then
     install -m 0644 "$work/aspnet-dev.crt" /usr/local/share/ca-certificates/aspnet-dev.crt
     update-ca-certificates >/dev/null
+fi
+
+# The value of a plain KEY=value line in the repository's .env, read rather than sourced, since this runs as root.
+dotenv_value() {
+    sed -n "s/^$1=//p" "$dotenv" | tail -n 1
+}
+
+# Without the clone, as when the workspace could not be cloned, the connection string is left as it is.
+connection=
+if [ -r "$dotenv" ]; then
+    connection="Server=localhost;Port=15432;Database=$(dotenv_value POSTGRES_DB);User ID=$(dotenv_value POSTGRES_USER)"
+    connection="$connection;Password=$(dotenv_value POSTGRES_PASSWORD);Include Error Detail=True;"
+else
+    echo "agent-dialogporten-dev-init: no $dotenv, so no database connection string" >&2
 fi
 
 b64url() { base64 -w0 | tr '+/' '-_' | tr -d '='; }
@@ -56,8 +71,7 @@ install -d -m 0700 -o "$user" -g "$user" "$home/.microsoft" "$home/.microsoft/us
 jq --arg connection "$connection" \
     --argjson primary "$(keypair primary)" \
     --argjson secondary "$(keypair secondary)" \
-    '{
-        "Infrastructure:DialogDbConnectionString": $connection,
+    '(if $connection == "" then {} else {"Infrastructure:DialogDbConnectionString": $connection} end) + {
         "Application:Dialogporten:Ed25519KeyPairs:Primary:Kid": $primary.Kid,
         "Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent": $primary.PrivateComponent,
         "Application:Dialogporten:Ed25519KeyPairs:Primary:PublicComponent": $primary.PublicComponent,

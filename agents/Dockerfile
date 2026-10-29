@@ -36,7 +36,7 @@ RUN case "${TARGETARCH}" in \
         arm64) DOTNET_ARCH=arm64 ;; \
         *) echo "unsupported target architecture: ${TARGETARCH}" >&2; exit 1 ;; \
     esac \
-    && curl -fsSL \
+    && curl -fsSL --proto '=https' --tlsv1.2 \
         "https://raw.githubusercontent.com/dotnet/install-scripts/${DOTNET_INSTALL_SCRIPT_COMMIT}/src/dotnet-install.sh" \
         -o /tmp/dotnet-install.sh \
     && echo "${DOTNET_INSTALL_SCRIPT_SHA256}  /tmp/dotnet-install.sh" | sha256sum -c - \

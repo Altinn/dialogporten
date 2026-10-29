@@ -223,6 +223,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);
         }
 
+        dialog.Activities.RemoveExtraTransmissionOpenedActivities();
+
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)
             .SaveChangesAsync(cancellationToken);

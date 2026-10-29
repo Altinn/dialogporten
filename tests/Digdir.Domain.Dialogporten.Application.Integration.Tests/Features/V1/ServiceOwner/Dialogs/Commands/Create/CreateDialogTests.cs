@@ -85,8 +85,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedDialogIdTestData))]
-    public Task Create_Dialog_With_Specified_DialogId_Tests(
-        CreateDialogWithSpecifiedDialogIdScenario scenario) =>
+    public Task Create_Dialog_With_Specified_DialogId_Tests(CreateDialogWithSpecifiedDialogIdScenario scenario) =>
         FlowBuilder.For(Application)
             .OverrideUtc(CreateDialogWithSpecifiedDialogIdTestData.FixedUtcNow)
             .CreateSimpleDialog((x, _) => x.Dto.Id = scenario.DialogId)
@@ -124,8 +123,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedCreatedAtTestData))]
-    public Task Create_Dialog_With_Specified_CreatedAt_Tests(
-        CreateDialogWithSpecifiedCreatedAtScenario scenario) =>
+    public Task Create_Dialog_With_Specified_CreatedAt_Tests(CreateDialogWithSpecifiedCreatedAtScenario scenario) =>
         FlowBuilder.For(Application)
             .OverrideUtc(CreateDialogWithSpecifiedCreatedAtTestData.FixedUtcNow)
             .CreateSimpleDialog((x, _) => x.Dto.CreatedAt = scenario.CreatedAt)
@@ -162,8 +160,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(CreateDialogWithSpecifiedPartyTestData))]
-    public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(
-        CreateDialogWithSpecifiedPartyScenario scenario)
+    public async Task Creates_Dialog_When_Dialog_Is_Simple_For_All_PartyTypes(CreateDialogWithSpecifiedPartyScenario scenario)
     {
         var expectedDialogId = IdentifiableExtensions.CreateVersion7();
 
@@ -314,6 +311,86 @@ public class CreateDialogTests : ApplicationCollectionFixture
                 x.Id.Should().Be(expectedDialogId));
     }
 
+    [Fact]
+    public async Task Create_Dialog_With_Multiple_TransmissionOpened()
+    {
+        var transmissionId = Guid.CreateVersion7();
+        var activityId = Guid.CreateVersion7();
+        var secondActivityId = Guid.CreateVersion7();
+        var firstCreatedAt = DateTimeOffset.UtcNow - TimeSpan.FromDays(2);
+        var secondCreatedAt = DateTimeOffset.UtcNow - TimeSpan.FromDays(1);
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Transmissions.Add(new TransmissionDto
+                {
+                    Id = transmissionId,
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    },
+                    Content = new TransmissionContentDto
+                    {
+                        Title = new ContentValueDto
+                        {
+                            Value =
+                            [
+                                new LocalizationDto
+                                {
+                                    Value = "hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        },
+                        Summary = new ContentValueDto
+                        {
+                            Value =
+                            [
+                                new LocalizationDto
+                                {
+                                    Value = "hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        }
+                    }
+                });
+                x.Dto.Activities.Add(new ActivityDto
+                {
+                    Id = activityId,
+                    CreatedAt = firstCreatedAt,
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    }
+                });
+                x.Dto.Activities.Add(new ActivityDto
+                {
+                    Id = secondActivityId,
+                    CreatedAt = secondCreatedAt,
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    }
+                });
+            })
+            .AssertSuccess()
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Activities.Count(x =>
+                    x is { Type: DialogActivityType.Values.TransmissionOpened, TransmissionId: not null }
+                    && x.TransmissionId.Value == transmissionId).Should().Be(1);
+
+                x.Activities.First().CreatedAt.Should().Be(firstCreatedAt);
+            });
+    }
+
     public sealed record ValidUpdatedAtScenario(
         string DisplayName,
         DateTimeOffset? CreatedAt,
@@ -458,34 +535,40 @@ public class CreateDialogTests : ApplicationCollectionFixture
     private static ContentValueDto CreateInvalidHtml(string html) => new()
     {
         MediaType = MediaTypes.LegacyHtml,
-        Value = [new()
-        {
-            LanguageCode = "nb",
-            Value = html
-        }]
+        Value =
+        [
+            new()
+            {
+                LanguageCode = "nb",
+                Value = html
+            }
+        ]
     };
 
     private static ContentValueDto CreateTableHtml() => new()
     {
         MediaType = MediaTypes.LegacyHtml,
-        Value = [new()
-        {
-            LanguageCode = "nb",
-            Value = """
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>table head</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>tr</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    """
-        }]
+        Value =
+        [
+            new()
+            {
+                LanguageCode = "nb",
+                Value = """
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>table head</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>tr</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        """
+            }
+        ]
     };
 
     public sealed record HtmlContentScenario(
@@ -658,16 +741,14 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
-    public Task Can_Create_Dialog_With_Past_Dates_When_Admin_Scope(
-        DatesInPastScenario scenario) =>
+    public Task Can_Create_Dialog_With_Past_Dates_When_Admin_Scope(DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .AsAdminUser()
             .CreateSimpleDialog(scenario.ModifyCommand)
             .ExecuteAndAssert<CreateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
-    public Task Can_Create_Dialog_With_Past_Dates_When_Silent_Update(
-        DatesInPastScenario scenario) =>
+    public Task Can_Create_Dialog_With_Past_Dates_When_Silent_Update(DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, ctx) =>
             {
@@ -677,8 +758,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             .ExecuteAndAssert<CreateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
-    public Task Cannot_Create_Dialog_With_Past_Dates_Without_Silent_Update_Or_Admin_Scope(
-        DatesInPastScenario scenario) =>
+    public Task Cannot_Create_Dialog_With_Past_Dates_Without_Silent_Update_Or_Admin_Scope(DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog(scenario.ModifyCommand)
             .ExecuteAndAssert<DomainError>(x =>
@@ -750,8 +830,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(TransmissionsCountTestData))]
-    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(
-        TransmissionsCountScenario scenario) =>
+    public Task Creating_Dialogs_With_Transmissions_Should_Count_FromServiceOwnerTransmissionsCount_And_FromPartyTransmissionsCount_Correctly(TransmissionsCountScenario scenario) =>
         FlowBuilder.For(Application).CreateSimpleDialog(scenario.CreateDialog)
             .GetServiceOwnerDialog()
             .ExecuteAndAssert<DialogDto>(x =>
@@ -879,8 +958,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
-    public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
-        AddingEndUserTransmissionSentLabelScenario scenario) =>
+    public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(AddingEndUserTransmissionSentLabelScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x =>
@@ -890,13 +968,11 @@ public class CreateDialogTests : ApplicationCollectionFixture
             {
                 if (scenario.ShouldAddSentLabel)
                 {
-                    x.EndUserContext.SystemLabels.Should().ContainSingle(
-                        label => label == SystemLabel.Values.Sent);
+                    x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Sent);
                 }
                 else
                 {
-                    x.EndUserContext.SystemLabels.Should().NotContain(
-                        label => label == SystemLabel.Values.Sent);
+                    x.EndUserContext.SystemLabels.Should().NotContain(label => label == SystemLabel.Values.Sent);
                 }
             });
 
@@ -935,8 +1011,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     }
 
     [Theory, ClassData(typeof(SystemLabelOnDialogCreateTestData))]
-    public Task SystemLabel_On_Dialog_Create_Should_Be_Accepted_When_In_Default_DAB_Group(
-        SystemLabelOnDialogCreateScenario scenario) =>
+    public Task SystemLabel_On_Dialog_Create_Should_Be_Accepted_When_In_Default_DAB_Group(SystemLabelOnDialogCreateScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
                 x.Dto.SystemLabel = scenario.Label)
@@ -958,8 +1033,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
     [Theory]
     [InlineData(DialogStatusInput.New, DialogStatus.Values.NotApplicable)]
     [InlineData(DialogStatusInput.Sent, DialogStatus.Values.Awaiting)]
-    public Task Can_Create_Dialog_With_Deprecated_DialogStatus(
-        DialogStatusInput initialStatus, DialogStatus.Values expectedStatus) =>
+    public Task Can_Create_Dialog_With_Deprecated_DialogStatus(DialogStatusInput initialStatus, DialogStatus.Values expectedStatus) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.Status = initialStatus)
             .GetServiceOwnerDialog()
@@ -1021,14 +1095,14 @@ public class CreateDialogTests : ApplicationCollectionFixture
         return flowExecutor
             .CreateSimpleDialog(scenario.ModifyCommand)
             .ExecuteAndAssert(result =>
-        {
-            result.Should().BeOfType(
-                expectedType: scenario.ExpectedResultType,
-                because: result is ValidationError ve
-                    ? $"there should be no validation errors: {string.Join(", ", ve.Errors.Select(e => e.ErrorMessage))}"
-                    : "there should be validation errors"
+            {
+                result.Should().BeOfType(
+                    expectedType: scenario.ExpectedResultType,
+                    because: result is ValidationError ve
+                        ? $"there should be no validation errors: {string.Join(", ", ve.Errors.Select(e => e.ErrorMessage))}"
+                        : "there should be validation errors"
                 );
-        });
+            });
     }
 
     public sealed record DialogLengthScenario(
@@ -1109,8 +1183,7 @@ public class CreateDialogTests : ApplicationCollectionFixture
             string caseName,
             Action<CreateDialogCommand, string> applyValue,
             int maxLength,
-            Func<IFlowStep, IFlowStep>? modifyFlow = null
-        )
+            Func<IFlowStep, IFlowStep>? modifyFlow = null)
         {
             Add(new DialogLengthScenario(
                 DisplayName: $"Valid length for case {caseName}: {maxLength} chars",
@@ -1167,7 +1240,8 @@ public class CreateDialogTests : ApplicationCollectionFixture
             ActorType = ActorType.Values.PartyRepresentative,
             ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
         },
-        Description = [
+        Description =
+        [
             new LocalizationDto
             {
                 LanguageCode = "nb",

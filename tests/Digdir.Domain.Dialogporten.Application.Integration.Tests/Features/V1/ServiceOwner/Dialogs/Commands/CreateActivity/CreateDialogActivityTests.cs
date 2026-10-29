@@ -50,6 +50,85 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
     }
 
     [Fact]
+    public async Task Creating_Duplicate_TransmissionOpened_Activity_Is_Silently_Ignored()
+    {
+        var transmissionId = Guid.CreateVersion7();
+        var activityId = Guid.CreateVersion7();
+        var revision = Guid.Empty;
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Transmissions.Add(new TransmissionDto
+                {
+                    Id = transmissionId,
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    },
+                    Content = new TransmissionContentDto
+                    {
+                        Title = new ContentValueDto
+                        {
+                            Value =
+                            [
+                                new LocalizationDto
+                                {
+                                    Value = "hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        },
+                        Summary = new ContentValueDto
+                        {
+                            Value =
+                            [
+                                new LocalizationDto
+                                {
+                                    Value = "hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        }
+                    }
+                });
+                x.Dto.Activities.Add(new()
+                {
+                    Id = activityId,
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    }
+                });
+            })
+            .AssertResult<CreateDialogSuccess>(x => revision = x.Revision)
+            .CreateActivity((c, _) =>
+                c.Activity = new()
+                {
+                    Id = Guid.CreateVersion7(),
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    }
+                })
+            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(activityId))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Activities.Count(x =>
+                    x is { Type: DialogActivityType.Values.TransmissionOpened, TransmissionId: not null }
+                 && x.TransmissionId.Value == transmissionId).Should().Be(1);
+
+                x.Activities.First().Id.Should().Be(activityId);
+                x.Revision.Should().Be(revision);
+            });
+    }
+
+    [Fact]
     public Task Can_Create_Activity_On_Existing_Dialog_Without_Supplying_Id()
     {
         return FlowBuilder.For(Application)

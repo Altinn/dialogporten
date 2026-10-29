@@ -24,9 +24,14 @@ agentctl --version
 agentd --version
 
 echo "## container storage"
-# Fails with "'overlay' is not supported over overlayfs" when the storage configuration is missing.
-test "$(sudo podman info --format '{{.Store.GraphDriverName}}')" = overlay \
-    || fail "Podman cannot configure its overlay storage"
+# Without a mount program, Podman fails on the agent's overlayfs root with "'overlay' is not supported over
+# overlayfs". Podman itself cannot start in the unprivileged container this runs in, so check its configuration.
+storage=/etc/containers/storage.conf
+test "$(sed -n 's/^driver = "\(.*\)"$/\1/p' "$storage")" = overlay \
+    || fail "Podman's storage driver is not overlay"
+mount_program="$(sed -n 's/^mount_program = "\(.*\)"$/\1/p' "$storage")"
+test -n "$mount_program" && "$mount_program" --version >/dev/null \
+    || fail "Podman's overlay storage has no working mount program"
 
 echo "## timezone"
 case "$(date +%Z)" in

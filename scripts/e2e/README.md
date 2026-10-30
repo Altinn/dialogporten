@@ -38,7 +38,7 @@ The script loads `.env` from this folder by default. You can override by setting
 Default `.env` values in this folder:
 ```bash
 WEBAPI_ENVIRONMENT=Development
-DialogportenBaseUri=https://localhost
+DialogportenBaseUri=https://localhost/dialogporten
 WEBAPI_PORT=7215
 GRAPHQL_PORT=5180
 SERVICE_PORT=56843

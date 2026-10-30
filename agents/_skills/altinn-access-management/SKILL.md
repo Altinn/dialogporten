@@ -27,7 +27,7 @@ bash $S/am.sh parties 08844397713
 bash $S/am.sh parties 08844397713 310923044 | jq -c '{name, partyUuid, packages: (.packages|length), roles: .roles[:5], resources}'
 bash $S/am.sh decide 08844397713 310923044 urn:altinn:resource:ttd-dialogporten-automated-tests
 bash $S/am.sh decide 51551dd0-b9c5-4f4b-a4a2-9b7e3669b364 310057223 ttd-dialogporten-automated-tests
-bash $S/am.sh policy ttd-dialogporten-automated-tests-2
+bash $S/am.sh policy ttd-dialogporten-automated-tests
 ```
 
 What it should show in AT23, as of October 2026:
@@ -64,7 +64,7 @@ curl -s -X POST https://platform.at23.altinn.cloud/register/api/v1/dialogporten/
 `Data` takes `urn:altinn:person:identifier-no:<pid>`, `urn:altinn:organization:identifier-no:<orgNo>`,
 `urn:altinn:party:uuid:<uuid>` and `urn:altinn:systemuser:uuid:<uuid>`, several at once. Each answer has
 `partyType`, `personIdentifier` or `organizationIdentifier`, `partyUuid`, `partyId` and `displayName`, but no user
-ID.
+ID. `partyId` is null for a system user.
 
 ## Commands
 
@@ -102,7 +102,8 @@ The first two show the client delegation the E2E tests use. 08885399984 is dagli
 AT23 is shared with other teams, and Altinn Authorization's own tests depend on some of the same parties, so
 **confirm with the user before changing anything**. Say what you will change and why. None of the requests below
 has been run by this skill; their shapes come from `ClientDelegationController.cs` and `ConnectionsController.cs` in
-altinn-auth. Send them with `curl -X POST` and a token from `am.sh enduser-token <the administrator's pid>`.
+altinn-auth. Send them with `curl` and the method each names, `POST` or `DELETE`, and a token from
+`am.sh enduser-token <the administrator's pid>`. Client delegations are taken back with a `POST` to a `/delete` route.
 
 - **Client delegation** (as the firm's daglig leder, base `/accessmanagement/api/v2/enduser/clientdelegations`):
   - add an agent: `POST agents?party=<firmUuid>` with `{"personIdentifier":"<pid>","lastName":"<last name>"}`;

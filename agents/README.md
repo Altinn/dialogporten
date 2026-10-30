@@ -26,10 +26,11 @@ agentctl apply --wait
 ```
 
 Fill in `.env` before applying; [`minimal/.env.sample`](minimal/.env.sample) explains each value, and Git ignores the
-copy. Only your Git identity and a GitHub token are needed to build and run the non-E2E tests. The E2E tests also need
-the AT23 credentials the [E2E docs](../docs/E2E-Tests.md) list: the token generator user and password and the APIM
-subscription key stay on your machine, and the host puts them only into requests to their hosts. The Maskinporten
-client's JWK cannot stay outside, since the apps sign with it, so use a dedicated AT23 test client for it, or `none`.
+copy. Your Git identity, a GitHub token and the AT23 APIM subscription key are required: the local apps and the
+`altinn-access-management` skill call Altinn APIs in AT23 that answer 401 without the key. The E2E tests also need the
+AT23 credentials the [E2E docs](../docs/E2E-Tests.md) list. The token generator user and password and the subscription
+key stay on your machine, and the host puts them only into requests to their hosts. The Maskinporten client's JWK
+cannot stay outside, since the apps sign with it, so use a dedicated AT23 test client for it, or `none`.
 
 The agent works in its own clone. It cannot mount your checkout instead: agentctl refuses a bind mount that
 contains a `.env` file, and this repository tracks `.env` and `scripts/e2e/.env`.

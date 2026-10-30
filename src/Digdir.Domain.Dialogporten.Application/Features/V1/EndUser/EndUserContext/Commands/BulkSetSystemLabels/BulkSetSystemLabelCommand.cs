@@ -12,6 +12,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
+using static Digdir.Domain.Dialogporten.Domain.Actors.ActorType.Values;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Commands.BulkSetSystemLabels;
 
@@ -88,9 +89,9 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
             sources: request.Dto.Dialogs,
             destinationKeySelector: x => x.Id,
             sourceKeySelector: x => x.DialogId,
-            update: (sets, ct) => UpdateDialogs(sets,
+            update: (sets, _) => UpdateDialogs(sets,
                 request.Dto.AddLabels,
-                request.Dto.RemoveLabels, ct),
+                request.Dto.RemoveLabels),
             cancellationToken: cancellationToken);
 
         var saveResult = await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -138,18 +139,18 @@ internal sealed class BulkSetSystemLabelCommandHandler : IRequestHandler<BulkSet
         return (distinctParties, distinctServiceResources);
     }
 
-    private async Task UpdateDialogs(
+    private Task UpdateDialogs(
         IEnumerable<UpdateSet<DialogEntity, DialogRevisionDto>> updateSets,
         IEnumerable<SystemLabel.Values> addLabels,
-        IEnumerable<SystemLabel.Values> removeLabels,
-        CancellationToken cancellationToken)
+        IEnumerable<SystemLabel.Values> removeLabels)
     {
-        var userInfo = await _userRegistry.GetCurrentUserInformation(cancellationToken);
-        var performedBy = LabelAssignmentLogActorFactory.FromUserInformation(userInfo);
+        var userId = _userRegistry.GetCurrentUserId();
+        var performedBy = LabelAssignmentLogActorFactory.Create(PartyRepresentative, userId.ExternalIdWithPrefix);
         foreach (var (dto, entity) in updateSets)
         {
             entity.EndUserContext.UpdateSystemLabels(addLabels, removeLabels, performedBy);
             _unitOfWork.EnableConcurrencyCheck(entity.EndUserContext, dto.EndUserContextRevision);
         }
+        return Task.CompletedTask;
     }
 }

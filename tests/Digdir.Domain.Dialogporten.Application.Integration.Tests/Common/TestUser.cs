@@ -10,7 +10,7 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 
 public sealed class TestUser : IUser
 {
-    private static readonly ClaimsPrincipal DefaultPrincipal = TestUsers.FromDefault();
+    private static readonly ClaimsPrincipal DefaultPrincipal = TestUsers.FromDefaultPidUser();
 
     private ClaimsPrincipal? _override;
 
@@ -24,21 +24,22 @@ public sealed class TestUser : IUser
 internal static class TestUsers
 {
     public static string DefaultPid => "22834498646";
+    public static string DefaultOrg => "991825827";
     private static string DefaultEmail => "TEST@TEST.NO";
     public static string DefaultParty => NorwegianPersonIdentifier.PrefixWithSeparator + DefaultPid;
     public static string DefaultSystemUserId => "2e39badb-fc4e-4d25-ba77-5a9fe8afcae4";
     public static string DefaultSystemUserOrg => "999888777";
     public static string DefaultSystemUserUrn => "urn:altinn:systemuser:uuid:" + DefaultSystemUserId;
 
-    private const string DefaultConsumerClaim =
-        """
-        {
+    private static string DefaultConsumerClaim =>
+        $"""
+        {"{"}
             "authority": "iso6523-actorid-upis",
-            "ID": "0192:991825827"
-        }
+            "ID": "0192:{DefaultOrg}"
+        {"}"}
         """;
 
-    private static readonly Dictionary<string, string> Default = new()
+    private static readonly Dictionary<string, string> DefaultPidUser = new()
     {
         [ClaimTypes.Name] = "Integration Test User",
         [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaHigh,
@@ -48,10 +49,20 @@ internal static class TestUsers
         [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim
     };
 
-    public static ClaimsPrincipalBuilder FromDefault() => ClaimsPrincipalBuilder.From(Default);
+    private static readonly Dictionary<string, string> DefaultOrgUser = new()
+    {
+        [ClaimTypes.Name] = "Integration Test Org User",
+        [ClaimsPrincipalExtensions.IdportenAuthLevelClaim] = Constants.IdportenLoaHigh,
+        [ClaimsPrincipalExtensions.AltinnOrgClaim] = "ttd",
+        [ClaimTypes.NameIdentifier] = "integration-test-user",
+        [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim
+    };
+
+    public static ClaimsPrincipalBuilder FromDefaultPidUser() => ClaimsPrincipalBuilder.From(DefaultPidUser);
+    public static ClaimsPrincipalBuilder FromDefaultOrgUser() => ClaimsPrincipalBuilder.From(DefaultOrgUser);
 
     private static ClaimsPrincipalBuilder FromSelfIdentifiedUser() =>
-        ClaimsPrincipalBuilder.From(Default)
+        ClaimsPrincipalBuilder.From(DefaultPidUser)
             .RemoveClaim(ClaimsPrincipalExtensions.PidClaim)
             .WithClaim(ClaimsPrincipalExtensions.IdportenAuthLevelClaim, Constants.IdportenLoaLow)
             .WithClaim(ClaimTypes.Name, "SI and email test user");
@@ -59,7 +70,7 @@ internal static class TestUsers
     extension<TFlowStep>(TFlowStep flowStep) where TFlowStep : IFlowStep
     {
         public TFlowStep AsIntegrationTestUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
-            flowStep.AsUser(() => FromDefault()
+            flowStep.AsUser(() => FromDefaultPidUser()
                 .Configure(configure)
                 .Build());
 
@@ -71,14 +82,26 @@ internal static class TestUsers
                 .Build());
 
         public TFlowStep AsCorrespondenceUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
-            flowStep.AsUser(() => FromDefault()
+            flowStep.AsUser(() => FromDefaultPidUser()
                 .WithScope(AuthorizationScope.CorrespondenceScope)
                 .Configure(configure)
                 .Build());
 
         public TFlowStep AsAdminUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
-            flowStep.AsUser(() => FromDefault()
+            flowStep.AsUser(() => FromDefaultPidUser()
                 .WithScope(AuthorizationScope.ServiceOwnerAdminScope)
+                .Configure(configure)
+                .Build());
+
+        public TFlowStep AsServiceOwner(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromDefaultOrgUser()
+                .WithScope(AuthorizationScope.ServiceProvider)
+                .Configure(configure)
+                .Build());
+
+        public TFlowStep AsServiceOwnerOnBehalfOfPerson(Action<ClaimsPrincipalBuilder>? configure = null) =>
+            flowStep.AsUser(() => FromDefaultPidUser()
+                .WithScope(AuthorizationScope.ServiceProvider)
                 .Configure(configure)
                 .Build());
 
@@ -108,7 +131,7 @@ internal static class TestUsers
             });
 
         public TFlowStep AsChangeTransmissionUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
-            flowStep.AsUser(() => FromDefault()
+            flowStep.AsUser(() => FromDefaultPidUser()
                 .WithScope($"{AuthorizationScope.ServiceProvider} {AuthorizationScope.ServiceProviderChangeTransmissions}")
                 .Configure(configure)
                 .Build());

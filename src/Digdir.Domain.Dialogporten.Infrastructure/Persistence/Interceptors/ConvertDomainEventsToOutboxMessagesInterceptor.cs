@@ -1,5 +1,6 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Context;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.GraphQL;
@@ -17,6 +18,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
     private readonly ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> _logger;
     private readonly Lazy<IPublishEndpoint> _publishEndpoint;
     private readonly IApplicationContext _applicationContext;
+    private readonly IDomainEventPublisher _domainEventPublisher;
 
     private List<IDomainEvent> _domainEvents = [];
 
@@ -25,19 +27,22 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         Lazy<ITopicEventSender> topicEventSender,
         ILogger<ConvertDomainEventsToOutboxMessagesInterceptor> logger,
         Lazy<IPublishEndpoint> publishEndpoint,
-        IApplicationContext applicationContext)
+        IApplicationContext applicationContext,
+        IDomainEventPublisher domainEventPublisher)
     {
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(topicEventSender);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(publishEndpoint);
         ArgumentNullException.ThrowIfNull(applicationContext);
+        ArgumentNullException.ThrowIfNull(domainEventPublisher);
 
         _transactionTime = transactionTime;
         _topicEventSender = topicEventSender;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
         _applicationContext = applicationContext;
+        _domainEventPublisher = domainEventPublisher;
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -59,6 +64,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
                 x.Entity is IEventPublisher publisher
                     ? publisher.PopDomainEvents()
                     : [])
+            .Concat(_domainEventPublisher.PopDomainEvents())
             .Where(EventShouldBeIncluded)
             .ToList();
 
@@ -136,9 +142,9 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
         }
     }
 
-    // This is an optimization to include only include dialog create and update events when doing
+    // This is an optimization to include only include dialog create, update, seen and resync events when doing
     // silent updates, as these are (currently) the only events consumed that are not effectively no-ops. This avoids
     // flooding the message bus with events that are not used during migration or other bulk silent updates.
     private bool EventShouldBeIncluded(IDomainEvent domainEvent) =>
-        !_applicationContext.IsSilentUpdate() || domainEvent is DialogCreatedDomainEvent or DialogUpdatedDomainEvent or DialogSeenDomainEvent;
+        !_applicationContext.IsSilentUpdate() || domainEvent is DialogCreatedDomainEvent or DialogUpdatedDomainEvent or DialogSeenDomainEvent or ResyncActorNameEvent;
 }

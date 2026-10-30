@@ -51,6 +51,7 @@ public interface IDialogDbContext
     DbSet<LabelAssignmentLog> LabelAssignmentLogs { get; }
     DbSet<ResourcePolicyInformation> ResourcePolicyInformation { get; }
 
+    DbSet<Actor> Actor { get; }
     DbSet<ActorName> ActorName { get; }
     DbSet<AttachmentUrl> AttachmentUrls { get; }
     DbSet<DialogAttachment> DialogAttachments { get; }

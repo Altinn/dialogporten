@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
@@ -16,6 +17,11 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
+using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 using ActivityDto =
     Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.GetActivity.ActivityDto;
 
@@ -95,6 +101,7 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                 },
                 Description = []
             })
+            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(guid))
             .GetActivity()
             .ExecuteAndAssert<ActivityDto>(x =>
                 {
@@ -106,12 +113,228 @@ public class CreateDialogActivityTests(DialogApplication application) : Applicat
                     x.PerformedBy.Should().BeEquivalentTo(new ActorDto
                     {
                         ActorType = ActorType.Values.PartyRepresentative,
-                        ActorName = "Brando Sando",
+                        ActorName = "leif",
                         ActorId = "urn:altinn:person:legacy-selfidentified:leif"
                     });
                     x.Description.Should().BeNull();
                 }
             );
+    }
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Can_Create_Activity_With_PerformedBy_As_Org_When_Party_Name_Registry_Is_Down_And_Resync_Name_Afterwards(
+        string failHow
+    )
+    {
+        var guid = Guid.Parse("019c0f25-9759-70c5-8d9d-f03f336a0b6f");
+        return FlowBuilder.For(Application)
+            .AsServiceOwner()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .CreateActivity((c, _) => c.Activity = new CreateActivityDto
+            {
+                Id = guid,
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.DialogCreated,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}799461455"
+                },
+                Description = []
+            })
+            .AssertResult<CreateActivitySuccess>(x => x.ActivityId.Should().Be(guid))
+            .GetActivity()
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetActivity()
+            .ExecuteAndAssert<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"));
+    }
+
+    [Fact]
+    public Task Can_Resync_Actor_Name_For_The_Same_Actor_After_Repeated_Party_Name_Registry_Outages()
+    {
+        var firstActivityId = Guid.CreateVersion7();
+        var secondActivityId = Guid.CreateVersion7();
+        var actorId = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}238837014";
+
+        CreateActivityDto ActivityWithUnresolvedActor(Guid id)
+        {
+            return new()
+            {
+                Id = id,
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.DialogCreated,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = actorId
+                },
+                Description = []
+            };
+        }
+
+        return FlowBuilder.For(Application)
+            .AsServiceOwner()
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .ConfigurePartyNameRegistry(p =>
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError))
+            .CreateActivity((c, _) => c.Activity = ActivityWithUnresolvedActor(firstActivityId))
+            .AssertResult<CreateActivitySuccess>()
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetActivity(firstActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"))
+            // The second outage reuses the same null-name ActorName row as the first,
+            // so its resync event must not be deduplicated against the first one.
+            .ConfigurePartyNameRegistry(p =>
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError))
+            .CreateActivity((c, _) => c.Activity = ActivityWithUnresolvedActor(secondActivityId))
+            .AssertResult<CreateActivitySuccess>()
+            .GetActivity(secondActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetActivity(secondActivityId)
+            .ExecuteAndAssert<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"));
+    }
+
+    [Fact]
+    public Task Can_Create_Activity_For_Existing_Actor_After_Party_Name_Registry_Recovers_But_Before_The_First_Resync()
+    {
+        var firstActivityId = Guid.CreateVersion7();
+        var secondActivityId = Guid.CreateVersion7();
+        var actorId = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}238837014";
+
+        CreateActivityDto ActivityWithUnresolvedActor(Guid id)
+        {
+            return new()
+            {
+                Id = id,
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.DialogCreated,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = actorId
+                },
+                Description = []
+            };
+        }
+
+        return FlowBuilder.For(Application)
+            .AsServiceOwner()
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .ConfigurePartyNameRegistry(p =>
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError))
+            .CreateActivity((c, _) => c.Activity = ActivityWithUnresolvedActor(firstActivityId))
+            .AssertResult<CreateActivitySuccess>()
+            .GetActivity(firstActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().BeNull())
+            // The registry recovers, but the resync event for the null-name ActorName row has not been consumed yet
+            .ResetPartyNameRegistry()
+            .CreateActivity((c, _) => c.Activity = ActivityWithUnresolvedActor(secondActivityId))
+            .AssertResult<CreateActivitySuccess>()
+            .GetActivity(secondActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"))
+            .GetActivity(firstActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().BeNull())
+            // The resync must reuse the ActorName row created by the second activity instead of conflicting with it
+            .ConsumeEvents()
+            .GetActivity(firstActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"))
+            .GetActivity(secondActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"))
+            .ExecuteAsync();
+    }
+
+    [Fact]
+    public Task Can_Resync_Actor_Name_When_Unresolved_Actor_Is_Reused_Before_The_First_Resync()
+    {
+        var firstActivityId = Guid.CreateVersion7();
+        var secondActivityId = Guid.CreateVersion7();
+        var actorId = $"{NorwegianOrganizationIdentifier.PrefixWithSeparator}238837014";
+
+        CreateActivityDto ActivityWithUnresolvedActor(Guid id)
+        {
+            return new()
+            {
+                Id = id,
+                CreatedAt = new DateTimeOffset(2001, 1, 1, 1, 1, 1, TimeSpan.Zero),
+                ExtendedType = new Uri("https://altinn.no"),
+                Type = DialogActivityType.Values.DialogCreated,
+                TransmissionId = null,
+                PerformedBy = new ActorDto
+                {
+                    ActorType = ActorType.Values.PartyRepresentative,
+                    ActorName = null,
+                    ActorId = actorId
+                },
+                Description = []
+            };
+        }
+
+        return FlowBuilder.For(Application)
+            .AsServiceOwner()
+            .CreateSimpleDialog()
+            .AssertResult<CreateDialogSuccess>()
+            .ConfigurePartyNameRegistry(p =>
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError))
+            .CreateActivity((c, _) => c.Activity = ActivityWithUnresolvedActor(firstActivityId))
+            .AssertResult<CreateActivitySuccess>()
+            // The registry is still down and the first resync event has not been consumed yet,
+            // so the second activity must reuse the in-use null-name ActorName row
+            .CreateActivity((c, _) => c.Activity = ActivityWithUnresolvedActor(secondActivityId))
+            .AssertResult<CreateActivitySuccess>()
+            .GetActivity(firstActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().BeNull())
+            .GetActivity(secondActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetActivity(firstActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"))
+            .GetActivity(secondActivityId)
+            .AssertResult<ActivityDto>(x => x.PerformedBy.ActorName.Should().Be("Brando Sando"))
+            .ExecuteAsync();
     }
 
     [Fact]

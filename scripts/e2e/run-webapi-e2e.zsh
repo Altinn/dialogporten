@@ -263,7 +263,8 @@ export DialogportenBaseUri="${DialogportenBaseUri:-https://localhost/dialogporte
 export WebApiPort="${WEBAPI_PORT:-7215}" # Default port should not colide with default port of APIs
 export GraphQlPort="${GRAPHQL_PORT:-5180}"
 export ServicePort="${SERVICE_PORT:-56843}"
-export WebApiUrl="${DialogportenBaseUri}:${WebApiPort}"
+# Kestrel binds an origin without a path; the WebApi adds the /dialogporten path base itself.
+export WebApiUrl="$(sed -E 's#^([a-z]+://[^/]+).*#\1#' <<<"$DialogportenBaseUri"):${WebApiPort}"
 export GraphQlBaseUrl="http://localhost:${GraphQlPort}"
 export GraphQlUrl="${GraphQlBaseUrl}/graphql"
 export ServiceBaseUrl="http://localhost:${ServicePort}"

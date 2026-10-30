@@ -11,7 +11,8 @@
   you have and overwrites the Maskinporten client.
 - The E2E tests run against AT23. `TokenGeneratorUser` and `TokenGeneratorPassword` for the E2E tests and
   `Infrastructure__Altinn__SubscriptionKey` for the apps are in the environment as placeholders, which the host
-  replaces with the real values only in requests to their hosts. Never print, copy or persist them. When one of them
+  replaces with the real values only in requests to their hosts. Never print, copy or persist them, except into a
+  nested agent's `~/nested.env` as `improving.md` describes. When one of them
   or the Maskinporten client (`Infrastructure:Maskinporten:ClientId` in `dotnet user-secrets list --project
   src/Digdir.Domain.Dialogporten.WebApi`) is missing, the E2E tests cannot run here: say so in the pull request
   rather than working around it, such as with the `LocalDevelopment` switches.

@@ -241,7 +241,7 @@ public class DialogMappingExtensionsTests
                 Action = "read",
                 Url = new Uri("https://example.com/gui"),
                 Priority = DialogGuiActionPriority.Primary,
-                HttpMethod = HttpVerb.GET,
+                HttpMethod = HttpVerb.Get,
             },
         ],
         ApiActions =
@@ -250,7 +250,7 @@ public class DialogMappingExtensionsTests
             {
                 Id = Guid.NewGuid(),
                 Action = "read",
-                Endpoints = [new DialogApiActionEndpoint { Id = Guid.NewGuid(), Url = new Uri("https://example.com/api"), HttpMethod = HttpVerb.GET }],
+                Endpoints = [new DialogApiActionEndpoint { Id = Guid.NewGuid(), Url = new Uri("https://example.com/api"), HttpMethod = HttpVerb.Get }],
             },
         ],
         Activities =

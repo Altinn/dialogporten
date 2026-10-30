@@ -5,26 +5,26 @@ namespace Altinn.ApiClients.Dialogporten.EndUser.Features.V1.Enums;
 public enum DialogTransmissionType
 {
     [EnumMember(Value = @"Information")]
-    Information = 0,
+    Information = 1,
 
     [EnumMember(Value = @"Acceptance")]
-    Acceptance = 1,
+    Acceptance = 2,
 
     [EnumMember(Value = @"Rejection")]
-    Rejection = 2,
+    Rejection = 3,
 
     [EnumMember(Value = @"Request")]
-    Request = 3,
+    Request = 4,
 
     [EnumMember(Value = @"Alert")]
-    Alert = 4,
+    Alert = 5,
 
     [EnumMember(Value = @"Decision")]
-    Decision = 5,
+    Decision = 6,
 
     [EnumMember(Value = @"Submission")]
-    Submission = 6,
+    Submission = 7,
 
     [EnumMember(Value = @"Correction")]
-    Correction = 7,
+    Correction = 8,
 }

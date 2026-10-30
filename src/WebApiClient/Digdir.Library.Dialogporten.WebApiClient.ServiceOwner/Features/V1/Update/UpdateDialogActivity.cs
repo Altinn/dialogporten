@@ -31,7 +31,7 @@ public class UpdateDialogActivity
     /// </summary>
     [JsonPropertyName("type")]
     [JsonConverter(typeof(JsonStringEnumConverter<DialogActivityType>))]
-    public DialogActivityType Type { get; set; }
+    public required DialogActivityType Type { get; set; }
 
     /// <summary>
     /// If the activity is related to a particular transmission, this field will contain the transmission identifier.

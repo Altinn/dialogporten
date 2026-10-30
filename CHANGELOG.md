@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.126.0](https://github.com/Altinn/dialogporten/compare/v1.125.0...v1.126.0) (2026-10-30)
+
+
+### Features
+
+* **sdk:** SDKs enums 1-based instead of 0-based ([#4524](https://github.com/Altinn/dialogporten/issues/4524)) ([a4330ea](https://github.com/Altinn/dialogporten/commit/a4330eae94f6a0fc27e4564954b53fff54ce50b6))
+
+
+### Bug Fixes
+
+* **dialogs:** return 200 for API-only end user dialogs without content ([#4515](https://github.com/Altinn/dialogporten/issues/4515)) ([a11e9fd](https://github.com/Altinn/dialogporten/commit/a11e9fd628f7f77c8f9aeff193189b9c8d18ce9a))
+
+
+### Miscellaneous Chores
+
+* **db:** codify hand-tuned prod indexes, storage parameters and server settings ([#4466](https://github.com/Altinn/dialogporten/issues/4466)) ([fd73899](https://github.com/Altinn/dialogporten/commit/fd738998a33280604c34444915a0b2530b0cecfe))
+* **deps:** update azure/bicep-deploy action to v2.4.0 ([#4519](https://github.com/Altinn/dialogporten/issues/4519)) ([6fb58b5](https://github.com/Altinn/dialogporten/commit/6fb58b5085b067914733edaf0fc32e97471c67d7))
+* **deps:** update dependency altinn.authorization.abac to 0.3.0 ([#4520](https://github.com/Altinn/dialogporten/issues/4520)) ([8d2c16b](https://github.com/Altinn/dialogporten/commit/8d2c16b3e573f208e90df070b262a0c26384bf0d))
+* **deps:** update dependency messagepack to 3.1.12 ([#4517](https://github.com/Altinn/dialogporten/issues/4517)) ([737ddc5](https://github.com/Altinn/dialogporten/commit/737ddc531c199775dbb45f7f4d65a6e25a112a37))
+* **deps:** update grafana/grafana docker tag to v12.4.13 ([#4518](https://github.com/Altinn/dialogporten/issues/4518)) ([f8d6221](https://github.com/Altinn/dialogporten/commit/f8d6221555b515e7a0682f92af234818cee76082))
+* **deps:** update grafana/loki docker tag to v3.7.9 ([#4525](https://github.com/Altinn/dialogporten/issues/4525)) ([d4a18f8](https://github.com/Altinn/dialogporten/commit/d4a18f85bc00b57b97a33229cf9697947da0bbfb))
+* **deps:** update hotchocolate dependencies to 16.6.9 ([#4526](https://github.com/Altinn/dialogporten/issues/4526)) ([a879f19](https://github.com/Altinn/dialogporten/commit/a879f192aa7abc3e46dc1d6857848df3a0bed224))
+
 ## [1.125.0](https://github.com/Altinn/dialogporten/compare/v1.124.1...v1.125.0) (2026-10-22)
 
 

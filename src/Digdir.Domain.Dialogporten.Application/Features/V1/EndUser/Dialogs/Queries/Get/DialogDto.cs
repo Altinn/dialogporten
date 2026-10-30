@@ -365,9 +365,9 @@ public sealed class DialogTransmissionDto
     public bool IsOpened { get; set; }
 
     /// <summary>
-    /// The transmission unstructured text content.
+    /// The transmission unstructured text content. May be null for API-only transmissions, which are not required to have content.
     /// </summary>
-    public DialogTransmissionContentDto Content { get; set; } = null!;
+    public DialogTransmissionContentDto? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

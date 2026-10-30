@@ -25,7 +25,7 @@ internal static class EndUserDialogMappingExtensions
         ExpiresAt = source.ExpiresAt,
         IsApiOnly = source.IsApiOnly,
         Status = source.Status.ToDialogStatusInput(),
-        Content = ToContentDto(source.Content),
+        Content = source.Content?.ToContentDto(),
         Attachments = source.Attachments.Select(ToAttachmentDto).ToList(),
         Transmissions = source.Transmissions.Select(ToTransmissionDto).ToList(),
         GuiActions = source.GuiActions.Select(ToGuiActionDto).ToList(),
@@ -33,7 +33,7 @@ internal static class EndUserDialogMappingExtensions
         Activities = source.Activities.Select(ToActivityDto).ToList()
     };
 
-    private static Up.ContentDto? ToContentDto(Eu.ContentDto? source) => source is null ? null : new()
+    private static Up.ContentDto ToContentDto(this Eu.ContentDto source) => new()
     {
         Title = source.Title,
         Summary = source.Summary,
@@ -43,7 +43,7 @@ internal static class EndUserDialogMappingExtensions
         MainContentReference = source.MainContentReference
     };
 
-    private static Up.AttachmentDto ToAttachmentDto(Eu.DialogAttachmentDto source) => new()
+    private static Up.AttachmentDto ToAttachmentDto(this Eu.DialogAttachmentDto source) => new()
     {
         Id = source.Id,
         DisplayName = source.DisplayName,
@@ -52,7 +52,7 @@ internal static class EndUserDialogMappingExtensions
         ExpiresAt = source.ExpiresAt
     };
 
-    private static Up.AttachmentUrlDto ToAttachmentUrlDto(Eu.DialogAttachmentUrlDto source) => new()
+    private static Up.AttachmentUrlDto ToAttachmentUrlDto(this Eu.DialogAttachmentUrlDto source) => new()
     {
         Id = source.Id,
         Url = source.Url,
@@ -60,7 +60,7 @@ internal static class EndUserDialogMappingExtensions
         ConsumerType = source.ConsumerType
     };
 
-    private static Up.GuiActionDto ToGuiActionDto(Eu.DialogGuiActionDto source) => new()
+    private static Up.GuiActionDto ToGuiActionDto(this Eu.DialogGuiActionDto source) => new()
     {
         Id = source.Id,
         Action = source.Action,
@@ -73,7 +73,7 @@ internal static class EndUserDialogMappingExtensions
         Prompt = source.Prompt
     };
 
-    private static Up.ApiActionDto ToApiActionDto(Eu.DialogApiActionDto source) => new()
+    private static Up.ApiActionDto ToApiActionDto(this Eu.DialogApiActionDto source) => new()
     {
         Id = source.Id,
         Action = source.Action,
@@ -82,7 +82,7 @@ internal static class EndUserDialogMappingExtensions
         Endpoints = source.Endpoints.Select(ToApiActionEndpointDto).ToList()
     };
 
-    private static Up.ApiActionEndpointDto ToApiActionEndpointDto(Eu.DialogApiActionEndpointDto source) => new()
+    private static Up.ApiActionEndpointDto ToApiActionEndpointDto(this Eu.DialogApiActionEndpointDto source) => new()
     {
         Id = source.Id,
         Version = source.Version,
@@ -95,7 +95,7 @@ internal static class EndUserDialogMappingExtensions
         SunsetAt = source.SunsetAt
     };
 
-    private static Up.TransmissionDto ToTransmissionDto(Eu.DialogTransmissionDto source) => new()
+    private static Up.TransmissionDto ToTransmissionDto(this Eu.DialogTransmissionDto source) => new()
     {
         Id = source.Id,
         CreatedAt = source.CreatedAt,
@@ -104,20 +104,20 @@ internal static class EndUserDialogMappingExtensions
         ExternalReference = source.ExternalReference,
         RelatedTransmissionId = source.RelatedTransmissionId,
         Type = source.Type,
-        Sender = ToActorDto(source.Sender),
-        Content = ToTransmissionContentDto(source.Content),
+        Sender = source.Sender.ToActorDto(),
+        Content = source.Content?.ToTransmissionContentDto(),
         Attachments = source.Attachments.Select(ToTransmissionAttachmentDto).ToList(),
         NavigationalActions = source.NavigationalActions.Select(ToNavigationalActionDto).ToList()
     };
 
-    private static Up.TransmissionContentDto ToTransmissionContentDto(Eu.DialogTransmissionContentDto source) => new()
+    private static Up.TransmissionContentDto ToTransmissionContentDto(this Eu.DialogTransmissionContentDto source) => new()
     {
         Title = source.Title,
         Summary = source.Summary,
         ContentReference = source.ContentReference
     };
 
-    private static Up.TransmissionAttachmentDto ToTransmissionAttachmentDto(Eu.DialogTransmissionAttachmentDto source) => new()
+    private static Up.TransmissionAttachmentDto ToTransmissionAttachmentDto(this Eu.DialogTransmissionAttachmentDto source) => new()
     {
         Id = source.Id,
         DisplayName = source.DisplayName,
@@ -126,14 +126,14 @@ internal static class EndUserDialogMappingExtensions
         ExpiresAt = source.ExpiresAt
     };
 
-    private static Up.TransmissionAttachmentUrlDto ToTransmissionAttachmentUrlDto(Eu.DialogTransmissionAttachmentUrlDto source) => new()
+    private static Up.TransmissionAttachmentUrlDto ToTransmissionAttachmentUrlDto(this Eu.DialogTransmissionAttachmentUrlDto source) => new()
     {
         Url = source.Url,
         MediaType = source.MediaType,
         ConsumerType = source.ConsumerType
     };
 
-    private static Up.TransmissionNavigationalActionDto ToNavigationalActionDto(Eu.DialogTransmissionNavigationalActionDto source) => new()
+    private static Up.TransmissionNavigationalActionDto ToNavigationalActionDto(this Eu.DialogTransmissionNavigationalActionDto source) => new()
     {
         Id = source.Id,
         Title = source.Title,
@@ -141,18 +141,18 @@ internal static class EndUserDialogMappingExtensions
         ExpiresAt = source.ExpiresAt
     };
 
-    private static Up.ActivityDto ToActivityDto(Eu.DialogActivityDto source) => new()
+    private static Up.ActivityDto ToActivityDto(this Eu.DialogActivityDto source) => new()
     {
         Id = source.Id,
         CreatedAt = source.CreatedAt,
         ExtendedType = source.ExtendedType,
         Type = source.Type,
         TransmissionId = source.TransmissionId,
-        PerformedBy = ToActorDto(source.PerformedBy),
+        PerformedBy = source.PerformedBy.ToActorDto(),
         Description = source.Description
     };
 
-    private static SoActorDto ToActorDto(EuActorDto source) => new()
+    private static SoActorDto ToActorDto(this EuActorDto source) => new()
     {
         ActorType = source.ActorType,
         ActorName = source.ActorName,

@@ -1,6 +1,7 @@
 [Unit]
 Description=Prepare local Dialogporten development: HTTPS dev certificate, Ed25519 key pair and user secrets
-# After the clone, so its CPU-heavy first run of the SDK does not slow the clone and the harness checks at boot.
+# After the clone, so its CPU-heavy first run of the SDK does not slow the clone and the harness checks at boot. The
+# clone's unit is `Type=exec`, so this orders the unit only after the clone has started; the script waits for the rest.
 After=network-online.target agent-workspace-init.service
 Wants=network-online.target
 Before=multi-user.target

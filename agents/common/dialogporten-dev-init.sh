@@ -31,6 +31,19 @@ work="$(mktemp -d)"
 chown "$user:$user" "$work"
 trap 'rm -rf "$work"' EXIT
 
+# agent-workspace-init.service is `Type=exec`, so the unit's After= only orders this after the clone has started. Wait
+# while it runs, so that the repository's .env is there; a clone that failed or was not needed ends the wait as well.
+# Without systemd, as in the smoke test, there is no clone to wait for.
+remaining=600
+while systemctl is-active --quiet agent-workspace-init.service 2>/dev/null; do
+    if [ "$remaining" -eq 0 ]; then
+        echo "agent-dialogporten-dev-init: the workspace clone is still running after 10 minutes" >&2
+        break
+    fi
+    remaining=$((remaining - 1))
+    sleep 1
+done
+
 # The certificate lives in the agent's .NET store, and its public part in the system store that .NET's HttpClient,
 # curl and the E2E tests read.
 (cd "$work" && as_agent dotnet dev-certs https >/dev/null)

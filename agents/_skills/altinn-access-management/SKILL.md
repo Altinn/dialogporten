@@ -5,13 +5,15 @@ description: Inspect Altinn Authorization and Access Management state in AT23 (a
 
 # Altinn access state in AT23
 
-Dialogporten does not decide access itself. It asks Altinn Authorization for the end user's authorized parties,
-with their roles, access packages and resource delegations, and asks the decision point (PDP) about single
-dialogs. The E2E tests assume test data in AT23 that is documented in
-`tests/Digdir.Library.Dialogporten.E2E.Common/E2EConstants.cs`. When that data changes, tests fail with 403s,
-404s or searches that time out. `am.sh` next to this file reads that state the way Dialogporten does; run it with
-`bash`. It uses the `altinn-token-generator` skill's `token.sh` for tokens and needs
-`Infrastructure__Altinn__SubscriptionKey`, a placeholder the host fills in only for `platform.at23.altinn.cloud`.
+Dialogporten does not decide access itself. It asks Altinn Authorization for the end user's authorized parties, with
+their roles, access packages and resource delegations, and asks the decision point (PDP) about single dialogs. The
+E2E tests assume test data in AT23 that is documented in
+`tests/Digdir.Library.Dialogporten.E2E.Common/E2EConstants.cs`. When that data changes, tests fail with 403s, 404s
+or searches that time out. So do they when the local database's subject-resource mappings are empty, as this agent's
+instructions describe: check `select count(*) from "SubjectResource"` first. `am.sh` next to this file reads that
+state the way Dialogporten does; run it with `bash`. It uses the `altinn-token-generator` skill's `token.sh` for
+tokens and needs `Infrastructure__Altinn__SubscriptionKey`, a placeholder the host fills in only for
+`platform.at23.altinn.cloud`.
 
 Background: [Access management](https://docs.altinn.studio/en/authorization/what-do-you-get/accessmanagement/),
 and the code in [altinn-auth](https://github.com/Altinn/altinn-auth) under `src/apps/Altinn.AccessManagement`.

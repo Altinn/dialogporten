@@ -34,7 +34,7 @@
         <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.6.0" />
         <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack" Version="2.6.0" />
         <!-- Pin transitive MessagePack above the version NeueccMessagePack references, to pick up MessagePack security fixes. Remove once NeueccMessagePack's own MessagePack dependency is at or above the version pinned here. -->
-        <PackageReference Include="MessagePack" Version="3.1.11" />
+        <PackageReference Include="MessagePack" Version="3.1.12" />
     </ItemGroup>
 
     <ItemGroup>

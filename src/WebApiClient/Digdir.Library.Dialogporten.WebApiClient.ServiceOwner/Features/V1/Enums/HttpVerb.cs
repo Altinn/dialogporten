@@ -5,29 +5,29 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 public enum HttpVerb
 {
     [EnumMember(Value = @"GET")]
-    GET = 0,
+    Get = 1,
 
     [EnumMember(Value = @"POST")]
-    POST = 1,
+    Post = 2,
 
     [EnumMember(Value = @"PUT")]
-    PUT = 2,
+    Put = 3,
 
     [EnumMember(Value = @"PATCH")]
-    PATCH = 3,
+    Patch = 4,
 
     [EnumMember(Value = @"DELETE")]
-    DELETE = 4,
+    Delete = 5,
 
     [EnumMember(Value = @"HEAD")]
-    HEAD = 5,
+    Head = 6,
 
     [EnumMember(Value = @"OPTIONS")]
-    OPTIONS = 6,
+    Options = 7,
 
     [EnumMember(Value = @"TRACE")]
-    TRACE = 7,
+    Trace = 8,
 
     [EnumMember(Value = @"CONNECT")]
-    CONNECT = 8,
+    Connect = 9,
 }

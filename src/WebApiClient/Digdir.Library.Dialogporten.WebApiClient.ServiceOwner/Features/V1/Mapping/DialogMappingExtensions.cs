@@ -226,7 +226,7 @@ public static class DialogMappingExtensions
     // System label: pick the category label (Default/Bin/Archive) from the end-user context, defaulting to
     // Default. The obsolete top-level Dialog.SystemLabel is intentionally not used.
     private static SystemLabel ToSystemLabel(this DialogEndUserContext source) =>
-        source.SystemLabels?.FirstOrDefault(x => x is SystemLabel.Default or SystemLabel.Bin or SystemLabel.Archive)
+        source.SystemLabels?.Cast<SystemLabel?>().FirstOrDefault(x => x is SystemLabel.Default or SystemLabel.Bin or SystemLabel.Archive)
      ?? SystemLabel.Default;
 
     // Reconstruct the end-user context from the create system label. A missing label yields an empty label set

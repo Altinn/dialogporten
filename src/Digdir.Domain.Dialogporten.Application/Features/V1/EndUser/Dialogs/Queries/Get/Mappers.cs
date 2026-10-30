@@ -43,7 +43,7 @@ internal static class DialogMapExtensions
                 .SystemLabelId,
             IsApiOnly = source.IsApiOnly,
             HasUnopenedContent = source.HasUnopenedContent,
-            Content = source.Content.ToContentDto()!,
+            Content = source.Content.ToContentDto(),
             FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
             FromPartyTransmissionsCount = source.FromPartyTransmissionsCount,
             Attachments = source.Attachments.Select(a => a.ToDto()).ToList(),

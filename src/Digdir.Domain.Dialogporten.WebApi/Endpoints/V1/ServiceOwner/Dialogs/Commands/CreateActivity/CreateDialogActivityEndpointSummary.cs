@@ -16,6 +16,9 @@ public sealed class CreateDialogActivityEndpointSummary : Summary<CreateDialogAc
         Description = $"""
                        The activity is created with the given configuration.
 
+                       Creating an activity does not count as a content change, 
+                       so it leaves the end user's system labels untouched; a dialog in 'Bin' or 'Archive' stays there.
+
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;
 

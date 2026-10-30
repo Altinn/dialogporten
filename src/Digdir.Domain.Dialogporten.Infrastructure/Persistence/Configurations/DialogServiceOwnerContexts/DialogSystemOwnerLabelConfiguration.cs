@@ -13,5 +13,10 @@ internal sealed class DialogSystemOwnerLabelConfiguration : IEntityTypeConfigura
         builder.HasIndex(x => x.Value)
             .HasDatabaseName("IX_DialogServiceOwnerLabel_Value_Covering")
             .IncludeProperties(x => x.DialogServiceOwnerContextId);
+
+        // Redundant with the primary key prefix, but a fraction of its size; the planner prefers it
+        // for context lookups.
+        builder.HasIndex(x => x.DialogServiceOwnerContextId)
+            .HasDatabaseName("IX_DialogServiceOwnerLabel_ContextId");
     }
 }

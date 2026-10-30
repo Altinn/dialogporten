@@ -69,7 +69,7 @@ public class CreateDialogTransmission
     /// </summary>
     [JsonPropertyName("type")]
     [JsonConverter(typeof(JsonStringEnumConverter<DialogTransmissionType>))]
-    public DialogTransmissionType Type { get; set; }
+    public required DialogTransmissionType Type { get; set; }
 
     /// <summary>
     /// The actor that sent the transmission.

@@ -67,7 +67,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Actor");
 
-                    b.UseTphMappingStrategy();
+                    b
+                        .UseTphMappingStrategy()
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Actors.ActorName", b =>
@@ -162,7 +170,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Attachment");
 
-                    b.UseTphMappingStrategy();
+                    b
+                        .UseTphMappingStrategy()
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Attachments.AttachmentUrl", b =>
@@ -204,6 +220,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("ConsumerTypeId");
 
                     b.ToTable("AttachmentUrl");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Attachments.AttachmentUrlConsumerType", b =>
@@ -268,6 +293,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("DialogId"), new[] { "Id" });
 
                     b.ToTable("DialogEndUserContext");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.DialogEndUserContextSystemLabel", b =>
@@ -288,6 +322,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("SystemLabelId");
 
                     b.ToTable("DialogEndUserContextSystemLabel");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.LabelAssignmentLog", b =>
@@ -320,6 +363,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("ContextId");
 
                     b.ToTable("LabelAssignmentLog");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.SystemLabel", b =>
@@ -388,6 +440,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasKey("DialogId");
 
                     b.ToTable("DialogServiceOwnerContext");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogServiceOwnerContexts.Entities.DialogServiceOwnerLabel", b =>
@@ -406,12 +467,24 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("DialogServiceOwnerContextId", "Value");
 
+                    b.HasIndex("DialogServiceOwnerContextId")
+                        .HasDatabaseName("IX_DialogServiceOwnerLabel_ContextId");
+
                     b.HasIndex("Value")
                         .HasDatabaseName("IX_DialogServiceOwnerLabel_Value_Covering");
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Value"), new[] { "DialogServiceOwnerContextId" });
 
                     b.ToTable("DialogServiceOwnerLabel");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogApiAction", b =>
@@ -452,6 +525,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("DialogId");
 
                     b.ToTable("DialogApiAction");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogApiActionEndpoint", b =>
@@ -511,6 +593,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("HttpMethodId");
 
                     b.ToTable("DialogApiActionEndpoint");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiAction", b =>
@@ -565,6 +656,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("PriorityId");
 
                     b.ToTable("DialogGuiAction");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions.DialogGuiActionPriority", b =>
@@ -638,6 +738,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasAnnotation("Dialogporten:ReplacesIndex", "IX_DialogActivity_DialogId");
 
                     b.ToTable("DialogActivity");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities.DialogActivityType", b =>
@@ -849,6 +958,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("DialogContent");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Contents.DialogContentType", b =>
@@ -1079,7 +1197,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("Id")
                         .HasDatabaseName("IX_Dialog_Id_Covering");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Id"), new[] { "ServiceResource", "Deleted", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt", "ContentUpdatedAt" });
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Id"), new[] { "ServiceResource", "Deleted", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt", "ContentUpdatedAt", "SystemLabelsMask" });
 
                     b.HasIndex("ServiceResource");
 
@@ -1105,25 +1223,29 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("IX_Dialog_Party_ContentUpdatedAt_Id_Covering")
                         .HasFilter("\"Deleted\" = false");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource", "IsApiOnly", "StatusId", "Org", "VisibleFrom", "ExpiresAt" });
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ContentUpdatedAt", "Id"), new[] { "ServiceResource", "StatusId", "VisibleFrom", "ExpiresAt", "IsApiOnly", "SystemLabelsMask", "IsSeenSinceLastContentUpdate" });
 
                     b.HasIndex("Party", "CreatedAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+                        .IsDescending(false, true, true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "CreatedAt", "Id"), new[] { "ServiceResource" });
 
                     b.HasIndex("Party", "DueAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+                        .IsDescending(false, true, true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "DueAt", "Id"), new[] { "ServiceResource" });
 
                     b.HasIndex("Party", "UpdatedAt", "Id")
-                        .IsDescending(false, true, true)
-                        .HasAnnotation("Npgsql:CreatedConcurrently", true);
+                        .IsDescending(false, true, true);
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "UpdatedAt", "Id"), new[] { "ServiceResource" });
+
+                    b.HasIndex("ServiceResource", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Dialog_ServiceResource_ContentUpdatedAt_Id_NotDeleted")
+                        .HasFilter("\"Deleted\" = false");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ServiceResource", "ContentUpdatedAt", "Id"), new[] { "Party", "StatusId", "VisibleFrom", "ExpiresAt", "IsApiOnly", "SystemLabelsMask", "IsSeenSinceLastContentUpdate" });
 
                     b.HasIndex("Org", "Party", "ContentUpdatedAt", "Id")
                         .IsDescending(false, false, true, true);
@@ -1131,14 +1253,31 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("Org", "ServiceResource", "ContentUpdatedAt", "Id")
                         .IsDescending(false, false, true, true);
 
+                    b.HasIndex("Party", "ServiceResource", "ContentUpdatedAt", "Id")
+                        .IsDescending(false, false, true, true)
+                        .HasDatabaseName("IX_Dialog_Party_ServiceResource_ContentUpdatedAt_Id_NotDeleted")
+                        .HasFilter("\"Deleted\" = false");
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("Party", "ServiceResource", "ContentUpdatedAt", "Id"), new[] { "StatusId", "VisibleFrom", "ExpiresAt", "IsApiOnly", "SystemLabelsMask", "IsSeenSinceLastContentUpdate" });
+
                     b.HasIndex("ServiceResource", "Party", "ContentUpdatedAt", "Id")
                         .IsDescending(false, false, true, true)
                         .HasDatabaseName("IX_Dialog_ServiceResource_Party_ContentUpdatedAt_Id_NotDeleted")
                         .HasFilter("\"Deleted\" = false");
 
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ServiceResource", "Party", "ContentUpdatedAt", "Id"), new[] { "StatusId", "VisibleFrom", "ExpiresAt", "IsApiOnly", "SystemLabelsMask" });
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("ServiceResource", "Party", "ContentUpdatedAt", "Id"), new[] { "StatusId", "VisibleFrom", "ExpiresAt", "IsApiOnly", "SystemLabelsMask", "IsSeenSinceLastContentUpdate" });
 
                     b.ToTable("Dialog", (string)null);
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.01")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 5)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 2000)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.01")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000)
+                        .HasAnnotation("Npgsql:StorageParameter:parallel_workers", 4);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogSearchTag", b =>
@@ -1166,6 +1305,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasIndex("DialogId");
 
                     b.ToTable("DialogSearchTag");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogSeenLog", b =>
@@ -1191,11 +1339,21 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DialogId");
-
                     b.HasIndex("EndUserTypeId");
 
+                    b.HasIndex("DialogId", "CreatedAt")
+                        .HasDatabaseName("IX_DialogSeenLog_DialogId_CreatedAt");
+
                     b.ToTable("DialogSeenLog");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.DialogStatus", b =>
@@ -1338,6 +1496,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("DialogTransmissionContent");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.Contents.DialogTransmissionContentType", b =>
@@ -1441,6 +1608,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                         .HasFilter("\"IdempotentKey\" is not null");
 
                     b.ToTable("DialogTransmission");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions.DialogTransmissionNavigationalAction", b =>
@@ -1609,6 +1785,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.HasKey("LocalizationSetId", "LanguageCode");
 
                     b.ToTable("Localization");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.Localizations.LocalizationSet", b =>
@@ -1629,7 +1814,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("LocalizationSet");
 
-                    b.UseTphMappingStrategy();
+                    b
+                        .UseTphMappingStrategy()
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 2)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 200)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.005")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 1000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation.ResourcePolicyInformation", b =>
@@ -1724,6 +1917,15 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Party", "SearchVector"), "GIN");
 
                     b.ToTable("DialogSearch", "search");
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", "0.01")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 20)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 300)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", "0.05")
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 50000);
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Infrastructure.Persistence.Configurations.Dialogs.Search.Iso639TsVectorMap", b =>
@@ -2040,17 +2242,31 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("SequenceNumber");
 
-                    b.HasIndex("EnqueueTime");
+                    b.HasIndex("EnqueueTime")
+                        .HasAnnotation("Npgsql:StorageParameter:fillfactor", 70);
 
-                    b.HasIndex("ExpirationTime");
+                    b.HasIndex("ExpirationTime")
+                        .HasAnnotation("Npgsql:StorageParameter:fillfactor", 70);
 
                     b.HasIndex("OutboxId", "SequenceNumber")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasAnnotation("Npgsql:StorageParameter:fillfactor", 70);
 
                     b.HasIndex("InboxMessageId", "InboxConsumerId", "SequenceNumber")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasAnnotation("Npgsql:StorageParameter:fillfactor", 70);
 
                     b.ToTable("MassTransitOutboxMessage", (string)null);
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", 0)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 0)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 1000)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", 0)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 2000)
+                        .HasAnnotation("Npgsql:StorageParameter:vacuum_index_cleanup", "on");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxState", b =>
@@ -2078,9 +2294,20 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 
                     b.HasKey("OutboxId");
 
-                    b.HasIndex("Created");
+                    b.HasIndex("Created")
+                        .HasAnnotation("Npgsql:StorageParameter:fillfactor", 70);
 
                     b.ToTable("MassTransitOutboxState", (string)null);
+
+                    b
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_scale_factor", 0)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_analyze_threshold", 500)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_enabled", true)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_delay", 0)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_cost_limit", 1000)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_scale_factor", 0)
+                        .HasAnnotation("Npgsql:StorageParameter:autovacuum_vacuum_threshold", 2000)
+                        .HasAnnotation("Npgsql:StorageParameter:vacuum_index_cleanup", "on");
                 });
 
             modelBuilder.Entity("Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities.LabelAssignmentLogActor", b =>

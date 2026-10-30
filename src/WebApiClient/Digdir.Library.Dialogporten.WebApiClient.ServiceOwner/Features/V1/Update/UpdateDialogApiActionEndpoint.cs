@@ -28,7 +28,7 @@ public class UpdateDialogApiActionEndpoint
     /// </summary>
     [JsonPropertyName("httpMethod")]
     [JsonConverter(typeof(JsonStringEnumConverter<HttpVerb>))]
-    public HttpVerb HttpMethod { get; set; }
+    public required HttpVerb HttpMethod { get; set; }
 
     /// <summary>
     /// Link to documentation for the endpoint, providing documentation for integrators. Should be a URL to a

@@ -156,9 +156,9 @@ public sealed class DialogDto
     public bool HasUnopenedContent { get; set; }
 
     /// <summary>
-    /// The dialog unstructured text content.
+    /// The dialog unstructured text content. May be null for API-only dialogs, which are not required to have content.
     /// </summary>
-    public ContentDto Content { get; set; } = null!;
+    public ContentDto? Content { get; set; }
 
     /// <summary>
     /// The dialog token. May be used (if supported) against external URLs referred to in this dialog's apiActions,

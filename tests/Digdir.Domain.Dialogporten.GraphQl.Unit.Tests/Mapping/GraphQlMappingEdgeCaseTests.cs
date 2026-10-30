@@ -79,13 +79,25 @@ public sealed class GraphQlMappingEdgeCaseTests
         return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
     }
 
+    [Fact]
+    public Task Dialog_Null_Content()
+    {
+        // API-only dialogs are not required to have content, so the end-user Get DTO maps a
+        // contentless dialog to a null Content. The dialogById mapper must not throw.
+        var source = ObjectFiller.Fill<Get.DialogDto>();
+        source.Content = null;
+        var result = Model.DialogByIdMapExtensions.ToDialog(source);
+        result.Content.Should().BeNull();
+        return Verify(result).DontIgnoreEmptyCollections().UseDirectory("Snapshots");
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public Task Dialog_Null_Optional_Content_And_Null_Or_Empty_Collections(bool empty)
     {
         var source = ObjectFiller.Fill<Get.DialogDto>();
-        source.Content.Summary = null;
+        source.Content!.Summary = null;
         source.Content.SenderName = null;
         source.Content.AdditionalInfo = null;
         source.Content.ExtendedStatus = null;

@@ -63,6 +63,7 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
+                x.Content.Should().NotBeNull();
                 x.Content.MainContentReference.Should().BeEquivalentTo(
                     new ContentValueDto
                     {
@@ -91,13 +92,30 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             });
 
     [Fact]
+    public Task Get_Should_Return_ApiOnly_Dialog_Without_Content() =>
+        // API-only dialogs are not required to have content. The handler must not throw
+        // when content is missing for such a dialog. Regression test for NullReferenceException.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.IsApiOnly = true;
+                x.Dto.Content = null;
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.IsApiOnly.Should().BeTrue();
+                x.Content.Should().BeNull();
+            });
+
+    [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference_When_No_Read_Access_To_Main_Resource() =>
         FlowBuilder.For(Application, ConfigureWriteOnlyAuthorization)
             .CreateSimpleDialog((x, _) => x.AddMainContentReference())
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
             {
-                x.Content.MainContentReference!.IsAuthorized.Should().BeFalse();
+                x.Content!.MainContentReference!.IsAuthorized.Should().BeFalse();
                 x.Content.MainContentReference!.Value.Should().AllSatisfy(x =>
                     x.Value.Should().Be(Constants.UnauthorizedUri.ToString()));
             });

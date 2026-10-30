@@ -40,6 +40,32 @@ param appConfigurationSku = {
 param appInsightsSku = {
   name: 'PerGB2018'
 }
+
+param appInsightsWorkspaceTransform = {
+  // Preserve the existing production DCR and its destination alias when adopting it into IaC.
+  name: 'FIlter-GraphQL-Subscriptions'
+  destinationName: '67c55f8fa47c440e9e7024780b1b6cd2'
+  transformations: [
+    {
+      table: 'AppExceptions'
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppExceptions.kql')
+    }
+    {
+      table: 'AppRequests'
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppRequests.kql')
+    }
+    {
+      table: 'AppTraces'
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppTraces.kql')
+    }
+    {
+      table: 'AppDependencies'
+      // Exclude the resource-policy sync job from URL-based names to limit cardinality.
+      transformKql: loadTextContent('./workspaceTransforms/prod/AppDependencies.kql')
+    }
+  ]
+}
+
 param postgresConfiguration = {
   serverNameStem: 'postgres2'
   version: '18'
@@ -56,6 +82,16 @@ param postgresConfiguration = {
   enableIndexTuning: false
   enableQueryPerformanceInsight: false
   enableTrackIoTiming: true
+  // Diagnostic and maintenance extensions installed by hand; allow-listed so they survive deploys.
+  additionalExtensions: [
+    'HYPOPG'
+    'PAGEINSPECT'
+    'PG_HINT_PLAN'
+    'PG_REPACK'
+    'PG_VISIBILITY'
+    'PGAUDIT'
+    'PGSTATTUPLE'
+  ]
   additionalServerConfigurations: [
     {
       name: 'logfiles.retention_days'
@@ -105,6 +141,60 @@ param postgresConfiguration = {
       name: 'vacuum_cost_limit'
       value: '10000'
     }
+    // Freeze and wraparound tuning. The static
+    // autovacuum_*freeze_max_age counterparts are in staticServerConfigurations.
+    {
+      name: 'vacuum_freeze_min_age'
+      value: '100000000'
+    }
+    {
+      name: 'vacuum_freeze_table_age'
+      value: '800000000'
+    }
+    {
+      name: 'vacuum_multixact_freeze_min_age'
+      value: '10000000'
+    }
+    {
+      name: 'vacuum_multixact_freeze_table_age'
+      value: '600000000'
+    }
+    {
+      name: 'vacuum_failsafe_age'
+      value: '1500000000'
+    }
+    {
+      name: 'vacuum_multixact_failsafe_age'
+      value: '1300000000'
+    }
+    {
+      name: 'log_autovacuum_min_duration'
+      value: '20000'
+    }
+    // Query Store, capturing top-level statements only. If its overhead ever becomes a concern,
+    // set pg_qs.query_capture_mode to none (dynamic, no restart); that also disables
+    // pgms_wait_sampling. Set directly rather than through enableQueryPerformanceInsight,
+    // which would set pg_qs.query_capture_mode to all.
+    {
+      name: 'pg_qs.query_capture_mode'
+      value: 'top'
+    }
+    {
+      name: 'pg_qs.store_query_plans'
+      value: 'on'
+    }
+    {
+      name: 'pg_qs.max_plan_size'
+      value: '10000'
+    }
+    {
+      name: 'pg_qs.max_query_text_length'
+      value: '10000'
+    }
+    {
+      name: 'pgms_wait_sampling.query_capture_mode'
+      value: 'all'
+    }
   ]
   applyStaticServerConfigurations: false
   staticServerConfigurations: [
@@ -118,7 +208,7 @@ param postgresConfiguration = {
     }
     {
       name: 'shared_preload_libraries'
-      value: 'pg_cron,pg_stat_statements,pg_hint_plan,auto_explain,pgaudit,pg_squeeze'
+      value: 'pg_cron,pg_stat_statements,auto_explain,pg_squeeze,pgaudit,pg_hint_plan'
     }
     {
       name: 'subtransaction_buffers'
@@ -127,6 +217,22 @@ param postgresConfiguration = {
     {
       name: 'transaction_buffers'
       value: '1024'
+    }
+    {
+      name: 'autovacuum_freeze_max_age'
+      value: '1000000000'
+    }
+    {
+      name: 'autovacuum_multixact_freeze_max_age'
+      value: '800000000'
+    }
+    {
+      name: 'multixact_member_buffers'
+      value: '512'
+    }
+    {
+      name: 'multixact_offset_buffers'
+      value: '256'
     }
   ]
   backupRetentionDays: 32

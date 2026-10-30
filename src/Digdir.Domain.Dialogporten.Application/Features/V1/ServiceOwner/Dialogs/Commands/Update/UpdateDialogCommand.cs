@@ -217,7 +217,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         var serviceResourceInformation = await _resourceRegistry.GetResourceInformation(dialog.ServiceResource, cancellationToken);
         dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
 
-        if (!request.IsSilentUpdate)
+        // Only reset the end user's system labels to Default when the change counts as a content update
+        if (!request.IsSilentUpdate && await _db.HasContentChanges(dialog, cancellationToken))
         {
             _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);
         }

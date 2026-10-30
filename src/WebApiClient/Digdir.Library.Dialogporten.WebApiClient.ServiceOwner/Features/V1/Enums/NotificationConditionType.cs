@@ -5,8 +5,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 public enum NotificationConditionType
 {
     [EnumMember(Value = @"NotExists")]
-    NotExists = 0,
+    NotExists = 1,
 
     [EnumMember(Value = @"Exists")]
-    Exists = 1,
+    Exists = 2,
 }

@@ -187,7 +187,7 @@ public class AuthorizationContextMappingExtensionsTests
                 Id = Guid.NewGuid(),
                 Url = new Uri("https://example.com/gui"),
                 Priority = DialogGuiActionPriority.Primary,
-                HttpMethod = HttpVerb.GET,
+                HttpMethod = HttpVerb.Get,
                 AuthorizationContext = Context(),
             },
         ],
@@ -197,7 +197,7 @@ public class AuthorizationContextMappingExtensionsTests
             {
                 Id = Guid.NewGuid(),
                 AuthorizationContext = Context(),
-                Endpoints = [new DialogApiActionEndpoint { Id = Guid.NewGuid(), Url = new Uri("https://example.com/api"), HttpMethod = HttpVerb.GET }],
+                Endpoints = [new DialogApiActionEndpoint { Id = Guid.NewGuid(), Url = new Uri("https://example.com/api"), HttpMethod = HttpVerb.Get }],
             },
         ],
     };

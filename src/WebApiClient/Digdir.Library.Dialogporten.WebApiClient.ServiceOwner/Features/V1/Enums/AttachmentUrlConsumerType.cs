@@ -5,8 +5,8 @@ namespace Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 public enum AttachmentUrlConsumerType
 {
     [EnumMember(Value = @"Gui")]
-    Gui = 0,
+    Gui = 1,
 
     [EnumMember(Value = @"Api")]
-    Api = 1,
+    Api = 2,
 }

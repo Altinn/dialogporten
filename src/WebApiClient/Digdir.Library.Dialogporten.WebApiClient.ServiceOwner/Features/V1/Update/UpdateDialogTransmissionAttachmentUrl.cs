@@ -22,5 +22,5 @@ public class UpdateDialogTransmissionAttachmentUrl
     /// </summary>
     [JsonPropertyName("consumerType")]
     [JsonConverter(typeof(JsonStringEnumConverter<AttachmentUrlConsumerType>))]
-    public AttachmentUrlConsumerType ConsumerType { get; set; }
+    public required AttachmentUrlConsumerType ConsumerType { get; set; }
 }

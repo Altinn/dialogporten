@@ -16,6 +16,11 @@ public sealed class UpdateDialogEndpointSummary : Summary<UpdateDialogEndpoint>
         Description = $"""
                        Replaces a given dialog with the supplied model.
 
+                       If the update changes the dialog's content (transmissions, content, attachments, GUI/API actions, status or extended status), 
+                       any end user system label of 'Bin' or 'Archive' is reset to 'Default', moving the dialog back to the inbox. 
+                       Changes to other fields leave the end user's system labels untouched. 
+                       This reset is suppressed for silent updates.
+
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;
         ResponseHeaders = [HttpResponseHeaderExamples.NewDialogETagHeader(Status204NoContent)];

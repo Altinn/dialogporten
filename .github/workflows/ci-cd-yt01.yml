@@ -108,7 +108,9 @@ jobs:
     with:
       environment: yt01
       version: ${{ needs.resolve-version.outputs.version }}
-      runMigration: false # DB may be off due to scale-to-zero, run migrations manually
+      # Runs on every deploy: the change-detection base (the last deployed apps version) does not prove
+      # the yt01 schema is current, and the migration bundle applies only pending migrations.
+      runMigration: true
       ref: "refs/tags/v${{ needs.resolve-version.outputs.version }}"
 
   update-manifests:

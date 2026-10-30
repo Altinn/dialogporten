@@ -100,6 +100,14 @@ public interface IDialogDbContext
         where TEntity : class, IIdentifiableEntity;
 
     /// <summary>
+    /// Determines whether the currently tracked changes to <paramref name="dialog"/> count as a content
+    /// change, using the same rule that drives <see cref="DialogEntity.ContentUpdatedAt"/>
+    /// (<see cref="DialogEntity.ContentHasChanged"/>). Intended to be called before saving so callers can
+    /// align behaviour with the content-change decision without duplicating the rule.
+    /// </summary>
+    Task<bool> HasContentChanges(DialogEntity dialog, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Only use this for split queries where data consistency is critical.
     /// For all other use cases, use IUnitOfWork.BeginTransactionAsync.
     /// Wraps the query in a transaction with isolation level Repeatable Read.

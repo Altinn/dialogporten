@@ -70,6 +70,10 @@ param appConfigurationSku AppConfigurationSku
 import { Sku as AppInsightsSku } from '../modules/applicationInsights/create.bicep'
 param appInsightsSku AppInsightsSku
 
+import { WorkspaceTransformConfiguration } from '../modules/applicationInsights/workspaceTransforms.bicep'
+@description('Optional ingestion-time transformations for the Application Insights workspace')
+param appInsightsWorkspaceTransform WorkspaceTransformConfiguration?
+
 import { Sku as PostgresSku } from '../modules/postgreSql/create.bicep'
 import { StorageConfiguration as PostgresStorageConfig } from '../modules/postgreSql/create.bicep'
 import { HighAvailabilityConfiguration as PostgresHighAvailabilityConfig } from '../modules/postgreSql/create.bicep'
@@ -83,6 +87,7 @@ param postgresConfiguration {
   enableIndexTuning: bool
   enableQueryPerformanceInsight: bool
   enableTrackIoTiming: bool?
+  additionalExtensions: string[]?
   additionalServerConfigurations: PostgresServerConfiguration[]?
   staticServerConfigurations: PostgresServerConfiguration[]?
   applyStaticServerConfigurations: bool?
@@ -159,6 +164,7 @@ module appInsights '../modules/applicationInsights/create.bicep' = {
     sku: appInsightsSku
     tags: tags
     immediatePurgeDataOn30Days: appInsightsPurgeDataOn30Days
+    workspaceTransform: appInsightsWorkspaceTransform
   }
 }
 
@@ -266,6 +272,7 @@ module postgresql '../modules/postgreSql/create.bicep' = {
     enableIndexTuning: postgresConfiguration.enableIndexTuning
     enableQueryPerformanceInsight: postgresConfiguration.enableQueryPerformanceInsight
     enableTrackIoTiming: postgresConfiguration.?enableTrackIoTiming ?? false
+    additionalExtensions: postgresConfiguration.?additionalExtensions ?? []
     additionalServerConfigurations: postgresConfiguration.?additionalServerConfigurations ?? []
     staticServerConfigurations: postgresConfiguration.?staticServerConfigurations ?? []
     applyStaticServerConfigurations: postgresConfiguration.?applyStaticServerConfigurations ?? false

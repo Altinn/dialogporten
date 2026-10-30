@@ -94,6 +94,21 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         newActivity.Id = newActivity.EnsureId();
         newActivity.DialogId = dialog.Id;
 
+        // Return existing activity if it already exists
+        if (newActivity is { TypeId: DialogActivityType.Values.TransmissionOpened, TransmissionId: { } transmissionId })
+        {
+            var existingActivity = await _db.DialogActivities
+                .Where(x => x.DialogId == dialog.Id
+                    && x.TypeId == DialogActivityType.Values.TransmissionOpened
+                    && x.TransmissionId == transmissionId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (existingActivity is not null)
+            {
+                return new CreateActivitySuccess(dialog.Revision, existingActivity.Id);
+            }
+        }
+
         var activityTypeForbidden = ValidateActivityTypeAuthorization(newActivity);
         if (activityTypeForbidden is not null)
         {

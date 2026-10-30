@@ -46,6 +46,8 @@ public sealed class PatchDialogsController : ControllerBase
     /// Patches a dialog aggregate with a RFC6902 JSON Patch document. The patch document must be a JSON array of RFC6902 operations.
     /// See [https://tools.ietf.org/html/rfc6902](https://tools.ietf.org/html/rfc6902) for more information.
     ///
+    /// A transmission can only be opened once, so only the first 'TransmissionOpened' activity per transmission is stored. Any 'TransmissionOpened' activity referencing a transmission that already has one, either on the dialog or earlier in the same request, is silently skipped regardless of who performed it. Skipped activities are still validated, and their ids are not stored. Other changes in the request are applied as normal.
+    ///
     /// Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.
     /// </remarks>
     /// <response code="204">Patch was successfully applied.</response>

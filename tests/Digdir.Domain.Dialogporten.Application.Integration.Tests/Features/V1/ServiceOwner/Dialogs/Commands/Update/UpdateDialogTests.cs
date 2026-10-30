@@ -88,6 +88,84 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public async Task UpdateDialogCommand_Should_Silently_Ignore_Duplicate_TransmissionOpened_Activities()
+    {
+        var transmissionId = Guid.CreateVersion7();
+        var activityId = Guid.CreateVersion7();
+        await FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Transmissions.Add(new()
+                {
+                    Id = transmissionId,
+                    Type = DialogTransmissionType.Values.Information,
+                    Sender = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    },
+                    Content = new()
+                    {
+                        Title = new ContentValueDto
+                        {
+                            Value =
+                            [
+                                new LocalizationDto
+                                {
+                                    Value = "hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        },
+                        Summary = new ContentValueDto
+                        {
+                            Value =
+                            [
+                                new LocalizationDto
+                                {
+                                    Value = "hei",
+                                    LanguageCode = "nb"
+                                }
+                            ]
+                        }
+                    }
+                });
+                x.Dto.Activities.Add(new()
+                {
+                    Id = activityId,
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    }
+                });
+            })
+            .AssertResult<CreateDialogSuccess>()
+            .UpdateDialog(x =>
+            {
+                x.Dto.Activities.Add(new()
+                {
+                    Type = DialogActivityType.Values.TransmissionOpened,
+                    TransmissionId = transmissionId,
+                    PerformedBy = new ActorDto
+                    {
+                        ActorType = ActorType.Values.ServiceOwner
+                    }
+
+                });
+            })
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.Activities.Count(x =>
+                    x is { Type: DialogActivityType.Values.TransmissionOpened, TransmissionId: not null }
+                 && x.TransmissionId.Value == transmissionId).Should().Be(1);
+
+                x.Activities.First().Id.Should().Be(activityId);
+            });
+    }
+
+    [Fact]
     public async Task UpdateDialogCommand_Should_Not_Set_SystemLabel_If_IsSilentUpdate_Is_Set()
     {
         var expectedSystemLabel = SystemLabel.Values.Bin;
@@ -151,8 +229,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Theory, ClassData(typeof(NonContentUpdateScenarioTestData))]
-    public Task UpdateDialogCommand_Should_Keep_SystemLabel_When_Only_NonContent_Fields_Change(
-        SystemLabelResetScenario scenario) =>
+    public Task UpdateDialogCommand_Should_Keep_SystemLabel_When_Only_NonContent_Fields_Change(SystemLabelResetScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Bin)
             .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
@@ -164,8 +241,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             });
 
     [Theory, ClassData(typeof(ContentUpdateScenarioTestData))]
-    public Task UpdateDialogCommand_Should_Move_To_Default_When_Content_Changes(
-        SystemLabelResetScenario scenario) =>
+    public Task UpdateDialogCommand_Should_Move_To_Default_When_Content_Changes(SystemLabelResetScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Archive)
             .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
@@ -177,8 +253,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             });
 
     [Theory, ClassData(typeof(ContentUpdateScenarioTestData))]
-    public Task UpdateDialogCommand_Should_Keep_SystemLabel_On_Content_Change_When_Silent(
-        SystemLabelResetScenario scenario) =>
+    public Task UpdateDialogCommand_Should_Keep_SystemLabel_On_Content_Change_When_Silent(SystemLabelResetScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) => x.Dto.SystemLabel = SystemLabel.Values.Archive)
             .AssertSuccessAndUpdateDialog(x =>
@@ -246,8 +321,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
-    public Task Can_Update_Dialog_With_Past_Dates_When_Admin_Scope(
-        DatesInPastScenario scenario) =>
+    public Task Can_Update_Dialog_With_Past_Dates_When_Admin_Scope(DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .AsAdminUser()
@@ -255,8 +329,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
-    public Task Can_Update_Dialog_With_Past_Dates_When_Silent_Update(
-        DatesInPastScenario scenario) =>
+    public Task Can_Update_Dialog_With_Past_Dates_When_Silent_Update(DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .UpdateDialog(x =>
@@ -267,8 +340,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             .ExecuteAndAssert<UpdateDialogSuccess>();
 
     [Theory, ClassData(typeof(DatesInPastTestData))]
-    public Task Cannot_Update_Dialog_With_Past_Dates_Without_Silent_Update(
-        DatesInPastScenario scenario) =>
+    public Task Cannot_Update_Dialog_With_Past_Dates_Without_Silent_Update(DatesInPastScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .UpdateDialog(scenario.UpdateDialog)
@@ -429,8 +501,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     [Theory]
     [InlineData(DialogStatusInput.New, DialogStatus.Values.NotApplicable)]
     [InlineData(DialogStatusInput.Sent, DialogStatus.Values.Awaiting)]
-    public Task Can_Update_Dialog_With_Deprecated_DialogStatus(
-        DialogStatusInput updateStatus, DialogStatus.Values expectedStatus) =>
+    public Task Can_Update_Dialog_With_Deprecated_DialogStatus(DialogStatusInput updateStatus, DialogStatus.Values expectedStatus) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
                 x.Dto.Status = DialogStatusInput.Completed)
@@ -770,37 +841,64 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
 
             Add(new ContentNotUpdatedAtSilentUpdateScenario(
                 DisplayName: $"{baseDesc} dialog content is updated {whenSilent}",
-                UpdateDialog: x => { x.ChangeTitle(); x.IsSilentUpdate = true; }));
+                UpdateDialog: x =>
+                {
+                    x.ChangeTitle();
+                    x.IsSilentUpdate = true;
+                }));
 
             Add(new ContentNotUpdatedAtSilentUpdateScenario(
                 DisplayName: $"{baseDesc} attachments are added {whenSilent}",
-                UpdateDialog: x => { x.AddAttachment(); x.IsSilentUpdate = true; }));
+                UpdateDialog: x =>
+                {
+                    x.AddAttachment();
+                    x.IsSilentUpdate = true;
+                }));
 
             Add(new ContentNotUpdatedAtSilentUpdateScenario(
                 DisplayName: $"{baseDesc} transmissions are added {whenSilent}",
-                UpdateDialog: x => { x.AddTransmission(); x.IsSilentUpdate = true; }));
+                UpdateDialog: x =>
+                {
+                    x.AddTransmission();
+                    x.IsSilentUpdate = true;
+                }));
 
             Add(new ContentNotUpdatedAtSilentUpdateScenario(
                 DisplayName: $"{baseDesc} GUI actions are added {whenSilent}",
-                UpdateDialog: x => { x.AddGuiAction(); x.IsSilentUpdate = true; }));
+                UpdateDialog: x =>
+                {
+                    x.AddGuiAction();
+                    x.IsSilentUpdate = true;
+                }));
 
             Add(new ContentNotUpdatedAtSilentUpdateScenario(
                 DisplayName: $"{baseDesc} API actions are added {whenSilent}",
-                UpdateDialog: x => { x.AddApiAction(); x.IsSilentUpdate = true; }));
+                UpdateDialog: x =>
+                {
+                    x.AddApiAction();
+                    x.IsSilentUpdate = true;
+                }));
 
             Add(new ContentNotUpdatedAtSilentUpdateScenario(
                 DisplayName: $"{baseDesc} status changes {whenSilent}",
-                UpdateDialog: x => { x.Dto.Status = DialogStatusInput.InProgress; x.IsSilentUpdate = true; }));
+                UpdateDialog: x =>
+                {
+                    x.Dto.Status = DialogStatusInput.InProgress;
+                    x.IsSilentUpdate = true;
+                }));
 
             Add(new ContentNotUpdatedAtSilentUpdateScenario(
                 DisplayName: $"{baseDesc} extended status changes {whenSilent}",
-                UpdateDialog: x => { x.Dto.ExtendedStatus = "new extended status"; x.IsSilentUpdate = true; }));
+                UpdateDialog: x =>
+                {
+                    x.Dto.ExtendedStatus = "new extended status";
+                    x.IsSilentUpdate = true;
+                }));
         }
     }
 
     [Theory, ClassData(typeof(ContentNotUpdatedAtSilentUpdateTestData))]
-    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Updated_Silently(
-        ContentNotUpdatedAtSilentUpdateScenario scenario) =>
+    public Task ContentUpdatedAt_Should_Not_Change_When_Content_Updated_Silently(ContentNotUpdatedAtSilentUpdateScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog()
             .AssertSuccessAndUpdateDialog(scenario.UpdateDialog)
@@ -885,8 +983,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Theory, ClassData(typeof(AddingEndUserTransmissionSentLabelTestData))]
-    public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(
-        AddingEndUserTransmissionSentLabelScenario scenario) =>
+    public Task Adding_EndUser_Transmission_Adds_Sent_Label_If_Submission_Or_Correction(AddingEndUserTransmissionSentLabelScenario scenario) =>
         FlowBuilder.For(Application)
             .CreateSimpleDialog((x, _) =>
                 x.AddTransmission(x => x.Type = scenario.TransmissionType))
@@ -895,13 +992,11 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             {
                 if (scenario.ShouldAddSentLabel)
                 {
-                    x.EndUserContext.SystemLabels.Should().ContainSingle(
-                        label => label == SystemLabel.Values.Sent);
+                    x.EndUserContext.SystemLabels.Should().ContainSingle(label => label == SystemLabel.Values.Sent);
                 }
                 else
                 {
-                    x.EndUserContext.SystemLabels.Should().NotContain(
-                        label => label == SystemLabel.Values.Sent);
+                    x.EndUserContext.SystemLabels.Should().NotContain(label => label == SystemLabel.Values.Sent);
                 }
             });
 
@@ -1004,8 +1099,7 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
             string caseName,
             Action<UpdateDialogCommand, string> applyValue,
             int maxLength,
-            Func<IFlowStep, IFlowStep>? modifyFlow = null
-        )
+            Func<IFlowStep, IFlowStep>? modifyFlow = null)
         {
             Add(new DialogContentLengthScenario(
                 DisplayName: $"Valid length for case {caseName}: {maxLength} chars",
@@ -1030,7 +1124,8 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
                 ActorType = ActorType.Values.PartyRepresentative,
                 ActorId = "urn:altinn:person:legacy-selfidentified:Leif"
             },
-            Description = [
+            Description =
+            [
                 new LocalizationDto
                 {
                     LanguageCode = "nb",

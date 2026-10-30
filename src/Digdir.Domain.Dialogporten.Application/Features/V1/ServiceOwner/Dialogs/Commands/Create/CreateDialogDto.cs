@@ -160,6 +160,10 @@ public sealed class CreateDialogDto
 
     /// <summary>
     /// An immutable list of activities associated with the dialog.
+    ///
+    /// A transmission can only be opened once, so only the first TransmissionOpened activity per transmission is stored.
+    /// Any additional TransmissionOpened activities referencing the same transmission are silently skipped
+    /// (regardless of who performed them), but are still validated.
     /// </summary>
     public List<ActivityDto> Activities { get; set; } = [];
 }
@@ -345,6 +349,8 @@ public sealed class ActivityDto
 {
     /// <summary>
     /// A self-defined UUIDv7 may be provided to support idempotent creation of activities. If not provided, a new UUIDv7 will be generated.
+    /// If the activity is a duplicate TransmissionOpened activity (see the activities list), it is not stored,
+    /// and this id cannot be used to look up the activity afterwards.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
     public Guid? Id { get; set; }

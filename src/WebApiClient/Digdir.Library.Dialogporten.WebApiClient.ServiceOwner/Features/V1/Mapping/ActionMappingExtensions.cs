@@ -1,4 +1,5 @@
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Create;
+using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Enums;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Get;
 using Altinn.ApiClients.Dialogporten.ServiceOwner.Features.V1.Update;
 
@@ -76,7 +77,7 @@ internal static class ActionMappingExtensions
     };
 
     // Create/Update -> Get. The Get-only IsAuthorized field has no source and is left null. Id and HttpMethod are
-    // optional on the input models and are defaulted (Guid.Empty / default HttpVerb) when absent.
+    // optional on the input models and are defaulted (Guid.Empty / HttpVerb.GET, matching the server) when absent.
 
     internal static DialogGuiAction ToDialogGuiAction(this CreateDialogGuiAction source) => new()
     {
@@ -87,7 +88,7 @@ internal static class ActionMappingExtensions
         AuthorizationAttribute = source.AuthorizationAttribute,
         AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         IsDeleteDialogAction = source.IsDeleteDialogAction,
-        HttpMethod = source.HttpMethod ?? default,
+        HttpMethod = source.HttpMethod ?? HttpVerb.Get,
         Priority = source.Priority,
         Title = source.Title,
         Prompt = source.Prompt,
@@ -102,7 +103,7 @@ internal static class ActionMappingExtensions
         AuthorizationAttribute = source.AuthorizationAttribute,
         AuthorizationContext = source.AuthorizationContext?.ToAuthorizationContext(),
         IsDeleteDialogAction = source.IsDeleteDialogAction,
-        HttpMethod = source.HttpMethod ?? default,
+        HttpMethod = source.HttpMethod ?? HttpVerb.Get,
         Priority = source.Priority,
         Title = source.Title,
         Prompt = source.Prompt,

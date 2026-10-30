@@ -65,7 +65,7 @@ public class UpdateDialog
     /// </summary>
     [JsonPropertyName("status")]
     [JsonConverter(typeof(JsonStringEnumConverter<DialogStatusInput>))]
-    public DialogStatusInput Status { get; set; }
+    public required DialogStatusInput Status { get; set; }
 
     /// <summary>
     /// The dialog unstructured text content.

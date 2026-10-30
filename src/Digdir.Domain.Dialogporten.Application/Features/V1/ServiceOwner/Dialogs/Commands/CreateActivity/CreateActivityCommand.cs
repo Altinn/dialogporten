@@ -1,4 +1,3 @@
-using System.Xml.Schema;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
@@ -96,12 +95,17 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         newActivity.DialogId = dialog.Id;
 
         // Return existing activity if it already exists
-        if (newActivity.TypeId == DialogActivityType.Values.TransmissionOpened)
+        if (newActivity is { TypeId: DialogActivityType.Values.TransmissionOpened, TransmissionId: { } transmissionId })
         {
-            var activity = dialog.Activities.FirstOrDefault(x => x.TypeId == DialogActivityType.Values.TransmissionOpened && x.TransmissionId == newActivity.TransmissionId);
-            if (activity is not null)
+            var existingActivity = await _db.DialogActivities
+                .Where(x => x.DialogId == dialog.Id
+                    && x.TypeId == DialogActivityType.Values.TransmissionOpened
+                    && x.TransmissionId == transmissionId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (existingActivity is not null)
             {
-                return new CreateActivitySuccess(dialog.Revision, activity.Id);
+                return new CreateActivitySuccess(dialog.Revision, existingActivity.Id);
             }
         }
 
@@ -150,7 +154,6 @@ internal sealed class CreateActivityCommandHandler : IRequestHandler<CreateActiv
         }
 
         return await _db.Dialogs
-            .Include(x => x.Activities)
             .Include(x => x.EndUserContext)
             .ThenInclude(x => x.DialogEndUserContextSystemLabels)
             .IgnoreQueryFilters()

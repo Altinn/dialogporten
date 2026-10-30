@@ -23,5 +23,6 @@ public sealed record ResyncActorNameEvent : DomainEvent
     {
         ActorNameId = actorNameId;
         Reason = reason;
+        EventId = actorNameId;
     }
 }

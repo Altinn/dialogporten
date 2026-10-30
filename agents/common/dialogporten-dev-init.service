@@ -4,10 +4,12 @@ Description=Prepare local Dialogporten development: HTTPS dev certificate, Ed255
 # clone's unit is `Type=exec`, so this orders the unit only after the clone has started; the script waits for the rest.
 After=network-online.target agent-workspace-init.service
 Wants=network-online.target
-Before=multi-user.target
 
 [Service]
-Type=oneshot
+# `Type=exec`, as the clone's unit, completes the start job once the script has started, so the wait for the clone and
+# the SDK's first run stay out of the boot transaction and `systemctl is-system-running --wait` does not wait for them.
+# The unit stays active while the script runs: `systemctl show -P SubState` is `running` until it is done, then `exited`.
+Type=exec
 RemainAfterExit=yes
 PassEnvironment=MASKINPORTEN_AT23_CLIENT_ID MASKINPORTEN_AT23_ENCODED_JWK
 ExecStart=/usr/local/libexec/agent-dialogporten-dev-init

@@ -5,8 +5,10 @@
   desktop.
 - At boot, `agent-dialogporten-dev-init.service` makes an HTTPS dev certificate trusted system-wide, and writes the
   local database connection string, a generated Ed25519 key pair and the AT23 Maskinporten client, when the agent has
-  one, into the user secrets every runtime project shares. After you change those secrets by hand, keep in mind that
-  rerunning the unit keeps the generated values you have and overwrites the Maskinporten client.
+  one, into the user secrets every runtime project shares. It runs in the background after the workspace clone, so
+  on a fresh boot wait until `systemctl show -P SubState agent-dialogporten-dev-init` says `exited` before you run
+  the apps. After you change those secrets by hand, keep in mind that rerunning the unit keeps the generated values
+  you have and overwrites the Maskinporten client.
 - The E2E tests run against AT23. `TokenGeneratorUser` and `TokenGeneratorPassword` for the E2E tests and
   `Infrastructure__Altinn__SubscriptionKey` for the apps are in the environment as placeholders, which the host
   replaces with the real values only in requests to their hosts. Never print, copy or persist them. When one of them

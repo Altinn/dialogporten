@@ -10,7 +10,7 @@ public class Actor
     /// </summary>
     [JsonPropertyName("actorType")]
     [JsonConverter(typeof(JsonStringEnumConverter<ActorType>))]
-    public ActorType ActorType { get; set; }
+    public required ActorType ActorType { get; set; }
 
     /// <summary>
     /// The name of the actor.

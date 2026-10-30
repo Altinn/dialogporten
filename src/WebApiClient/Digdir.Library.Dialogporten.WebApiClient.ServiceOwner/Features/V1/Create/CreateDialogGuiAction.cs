@@ -66,7 +66,7 @@ public class CreateDialogGuiAction
     /// </summary>
     [JsonPropertyName("priority")]
     [JsonConverter(typeof(JsonStringEnumConverter<DialogGuiActionPriority>))]
-    public DialogGuiActionPriority Priority { get; set; }
+    public required DialogGuiActionPriority Priority { get; set; }
 
     /// <summary>
     /// The title of the action, this should be short and in verb form. Must be text/plain.

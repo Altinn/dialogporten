@@ -79,14 +79,16 @@ mint() {
 
 token() {
     (( $# >= 1 )) || usage
-    if [[ "$1" == e2e ]]; then
+    local kind="$1"
+    if [[ "$kind" == e2e ]]; then
         (( $# == 2 )) || usage
-        [[ -n "${presets[$2]:-}" ]] || {
-            echo "token.sh: no preset '$2' in $env; this environment has: ${!presets[*]}" >&2
+        local preset="$2"
+        [[ -n "${presets[$preset]:-}" ]] || {
+            echo "token.sh: no preset '$preset' in $env; this environment has: ${!presets[*]}" >&2
             exit 2
         }
         local -a p
-        IFS='|' read -r -a p <<<"${presets[$2]}"
+        IFS='|' read -r -a p <<<"${presets[$preset]}"
         mint "${p[@]}"
     else
         mint "$@"

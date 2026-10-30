@@ -49,30 +49,32 @@ call() {
 
 # The URN a party or subject identifier is written as in request bodies.
 urn() {
-    case "$1" in
+    local id="$1"
+    case "$id" in
         [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]) echo urn:altinn:person:identifier-no ;;
         [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]) echo urn:altinn:organization:identifier-no ;;
         ????????-????-????-????-????????????) echo urn:altinn:systemuser:uuid ;;
-        *) echo "am.sh: '$1' is neither an 11-digit pid, a 9-digit orgNo nor a system user UUID" >&2; exit 2 ;;
+        *) echo "am.sh: '$id' is neither an 11-digit pid, a 9-digit orgNo nor a system user UUID" >&2; exit 2 ;;
     esac
 }
 
 authorized_parties() {
-    local type
-    type="$(urn "$1")"
-    jq -n --arg type "$type" --arg value "$1" '{type: $type, value: $value}' |
+    local id="$1" type
+    type="$(urn "$id")"
+    jq -n --arg type "$type" --arg value "$id" '{type: $type, value: $value}' |
         call -X POST -H "Authorization: Bearer $(resourceowner_token)" -H 'Content-Type: application/json' -d @- \
             "$platform/accessmanagement/api/v1/resourceowner/authorizedparties?includeAccessPackages=true&includeRoles=true&includeResources=true&includeInstances=true&includePartiesViaKeyRoles=auto&includeSubParties=auto&includeInactiveParties=auto"
 }
 
 parties() {
-    if (( $# == 1 )); then
-        authorized_parties "$1" | jq -c '.[] | {name, orgNo: .organizationNumber, pid: .personId, partyUuid, partyId,
+    local subject="$1" party="${2:-}"
+    if [[ -z "$party" ]]; then
+        authorized_parties "$subject" | jq -c '.[] | {name, orgNo: .organizationNumber, pid: .personId, partyUuid, partyId,
             packages: (.authorizedAccessPackages | length), roles: (.authorizedRoles | length),
             dialogportenResources: [.authorizedResources[] | select(test("dialogporten"))],
             subunits: (.subunits | length)}'
     else
-        authorized_parties "$1" | jq --arg id "$2" '[.[], .[].subunits[]?]
+        authorized_parties "$subject" | jq --arg id "$party" '[.[], .[].subunits[]?]
             | map(select(.organizationNumber == $id or .personId == $id)) | first // error("no such party")
             | {name, orgNo: .organizationNumber, pid: .personId, partyUuid, partyId, type, isDeleted,
                packages: .authorizedAccessPackages, roles: .authorizedRoles, resources: .authorizedResources,
@@ -82,9 +84,10 @@ parties() {
 
 # The register URN of an identifier. A UUID is a party UUID, which for a system user is its own UUID.
 party_urn() {
-    case "$1" in
-        ????????-????-????-????-????????????) echo "urn:altinn:party:uuid:$1" ;;
-        *) echo "$(urn "$1"):$1" ;;
+    local id="$1"
+    case "$id" in
+        ????????-????-????-????-????????????) echo "urn:altinn:party:uuid:$id" ;;
+        *) echo "$(urn "$id"):$id" ;;
     esac
 }
 
@@ -107,23 +110,24 @@ lookup() {
 }
 
 whoami() {
-    [[ "$(urn "$1")" == urn:altinn:person:identifier-no ]] || { echo "am.sh: whoami takes a pid" >&2; exit 2; }
-    lookup "$1" | jq -ce '{partyUuid, partyId}'
+    local pid="$1"
+    [[ "$(urn "$pid")" == urn:altinn:person:identifier-no ]] || { echo "am.sh: whoami takes a pid" >&2; exit 2; }
+    lookup "$pid" | jq -ce '{partyUuid, partyId}'
 }
 
 enduser_token() {
-    local self
-    self="$(whoami "$1")"
-    bash "$token_sh" personal "pid=$1" "scopes=${2:-altinn:portal/enduser}" \
+    local pid="$1" scopes="${2:-altinn:portal/enduser}" self
+    self="$(whoami "$pid")"
+    bash "$token_sh" personal "pid=$pid" "scopes=$scopes" \
         "partyId=$(jq -r .partyId <<<"$self")" "partyuuid=$(jq -r .partyUuid <<<"$self")"
 }
 
 decide() {
-    local subject_type party_type
-    subject_type="$(urn "$1")"
-    party_type="$(urn "$2")"
-    jq -n --arg st "$subject_type" --arg s "$1" --arg pt "$party_type" --arg p "$2" \
-        --arg r "${3#urn:altinn:resource:}" --arg a "${4:-read}" '{Request: {
+    local subject="$1" party="$2" resource="${3#urn:altinn:resource:}" action="${4:-read}" subject_type party_type
+    subject_type="$(urn "$subject")"
+    party_type="$(urn "$party")"
+    jq -n --arg st "$subject_type" --arg s "$subject" --arg pt "$party_type" --arg p "$party" \
+        --arg r "$resource" --arg a "$action" '{Request: {
             AccessSubject: [{Id: "s1", Attribute: [{AttributeId: $st, Value: $s}]}],
             Action: [{Id: "a1", Attribute: [{AttributeId: "urn:oasis:names:tc:xacml:1.0:action:action-id",
                 Value: $a, DataType: "http://www.w3.org/2001/XMLSchema#string"}]}],
@@ -136,11 +140,13 @@ decide() {
 }
 
 policy() {
-    call "$platform/resourceregistry/api/v1/resource/${1#urn:altinn:resource:}/policy/subjects" | jq -r '.data[].urn'
+    local resource="${1#urn:altinn:resource:}"
+    call "$platform/resourceregistry/api/v1/resource/$resource/policy/subjects" | jq -r '.data[].urn'
 }
 
 get() {
-    call -H "Authorization: Bearer $(enduser_token "$1")" "$platform$2" | jq .
+    local pid="$1" path="$2"
+    call -H "Authorization: Bearer $(enduser_token "$pid")" "$platform$path" | jq .
 }
 
 case "${1:-}" in

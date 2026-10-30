@@ -55,7 +55,8 @@ fi
 
 # The value of a plain KEY=value line in the repository's .env, read rather than sourced, since this runs as root.
 dotenv_value() {
-    sed -n "s/^$1=//p" "$dotenv" | tail -n 1
+    key="$1"
+    sed -n "s/^$key=//p" "$dotenv" | tail -n 1
 }
 
 # Without the clone, as when the workspace could not be cloned, the connection string is left as it is.
@@ -70,10 +71,11 @@ fi
 b64url() { base64 -w0 | tr '+/' '-_' | tr -d '='; }
 
 keypair() {
-    openssl genpkey -algorithm ed25519 -out "$work/$1.pem" 2>/dev/null
-    private="$(openssl pkey -in "$work/$1.pem" -outform DER | tail -c 32 | b64url)"
-    public="$(openssl pkey -in "$work/$1.pem" -pubout -outform DER | tail -c 32 | b64url)"
-    jq -n --arg kid "dev-$1-signing-key" --arg private "$private" --arg public "$public" \
+    name="$1"
+    openssl genpkey -algorithm ed25519 -out "$work/$name.pem" 2>/dev/null
+    private="$(openssl pkey -in "$work/$name.pem" -outform DER | tail -c 32 | b64url)"
+    public="$(openssl pkey -in "$work/$name.pem" -pubout -outform DER | tail -c 32 | b64url)"
+    jq -n --arg kid "dev-$name-signing-key" --arg private "$private" --arg public "$public" \
         '{Kid: $kid, PrivateComponent: $private, PublicComponent: $public}'
 }
 
@@ -94,7 +96,9 @@ jq --arg connection "$connection" \
     } + .' "$secrets" >"$work/secrets.json"
 
 set_secret() {
-    jq --arg key "$1" --arg value "$2" '.[$key] = $value' "$work/secrets.json" >"$work/secrets.next.json"
+    key="$1"
+    value="$2"
+    jq --arg key "$key" --arg value "$value" '.[$key] = $value' "$work/secrets.json" >"$work/secrets.next.json"
     mv "$work/secrets.next.json" "$work/secrets.json"
 }
 client_id="${MASKINPORTEN_AT23_CLIENT_ID:-none}"

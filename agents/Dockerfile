@@ -13,17 +13,15 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 ENV DOTNET_NOLOGO=1
 
 # zsh runs scripts/e2e/run-webapi-e2e.zsh, openssl generates the local Ed25519 key pair at boot, and the Postgres
-# client inspects the database the E2E stack starts.
+# client inspects the database the E2E stack starts. The clock is Norwegian local time, as the team's own machines keep.
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
         libicu-dev \
         openssl \
         postgresql-client \
         zsh \
-    && rm -rf /var/lib/apt/lists/*
-
-# Norwegian local time, as the team's own machines keep.
-RUN ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
 
 ARG TARGETARCH
 # The SDK global.json pins, with rollForward disabled, so it must match exactly. Move it together with global.json.
@@ -31,15 +29,14 @@ ARG DOTNET_SDK_VERSION=10.0.402
 ARG DOTNET_INSTALL_SCRIPT_COMMIT=6f559c420847ded38591392dafe785ad511f39f5
 ARG DOTNET_INSTALL_SCRIPT_SHA256=082f7685e156738a1b2e2ed8381a621870d4ce8e8c59278034556f05c186eb2e
 
+ADD --checksum=sha256:${DOTNET_INSTALL_SCRIPT_SHA256} \
+    https://raw.githubusercontent.com/dotnet/install-scripts/${DOTNET_INSTALL_SCRIPT_COMMIT}/src/dotnet-install.sh \
+    /tmp/dotnet-install.sh
 RUN case "${TARGETARCH}" in \
         amd64) DOTNET_ARCH=x64 ;; \
         arm64) DOTNET_ARCH=arm64 ;; \
         *) echo "unsupported target architecture: ${TARGETARCH}" >&2; exit 1 ;; \
     esac \
-    && curl -fsSL --proto '=https' --tlsv1.2 \
-        "https://raw.githubusercontent.com/dotnet/install-scripts/${DOTNET_INSTALL_SCRIPT_COMMIT}/src/dotnet-install.sh" \
-        -o /tmp/dotnet-install.sh \
-    && echo "${DOTNET_INSTALL_SCRIPT_SHA256}  /tmp/dotnet-install.sh" | sha256sum -c - \
     && bash /tmp/dotnet-install.sh \
         --architecture "${DOTNET_ARCH}" \
         --install-dir "${DOTNET_ROOT}" \

@@ -1,0 +1,15 @@
+apiVersion: agents.platform/v1alpha1
+kind: AgentVariant
+extends: agent.nested.yaml
+
+metadata:
+  name: dialogporten-backend-nested-build
+
+# Builds the image from this checkout, to try a change to the Dockerfile before CI publishes it.
+spec:
+  sandbox:
+    image:
+      type: build
+      context: ..
+      dockerfile: Dockerfile
+      target: minimal

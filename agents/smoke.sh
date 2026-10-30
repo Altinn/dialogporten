@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Smoke-tests what the Dialogporten agent image adds to the agentctl base image, inside a freshly built image. The
+# base image and its features are tested where they are built, in digdir/digdir-agents.
+#
+#   docker run --rm --entrypoint bash -v "$PWD/agents/smoke.sh:/smoke.sh:ro" <image> /smoke.sh
+#
+# Runs as the image's `agent` user, which has passwordless sudo.
+set -euo pipefail
+
+work="$(mktemp -d)"
+cd "$work"
+fail() { echo "smoke: $*" >&2; exit 1; }
+
+echo "## versions"
+[[ "$(id -un)" == agent ]] || fail "expected to run as agent, got $(id -un)"
+dotnet --list-sdks
+dotnet --list-sdks | grep -q '^10\.0\.402 ' || fail "the .NET SDK global.json pins is missing"
+dotnet-ef --version | tail -1
+zsh --version
+psql --version
+podman --version
+/usr/libexec/docker/cli-plugins/docker-compose version
+agentctl --version
+agentd --version
+
+echo "## container storage"
+# Without a mount program, Podman fails on the agent's overlayfs root with "'overlay' is not supported over
+# overlayfs". Podman itself cannot start in the unprivileged container this runs in, so check its configuration.
+storage=/etc/containers/storage.conf
+[[ "$(sed -n 's/^driver = "\(.*\)"$/\1/p' "$storage")" == overlay ]] \
+    || fail "Podman's storage driver is not overlay"
+mount_program="$(sed -n 's/^mount_program = "\(.*\)"$/\1/p' "$storage")"
+[[ -n "$mount_program" ]] && "$mount_program" --version >/dev/null \
+    || fail "Podman's overlay storage has no working mount program"
+
+echo "## timezone"
+case "$(date +%Z)" in
+    CET | CEST) ;;
+    *) fail "system clock is $(date +%Z), expected Norwegian local time" ;;
+esac
+
+echo "## boot unit"
+systemctl is-enabled agent-dialogporten-dev-init.service >/dev/null \
+    || fail "the Dialogporten development unit is not enabled"
+grep -qxF 'PassEnvironment=MASKINPORTEN_AT23_CLIENT_ID MASKINPORTEN_AT23_ENCODED_JWK' \
+    /etc/systemd/system/agent-dialogporten-dev-init.service \
+    || fail "the development unit does not receive the Maskinporten values"
+
+secrets=/home/agent/.microsoft/usersecrets/750256a4-f332-4783-8802-8a7d9566f9ca/secrets.json
+# The unit runs after the workspace clone and takes the database credentials from the repository's .env.
+clone=/home/agent/code/dialogporten
+[[ ! -e "$clone" ]] || fail "$clone exists: run this in a freshly built image, not in a booted agent"
+sudo install -d -o agent -g agent /home/agent/code "$clone"
+printf '%s\n' POSTGRES_USER=smoke-user POSTGRES_PASSWORD=smoke-password POSTGRES_DB=smoke-db >"$clone/.env"
+sudo env MASKINPORTEN_AT23_CLIENT_ID=none MASKINPORTEN_AT23_ENCODED_JWK=none \
+    /usr/local/libexec/agent-dialogporten-dev-init
+[[ "$(jq -r '."Infrastructure:DialogDbConnectionString"' "$secrets")" == \
+    'Server=localhost;Port=15432;Database=smoke-db;User ID=smoke-user;Password=smoke-password;Include Error Detail=True;' ]] \
+    || fail "the connection string from the repository's .env is not in the user secrets"
+jq -e 'has("Infrastructure:Maskinporten:ClientId") | not' "$secrets" >/dev/null \
+    || fail "a Maskinporten client of none was written to the user secrets"
+private="$(jq -r '."Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent"' "$secrets")"
+[[ "${#private}" -eq 43 ]] || fail "the generated Ed25519 private key is not 32 bytes in base64url"
+
+# A second run keeps the generated pair and writes the Maskinporten client it is given.
+sudo env MASKINPORTEN_AT23_CLIENT_ID=smoke-client MASKINPORTEN_AT23_ENCODED_JWK=smoke-jwk \
+    /usr/local/libexec/agent-dialogporten-dev-init
+[[ "$(jq -r '."Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent"' "$secrets")" == "$private" ]] \
+    || fail "a second run replaced the generated key pair"
+[[ "$(jq -r '."Infrastructure:Maskinporten:ClientId"' "$secrets")" == smoke-client ]] \
+    || fail "the Maskinporten client was not written to the user secrets"
+
+echo "## dev certificate"
+# Against the system store itself: a container runtime may point SSL_CERT_FILE at a CA bundle it copied when the
+# container started, before the boot unit added the certificate, as the agent's own Podman does.
+openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt /usr/local/share/ca-certificates/aspnet-dev.crt \
+    || fail "the HTTPS dev certificate is not trusted system-wide"
+dotnet dev-certs https --check || fail "the agent has no HTTPS dev certificate"
+
+echo "smoke: ok"

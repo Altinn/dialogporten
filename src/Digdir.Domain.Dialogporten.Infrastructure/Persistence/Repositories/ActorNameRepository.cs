@@ -22,9 +22,9 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
                       WHERE "ActorId" = {actorId}
                      """);
         query = actorName is not null
-            ? query.Append(" AND \"Name\" = ").Append(actorName)
+            ? query.Append($" AND \"Name\" = {actorName}")
             : query.Append(" AND \"Name\" IS NULL");
-        query.Append(" LIMIT 1;");
+        query.Append(" LIMIT 1");
 
         return await db.Database
             .SqlQuery<Guid>(query.ToFormattableString())

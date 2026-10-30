@@ -179,8 +179,8 @@
       },
       "Altinn.Authorization.ABAC": {
         "type": "Transitive",
-        "resolved": "0.1.1",
-        "contentHash": "Ln+6W3j06wt3yXA+AQwy6gw4pJllI1vC0+IzUWTy57NccW2Q5cqPz2cxBaJF2Z+eG8fhH3tYShsw0gqM9SEylA=="
+        "resolved": "0.3.0",
+        "contentHash": "IRk3fAxcxAuZNQ2mztMF71sCrEdGVSfEq333Oaul8qDsq1eyvtWXkWyXGriyswLEGKYqe+vqb2N4Shgeoo5XDA=="
       },
       "AspNetCore.HealthChecks.NpgSql": {
         "type": "Transitive",
@@ -1423,7 +1423,7 @@
           "Altinn.ApiClients.Maskinporten": "[10.1.0, )",
           "Altinn.AspNet.HealthChecks": "[0.4.0, )",
           "Altinn.AspNet.HealthChecks.Warmup": "[0.4.0, )",
-          "Altinn.Authorization.ABAC": "[0.1.1, )",
+          "Altinn.Authorization.ABAC": "[0.3.0, )",
           "AspNetCore.HealthChecks.NpgSql": "[9.0.0, )",
           "AspNetCore.HealthChecks.Redis": "[9.0.0, )",
           "Azure.Identity": "[1.21.0, )",

@@ -1,7 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Microsoft.EntityFrameworkCore;
 
-namespace Digdir.Domain.Dialogporten.Application.Common.Extensions;
+namespace Digdir.Domain.Dialogporten.Infrastructure;
 
 public static class IDialogDbContextExtensions
 {

@@ -1,16 +1,9 @@
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Externals;
 
 public interface IActorNameRepository
 {
-    Task<Guid> GetOrCreateActorName(
-        string actorId,
-        string? actorName,
-        CancellationToken cancellationToken
-    );
-
     /// <summary>
     /// Gets or creates the given <see cref="ActorName"/> rows in a single round trip, without involving the EF
     /// change tracker. Runs outside any EF transaction.

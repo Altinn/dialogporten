@@ -106,6 +106,25 @@ public class GetDialogTests(DialogApplication application) : ApplicationCollecti
             });
 
     [Fact]
+    public Task Get_Should_Return_ApiOnly_Dialog_With_Transmission_Without_Content() =>
+        // API-only transmissions are not required to have content. The read path must not throw
+        // when a transmission has no content. Regression test for #4516.
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.IsApiOnly = true;
+                x.Dto.Content = null;
+                x.AddTransmission(transmission => transmission.Content = null);
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+            {
+                x.IsApiOnly.Should().BeTrue();
+                var transmission = x.Transmissions.Should().ContainSingle().Subject;
+                transmission.Content.Should().BeNull();
+            });
+
+    [Fact]
     public Task Get_Dialog_Should_Mask_Unauthorized_MainContentReference_When_No_Read_Access_To_Main_Resource() =>
         FlowBuilder.For(Application, ConfigureWriteOnlyAuthorization)
             .CreateSimpleDialog((x, _) => x.AddMainContentReference())

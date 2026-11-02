@@ -17,9 +17,8 @@ public sealed class ResyncActorNameConsumerDefinition : ConsumerDefinition<Domai
             TimeSpan.FromMinutes(10),
             TimeSpan.FromMinutes(15),
             TimeSpan.FromHours(2),
-            TimeSpan.FromHours(24),
-            TimeSpan.FromHours(24),
-            TimeSpan.FromHours(24)));
+            TimeSpan.FromHours(4),
+            TimeSpan.FromHours(8)));
         endpointConfigurator.DiscardFaultedMessages();
     }
 }

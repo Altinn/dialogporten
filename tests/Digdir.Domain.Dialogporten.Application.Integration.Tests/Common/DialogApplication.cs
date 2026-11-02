@@ -9,10 +9,11 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
-using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.SaveChangesTestInterceptors;
+using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
-using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.ResourceRegistry;
 using Digdir.Domain.Dialogporten.Infrastructure.Common.Configurations.Dapper;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
@@ -22,6 +23,7 @@ using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogS
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Selection;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories.DialogSearch.EndUser.Strategies;
+using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Digdir.Library.Entity.Abstractions.Features.Lookup;
 using HotChocolate.Subscriptions;
 using MassTransit;
@@ -55,6 +57,7 @@ public class DialogApplication : IAsyncLifetime
     internal static TestUser User { get; } = new();
     internal static TestAltinnAuthorization AltinnAuthorization { get; } = new();
     internal static TestServiceResourceAuthorizer ServiceResourceAuthorizer { get; } = new();
+    internal static TestPartyNameRegistry PartyNameRegistry { get; } = new();
     internal static TestApplicationSettings Settings { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
@@ -116,8 +119,8 @@ public class DialogApplication : IAsyncLifetime
             .AddSingleton<IServiceResourceAuthorizer>(ServiceResourceAuthorizer)
             .AddDistributedMemoryCache()
             .AddLogging()
-            .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddScoped<PopulateActorNameInterceptor>()
+            .AddScoped<ConvertDomainEventsToOutboxMessagesInterceptor>()
             .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
             .AddSingleton<NpgsqlDataSource>(_ => new NpgsqlDataSourceBuilder(_dbContainer.GetConnectionString() + ";Include Error Detail=true").Build())
             .AddDbContext<DialogDbContext>((services, options) =>
@@ -127,8 +130,9 @@ public class DialogApplication : IAsyncLifetime
                     })
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors()
-                    .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
                     .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>())
+                    .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
+                    .AddInterceptors(services.GetServices<ISaveChangesTestInterceptor>()) // Must be last
             )
             .AddDapperTypeHandlers()
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())
@@ -138,7 +142,6 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<IServiceOwnerNameRegistry>(_ => CreateServiceOwnerNameRegistrySubstitute())
             .AddScoped<IAccessManagementMetadata>(_ => CreateAccessManagementMetadataSubstitute())
             .AddScoped<IMetadataLinkProvider>(_ => CreateMetadataLinkProviderSubstitute())
-            .AddScoped<IPartyNameRegistry>(_ => CreateNameRegistrySubstitute())
             .AddSingleton(Settings)
             .AddScoped<IOptionsSnapshot<ApplicationSettings>>(x => x.GetRequiredService<TestApplicationSettings>())
             .AddScoped<IOptions<ApplicationSettings>>(x => x.GetRequiredService<TestApplicationSettings>())
@@ -148,9 +151,14 @@ public class DialogApplication : IAsyncLifetime
             .AddScoped<Lazy<ITopicEventSender>>(sp => new Lazy<ITopicEventSender>(() => sp.GetRequiredService<ITopicEventSender>()))
             .AddScoped<Lazy<IPublishEndpoint>>(sp => new Lazy<IPublishEndpoint>(() => sp.GetRequiredService<IPublishEndpoint>()))
             .AddScoped<IUnitOfWork, UnitOfWork>()
+            .AddScoped<IPartyNameRegistry, PartyNameRegistryClient>()
+            .AddScoped<LocalPartyNameRegistryTransport>()
+            .AddScoped<IPartyNameRegistryTransport, RoutedPartyNameRegistryTransport>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
+            .AddTransient<IActorNameRepository, ActorNameRepository>()
             .AddSingleton(AltinnAuthorization)
+            .AddSingleton(PartyNameRegistry)
             .AddScoped<LocalDevelopmentAltinnAuthorization>()
             .AddScoped<IAltinnAuthorization, RoutedAltinnAuthorization>()
             .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
@@ -168,21 +176,6 @@ public class DialogApplication : IAsyncLifetime
             .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>();
-    }
-
-    private static IPartyNameRegistry CreateNameRegistrySubstitute()
-    {
-        var nameRegistrySubstitute = Substitute.For<IPartyNameRegistry>();
-
-        nameRegistrySubstitute
-            .GetName(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns("Brando Sando");
-
-        nameRegistrySubstitute
-            .GetName(Arg.Is(TestUsers.DefaultSystemUserUrn), Arg.Any<CancellationToken>())
-            .Returns("Mock system user name");
-
-        return nameRegistrySubstitute;
     }
 
     private static IServiceOwnerNameRegistry CreateServiceOwnerNameRegistrySubstitute()
@@ -309,6 +302,7 @@ public class DialogApplication : IAsyncLifetime
         User.Reset();
         AltinnAuthorization.Reset();
         ServiceResourceAuthorizer.Reset();
+        PartyNameRegistry.Reset();
         Settings.Reset();
         _publishedEvents.Clear();
         await using var connection = new NpgsqlConnection(_dbContainer.GetConnectionString());

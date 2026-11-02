@@ -209,8 +209,8 @@ public sealed class Transmission
     [GraphQLDescription("Indicates whether the dialog transmission has been opened.")]
     public bool IsOpened { get; set; }
 
-    [GraphQLDescription("The transmission unstructured text content.")]
-    public TransmissionContent Content { get; set; } = null!;
+    [GraphQLDescription("The transmission unstructured text content. May be null for API-only transmissions.")]
+    public TransmissionContent? Content { get; set; }
 
     [GraphQLDescription("The transmission-level attachments.")]
     public List<Attachment> Attachments { get; set; } = [];

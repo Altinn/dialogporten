@@ -39,7 +39,7 @@ internal static class SearchDialogsMapExtensions
         OrderBy = source.OrderBy.AsSpan().ToSearchDialogSortTypeList()
     };
 
-    internal static SearchDialog ToSearchDialog(DialogDto source) => new()
+    internal static SearchDialog ToSearchDialog(this DialogDto source) => new()
     {
         Id = source.Id,
         Org = source.Org,
@@ -61,15 +61,15 @@ internal static class SearchDialogsMapExtensions
         IsApiOnly = source.IsApiOnly,
         FromServiceOwnerTransmissionsCount = source.FromServiceOwnerTransmissionsCount,
         FromPartyTransmissionsCount = source.FromPartyTransmissionsCount,
-        LatestActivity = source.LatestActivity is null ? null : ToActivity(source.LatestActivity),
-        Content = source.Content is null ? null : ToSearchContent(source.Content),
+        LatestActivity = source.LatestActivity?.ToActivity(),
+        Content = source.Content?.ToSearchContent(),
         SeenSinceLastUpdate = source.SeenSinceLastUpdate.Select(ToSeenLog).ToList(),
         SeenSinceLastContentUpdate = source.SeenSinceLastContentUpdate.Select(ToSeenLog).ToList(),
         IsContentSeen = source.IsContentSeen,
-        EndUserContext = ToEndUserContext(source.EndUserContext)
+        EndUserContext = source.EndUserContext.ToEndUserContext()
     };
 
-    internal static SearchContent ToSearchContent(ContentDto source) => new()
+    internal static SearchContent ToSearchContent(this ContentDto source) => new()
     {
         Title = source.Title.ToGraphQlContentValue(),
         Summary = source.Summary.ToGraphQlContentValueOrNull(),
@@ -77,13 +77,13 @@ internal static class SearchDialogsMapExtensions
         ExtendedStatus = source.ExtendedStatus.ToGraphQlContentValueOrNull()
     };
 
-    internal static EndUserContext ToEndUserContext(DialogEndUserContextDto source) => new()
+    internal static EndUserContext ToEndUserContext(this DialogEndUserContextDto source) => new()
     {
         Revision = source.Revision,
         SystemLabels = source.SystemLabels.Select(x => x.ToGraphQl()).ToList()
     };
 
-    internal static SeenLog ToSeenLog(DialogSeenLogDto source) => new()
+    internal static SeenLog ToSeenLog(this DialogSeenLogDto source) => new()
     {
         Id = source.Id,
         SeenAt = source.SeenAt,
@@ -92,7 +92,7 @@ internal static class SearchDialogsMapExtensions
         IsCurrentEndUser = source.IsCurrentEndUser
     };
 
-    internal static Activity ToActivity(DialogActivityDto source) => new()
+    internal static Activity ToActivity(this DialogActivityDto source) => new()
     {
         Id = source.Id,
         CreatedAt = source.CreatedAt,

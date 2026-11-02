@@ -10,6 +10,6 @@ internal sealed class UpdateFormSavedActivityTimeCommandValidator : AbstractVali
     {
         RuleFor(x => x.DialogId).NotEmpty();
         RuleFor(x => x.ActivityId).NotEmpty();
-        RuleFor(x => x.NewCreatedAt).IsInPast(clock).IsFinite();
+        RuleFor(x => x.NewCreatedAt).IsInPast(clock);
     }
 }

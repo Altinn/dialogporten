@@ -20,8 +20,7 @@ internal sealed class CreateDialogDialogActivityDtoValidator : AbstractValidator
             .UuidV7TimestampIsInPast(clock);
 
         RuleFor(x => x.CreatedAt)
-            .IsInPast(clock)
-            .IsFinite();
+            .IsInPast(clock);
 
         RuleFor(x => x.ExtendedType)
             .IsValidUri()

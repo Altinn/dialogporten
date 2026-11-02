@@ -23,8 +23,7 @@ internal sealed class CreateDialogDialogTransmissionDtoValidator : AbstractValid
             .UuidV7TimestampIsInPast(clock);
 
         RuleFor(x => x.CreatedAt)
-            .IsInPast(clock)
-            .IsFinite();
+            .IsInPast(clock);
 
         RuleFor(x => x.ExtendedType)
             .IsValidUri()

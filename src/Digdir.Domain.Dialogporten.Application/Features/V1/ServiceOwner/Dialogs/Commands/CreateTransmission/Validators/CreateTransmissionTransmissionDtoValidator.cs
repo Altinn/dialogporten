@@ -27,8 +27,7 @@ internal sealed class CreateTransmissionTransmissionDtoValidator : AbstractValid
             .MaximumLength(Constants.MaxIdempotentKeyLength);
 
         RuleFor(x => x.CreatedAt)
-            .IsInPast(clock)
-            .IsFinite();
+            .IsInPast(clock);
 
         RuleFor(x => x.ExtendedType)
             .IsValidUri()

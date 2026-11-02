@@ -26,12 +26,16 @@ internal sealed class CreateDialogDtoValidator : AbstractValidator<CreateDialogD
             .UuidV7TimestampIsInPast(clock);
 
         RuleFor(x => x.CreatedAt)
-            .IsInPast(clock);
+            .IsInPast(clock)
+            .IsFinite();
 
         RuleFor(x => x.CreatedAt)
             .NotEmpty()
             .WithMessage($"{{PropertyName}} must not be empty when '{nameof(CreateDialogDto.UpdatedAt)} is set.")
             .When(x => x.UpdatedAt.HasValue && x.UpdatedAt != default(DateTimeOffset));
+
+        RuleFor(x => x.UpdatedAt)
+            .IsFinite();
 
         RuleFor(x => x.UpdatedAt)
             .IsInPast(clock)

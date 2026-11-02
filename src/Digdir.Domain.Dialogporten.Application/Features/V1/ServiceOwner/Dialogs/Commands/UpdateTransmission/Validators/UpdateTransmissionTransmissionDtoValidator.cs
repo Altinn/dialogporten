@@ -18,7 +18,9 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
     {
         // CreatedAt is not validated for InPast,
         // Dialog.VisibleFrom could have set the transmission
-        // CreatedAt to a date in the future.
+        // CreatedAt to a date in the future. It must still be finite.
+        RuleFor(x => x.CreatedAt)
+            .IsFinite();
 
         RuleFor(x => x.IdempotentKey)
             .MinimumLength(Constants.MinIdempotentKeyLength)

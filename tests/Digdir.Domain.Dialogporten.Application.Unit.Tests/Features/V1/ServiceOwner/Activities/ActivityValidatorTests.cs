@@ -65,6 +65,44 @@ public class ActivityValidatorTests
         }
     }
 
+    public static IEnumerable<object[]> NonFiniteCreatedAt() =>
+    [
+        [DateTimeOffset.MinValue],
+        [DateTimeOffset.MaxValue],
+    ];
+
+    [Theory, MemberData(nameof(NonFiniteCreatedAt))]
+    public void Activity_With_NonFinite_CreatedAt_Is_Rejected(DateTimeOffset createdAt)
+    {
+        // Arrange
+        var activity = DialogGenerator.GenerateFakeDialogActivity();
+        activity.CreatedAt = createdAt;
+
+        var user = Substitute.For<IUser>();
+        var actorValidator = new ActorValidator();
+        var localizationValidator = new LocalizationDtosValidatorFactory(user);
+        var clock = new Clock();
+
+        var createValidator = new CreateDialogDialogActivityDtoValidator(actorValidator, localizationValidator, clock);
+        var updateValidator = new UpdateDialogDialogActivityDtoValidator(actorValidator, localizationValidator, clock);
+        var createActivityValidator = new CreateActivityDtoValidator(actorValidator, localizationValidator, clock);
+
+        // Act
+        var createValidation = createValidator.Validate(activity);
+        var updateValidation = updateValidator.Validate(ToUpdateActivityDto(activity));
+        var createActivityValidation = createActivityValidator.Validate(ToCreateActivityDto(activity));
+
+        // Assert
+        const string finiteMessage = "must be a valid, finite date";
+        createValidation.IsValid.Should().BeFalse();
+        updateValidation.IsValid.Should().BeFalse();
+        createActivityValidation.IsValid.Should().BeFalse();
+
+        createValidation.Errors.Should().Contain(x => x.ErrorMessage.Contains(finiteMessage));
+        updateValidation.Errors.Should().Contain(x => x.ErrorMessage.Contains(finiteMessage));
+        createActivityValidation.Errors.Should().Contain(x => x.ErrorMessage.Contains(finiteMessage));
+    }
+
     private static UpdateDialogActivityDto ToUpdateActivityDto(CreateDialogActivityDto source) => new()
     {
         Id = source.Id,

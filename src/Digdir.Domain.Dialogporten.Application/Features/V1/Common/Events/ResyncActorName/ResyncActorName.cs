@@ -1,4 +1,5 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -51,18 +52,19 @@ public sealed class ResyncActorName(
     private async Task UpdateActors(
         PartyNameFound result,
         string actorId,
-        Guid nullActorNameId,
-        CancellationToken cancellationToken
-    )
+        Guid inputActorNameId,
+        CancellationToken cancellationToken)
     {
-        var newActorNameId = await actorNameRepository.GetOrCreateActorName(actorId, result.Name, cancellationToken);
-        if (newActorNameId == nullActorNameId) return;
+        var actorName = new ActorName { Id = inputActorNameId, ActorId = actorId, Name = result.Name };
+        var actualActorNameIdByInput = await actorNameRepository.GetOrCreateActorNames([actorName], cancellationToken);
+        var newActorNameId = actualActorNameIdByInput.Single().Value;
+        if (newActorNameId == inputActorNameId) return;
 
         int updatedRows;
         do
         {
             updatedRows = await db.Actor
-                .Where(x => x.ActorNameEntityId == nullActorNameId)
+                .Where(x => x.ActorNameEntityId == inputActorNameId)
                 .Take(BatchSize)
                 .ExecuteUpdateAsync(
                     setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),
@@ -70,7 +72,7 @@ public sealed class ResyncActorName(
                 );
         } while (updatedRows == BatchSize);
 
-        await DeleteActorName(nullActorNameId, cancellationToken);
+        await DeleteActorName(inputActorNameId, cancellationToken);
     }
 
     private Task<int> DeleteActorName(Guid actorNameId, CancellationToken cancellationToken) =>

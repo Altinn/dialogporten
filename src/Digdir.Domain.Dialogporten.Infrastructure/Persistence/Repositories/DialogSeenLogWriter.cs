@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -12,9 +13,12 @@ internal sealed class DialogSeenLogWriter(
     DialogDbContext db,
     IPartyNameRegistry partyNameRegistry,
     ITransactionTime transactionTime,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IActorNameRepository actorNameRepository,
+    IDomainEventPublisher domainEventPublisher
 ) : IDialogSeenLogWriter
 {
+
     /// <summary>
     /// This method handles everything that needs to be done when a dialog is "seen":
     /// - Flips IsSeenSinceLastContentUpdate to true, unless another thread modified the dialog content
@@ -52,15 +56,27 @@ internal sealed class DialogSeenLogWriter(
         {
             return null;
         }
+        var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
+
+        if (actorNameEntity.ActorId is not null && actorNameEntity.Name is null)
+        {
+            domainEventPublisher.Publish(
+                new ResyncActorNameEvent(
+                    actorNameEntity.Id,
+                    $"Actor name for SeenLog/LabelAssignment is null for dialog {dialog.Id}"
+                )
+            );
+        }
 
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
-        var seenLogWriteResult = await EnsureSeenLog(
+        var newSeenLog = await EnsureSeenLog(
             seenLogId,
             dialog.Id,
-            userId.ExternalIdWithPrefix,
+            actorNameEntity,
             userId.Type,
             transactionTime.Value,
-            cancellationToken);
+            cancellationToken
+        );
 
         dialog.EndUserContext.UpdateSystemLabels(
             addLabels: [],
@@ -68,14 +84,10 @@ internal sealed class DialogSeenLogWriter(
             new LabelAssignmentLogActor
             {
                 ActorTypeId = ActorType.Values.PartyRepresentative,
-                ActorNameEntity = new ActorName
-                {
-                    ActorId = userId.ExternalIdWithPrefix,
-                }
+                ActorNameEntityId = actorNameEntity.Id,
             }
         );
 
-        var newSeenLog = seenLogWriteResult.NewDialogSeenLog;
         var isSeenSinceLastContentUpdateSetToTrue = (await MarkThisRevisionAsSeen(dialog, cancellationToken)) > 0;
 
         return new DialogSeenResult(
@@ -96,69 +108,52 @@ internal sealed class DialogSeenLogWriter(
                                           """, cancellationToken);
     }
 
-    private sealed record EnsureSeenLogResult(
-        DialogSeenLog? NewDialogSeenLog
-    );
-
-    private async Task<EnsureSeenLogResult> EnsureSeenLog(
+    private async Task<DialogSeenLog?> EnsureSeenLog(
         Guid seenLogId,
         Guid dialogId,
-        string actorId,
+        ActorName actorNameEntity,
         DialogUserType.Values userType,
         DateTimeOffset seenAt,
         CancellationToken cancellationToken)
     {
-        var normalizedActorId = actorId.ToLowerInvariant();
-        var actorName = await partyNameRegistry.GetName(normalizedActorId, cancellationToken);
-        if (string.IsNullOrWhiteSpace(actorName))
-        {
-            throw new InvalidOperationException("Unable to look up actor name.");
-        }
-
-        var actorNameId = await EnsureActorName(normalizedActorId, actorName, cancellationToken);
         var actorType = ActorType.Values.PartyRepresentative;
 
         var rowsUpdated = await EnsureSeenLog(seenLogId, dialogId, userType, seenAt, cancellationToken);
-        await EnsureSeenByActor(seenLogId, actorNameId, actorType, cancellationToken);
+        await EnsureSeenByActor(seenLogId, actorNameEntity.Id, actorType, cancellationToken);
 
-        return new EnsureSeenLogResult
-        (
-            rowsUpdated == 0
-                ? null
-                : new DialogSeenLog
+        return rowsUpdated == 0
+            ? null
+            : new DialogSeenLog
+            {
+                Id = seenLogId,
+                CreatedAt = seenAt,
+                SeenBy = new DialogSeenLogSeenByActor
                 {
-                    Id = seenLogId,
-                    CreatedAt = seenAt,
-                    SeenBy = new DialogSeenLogSeenByActor
-                    {
-                        ActorNameEntity = new ActorName
-                        {
-                            ActorId = normalizedActorId,
-                            Name = actorName
-                        },
-                        ActorTypeId = actorType
-                    }
+                    ActorNameEntityId = actorNameEntity.Id,
+                    ActorNameEntity = actorNameEntity,
+                    ActorTypeId = actorType
                 }
-        );
+            };
     }
 
-    private async Task<Guid> EnsureActorName(string actorId, string actorName, CancellationToken cancellationToken)
+    private async Task<ActorName> CreateActorNameEntity(string actorId, CancellationToken ct)
     {
-        await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                       INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt")
-                                                       VALUES ({Guid.CreateVersion7()}, {actorId}, {actorName}, {transactionTime.Value})
-                                                       ON CONFLICT ("ActorId", "Name") DO NOTHING
-                                                       """, cancellationToken);
+        var normalizedActorId = actorId.ToLowerInvariant();
+        var result = await partyNameRegistry.GetName(normalizedActorId, ct);
+        var actorName = result.Match<string?>(
+            found => found.Name,
+            notFound => null,
+            unsupported => throw new InvalidOperationException($"Unable to look up name for actor {actorId}. Reason: {unsupported.Reason}"),
+            unavailable => null
+        );
 
-        return await db.Database
-            .SqlQuery<Guid>($"""
-                             SELECT "Id" AS "Value"
-                             FROM "ActorName"
-                             WHERE "ActorId" = {actorId}
-                               AND "Name" = {actorName}
-                             LIMIT 1
-                             """)
-            .SingleAsync(cancellationToken);
+        var actorNameId = await actorNameRepository.GetOrCreateActorName(normalizedActorId, actorName, ct);
+        return new ActorName
+        {
+            Id = actorNameId,
+            ActorId = normalizedActorId,
+            Name = actorName
+        };
     }
 
     private async Task<int> EnsureSeenLog(
@@ -168,16 +163,19 @@ internal sealed class DialogSeenLogWriter(
         DateTimeOffset seenAt,
         CancellationToken cancellationToken)
     {
-        return await db.Database.ExecuteSqlInterpolatedAsync($"""
-                                                       INSERT INTO "DialogSeenLog" ("Id", "CreatedAt", "DialogId", "EndUserTypeId", "IsViaServiceOwner")
-                                                       VALUES (
-                                                           {seenLogId},
-                                                           {seenAt},
-                                                           {dialogId},
-                                                           {(int)userType},
-                                                           {userType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson})
-                                                       ON CONFLICT ("Id") DO NOTHING
-                                                       """, cancellationToken);
+        return await db.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             INSERT INTO "DialogSeenLog" ("Id", "CreatedAt", "DialogId", "EndUserTypeId", "IsViaServiceOwner")
+             VALUES (
+                 {seenLogId},
+                 {seenAt},
+                 {dialogId},
+                 {(int)userType},
+                 {userType == DialogUserType.Values.ServiceOwnerOnBehalfOfPerson})
+             ON CONFLICT ("Id") DO NOTHING
+             """,
+            cancellationToken
+        );
     }
 
     private async Task EnsureSeenByActor(

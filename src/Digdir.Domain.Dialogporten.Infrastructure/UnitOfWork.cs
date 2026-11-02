@@ -198,7 +198,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             .Entries<ActorName>()
             .Where(e => e.State == EntityState.Added)
             .Select(e => e.Entity)
-            .Where(e => e.ActorId is not null && e.Name is not null)
+            .Where(e => e.ActorId is not null)
             .ToList();
 
         if (addedActorNames.Count == 0)
@@ -212,9 +212,10 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             .ToList();
         var actorIds = actorIdNamePairs.Select(x => x.ActorId).Distinct().ToList();
         var names = actorIdNamePairs.Select(x => x.Name).Distinct().ToList();
+        var hasNull = names.Any(x => x == null);
 
         var existingActorNames = await _dialogDbContext.Set<ActorName>()
-            .Where(x => actorIds.Contains(x.ActorId) && names.Contains(x.Name))
+            .Where(x => actorIds.Contains(x.ActorId) && (names.Contains(x.Name) || (hasNull && x.Name == null)))
             .ToListAsync(cancellationToken);
         var existingByPair = existingActorNames
             .ToDictionary(x => (x.ActorId, x.Name));

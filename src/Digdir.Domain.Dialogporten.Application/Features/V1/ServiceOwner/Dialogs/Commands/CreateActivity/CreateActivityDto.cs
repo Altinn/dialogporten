@@ -10,7 +10,7 @@ public class CreateActivityDto
     /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
     /// If not supplied, a new UUIDv7 will be generated.
     /// If the activity is a duplicate TransmissionOpened activity, it is not stored, the id of the existing
-    /// TransmissionOpened activity is returned instead, and this id cannot be used to look up the activity afterwards.
+    /// TransmissionOpened activity is returned instead, and the supplied id cannot be used to look up the activity afterwards.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
     public Guid? Id { get; set; }

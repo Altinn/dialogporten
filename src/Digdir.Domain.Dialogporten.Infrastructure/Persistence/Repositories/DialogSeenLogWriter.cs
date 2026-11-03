@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
@@ -149,10 +148,7 @@ internal sealed class DialogSeenLogWriter(
         );
 
         var actorNameEntity = new ActorName { ActorId = normalizedActorId, Name = actorName };
-
-        var inputIdByActorNameEntityId = await actorNameRepository.GetOrCreateActorNames([actorNameEntity], ct);
-        actorNameEntity.Id = inputIdByActorNameEntityId[actorNameEntity.Id];
-
+        await actorNameRepository.EnsureActorName(actorNameEntity, ct);
         return actorNameEntity;
     }
 

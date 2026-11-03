@@ -28,7 +28,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         CancellationToken cancellationToken = default)
     {
         var dbContext = eventData.Context;
-        if (dbContext is not IDialogDbContext dialogDbContext)
+        if (dbContext is null)
         {
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
@@ -55,8 +55,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        var actorNames = await _actorNameRepository.GetOrCreateActorNames(addedActorNameEntities, cancellationToken);
-        dialogDbContext.RemapActorNameIds(actorNames);
+        await _actorNameRepository.EnsureActorNames(addedActorNameEntities, cancellationToken);
+
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 

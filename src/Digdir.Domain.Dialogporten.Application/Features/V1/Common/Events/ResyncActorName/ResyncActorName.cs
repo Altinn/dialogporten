@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
@@ -56,9 +57,14 @@ public sealed class ResyncActorName(
         CancellationToken cancellationToken)
     {
         var actorName = new ActorName { Id = inputActorNameId, ActorId = actorId, Name = result.Name };
-        var actualActorNameIdByInput = await actorNameRepository.GetOrCreateActorNames([actorName], cancellationToken);
-        var newActorNameId = actualActorNameIdByInput.Single().Value;
-        if (newActorNameId == inputActorNameId) return;
+        await actorNameRepository.EnsureActorName(actorName, cancellationToken);
+        if (actorName.Id == inputActorNameId)
+        {
+            throw new UnreachableException(
+                "We should never get into this method without an actual actor name. Therefore we " +
+                "should never collide with the 'promise' - that is the actorName with name=null. " +
+                "If we do, it is a bug in the code.");
+        }
 
         int updatedRows;
         do
@@ -67,7 +73,7 @@ public sealed class ResyncActorName(
                 .Where(x => x.ActorNameEntityId == inputActorNameId)
                 .Take(BatchSize)
                 .ExecuteUpdateAsync(
-                    setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),
+                    setters => setters.SetProperty(x => x.ActorNameEntityId, actorName.Id),
                     cancellationToken
                 );
         } while (updatedRows == BatchSize);

@@ -65,7 +65,7 @@ RUN set -eu; \
     rm -rf "${scratch}"
 
 # Podman, with the `docker` command and Docker Compose, for Testcontainers in the integration tests, the E2E
-# launcher's docker-compose-db-redis.yml and building this image in a nested agent.
+# launcher's docker-compose-db-redis.yml and building this image to try a change to it.
 RUN agent-feature install containers
 
 # The overlay storage driver through fuse-overlayfs, since the agent's root filesystem is itself overlayfs.
@@ -73,10 +73,6 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends fuse-overlayfs \
     && rm -rf /var/lib/apt/lists/*
 COPY common/containers-storage.conf /etc/containers/storage.conf
-
-# agentctl and agentd run nested agents, so this agent can try changes to its own definition.
-COPY --from=ghcr.io/digdir/agentctl:v0.1.0-preview.13@sha256:5451dd5e912865d7ed4544f0bf2e6d0912cd274b878515224cd05896a286b28f \
-    /agentctl /agentd /usr/local/bin/
 
 # The repositories to clone at boot, and the boot unit that prepares local development: an HTTPS dev certificate
 # trusted system-wide, a local Ed25519 key pair and the local database connection string in user secrets.
@@ -87,9 +83,7 @@ COPY --chmod=0755 common/dialogporten-dev-init.sh /usr/local/libexec/agent-dialo
 RUN systemctl enable agent-dialogporten-dev-init.service \
     && scratch="$(mktemp -d)" \
     && HOME="${scratch}" TMPDIR="${scratch}" sh -c ' \
-        agentctl --version \
-        && agentd --version \
-        && podman --version \
+        podman --version \
         && fuse-overlayfs --version \
         && zsh --version \
         && psql --version' \

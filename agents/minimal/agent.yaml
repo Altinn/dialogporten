@@ -17,7 +17,6 @@ spec:
       rootFilesystem:
         capacity: "64Gi"
         mode: layered
-      nestedSandboxes: preferred
     initSystem: image
   home:
     source: ../home

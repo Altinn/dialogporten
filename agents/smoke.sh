@@ -23,8 +23,6 @@ zsh --version
 psql --version
 podman --version
 /usr/libexec/docker/cli-plugins/docker-compose version
-agentctl --version
-agentd --version
 
 echo "## container storage"
 # Without a mount program, Podman fails on the agent's overlayfs root with "'overlay' is not supported over

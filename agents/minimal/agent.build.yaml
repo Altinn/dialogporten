@@ -5,8 +5,8 @@ extends: agent.yaml
 metadata:
   name: dialogporten-backend-build
 
-# Builds the image from this checkout, to try a change to the Dockerfile before CI publishes it. Sized to fit inside
-# another agent, yet large enough for the Release build of the solution.
+# Builds the image from this checkout, to try a change to the Dockerfile before CI publishes it. Sized smaller than
+# the published agent, yet large enough for the Release build of the solution.
 spec:
   sandbox:
     image:
@@ -20,4 +20,3 @@ spec:
       rootFilesystem:
         capacity: "32Gi"
         mode: layered
-      nestedSandboxes: null

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.1.0" />
+        <PackageReference Include="Altinn.ApiClients.Maskinporten" Version="10.2.0" />
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
         <PackageReference Include="Dapper" Version="2.1.89" />
         <PackageReference Include="EntityFrameworkCore.Exceptions.PostgreSQL" Version="8.1.3" />

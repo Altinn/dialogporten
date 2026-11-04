@@ -83,6 +83,18 @@ four parallel workflows consume:
 > the step into a reusable `workflow-*.yml` or renaming this file would break
 > publishing.
 
+> **Note:** The SDK NuGet packages are published only by the reusable
+> `workflow-publish-nuget.yml`, which `ci-cd-main.yml`, `ci-cd-staging.yml`,
+> `ci-cd-prod.yml` and `dispatch-publish-nuget.yml` call. It authenticates via
+> NuGet Trusted Publishing over OIDC, so no NuGet API key is stored as a secret.
+> The `NUGET_USER` repository variable holds the nuget.org username of the user
+> who created the Trusted Publishing policy.
+>
+> Unlike npm, nuget.org validates the *called* workflow's **filename**, so the
+> policy names `workflow-publish-nuget.yml` and covers every caller. Renaming
+> that file breaks publishing, and every calling job must grant
+> `id-token: write`.
+
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)
 - Requires specific version input

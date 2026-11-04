@@ -5,6 +5,7 @@ on:
     types: [opened, reopened, synchronize, ready_for_review, converted_to_draft, closed]
     paths:
       - agents/**
+      - global.json
       - .github/workflows/agents-images.yml
       - '!agents/**/*.md'
   push:
@@ -12,6 +13,7 @@ on:
       - main
     paths:
       - agents/**
+      - global.json
       - .github/workflows/agents-images.yml
       - '!agents/**/*.md'
 
@@ -55,6 +57,8 @@ jobs:
           persist-credentials: false
           sparse-checkout: |
             agents
+            global.json
+          sparse-checkout-cone-mode: false
 
       # The containerd image store keeps the image the build step pushes, so the smoke test runs it
       # without a second copy on the runner's disk. The runner's own Docker is switched to it in place:
@@ -131,6 +135,7 @@ jobs:
         run: |
           docker run --rm --entrypoint bash \
             --volume "${PWD}/agents/smoke.sh:/smoke.sh:ro" \
+            --volume "${PWD}/global.json:/global.json:ro" \
             "${SMOKE_IMAGE}" /smoke.sh
 
       - name: Upload image digest

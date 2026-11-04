@@ -1,0 +1,23 @@
+apiVersion: agents.platform/v1alpha1
+kind: AgentVariant
+extends: agent.yaml
+
+metadata:
+  name: dialogporten-backend-build
+
+# Builds the image from this checkout, to try a change to the Dockerfile before CI publishes it. Sized to fit inside
+# another agent, yet large enough for the Release build of the solution.
+spec:
+  sandbox:
+    image:
+      type: build
+      context: ..
+      dockerfile: Dockerfile
+      target: minimal
+    resources:
+      cpu: "3"
+      memory: "6Gi"
+      rootFilesystem:
+        capacity: "32Gi"
+        mode: layered
+      nestedSandboxes: null

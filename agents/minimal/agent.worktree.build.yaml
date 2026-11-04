@@ -1,0 +1,22 @@
+apiVersion: agents.platform/v1alpha1
+kind: AgentVariant
+extends: agent.worktree.yaml
+
+metadata:
+  name: dialogporten-backend-worktree-build
+
+# The worktree variant with the image built from this checkout, sized like the build variant.
+spec:
+  sandbox:
+    image:
+      type: build
+      context: ..
+      dockerfile: Dockerfile
+      target: minimal
+    resources:
+      cpu: "3"
+      memory: "6Gi"
+      rootFilesystem:
+        capacity: "32Gi"
+        mode: layered
+      nestedSandboxes: null

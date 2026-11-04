@@ -3,5 +3,6 @@ agent.*.yaml
 .env
 
 # The repository's own variants.
-!agent.nested.yaml
-!agent.nested-build.yaml
+!agent.build.yaml
+!agent.worktree.yaml
+!agent.worktree.build.yaml

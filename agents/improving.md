@@ -22,9 +22,9 @@ MASKINPORTEN_AT23_ENCODED_JWK=none
 EOF
 chmod 600 ~/nested.env
 cd /home/agent/code/.worktrees/<task>/agents/minimal
-agentctl apply --variant nested-build --name <task>-nested --env-file ~/nested.env --wait
+agentctl apply --variant build --name <task>-nested --env-file ~/nested.env --wait
 ```
 
-`nested-build` builds the image from the worktree, so a change to the `Dockerfile` is tried too. Run in it what
+`build` builds the image from the worktree, so a change to the `Dockerfile` is tried too. Run in it what
 these instructions promise, then delete it. Say in the pull request when a change widens what the agent may reach,
 such as hosts or secrets: that is the team's decision.

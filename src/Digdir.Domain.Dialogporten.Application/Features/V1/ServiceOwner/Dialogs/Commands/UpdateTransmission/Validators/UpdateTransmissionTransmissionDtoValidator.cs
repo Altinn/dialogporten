@@ -17,11 +17,12 @@ internal sealed class UpdateTransmissionTransmissionDtoValidator : AbstractValid
         IValidator<AuthorizationContextDto> authorizationContextValidator)
     {
         // CreatedAt is not validated for InPast, Dialog.VisibleFrom could have set the
-        // transmission CreatedAt to a date in the future. Unlike the other create flows
-        // there is no IsInPast rule here to reject DateTimeOffset.MaxValue, so guard it
-        // explicitly to avoid persisting a PostgreSQL 'infinity' timestamp.
+        // transmission CreatedAt to a date in the future. There is no IsInPast rule here to
+        // reject DateTimeOffset.MaxValue, and this updates an existing transmission in place
+        // (the ICreatableEntity now-fallback does not run), so an explicit MinValue would
+        // persist as '-infinity'. Reject both infinity sentinels; omission is null, not MinValue.
         RuleFor(x => x.CreatedAt)
-            .IsNotMaxValue();
+            .IsFinite();
 
         RuleFor(x => x.IdempotentKey)
             .MinimumLength(Constants.MinIdempotentKeyLength)

@@ -6,7 +6,7 @@
 CREATE OR REPLACE FUNCTION search."EpochToBigintSortKey"(p_ts timestamptz)
 RETURNS bigint
 LANGUAGE sql
-IMMUTABLE
+STABLE
 PARALLEL SAFE
 AS $$
     SELECT CASE p_ts

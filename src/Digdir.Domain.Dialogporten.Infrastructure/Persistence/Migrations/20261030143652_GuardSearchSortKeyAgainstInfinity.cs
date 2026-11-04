@@ -33,7 +33,7 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                 migrationBuilder.Sql(sql);
             }
 
-            migrationBuilder.Sql(@"DROP FUNCTION IF EXISTS search.""EpochToBigintSortKey""(timestamptz)");
+            migrationBuilder.Sql(@"DROP FUNCTION IF EXISTS search.""EpochToBigintSortKey""(timestamptz);");
         }
     }
 }

@@ -6,44 +6,39 @@ namespace Digdir.Domain.Dialogporten.Application.Unit.Tests.Common.Extensions.Fl
 
 public class FluentValidationDateTimeOffsetExtensionsTests
 {
-    private sealed record Model(DateTimeOffset Required, DateTimeOffset? Optional);
+    private sealed record Model(DateTimeOffset? CreatedAt);
 
     private sealed class ModelValidator : AbstractValidator<Model>
     {
         public ModelValidator()
         {
-            RuleFor(x => x.Required).IsNotMaxValue();
-            RuleFor(x => x.Optional).IsNotMaxValue();
+            RuleFor(x => x.CreatedAt).IsFinite();
         }
     }
 
     [Fact]
-    public void IsNotMaxValue_Allows_Null_Optional()
+    public void IsFinite_Allows_Null_And_Normal_Dates()
     {
-        var result = new ModelValidator().Validate(new Model(DateTimeOffset.MinValue, Optional: null));
-        result.IsValid.Should().BeTrue();
-    }
+        // null is "not supplied" and must stay valid.
+        new ModelValidator().Validate(new Model(null)).IsValid.Should().BeTrue();
 
-    [Fact]
-    public void IsNotMaxValue_Allows_MinValue_Sentinel_And_Normal_Dates()
-    {
-        // DateTimeOffset.MinValue / default is the "not supplied, use current time" sentinel
-        // (handled by the ICreatableEntity hook) and must remain valid.
         var normal = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
-
-        new ModelValidator().Validate(new Model(DateTimeOffset.MinValue, DateTimeOffset.MinValue))
-            .IsValid.Should().BeTrue();
-        new ModelValidator().Validate(new Model(normal, normal))
-            .IsValid.Should().BeTrue();
+        new ModelValidator().Validate(new Model(normal)).IsValid.Should().BeTrue();
     }
 
-    [Fact]
-    public void IsNotMaxValue_Rejects_MaxValue()
+    [Theory]
+    [MemberData(nameof(InfinitySentinels))]
+    public void IsFinite_Rejects_Infinity_Sentinels(DateTimeOffset value)
     {
-        var result = new ModelValidator().Validate(new Model(DateTimeOffset.MaxValue, DateTimeOffset.MaxValue));
+        var result = new ModelValidator().Validate(new Model(value));
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(x => x.PropertyName == nameof(Model.Required));
-        result.Errors.Should().Contain(x => x.PropertyName == nameof(Model.Optional));
+        result.Errors.Should().Contain(x => x.PropertyName == nameof(Model.CreatedAt));
     }
+
+    public static TheoryData<DateTimeOffset> InfinitySentinels() =>
+    [
+        DateTimeOffset.MinValue, // -> PostgreSQL '-infinity'
+        DateTimeOffset.MaxValue, // -> PostgreSQL 'infinity'
+    ];
 }

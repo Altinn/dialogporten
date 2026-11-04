@@ -20,13 +20,11 @@ on:
         required: false
         default: ${{ github.ref }}
         type: string
-    secrets:
-      NUGET_API_KEY:
-        required: true
 
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 jobs:
   build-and-push:
@@ -62,8 +60,16 @@ jobs:
           name: package
           path: '*.*nupkg'
 
+      # The nuget.org trusted publishing policy names this workflow file, so renaming it breaks publishing.
+      # NUGET_USER must be the nuget.org username of the user who created that policy.
+      - name: Log in to NuGet
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Push to NuGet
         run: dotnet nuget push *.nupkg --source "${NUGET_SOURCE}" --api-key "${NUGET_API_KEY}"
         env:
           NUGET_SOURCE: ${{ inputs.source }}
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}

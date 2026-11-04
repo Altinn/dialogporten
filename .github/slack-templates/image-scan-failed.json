@@ -1,0 +1,42 @@
+{
+  "channel": "${{ env.CHANNEL_ID }}",
+  "text": "Container image scan failed for version ${{ env.VERSION }}",
+  "attachments": [
+    {
+      "color": "#FF0000",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Container image scan",
+            "emoji": true
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Version:* ${{ env.VERSION }}\nThe prod images have HIGH or CRITICAL vulnerabilities with a fix available, or the scan could not complete."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "View Run"
+              },
+              "url": "${{ env.RUN_URL }}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

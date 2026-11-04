@@ -1254,25 +1254,25 @@
       },
       "ZiggyCreatures.FusionCache": {
         "type": "Transitive",
-        "resolved": "2.6.0",
-        "contentHash": "BCe+/SkwQZfaMpq2ZGDZB2pyx6BdGnP+zxqjMM/5K+4PBuH6hljZeIqH4KVzQ26khSbPsQ7IiYZl0Fve4OZOog=="
+        "resolved": "2.9.0",
+        "contentHash": "m2z6LlE4yckDkE95Vha2NH/gPD+iM9PnCUMfe1nfkC+xaiq48S80HI7olnSblVOAHx5OP+VN9vhQoTdZAPZp0g=="
       },
       "ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis": {
         "type": "Transitive",
-        "resolved": "2.6.0",
-        "contentHash": "GHzTt4OVBzVcajgFUJ8oHLmBZJPF+pi044LKG5rTS44ECcSxfzzvSnVZoTPrECbPl3tG96TyiLM+P4uIvzZWPQ==",
+        "resolved": "2.9.0",
+        "contentHash": "1O2IZiNvTgjssKwxuG5yFBHhrcjXDbraaQUbUPBSGM5sdsHNrj5hxNIx6uAXshikSxBibTdPotwTfgZaO4GPjQ==",
         "dependencies": {
           "StackExchange.Redis": "2.10.1",
-          "ZiggyCreatures.FusionCache": "2.6.0"
+          "ZiggyCreatures.FusionCache": "2.9.0"
         }
       },
       "ZiggyCreatures.FusionCache.Locking.AsyncKeyed": {
         "type": "Transitive",
-        "resolved": "2.6.0",
-        "contentHash": "ZuP70BWf96Bxynb4UIzrzaJ3Mi7h1y7eSm6poRxHQQyRjkYJ0s0tmnw4JnlTfpBePepC5/ZZaSp9zAwxcJSNeA==",
+        "resolved": "2.9.0",
+        "contentHash": "jU2QTd6J9j3YHa6Pznuq/vgT5JPRpZMT7deR3iKkiy0MSu0Q250HaBHacrettx7FEPeEOmGpQEAbqCvGhURRrA==",
         "dependencies": {
-          "AsyncKeyedLock": "8.0.2",
-          "ZiggyCreatures.FusionCache": "2.6.0"
+          "AsyncKeyedLock": "8.1.2",
+          "ZiggyCreatures.FusionCache": "2.9.0"
         }
       },
       "ZiggyCreatures.FusionCache.OpenTelemetry": {
@@ -1286,11 +1286,11 @@
       },
       "ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack": {
         "type": "Transitive",
-        "resolved": "2.6.0",
-        "contentHash": "Ew9PPsuInBDaqwT4M9f6GWoFeBGS8XgDvQ9fRX5mKQ4WcEFX04F9wGqurWNPVxPD9/6ddFsDl7bTcnoUzAHr3w==",
+        "resolved": "2.9.0",
+        "contentHash": "5gK0hxCo5ZuyyuAvSP3XQotbmfUSWuISJXJLjQ3wMQzJRcpEZKJSm8RJEzNw6Hy9k2+75Y8OYmjLsehGZJBwXQ==",
         "dependencies": {
-          "MessagePack": "3.1.4",
-          "ZiggyCreatures.FusionCache": "2.6.0"
+          "MessagePack": "3.1.7",
+          "ZiggyCreatures.FusionCache": "2.9.0"
         }
       },
       "digdir.domain.dialogporten.application": {
@@ -1340,9 +1340,9 @@
           "Npgsql": "[10.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )",
           "Polly.Contrib.WaitAndRetry": "[1.1.1, )",
-          "ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis": "[2.6.0, )",
-          "ZiggyCreatures.FusionCache.Locking.AsyncKeyed": "[2.6.0, )",
-          "ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack": "[2.6.0, )"
+          "ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis": "[2.9.0, )",
+          "ZiggyCreatures.FusionCache.Locking.AsyncKeyed": "[2.9.0, )",
+          "ZiggyCreatures.FusionCache.Serialization.NeueccMessagePack": "[2.9.0, )"
         }
       },
       "digdir.library.entity.abstractions": {

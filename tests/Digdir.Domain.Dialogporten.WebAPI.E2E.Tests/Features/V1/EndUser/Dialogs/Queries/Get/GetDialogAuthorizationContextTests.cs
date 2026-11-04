@@ -275,6 +275,7 @@ public class GetDialogAuthorizationContextTests(WebApiE2EFixture fixture) : E2ET
         var disabled = content.Transmissions.Should().ContainSingle(
             "the excluded transmission left the list, the disabled one did not").Subject;
         disabled.IsAuthorized.Should().BeFalse();
+        disabled.Content.Should().NotBeNull("disabled keeps the transmission legible");
         disabled.Content.Title.Should().NotBeNull("disabled keeps the transmission legible");
         disabled.Sender.Should().NotBeNull();
 

@@ -77,10 +77,10 @@ public class DialogTransmission
     public bool IsOpened { get; set; }
 
     /// <summary>
-    /// The transmission unstructured text content.
+    /// The transmission unstructured text content. May be null for API-only transmissions, which are not required to have content.
     /// </summary>
     [JsonPropertyName("content")]
-    public required DialogTransmissionContent Content { get; set; }
+    public DialogTransmissionContent? Content { get; set; }
 
     /// <summary>
     /// The transmission-level attachments.

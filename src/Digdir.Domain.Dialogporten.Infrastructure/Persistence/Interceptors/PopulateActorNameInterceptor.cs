@@ -19,15 +19,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     public PopulateActorNameInterceptor(
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IPartyNameRegistry partyNameRegistry)
+        IPartyNameRegistry partyNameRegistry
+    )
     {
-        ArgumentNullException.ThrowIfNull(transactionTime);
-        ArgumentNullException.ThrowIfNull(domainContext);
-        ArgumentNullException.ThrowIfNull(partyNameRegistry);
-
-        _domainContext = domainContext;
-        _partyNameRegistry = partyNameRegistry;
-        _transactionTime = transactionTime;
+        _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
+        _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
+        _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -48,7 +45,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        var actorNameEntities = dbContext.ChangeTracker
+        var addedActorNameEntities = dbContext.ChangeTracker
             .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
             .Where(e => e.Entity.ActorId is not null || e.Entity.Name is not null)
@@ -60,18 +57,30 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             })
             .ToList();
 
-        if (!await TrySetActorNames(actorNameEntities, cancellationToken))
+        if (addedActorNameEntities.Count == 0)
+        {
+            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        }
+
+        if (!await TrySetActorNames(addedActorNameEntities, cancellationToken))
         {
             _hasBeenExecuted = true;
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        await ConsolidateActorNameInstances(dbContext, actorNameEntities, cancellationToken);
+        await ConsolidateActorNameInstances(dbContext, addedActorNameEntities, cancellationToken);
         _hasBeenExecuted = true;
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private async Task<bool> TrySetActorNames(IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
+    /// <summary>
+    /// Actor names are enrichment, not validation. If the party name registry is unavailable or has no name
+    /// for the actor, we persist the actor with a null name instead of failing the request. Null names are
+    /// filled in later by the ResyncActorNameEvent handler.
+    /// </summary>
+    private async Task<bool> TrySetActorNames(
+        IEnumerable<ActorName> actorNameEntities,
+        CancellationToken cancellationToken)
     {
         var relevantActorNameEntities = actorNameEntities
             .Where(x => x.ActorId is not null)
@@ -81,26 +90,29 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 .Select(x => x.ActorId!)
                 .Distinct()
                 .Select(x => ActorNameByActorId(x, cancellationToken))))
-            .ToDictionary(x => x.ActorId, x => x.ActorName);
+            .ToDictionary(x => x.ActorId, x => x.Result);
 
         foreach (var actorName in relevantActorNameEntities)
         {
-            actorName.Name = actorNameById[actorName.ActorId!];
-
-            if (string.IsNullOrWhiteSpace(actorName.Name))
-            {
-                _domainContext.AddError(nameof(Actor.ActorNameEntity.ActorId), $"Unable to look up name for actor id: {actorName.ActorId}");
-            }
+            actorNameById[actorName.ActorId!].Switch(
+                found => actorName.Name = found.Name,
+                notFound => actorName.Name = null,
+                unsupported => _domainContext.AddError(
+                    nameof(Actor.ActorNameEntity.ActorId),
+                    $"Unable to look up name for actor id: {actorName.ActorId}. Reason: {unsupported.Reason}"),
+                unavailable => actorName.Name = null
+            );
         }
 
         return _domainContext.IsValid;
     }
 
-    private async Task ConsolidateActorNameInstances(DbContext dbContext, List<ActorName> added, CancellationToken cancellationToken)
+    private async Task ConsolidateActorNameInstances(
+        DbContext dbContext,
+        List<ActorName> added,
+        CancellationToken cancellationToken
+    )
     {
-        // There may be an actorNameEntity with an Id where name is null.
-        // One can argue that this method should consider those as well.
-        // however we chose to put that responsibility to actorName clean up job.
         var existing = await GetExistingActorNames(dbContext, added, cancellationToken);
 
         var actorNamePairs = added
@@ -122,6 +134,8 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
             mainActorName.EnsureId();
             mainActorName.Create(_transactionTime.Value);
+            mainActorName.RequestActorNameResync($"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name");
+
             foreach (var actor in discardActorNames.SelectMany(x => x.ActorEntities))
             {
                 actor.ActorNameEntity = mainActorName;
@@ -134,10 +148,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         }
     }
 
-    private async Task<(string ActorId, string? ActorName)> ActorNameByActorId(string actorId, CancellationToken cancellationToken) =>
+    private async Task<(string ActorId, GetPartyNameResult Result)> ActorNameByActorId(string actorId,
+        CancellationToken cancellationToken) =>
         (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
 
-    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext, IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
+    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext,
+        IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
     {
         // Why are we doing "composite key contains" this way, you ask?
         // See https://stackoverflow.com/a/26201371/2301766

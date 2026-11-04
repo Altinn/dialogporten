@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
@@ -14,13 +15,19 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
+using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.SaveChangesTestInterceptors;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
+using MessagePack.Resolvers;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf;
+using ZiggyCreatures.Caching.Fusion;
+using static Digdir.Domain.Dialogporten.Infrastructure.IServiceCollectionExtensions;
 using DialogDtoSO = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogDto;
 using DialogDtoEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using GetDialogQueryEU = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.GetDialogQuery;
@@ -82,12 +89,6 @@ namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Applic
 
 public static class IFlowStepExtensions
 {
-    private const string DialogIdKey = "DialogId";
-    private const string TransmissionIdKey = "TransmissionId";
-    private const string PartyKey = "Party";
-    private const string ActivityIdKey = "ActivityId";
-    private const string ServiceResource = "ServiceResource";
-
     public static IFlowExecutor<CreateDialogSuccess> CreateDialogs(this IFlowStep step,
         params CreateDialogCommand[] commands)
     {
@@ -122,8 +123,7 @@ public static class IFlowStepExtensions
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
         Guid? ifMatchDialogRevision = null) =>
-        step.CreateTransmission((_, _) =>
-            { }, ifMatchDialogRevision);
+        step.CreateTransmission((_, _) => { }, ifMatchDialogRevision);
 
     public static IFlowExecutor<CreateTransmissionResult> CreateTransmission(
         this IFlowStep step,
@@ -208,12 +208,15 @@ public static class IFlowStepExtensions
             return command;
         });
 
-    public static IFlowExecutor<SearchLabelAssignmentLogResult> GetLabelAssignmentLogs(this IFlowStep step) =>
+    public static IFlowExecutor<SearchLabelAssignmentLogResult> GetLabelAssignmentLogs(
+        this IFlowStep step,
+        Guid? dialogId = null
+    ) =>
         step.SendCommand(x =>
         {
             var command = new SearchLabelAssignmentLogQuery
             {
-                DialogId = x.GetDialogId(),
+                DialogId = dialogId ?? x.GetDialogId(),
             };
             return command;
         });
@@ -272,6 +275,46 @@ public static class IFlowStepExtensions
         {
             step.Context.Application.ConfigureServices(configure);
             return x;
+        });
+
+    public static IFlowStep EnableCaching(this IFlowStep step) =>
+        step.ConfigureServices(x =>
+        {
+            x.RemoveAll<IFusionCacheProvider>();
+            x.AddMemoryCache();
+            x.AddFusionCacheNeueccMessagePackSerializer(ContractlessStandardResolverAllowPrivate.Options);
+
+            x.ConfigureCaches();
+        });
+
+    public static IFlowStep ExpireAllCaches(this IFlowStep step) =>
+        step.Do(ctx =>
+        {
+            foreach (var cache in GetCaches(ctx.Application))
+            {
+                cache.Clear(allowFailSafe: true);
+            }
+        });
+
+    public static IFlowStep DeleteAllCaches(this IFlowStep step) =>
+        step.Do(ctx =>
+        {
+            foreach (var cache in GetCaches(ctx.Application))
+            {
+                cache.Clear(allowFailSafe: false);
+            }
+        });
+
+    public static IFlowStep WithSaveChangesInterceptor(this IFlowStep step, ISaveChangesInterceptor interceptor) =>
+        step.Do(x =>
+        {
+            x.Application.ConfigureServices(services => services.AddSingleton(interceptor));
+        });
+
+    public static IFlowStep WithSaveChangesInterceptor<T>(this IFlowStep s) where T : class, ISaveChangesTestInterceptor =>
+        s.Do(x =>
+        {
+            x.Application.ConfigureServices(services => services.AddSingleton<ISaveChangesTestInterceptor, T>());
         });
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step,
@@ -377,14 +420,15 @@ public static class IFlowStepExtensions
                         ExpiresAt = x.ExpiresAt,
                         AuthorizationContext = x.AuthorizationContext.ToUpdateTransmissionChildContext()
                     }).ToList(),
-                    NavigationalActions = transmission.NavigationalActions.Select(x => new TransmissionNavigationalActionDto
-                    {
-                        Id = x.Id,
-                        Title = x.Title,
-                        Url = x.Url,
-                        ExpiresAt = x.ExpiresAt,
-                        AuthorizationContext = x.AuthorizationContext.ToUpdateTransmissionChildContext()
-                    }).ToList(),
+                    NavigationalActions = transmission.NavigationalActions.Select(x =>
+                        new TransmissionNavigationalActionDto
+                        {
+                            Id = x.Id,
+                            Title = x.Title,
+                            Url = x.Url,
+                            ExpiresAt = x.ExpiresAt,
+                            AuthorizationContext = x.AuthorizationContext.ToUpdateTransmissionChildContext()
+                        }).ToList(),
                 };
 
                 var updateTransmissionCommand = new UpdateTransmissionCommand
@@ -569,14 +613,15 @@ public static class IFlowStepExtensions
             });
     }
 
-    public static IFlowExecutor<GetActivityResult> GetActivity(
-        this IFlowStep<CreateActivityResult> step) =>
-        step.AssertResult<CreateActivitySuccess>()
-            .SendCommand(ctx => new GetActivityQuery
-            {
-                DialogId = ctx.GetDialogId(),
-                ActivityId = ctx.GetActivityId()
-            });
+    public static IFlowExecutor<GetActivityResult> GetActivity<TIn>(
+        this IFlowStep<TIn> step,
+        Guid? activityId = null
+    ) =>
+        step.SendCommand(ctx => new GetActivityQuery
+        {
+            DialogId = ctx.GetDialogId(),
+            ActivityId = activityId ?? ctx.GetActivityId()
+        });
 
     public static IFlowExecutor<TIn> Modify<TIn>(
         this IFlowStep<TIn> step,
@@ -731,8 +776,8 @@ public static class IFlowStepExtensions
 
     private static GetDialogQuerySO CreateGetServiceOwnerDialogQuery(Guid id) => new() { DialogId = id };
 
-    private static Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.AuthorizationContextDto? ToUpdateTransmissionChildContext(
-        this Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.AuthorizationContextDto? source) =>
+    private static AuthorizationContextDto? ToUpdateTransmissionChildContext(
+        this Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.AuthorizationContextDto? source) =>
         source is null
             ? null
             : new()
@@ -746,12 +791,26 @@ public static class IFlowStepExtensions
                 UnauthorizedPresentation = source.UnauthorizedPresentation
             };
 
-    private static Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts.DialogPartyCheckDto ToUpdateDialogPartyCheck(
-        this Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogPartyCheckDto source) => new()
+    private static DialogPartyCheckDto ToUpdateDialogPartyCheck(
+        this Application.Features.V1.ServiceOwner.Dialogs.Queries.Get.DialogPartyCheckDto source) => new()
         {
             AccessRestriction = source.AccessRestriction,
             ViaParty = source.ViaParty,
             ServiceResource = source.ServiceResource,
             Action = source.Action
         };
+
+    private static IEnumerable<IFusionCache> GetCaches(DialogApplication application)
+    {
+        var serviceProvider = application.GetServiceProvider();
+        var cacheProvider = serviceProvider.GetRequiredService<IFusionCacheProvider>();
+        var cacheRegistrations = serviceProvider.GetServices<FusionCacheRegistration>().ToList();
+
+        if (cacheRegistrations.Count == 0)
+        {
+            throw new InvalidOperationException("No Caches found. Did you forget to call EnableCache?");
+        }
+
+        return cacheRegistrations.Select(registration => cacheProvider.GetCache(registration.CacheName));
+    }
 }

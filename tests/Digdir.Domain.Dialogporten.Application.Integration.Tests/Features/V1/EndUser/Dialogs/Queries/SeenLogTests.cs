@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -8,13 +9,17 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Events;
 using Digdir.Domain.Dialogporten.Domain.Parties;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using static Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry.IPartyNameRegistryTransport;
 using DialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Get.DialogDto;
 using SearchDialogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogDto;
 using SearchDialogSeenLogDto = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search.DialogSeenLogDto;
@@ -189,24 +194,144 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
     }
 
     [Fact]
-    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs_And_One_Pair_Of_Events() => FlowBuilder.For(Application)
-        .CreateSimpleDialog()
-        .ConsumeEvents((x, ctx) =>
-        {
-            x.Count.Should().Be(1);
-            ((DialogCreatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
-        })
-        .GetEndUserDialog()
-        .GetEndUserDialog()
-        .GetEndUserSeenLogs()
-        .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
-        {
-            x.Count.Should().Be(1);
-            var events = ctx.Application.GetPublishedEvents();
-            events.Count.Should().Be(2);
-            ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
-            ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
-        });
+    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs_And_One_Pair_Of_Events()
+    {
+        var firstSeenLogId = Guid.Empty;
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConsumeEvents((x, ctx) =>
+            {
+                x.Count.Should().Be(1);
+                ((DialogCreatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+            })
+            .GetEndUserDialog()
+            .GetEndUserSeenLogs()
+            .AssertResult<List<SearchSeenLogDto>>((x, ctx) =>
+            {
+                x.Count.Should().Be(1);
+                x[0].Id.Should().NotBeEmpty();
+                firstSeenLogId = x[0].Id;
+                var events = ctx.Application.GetPublishedEvents();
+                events.Count.Should().Be(2);
+                ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
+                ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
+            })
+            .GetEndUserDialog()
+            .GetEndUserSeenLogs()
+            .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
+            {
+                x.Count.Should().Be(1);
+                x[0].Id.Should().Be(firstSeenLogId);
+                var events = ctx.Application.GetPublishedEvents();
+                events.Count.Should().Be(2);
+                ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
+                ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
+            });
+    }
+
+
+    [Fact]
+    public Task Multiple_Gets_Should_Only_Create_One_SeenLogs_And_One_Pair_Of_Events_Even_When_Party_Name_Registry_Is_Down()
+    {
+        var firstSeenLogId = Guid.Empty;
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConsumeEvents((x, ctx) =>
+            {
+                x.Count.Should().Be(1);
+                ((DialogCreatedDomainEvent)x[0]).DialogId.Should().Be(ctx.GetDialogId());
+            })
+            .ConfigurePartyNameRegistry(p =>
+            {
+                p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                    .Returns(TestPartyNameRegistry.InternalServerError);
+            })
+            .GetEndUserDialog()
+            .GetEndUserSeenLogs()
+            .AssertResult<List<SearchSeenLogDto>>((x, ctx) =>
+            {
+                x.Count.Should().Be(1);
+                x[0].Id.Should().NotBeEmpty();
+                x[0].SeenBy.ActorName.Should().BeNull();
+                firstSeenLogId = x[0].Id;
+
+                var events = ctx.Application.GetPublishedEvents();
+                events.Count.Should().Be(3);
+                ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
+                ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
+
+                var resyncActorNameEvent = (ResyncActorNameEvent)events[2];
+                resyncActorNameEvent.ActorNameId.Should().NotBeEmpty();
+                resyncActorNameEvent.Reason.Should().NotBeNullOrEmpty();
+            })
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetEndUserDialog()
+            .GetEndUserSeenLogs()
+            .ExecuteAndAssert<List<SearchSeenLogDto>>((x, ctx) =>
+            {
+                x.Count.Should().Be(1);
+                x[0].Id.Should().Be(firstSeenLogId);
+                x[0].SeenBy.ActorName.Should().Be("Brando Sando");
+                var events = ctx.Application.GetPublishedEvents();
+                events.Count.Should().Be(0);
+            });
+    }
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Resync_Should_Throw_And_Keep_Null_Name_While_Party_Name_Registry_Is_Still_Failing(string failHow)
+    {
+        ResyncActorNameEvent? resyncEvent = null;
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .ConsumeEvents()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Unknown failhow {failHow}");
+                }
+            })
+            .GetEndUserDialog()
+            .Do(async ctx =>
+            {
+                resyncEvent = ctx.Application.GetPublishedEvents().OfType<ResyncActorNameEvent>().Single();
+
+                // The handler throws so that the message bus retries the event later
+                var consume = () => ctx.Application.PublishEvents();
+                await consume.Should().ThrowAsync<InvalidOperationException>();
+            })
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(x =>
+                x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull())
+            .ResetPartyNameRegistry()
+            .Do(async ctx =>
+            {
+                // Simulate the message bus retrying the failed event once the registry has recovered
+                using var scope = ctx.Application.GetServiceProvider().CreateScope();
+                var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
+                resyncEvent.Should().NotBeNull();
+                await publisher.Publish(resyncEvent);
+            })
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando"));
+    }
 
     [Fact]
     public Task Multiple_Gets_Around_Update_Should_Create_Multiple_SeenLogs_And_Events() => FlowBuilder.For(Application)
@@ -304,6 +429,91 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
             .GetEndUserDialog()
             .ExecuteAndAssert<DialogDto>(x =>
                 x.SeenSinceLastUpdate.Should().ContainSingle().Which.IsCurrentEndUser.Should().BeTrue());
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Party_Name_Register_Down_Or_No_Results_Should_Fallback_To_Async_Name_Fetch(string failHow) =>
+        FlowBuilder.For(Application)
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .ConsumeEvents()
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
+                }
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Brando Sando");
+                }
+            );
+
+    [Theory]
+    [InlineData("InternalServerError")]
+    [InlineData("HttpRequestException")]
+    [InlineData("NoMatch")]
+    public Task Party_Name_Register_Down_Or_No_Results_Should_Fallback_To_Async_Name_Fetch_For_System_User(string failHow) =>
+        FlowBuilder.For(Application)
+            .AsSystemUser()
+            .ConfigurePartyNameRegistry(p =>
+            {
+                switch (failHow)
+                {
+                    case "InternalServerError":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.InternalServerError);
+                        break;
+                    case "HttpRequestException":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Throws(new HttpRequestException());
+                        break;
+                    case "NoMatch":
+                        p.QueryPartyNameResponse(Arg.Any<NameLookup>(), Arg.Any<CancellationToken>())
+                            .Returns(TestPartyNameRegistry.OkNoMatch());
+                        break;
+                    default: throw new UnreachableException($"Uknown failhow {failHow}");
+                }
+            })
+            .ConsumeEvents()
+            .CreateSimpleDialog()
+            .GetEndUserDialog()
+            .AssertResult<DialogDto>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().BeNull();
+                }
+            )
+            .ResetPartyNameRegistry()
+            .ConsumeEvents()
+            .GetEndUserDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                {
+                    x.SeenSinceLastUpdate.Should().ContainSingle().Which.SeenBy.ActorName.Should().Be("Systembruker");
+                }
+            );
 
     private static void BothSeenLogsContainsOneHashedEntry(DialogDto x)
     {

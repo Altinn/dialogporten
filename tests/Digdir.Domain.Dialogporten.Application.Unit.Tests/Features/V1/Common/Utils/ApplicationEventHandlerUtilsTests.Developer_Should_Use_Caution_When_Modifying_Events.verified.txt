@@ -1,4 +1,5 @@
 ﻿[
+  Digdir.Domain.Dialogporten.Domain.Actors.Events.ResyncActorNameEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.Activities.DialogActivityCreatedDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogCreatedDomainEvent,
   Digdir.Domain.Dialogporten.Domain.Dialogs.Events.DialogDeletedDomainEvent,

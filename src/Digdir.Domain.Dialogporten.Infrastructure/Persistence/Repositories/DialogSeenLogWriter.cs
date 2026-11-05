@@ -148,7 +148,7 @@ internal sealed class DialogSeenLogWriter(
         );
 
         var actorNameEntity = new ActorName { ActorId = normalizedActorId, Name = actorName };
-        return await actorNameRepository.EnsureActorName(db, actorNameEntity, ct);
+        return await actorNameRepository.EnsureActorName(actorNameEntity, ct);
     }
 
     private async Task<int> EnsureSeenLog(

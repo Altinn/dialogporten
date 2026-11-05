@@ -176,8 +176,6 @@ public static class InfrastructureExtensions
             // Feature Metrics
             .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
 
-        services.TryAddTransient(typeof(Lazy<>), typeof(LazyService<>));
-
         services.AddFusionCacheNeueccMessagePackSerializer(ContractlessStandardResolverAllowPrivate.Options);
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
         services.AddFusionCacheStackExchangeRedisBackplane(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
@@ -473,5 +471,3 @@ public static class InfrastructureExtensions
             .AddMaskinportenHttpMessageHandler<TClientDefinition, TClient>(configureClientDefinition);
     }
 }
-
-internal sealed class LazyService<T>(IServiceProvider provider) : Lazy<T>(provider.GetRequiredService<T>) where T : notnull;

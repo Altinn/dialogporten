@@ -9,20 +9,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class ActorNameRepository(ITransactionTime transactionTime) : IActorNameRepository
+internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime transactionTime) : IActorNameRepository
 {
-    public async Task<ActorName> EnsureActorName(DbContext db, ActorName actorName, CancellationToken cancellationToken)
+    public async Task<ActorName> EnsureActorName(ActorName actorName, CancellationToken cancellationToken)
     {
-        var names = await EnsureActorNames(db, [actorName], cancellationToken);
+        var names = await EnsureActorNames([actorName], cancellationToken);
         return names.Single();
     }
 
     public async Task<List<ActorName>> EnsureActorNames(
-        DbContext db,
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {
-        db.ChangeTracker.AutoDetectChangesEnabled = false;
+        using var _ = db.DisableAutoDetectChanges();
+        db.ChangeTracker.DetectChanges();
+
         var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(db, actorNames);
         var maps = await GetOrCreateActorNames(db, consolidatedActorNames, cancellationToken);
 

@@ -10,12 +10,12 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
-    private readonly IActorNameRepository _actorNameRepository;
+    private readonly Lazy<IActorNameRepository> _actorNameRepository;
 
     public PopulateActorNameInterceptor(
         IDomainContext domainContext,
         IPartyNameRegistry partyNameRegistry,
-        IActorNameRepository actorNameRepository)
+        Lazy<IActorNameRepository> actorNameRepository)
     {
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
@@ -55,7 +55,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        await _actorNameRepository.EnsureActorNames(dbContext, addedActorNameEntities, cancellationToken);
+        await _actorNameRepository.Value.EnsureActorNames(addedActorNameEntities, cancellationToken);
 
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }

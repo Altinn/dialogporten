@@ -33,13 +33,19 @@ loadEnv() {
 
   if [[ -n "$env_file" ]]; then
     echo "Loading environment from $env_file"
-    # Variables already exported in the shell (such as WEBAPI_PORT) take precedence over the env file.
-    local shell_env
-    shell_env="$(export -p)"
+    # Ports exported in the shell take precedence over the env file. Everything else in it, such as the
+    # LocalDevelopment__* flags that make a run valid, stays pinned.
+    local -A shell_ports
+    local name
+    for name in WEBAPI_PORT GRAPHQL_PORT SERVICE_PORT; do
+      [[ -n "${(P)name:-}" ]] && shell_ports[$name]="${(P)name}"
+    done
     set -a
     source "$env_file"
     set +a
-    eval "$shell_env"
+    for name in ${(k)shell_ports}; do
+      export "$name=${shell_ports[$name]}"
+    done
   fi
 }
 

@@ -61,7 +61,7 @@ LocalDevelopment__UseLocalMetricsAggregationStorage=true
 literal string `local-development-jws`, while the E2E tests verify real dialog token
 signatures against the JWKS endpoint (`Expected a compact JWS with three parts, got 1`).
 
-Optional overrides (set in `.env` or exported in the shell; the shell takes precedence):
+Optional overrides (set in `.env` or exported in the shell; for these three, the shell takes precedence over `.env`, while every other value in `.env` wins over the shell — use `ENV_FILE` to change those):
 ```bash
 WEBAPI_PORT=7215
 GRAPHQL_PORT=5180

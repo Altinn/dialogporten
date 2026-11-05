@@ -103,7 +103,7 @@ type ServerConfiguration = {
 @description('Extensions to allow-list in azure.extensions in addition to the ones the application schema needs (PG_TRGM, BTREE_GIN). Use upper case, as Azure reports them.')
 param additionalExtensions string[] = []
 
-@description('Additional PostgreSQL server parameters to persist as user overrides. Values must not duplicate the module-managed base/query-store settings.')
+@description('Additional PostgreSQL server parameters to persist as user overrides. Must not include the parameters this module manages (moduleManagedServerConfigurationNames).')
 param additionalServerConfigurations ServerConfiguration[] = []
 
 @description('Static PostgreSQL server parameters to persist but not apply unless applyStaticServerConfigurations is true.')
@@ -229,6 +229,27 @@ var staticServerConfigurationStaticChecks = [
 var staticServerConfigurationsContainOnlyStatic = !contains(staticServerConfigurationStaticChecks, false)
   ? true
   : fail('Only known static PostgreSQL server parameters can be deployed through staticServerConfigurations.')
+
+// Parameters set by this module's own configuration resources. The additionalServerConfigurations loop
+// depends on those resources, even when their condition is false, so an entry with one of these names
+// would depend on itself and ARM rejects the whole template.
+var moduleManagedServerConfigurationNames = [
+  'azure.extensions'
+  'idle_in_transaction_session_timeout'
+  'track_io_timing'
+  'pg_qs.query_capture_mode'
+  'pgms_wait_sampling.query_capture_mode'
+  'index_tuning.mode'
+]
+var additionalServerConfigurationNames = [
+  for configuration in additionalServerConfigurations: toLower(configuration.name)
+]
+var additionalServerConfigurationsAvoidModuleManaged = empty(intersection(
+    additionalServerConfigurationNames,
+    moduleManagedServerConfigurationNames
+  ))
+  ? true
+  : fail('additionalServerConfigurations must not set azure.extensions, idle_in_transaction_session_timeout, track_io_timing, pg_qs.query_capture_mode, pgms_wait_sampling.query_capture_mode or index_tuning.mode, which this module manages. Use additionalExtensions, enableTrackIoTiming, enableQueryPerformanceInsight or enableIndexTuning instead.')
 
 // Note: This provisions only the storage primitives used for PostgreSQL restores. The actual Azure Backup vault/RSV is clickopsed for now.
 module backupVaultStorageAccount '../storageAccount/main.bicep' = if (enableBackupVault) {
@@ -407,7 +428,7 @@ resource index_tuning_mode 'Microsoft.DBforPostgreSQL/flexibleServers/configurat
 }
 
 @batchSize(1)
-resource additionalPostgresServerConfigurations 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = [for configuration in additionalServerConfigurations: if (additionalServerConfigurationsAreRestartSafe) {
+resource additionalPostgresServerConfigurations 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2025-08-01' = [for configuration in additionalServerConfigurations: if (additionalServerConfigurationsAreRestartSafe && additionalServerConfigurationsAvoidModuleManaged) {
   parent: postgres
   name: configuration.name
   properties: {

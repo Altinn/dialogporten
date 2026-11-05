@@ -31,7 +31,7 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
             .Join(maps,
                 actorName => actorName.Id,
                 map => map.InputActorNameId,
-                (actorName, mapping) => (actorName, mapping.ActualActorNameId))
+                (actorName, mapping) => (actorName, mapping.ActualActorNameId, mapping.ActualCreatedAt))
             .ToList();
 
         if (actorNameIdTuples.Count != consolidatedActorNames.Count)
@@ -42,11 +42,12 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
                 "This indicates a bug in the code or a data integrity issue.");
         }
 
-        foreach (var (actorName, actualActorNameId) in actorNameIdTuples)
+        foreach (var (actorName, actualActorNameId, actualCreatedAt) in actorNameIdTuples)
         {
             var entry = db.Entry(actorName);
             entry.State = EntityState.Detached;
             actorName.Id = actualActorNameId;
+            actorName.CreatedAt = actualCreatedAt;
             entry.OriginalValues.SetValues(actorName);
             entry.State = EntityState.Unchanged;
         }
@@ -146,7 +147,8 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
                  SELECT * FROM concurrently_inserted_actor_names
              )
              SELECT i."Id"          AS "InputActorNameId",
-                    r."Id"          AS "ActualActorNameId"
+                    r."Id"          AS "ActualActorNameId",
+                    r."CreatedAt"   AS "ActualCreatedAt"
              FROM input_rows i
              JOIN resolved r
                ON r."ActorId" IS NOT DISTINCT FROM i."ActorId"
@@ -159,5 +161,8 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
             .ToList();
     }
 
-    private sealed record ActorNameIdMapping(Guid InputActorNameId, Guid ActualActorNameId);
+    private sealed record ActorNameIdMapping(
+        Guid InputActorNameId,
+        Guid ActualActorNameId,
+        DateTimeOffset ActualCreatedAt);
 }

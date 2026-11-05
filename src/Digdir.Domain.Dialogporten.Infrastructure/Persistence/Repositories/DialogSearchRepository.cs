@@ -415,6 +415,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
     public async Task<Dictionary<Guid, DataContentDto>> FetchContentByDialogId(
         Guid[] dialogIds,
         int userAuthLevel,
+        bool systemUser,
         CancellationToken cancellationToken)
     {
         var parameters = new
@@ -429,6 +430,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             )
             SELECT d."Id" AS dialogId
                  , COALESCE(r."MinimumAuthenticationLevel", 0) AS authLevel
+                 , COALESCE(r."MinimumSystemUserAuthenticationLevel", null) AS systemUserAuthLevel
                  , c."TypeId"
                  , c."MediaType"
                  , l."LanguageCode"
@@ -447,10 +449,14 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
         var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
         var rawRows = await connection.QueryAsync<RawContentRow>(command);
         return rawRows
-            .GroupBy(x => new { x.DialogId, x.AuthLevel })
+            .GroupBy(x => new { x.DialogId, x.AuthLevel, x.SystemUserAuthLevel })
             .ToDictionary(x => x.Key.DialogId, row =>
             {
-                var hasRequiredAuth = row.Key.AuthLevel <= userAuthLevel;
+                var level = systemUser ?
+                    row.Key.SystemUserAuthLevel ?? row.Key.AuthLevel : // Use auth level if system user auth level is null
+                    row.Key.AuthLevel;
+
+                var hasRequiredAuth = level <= userAuthLevel;
                 var contentValues = row
                     .GroupBy(r => new { r.TypeId, r.MediaType })
                     .Select(x => new DataContentValueDto(TypeId: x.Key.TypeId, MediaType: x.Key.MediaType, Value: x
@@ -680,7 +686,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
         })
         .FirstOrDefault();
 
-    private sealed record RawContentRow(Guid DialogId, int AuthLevel, DialogContentType.Values TypeId, string MediaType,
+    private sealed record RawContentRow(Guid DialogId, int AuthLevel, int? SystemUserAuthLevel, DialogContentType.Values TypeId, string MediaType,
         string LanguageCode, string Value);
     private sealed record RawEndUserContextRow(Guid DialogId, Guid Revision, SystemLabel.Values SystemLabelId);
     private sealed class RawEndUserContextListItemRow

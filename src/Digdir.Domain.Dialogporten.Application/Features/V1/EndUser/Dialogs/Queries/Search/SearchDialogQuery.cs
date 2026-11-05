@@ -364,7 +364,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private async Task<Dictionary<Guid, ContentDto>> FetchContentByDialogId(Guid[] dialogIds, CancellationToken cancellationToken)
     {
         var userAuthLevel = _user.GetPrincipal().GetAuthenticationLevel();
-        var result = await _searchRepository.FetchContentByDialogId(dialogIds, userAuthLevel, cancellationToken);
+        var systemUser = _user.GetPrincipal().TryGetSystemUserId(out _);
+        var result = await _searchRepository.FetchContentByDialogId(dialogIds, userAuthLevel, systemUser, cancellationToken);
         return result.ToDictionary(x => x.Key, x => ToContentDto(x.Value));
         static ContentDto ToContentDto(DataContentDto dataContent)
         {

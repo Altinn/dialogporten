@@ -12,6 +12,8 @@
 #   $2            badge label
 #   $3            run result: success or failure
 #   $4            deployed version; when empty, the badge keeps the version it already shows
+
+# Stop on a failed command, an unset variable or a failed step in a pipe.
 set -euo pipefail
 
 NAME="$1"
@@ -34,11 +36,15 @@ esac
 # Prints the badge JSON currently on the branch, or nothing if the branch or file does not exist yet.
 current_badge() {
   local content
+  # The Contents API returns the file base64-encoded.
+  # A missing file or branch gives a 404, which skips the decode.
   if content=$(gh api "repos/$REPOSITORY/contents/$FILE?ref=$BRANCH" --jq .content 2>/dev/null); then
     base64 -d <<<"$content"
   fi
 }
 
+# Creates the badges branch if it is missing. It shares no history with main, so it is built through the
+# Git Data API: a tree with one README file, a commit of that tree with no parent, then the branch ref.
 ensure_branch() {
   if gh api "repos/$REPOSITORY/git/ref/heads/$BRANCH" --silent 2>/dev/null; then
     return
@@ -50,7 +56,7 @@ ensure_branch() {
     | gh api "repos/$REPOSITORY/git/trees" --input - --jq .sha)
   commit=$(jq -n --arg tree "$tree" '{message: "Create badges branch", tree: $tree, parents: []}' \
     | gh api "repos/$REPOSITORY/git/commits" --input - --jq .sha)
-  # Another run may have created the branch in the meantime.
+  # Creating the ref fails if another run created the branch first, which is fine if it exists now.
   jq -n --arg ref "refs/heads/$BRANCH" --arg sha "$commit" '{ref: $ref, sha: $sha}' \
     | gh api "repos/$REPOSITORY/git/refs" --input - --silent \
     || gh api "repos/$REPOSITORY/git/ref/heads/$BRANCH" --silent
@@ -61,9 +67,11 @@ ensure_branch() {
 write_file() {
   local content=$1 message=$2 attempt sha
   for attempt in 1 2 3 4 5; do
+    # Updating a file requires its current blob sha. A new file has none.
     if ! sha=$(gh api "repos/$REPOSITORY/contents/$FILE?ref=$BRANCH" --jq .sha 2>/dev/null); then
       sha=""
     fi
+    # The request body has the content base64-encoded on one line, and the sha only when the file exists.
     if jq -n --arg message "$message" --arg content "$(base64 <<<"$content" | tr -d '\n')" \
         --arg branch "$BRANCH" --arg sha "$sha" \
         '{message: $message, content: $content, branch: $branch} + (if $sha == "" then {} else {sha: $sha} end)' \
@@ -77,6 +85,8 @@ write_file() {
   return 1
 }
 
+# The badge text is the version with one leading "v" (${VERSION#v} drops a "v" the input already has).
+# Without a version, the badge keeps the text it already shows and only changes color.
 if [[ -n "$VERSION" ]]; then
   message="v${VERSION#v}"
 else
@@ -87,6 +97,8 @@ else
   fi
 fi
 
+# Badge in the shields.io endpoint format (https://shields.io/badges/endpoint-badge).
+# labelColor is the dark gray of GitHub's own badges.
 json=$(jq -n --arg label "$LABEL" --arg message "$message" --arg color "$color" \
   '{schemaVersion: 1, label: $label, message: $message, color: $color, labelColor: "#24292e", namedLogo: "github"}')
 echo "$FILE: $json"

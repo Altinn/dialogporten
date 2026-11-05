@@ -48,4 +48,4 @@ public sealed record ResourceLocalization(string LanguageCode, string Value);
 
 
 public sealed record UpdatedSubjectResource(Uri SubjectUrn, Uri ResourceUrn, DateTimeOffset UpdatedAt, bool Deleted);
-public sealed record UpdatedResourcePolicyInformation(Uri ResourceUrn, int MinimumAuthenticationLevel, DateTimeOffset UpdatedAt);
+public sealed record UpdatedResourcePolicyInformation(Uri ResourceUrn, int MinimumAuthenticationLevel, int? MinimumSystemUserLevelAuthenticationLevel, DateTimeOffset UpdatedAt);

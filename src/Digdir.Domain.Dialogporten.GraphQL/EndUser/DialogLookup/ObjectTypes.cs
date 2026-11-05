@@ -46,6 +46,7 @@ public sealed class DialogLookupServiceResource
     public string Id { get; set; } = null!;
     public bool IsDelegable { get; set; }
     public int MinimumAuthenticationLevel { get; set; }
+    public int? MinimumSystemUserAuthenticationLevel { get; set; }
     public List<Localization> Name { get; set; } = [];
 }
 

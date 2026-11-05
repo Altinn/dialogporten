@@ -103,7 +103,7 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
         AccessManagementMetadata metadata,
         IReadOnlyDictionary<string, ServiceResourceInformation> resourceInformationByResource,
         IReadOnlyDictionary<string, ServiceOwnerInfo> ownerInfoByOrgNumber,
-        IReadOnlyDictionary<string, int> minimumAuthenticationLevels,
+        IReadOnlyDictionary<string, MinimumAuthenticationLevels> minimumAuthenticationLevels,
         List<AcceptedLanguage>? acceptedLanguages)
     {
         resourceInformationByResource.TryGetValue(serviceResource, out var resourceInformation);
@@ -170,7 +170,8 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
                 ResourceType = resourceInformation?.ResourceType ?? string.Empty,
                 Status = resourceInformation?.Status ?? string.Empty,
                 IsDelegable = resourceInformation?.Delegable ?? false,
-                MinimumAuthenticationLevel = minimumAuthenticationLevels.GetValueOrDefault(serviceResource),
+                MinimumAuthenticationLevel = minimumAuthenticationLevels.GetValueOrDefault(serviceResource)?.AuthenticationLevel ?? 0,
+                MinimumSystemUserAuthenticationLevel = minimumAuthenticationLevels.GetValueOrDefault(serviceResource)?.SystemUserAuthenticationLevel ?? 0,
                 Name = serviceResourceName,
                 Links = new LinkDto { Metadata = _metadataLinkProvider.GetServiceResourceMetadataLink(resourceId) }
             },

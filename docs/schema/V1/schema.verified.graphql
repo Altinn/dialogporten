@@ -363,6 +363,7 @@ type DialogLookupServiceResource {
   id: String!
   isDelegable: Boolean!
   minimumAuthenticationLevel: Int!
+  minimumSystemUserAuthenticationLevel: Int
   name: [Localization!]!
 }
 
@@ -628,6 +629,7 @@ type ServiceResourceMetadataServiceResource {
   status: String!
   isDelegable: Boolean!
   minimumAuthenticationLevel: Int!
+  minimumSystemUserAuthenticationLevel: Int
   name: [Localization!]!
   links: ServiceResourceMetadataLinks!
 }

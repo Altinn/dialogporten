@@ -533,6 +533,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
                 result.ServiceResource.MinimumAuthenticationLevel.Should().Be(4);
+                result.ServiceResource.MinimumSystemUserAuthenticationLevel.Should().BeNull();
                 result.AuthorizationEvidence.ViaRole.Should().BeTrue();
                 result.AuthorizationEvidence.ViaAccessPackage.Should().BeFalse();
                 result.AuthorizationEvidence.ViaResourceDelegation.Should().BeFalse();

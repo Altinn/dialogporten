@@ -67,7 +67,8 @@ internal sealed class IdentifierLookupPresentationResolver : IIdentifierLookupPr
                 Id = resourceId,
                 Name = serviceResourceName,
                 IsDelegable = resourceInformation?.Delegable ?? false,
-                MinimumAuthenticationLevel = minimumAuthenticationLevel
+                MinimumAuthenticationLevel = minimumAuthenticationLevel.AuthenticationLevel,
+                MinimumSystemUserAuthenticationLevel = minimumAuthenticationLevel.SystemUserAuthenticationLevel
             },
             new IdentifierLookupServiceOwnerDto
             {

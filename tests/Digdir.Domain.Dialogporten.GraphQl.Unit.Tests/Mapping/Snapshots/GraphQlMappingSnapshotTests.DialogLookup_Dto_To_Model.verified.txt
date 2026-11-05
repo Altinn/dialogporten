@@ -4,82 +4,83 @@
   Party: str-3,
   Title: [
     {
-      Value: str-17,
-      LanguageCode: lang18
+      Value: str-18,
+      LanguageCode: lang19
     },
     {
-      Value: str-19,
-      LanguageCode: lang20
+      Value: str-20,
+      LanguageCode: lang21
     }
   ],
   ServiceResource: {
     Id: str-4,
     IsDelegable: true,
     MinimumAuthenticationLevel: 6,
+    MinimumSystemUserAuthenticationLevel: 7,
     Name: [
       {
-        Value: str-7,
-        LanguageCode: lang8
+        Value: str-8,
+        LanguageCode: lang9
       },
       {
-        Value: str-9,
-        LanguageCode: lang10
+        Value: str-10,
+        LanguageCode: lang11
       }
     ]
   },
   ServiceOwner: {
-    OrgNumber: str-11,
-    Code: str-12,
+    OrgNumber: str-12,
+    Code: str-13,
     Name: [
       {
-        Value: str-13,
-        LanguageCode: lang14
+        Value: str-14,
+        LanguageCode: lang15
       },
       {
-        Value: str-15,
-        LanguageCode: lang16
+        Value: str-16,
+        LanguageCode: lang17
       }
     ]
   },
   AuthorizationEvidence: {
-    CurrentAuthenticationLevel: 21,
-    ViaRole: false,
-    ViaAccessPackage: true,
-    ViaResourceDelegation: false,
-    ViaInstanceDelegation: true,
+    CurrentAuthenticationLevel: 22,
+    ViaRole: true,
+    ViaAccessPackage: false,
+    ViaResourceDelegation: true,
+    ViaInstanceDelegation: false,
     Evidence: [
       {
-        GrantType: ResourceDelegation,
-        Subject: str-27,
+        GrantType: InstanceDelegation,
+        Subject: str-28,
         Name: [
           {
-            Value: str-28,
-            LanguageCode: lang29
+            Value: str-29,
+            LanguageCode: lang30
           },
           {
-            Value: str-30,
-            LanguageCode: lang31
+            Value: str-31,
+            LanguageCode: lang32
           }
         ],
         Links: {
-          Metadata: str-32
+          Metadata: str-33
         }
       },
       {
-        GrantType: AccessPackage,
-        Subject: str-34,
+        GrantType: ResourceDelegation,
+        Subject: str-35,
         Name: [
           {
-            Value: str-35,
-            LanguageCode: lang36
+            Value: str-36,
+            LanguageCode: lang37
           },
           {
-            Value: str-37,
-            LanguageCode: lang38
+            Value: str-38,
+            LanguageCode: lang39
           }
         ],
         Links: {
-          Metadata: str-39
+          Metadata: str-40
         }
       }
     ]

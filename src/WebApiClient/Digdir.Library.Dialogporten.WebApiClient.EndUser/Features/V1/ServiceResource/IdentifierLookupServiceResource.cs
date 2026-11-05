@@ -14,6 +14,9 @@ public class IdentifierLookupServiceResource
     [JsonPropertyName("minimumAuthenticationLevel")]
     public int MinimumAuthenticationLevel { get; set; }
 
+    [JsonPropertyName("minimumSystemUserAuthenticationLevel")]
+    public int? MinimumSystemUserAuthenticationLevel { get; set; }
+
     [JsonPropertyName("name")]
     public ICollection<Localization> Name { get; set; } = [];
 }

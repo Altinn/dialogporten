@@ -7,9 +7,9 @@ public interface IResourcePolicyInformationRepository
 {
     Task<int> Merge(IReadOnlyCollection<ResourcePolicyInformation> resourceMetadata, CancellationToken cancellationToken = default);
     Task<DateTimeOffset> GetLastUpdatedAt(TimeSpan? timeSkew = null, CancellationToken cancellationToken = default);
-    Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(CancellationToken cancellationToken);
+    Task<IReadOnlyDictionary<string, MinimumAuthenticationLevels>> GetMinimumAuthenticationLevels(CancellationToken cancellationToken);
 }
-
+public sealed record MinimumAuthenticationLevels(int AuthenticationLevel, int? SystemUserAuthenticationLevel);
 public static class ResourcePolicyInformationExtensions
 {
     public static ResourcePolicyInformation ToResourcePolicyInformation(this UpdatedResourcePolicyInformation updatedResourcePolicyInformation, DateTimeOffset createdAt)
@@ -19,6 +19,7 @@ public static class ResourcePolicyInformationExtensions
             Id = IdentifiableExtensions.CreateVersion7(),
             Resource = updatedResourcePolicyInformation.ResourceUrn.ToString()!,
             MinimumAuthenticationLevel = updatedResourcePolicyInformation.MinimumAuthenticationLevel,
+            MinimumSystemUserAuthenticationLevel = updatedResourcePolicyInformation.MinimumSystemUserLevelAuthenticationLevel,
             CreatedAt = createdAt.ToUniversalTime(),
             UpdatedAt = updatedResourcePolicyInformation.UpdatedAt.ToUniversalTime()
         };

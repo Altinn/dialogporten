@@ -22,6 +22,7 @@ internal static class DialogLookupMapExtensions
         Id = source.Id,
         IsDelegable = source.IsDelegable,
         MinimumAuthenticationLevel = source.MinimumAuthenticationLevel,
+        MinimumSystemUserAuthenticationLevel = source.MinimumSystemUserAuthenticationLevel,
         Name = source.Name.ToGraphQlLocalizations()
     };
 

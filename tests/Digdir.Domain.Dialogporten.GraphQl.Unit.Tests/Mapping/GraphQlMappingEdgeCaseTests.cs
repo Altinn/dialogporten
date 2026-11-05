@@ -515,7 +515,8 @@ public sealed class GraphQlMappingEdgeCaseTests
                 {
                     Id = "resource",
                     IsDelegable = index == 1,
-                    MinimumAuthenticationLevel = 3
+                    MinimumAuthenticationLevel = 3,
+                    MinimumSystemUserAuthenticationLevel = null
                 })
             };
         });

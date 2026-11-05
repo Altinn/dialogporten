@@ -29,19 +29,19 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
         _minimumAuthenticationLevelsCache = minimumAuthenticationLevelsCache;
     }
 
-    public async Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(CancellationToken cancellationToken) =>
-        await _minimumAuthenticationLevelsCache.GetOrSetAsync<Dictionary<string, int>>(
+    public async Task<IReadOnlyDictionary<string, MinimumAuthenticationLevels>> GetMinimumAuthenticationLevels(CancellationToken cancellationToken) =>
+        await _minimumAuthenticationLevelsCache.GetOrSetAsync<Dictionary<string, MinimumAuthenticationLevels>>(
             MinimumAuthenticationLevelsCacheKey,
             FetchMinimumAuthenticationLevels,
             token: cancellationToken);
 
-    private async Task<Dictionary<string, int>> FetchMinimumAuthenticationLevels(CancellationToken cancellationToken) =>
+    private async Task<Dictionary<string, MinimumAuthenticationLevels>> FetchMinimumAuthenticationLevels(CancellationToken cancellationToken) =>
         await _dbContext.ResourcePolicyInformation
             .AsNoTracking()
-            .Select(x => new { x.Resource, x.MinimumAuthenticationLevel })
+            .Select(x => new { x.Resource, x.MinimumAuthenticationLevel, x.MinimumSystemUserAuthenticationLevel })
             .ToDictionaryAsync(
                 x => x.Resource,
-                x => x.MinimumAuthenticationLevel,
+                x => new MinimumAuthenticationLevels(x.MinimumAuthenticationLevel, x.MinimumSystemUserAuthenticationLevel),
                 StringComparer.OrdinalIgnoreCase,
                 cancellationToken);
 

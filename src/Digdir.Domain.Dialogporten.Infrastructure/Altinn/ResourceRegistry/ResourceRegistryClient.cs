@@ -19,6 +19,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey_V4";
     private const string ResourceRegistryResourceEndpoint = "resourceregistry/api/v1/resource/";
     private const string AuthenticationLevelCategory = "urn:altinn:minimum-authenticationlevel";
+    private const string AuthenticationLevelSystemUserCategory = "urn:altinn:minimum-authenticationlevel-systemuser";
 
     private readonly IFusionCache _cache;
     private readonly HttpClient _client;
@@ -161,11 +162,13 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         try
         {
             var minimumAuthenticationLevel = GetMinimumAuthenticationLevel(await FetchPolicy(resourceRegistryEntry.Identifier, cancellationToken));
+            var miniumSystemUserAuthenticationLevel = GetMinimumSystemUserAuthenticationLevel(await FetchPolicy(resourceRegistryEntry.Identifier, cancellationToken));
             return minimumAuthenticationLevel is null
                 ? null
                 : new UpdatedResourcePolicyInformation(
                     resource.ResourceUrn,
                     minimumAuthenticationLevel.Value,
+                    miniumSystemUserAuthenticationLevel,
                     resource.UpdatedAt);
         }
         catch (Exception ex)
@@ -193,6 +196,24 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         var authenticationLevelAttributeAssignmentExpression = policy.ObligationExpressions
             .FirstOrDefault()?.AttributeAssignmentExpressions
             .FirstOrDefault(x => x.Category?.ToString() == AuthenticationLevelCategory);
+
+        if (authenticationLevelAttributeAssignmentExpression?.Property is XacmlAttributeValue attributeValue)
+        {
+            if (int.TryParse(attributeValue.Value, out var minimumSecurityLevel))
+            {
+                return minimumSecurityLevel;
+            }
+        }
+
+        // No minimum authentication level defined
+        return null;
+    }
+
+    private static int? GetMinimumSystemUserAuthenticationLevel(XacmlPolicy policy)
+    {
+        var authenticationLevelAttributeAssignmentExpression = policy.ObligationExpressions
+            .FirstOrDefault()?.AttributeAssignmentExpressions
+            .FirstOrDefault(x => x.Category?.ToString() == AuthenticationLevelSystemUserCategory);
 
         if (authenticationLevelAttributeAssignmentExpression?.Property is XacmlAttributeValue attributeValue)
         {

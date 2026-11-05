@@ -3,6 +3,7 @@ using Digdir.Domain.Dialogporten.GraphQL.EndUser;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.DialogById;
 using Digdir.Domain.Dialogporten.GraphQL.EndUser.MutationTypes;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
+using HotChocolate.AspNetCore;
 using HotChocolate.Diagnostics;
 
 namespace Digdir.Domain.Dialogporten.GraphQL;
@@ -14,6 +15,9 @@ public static class ServiceCollectionExtensions
         .BindRuntimeType<Uri, UrlType>()
         .AddHttpRequestInterceptor<DialogportenHttpRequestInterceptor>()
         .ModifyCostOptions(o => o.ApplyCostDefaults = false)
+        // HotChocolate allows variable batching by default, which lets one HTTP request run many operations.
+        // Keep batching off so the work per request stays bounded.
+        .ModifyServerOptions(o => o.Batching = AllowedBatching.None)
         // This assumes that subscriptions have been set up by the infrastructure
         .AddSubscriptionType<Subscriptions>()
         .AddAuthorization()

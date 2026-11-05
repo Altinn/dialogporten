@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
@@ -21,28 +22,35 @@ internal sealed class ActorNameRepository(ITransactionTime transactionTime) : IA
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {
+        db.ChangeTracker.AutoDetectChangesEnabled = false;
         var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(db, actorNames);
         var maps = await GetOrCreateActorNames(db, consolidatedActorNames, cancellationToken);
 
-        var inputIdByActorNames = consolidatedActorNames
-            .Join(
-                maps,
+        var actorNameIdTuples = consolidatedActorNames
+            .Join(maps,
                 actorName => actorName.Id,
                 map => map.InputActorNameId,
                 (actorName, mapping) => (actorName, mapping.ActualActorNameId))
             .ToList();
 
-        foreach (var (actorName, actualActorNameId) in inputIdByActorNames)
+        if (actorNameIdTuples.Count != consolidatedActorNames.Count)
+        {
+            throw new UnreachableException(
+                "The number of input actor names does not match the " +
+                "number of actual actor names returned from the database. " +
+                "This indicates a bug in the code or a data integrity issue.");
+        }
+
+        foreach (var (actorName, actualActorNameId) in actorNameIdTuples)
         {
             var entry = db.Entry(actorName);
-
             entry.State = EntityState.Detached;
             actorName.Id = actualActorNameId;
             entry.OriginalValues.SetValues(actorName);
             entry.State = EntityState.Unchanged;
         }
 
-        return inputIdByActorNames
+        return actorNameIdTuples
             .Select(x => x.actorName)
             .ToList();
     }
@@ -95,6 +103,7 @@ internal sealed class ActorNameRepository(ITransactionTime transactionTime) : IA
         var inputRows = JsonSerializer.Serialize(actorNameById
             .Select(x => new { Id = x.Key, x.Value.ActorId, x.Value.Name, x.Value.CreatedAt }));
 
+        // lang=PostgreSQL
         var mappings = await db.Database.SqlQuery<ActorNameIdMapping>(
             $"""
              WITH input_rows AS (

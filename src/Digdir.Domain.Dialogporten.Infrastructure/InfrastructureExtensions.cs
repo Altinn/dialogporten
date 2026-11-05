@@ -40,6 +40,7 @@ using MessagePack.Resolvers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -162,8 +163,6 @@ public static class InfrastructureExtensions
             .AddTransient<IMetadataLinkProvider, MetadataLinkProvider>()
             .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
             .AddTransient<IServiceResourceMetadataCatalogue, ServiceResourceMetadataCatalogue>()
-            .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
-            .AddTransient(x => new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
             // Singleton
             .AddSingleton<INotificationProcessingContextFactory, NotificationProcessingContextFactory>()
@@ -176,6 +175,8 @@ public static class InfrastructureExtensions
 
             // Feature Metrics
             .AddScoped<IFeatureMetricServiceResourceCache, FeatureMetricServiceResourceCache>();
+
+        services.TryAddTransient(typeof(Lazy<>), typeof(LazyService<>));
 
         services.AddFusionCacheNeueccMessagePackSerializer(ContractlessStandardResolverAllowPrivate.Options);
         services.AddStackExchangeRedisCache(opt => opt.Configuration = infrastructureSettings.Redis.ConnectionString);
@@ -472,3 +473,5 @@ public static class InfrastructureExtensions
             .AddMaskinportenHttpMessageHandler<TClientDefinition, TClient>(configureClientDefinition);
     }
 }
+
+internal sealed class LazyService<T>(IServiceProvider provider) : Lazy<T>(provider.GetRequiredService<T>) where T : notnull;

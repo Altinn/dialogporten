@@ -16,7 +16,7 @@ spec:
       memory: "8Gi"
       rootFilesystem:
         capacity: "64Gi"
-        mode: layered
+        mode: direct
       nestedSandboxes: preferred
     initSystem: image
   home:

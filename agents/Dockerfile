@@ -66,10 +66,8 @@ RUN set -eu; \
 # launcher's docker-compose-db-redis.yml and building this image in a nested agent.
 RUN agent-feature install containers
 
-# The overlay storage driver through fuse-overlayfs, since the agent's root filesystem is itself overlayfs.
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends fuse-overlayfs \
-    && rm -rf /var/lib/apt/lists/*
+# The native overlay storage driver, which needs the agent's root filesystem not to be overlayfs: the manifests
+# use a direct root.
 COPY common/containers-storage.conf /etc/containers/storage.conf
 
 # agentctl and agentd run nested agents, so this agent can try changes to its own definition.
@@ -88,7 +86,6 @@ RUN systemctl enable agent-dialogporten-dev-init.service \
         agentctl --version \
         && agentd --version \
         && podman --version \
-        && fuse-overlayfs --version \
         && zsh --version \
         && psql --version' \
     && rm -rf "${scratch}" \

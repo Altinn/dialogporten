@@ -18,5 +18,5 @@ spec:
       memory: "6Gi"
       rootFilesystem:
         capacity: "32Gi"
-        mode: layered
+        mode: direct
       nestedSandboxes: null

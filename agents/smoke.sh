@@ -2,7 +2,8 @@
 # Smoke-tests what the Dialogporten agent image adds to the agentctl base image, inside a freshly built image. The
 # base image and its features are tested where they are built, in digdir/digdir-agents.
 #
-#   docker run --rm --entrypoint bash -v "$PWD/agents/smoke.sh:/smoke.sh:ro" <image> /smoke.sh
+#   docker run --rm --entrypoint bash -v "$PWD/agents/smoke.sh:/smoke.sh:ro" -v "$PWD/global.json:/global.json:ro" \
+#     <image> /smoke.sh
 #
 # Runs as the image's `agent` user, which has passwordless sudo.
 set -euo pipefail
@@ -14,14 +15,14 @@ fail() { echo "smoke: $*" >&2; exit 1; }
 echo "## versions"
 [[ "$(id -un)" == agent ]] || fail "expected to run as agent, got $(id -un)"
 dotnet --list-sdks
-dotnet --list-sdks | grep -q '^10\.0\.402 ' || fail "the .NET SDK global.json pins is missing"
+sdk="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' /global.json)"
+[[ -n "$sdk" ]] || fail "no SDK version in /global.json"
+dotnet --list-sdks | grep -q "^${sdk//./\\.} " || fail "the .NET SDK $sdk that global.json pins is missing"
 dotnet-ef --version | tail -1
 zsh --version
 psql --version
 podman --version
 /usr/libexec/docker/cli-plugins/docker-compose version
-agentctl --version
-agentd --version
 
 echo "## container storage"
 # Podman itself cannot start in the unprivileged container this runs in, so check its configuration.

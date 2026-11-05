@@ -44,7 +44,7 @@ internal static class DialogByIdMapExtensions
         IsContentSeen = source.IsContentSeen,
         Transmissions = source.Transmissions.Select(ToTransmission).ToList(),
         ExcludedTransmissions = source.ExcludedTransmissions?.Select(ToExcludedElement).ToList() ?? [],
-        EndUserContext = ToEndUserContext(source.EndUserContext)
+        EndUserContext = source.EndUserContext.ToEndUserContext()
     };
 
     internal static Content ToContent(this ContentDto source) => new()
@@ -57,19 +57,19 @@ internal static class DialogByIdMapExtensions
         MainContentReference = source.MainContentReference.ToGraphQlContentValueOrNull()
     };
 
-    internal static EndUserContext ToEndUserContext(DialogEndUserContextDto source) => new()
+    internal static EndUserContext ToEndUserContext(this DialogEndUserContextDto source) => new()
     {
         Revision = source.Revision,
         SystemLabels = source.SystemLabels.Select(x => x.ToGraphQl()).ToList()
     };
 
-    internal static ExcludedElement ToExcludedElement(ExcludedElementDto source) => new()
+    internal static ExcludedElement ToExcludedElement(this ExcludedElementDto source) => new()
     {
         Id = source.Id,
         CreatedAt = source.CreatedAt
     };
 
-    internal static Attachment ToAttachment(DialogAttachmentDto source) => new()
+    internal static Attachment ToAttachment(this DialogAttachmentDto source) => new()
     {
         Id = source.Id,
         DisplayName = source.DisplayName.ToGraphQlLocalizations(),
@@ -79,7 +79,7 @@ internal static class DialogByIdMapExtensions
         IsAuthorized = source.IsAuthorized
     };
 
-    internal static AttachmentUrl ToAttachmentUrl(DialogAttachmentUrlDto source) => new()
+    internal static AttachmentUrl ToAttachmentUrl(this DialogAttachmentUrlDto source) => new()
     {
         Id = source.Id,
         Url = source.Url,
@@ -87,7 +87,7 @@ internal static class DialogByIdMapExtensions
         ConsumerType = source.ConsumerType.ToGraphQl()
     };
 
-    internal static Attachment ToAttachment(DialogTransmissionAttachmentDto source) => new()
+    internal static Attachment ToAttachment(this DialogTransmissionAttachmentDto source) => new()
     {
         Id = source.Id,
         DisplayName = source.DisplayName.ToGraphQlLocalizations(),
@@ -97,7 +97,7 @@ internal static class DialogByIdMapExtensions
         IsAuthorized = source.IsAuthorized
     };
 
-    internal static AttachmentUrl ToAttachmentUrl(DialogTransmissionAttachmentUrlDto source) => new()
+    internal static AttachmentUrl ToAttachmentUrl(this DialogTransmissionAttachmentUrlDto source) => new()
     {
         Id = source.Id,
         Url = source.Url,
@@ -105,7 +105,7 @@ internal static class DialogByIdMapExtensions
         ConsumerType = source.ConsumerType.ToGraphQl()
     };
 
-    internal static GuiAction ToGuiAction(DialogGuiActionDto source) => new()
+    internal static GuiAction ToGuiAction(this DialogGuiActionDto source) => new()
     {
         Id = source.Id,
         Action = source.Action,
@@ -119,7 +119,7 @@ internal static class DialogByIdMapExtensions
         Prompt = (source.Prompt ?? []).ToGraphQlLocalizations()
     };
 
-    internal static ApiAction ToApiAction(DialogApiActionDto source) => new()
+    internal static ApiAction ToApiAction(this DialogApiActionDto source) => new()
     {
         Id = source.Id,
         Action = source.Action,
@@ -129,7 +129,7 @@ internal static class DialogByIdMapExtensions
         Endpoints = source.Endpoints.Select(ToApiActionEndpoint).ToList()
     };
 
-    internal static ApiActionEndpoint ToApiActionEndpoint(DialogApiActionEndpointDto source) => new()
+    internal static ApiActionEndpoint ToApiActionEndpoint(this DialogApiActionEndpointDto source) => new()
     {
         Id = source.Id,
         Version = source.Version,
@@ -142,7 +142,7 @@ internal static class DialogByIdMapExtensions
         SunsetAt = source.SunsetAt
     };
 
-    internal static SeenLog ToSeenLog(DialogSeenLogDto source) => new()
+    internal static SeenLog ToSeenLog(this DialogSeenLogDto source) => new()
     {
         Id = source.Id,
         SeenAt = source.SeenAt,
@@ -151,7 +151,7 @@ internal static class DialogByIdMapExtensions
         IsCurrentEndUser = source.IsCurrentEndUser
     };
 
-    internal static Activity ToActivity(DialogActivityDto source) => new()
+    internal static Activity ToActivity(this DialogActivityDto source) => new()
     {
         Id = source.Id,
         CreatedAt = source.CreatedAt,
@@ -162,7 +162,7 @@ internal static class DialogByIdMapExtensions
         Description = source.Description.ToGraphQlLocalizations()
     };
 
-    internal static Transmission ToTransmission(DialogTransmissionDto source) => new()
+    internal static Transmission ToTransmission(this DialogTransmissionDto source) => new()
     {
         Id = source.Id,
         CreatedAt = source.CreatedAt,
@@ -174,21 +174,21 @@ internal static class DialogByIdMapExtensions
         Type = source.Type.ToGraphQl(),
         Sender = source.Sender.ToGraphQlActor(),
         IsOpened = source.IsOpened,
-        Content = ToTransmissionContent(source.Content),
+        Content = source.Content?.ToTransmissionContent(),
         Attachments = source.Attachments.Select(ToAttachment).ToList(),
         ExcludedAttachments = source.ExcludedAttachments?.Select(ToExcludedElement).ToList() ?? [],
         NavigationalActions = source.NavigationalActions.Select(ToNavigationalAction).ToList(),
         ExcludedNavigationalActions = source.ExcludedNavigationalActions?.Select(ToExcludedElement).ToList() ?? []
     };
 
-    internal static TransmissionContent ToTransmissionContent(DialogTransmissionContentDto source) => new()
+    internal static TransmissionContent ToTransmissionContent(this DialogTransmissionContentDto source) => new()
     {
         Title = source.Title.ToGraphQlContentValue(),
         Summary = source.Summary.ToGraphQlContentValueOrNull(),
         ContentReference = source.ContentReference.ToGraphQlContentValueOrNull()
     };
 
-    internal static TransmissionNavigationalAction ToNavigationalAction(DialogTransmissionNavigationalActionDto source) => new()
+    internal static TransmissionNavigationalAction ToNavigationalAction(this DialogTransmissionNavigationalActionDto source) => new()
     {
         Id = source.Id,
         Title = source.Title.ToGraphQlLocalizations(),

@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.126.0](https://github.com/Altinn/dialogporten/compare/v1.125.0...v1.126.0) (2026-11-04)
+
+
+### Features
+
+* **sdk:** SDKs enums 1-based instead of 0-based ([#4524](https://github.com/Altinn/dialogporten/issues/4524)) ([a4330ea](https://github.com/Altinn/dialogporten/commit/a4330eae94f6a0fc27e4564954b53fff54ce50b6))
+
+
+### Bug Fixes
+
+* **dialogs:** return 200 for API-only end user dialogs without content ([#4515](https://github.com/Altinn/dialogporten/issues/4515)) ([a11e9fd](https://github.com/Altinn/dialogporten/commit/a11e9fd628f7f77c8f9aeff193189b9c8d18ce9a))
+* **dialogs:** return 200 for API-only end user transmissions without content ([#4523](https://github.com/Altinn/dialogporten/issues/4523)) ([9ffaee5](https://github.com/Altinn/dialogporten/commit/9ffaee5d113179f644305cb49a2dc01c3dbb7a19))
+* snapshot tests after merge with 1-base enums ([#4534](https://github.com/Altinn/dialogporten/issues/4534)) ([971f063](https://github.com/Altinn/dialogporten/commit/971f063b1e68fbbbcb68804badaa14f4520c04ce))
+* Uncouple actor name lookup failures from dialogporten endpoints ([#4196](https://github.com/Altinn/dialogporten/issues/4196)) ([8855659](https://github.com/Altinn/dialogporten/commit/88556591af91c3b324a983b2ad8900fef96df63f))
+
+
+### Miscellaneous Chores
+
+* **db:** codify hand-tuned prod indexes, storage parameters and server settings ([#4466](https://github.com/Altinn/dialogporten/issues/4466)) ([fd73899](https://github.com/Altinn/dialogporten/commit/fd738998a33280604c34444915a0b2530b0cecfe))
+* **deps:** update azure/bicep-deploy action to v2.4.0 ([#4519](https://github.com/Altinn/dialogporten/issues/4519)) ([6fb58b5](https://github.com/Altinn/dialogporten/commit/6fb58b5085b067914733edaf0fc32e97471c67d7))
+* **deps:** update dependency altinn.authorization.abac to 0.3.0 ([#4520](https://github.com/Altinn/dialogporten/issues/4520)) ([8d2c16b](https://github.com/Altinn/dialogporten/commit/8d2c16b3e573f208e90df070b262a0c26384bf0d))
+* **deps:** update dependency dotnet-sdk to v10.0.403 ([#4530](https://github.com/Altinn/dialogporten/issues/4530)) ([4ae1786](https://github.com/Altinn/dialogporten/commit/4ae1786a35e9101b0730b8bcd6891fbd6523bd53))
+* **deps:** update dependency fluentvalidation.dependencyinjectionextensions to 12.2.0 ([#4532](https://github.com/Altinn/dialogporten/issues/4532)) ([94cc693](https://github.com/Altinn/dialogporten/commit/94cc693031a69ca1dfe14b3510f445ea84f1b474))
+* **deps:** update dependency messagepack to 3.1.12 ([#4517](https://github.com/Altinn/dialogporten/issues/4517)) ([737ddc5](https://github.com/Altinn/dialogporten/commit/737ddc531c199775dbb45f7f4d65a6e25a112a37))
+* **deps:** update dependency polly to 8.8.1 ([#4540](https://github.com/Altinn/dialogporten/issues/4540)) ([d3298f8](https://github.com/Altinn/dialogporten/commit/d3298f801e45dffdde00136429421841a90e1c8d))
+* **deps:** update dependency scalar.aspnetcore to 2.18.3 ([#4533](https://github.com/Altinn/dialogporten/issues/4533)) ([095b27a](https://github.com/Altinn/dialogporten/commit/095b27a0226f5da6f5534fd26adcdef6e996bf35))
+* **deps:** update grafana/grafana docker tag to v12.4.13 ([#4518](https://github.com/Altinn/dialogporten/issues/4518)) ([f8d6221](https://github.com/Altinn/dialogporten/commit/f8d6221555b515e7a0682f92af234818cee76082))
+* **deps:** update grafana/loki docker tag to v3.7.9 ([#4525](https://github.com/Altinn/dialogporten/issues/4525)) ([d4a18f8](https://github.com/Altinn/dialogporten/commit/d4a18f85bc00b57b97a33229cf9697947da0bbfb))
+* **deps:** update hotchocolate dependencies to 16.6.9 ([#4526](https://github.com/Altinn/dialogporten/issues/4526)) ([a879f19](https://github.com/Altinn/dialogporten/commit/a879f192aa7abc3e46dc1d6857848df3a0bed224))
+* **deps:** update nginx docker tag to v1.31.7 ([#4531](https://github.com/Altinn/dialogporten/issues/4531)) ([1cf8e81](https://github.com/Altinn/dialogporten/commit/1cf8e8124bc923b29a9d22899b4706b03503c1fe))
+
 ## [1.125.0](https://github.com/Altinn/dialogporten/compare/v1.124.1...v1.125.0) (2026-10-22)
 
 

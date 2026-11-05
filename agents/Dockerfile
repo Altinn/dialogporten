@@ -24,8 +24,10 @@ RUN apt-get update \
     && ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
 
 ARG TARGETARCH
-# The SDK global.json pins, with rollForward disabled, so it must match exactly. Move it together with global.json.
-ARG DOTNET_SDK_VERSION=10.0.402
+# The SDK global.json pins, with rollForward disabled, so it must match exactly. Renovate moves it in the same pull
+# request as global.json, and the smoke test fails when the two differ.
+# renovate: datasource=dotnet-version depName=dotnet-sdk
+ARG DOTNET_SDK_VERSION=10.0.403
 ARG DOTNET_INSTALL_SCRIPT_COMMIT=6f559c420847ded38591392dafe785ad511f39f5
 ARG DOTNET_INSTALL_SCRIPT_SHA256=082f7685e156738a1b2e2ed8381a621870d4ce8e8c59278034556f05c186eb2e
 
@@ -63,16 +65,12 @@ RUN set -eu; \
     rm -rf "${scratch}"
 
 # Podman, with the `docker` command and Docker Compose, for Testcontainers in the integration tests, the E2E
-# launcher's docker-compose-db-redis.yml and building this image in a nested agent.
+# launcher's docker-compose-db-redis.yml and building this image to try a change to it.
 RUN agent-feature install containers
 
 # The native overlay storage driver, which needs the agent's root filesystem not to be overlayfs: the manifests
 # use a direct root.
 COPY common/containers-storage.conf /etc/containers/storage.conf
-
-# agentctl and agentd run nested agents, so this agent can try changes to its own definition.
-COPY --from=ghcr.io/digdir/agentctl:v0.1.0-preview.13@sha256:5451dd5e912865d7ed4544f0bf2e6d0912cd274b878515224cd05896a286b28f \
-    /agentctl /agentd /usr/local/bin/
 
 # The repositories to clone at boot, and the boot unit that prepares local development: an HTTPS dev certificate
 # trusted system-wide, a local Ed25519 key pair and the local database connection string in user secrets.
@@ -83,9 +81,7 @@ COPY --chmod=0755 common/dialogporten-dev-init.sh /usr/local/libexec/agent-dialo
 RUN systemctl enable agent-dialogporten-dev-init.service \
     && scratch="$(mktemp -d)" \
     && HOME="${scratch}" TMPDIR="${scratch}" sh -c ' \
-        agentctl --version \
-        && agentd --version \
-        && podman --version \
+        podman --version \
         && zsh --version \
         && psql --version' \
     && rm -rf "${scratch}" \

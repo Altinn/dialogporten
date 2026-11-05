@@ -38,7 +38,7 @@ same with the image built from your checkout.
 
 ## Change it
 
-Change these files in a pull request. The `build` variant builds the image from your checkout, to try a change in
-a nested agent before CI publishes it. Changes to the contents of the instructions and skills, and to secrets, reach an
-agent when you run `agentctl apply` again from an updated checkout. A new image, or a change to which instruction files
-and skills it reads, reaches it only when it is created again.
+Change these files in a pull request. The `build` variant builds the image from your checkout, to try a change before CI
+publishes it. Changes to the contents of the instructions and skills, and to secrets, reach an agent when you run
+`agentctl apply` again from an updated checkout. A new image, or a change to which instruction files and skills it
+reads, reaches it only when it is created again.

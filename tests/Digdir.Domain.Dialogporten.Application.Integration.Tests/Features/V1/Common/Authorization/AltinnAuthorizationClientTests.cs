@@ -210,7 +210,7 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             .Returns(_ => new NullFusionCache(Options.Create(new FusionCacheOptions())));
 
         var user = Substitute.For<IUser>();
-        user.GetPrincipal().Returns(TestUsers.FromDefault()
+        user.GetPrincipal().Returns(TestUsers.FromDefaultPidUser()
             .WithClaim(ClaimsPrincipalExtensions.IdportenAuthLevelClaim, userAuthLevel)
             .Build());
 
@@ -240,7 +240,7 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             : new NullFusionCache(Options.Create(new FusionCacheOptions())));
 
         var user = Substitute.For<IUser>();
-        user.GetPrincipal().Returns(TestUsers.FromDefault().Build());
+        user.GetPrincipal().Returns(TestUsers.FromDefaultPidUser().Build());
 
         var applicationSettings = Substitute.For<IOptionsMonitor<ApplicationSettings>>();
         applicationSettings.CurrentValue.Returns(TestApplicationSettings.CreateDefault(featureToggle: featureToggle));

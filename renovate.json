@@ -24,6 +24,16 @@
     "minimumReleaseAge": null,
     "schedule": ["at any time"]
   },
+  "customManagers": [
+    {
+      "description": "Versions the agent image's Dockerfile pins, such as the .NET SDK that moves with global.json",
+      "customType": "regex",
+      "managerFilePatterns": ["/^agents/Dockerfile$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+ARG \\w+=(?<currentValue>\\S+)"
+      ]
+    }
+  ],
   "packageRules": [
     {
       "matchFileNames": ["docs/**"],

@@ -66,7 +66,7 @@ ensure_branch() {
 # under a pending write and fails it with a conflict, so each write retries with a fresh blob sha.
 write_file() {
   local content=$1 message=$2 attempt sha
-  for attempt in 1 2 3 4 5; do
+  for attempt in {1..5}; do
     # Updating a file requires its current blob sha. A new file has none.
     if ! sha=$(gh api "repos/$REPOSITORY/contents/$FILE?ref=$BRANCH" --jq .sha 2>/dev/null); then
       sha=""

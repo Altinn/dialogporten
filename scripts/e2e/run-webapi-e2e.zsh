@@ -33,9 +33,13 @@ loadEnv() {
 
   if [[ -n "$env_file" ]]; then
     echo "Loading environment from $env_file"
+    # Variables already exported in the shell (such as WEBAPI_PORT) take precedence over the env file.
+    local shell_env
+    shell_env="$(export -p)"
     set -a
     source "$env_file"
     set +a
+    eval "$shell_env"
   fi
 }
 
@@ -259,14 +263,18 @@ done
 export DOTNET_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
 export ASPNETCORE_ENVIRONMENT="${WEBAPI_ENVIRONMENT}"
 export RUNNING_E2E_TESTS=true
-export DialogportenBaseUri="${DialogportenBaseUri:-https://localhost/dialogporten}"
-export WebApiPort="${WEBAPI_PORT:-7215}" # Default port should not colide with default port of APIs
-export GraphQlPort="${GRAPHQL_PORT:-5180}"
-export ServicePort="${SERVICE_PORT:-56843}"
-export WebApiUrl="${DialogportenBaseUri}:${WebApiPort}"
-export GraphQlBaseUrl="http://localhost:${GraphQlPort}"
-export GraphQlUrl="${GraphQlBaseUrl}/graphql"
-export ServiceBaseUrl="http://localhost:${ServicePort}"
+# Ports come only from WEBAPI_PORT/GRAPHQL_PORT/SERVICE_PORT. Both the addresses the apps listen on
+# and the URLs the tests call are derived from them, so they cannot drift apart.
+webapi_port="${WEBAPI_PORT:-7215}" # Default port should not collide with default port of APIs
+graphql_port="${GRAPHQL_PORT:-5180}"
+service_port="${SERVICE_PORT:-56843}"
+webapi_listen_url="https://localhost:${webapi_port}"
+graphql_listen_url="http://localhost:${graphql_port}"
+service_listen_url="http://localhost:${service_port}"
+
+# E2E test settings (E2ESettings). Environment variables override the test projects' appsettings.
+export WebApiBaseUri="${webapi_listen_url}/dialogporten"
+export GraphQlUri="${graphql_listen_url}/graphql"
 
 wait_for_url() {
   local url="$1"
@@ -296,39 +304,39 @@ wait_for_url() {
 }
 
 start_webapi() {
-  echo "Starting Dialogporten WebAPI on ${WebApiUrl}..."
+  echo "Starting Dialogporten WebAPI on ${webapi_listen_url}..."
   dotnet run \
     --project "$repo_root/src/Digdir.Domain.Dialogporten.WebApi/Digdir.Domain.Dialogporten.WebApi.csproj" \
     --environment "${WEBAPI_ENVIRONMENT}" \
-    --urls "$WebApiUrl" \
+    --urls "$webapi_listen_url" \
     >"$webapi_log" 2>&1 &
   webapi_pid=$!
   echo "WebApi PID: $webapi_pid"
-  wait_for_url "$WebApiUrl" "WebAPI" "$webapi_log"
+  wait_for_url "$webapi_listen_url" "WebAPI" "$webapi_log"
 }
 
 start_graphql() {
-  echo "Starting Dialogporten GraphQL on ${GraphQlBaseUrl}..."
+  echo "Starting Dialogporten GraphQL on ${graphql_listen_url}..."
   dotnet run \
     --project "$repo_root/src/Digdir.Domain.Dialogporten.GraphQL/Digdir.Domain.Dialogporten.GraphQL.csproj" \
     --environment "${WEBAPI_ENVIRONMENT}" \
-    --urls "$GraphQlBaseUrl" \
+    --urls "$graphql_listen_url" \
     >"$graphql_log" 2>&1 &
   graphql_pid=$!
   echo "GraphQL PID: $graphql_pid"
-  wait_for_url "$GraphQlUrl" "GraphQL" "$graphql_log"
+  wait_for_url "$GraphQlUri" "GraphQL" "$graphql_log"
 }
 
 start_service() {
-  echo "Starting Dialogporten Service on ${ServiceBaseUrl}..."
+  echo "Starting Dialogporten Service on ${service_listen_url}..."
   dotnet run \
     --project "$repo_root/src/Digdir.Domain.Dialogporten.Service/Digdir.Domain.Dialogporten.Service.csproj" \
     --environment "${WEBAPI_ENVIRONMENT}" \
-    --urls "$ServiceBaseUrl" \
+    --urls "$service_listen_url" \
     >"$service_log" 2>&1 &
   service_pid=$!
   echo "Service PID: $service_pid"
-  wait_for_url "$ServiceBaseUrl" "Service" "$service_log"
+  wait_for_url "$service_listen_url" "Service" "$service_log"
 }
 
 #  Always start WebApi and Service (Service handles async event processing)

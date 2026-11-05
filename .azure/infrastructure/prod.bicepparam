@@ -171,14 +171,11 @@ param postgresConfiguration = {
       name: 'log_autovacuum_min_duration'
       value: '20000'
     }
-    // Query Store, capturing top-level statements only. If its overhead ever becomes a concern,
-    // set pg_qs.query_capture_mode to none (dynamic, no restart); that also disables
-    // pgms_wait_sampling. Set directly rather than through enableQueryPerformanceInsight,
-    // which would set pg_qs.query_capture_mode to all.
-    {
-      name: 'pg_qs.query_capture_mode'
-      value: 'top'
-    }
+    // Query Store. pg_qs.query_capture_mode (top) and pgms_wait_sampling.query_capture_mode (all) are
+    // set on the server outside IaC: the postgreSql module manages both parameters itself, so they
+    // cannot be listed here, and enableQueryPerformanceInsight would set pg_qs.query_capture_mode to
+    // all. If Query Store overhead ever becomes a concern, set pg_qs.query_capture_mode to none
+    // (dynamic, no restart); that also disables pgms_wait_sampling.
     {
       name: 'pg_qs.store_query_plans'
       value: 'on'
@@ -190,10 +187,6 @@ param postgresConfiguration = {
     {
       name: 'pg_qs.max_query_text_length'
       value: '10000'
-    }
-    {
-      name: 'pgms_wait_sampling.query_capture_mode'
-      value: 'all'
     }
   ]
   applyStaticServerConfigurations: false

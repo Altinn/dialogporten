@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.126.1](https://github.com/Altinn/dialogporten/compare/v1.126.0...v1.126.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **infra:** keep module-managed Postgres parameters out of prod server configurations ([#4557](https://github.com/Altinn/dialogporten/issues/4557)) ([cb01f1f](https://github.com/Altinn/dialogporten/commit/cb01f1fa6d60577ba32778e04e30803706fe86cd))
+
+
+### Miscellaneous Chores
+
+* clarify which database changes need manual rollout ([#4481](https://github.com/Altinn/dialogporten/issues/4481)) ([85b7042](https://github.com/Altinn/dialogporten/commit/85b7042f199c033afe5c71a79291f0e284fbf898))
+* **deps:** update dependency altinn.apiclients.maskinporten to 10.2.0 ([#4544](https://github.com/Altinn/dialogporten/issues/4544)) ([6305b36](https://github.com/Altinn/dialogporten/commit/6305b365d3085b2a6b31b00fdd32100e422dbbab))
+* **deps:** update docker/login-action action to v4.7.0 ([#4545](https://github.com/Altinn/dialogporten/issues/4545)) ([97d2195](https://github.com/Altinn/dialogporten/commit/97d2195e306cc434874dc5faf62fcfeba677f369))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.25.0 ([#4546](https://github.com/Altinn/dialogporten/issues/4546)) ([4c670c5](https://github.com/Altinn/dialogporten/commit/4c670c5894523426ba33bb8edff4fefab15d92b8))
+* **deps:** update fusioncache dependencies to 2.9.0 ([#4547](https://github.com/Altinn/dialogporten/issues/4547)) ([308706a](https://github.com/Altinn/dialogporten/commit/308706a7d31222bd27b13dbe5a6590cee2fd7489))
+* **deps:** update hotchocolate dependencies to 16.7.3 and keep batching off ([#4548](https://github.com/Altinn/dialogporten/issues/4548)) ([431175c](https://github.com/Altinn/dialogporten/commit/431175c24420221a1cc80b2ba66b808f082cb201))
+* **deps:** update microsoft dependencies ([#4549](https://github.com/Altinn/dialogporten/issues/4549)) ([7ad70ca](https://github.com/Altinn/dialogporten/commit/7ad70cadf228a595fea4b907f3ff185847bef7a1))
+* **deps:** update opentelemetry dependencies ([#4550](https://github.com/Altinn/dialogporten/issues/4550)) ([0dc9e15](https://github.com/Altinn/dialogporten/commit/0dc9e15ab0d7a83dd2b9c1376ea29953e10dfaab))
+* **deps:** update step-security/harden-runner action to v2.22.3 ([#4551](https://github.com/Altinn/dialogporten/issues/4551)) ([cec401f](https://github.com/Altinn/dialogporten/commit/cec401fef40921d0d5cbce99bcf58973294e0eef))
+* **renovate:** raise PR hourly limit and require approval for major updates ([#4542](https://github.com/Altinn/dialogporten/issues/4542)) ([1eb2f21](https://github.com/Altinn/dialogporten/commit/1eb2f211e21026fedd203e0a0d97343c3def122f))
+
 ## [1.126.0](https://github.com/Altinn/dialogporten/compare/v1.125.0...v1.126.0) (2026-11-04)
 
 

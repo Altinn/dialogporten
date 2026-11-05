@@ -83,6 +83,18 @@ four parallel workflows consume:
 > the step into a reusable `workflow-*.yml` or renaming this file would break
 > publishing.
 
+> **Note:** The SDK NuGet packages are published only by the reusable
+> `workflow-publish-nuget.yml`, which `ci-cd-main.yml`, `ci-cd-staging.yml`,
+> `ci-cd-prod.yml` and `dispatch-publish-nuget.yml` call. It authenticates via
+> NuGet Trusted Publishing over OIDC, so no NuGet API key is stored as a secret.
+> The `NUGET_USER` repository variable holds the nuget.org username of the user
+> who created the Trusted Publishing policy.
+>
+> Unlike npm, nuget.org validates the *called* workflow's **filename**, so the
+> policy names `workflow-publish-nuget.yml` and covers every caller. Renaming
+> that file breaks publishing, and every calling job must grant
+> `id-token: write`.
+
 #### Production Deployment
 - **Manual Trigger Required** (`ci-cd-prod.yml`)
 - Requires specific version input
@@ -127,6 +139,7 @@ Available manual workflows for all environments:
 ### 6. Automated Monitoring
 
 - `ci-cd-deployment-lag-monitor.yml`: Monitors deployment lag between staging and production environments. Runs weekdays at 12pm Norway time and sends Slack notifications when production is lagging behind staging. See [DeploymentLagMonitoring.md](DeploymentLagMonitoring.md) for detailed documentation.
+- `check-container-image-vulnerabilities.yml`: Scans the container images deployed to production with Trivy for HIGH and CRITICAL vulnerabilities that have a fix available, covering OS packages, the .NET runtime and NuGet packages. Runs Monday and Wednesday mornings and sends a Slack notification when it finds any or the scan fails. Run it manually with a `version` input to scan other image tags. It never blocks a pull request or a deployment.
 
 #### Using `dispatch-apps.yml`
 

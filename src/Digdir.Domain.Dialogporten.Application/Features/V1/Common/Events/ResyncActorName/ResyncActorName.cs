@@ -56,8 +56,8 @@ public sealed class ResyncActorName(
         Guid inputActorNameId,
         CancellationToken cancellationToken)
     {
-        var actorName = new ActorName { Id = inputActorNameId, ActorId = actorId, Name = result.Name };
-        await actorNameRepository.EnsureActorName(actorName, cancellationToken);
+        var actorName = new ActorName { ActorId = actorId, Name = result.Name };
+        await actorNameRepository.EnsureActorName((DbContext)db, actorName, cancellationToken);
         if (actorName.Id == inputActorNameId)
         {
             throw new UnreachableException(

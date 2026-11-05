@@ -55,7 +55,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return InterceptionResult<int>.SuppressWithResult(0);
         }
 
-        await _actorNameRepository.EnsureActorNames(addedActorNameEntities, cancellationToken);
+        await _actorNameRepository.EnsureActorNames(dbContext, addedActorNameEntities, cancellationToken);
 
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }

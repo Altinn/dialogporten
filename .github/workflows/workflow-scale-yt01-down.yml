@@ -58,10 +58,12 @@ jobs:
         run: az extension add --name containerapp --upgrade
 
       # The purge calls the API, so it runs while the environment is still reachable.
-      # A failed purge must not stop the scale-down; the job reports it once the scale-down steps have run.
+      # A failed or timed-out purge must not stop the scale-down; the job reports it
+      # once the scale-down steps have run.
       - name: Purge E2E test data
         id: purge
         continue-on-error: true
+        timeout-minutes: 15
         env:
           GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
           REPOSITORY: ${{ github.repository }}
@@ -83,8 +85,7 @@ jobs:
           RUN_ID="${BASH_REMATCH[1]}"
 
           echo "Waiting for E2E purge run $RUN_ID to complete..."
-          # Bounded so a queued or stuck purge run cannot hold up the scale-down.
-          timeout 15m gh run watch "$RUN_ID" \
+          gh run watch "$RUN_ID" \
             --repo "$REPOSITORY" \
             --exit-status
 

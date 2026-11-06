@@ -19,6 +19,12 @@ public sealed class CreateDialogActivityEndpointSummary : Summary<CreateDialogAc
                        Creating an activity does not count as a content change, 
                        so it leaves the end user's system labels untouched; a dialog in 'Bin' or 'Archive' stays there.
 
+                       A transmission can only be opened once. If the activity is of type 'TransmissionOpened' and the
+                       referenced transmission already has a 'TransmissionOpened' activity (regardless of who performed it),
+                       the request is still validated, but no new activity is stored. The response is still a success,
+                       containing the id of the existing 'TransmissionOpened' activity and the dialog's current, unchanged revision.
+                       No new revision or event is produced. A self-supplied activity id is not stored in this case.
+
                        {Constants.SwaggerSummary.OptimisticConcurrencyNote}
                        """;
 

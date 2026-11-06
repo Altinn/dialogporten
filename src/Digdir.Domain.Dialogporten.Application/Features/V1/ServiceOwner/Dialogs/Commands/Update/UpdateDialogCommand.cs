@@ -136,6 +136,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
 
         AppendActivity(dialog, request.Dto);
 
+        dialog.Activities.RemoveExtraTransmissionOpenedActivities();
+
         var activityTypes = request.Dto.Activities
             .Select(x => x.Type)
             .Distinct();
@@ -222,6 +224,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         {
             _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Default);
         }
+
 
         var saveResult = await _unitOfWork
             .EnableConcurrencyCheck(dialog, request.IfMatchDialogRevision)

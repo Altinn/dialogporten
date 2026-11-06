@@ -17,6 +17,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
@@ -185,6 +186,8 @@ internal sealed class CreateDialogCommandHandler : IRequestHandler<CreateDialogC
         {
             _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
+
+        dialog.Activities.RemoveExtraTransmissionOpenedActivities();
 
         _db.Dialogs.Add(dialog);
 

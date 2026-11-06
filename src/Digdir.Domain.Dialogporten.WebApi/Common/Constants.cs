@@ -32,6 +32,7 @@ internal static class Constants
         internal const string AccessDeniedToDialogForChildEntity = "Unauthorized to {0} child entity for the given dialog (not owned by authenticated organization).";
         internal const string DialogCreationNotAllowed = "Unauthorized to create a dialog for the given serviceResource (not owned by authenticated organization).";
         internal const string OptimisticConcurrencyNote = "Optimistic concurrency control is implemented using the If-Match header. Supply the Revision value from the GetDialog endpoint to ensure that the dialog is not modified/deleted by another request in the meantime.";
+        internal const string DuplicateTransmissionOpenedNote = "A transmission can only be opened once, so only the first 'TransmissionOpened' activity per transmission is stored. Any 'TransmissionOpened' activity referencing a transmission that already has one, either on the dialog or earlier in the same request, is silently skipped regardless of who performed it. Skipped activities are still validated, and their ids are not stored. Other changes in the request are applied as normal.";
         internal const string OptimisticConcurrencyNoteEnduserContext = "Optimistic concurrency control is implemented using the If-Match header. Supply EnduserContextRevision to ensure that the context is not modified/deleted by another request in the meantime.";
     }
 }

@@ -70,25 +70,17 @@ jobs:
           set -euo pipefail
 
           echo "Triggering E2E test data purge for yt01..."
-          gh workflow run dispatch-purge-e2e-test-data.yml \
+          DISPATCH_OUTPUT=$(gh workflow run dispatch-purge-e2e-test-data.yml \
             --repo "$REPOSITORY" \
-            -f environment=yt01
+            -f environment=yt01)
+          echo "$DISPATCH_OUTPUT"
 
-          # Wait for the run to be created
-          sleep 10
-
-          RUN_ID=$(gh run list \
-            --repo "$REPOSITORY" \
-            --workflow "dispatch-purge-e2e-test-data.yml" \
-            --event workflow_dispatch \
-            --limit 1 \
-            --json databaseId \
-            --jq '.[0].databaseId')
-
-          if [[ -z "$RUN_ID" || "$RUN_ID" == "null" ]]; then
-            echo "Error: Could not find the purge workflow run."
+          # gh prints the created run's URL when the dispatch API returns run details.
+          if [[ ! "$DISPATCH_OUTPUT" =~ /actions/runs/([0-9]+) ]]; then
+            echo "Error: The dispatch did not return the purge workflow run."
             exit 1
           fi
+          RUN_ID="${BASH_REMATCH[1]}"
 
           echo "Waiting for E2E purge run $RUN_ID to complete..."
           # Bounded so a queued or stuck purge run cannot hold up the scale-down.
@@ -267,9 +259,9 @@ jobs:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
 
       - name: Fail job if E2E test data purge failed
-        if: ${{ steps.purge.outcome == 'failure' }}
+        if: ${{ !cancelled() && steps.purge.outcome == 'failure' }}
         run: |
-          echo "::error::The E2E test data purge failed; yt01 was scaled down without it."
+          echo "::error::The E2E test data purge failed."
           exit 1
 
       - name: Logout from Azure

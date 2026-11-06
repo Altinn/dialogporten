@@ -250,14 +250,17 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        # In test, the two sync jobs and custom-metrics-job run as CronJobs from Altinn/dialogporten-manifests.
         include:
           - name: sync-subject-resource-mappings-job
+            environments: ['staging', 'yt01', 'prod']
           - name: sync-resource-policy-information-job
+            environments: ['staging', 'yt01', 'prod']
           - name: reindex-dialogsearch-job
           - name: aggregate-cost-metrics-job
             environments: ['staging', 'prod']
           - name: custom-metrics-job
-            environments: ['test', 'staging', 'prod']
+            environments: ['staging', 'prod']
     steps:
       - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:

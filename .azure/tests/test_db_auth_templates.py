@@ -73,7 +73,11 @@ class DatabaseAuthenticationTemplates(unittest.TestCase):
 
     def application_snapshot(self, application, mode, host=DB_HOST, secrets=None, expected_error=None):
         directory = ROOT / ".azure/applications" / application
-        parameters = (directory / "test.bicepparam").read_text()
+        # Workloads that do not deploy to test have no test parameters; every workload deploys
+        # to staging.
+        parameter_file = next(directory / name for name in ("test.bicepparam", "staging.bicepparam")
+                              if (directory / name).is_file())
+        parameters = parameter_file.read_text()
         parameters = re.sub(r"^using .+\n", "", parameters)
         parameters = re.sub(r"readEnvironmentVariable\('[^']+'\)", "'validation-only'", parameters)
         parameters += f"\nparam dbAuthMode = '{mode}'\nparam dbHost = '{host}'\n"

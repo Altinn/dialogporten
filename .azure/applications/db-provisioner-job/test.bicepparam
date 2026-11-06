@@ -10,17 +10,11 @@ param replicaTimeOutInSeconds = 600
 // Keep in sync with postgresConfiguration.serverNameStem in .azure/infrastructure/test.bicepparam.
 param serverNameStem = 'postgres2'
 
-// name is the identity name between the environment prefix and '-identity'.
-param workloads = [
-  { name: 'webapi-so', profile: 'dp_api_dml' }
-  { name: 'webapi-eu', profile: 'dp_api_dml' }
-  { name: 'graphql', profile: 'dp_api_dml' }
-  { name: 'service', profile: 'dp_service_dml' }
-  { name: 'sync-sr-mappings', profile: 'dp_sync_sr_mappings' }
-  { name: 'sync-rp-info', profile: 'dp_sync_rp_info' }
-  { name: 'reindex-search', profile: 'dp_reindex_search' }
-  { name: 'custom-metrics', profile: 'dp_metrics_read' }
-]
+// Test (at23) is provisioned by the db-provisioner-job in Altinn/dialogporten-manifests, which
+// reads the workload identities from their ApplicationIdentity resources in the AKS cluster. The
+// Container Apps workloads in test stay on password authentication, so this job has none to
+// provision here.
+param workloads = []
 
 //secrets
 param containerAppEnvironmentName = readEnvironmentVariable('AZURE_CONTAINER_APP_ENVIRONMENT_NAME')

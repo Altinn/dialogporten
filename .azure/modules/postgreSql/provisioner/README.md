@@ -5,6 +5,10 @@ It authenticates with its own Entra administrator identity. Connections require
 `verify-full` TLS and use the image's system CA store. Set `PGSSLROOTCERT` to a
 mounted CA file when a custom trust store is needed; use the server FQDN as `PGHOST`.
 
+In test (at23) the workloads run on AKS. Their login roles are provisioned by the
+`db-provisioner-job` in Altinn/dialogporten-manifests, which reads each workload identity
+from its `ApplicationIdentity`; the Container Apps job's test parameters list no workloads.
+
 ## Bootstrap and rollout
 
 1. Deploy infrastructure with `enableDbProvisioner: true` for the target environment.
@@ -38,8 +42,8 @@ mounted CA file when a custom trust store is needed; use the server FQDN as `PGH
    needs that gate opened and a `db-provisioner-job` parameter file. The next deployment
    to an admitted environment runs the provisioner, and from then on a failed run
    blocks that deployment. On AKS, manually create a Job from the
-   provisioner CronJob. The image tag must reference a published image; on ACA the job
-   pulls without registry credentials, so the container package must be public.
+   provisioner CronJob. The image tag must reference a published image; both platforms
+   pull it without registry credentials, so the container package must be public.
    The read-only pgAudit preflight runs before any principal or privilege changes.
 5. Verify login and auditing with a fresh workload session, then enable Entra token
    authentication per workload using the credential-retirement steps below. Do not

@@ -250,13 +250,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # In test, the two sync jobs and custom-metrics-job run as CronJobs from Altinn/dialogporten-manifests.
+        # In test, the two sync jobs, custom-metrics-job and the reindex job run from
+        # CronJobs in Altinn/dialogporten-manifests.
         include:
           - name: sync-subject-resource-mappings-job
             environments: ['staging', 'yt01', 'prod']
           - name: sync-resource-policy-information-job
             environments: ['staging', 'yt01', 'prod']
           - name: reindex-dialogsearch-job
+            environments: ['staging', 'yt01', 'prod']
           - name: aggregate-cost-metrics-job
             environments: ['staging', 'prod']
           - name: custom-metrics-job

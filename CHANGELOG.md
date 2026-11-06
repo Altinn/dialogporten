@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.126.2](https://github.com/Altinn/dialogporten/compare/v1.126.1...v1.126.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* Configure dlq handling per ConsumerDefinition ([#4562](https://github.com/Altinn/dialogporten/issues/4562)) ([9e02575](https://github.com/Altinn/dialogporten/commit/9e02575cc013696c852680bc0b3dd3945f330168))
+
 ## [1.126.1](https://github.com/Altinn/dialogporten/compare/v1.126.0...v1.126.1) (2026-11-05)
 
 

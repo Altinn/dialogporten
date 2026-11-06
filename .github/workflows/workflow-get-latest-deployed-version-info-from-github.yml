@@ -17,6 +17,12 @@ on:
       apps_version_sha:
         description: "SHA of the latest deployed applications version"
         value: ${{ jobs.get-versions.outputs.apps_version_sha }}
+      infra_version:
+        description: "Latest deployed infrastructure version (e.g., 1.23.4)"
+        value: ${{ jobs.get-versions.outputs.infra_version }}
+      apps_version:
+        description: "Latest deployed applications version (e.g., 1.23.4)"
+        value: ${{ jobs.get-versions.outputs.apps_version }}
 
 jobs:
   get-versions:
@@ -30,6 +36,8 @@ jobs:
     outputs:
       infra_version_sha: ${{ steps.get-infra-sha.outputs.sha }}
       apps_version_sha: ${{ steps.get-apps-sha.outputs.sha }}
+      infra_version: ${{ steps.get-infra-sha.outputs.version }}
+      apps_version: ${{ steps.get-apps-sha.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -41,11 +49,13 @@ jobs:
         if: vars.LATEST_DEPLOYED_INFRA_VERSION != ''
         run: |
           SHA=$(git rev-list -n 1 v${{ vars.LATEST_DEPLOYED_INFRA_VERSION }})
-          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "version=${{ vars.LATEST_DEPLOYED_INFRA_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Get Apps SHA
         id: get-apps-sha
         if: vars.LATEST_DEPLOYED_APPS_VERSION != ''
         run: |
           SHA=$(git rev-list -n 1 v${{ vars.LATEST_DEPLOYED_APPS_VERSION }})
-          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "version=${{ vars.LATEST_DEPLOYED_APPS_VERSION }}" >> "$GITHUB_OUTPUT"

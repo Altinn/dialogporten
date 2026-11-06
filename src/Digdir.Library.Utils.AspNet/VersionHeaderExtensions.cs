@@ -14,7 +14,8 @@ public static class VersionHeaderExtensions
 
     /// <summary>
     /// Request header that asks for <see cref="HeaderName"/>. Responses to other requests do not carry the
-    /// version.
+    /// version. A version check should also send Cache-Control: no-cache and use a path that is not publicly
+    /// cacheable, since a cache that holds an ordinary response can answer without reaching the app.
     /// </summary>
     public const string RequestHeaderName = "X-Dialogporten-Version-Check";
 

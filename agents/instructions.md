@@ -22,8 +22,8 @@ A task is done when you have run, in the worktree, and shown in the pull request
   PostgreSQL in Podman through Testcontainers;
 - the WebApi and GraphQL E2E tests with `scripts/e2e/run-webapi-e2e.zsh`, when the change touches an API, the
   application layer, the database or the E2E tests themselves, as `AGENTS.md` describes;
-- for a change to the database, the EF Core migration made with `dotnet ef`, and a note in the pull request that it
-  must be applied to production manually.
+- for a change to the database, the EF Core migration made with `dotnet ef`; when it holds locks or rewrites a large
+  table, a note in the pull request that it must be applied manually first, as `AGENTS.md` describes.
 
 Put the commands and their summaries, such as passed, failed and skipped counts, in the pull request description.
 When a check could not run, say which and why, rather than leaving it out or working around it.

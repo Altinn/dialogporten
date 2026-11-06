@@ -24,8 +24,8 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
         using var _ = db.DisableAutoDetectChanges();
         db.ChangeTracker.DetectChanges();
 
-        var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(db, actorNames);
-        var maps = await GetOrCreateActorNames(db, consolidatedActorNames, cancellationToken);
+        var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(actorNames);
+        var maps = await GetOrCreateActorNames(consolidatedActorNames, cancellationToken);
 
         var actorNameIdTuples = consolidatedActorNames
             .Join(maps,
@@ -57,8 +57,7 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
             .ToList();
     }
 
-    private List<ActorName> ConsolidateDuplicateActorNameInstances(DbContext db,
-        IReadOnlyCollection<ActorName> actorNames)
+    private List<ActorName> ConsolidateDuplicateActorNameInstances(IReadOnlyCollection<ActorName> actorNames)
     {
         var mainAndDiscardActorNames = db.ChangeTracker
             .Entries<ActorName>()
@@ -95,8 +94,7 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
             .ToList();
     }
 
-    private static async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNames(
-        DbContext db,
+    private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNames(
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {

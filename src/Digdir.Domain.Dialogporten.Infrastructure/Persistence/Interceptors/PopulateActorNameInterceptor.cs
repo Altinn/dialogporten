@@ -33,6 +33,17 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
+        await PopulateActorNames(dbContext, cancellationToken);
+
+        return _domainContext.IsValid
+            ? await base.SavingChangesAsync(eventData, result, cancellationToken)
+            : InterceptionResult<int>.SuppressWithResult(0);
+    }
+
+    private async ValueTask PopulateActorNames(DbContext dbContext, CancellationToken cancellationToken)
+    {
+        using var _ = dbContext.DisableAutoDetectChanges();
+        dbContext.ChangeTracker.DetectChanges();
         var addedActorNameEntities = dbContext.ChangeTracker
             .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
@@ -47,17 +58,11 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         if (addedActorNameEntities.Count == 0)
         {
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+            return;
         }
 
-        if (!await TrySetActorNames(addedActorNameEntities, cancellationToken))
-        {
-            return InterceptionResult<int>.SuppressWithResult(0);
-        }
-
+        await TrySetActorNames(addedActorNameEntities, cancellationToken);
         await _actorNameRepository.Value.EnsureActorNames(addedActorNameEntities, cancellationToken);
-
-        return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     /// <summary>
@@ -65,7 +70,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     /// for the actor, we persist the actor with a null name instead of failing the request. Null names are
     /// filled in later by the ResyncActorNameEvent handler.
     /// </summary>
-    private async Task<bool> TrySetActorNames(
+    private async Task TrySetActorNames(
         IEnumerable<ActorName> actorNameEntities,
         CancellationToken cancellationToken)
     {
@@ -90,8 +95,6 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 unavailable => actorName.Name = null
             );
         }
-
-        return _domainContext.IsValid;
     }
 
     private async Task<(string ActorId, GetPartyNameResult Result)> ActorNameByActorId(string actorId,

@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
@@ -21,15 +22,12 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {
-        using var _ = db.DisableAutoDetectChanges();
-        db.ChangeTracker.DetectChanges();
-
         var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(actorNames);
         var maps = await GetOrCreateActorNames(consolidatedActorNames, cancellationToken);
 
         var actorNameIdTuples = consolidatedActorNames
             .Join(maps,
-                actorName => actorName.Id,
+                actorName => actorName.Entity.Id,
                 map => map.InputActorNameId,
                 (actorName, mapping) => (actorName, mapping.ActualActorNameId, mapping.ActualCreatedAt))
             .ToList();
@@ -42,22 +40,21 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
                 "This indicates a bug in the code or a data integrity issue.");
         }
 
-        foreach (var (actorName, actualActorNameId, actualCreatedAt) in actorNameIdTuples)
+        foreach (var (actorNameEntry, actualActorNameId, actualCreatedAt) in actorNameIdTuples)
         {
-            var entry = db.Entry(actorName);
-            entry.State = EntityState.Detached;
-            actorName.Id = actualActorNameId;
-            actorName.CreatedAt = actualCreatedAt;
-            entry.OriginalValues.SetValues(actorName);
-            entry.State = EntityState.Unchanged;
+            actorNameEntry.State = EntityState.Detached;
+            actorNameEntry.Entity.Id = actualActorNameId;
+            actorNameEntry.Entity.CreatedAt = actualCreatedAt;
+            actorNameEntry.OriginalValues.SetValues(actorNameEntry.Entity);
+            actorNameEntry.State = EntityState.Unchanged;
         }
 
         return actorNameIdTuples
-            .Select(x => x.actorName)
+            .Select(x => x.actorName.Entity)
             .ToList();
     }
 
-    private List<ActorName> ConsolidateDuplicateActorNameInstances(IReadOnlyCollection<ActorName> actorNames)
+    private List<EntityEntry<ActorName>> ConsolidateDuplicateActorNameInstances(IReadOnlyCollection<ActorName> actorNames)
     {
         var mainAndDiscardActorNames = db.ChangeTracker
             .Entries<ActorName>()
@@ -90,15 +87,17 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
         }
 
         return mainAndDiscardActorNames
-            .Select(x => x.mainActorName.Entity)
+            .Select(x => x.mainActorName)
             .ToList();
     }
 
     private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNames(
-        IReadOnlyCollection<ActorName> actorNames,
+        IReadOnlyCollection<EntityEntry<ActorName>> actorNames,
         CancellationToken cancellationToken)
     {
-        var actorNameById = actorNames.ToDictionary(_ => IdentifiableExtensions.CreateVersion7());
+        var actorNameById = actorNames
+            .Select(x => x.Entity)
+            .ToDictionary(_ => IdentifiableExtensions.CreateVersion7());
 
         var inputRows = JsonSerializer.Serialize(actorNameById
             .Select(x => new { Id = x.Key, x.Value.ActorId, x.Value.Name, x.Value.CreatedAt }));

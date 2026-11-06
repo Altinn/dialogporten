@@ -171,7 +171,7 @@ internal sealed class ServiceResourceMetadataItemBuilder : IServiceResourceMetad
                 Status = resourceInformation?.Status ?? string.Empty,
                 IsDelegable = resourceInformation?.Delegable ?? false,
                 MinimumAuthenticationLevel = minimumAuthenticationLevels.GetValueOrDefault(serviceResource)?.AuthenticationLevel ?? 0,
-                MinimumSystemUserAuthenticationLevel = minimumAuthenticationLevels.GetValueOrDefault(serviceResource)?.SystemUserAuthenticationLevel ?? 0,
+                MinimumSystemUserAuthenticationLevel = minimumAuthenticationLevels.GetValueOrDefault(serviceResource)?.SystemUserAuthenticationLevel ?? null,
                 Name = serviceResourceName,
                 Links = new LinkDto { Metadata = _metadataLinkProvider.GetServiceResourceMetadataLink(resourceId) }
             },

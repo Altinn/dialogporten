@@ -32,9 +32,8 @@ AT23 credentials the [E2E docs](../docs/E2E-Tests.md) list. The token generator 
 key stay on your machine, and the host puts them only into requests to their hosts. The Maskinporten client's JWK
 cannot stay outside, since the apps sign with it, so use a dedicated AT23 test client for it, or `none`.
 
-The agent works in its own clone by default. The `worktree` variant bind-mounts your checkout at
-`/home/agent/code/dialogporten` instead (`agentctl apply --variant worktree`); `build` and `worktree.build` are the
-same with the image built from your checkout.
+The agent works in its own clone. It cannot mount your checkout instead: agentctl refuses a bind mount that
+contains a `.env` file, and this repository tracks `.env` and `scripts/e2e/.env`.
 
 ## Change it
 

@@ -4,5 +4,3 @@ agent.*.yaml
 
 # The repository's own variants.
 !agent.build.yaml
-!agent.worktree.yaml
-!agent.worktree.build.yaml

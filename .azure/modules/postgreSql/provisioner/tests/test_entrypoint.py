@@ -10,7 +10,7 @@ ENTRYPOINT = Path(__file__).resolve().parents[1] / "entrypoint.sh"
 
 
 class ProvisionerTests(unittest.TestCase):
-    def run_provisioner(self, *, federation=False, fail_preflight=False,
+    def run_provisioner(self, *, federation=False, fail_preflight=False, fail_script="",
                         workloads=None, token_source=True):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -22,6 +22,7 @@ class ProvisionerTests(unittest.TestCase):
 [[ "$PGPASSWORD" == fixture-token ]] || exit 93
 printf '%s\\n' "$*" >> "$CALL_LOG"
 if [[ "$*" == *require-pgaudit.sql* && "$FAIL_PREFLIGHT" == 1 ]]; then exit 1; fi
+if [[ -n "$FAIL_SCRIPT" && "$*" == *"$FAIL_SCRIPT"* ]]; then exit 3; fi
 ''',
             }.items():
                 path = root / command
@@ -37,6 +38,7 @@ if [[ "$*" == *require-pgaudit.sql* && "$FAIL_PREFLIGHT" == 1 ]]; then exit 1; f
                 ]),
                 "CALL_LOG": str(log),
                 "FAIL_PREFLIGHT": "1" if fail_preflight else "0",
+                "FAIL_SCRIPT": fail_script,
             }
             if token_source:
                 if federation:
@@ -65,6 +67,15 @@ if [[ "$*" == *require-pgaudit.sql* && "$FAIL_PREFLIGHT" == 1 ]]; then exit 1; f
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(len(calls), 1)
         self.assertIn("require-pgaudit.sql", calls[0])
+
+    def test_refused_principal_stops_before_profiles_and_memberships(self):
+        # psql exits 3 when ON_ERROR_STOP stops a script, as provision-entra-principal.sql does
+        # for a role it refuses to map.
+        result, calls = self.run_provisioner(fail_script="provision-entra-principal.sql")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(len(calls), 2)
+        self.assertIn("require-pgaudit.sql", calls[0])
+        self.assertIn("provision-entra-principal.sql", calls[1])
 
     def test_invalid_entry_never_reaches_database(self):
         result, calls = self.run_provisioner(workloads=[{"roleName": "missing-fields"}])

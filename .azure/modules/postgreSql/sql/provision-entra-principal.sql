@@ -51,13 +51,16 @@ SELECT
             WHERE p.rolname = :'role_name'), '')                                     AS mapped_oid
 \gset
 
+-- The refusals below end in an SQL error rather than \quit: \quit takes no exit status and
+-- psql exits 0 after it, so the caller would carry on and grant a profile to the refused role.
+-- Under ON_ERROR_STOP the error makes psql exit non-zero, which stops the run before any grant.
 \if :role_exists
   SELECT :'mapped_oid' = ''             AS mapping_missing \gset
   SELECT :'mapped_oid' = :'mi_oid'      AS mapping_matches \gset
   \if :mapping_missing
     \echo 'ERROR: role exists but has NO Entra (pgaadauth) mapping - refusing to touch it.'
     \echo '       A plain PG role already owns this name; resolve manually before provisioning.'
-    \quit 1
+    DO $$ BEGIN RAISE EXCEPTION 'role exists without an Entra mapping'; END $$;
   \elif :mapping_matches
     \echo 'Principal exists and is mapped to the expected object id, skipping creation'
   \else
@@ -66,7 +69,7 @@ SELECT
     \echo '       Found:   ' :'mapped_oid'
     \echo '       The managed identity was likely deleted and recreated. Drop and reprovision'
     \echo '       the role manually (DROP ROLE then rerun) - this script will not silently re-map.'
-    \quit 1
+    DO $$ BEGIN RAISE EXCEPTION 'role exists but is mapped to a different Entra object id'; END $$;
   \endif
 \else
   SELECT pgaadauth_create_principal_with_oid(

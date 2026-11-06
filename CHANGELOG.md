@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.126.3](https://github.com/Altinn/dialogporten/compare/v1.126.2...v1.126.3) (2026-11-06)
+
+
+### Miscellaneous Chores
+
+* **agents:** add a backend developer agent definition ([#4527](https://github.com/Altinn/dialogporten/issues/4527)) ([0b04995](https://github.com/Altinn/dialogporten/commit/0b04995e270ae723683ee89d735d6e8884b638b7))
+* **infra:** keep yt01 scale-down going when the E2E purge fails ([#4559](https://github.com/Altinn/dialogporten/issues/4559)) ([da8d9ed](https://github.com/Altinn/dialogporten/commit/da8d9ed1ecfa90516eaf094824668b3ff477b720))
+
 ## [1.126.2](https://github.com/Altinn/dialogporten/compare/v1.126.1...v1.126.2) (2026-11-06)
 
 

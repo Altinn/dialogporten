@@ -118,7 +118,12 @@ grant removal and any database/bootstrap changes remain manual rollout operation
 Run `shellcheck .azure/modules/postgreSql/provisioner/entrypoint.sh` and
 `python3 -m unittest discover -s .azure/modules/postgreSql/provisioner/tests`.
 The tests stub token acquisition and psql; live Azure permissions, TLS certificate
-validation, and pgAudit installation still require environment validation.
+validation, and pgAudit installation still require environment validation. The
+principal script also runs with a real psql, against stand-ins for the `pgaadauth_*`
+functions, when `PROVISIONER_TEST_DATABASE_URL` is a `postgresql://` URL for a
+disposable server that the test may create a database and roles on. The PR
+validation job provides one as a service container; never point it at a shared
+server.
 
 Run `python3 -m unittest discover -s .azure/tests` with Bicep CLI 0.41.2 or later
 to evaluate all eight workload templates locally in Password and EntraToken modes.

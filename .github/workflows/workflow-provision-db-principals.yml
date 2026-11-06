@@ -93,15 +93,32 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # A disposable PostgreSQL 18 server for the test that runs the principal script with a real
+    # psql. Trust authentication suits a server that lives only as long as this job.
+    services:
+      postgres:
+        image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Validate authentication templates and provisioning control flow
+        env:
+          PROVISIONER_TEST_DATABASE_URL: postgresql://postgres@localhost:5432/postgres
         run: |
           az bicep install --version v0.43.1
           BICEP_CLI="$HOME/.azure/bin/bicep" python3 -m unittest discover -s .azure/tests
+          psql --version
           python3 -m unittest discover -s .azure/modules/postgreSql/provisioner/tests
           shellcheck .azure/modules/postgreSql/provisioner/entrypoint.sh
 

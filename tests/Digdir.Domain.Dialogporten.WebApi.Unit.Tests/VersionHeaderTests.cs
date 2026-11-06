@@ -1,3 +1,4 @@
+using System.Net;
 using Digdir.Library.Utils.AspNet;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,16 +13,18 @@ public class VersionHeaderTests
     private const string Version = "1.126.2-81787c8";
 
     // A deploy waits for this header to show the new image tag. Through the edge, some apps can only be reached
-    // on paths that reject the request, so error and challenge responses must carry the header too.
+    // on paths that reject the request, so challenge, not-found and handled error responses must carry it too.
     [Theory]
-    [InlineData("/health")]
-    [InlineData("/protected")]
-    [InlineData("/missing")]
-    public Task Should_Send_Version_Header_On_Every_Response(string path) =>
+    [InlineData("/health", HttpStatusCode.OK)]
+    [InlineData("/protected", HttpStatusCode.Unauthorized)]
+    [InlineData("/missing", HttpStatusCode.NotFound)]
+    [InlineData("/throws", HttpStatusCode.InternalServerError)]
+    public Task Should_Send_Version_Header_On_Every_Response(string path, HttpStatusCode expectedStatus) =>
         WithApp(Version, async client =>
         {
             using var response = await client.GetAsync(new Uri(path, UriKind.Relative), TestContext.Current.CancellationToken);
 
+            Assert.Equal(expectedStatus, response.StatusCode);
             Assert.True(response.Headers.TryGetValues(VersionHeaderExtensions.HeaderName, out var values));
             Assert.Equal(Version, Assert.Single(values));
         });
@@ -46,8 +49,14 @@ public class VersionHeaderTests
 
         await using var app = builder.Build();
         app.UseVersionHeader();
+        app.UseExceptionHandler(errorApp => errorApp.Run(context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            return Task.CompletedTask;
+        }));
         app.MapDialogportenHealthChecks();
         app.MapGet("/protected", () => Results.Unauthorized());
+        app.Map("/throws", _ => throw new InvalidOperationException("Handled by the exception handler."));
         await app.StartAsync(TestContext.Current.CancellationToken);
 
         using var client = app.GetTestClient();

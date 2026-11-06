@@ -21,8 +21,10 @@ public static class VersionHeaderExtensions
     extension(IApplicationBuilder app)
     {
         /// <summary>
-        /// Adds <see cref="HeaderName"/> to every response, including error and challenge responses.
-        /// Register it before any other middleware, so it is in place before a response can start.
+        /// Adds <see cref="HeaderName"/> to every response the app writes, including challenge, not-found and
+        /// handled error responses. A request that fails with an exception no middleware handles gets Kestrel's
+        /// own 500, which has no header. Register it before any other middleware, so it is in place before a
+        /// response can start.
         /// </summary>
         public IApplicationBuilder UseVersionHeader()
         {

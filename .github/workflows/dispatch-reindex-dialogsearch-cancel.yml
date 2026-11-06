@@ -8,7 +8,6 @@ on:
         required: true
         type: choice
         options:
-          - test
           - yt01
           - staging
           - prod

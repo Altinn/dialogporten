@@ -13,6 +13,12 @@ public static class VersionHeaderExtensions
     public const string HeaderName = "X-Dialogporten-Version";
 
     /// <summary>
+    /// Request header that asks for <see cref="HeaderName"/>. Responses to other requests do not carry the
+    /// version.
+    /// </summary>
+    public const string RequestHeaderName = "X-Dialogporten-Version-Check";
+
+    /// <summary>
     /// Holds the image tag. The Dockerfiles set it from the VERSION build argument; local builds leave it
     /// unset, and then no header is sent.
     /// </summary>
@@ -21,10 +27,10 @@ public static class VersionHeaderExtensions
     extension(IApplicationBuilder app)
     {
         /// <summary>
-        /// Adds <see cref="HeaderName"/> to every response the app writes, including challenge, not-found and
-        /// handled error responses. A request that fails with an exception no middleware handles gets Kestrel's
-        /// own 500, which has no header. Register it before any other middleware, so it is in place before a
-        /// response can start.
+        /// Adds <see cref="HeaderName"/> to every response the app writes for a request that carries
+        /// <see cref="RequestHeaderName"/>, including challenge, not-found and handled error responses. A request
+        /// that fails with an exception no middleware handles gets Kestrel's own 500, which has no header.
+        /// Register it before any other middleware, so it is in place before a response can start.
         /// </summary>
         public IApplicationBuilder UseVersionHeader()
         {
@@ -36,6 +42,11 @@ public static class VersionHeaderExtensions
 
             return app.Use((context, next) =>
             {
+                if (!context.Request.Headers.ContainsKey(RequestHeaderName))
+                {
+                    return next(context);
+                }
+
                 context.Response.OnStarting(() =>
                 {
                     context.Response.Headers[HeaderName] = version;

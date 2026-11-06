@@ -12,31 +12,53 @@ public class VersionHeaderTests
 {
     private const string Version = "1.126.2-81787c8";
 
-    // A deploy waits for this header to show the new image tag. Through the edge, some apps can only be reached
-    // on paths that reject the request, so challenge, not-found and handled error responses must carry it too.
+    // A deploy asks for this header to see when the new image tag answers. Through the edge, some apps can only be
+    // reached on paths that reject the request, so challenge, not-found and handled error responses must carry it too.
     [Theory]
     [InlineData("/health", HttpStatusCode.OK)]
     [InlineData("/protected", HttpStatusCode.Unauthorized)]
     [InlineData("/missing", HttpStatusCode.NotFound)]
     [InlineData("/throws", HttpStatusCode.InternalServerError)]
-    public Task Should_Send_Version_Header_On_Every_Response(string path, HttpStatusCode expectedStatus) =>
+    public Task Should_Send_Version_Header_When_Requested(string path, HttpStatusCode expectedStatus) =>
         WithApp(Version, async client =>
         {
-            using var response = await client.GetAsync(new Uri(path, UriKind.Relative), TestContext.Current.CancellationToken);
+            using var response = await GetAsync(client, path, requestVersion: true);
 
             Assert.Equal(expectedStatus, response.StatusCode);
             Assert.True(response.Headers.TryGetValues(VersionHeaderExtensions.HeaderName, out var values));
             Assert.Equal(Version, Assert.Single(values));
         });
 
+    [Theory]
+    [InlineData("/health")]
+    [InlineData("/protected")]
+    public Task Should_Not_Send_Version_Header_When_Not_Requested(string path) =>
+        WithApp(Version, async client =>
+        {
+            using var response = await GetAsync(client, path, requestVersion: false);
+
+            Assert.False(response.Headers.Contains(VersionHeaderExtensions.HeaderName));
+        });
+
     [Fact]
     public Task Should_Not_Send_Version_Header_When_Version_Is_Unset() =>
         WithApp(string.Empty, async client =>
         {
-            using var response = await client.GetAsync(new Uri("/health", UriKind.Relative), TestContext.Current.CancellationToken);
+            using var response = await GetAsync(client, "/health", requestVersion: true);
 
             Assert.False(response.Headers.Contains(VersionHeaderExtensions.HeaderName));
         });
+
+    private static async Task<HttpResponseMessage> GetAsync(HttpClient client, string path, bool requestVersion)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(path, UriKind.Relative));
+        if (requestVersion)
+        {
+            request.Headers.Add(VersionHeaderExtensions.RequestHeaderName, "true");
+        }
+
+        return await client.SendAsync(request, TestContext.Current.CancellationToken);
+    }
 
     private static async Task WithApp(string version, Func<HttpClient, Task> assert)
     {

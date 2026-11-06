@@ -38,8 +38,8 @@ FROM base AS final
 WORKDIR /app
 USER $APP_UID
 COPY --from=build /app/publish .
-# The image tag, passed by .github/workflows/workflow-publish-docker-images.yml. The app sends it in the
-# X-Dialogporten-Version response header; without it, no header is sent.
+# The image tag, passed by .github/workflows/workflow-publish-docker-images.yml. The app returns it in the
+# X-Dialogporten-Version response header to requests that ask for it; without it, no header is sent.
 ARG VERSION
 ENV DIALOGPORTEN_VERSION=$VERSION
 ENTRYPOINT ["dotnet", "Digdir.Domain.Dialogporten.Service.dll"]

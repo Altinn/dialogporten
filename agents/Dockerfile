@@ -51,8 +51,9 @@ RUN case "${TARGETARCH}" in \
 
 # dotnet-ef at the version of the repository's Microsoft.EntityFrameworkCore packages, installed to a shared path
 # because the host resynchronizes the agent's home directory. Root steps that run the SDK use a scratch HOME, so no
-# root-owned cache is left in the agent's.
-ARG DOTNET_EF_VERSION=10.0.12
+# root-owned cache is left in the agent's. Renovate moves it with the EF Core packages, which release together.
+# renovate: datasource=nuget depName=dotnet-ef
+ARG DOTNET_EF_VERSION=10.0.14
 
 RUN set -eu; \
     scratch="$(mktemp -d)"; \

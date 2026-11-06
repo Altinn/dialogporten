@@ -201,9 +201,9 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
             && int.TryParse(v.Value, out var value) ? value : (int?)null)
         .FirstOrDefault(x => x.HasValue);
 
-    private static int? GetMinimumAuthenticationLevel(XacmlPolicy policy) => GetObligationIntValue(policy, AuthenticationLevelCategory);
+    internal static int? GetMinimumAuthenticationLevel(XacmlPolicy policy) => GetObligationIntValue(policy, AuthenticationLevelCategory);
 
-    private static int? GetMinimumSystemUserAuthenticationLevel(XacmlPolicy policy) => GetObligationIntValue(policy, AuthenticationLevelSystemUserCategory);
+    internal static int? GetMinimumSystemUserAuthenticationLevel(XacmlPolicy policy) => GetObligationIntValue(policy, AuthenticationLevelSystemUserCategory);
 
     private async Task<ServiceResourceInformation[]> FetchServiceResources(CancellationToken cancellationToken)
     {

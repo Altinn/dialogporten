@@ -157,6 +157,7 @@ static void BuildAndRun(string[] args)
 
     var app = builder.Build();
 
+    app.UseVersionHeader();
     app.UseCors();
     app.MapDialogportenHealthChecks();
 

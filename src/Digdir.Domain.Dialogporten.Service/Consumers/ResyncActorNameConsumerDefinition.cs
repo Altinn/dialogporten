@@ -11,6 +11,7 @@ public sealed class ResyncActorNameConsumerDefinition : ConsumerDefinition<Domai
         IConsumerConfigurator<DomainEventConsumer<ResyncActorName, ResyncActorNameEvent>> consumerConfigurator,
         IRegistrationContext context)
     {
+        endpointConfigurator.DiscardFaultedMessages();
         endpointConfigurator.UseDelayedRedelivery(r => r.Intervals(
             TimeSpan.FromMinutes(1),
             TimeSpan.FromMinutes(5),
@@ -19,6 +20,5 @@ public sealed class ResyncActorNameConsumerDefinition : ConsumerDefinition<Domai
             TimeSpan.FromHours(2),
             TimeSpan.FromHours(4),
             TimeSpan.FromHours(8)));
-        endpointConfigurator.DiscardFaultedMessages();
     }
 }

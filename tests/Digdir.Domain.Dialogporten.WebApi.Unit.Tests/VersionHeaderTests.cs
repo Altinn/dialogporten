@@ -11,6 +11,7 @@ namespace Digdir.Domain.Dialogporten.WebApi.Unit.Tests;
 public class VersionHeaderTests
 {
     private const string Version = "1.126.2-81787c8";
+    private const string PublicCaching = "public, max-age=86400";
 
     // A deploy asks for this header to see when the new image tag answers. Through the edge, some apps can only be
     // reached on paths that reject the request, so challenge, not-found and handled error responses must carry it too.
@@ -38,6 +39,27 @@ public class VersionHeaderTests
             using var response = await GetAsync(client, path, requestVersion: false);
 
             Assert.False(response.Headers.Contains(VersionHeaderExtensions.HeaderName));
+        });
+
+    // Some endpoints, such as the OAuth metadata, are publicly cacheable. A response that carries the version must not
+    // be stored, or a cache could replay it to callers that did not ask, or give a version check an old answer.
+    [Fact]
+    public Task Should_Mark_Version_Responses_No_Store() =>
+        WithApp(Version, async client =>
+        {
+            using var response = await GetAsync(client, "/cacheable", requestVersion: true);
+
+            Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
+            Assert.True(response.Headers.Contains(VersionHeaderExtensions.HeaderName));
+        });
+
+    [Fact]
+    public Task Should_Leave_Caching_Unchanged_When_Not_Requested() =>
+        WithApp(Version, async client =>
+        {
+            using var response = await GetAsync(client, "/cacheable", requestVersion: false);
+
+            Assert.Equal(PublicCaching, response.Headers.CacheControl?.ToString());
         });
 
     [Fact]
@@ -78,6 +100,11 @@ public class VersionHeaderTests
         }));
         app.MapDialogportenHealthChecks();
         app.MapGet("/protected", () => Results.Unauthorized());
+        app.MapGet("/cacheable", (HttpContext context) =>
+        {
+            context.Response.Headers.CacheControl = PublicCaching;
+            return Results.Ok();
+        });
         app.Map("/throws", _ => throw new InvalidOperationException("Handled by the exception handler."));
         await app.StartAsync(TestContext.Current.CancellationToken);
 

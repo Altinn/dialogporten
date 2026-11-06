@@ -30,7 +30,9 @@ public static class VersionHeaderExtensions
         /// Adds <see cref="HeaderName"/> to every response the app writes for a request that carries
         /// <see cref="RequestHeaderName"/>, including challenge, not-found and handled error responses. A request
         /// that fails with an exception no middleware handles gets Kestrel's own 500, which has no header.
-        /// Register it before any other middleware, so it is in place before a response can start.
+        /// Those responses are also marked no-store, so no cache can hand the version to other callers or an old
+        /// answer to a version check. Register it before any other middleware, so it is in place before a
+        /// response can start, and so its callback runs after any that set caching headers.
         /// </summary>
         public IApplicationBuilder UseVersionHeader()
         {
@@ -50,6 +52,7 @@ public static class VersionHeaderExtensions
                 context.Response.OnStarting(() =>
                 {
                     context.Response.Headers[HeaderName] = version;
+                    context.Response.Headers.CacheControl = "no-store";
                     return Task.CompletedTask;
                 });
 

@@ -86,6 +86,34 @@ dotnet user-secrets set -p tests/Digdir.Domain.Dialogporten.GraphQl.E2E.Tests To
    - The shell script and Rider E2E profiles set `RUNNING_E2E_TESTS=true`, which prevents `appsettings.local.json` from being loaded for `WebApi`, `GraphQL`, and `Service`. This avoids accidental local overrides during E2E runs.
    - The test-project file `tests/Digdir.Library.Dialogporten.E2E.Common/appsettings.local.json` is unaffected and is still the place to set `ExplicitTests=false` if you want explicit tests to run by default in your IDE.
 
+## Service URLs
+The tests find the APIs from two settings in `E2ESettings`
+([tests/Digdir.Library.Dialogporten.E2E.Common/E2ESettings.cs](../tests/Digdir.Library.Dialogporten.E2E.Common/E2ESettings.cs)).
+Each holds the complete URL the tests call; nothing is added to it:
+
+| Setting | Meaning |
+|---|---|
+| `WebApiBaseUri` | The WebAPI up to and including its path base, without `/api/...`. A trailing `/` is optional. |
+| `GraphQlUri` | The GraphQL endpoint itself. |
+
+The values per `DOTNET_ENVIRONMENT` are in `appsettings.{environment}.json` in
+[Digdir.Library.Dialogporten.E2E.Common](../tests/Digdir.Library.Dialogporten.E2E.Common) and
+[Digdir.Domain.Dialogporten.E2E.Cleanup.Tests](../tests/Digdir.Domain.Dialogporten.E2E.Cleanup.Tests):
+
+| Environment | `WebApiBaseUri` | `GraphQlUri` |
+|---|---|---|
+| Launcher ([scripts/e2e](../scripts/e2e/README.md)) | `https://localhost:${WEBAPI_PORT}/dialogporten` | `http://localhost:${GRAPHQL_PORT}/graphql` |
+| `Development` (Rider E2E profiles) | `https://localhost:7214/dialogporten` | `http://localhost:5181/graphql` |
+| `test` (AT23) | `https://platform.at23.altinn.cloud/dialogporten` | `https://platform.at23.altinn.cloud/dialogporten/graphql` |
+| `staging` (TT02) | `https://platform.tt02.altinn.no/dialogporten` | `https://platform.tt02.altinn.no/dialogporten/graphql` |
+| `yt01` | `https://platform.yt01.altinn.cloud/dialogporten` | `https://platform.yt01.altinn.cloud/dialogporten/graphql` |
+
+The launcher exports both settings as environment variables, derived from `WEBAPI_PORT` and `GRAPHQL_PORT`.
+To point the tests elsewhere, set them in `appsettings.local.json`, user secrets or the environment.
+
+The settings `DialogportenBaseUri`, `WebApiPort` and `GraphQlPort` were removed. If any of them is still set,
+the fixture fails at startup and names where it was set.
+
 ## Writing tests
 Use the shared E2E base class and custom attributes so hooks and explicit behavior are consistent:
 - WebAPI: inherit `E2ETestBase<WebApiE2EFixture>`.

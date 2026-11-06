@@ -41,8 +41,11 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             .AddEnvironmentVariables()
             .Build();
 
+        ThrowIfRemovedSettingsArePresent(configuration);
+
         var settings = configuration.Get<E2ESettings>()
                        ?? throw new InvalidOperationException("E2E settings are missing.");
+        ThrowIfServiceUrisAreMissing(settings);
         Settings = settings;
 
         var services = new ServiceCollection();
@@ -59,15 +62,10 @@ public abstract class E2EFixtureBase : IAsyncLifetime
             Converters = { new JsonStringEnumConverter() }
         };
 
-        var refitBaseAddress = new UriBuilder(settings.DialogportenBaseUri)
-        {
-            Port = settings.WebAPiPort
-        }.Uri;
-
-        WebApiUri = new UriBuilder(settings.DialogportenBaseUri + "/")
-        {
-            Port = settings.WebAPiPort
-        }.Uri;
+        // Refit appends its routes (which start with '/') to the base address, so it must not end with '/'.
+        // Raw HttpClients resolve relative paths against WebApiUri, so that one must end with '/'.
+        var refitBaseAddress = WithTrailingSlash(settings.WebApiBaseUri, trailingSlash: false);
+        WebApiUri = WithTrailingSlash(settings.WebApiBaseUri, trailingSlash: true);
 
         services
             .AddRefitClient<IServiceownerApi>(new RefitSettings
@@ -83,19 +81,7 @@ public abstract class E2EFixtureBase : IAsyncLifetime
 
         services.Decorate<IServiceownerApi, EphemeralDialogDecorator>();
 
-        var graphQlPath = DotnetEnvironment == Environments.Development ? "/graphql" : "/dialogporten/graphql";
-        var graphQlUriBuilder = new UriBuilder(settings.DialogportenBaseUri)
-        {
-            Path = graphQlPath
-        };
-
-        if (settings.GraphQlPort is not -1)
-        {
-            graphQlUriBuilder.Scheme = "http";
-            graphQlUriBuilder.Port = settings.GraphQlPort;
-        }
-
-        var graphQlUri = graphQlUriBuilder.Uri;
+        var graphQlUri = settings.GraphQlUri;
 
         ConfigureServices(services, settings, refitBaseAddress, graphQlUri);
 
@@ -211,6 +197,64 @@ public abstract class E2EFixtureBase : IAsyncLifetime
         {
             return exception.GetBaseException().Message;
         }
+    }
+
+    private static readonly (string RemovedKey, string Replacement)[] RemovedSettings =
+    [
+        ("DialogportenBaseUri", nameof(E2ESettings.WebApiBaseUri)),
+        ("WebApiPort", nameof(E2ESettings.WebApiBaseUri)),
+        ("GraphQlPort", nameof(E2ESettings.GraphQlUri))
+    ];
+
+    private static void ThrowIfRemovedSettingsArePresent(IConfigurationRoot configuration)
+    {
+        var issues = RemovedSettings
+            .Select(removed => (removed.RemovedKey, removed.Replacement, Provider: configuration.Providers
+                .LastOrDefault(provider => provider.TryGet(removed.RemovedKey, out _))))
+            .Where(removed => removed.Provider is not null)
+            .Select(removed =>
+                $"'{removed.RemovedKey}' is no longer supported; set '{removed.Replacement}' to the full URL instead. " +
+                $"It was set by {removed.Provider}.")
+            .ToList();
+
+        if (issues.Count == 0)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"E2E settings contain removed keys (check appsettings.local.json, user secrets and environment variables):" +
+            $"{Environment.NewLine}{string.Join(Environment.NewLine, issues)}");
+    }
+
+    private static void ThrowIfServiceUrisAreMissing(E2ESettings settings)
+    {
+        string[] issues =
+        [
+            .. MissingAbsoluteUri(nameof(E2ESettings.WebApiBaseUri), settings.WebApiBaseUri),
+            .. MissingAbsoluteUri(nameof(E2ESettings.GraphQlUri), settings.GraphQlUri)
+        ];
+
+        if (issues.Length == 0)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"E2E settings are invalid:{Environment.NewLine}{string.Join(Environment.NewLine, issues)}");
+    }
+
+    private static IEnumerable<string> MissingAbsoluteUri(string key, Uri? uri) => uri switch
+    {
+        null => [$"'{key}' is missing."],
+        { IsAbsoluteUri: false } => [$"'{key}' must be an absolute URL, got '{uri}'."],
+        _ => []
+    };
+
+    private static Uri WithTrailingSlash(Uri uri, bool trailingSlash)
+    {
+        var path = uri.AbsolutePath.TrimEnd('/');
+        return new UriBuilder(uri) { Path = trailingSlash ? path + "/" : path }.Uri;
     }
 
     private void ClearTokenOverrides() => _tokenOverridesAccessor?.Current = null;

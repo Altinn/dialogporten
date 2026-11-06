@@ -290,7 +290,6 @@ public static class InfrastructureExtensions
                 if (cfg is IServiceBusReceiveEndpointConfigurator sb)
                 {
                     sb.ConfigureDeadLetterQueueDeadLetterTransport();
-                    sb.ConfigureDeadLetterQueueErrorTransport();
                 }
             });
             x.UsingAzureServiceBus((context, cfg) =>

@@ -66,8 +66,8 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
             $"""
             with source as (
             	SELECT *
-            	FROM unnest(@ids, @resources, @minimumAuthenticationLevels, @createdAts, @updatedAts) 
-            	    as s(id, resource, minimumSecurityLevel, createdAt, updatedAt)
+            	FROM unnest(@ids, @resources, @minimumAuthenticationLevels, @minimumSystemUserAuthenticationLevels, @createdAts, @updatedAts) 
+            	    as s(id, resource, minimumSecurityLevel, minimumSystemUserSecurityLevel, createdAt, updatedAt)
             )
             merge into "{nameof(ResourcePolicyInformation)}" t
             using source s
@@ -75,10 +75,11 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
             when matched then
               	update set 
               	    "{nameof(ResourcePolicyInformation.UpdatedAt)}" = s.updatedAt,
-                    "{nameof(ResourcePolicyInformation.MinimumAuthenticationLevel)}" = s.minimumSecurityLevel
+                    "{nameof(ResourcePolicyInformation.MinimumAuthenticationLevel)}" = s.minimumSecurityLevel,
+              	    "{nameof(ResourcePolicyInformation.MinimumSystemUserAuthenticationLevel)}" = s.minimumSystemUserSecurityLevel
             when not matched then
-              	insert ("{nameof(ResourcePolicyInformation.Id)}", "{nameof(ResourcePolicyInformation.Resource)}", "{nameof(ResourcePolicyInformation.MinimumAuthenticationLevel)}", "{nameof(ResourcePolicyInformation.CreatedAt)}", "{nameof(ResourcePolicyInformation.UpdatedAt)}")
-              	values (s.id, s.resource, s.minimumSecurityLevel, s.createdAt, s.updatedAt);
+              	insert ("{nameof(ResourcePolicyInformation.Id)}", "{nameof(ResourcePolicyInformation.Resource)}", "{nameof(ResourcePolicyInformation.MinimumAuthenticationLevel)}", "{nameof(ResourcePolicyInformation.MinimumSystemUserAuthenticationLevel)}", "{nameof(ResourcePolicyInformation.CreatedAt)}", "{nameof(ResourcePolicyInformation.UpdatedAt)}")
+              	values (s.id, s.resource, s.minimumSecurityLevel, s.minimumSystemUserSecurityLevel, s.createdAt, s.updatedAt);
             """;
 
         if (resourceMetadata.Count == 0)
@@ -91,6 +92,7 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
                 new NpgsqlParameter("ids", resourceMetadata.Select(x => x.Id).ToArray()),
                 new NpgsqlParameter("resources", resourceMetadata.Select(x => x.Resource).ToArray()),
                 new NpgsqlParameter("minimumAuthenticationLevels", resourceMetadata.Select(x => x.MinimumAuthenticationLevel).ToArray()),
+                new NpgsqlParameter("minimumSystemUserAuthenticationLevels", resourceMetadata.Select(x => x.MinimumSystemUserAuthenticationLevel).ToArray()),
                 new NpgsqlParameter("createdAts", resourceMetadata.Select(x => x.CreatedAt).ToArray()),
                 new NpgsqlParameter("updatedAts", resourceMetadata.Select(x => x.UpdatedAt).ToArray())
             ], cancellationToken);

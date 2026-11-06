@@ -200,6 +200,49 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             });
     }
 
+    [Theory]
+    [InlineData(4, null)]
+    [InlineData(3, 4)]
+    public Task Get_Should_Return_NonSensitiveTitle_As_Title_When_SystemUser_Auth_Level_Is_Too_Low(int minimumAuthenticationLevel, int? minimumSystemUserAuthenticationLevel)
+    {
+        var party = Party;
+        const string serviceResource = "urn:altinn:resource:test-service-auth-level-too-low";
+
+        return FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
+            .AsSystemUser(x => x.WithClaim(
+                ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                Constants.IdportenLoaSubstantial))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.Dto.Content!.Title.Value =
+                [
+                    new LocalizationDto { LanguageCode = "nb", Value = "Gradert tittel" }
+                ];
+                x.Dto.Content.NonSensitiveTitle = new ContentValueDto
+                {
+                    Value =
+                    [
+                        new LocalizationDto { LanguageCode = "nb", Value = "Ugradert tittel" }
+                    ]
+                };
+            })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel, minimumSystemUserAuthenticationLevel))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.Title.Should().ContainSingle();
+                result.Title[0].Value.Should().Be("Ugradert tittel");
+                result.AuthorizationEvidence.CurrentAuthenticationLevel.Should().Be(3);
+            });
+    }
+
     [Fact]
     public Task Get_Should_Fall_Back_To_Title_When_EndUser_Auth_Level_Is_Too_Low_And_NonSensitiveTitle_Is_Not_Set()
     {
@@ -699,7 +742,8 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     private static async Task SeedMinimumAuthenticationLevel(
         FlowContext ctx,
         string serviceResource,
-        int minimumAuthenticationLevel)
+        int minimumAuthenticationLevel,
+        int? minimumSystemUserAuthenticationLevel = null)
     {
         using var scope = ctx.Application.GetServiceProvider().CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
@@ -707,7 +751,8 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         db.ResourcePolicyInformation.Add(new()
         {
             Resource = serviceResource,
-            MinimumAuthenticationLevel = minimumAuthenticationLevel
+            MinimumAuthenticationLevel = minimumAuthenticationLevel,
+            MinimumSystemUserAuthenticationLevel = minimumSystemUserAuthenticationLevel
         });
 
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);

@@ -430,7 +430,7 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             )
             SELECT d."Id" AS dialogId
                  , COALESCE(r."MinimumAuthenticationLevel", 0) AS authLevel
-                 , COALESCE(r."MinimumSystemUserAuthenticationLevel", null) AS systemUserAuthLevel
+                 , r."MinimumSystemUserAuthenticationLevel" AS systemUserAuthLevel
                  , c."TypeId"
                  , c."MediaType"
                  , l."LanguageCode"

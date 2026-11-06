@@ -25,6 +25,34 @@
         "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
       }
+    },
+    "https (E2E)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7214;http://localhost:5123",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "RUNNING_E2E_TESTS": "true",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+        "LocalDevelopment__DisableAuth": "false",
+        "LocalDevelopment__DisableCache": "false",
+        "LocalDevelopment__DisablePolicyInformationSyncOnStartup": "true",
+        "LocalDevelopment__DisableSubjectResourceSyncOnStartup": "true",
+        "LocalDevelopment__UseInMemoryServiceBusTransport": "true",
+        "LocalDevelopment__UseLocalDevelopmentAltinnAuthorization": "false",
+        "LocalDevelopment__UseLocalDevelopmentCloudEventBus": "true",
+        "LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator": "false",
+        "LocalDevelopment__UseLocalDevelopmentNameRegister": "false",
+        "LocalDevelopment__UseLocalDevelopmentOrganizationRegister": "false",
+        "LocalDevelopment__UseLocalDevelopmentPartyNameRegistry": "false",
+        "LocalDevelopment__UseLocalDevelopmentResourceRegister": "false",
+        "LocalDevelopment__UseLocalDevelopmentUser": "false",
+        "LocalDevelopment__UseLocalMetricsAggregationStorage": "true"
+      }
     }
   }
 }

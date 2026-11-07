@@ -91,7 +91,6 @@ static void BuildAndRun(string[] args)
         .AddDialogportenHealthChecks(builder.Configuration, DialogportenHealthCheckExtensions.ProbeSectionName);
 
     var app = builder.Build();
-    app.UseVersionHeader();
     app.MapDialogportenHealthChecks();
     app.UseHttpsRedirection()
         .UseAzureConfiguration();

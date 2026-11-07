@@ -204,9 +204,12 @@ static void BuildAndRun(string[] args)
     }
 
     var app = builder.Build();
-    app.UseVersionHeader();
     app.UsePathBase("/dialogporten");
     app.MapDialogportenHealthChecks();
+    // The edge can route the service owner and end user prefixes to separate deployments, so a version check
+    // needs a path under each.
+    app.MapVersionEndpoint("/api/v1/serviceowner/version");
+    app.MapVersionEndpoint("/api/v1/enduser/version");
     app.MapControllers();
 
     app.UseStaticFiles();

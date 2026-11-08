@@ -611,16 +611,16 @@
       },
       "Polly": {
         "type": "Transitive",
-        "resolved": "8.8.1",
-        "contentHash": "YpeoOqj82RfUtzQ3Tcn/zGnL/fdFmev1gEPSexYD3HgQZACo0b1avF8QU6f86KhUP+agXzCwKOKjo/8cqTjXvw==",
+        "resolved": "8.9.0",
+        "contentHash": "k/gux3e2R/kmXXVBPmaPi/MWMEsCu6gvWfKwWYRiOtEbDljg91iP8zH5LGPpiTNyoGrmw3hrK8wY1s9rs9nluA==",
         "dependencies": {
-          "Polly.Core": "8.8.1"
+          "Polly.Core": "8.9.0"
         }
       },
       "Polly.Core": {
         "type": "Transitive",
-        "resolved": "8.8.1",
-        "contentHash": "yyzOT3XJRR7sEOxZH1Xpb6Oi5cDiGVuTOSVfIlcC23wFUdoyCPOujjKfIX5WdIX8l5TkRneOTyyW1Y1zNQKnUA=="
+        "resolved": "8.9.0",
+        "contentHash": "Imm3q+XvH+8fiOdCkp+GggDQuxN3e4VznbRxODjjJxCurmAIfUEO4dKcPx8RCwocTkvP6Udw2DyXtC+45tu3jA=="
       },
       "Refit": {
         "type": "Transitive",
@@ -802,7 +802,7 @@
           "Microsoft.Extensions.Configuration.UserSecrets": "[10.0.14, )",
           "Microsoft.NET.Test.Sdk": "[18.9.0, )",
           "NSec.Cryptography": "[25.4.0, )",
-          "Polly": "[8.8.1, )",
+          "Polly": "[8.9.0, )",
           "Verify.XunitV3": "[31.28.0, )",
           "coverlet.collector": "[10.0.1, )",
           "xunit.runner.visualstudio": "[3.1.5, )",

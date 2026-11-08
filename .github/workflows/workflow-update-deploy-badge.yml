@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       name:
-        description: "Badge name, written to <name>.json on the badges branch"
+        description: "Badge name, written to <name>.svg and <name>.json on the badges branch"
         required: true
         type: string
       label:

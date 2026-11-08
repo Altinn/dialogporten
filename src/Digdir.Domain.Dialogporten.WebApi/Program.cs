@@ -241,13 +241,13 @@ static void BuildAndRun(string[] args)
     app.UseResponseCompression();
     app.UseDefaultExceptionHandler()
         .UseStatusCodePages(UseStatusCodePagesHandlers.CreateStatusCodePageProblemDetails)
+        .UseAzureConfiguration()
         .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
         .UseAuthorization()
         .UseServiceOwnerOnBehalfOfPerson()
         .UseUserTypeValidation()
-        .UseAzureConfiguration()
         .UseFastEndpoints(x =>
         {
             x.Endpoints.RoutePrefix = "api";

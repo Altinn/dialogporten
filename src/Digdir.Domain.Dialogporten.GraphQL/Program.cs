@@ -160,11 +160,11 @@ static void BuildAndRun(string[] args)
     app.UseCors();
     app.MapDialogportenHealthChecks();
 
-    app.UseMaintenanceMode()
+    app.UseAzureConfiguration()
+        .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
-        .UseAuthorization()
-        .UseAzureConfiguration();
+        .UseAuthorization();
 
     app.MapGraphQL()
         .RequireCors(GraphQlCorsOptions.PolicyName)

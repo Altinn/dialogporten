@@ -4,17 +4,17 @@
     "net10.0": {
       "Altinn.ApiClients.Maskinporten": {
         "type": "Direct",
-        "requested": "[10.2.0, )",
-        "resolved": "10.2.0",
-        "contentHash": "EbH7WY0f3jSU1vmm1awzFcv7Jfohlxk4KOqxnnXd9fcZoFuuGdLIH4VeBmfPcXGlpj96+UQhErC2NbVSYo7Svg==",
+        "requested": "[10.2.1, )",
+        "resolved": "10.2.1",
+        "contentHash": "Qm4DboTlQsrBlBP4800qQ4u7FlyssRo/zI3z1v8K8Sj3uGPacv+KF6YVQzEgysfdNML/PSnQ62E4b/7ZyG1xFA==",
         "dependencies": {
-          "Microsoft.Extensions.Caching.Abstractions": "10.0.13",
-          "Microsoft.Extensions.Caching.Memory": "10.0.13",
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.13",
-          "Microsoft.Extensions.Http": "10.0.13",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.13",
-          "Microsoft.Extensions.Options": "10.0.13",
-          "Microsoft.Extensions.Options.ConfigurationExtensions": "10.0.13",
+          "Microsoft.Extensions.Caching.Abstractions": "10.0.14",
+          "Microsoft.Extensions.Caching.Memory": "10.0.14",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.14",
+          "Microsoft.Extensions.Http": "10.0.14",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.14",
+          "Microsoft.Extensions.Options": "10.0.14",
+          "Microsoft.Extensions.Options.ConfigurationExtensions": "10.0.14",
           "Microsoft.IdentityModel.Tokens": "8.23.0",
           "System.IdentityModel.Tokens.Jwt": "8.23.0"
         }

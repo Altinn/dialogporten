@@ -19,8 +19,8 @@
       },
       "Altinn.ApiClients.Maskinporten": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "EbH7WY0f3jSU1vmm1awzFcv7Jfohlxk4KOqxnnXd9fcZoFuuGdLIH4VeBmfPcXGlpj96+UQhErC2NbVSYo7Svg==",
+        "resolved": "10.2.1",
+        "contentHash": "Qm4DboTlQsrBlBP4800qQ4u7FlyssRo/zI3z1v8K8Sj3uGPacv+KF6YVQzEgysfdNML/PSnQ62E4b/7ZyG1xFA==",
         "dependencies": {
           "Microsoft.IdentityModel.Tokens": "8.23.0",
           "System.IdentityModel.Tokens.Jwt": "8.23.0"
@@ -99,7 +99,7 @@
       "Altinn.ApiClients.Dialogporten.Common": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Maskinporten": "[10.2.0, )",
+          "Altinn.ApiClients.Maskinporten": "[10.2.1, )",
           "NSec.Cryptography": "[25.4.0, )",
           "Refit": "[10.2.0, )",
           "Refit.HttpClientFactory": "[10.2.0, )"
@@ -108,7 +108,7 @@
       "Altinn.ApiClients.Dialogporten.ServiceOwner": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Maskinporten": "[10.2.0, )",
+          "Altinn.ApiClients.Maskinporten": "[10.2.1, )",
           "NSec.Cryptography": "[25.4.0, )",
           "Refit": "[10.2.0, )",
           "Refit.HttpClientFactory": "[10.2.0, )"

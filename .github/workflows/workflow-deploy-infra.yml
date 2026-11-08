@@ -92,7 +92,7 @@ jobs:
           echo "::set-output name=postgresqlPassword::$password"
 
       - name: Dryrun Deploy infrastructure (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -115,7 +115,7 @@ jobs:
           parameters-file: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
 
       - name: Deploy infrastructure (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ !inputs.dryRun }}
         id: deploy
         env:

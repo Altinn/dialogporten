@@ -16,7 +16,8 @@ jobs:
   check-dispatch-sender:
     name: Check dispatch sender
     permissions: {}
-    runs-on: self-hosted
+    # GitHub-hosted, so the manual schema publish never waits for a self-hosted runner.
+    runs-on: ubuntu-latest
     steps:
       - name: Accept the event only from the expected sender
         if: ${{ github.event_name == 'repository_dispatch' }}

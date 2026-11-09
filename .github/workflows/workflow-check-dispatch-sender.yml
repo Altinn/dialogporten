@@ -1,0 +1,32 @@
+# Fails a repository_dispatch run unless the event comes from the expected sender.
+# Any token with write access to this repository can send repository_dispatch, so a
+# workflow that acts on one calls this first and lets every other job wait for it.
+# Other events pass, so a workflow with more triggers can call it unconditionally.
+name: "Check dispatch sender"
+
+on:
+  workflow_call:
+    inputs:
+      sender_id:
+        description: "GitHub user ID of the only account allowed to send the event"
+        required: true
+        type: number
+
+jobs:
+  check-dispatch-sender:
+    name: Check dispatch sender
+    permissions: {}
+    runs-on: self-hosted
+    steps:
+      - name: Accept the event only from the expected sender
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        env:
+          EVENT_TYPE: ${{ github.event.action }}
+          EXPECTED_ID: ${{ inputs.sender_id }}
+          SENDER_ID: ${{ github.event.sender.id }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+        run: |
+          if [ "$SENDER_ID" != "$EXPECTED_ID" ]; then
+            echo "::error::${EVENT_TYPE} must come from user ID ${EXPECTED_ID}, not ${SENDER_LOGIN} (${SENDER_ID})."
+            exit 1
+          fi

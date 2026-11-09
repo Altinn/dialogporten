@@ -16,21 +16,10 @@ permissions:
 jobs:
   check-dispatch-sender:
     name: Check dispatch sender
-    runs-on: ubuntu-latest
-    permissions: {}
-    steps:
-      # Any token with write access to this repository can send release_created. Only
-      # dialogporten-bot sends it (RELEASE_PLEASE_PAT in ci-cd-release-please.yml),
-      # so every other job waits for this check.
-      - name: Accept release_created only from dialogporten-bot
-        env:
-          SENDER_ID: ${{ github.event.sender.id }}
-          SENDER_LOGIN: ${{ github.event.sender.login }}
-        run: |
-          if [ "$SENDER_ID" != "164321870" ]; then
-            echo "::error::release_created must come from dialogporten-bot (164321870), not ${SENDER_LOGIN} (${SENDER_ID})."
-            exit 1
-          fi
+    uses: ./.github/workflows/workflow-check-dispatch-sender.yml
+    with:
+      # dialogporten-bot, which sends release_created from ci-cd-release-please.yml (RELEASE_PLEASE_PAT)
+      sender_id: 164321870
 
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub

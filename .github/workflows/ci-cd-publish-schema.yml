@@ -60,6 +60,19 @@ jobs:
         with:
           egress-policy: audit
 
+      # Any token with write access to this repository can send release_created. Only
+      # dialogporten-bot sends it (RELEASE_PLEASE_PAT in ci-cd-release-please.yml).
+      - name: Accept release_created only from dialogporten-bot
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        env:
+          SENDER_ID: ${{ github.event.sender.id }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+        run: |
+          if [ "$SENDER_ID" != "164321870" ]; then
+            echo "::error::release_created must come from dialogporten-bot (164321870), not ${SENDER_LOGIN} (${SENDER_ID})."
+            exit 1
+          fi
+
       # Same guard as the other dispatch workflows, and it matters more here:
       # this one signs what it publishes with `npm publish --provenance`.
       - name: Validate dispatched ref

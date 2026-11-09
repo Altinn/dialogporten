@@ -16,12 +16,32 @@ permissions:
   pull-requests: write
 
 jobs:
+  check-dispatch-sender:
+    name: Check dispatch sender
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      # Any token with write access to this repository can send release_created. Only
+      # dialogporten-bot sends it (RELEASE_PLEASE_PAT in ci-cd-release-please.yml),
+      # so every other job waits for this check.
+      - name: Accept release_created only from dialogporten-bot
+        env:
+          SENDER_ID: ${{ github.event.sender.id }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+        run: |
+          if [ "$SENDER_ID" != "164321870" ]; then
+            echo "::error::release_created must come from dialogporten-bot (164321870), not ${SENDER_LOGIN} (${SENDER_ID})."
+            exit 1
+          fi
+
   generate-git-short-sha:
     name: Generate git short sha
+    needs: [check-dispatch-sender]
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml
 
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub
+    needs: [check-dispatch-sender]
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
     with:
       environment: staging
@@ -210,6 +230,7 @@ jobs:
     # needs lists every job so the badge color covers the whole run
     needs:
       [
+        check-dispatch-sender,
         generate-git-short-sha,
         get-versions-from-github,
         check-for-changes,
@@ -226,7 +247,8 @@ jobs:
         send-slack-message-on-failure,
         send-deployment-to-swarmia,
       ]
-    if: ${{ always() && !cancelled() }}
+    # A rejected sender deployed nothing, so it leaves the badge alone.
+    if: ${{ always() && !cancelled() && needs.check-dispatch-sender.result == 'success' }}
     permissions:
       contents: write
     uses: ./.github/workflows/workflow-update-deploy-badge.yml

@@ -83,6 +83,20 @@ jobs:
       value: ${{ steps.decide.outputs.value }}
       mode: ${{ steps.decide.outputs.mode }}
     steps:
+      # Any token with write access to this repository can send replica_hanging. Only the
+      # Grafana alerts above send it, with knuhau's token today. Update the ID here if the
+      # alerts move to another account's token.
+      - name: Accept replica_hanging only from the Grafana alerts' token
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        env:
+          SENDER_ID: ${{ github.event.sender.id }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+        run: |
+          if [ "$SENDER_ID" != "154342485" ]; then
+            echo "::error::replica_hanging must come from the Grafana alerts' token (knuhau, 154342485), not ${SENDER_LOGIN} (${SENDER_ID})."
+            exit 1
+          fi
+
       - name: Evaluate guardrails
         id: decide
         env:

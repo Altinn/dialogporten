@@ -17,6 +17,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(DialogApplication applic
     : ApplicationCollectionFixture(application)
 {
     private const string ActorId = "urn:altinn:person:identifier-no:09095614407";
+    private const string Name = "Brando Sando";
     private const string SerializationFailureSqlState = "40001";
     private static readonly TimeSpan BlockedTimeout = TimeSpan.FromSeconds(10);
 
@@ -27,8 +28,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(DialogApplication applic
         await using var a = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
         await using var b = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
 
-        var actorNameA = await a.EnsureActorName(ActorId, ct);
-        var ensureB = b.EnsureActorName(ActorId, ct);
+        var actorNameA = await a.EnsureActorName(ActorId, null, ct);
+        var ensureB = b.EnsureActorName(ActorId, null, ct);
         await WaitUntilBlocked(b.ProcessId, ensureB, ct);
 
         await a.Commit(ct);
@@ -51,8 +52,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(DialogApplication applic
         await using var a = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
         await using var b = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
 
-        var actorNameA = await a.EnsureActorName(ActorId, ct);
-        var ensureB = b.EnsureActorName(ActorId, ct);
+        var actorNameA = await a.EnsureActorName(ActorId, null, ct);
+        var ensureB = b.EnsureActorName(ActorId, null, ct);
         await WaitUntilBlocked(b.ProcessId, ensureB, ct);
 
         await a.Rollback(ct);
@@ -73,8 +74,75 @@ public sealed class ActorNameRepositoryConcurrencyTests(DialogApplication applic
         await using var a = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
         await using var b = await TransactionalActor.Begin(Application, IsolationLevel.RepeatableRead, ct);
 
-        await a.EnsureActorName(ActorId, ct);
-        var ensureB = b.EnsureActorName(ActorId, ct);
+        await a.EnsureActorName(ActorId, null, ct);
+        var ensureB = b.EnsureActorName(ActorId, null, ct);
+        await WaitUntilBlocked(b.ProcessId, ensureB, ct);
+
+        await a.Commit(ct);
+        var act = () => ensureB;
+
+        var exception = (await act.Should().ThrowAsync<Exception>()).Which;
+        FindPostgresException(exception).Should().NotBeNull()
+            .And.Subject.As<PostgresException>().SqlState.Should().Be(SerializationFailureSqlState);
+    }
+
+    [Fact]
+    public async Task Concurrent_EnsureActorName_Without_ActorId_Resolves_To_Same_Row_When_First_Transaction_Commits()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var a = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
+        await using var b = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
+
+        var actorNameA = await a.EnsureActorName(null, Name, ct);
+        var ensureB = b.EnsureActorName(null, Name, ct);
+        await WaitUntilBlocked(b.ProcessId, ensureB, ct);
+
+        await a.Commit(ct);
+        var actorNameB = await ensureB;
+        await b.Commit(ct);
+
+        actorNameB.Id.Should().Be(actorNameA.Id);
+        actorNameB.CreatedAt.Should().Be(actorNameA.CreatedAt);
+        actorNameA.HasEvents().Should().BeFalse("actor names without an actor id never need a resync");
+        actorNameB.HasEvents().Should().BeFalse("actor names without an actor id never need a resync");
+
+        var persisted = await Application.GetDbEntities<ActorName>();
+        persisted.Should().ContainSingle(x => x.ActorId == null && x.Name == Name)
+            .Which.Id.Should().Be(actorNameA.Id);
+    }
+
+    [Fact]
+    public async Task Concurrent_EnsureActorName_Without_ActorId_Creates_Own_Row_When_First_Transaction_Rolls_Back()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var a = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
+        await using var b = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
+
+        var actorNameA = await a.EnsureActorName(null, Name, ct);
+        var ensureB = b.EnsureActorName(null, Name, ct);
+        await WaitUntilBlocked(b.ProcessId, ensureB, ct);
+
+        await a.Rollback(ct);
+        var actorNameB = await ensureB;
+        await b.Commit(ct);
+
+        actorNameB.Id.Should().NotBe(actorNameA.Id);
+        actorNameB.HasEvents().Should().BeFalse("actor names without an actor id never need a resync");
+
+        var persisted = await Application.GetDbEntities<ActorName>();
+        persisted.Should().ContainSingle(x => x.ActorId == null && x.Name == Name)
+            .Which.Id.Should().Be(actorNameB.Id);
+    }
+
+    [Fact]
+    public async Task Concurrent_EnsureActorName_Without_ActorId_In_RepeatableRead_Fails_With_Serialization_Failure_When_First_Transaction_Commits()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var a = await TransactionalActor.Begin(Application, IsolationLevel.ReadCommitted, ct);
+        await using var b = await TransactionalActor.Begin(Application, IsolationLevel.RepeatableRead, ct);
+
+        await a.EnsureActorName(null, Name, ct);
+        var ensureB = b.EnsureActorName(null, Name, ct);
         await WaitUntilBlocked(b.ProcessId, ensureB, ct);
 
         await a.Commit(ct);
@@ -145,8 +213,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(DialogApplication applic
             return actor;
         }
 
-        public Task<ActorName> EnsureActorName(string actorId, CancellationToken cancellationToken) =>
-            _repository.EnsureActorName(new ActorName { ActorId = actorId, Name = null }, cancellationToken);
+        public Task<ActorName> EnsureActorName(string? actorId, string? name, CancellationToken cancellationToken) =>
+            _repository.EnsureActorName(new ActorName { ActorId = actorId, Name = name }, cancellationToken);
 
         public Task Commit(CancellationToken cancellationToken) =>
             _db.Database.CommitTransactionAsync(cancellationToken);

@@ -33,4 +33,26 @@ public sealed class FormattableStringBuilderTests
 
         Assert.Equal("o0 o1 f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11", result);
     }
+
+    [Fact]
+    public void Embedding_Fragment_With_Literal_Braces_Adjacent_To_Placeholder_Preserves_Both()
+    {
+        string o0 = "o0", a = "aVal";
+
+        // Fragment with a literal "{0}" (Append(string) escapes it to "{{0}}") immediately followed by a
+        // real placeholder for 'a'. The escaped literal and the placeholder are adjacent ("{{0}}{0}").
+        var fragment = new PostgresFormattableStringBuilder()
+            .Append("lit{0}")
+            .Append($"{a}");
+
+        // Outer already holds an arg, so embedding renumbers the fragment's "{0}" to "{1}". The escaped
+        // literal "{{0}}" must be left untouched by the renumber.
+        var outer = new PostgresFormattableStringBuilder()
+            .Append($"{o0} {fragment}");
+
+        var result = outer.ToFormattableString().ToString(CultureInfo.InvariantCulture);
+
+        // Literal "{0}" survives verbatim; the placeholder still resolves to 'a'.
+        Assert.Equal("o0 lit{0}aVal", result);
+    }
 }

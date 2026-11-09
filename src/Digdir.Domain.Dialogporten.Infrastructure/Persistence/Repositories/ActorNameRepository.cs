@@ -24,12 +24,11 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
     {
         var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(actorNames);
         var maps = await GetOrCreateActorNames(consolidatedActorNames, cancellationToken);
-
         var actorNameIdTuples = consolidatedActorNames
             .Join(maps,
                 actorName => actorName.Entity.Id,
                 map => map.InputActorNameId,
-                (actorName, mapping) => (actorName, mapping.ActualActorNameId, mapping.ActualCreatedAt))
+                (actorName, mapping) => (actorName, mapping))
             .ToList();
 
         if (actorNameIdTuples.Count != consolidatedActorNames.Count)
@@ -40,13 +39,17 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
                 "This indicates a bug in the code or a data integrity issue.");
         }
 
-        foreach (var (actorNameEntry, actualActorNameId, actualCreatedAt) in actorNameIdTuples)
+        foreach (var (actorNameEntry, mapping) in actorNameIdTuples)
         {
             actorNameEntry.State = EntityState.Detached;
-            actorNameEntry.Entity.Id = actualActorNameId;
-            actorNameEntry.Entity.CreatedAt = actualCreatedAt;
+            actorNameEntry.Entity.Id = mapping.ActualActorNameId;
+            actorNameEntry.Entity.CreatedAt = mapping.ActualCreatedAt;
             actorNameEntry.OriginalValues.SetValues(actorNameEntry.Entity);
             actorNameEntry.State = EntityState.Unchanged;
+            if (mapping.Created && actorNameEntry.Entity.Name is null)
+            {
+                actorNameEntry.Entity.RequestActorNameResync("Newly created actor name");
+            }
         }
 
         return actorNameIdTuples
@@ -145,7 +148,8 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
              )
              SELECT i."Id"          AS "InputActorNameId",
                     r."Id"          AS "ActualActorNameId",
-                    r."CreatedAt"   AS "ActualCreatedAt"
+                    r."CreatedAt"   AS "ActualCreatedAt",
+                    i."Id" = r."Id" AS "Created"
              FROM input_rows i
              JOIN resolved r
                ON r."ActorId" IS NOT DISTINCT FROM i."ActorId"
@@ -161,5 +165,6 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
     private sealed record ActorNameIdMapping(
         Guid InputActorNameId,
         Guid ActualActorNameId,
-        DateTimeOffset ActualCreatedAt);
+        DateTimeOffset ActualCreatedAt,
+        bool Created);
 }

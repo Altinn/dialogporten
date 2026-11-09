@@ -10,7 +10,7 @@ namespace Digdir.Domain.Dialogporten.Domain.Actors;
 public sealed class ActorName : IImmutableEntity, IIdentifiableEntity, ICreatableEntity, IEventPublisher
 {
     public Guid Id { get; set; }
-    public string? ActorId { get; set; }
+    public string? ActorId { get; set => field = value?.ToLowerInvariant(); }
     public string? Name { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 

@@ -27,13 +27,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        var dbContext = eventData.Context;
-        if (dbContext is null)
+        if (eventData.Context is not null)
         {
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+            await PopulateActorNames(eventData.Context, cancellationToken);
         }
-
-        await PopulateActorNames(dbContext, cancellationToken);
 
         return _domainContext.IsValid
             ? await base.SavingChangesAsync(eventData, result, cancellationToken)
@@ -48,19 +45,10 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
             .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
             .Where(e => e.Entity.ActorId is not null || e.Entity.Name is not null)
-            .Select(e =>
-            {
-                var entity = e.Entity;
-                entity.ActorId = entity.ActorId?.ToLowerInvariant();
-                return entity;
-            })
+            .Select(e => e.Entity)
             .ToList();
 
-        if (addedActorNameEntities.Count == 0)
-        {
-            return;
-        }
-
+        if (addedActorNameEntities.Count == 0) return;
         await TrySetActorNames(addedActorNameEntities, cancellationToken);
         await _actorNameRepository.Value.EnsureActorNames(addedActorNameEntities, cancellationToken);
     }

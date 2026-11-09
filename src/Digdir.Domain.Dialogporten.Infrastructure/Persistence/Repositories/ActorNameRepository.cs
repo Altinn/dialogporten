@@ -126,7 +126,7 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
                  SELECT an."Id", an."ActorId", an."Name", an."CreatedAt"
                  FROM input_rows i
                  JOIN "ActorName" an
-                   ON an."ActorId" = i."ActorId"
+                   ON (an."ActorId" = i."ActorId" OR (an."ActorId" IS NULL AND i."ActorId" IS NULL))
                    AND an."Name" IS NOT DISTINCT FROM i."Name"
              )
              , concurrently_inserted_actor_names AS (

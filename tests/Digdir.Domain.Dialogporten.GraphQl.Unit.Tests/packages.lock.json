@@ -10,18 +10,18 @@
       },
       "coverlet.collector": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "27jXSV/0DbVqF5jDrAxuQFZ9oaz6gmG03p8ttxAFk+X0M4woFYj7MoWDLCna5EGLb0CE6OE7X6ZH3Wt5smTtaA=="
+        "requested": "[10.1.0, )",
+        "resolved": "10.1.0",
+        "contentHash": "SlYCIHnBYxINSUpR75SiM5JEmnx11pqT+Ac/C/fUqTTA0dLPl9eYzmFXKKuxmQhL3ZdTQl4PBD3YdAxAauaKLQ=="
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
-        "requested": "[18.9.0, )",
-        "resolved": "18.9.0",
-        "contentHash": "xIzVXa/VpKXqDWzyC/5Hw8JbFY5u9k3Jc53CpcjBiOXvkQGio484LD9FNwOiGUSMDcYL3Rcw9sNgGi5WrswlPQ==",
+        "requested": "[18.11.0, )",
+        "resolved": "18.11.0",
+        "contentHash": "xf/bR0LNkhK0SnadDRlZIQmC4sac5Wk0e1WAdiQjRN3MSo6gQ9M2c4c1XRNnVGjfOvckh704W5CJ19AL0/Xsdg==",
         "dependencies": {
-          "Microsoft.CodeCoverage": "18.9.0",
-          "Microsoft.TestPlatform.TestHost": "18.9.0"
+          "Microsoft.CodeCoverage": "18.11.0",
+          "Microsoft.TestPlatform.TestHost": "18.11.0"
         }
       },
       "Verify.XunitV3": {
@@ -55,16 +55,16 @@
       },
       "Altinn.ApiClients.Maskinporten": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "EbH7WY0f3jSU1vmm1awzFcv7Jfohlxk4KOqxnnXd9fcZoFuuGdLIH4VeBmfPcXGlpj96+UQhErC2NbVSYo7Svg==",
+        "resolved": "10.2.1",
+        "contentHash": "Qm4DboTlQsrBlBP4800qQ4u7FlyssRo/zI3z1v8K8Sj3uGPacv+KF6YVQzEgysfdNML/PSnQ62E4b/7ZyG1xFA==",
         "dependencies": {
-          "Microsoft.Extensions.Caching.Abstractions": "10.0.13",
-          "Microsoft.Extensions.Caching.Memory": "10.0.13",
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.13",
-          "Microsoft.Extensions.Http": "10.0.13",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.13",
-          "Microsoft.Extensions.Options": "10.0.13",
-          "Microsoft.Extensions.Options.ConfigurationExtensions": "10.0.13",
+          "Microsoft.Extensions.Caching.Abstractions": "10.0.14",
+          "Microsoft.Extensions.Caching.Memory": "10.0.14",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.14",
+          "Microsoft.Extensions.Http": "10.0.14",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.14",
+          "Microsoft.Extensions.Options": "10.0.14",
+          "Microsoft.Extensions.Options.ConfigurationExtensions": "10.0.14",
           "Microsoft.IdentityModel.Tokens": "8.23.0",
           "System.IdentityModel.Tokens.Jwt": "8.23.0"
         }
@@ -259,6 +259,20 @@
         "resolved": "2.1.89",
         "contentHash": "1VjFE664wnxvuhlgP8kS4PeFFF4jqD3VkbIHW6Zlc52zuibgcz5ICnIHcQXlTp6pURpPNGLV0ZpNe5x9KePJnA=="
       },
+      "DbExceptionClassifier.Common": {
+        "type": "Transitive",
+        "resolved": "1.0.1",
+        "contentHash": "Lz0R2s1+7iIin7TUvz4XjCg8zD0D8aLTAU3WfGnS+M5cEiIdNYmGWn1h7wZXpAzHh8Js4De7MLChp8qE2wl3ig=="
+      },
+      "DbExceptionClassifier.PostgreSQL": {
+        "type": "Transitive",
+        "resolved": "1.0.1",
+        "contentHash": "bs2PvMf3kUMYPGJBMDwgUz3dO9MSa+DO765IsZbe2wAxc8zgfircZBqaWPNi4OxLe8zCX+azD0ySaBxKQa7xTQ==",
+        "dependencies": {
+          "DbExceptionClassifier.Common": "1.0.1",
+          "Npgsql": "10.0.2"
+        }
+      },
       "DeterministicGuids": {
         "type": "Transitive",
         "resolved": "1.0.11",
@@ -284,19 +298,20 @@
       },
       "EntityFrameworkCore.Exceptions.Common": {
         "type": "Transitive",
-        "resolved": "8.1.3",
-        "contentHash": "nweeiVHx4HbDi6+TqendOe0QmN0a9v0AB5FaL83eToqFFztwGIhOqLfveKqJDYSCU51CJShW8kbU1onZLdZZSg==",
+        "resolved": "10.0.1",
+        "contentHash": "dUuK9lJFQeLHqnPq5kTusu9MUIxvm3QVukwKDIB5ti0iaN6wBtm2SIQ4JNKU3ZneC6IQUEU57L6tWB+fB2IhCw==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "8.0.0"
+          "DbExceptionClassifier.Common": "1.0.1",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.5"
         }
       },
       "EntityFrameworkCore.Exceptions.PostgreSQL": {
         "type": "Transitive",
-        "resolved": "8.1.3",
-        "contentHash": "hqTsPy2SeupzawK/AeH5/8/K7+KEdZjQbyKVlxBX45ei86eU8D14X9E06uS6MX+J5TdSKY6o+WXGS7G2k8Xvyw==",
+        "resolved": "10.0.1",
+        "contentHash": "xB59v0MquOrRGh7FPwAyuVa+TkbmguWC6zYpaMOJE9uwC475BpXLctTdGXgxiQhwqPoq+i9yL6HQqnVFTBNutw==",
         "dependencies": {
-          "EntityFrameworkCore.Exceptions.Common": "8.1.3",
-          "Npgsql": "8.0.3"
+          "DbExceptionClassifier.PostgreSQL": "1.0.1",
+          "EntityFrameworkCore.Exceptions.Common": "10.0.1"
         }
       },
       "FluentValidation": {
@@ -1017,8 +1032,8 @@
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
-        "resolved": "18.9.0",
-        "contentHash": "MtegCIKGuG0r/LCdIjoR1HgzCGIUBhR3aNdbtQpts5vMXQuqBDZ2Jsd2uFKoHFM2XrQV6ZrDf3F5oLi3SLTp8w=="
+        "resolved": "18.11.0",
+        "contentHash": "MhN9wpvL1Es4hfIYslrsVgIsUdDFxuOBTbAl9mGIMvFo8PP5CLf4DrGdNrfwWSyn0lqi6sssm+I/qkkLL3MU+g=="
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
@@ -1540,15 +1555,15 @@
       },
       "Microsoft.TestPlatform.ObjectModel": {
         "type": "Transitive",
-        "resolved": "18.9.0",
-        "contentHash": "Fz/qXC52VXXopzHj7v2reCKcCqSxkTDCkEDfkNAH0vni/7qK/KLMiEYtRmnUanxO2F2g2zZZ60qCpxF0AF7URA=="
+        "resolved": "18.11.0",
+        "contentHash": "BXBHYnwSOljKute8UYCMXOLAdB7awxEMppPSpqOF1ZxLD/W/OH+vTBgFaXA7q0aditJTVXSMVenel+wOkEIyNg=="
       },
       "Microsoft.TestPlatform.TestHost": {
         "type": "Transitive",
-        "resolved": "18.9.0",
-        "contentHash": "Oq+Pma/J86aZL72t71bcESvDszDsTjUfl6PIsuDdPoKTHZfNMhKamCfLD5fKx51W/u0KozXtJo2/3fnt0sgPxg==",
+        "resolved": "18.11.0",
+        "contentHash": "AKjwKpyRBwoQFQmpcchtoYlfJEBlaY/40uxBRi+qXP4NR7xT8t+XTJtOyEyumfvfJcH5pASs75LwNdXYRr4XNA==",
         "dependencies": {
-          "Microsoft.TestPlatform.ObjectModel": "18.9.0"
+          "Microsoft.TestPlatform.ObjectModel": "18.11.0"
         }
       },
       "Microsoft.Win32.Registry": {
@@ -2068,7 +2083,7 @@
       "digdir.domain.dialogporten.infrastructure": {
         "type": "Project",
         "dependencies": {
-          "Altinn.ApiClients.Maskinporten": "[10.2.0, )",
+          "Altinn.ApiClients.Maskinporten": "[10.2.1, )",
           "Altinn.AspNet.HealthChecks": "[0.4.0, )",
           "Altinn.AspNet.HealthChecks.Warmup": "[0.4.0, )",
           "Altinn.Authorization.ABAC": "[0.3.0, )",
@@ -2078,7 +2093,7 @@
           "Dapper": "[2.1.89, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
-          "EntityFrameworkCore.Exceptions.PostgreSQL": "[8.1.3, )",
+          "EntityFrameworkCore.Exceptions.PostgreSQL": "[10.0.1, )",
           "HotChocolate.Subscriptions.Redis": "[16.7.3, )",
           "MassTransit.Azure.ServiceBus.Core": "[8.5.7, 9.0.0)",
           "MassTransit.EntityFrameworkCore": "[8.5.7, 9.0.0)",

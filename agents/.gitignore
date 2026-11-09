@@ -1,0 +1,2 @@
+# The agent's Claude Code settings, which the repository's .gitignore otherwise leaves out with every .claude.
+!/home/.claude/

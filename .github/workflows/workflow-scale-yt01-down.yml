@@ -57,6 +57,40 @@ jobs:
       - name: Install containerapp CLI extension
         run: az extension add --name containerapp --upgrade
 
+      # The purge calls the API, so it runs while the environment is still reachable.
+      # A failed or timed-out purge must not stop the scale-down; the job reports it
+      # once the scale-down steps have run.
+      - name: Purge E2E test data
+        id: purge
+        continue-on-error: true
+        timeout-minutes: 15
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Triggering E2E test data purge for yt01..."
+          DISPATCH_OUTPUT=$(gh workflow run dispatch-purge-e2e-test-data.yml \
+            --repo "$REPOSITORY" \
+            -f environment=yt01)
+          echo "$DISPATCH_OUTPUT"
+
+          # gh prints the created run's URL when the dispatch API returns run details.
+          if [[ ! "$DISPATCH_OUTPUT" =~ /actions/runs/([0-9]+) ]]; then
+            echo "Error: The dispatch did not return the purge workflow run."
+            exit 1
+          fi
+          RUN_ID="${BASH_REMATCH[1]}"
+
+          echo "Waiting for E2E purge run $RUN_ID to complete..."
+          gh run watch "$RUN_ID" \
+            --repo "$REPOSITORY" \
+            --exit-status
+
+      # Disabled right before the environment closes, so the test keeps covering yt01
+      # for as long as it is reachable.
       - name: Disable availability test
         shell: bash
         run: |
@@ -68,40 +102,6 @@ jobs:
             --enabled false
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-
-      - name: Purge E2E test data
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_VERSION_STORAGE_PAT }}
-          REPOSITORY: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "Triggering E2E test data purge for yt01..."
-          gh workflow run dispatch-purge-e2e-test-data.yml \
-            --repo "$REPOSITORY" \
-            -f environment=yt01
-
-          # Wait for the run to be created
-          sleep 10
-
-          RUN_ID=$(gh run list \
-            --repo "$REPOSITORY" \
-            --workflow "dispatch-purge-e2e-test-data.yml" \
-            --event workflow_dispatch \
-            --limit 1 \
-            --json databaseId \
-            --jq '.[0].databaseId')
-
-          if [[ -z "$RUN_ID" || "$RUN_ID" == "null" ]]; then
-            echo "Error: Could not find the purge workflow run."
-            exit 1
-          fi
-
-          echo "Waiting for E2E purge run $RUN_ID to complete..."
-          gh run watch "$RUN_ID" \
-            --repo "$REPOSITORY" \
-            --exit-status
 
       - name: Disable public network access for container app environment
         shell: bash
@@ -258,6 +258,12 @@ jobs:
           fi
         env:
           RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+
+      - name: Fail job if E2E test data purge failed
+        if: ${{ !cancelled() && steps.purge.outcome == 'failure' }}
+        run: |
+          echo "::error::The E2E test data purge failed."
+          exit 1
 
       - name: Logout from Azure
         if: ${{ always() }}

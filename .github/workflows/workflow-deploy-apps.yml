@@ -82,7 +82,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy migration job (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -102,7 +102,7 @@ jobs:
           parameters-file: ./.azure/applications/web-api-migration-job/${{ inputs.environment }}.bicepparam
 
       - name: Deploy migration job (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -176,7 +176,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -200,7 +200,7 @@ jobs:
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy app ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{!inputs.dryRun}}
         id: deploy
         env:
@@ -240,8 +240,8 @@ jobs:
   deploy-jobs:
     name: Deploy job ${{ matrix.name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    # Should run even though the migration job was skipped
-    if: ${{ always() && !failure() && !cancelled() }}
+    # Should run even though the migration job was skipped. Skipped in test, where no matrix entry deploys.
+    if: ${{ always() && !failure() && !cancelled() && inputs.environment != 'test' }}
     needs: deploy-apps
     environment: ${{ inputs.environment }}
     permissions:
@@ -250,14 +250,20 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        # In test, the two sync jobs, custom-metrics-job and the reindex job run from
+        # CronJobs in Altinn/dialogporten-manifests. Deploying an entry to test also
+        # requires removing the test check from the job's if.
         include:
           - name: sync-subject-resource-mappings-job
+            environments: ['staging', 'yt01', 'prod']
           - name: sync-resource-policy-information-job
+            environments: ['staging', 'yt01', 'prod']
           - name: reindex-dialogsearch-job
+            environments: ['staging', 'yt01', 'prod']
           - name: aggregate-cost-metrics-job
             environments: ['staging', 'prod']
           - name: custom-metrics-job
-            environments: ['test', 'staging', 'prod']
+            environments: ['staging', 'prod']
     steps:
       - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
@@ -276,7 +282,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Dryrun Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ inputs.dryRun && (!matrix.environments[0] || contains(matrix.environments, inputs.environment)) }}
         id: deploy-dry-run
         env:
@@ -298,7 +304,7 @@ jobs:
           parameters-file: ./.azure/applications/${{ matrix.name }}/${{ inputs.environment }}.bicepparam
 
       - name: Deploy job ${{ matrix.name }}(${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ !inputs.dryRun && (!matrix.environments[0] || contains(matrix.environments, inputs.environment)) }}
         id: deploy
         env:

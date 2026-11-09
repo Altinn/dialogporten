@@ -389,7 +389,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Send Slack message
-        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         env:
           CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
           # resolve-context can be the failing job, and then its outputs are empty -

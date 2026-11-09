@@ -1,0 +1,6 @@
+# Personal variants and values stay out of Git.
+agent.*.yaml
+.env
+
+# The repository's own variants.
+!agent.build.yaml

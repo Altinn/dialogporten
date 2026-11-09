@@ -14,8 +14,7 @@ internal sealed class DialogSeenLogWriter(
     IPartyNameRegistry partyNameRegistry,
     ITransactionTime transactionTime,
     IUnitOfWork unitOfWork,
-    IActorNameRepository actorNameRepository,
-    IDomainEventPublisher domainEventPublisher
+    IActorNameRepository actorNameRepository
 ) : IDialogSeenLogWriter
 {
 
@@ -57,16 +56,6 @@ internal sealed class DialogSeenLogWriter(
             return null;
         }
         var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
-
-        if (actorNameEntity.ActorId is not null && actorNameEntity.Name is null)
-        {
-            domainEventPublisher.Publish(
-                new ResyncActorNameEvent(
-                    actorNameEntity.Id,
-                    $"Actor name for SeenLog/LabelAssignment is null for dialog {dialog.Id}"
-                )
-            );
-        }
 
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
         var newSeenLog = await EnsureSeenLog(

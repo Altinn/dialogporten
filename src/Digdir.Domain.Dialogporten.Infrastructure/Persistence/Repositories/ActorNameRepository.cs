@@ -108,53 +108,73 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
         // lang=PostgreSQL
         var mappings = await db.Database.SqlQuery<ActorNameIdMapping>(
             $"""
-             WITH input_rows AS (
-                 SELECT *
-                 FROM jsonb_to_recordset({inputRows}::jsonb)
-                      AS t("Id" uuid, "ActorId" text, "Name" text, "CreatedAt" timestamptz)
-             )
-             , inserted_actor_names AS (
-                 INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt")
-                     SELECT "Id", "ActorId", "Name", "CreatedAt" FROM input_rows
-                     ORDER BY "ActorId", "Name"
-                 ON CONFLICT ("ActorId", "Name") DO NOTHING
-                 RETURNING "Id", "ActorId", "Name", "CreatedAt"
-             )
-             , inserted_or_preexisting_actor_names AS (
-                 SELECT "Id", "ActorId", "Name", "CreatedAt" FROM inserted_actor_names
-                 UNION ALL
-                 SELECT an."Id", an."ActorId", an."Name", an."CreatedAt"
-                 FROM input_rows i
-                 JOIN "ActorName" an
-                   ON (an."ActorId" = i."ActorId" OR (an."ActorId" IS NULL AND i."ActorId" IS NULL))
-                   AND an."Name" IS NOT DISTINCT FROM i."Name"
-             )
-             , concurrently_inserted_actor_names AS (
-                 INSERT INTO "ActorName" AS an ("Id", "ActorId", "Name", "CreatedAt")
-                     SELECT i."Id", i."ActorId", i."Name", i."CreatedAt"
-                     FROM input_rows i
-                     LEFT JOIN inserted_or_preexisting_actor_names ins
-                       ON ins."ActorId" IS NOT DISTINCT FROM i."ActorId"
-                       AND ins."Name"    IS NOT DISTINCT FROM i."Name"
-                     WHERE ins."Id" IS NULL
-                     ORDER BY i."ActorId", i."Name"
-                 ON CONFLICT ("ActorId", "Name") DO UPDATE SET "Name" = an."Name"
-                 RETURNING "Id", "ActorId", "Name", "CreatedAt"
-             )
-             , resolved AS (
-                 SELECT * FROM inserted_or_preexisting_actor_names
-                 UNION ALL
-                 SELECT * FROM concurrently_inserted_actor_names
-             )
-             SELECT i."Id"          AS "InputActorNameId",
-                    r."Id"          AS "ActualActorNameId",
-                    r."CreatedAt"   AS "ActualCreatedAt",
-                    i."Id" = r."Id" AS "Created"
-             FROM input_rows i
-             JOIN resolved r
-               ON r."ActorId" IS NOT DISTINCT FROM i."ActorId"
-              AND r."Name"    IS NOT DISTINCT FROM i."Name";
-             """)
+              WITH input_rows AS (
+                  SELECT t.*,
+                         dense_rank() OVER (ORDER BY t."ActorId", t."Name") AS grp
+                  FROM jsonb_to_recordset({inputRows}::jsonb)
+                       AS t("Id" uuid, "ActorId" text, "Name" text, "CreatedAt" timestamptz)
+                  WHERE t."ActorId" IS NOT NULL AND t."Name" IS NOT NULL
+              )
+              , keys AS (                       -- one row per distinct (ActorId, Name)
+                  SELECT DISTINCT ON (grp) grp, "Id", "ActorId", "Name", "CreatedAt"
+                  FROM input_rows
+                  ORDER BY grp, "CreatedAt", "Id"   -- earliest row wins; Id breaks exact ties
+              )
+              , preexisting AS (
+                  SELECT k.grp, an."Id", an."CreatedAt"
+                  FROM keys k
+                  CROSS JOIN LATERAL (
+                      -- ActorId and Name both set
+                      SELECT an."Id", an."CreatedAt" FROM "ActorName" an
+                      WHERE an."ActorId" = k."ActorId" AND an."Name" = k."Name"
+                      UNION ALL
+                      -- ActorId is null
+                      SELECT an."Id", an."CreatedAt" FROM "ActorName" an
+                      WHERE k."ActorId" IS NULL AND an."ActorId" IS NULL AND an."Name" = k."Name"
+                      UNION ALL
+                      -- Name is null
+                      SELECT an."Id", an."CreatedAt" FROM "ActorName" an
+                      WHERE k."Name" IS NULL AND an."ActorId" = k."ActorId" AND an."Name" IS NULL
+                  ) an
+              )
+              , inserted AS (
+                  INSERT INTO "ActorName" ("Id", "ActorId", "Name", "CreatedAt")
+                  SELECT k."Id", k."ActorId", k."Name", k."CreatedAt"
+                  FROM keys k
+                  WHERE NOT EXISTS (SELECT 1 FROM preexisting p WHERE p.grp = k.grp)
+                  ORDER BY k.grp
+                  ON CONFLICT ("ActorId", "Name") DO NOTHING
+                  RETURNING "Id"
+              )
+              , concurrent AS ( -- rare: committed by another tx after our snapshot
+                  INSERT INTO "ActorName" AS an ("Id", "ActorId", "Name", "CreatedAt")
+                  SELECT k."Id", k."ActorId", k."Name", k."CreatedAt"
+                  FROM keys k
+                  WHERE NOT EXISTS (SELECT 1 FROM preexisting p WHERE p.grp = k.grp)
+                    AND NOT EXISTS (SELECT 1 FROM inserted ins WHERE ins."Id" = k."Id")
+                  ORDER BY k.grp
+                  ON CONFLICT ("ActorId", "Name") DO UPDATE SET "Name" = an."Name"
+                  RETURNING "Id", "ActorId", "Name", "CreatedAt"
+              )
+              , resolved AS (
+                  SELECT grp, "Id", "CreatedAt" FROM preexisting
+                  UNION ALL
+                  SELECT k.grp, k."Id", k."CreatedAt"
+                  FROM keys k JOIN inserted ins ON ins."Id" = k."Id"
+                  UNION ALL
+                  SELECT k.grp, c."Id", c."CreatedAt"
+                  FROM keys k
+                  JOIN concurrent c
+                    ON c."ActorId" IS NOT DISTINCT FROM k."ActorId"
+                   AND c."Name"    IS NOT DISTINCT FROM k."Name"
+              )
+              SELECT k."Id"          AS "InputActorNameId",
+                     r."Id"          AS "ActualActorNameId",
+                     r."CreatedAt"   AS "ActualCreatedAt",
+                     k."Id" = r."Id" AS "Created"
+              FROM keys k
+              JOIN resolved r USING (grp);
+              """)
             .ToListAsync(cancellationToken);
 
         return mappings

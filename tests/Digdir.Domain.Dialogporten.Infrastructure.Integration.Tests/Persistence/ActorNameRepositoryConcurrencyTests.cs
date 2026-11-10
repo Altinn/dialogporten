@@ -85,7 +85,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Arrange
         var ct = TestContext.Current.CancellationToken;
         await using var a = await CreateSut();
-        await using var b = await CreateSut();
+        await using var b = await CreateSut(IsolationLevel.RepeatableRead);
 
         await a.EnsureActorName(actorName, ct);
         var promiseOfB = await b.EnsureActorNameAssertBlock(actorName, ct);
@@ -98,45 +98,44 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
             .And.Subject.As<PostgresException>().SqlState.Should().Be(SerializationFailureSqlState);
     }
 
-    // /// <summary>
-    // /// Ensuring an already committed actor name should be a plain read. If the lookup of
-    // /// preexisting rows misses (e.g. a non-null-safe join on ActorId), the query falls through
-    // /// to INSERT ... ON CONFLICT DO UPDATE, which writes a new row version and holds a row lock
-    // /// until commit, blocking every other transaction that uses the same actor name.
-    // /// </summary>
-    // [Theory, ClassData<TestData>]
-    // public async Task EnsureActorName_For_Existing_Row_Does_Not_Block_Concurrent_Transactions(ActorName actorName)
-    // {
-    //     // Arrange
-    //     var ct = TestContext.Current.CancellationToken;
-    //     ActorName seeded;
-    //     await using (var seed = await CreateSut())
-    //     {
-    //         seeded = await seed.EnsureActorName(actorName, ct);
-    //         await seed.Db.Database.CommitTransactionAsync(ct);
-    //     }
-    //     await using var a = await CreateSut();
-    //     await using var b = await CreateSut();
-    //
-    //     var actorNameA = await a.EnsureActorName(actorName, ct);
-    //     var promiseOfB = await b.EnsureActorNameAssertNonBlock(actorName, ct);
-    //     var bWasBlocked = await WasBlockedBeforeCompleting(b.ProcessId, promiseOfB, ct);
-    //
-    //     // Release A before asserting, so a blocked B can finish and both scopes dispose cleanly.
-    //     await a.Commit(ct);
-    //     var actorNameB = await promiseOfB;
-    //     await b.Commit(ct);
-    //
-    //     bWasBlocked.Should().BeFalse("ensuring an existing actor name should not take a row lock");
-    //     actorNameA.Id.Should().Be(seeded.Id);
-    //     actorNameB.Id.Should().Be(seeded.Id);
-    //     actorNameA.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
-    //     actorNameB.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
-    //
-    //     var persisted = await GetPersistedActorNames();
-    //     persisted.Should().ContainSingle(x => x.ActorId == actorId && x.Name == name)
-    //         .Which.Id.Should().Be(seeded.Id);
-    // }
+    /// <summary>
+    /// Ensuring an already committed actor name should be a plain read. If the lookup of
+    /// preexisting rows misses (e.g. a non-null-safe join on ActorId), the query falls through
+    /// to INSERT ... ON CONFLICT DO UPDATE, which writes a new row version and holds a row lock
+    /// until commit, blocking every other transaction that uses the same actor name.
+    /// </summary>
+    [Theory, ClassData<TestData>]
+    public async Task EnsureActorName_For_Existing_Row_Does_Not_Block_Concurrent_Transactions(ActorName actorName)
+    {
+        // Arrange
+        var ct = TestContext.Current.CancellationToken;
+        ActorName seeded;
+        await using (var seed = await CreateSut())
+        {
+            seeded = await seed.EnsureActorName(actorName, ct);
+            await seed.Db.Database.CommitTransactionAsync(ct);
+        }
+
+        await using var a = await CreateSut();
+        await using var b = await CreateSut();
+
+        // Act
+        var actorNameA = await a.EnsureActorName(actorName, ct);
+        var promiseOfB = await b.EnsureActorNameAssertNonBlock(actorName, ct);
+        var actorNameB = await promiseOfB;
+        await a.Db.Database.CommitTransactionAsync(ct);
+        await b.Db.Database.CommitTransactionAsync(ct);
+
+        // Assert
+        actorNameA.Id.Should().Be(seeded.Id);
+        actorNameB.Id.Should().Be(seeded.Id);
+        actorNameA.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
+        actorNameB.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
+
+        var persisted = await GetPersistedActorNames();
+        persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
+            .Which.Id.Should().Be(seeded.Id);
+    }
 
     private sealed class TestData : TheoryData<ActorName>
     {
@@ -204,11 +203,16 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         }
 
         public Task<ActorName> EnsureActorName(ActorName actorName, CancellationToken cancellationToken) =>
-            Repository.EnsureActorName(actorName, cancellationToken);
+            Repository.EnsureActorName(CopyOf(actorName), cancellationToken);
+
+        // The repository mutates the instance it is given (Id, CreatedAt, events), so every
+        // transaction must work on its own instance, just like separate requests would.
+        private static ActorName CopyOf(ActorName actorName) =>
+            new() { ActorId = actorName.ActorId, Name = actorName.Name };
 
         public async Task<Task<ActorName>> EnsureActorNameAssertBlock(ActorName actorName, CancellationToken cancellationToken)
         {
-            var task = Repository.EnsureActorName(actorName, cancellationToken);
+            var task = EnsureActorName(actorName, cancellationToken);
             if (await WasBlockedBeforeCompleting(task, cancellationToken)) return task;
             await task; // Surface any exception
             throw new InvalidOperationException("Expected the transaction to block, but it completed.");
@@ -216,10 +220,9 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         public async Task<Task<ActorName>> EnsureActorNameAssertNonBlock(ActorName actorName, CancellationToken cancellationToken)
         {
-            var task = Repository.EnsureActorName(actorName, cancellationToken);
+            var task = EnsureActorName(actorName, cancellationToken);
             if (!await WasBlockedBeforeCompleting(task, cancellationToken)) return task;
-            await task; // Surface any exception
-            throw new InvalidOperationException("Expected the transaction not to block, but it completed.");
+            throw new InvalidOperationException("Expected the transaction not to block, but it was blocked by another transaction.");
         }
 
         private async Task<bool> WasBlockedBeforeCompleting(Task pending, CancellationToken cancellationToken)

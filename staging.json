@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "label": "CI/CD Staging",
-  "message": "v1.126.2",
+  "message": "v1.126.3",
   "color": "#2ea44f",
   "labelColor": "#24292e",
   "namedLogo": "github"

@@ -28,10 +28,11 @@ public sealed class ActorName : IImmutableEntity, IIdentifiableEntity, ICreatabl
     [NotMapped]
     public bool NeedsActorNameResync => ActorId is not null && Name is null;
 
-    public void RequestActorNameResync(string reason)
+    public bool TryRequestActorNameResync(string reason)
     {
-        if (!NeedsActorNameResync) return;
+        if (!NeedsActorNameResync) return false;
         this.EnsureId();
         _domainEvents.Add(new ResyncActorNameEvent(Id, reason));
+        return true;
     }
 }

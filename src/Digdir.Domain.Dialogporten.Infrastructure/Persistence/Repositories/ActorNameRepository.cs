@@ -46,9 +46,9 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
             actorNameEntry.Entity.CreatedAt = mapping.ActualCreatedAt;
             actorNameEntry.OriginalValues.SetValues(actorNameEntry.Entity);
             actorNameEntry.State = EntityState.Unchanged;
-            if (mapping.Created && actorNameEntry.Entity.Name is null)
+            if (mapping.Created)
             {
-                actorNameEntry.Entity.RequestActorNameResync("Newly created actor name");
+                actorNameEntry.Entity.TryRequestActorNameResync("Newly created actor name");
             }
         }
 
@@ -113,7 +113,7 @@ internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime t
                          dense_rank() OVER (ORDER BY t."ActorId", t."Name") AS grp
                   FROM jsonb_to_recordset({inputRows}::jsonb)
                        AS t("Id" uuid, "ActorId" text, "Name" text, "CreatedAt" timestamptz)
-                  WHERE t."ActorId" IS NOT NULL AND t."Name" IS NOT NULL
+                  WHERE NOT (t."ActorId" IS NULL AND t."Name" IS NULL)
               )
               , keys AS (                       -- one row per distinct (ActorId, Name)
                   SELECT DISTINCT ON (grp) grp, "Id", "ActorId", "Name", "CreatedAt"

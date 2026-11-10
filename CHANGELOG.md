@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.126.3](https://github.com/Altinn/dialogporten/compare/v1.126.2...v1.126.3) (2026-11-08)
+
+
+### Miscellaneous Chores
+
+* **agents:** add a backend developer agent definition ([#4527](https://github.com/Altinn/dialogporten/issues/4527)) ([0b04995](https://github.com/Altinn/dialogporten/commit/0b04995e270ae723683ee89d735d6e8884b638b7))
+* **deps:** update actions/download-artifact action to v8.0.2 ([#4568](https://github.com/Altinn/dialogporten/issues/4568)) ([32cef82](https://github.com/Altinn/dialogporten/commit/32cef82493b05bf730533a7c6a524051580b484e))
+* **deps:** update actions/upload-artifact action to v7 ([#4578](https://github.com/Altinn/dialogporten/issues/4578)) ([22289ef](https://github.com/Altinn/dialogporten/commit/22289effe74a2d79c2ff70415060c37546d89c26))
+* **deps:** update azure/bicep-deploy action to v2.5.0 ([#4571](https://github.com/Altinn/dialogporten/issues/4571)) ([30d479a](https://github.com/Altinn/dialogporten/commit/30d479a191d25d452b6fd26c62b47d295a857edd))
+* **deps:** update dependency altinn.apiclients.maskinporten to 10.2.1 ([#4569](https://github.com/Altinn/dialogporten/issues/4569)) ([46d138f](https://github.com/Altinn/dialogporten/commit/46d138f7587c639fd28cbf586fe2e976476bcc8e))
+* **deps:** update dependency entityframeworkcore.exceptions.postgresql to v10 ([#4584](https://github.com/Altinn/dialogporten/issues/4584)) ([83d4f9f](https://github.com/Altinn/dialogporten/commit/83d4f9f18f787fa03b2b84b71147ecef7d292514))
+* **deps:** update dependency polly to 8.9.0 ([#4572](https://github.com/Altinn/dialogporten/issues/4572)) ([88ef2a1](https://github.com/Altinn/dialogporten/commit/88ef2a1f649cb73d4a0f87ab9f5a2c6ca9ddc858))
+* **deps:** update dependency scalar.aspnetcore to 2.18.7 ([#4570](https://github.com/Altinn/dialogporten/issues/4570)) ([3628c0d](https://github.com/Altinn/dialogporten/commit/3628c0de2b1424656275602149e00383d92b40c7))
+* **deps:** update dependency testcontainers.postgresql to 4.16.0 ([#4573](https://github.com/Altinn/dialogporten/issues/4573)) ([cc23d9f](https://github.com/Altinn/dialogporten/commit/cc23d9f2a6abdd48210ecf1d0403325f065b5a47))
+* **deps:** update docker/login-action action to v4.7.0 ([#4574](https://github.com/Altinn/dialogporten/issues/4574)) ([82eb3de](https://github.com/Altinn/dialogporten/commit/82eb3decec49dbea5c129047a36a1db0efde2b26))
+* **deps:** update googleapis/release-please-action action to v5 ([#4580](https://github.com/Altinn/dialogporten/issues/4580)) ([77ad008](https://github.com/Altinn/dialogporten/commit/77ad0089354beb4395beb5ac9071f7aa5c9261b6))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.164.0 ([#4575](https://github.com/Altinn/dialogporten/issues/4575)) ([dce9b9b](https://github.com/Altinn/dialogporten/commit/dce9b9bbeb8fc7e9b5ac0525e385612c6a7c7bc7))
+* **deps:** update slackapi/slack-github-action action to v4 ([#4581](https://github.com/Altinn/dialogporten/issues/4581)) ([d4cfdcf](https://github.com/Altinn/dialogporten/commit/d4cfdcf1a149d7ff5fbad6eef62c222055a37e05))
+* **deps:** update test dependencies ([#4577](https://github.com/Altinn/dialogporten/issues/4577)) ([45fba72](https://github.com/Altinn/dialogporten/commit/45fba7243f7ddda9fe24e96f6669e9269e80f3e7))
+* **deps:** update thehanimo/pr-title-checker action to v2 ([#4579](https://github.com/Altinn/dialogporten/issues/4579)) ([c206b50](https://github.com/Altinn/dialogporten/commit/c206b5025242509af425441412e09f5a0c6d7d37))
+* **infra:** keep yt01 scale-down going when the E2E purge fails ([#4559](https://github.com/Altinn/dialogporten/issues/4559)) ([da8d9ed](https://github.com/Altinn/dialogporten/commit/da8d9ed1ecfa90516eaf094824668b3ff477b720))
+
 ## [1.126.2](https://github.com/Altinn/dialogporten/compare/v1.126.1...v1.126.2) (2026-11-06)
 
 

@@ -5,12 +5,15 @@ using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
-internal sealed class ActorNameRepository(DialogDbContext db, ITransactionTime transactionTime) : IActorNameRepository
+internal sealed class ActorNameRepository(
+    DialogDbContext db,
+    ITransactionTime transactionTime) : IActorNameRepository
 {
     public async Task<ActorName> EnsureActorName(ActorName actorName, CancellationToken cancellationToken)
     {

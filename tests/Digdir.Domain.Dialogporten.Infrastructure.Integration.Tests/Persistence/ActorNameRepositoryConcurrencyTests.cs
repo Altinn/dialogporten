@@ -41,9 +41,9 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         // Act
         var actorNameA = await a.EnsureActorName(actorName, ct);
-        var thePromiseOfActorName = await b.EnsureActorNameAssertBlock(actorName, ct);
+        var actorNameBTask = b.EnsureActorName(actorName, ct);
         await a.Db.Database.CommitTransactionAsync(ct);
-        var actorNameB = await thePromiseOfActorName;
+        var actorNameB = await actorNameBTask;
         await b.Db.Database.CommitTransactionAsync(ct);
 
         // Assert
@@ -65,10 +65,10 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         await using var b = await CreateSut();
 
         var actorNameA = await a.EnsureActorName(actorName, ct);
-        var promiseOfB = await b.EnsureActorNameAssertBlock(actorName, ct);
+        var actorNameBTask = await b.EnsureActorNameAssertBlock(actorName, ct);
 
         await a.Db.Database.RollbackTransactionAsync(ct);
-        var actorNameB = await promiseOfB;
+        var actorNameB = await actorNameBTask;
         await b.Db.Database.CommitTransactionAsync(ct);
 
         actorNameB.Id.Should().NotBe(actorNameA.Id);
@@ -88,10 +88,10 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         await using var b = await CreateSut(IsolationLevel.RepeatableRead);
 
         await a.EnsureActorName(actorName, ct);
-        var promiseOfB = await b.EnsureActorNameAssertBlock(actorName, ct);
+        var actorNameBTask = await b.EnsureActorNameAssertBlock(actorName, ct);
 
         await a.Db.Database.CommitTransactionAsync(ct);
-        var act = () => promiseOfB;
+        var act = () => actorNameBTask;
 
         var exception = (await act.Should().ThrowAsync<Exception>()).Which;
         FindPostgresException(exception).Should().NotBeNull()
@@ -121,8 +121,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         // Act
         var actorNameA = await a.EnsureActorName(actorName, ct);
-        var promiseOfB = await b.EnsureActorNameAssertNonBlock(actorName, ct);
-        var actorNameB = await promiseOfB;
+        var actorNameBTask = await b.EnsureActorNameAssertNonBlock(actorName, ct);
+        var actorNameB = await actorNameBTask;
         await a.Db.Database.CommitTransactionAsync(ct);
         await b.Db.Database.CommitTransactionAsync(ct);
 

@@ -2,12 +2,14 @@ using System.Data;
 using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Infrastructure.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Npgsql;
 
@@ -190,7 +192,12 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
             Db = db;
             _dataSource = dataSource;
             _processId = processId;
-            Repository = new(db, transactionTime);
+            // Every Sut runs inside a transaction, so the isolated scope is never used.
+            Repository = new(
+                db,
+                transactionTime,
+                Substitute.For<IApplicationContext>(),
+                Substitute.For<IServiceScopeFactory>());
         }
 
         public static async Task<Sut> Begin(

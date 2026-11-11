@@ -257,12 +257,14 @@ public class SeenLogTests(DialogApplication application) : ApplicationCollection
 
                 var events = ctx.Application.GetPublishedEvents();
                 events.Count.Should().Be(3);
-                ((DialogUpdatedDomainEvent)events[0]).DialogId.Should().Be(ctx.GetDialogId());
-                ((DialogSeenDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
 
-                var resyncActorNameEvent = (ResyncActorNameEvent)events[2];
+                var resyncActorNameEvent = (ResyncActorNameEvent)events[0];
                 resyncActorNameEvent.ActorNameId.Should().NotBeEmpty();
                 resyncActorNameEvent.Reason.Should().NotBeNullOrEmpty();
+
+                ((DialogUpdatedDomainEvent)events[1]).DialogId.Should().Be(ctx.GetDialogId());
+                ((DialogSeenDomainEvent)events[2]).DialogId.Should().Be(ctx.GetDialogId());
+
             })
             .ResetPartyNameRegistry()
             .ConsumeEvents()

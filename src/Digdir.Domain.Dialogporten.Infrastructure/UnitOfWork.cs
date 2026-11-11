@@ -4,31 +4,24 @@ using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Externals;
-using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Library.Entity.Abstractions.Features.Versionable;
 using Digdir.Library.Entity.EntityFrameworkCore;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
 using OneOf.Types;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure;
 
-internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
+internal sealed class UnitOfWork : IUnitOfWork
 {
-    private const int ActorNameSaveRetries = 1;
-    private const string ActorNameTableName = "ActorName";
-
     private readonly DialogDbContext _dialogDbContext;
     private readonly ITransactionTime _transactionTime;
     private readonly IDomainContext _domainContext;
     private readonly IApplicationContext _applicationContext;
     private readonly SaveChangesOptions _saveChangesOptions = new();
-
-    private IDbContextTransaction? _transaction;
 
     private bool _enableConcurrencyCheck;
 
@@ -61,8 +54,8 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
         return this;
     }
 
-    public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
-        => _transaction ??= await _dialogDbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+    public Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.Unspecified, CancellationToken cancellationToken = default)
+        => _dialogDbContext.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
 
     public IUnitOfWork DisableAggregateFilter()
     {
@@ -101,7 +94,7 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
             var result = await SaveChangesAsync_Internal(cancellationToken);
 
             // If it is not a success, rollback the transaction
-            await (result.IsT0
+            await (result.Value is Success
                 ? CommitTransactionAsync(cancellationToken)
                 : RollbackTransactionAsync(cancellationToken));
 
@@ -203,41 +196,16 @@ internal sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable, IDisposable
 
     private async Task CommitTransactionAsync(CancellationToken cancellationToken)
     {
-        if (_transaction is null)
-        {
-            return;
-        }
-
-        await _transaction.CommitAsync(cancellationToken);
-        await _transaction.DisposeAsync();
-        _transaction = null;
+        await using var tx = _dialogDbContext.Database.CurrentTransaction;
+        if (tx is null) return;
+        await tx.CommitAsync(cancellationToken);
     }
 
     private async Task RollbackTransactionAsync(CancellationToken cancellationToken)
     {
-        if (_transaction is null)
-        {
-            return;
-        }
-
-        await _transaction.RollbackAsync(cancellationToken);
-        await _transaction.DisposeAsync();
-        _transaction = null;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_transaction is not null)
-        {
-            await _transaction.DisposeAsync();
-            _transaction = null;
-        }
-    }
-
-    public void Dispose()
-    {
-        _transaction?.Dispose();
-        _transaction = null;
+        await using var tx = _dialogDbContext.Database.CurrentTransaction;
+        if (tx is null) return;
+        await tx.RollbackAsync(cancellationToken);
     }
 
     // Although Digdir.Library.Entity.EntityFrameworkCore supports all the options,

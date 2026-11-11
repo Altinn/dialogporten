@@ -53,8 +53,7 @@ jobs:
       path: ${{ (inputs.project == 'ServiceOwner (Legacy)' && 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj') || (inputs.project == 'ServiceOwner' && 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj') || 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj' }}
       source: ${{ inputs.source }}
       ref: ${{ inputs.ref || github.ref }}
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     permissions:
       contents: read
       packages: write
+      id-token: write

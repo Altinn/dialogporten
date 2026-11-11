@@ -31,7 +31,7 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+    - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
       with:
         egress-policy: audit
 
@@ -60,7 +60,7 @@ jobs:
         path: junit.xml
 
     - name: 'Publish test results'
-      uses: EnricoMi/publish-unit-test-result-action@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
+      uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
       if: always()
       with:
         action_fail: true

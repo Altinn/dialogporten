@@ -168,6 +168,7 @@ The janitor image contains a resumable `reindex-dialogsearch` command that can b
 - **Cancel a run:** Trigger the `Cancel reindex of dialogsearch` workflow for the relevant environment. It stops the active execution (falling back to deletion if stop is unavailable) and fails if no run is currently active.
 - **Check progress:** Trigger the `Show reindex dialogsearch progress` workflow to display the last 10 logs from the active execution. The workflow fails if no execution is currently running.
 - **Job naming:** Each environment deploys the job as `dp-be-<environment>-reindex-search`. The job uses the regular janitor secrets (database, Redis, Application Insights) and a user-assigned managed identity identical to the scheduled janitor jobs.
+- **Test (at23):** The workflows above cover `yt01`, `staging` and `prod` only. In at23 the job runs on DIS from the `reindex-search-job` CronJob in [Altinn/dialogporten-manifests](https://github.com/Altinn/dialogporten-manifests). See [Search reindex in at23](https://github.com/Altinn/dialogporten-manifests/blob/main/docs/summary.md#search-reindex-in-at23) for how to start, follow and cancel a run.
 
 ## Connecting to resources in Azure
 

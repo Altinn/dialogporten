@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
         <!-- Pin transitive Microsoft.OpenApi to a non-vulnerable version (GHSA-v5pm-xwqc-g5wc) -->
-        <PackageReference Include="Microsoft.OpenApi" Version="2.12.2" />
+        <PackageReference Include="Microsoft.OpenApi" Version="2.13.0" />
     </ItemGroup>
 
     <ItemGroup>

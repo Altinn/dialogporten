@@ -171,8 +171,6 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
   publish-enduser-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
@@ -182,8 +180,6 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Digdir.Library.Dialogporten.WebApiClient.EndUser.csproj'
       source: 'https://api.nuget.org/v3/index.json'
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
   publish-serviceowner-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
@@ -193,8 +189,6 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj'
       source: 'https://api.nuget.org/v3/index.json'
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
   run-e2e-tests:
     name: "Run K6 functional end-to-end tests"
@@ -275,3 +269,40 @@ jobs:
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}
+
+  update-deploy-badge:
+    name: Update deploy badge
+    # needs lists every job so the badge color covers the whole run
+    needs:
+      [
+        generate-git-short-sha,
+        get-current-version,
+        check-for-changes,
+        build-and-test,
+        publish-docker-images,
+        update-manifests,
+        deploy-infra,
+        deploy-apps,
+        get-previous-deployed-sha,
+        tag-issues-with-environment,
+        store-latest-deployed-sha,
+        generate-timestamp,
+        publish-sdk-to-nuget,
+        publish-enduser-sdk-to-nuget,
+        publish-serviceowner-sdk-to-nuget,
+        run-e2e-tests,
+        run-graphql-e2e-tests,
+        run-webapi-e2e-tests,
+        send-slack-message-on-failure,
+        send-deployment-to-swarmia,
+      ]
+    if: ${{ always() && !cancelled() }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: test
+      label: CI/CD Main
+      status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+      # The badge shows the app version, so it only moves when the apps deploy. An infra-only or failed app deployment keeps it.
+      version: ${{ needs.deploy-apps.outputs.deployment_executed == 'true' && format('{0}-{1}', needs.get-current-version.outputs.version, needs.generate-git-short-sha.outputs.gitShortSha) || '' }}

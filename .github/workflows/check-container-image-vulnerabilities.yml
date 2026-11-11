@@ -1,0 +1,141 @@
+name: Check container image vulnerabilities
+
+# Scans the container images deployed to prod for HIGH and CRITICAL vulnerabilities
+# that have a fix available: OS packages, the .NET runtime in the base image, and
+# NuGet packages including transitive ones. Scheduled runs report failures to Slack.
+# This workflow never gates a pull request or a deployment.
+
+on:
+  schedule:
+    # 06:00 UTC (07:00 or 08:00 in Oslo) on Mondays and Wednesdays. The Wednesday
+    # run picks up advisories from Microsoft's Patch Tuesday releases.
+    - cron: '0 6 * * 1,3'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version to scan, for example 1.126.0. Default: the version deployed to prod."
+        required: false
+        type: string
+
+permissions: {}
+
+jobs:
+  resolve-version:
+    name: Resolve image version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      # The image tags in this prod overlay are the version ci-cd-prod deploys.
+      - name: Checkout prod image tags
+        if: ${{ !inputs.version }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Altinn/dialogporten-manifests
+          path: dialogporten-manifests
+          persist-credentials: false
+          sparse-checkout: manifests/environments/prod
+
+      - name: Resolve version
+        id: resolve
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
+          KUSTOMIZATION: dialogporten-manifests/manifests/environments/prod/kustomization.yaml
+        run: |
+          set -euo pipefail
+          if [[ -n "$VERSION_INPUT" ]]; then
+            VERSION="${VERSION_INPUT#v}"
+            SOURCE="the version input"
+          else
+            TAGS="$(yq '.images[] | select(.name | test("^ghcr[.]io/altinn/dialogporten-")) | .newTag' "$KUSTOMIZATION" | sort -u)"
+            if [[ -z "$TAGS" || "$TAGS" == *$'\n'* ]]; then
+              echo "::error::Expected one image tag in ${KUSTOMIZATION}, found: '$(printf '%s' "$TAGS" | tr '\n' ' ')'"
+              exit 1
+            fi
+            VERSION="$TAGS"
+            SOURCE="the prod overlay in Altinn/dialogporten-manifests"
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "::error::Not a valid image version: '${VERSION}'"
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Scanning images tagged \`${VERSION}\` from ${SOURCE}" >> "$GITHUB_STEP_SUMMARY"
+
+  scan:
+    name: Scan ${{ matrix.image }}
+    needs: resolve-version
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every image in the prod overlay of dialogporten-manifests.
+        image: [webapi, graphql, service, janitor, migration-bundle]
+    env:
+      IMAGE: ghcr.io/altinn/dialogporten-${{ matrix.image }}:${{ needs.resolve-version.outputs.version }}
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE }}
+          scanners: vuln
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+          output: trivy-report.txt
+
+      - name: Publish report
+        if: ${{ !cancelled() }}
+        run: |
+          [ -s trivy-report.txt ] || exit 0
+          cat trivy-report.txt
+          {
+            echo "### ${IMAGE}"
+            echo '```'
+            cat trivy-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  notify:
+    name: Notify Slack
+    needs: [resolve-version, scan]
+    if: ${{ failure() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout Slack templates
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/slack-templates
+
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        env:
+          CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
+          VERSION: ${{ needs.resolve-version.outputs.version || 'unknown' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          errors: true
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload-templated: true
+          payload-file-path: "./.github/slack-templates/image-scan-failed.json"

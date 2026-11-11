@@ -38,7 +38,6 @@ The script loads `.env` from this folder by default. You can override by setting
 Default `.env` values in this folder:
 ```bash
 WEBAPI_ENVIRONMENT=Development
-DialogportenBaseUri=https://localhost
 WEBAPI_PORT=7215
 GRAPHQL_PORT=5180
 SERVICE_PORT=56843
@@ -62,12 +61,21 @@ LocalDevelopment__UseLocalMetricsAggregationStorage=true
 literal string `local-development-jws`, while the E2E tests verify real dialog token
 signatures against the JWKS endpoint (`Expected a compact JWS with three parts, got 1`).
 
-Optional overrides (if set in `.env` or the shell):
+Optional overrides (set in `.env` or exported in the shell; for these three, the shell takes precedence over `.env`, while every other value in `.env` wins over the shell — use `ENV_FILE` to change those):
 ```bash
 WEBAPI_PORT=7215
 GRAPHQL_PORT=5180
 SERVICE_PORT=56843
 ```
+
+The ports are the only place to change where the apps run. The script starts the apps on
+`https://localhost:${WEBAPI_PORT}`, `http://localhost:${GRAPHQL_PORT}` and `http://localhost:${SERVICE_PORT}`,
+and exports the matching E2E test settings, which override the test projects' `appsettings.Development.json`:
+```bash
+WebApiBaseUri=https://localhost:${WEBAPI_PORT}/dialogporten
+GraphQlUri=http://localhost:${GRAPHQL_PORT}/graphql
+```
+See [docs/E2E-Tests.md](../../docs/E2E-Tests.md#service-urls).
 
 ## Optional
 - Set `DIALOGPORTEN` to the repo root:

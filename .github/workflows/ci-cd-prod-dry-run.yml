@@ -14,8 +14,16 @@ permissions:
   id-token: write
 
 jobs:
+  check-dispatch-sender:
+    name: Check dispatch sender
+    uses: ./.github/workflows/workflow-check-dispatch-sender.yml
+    with:
+      # dialogporten-bot, which sends release_created from ci-cd-release-please.yml (RELEASE_PLEASE_PAT)
+      sender_id: 164321870
+
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub
+    needs: [check-dispatch-sender]
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
     with:
       environment: prod
@@ -85,3 +93,27 @@ jobs:
     secrets:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
+
+  update-deploy-badge:
+    name: Update deploy badge
+    # needs lists every job so the badge color covers the whole run
+    needs:
+      [
+        check-dispatch-sender,
+        get-versions-from-github,
+        check-for-changes,
+        dry-run-deploy-infra,
+        dry-run-deploy-apps,
+        send-slack-message-on-failure,
+      ]
+    # A rejected sender ran nothing, so it leaves the badge alone.
+    if: ${{ always() && !cancelled() && needs.check-dispatch-sender.result == 'success' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: prod-dry-run
+      label: CI/CD Production Dry Run
+      status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+      # A dry run deploys nothing, so the badge shows the version it was run against.
+      version: ${{ github.event.client_payload.version }}

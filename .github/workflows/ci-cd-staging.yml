@@ -16,12 +16,21 @@ permissions:
   pull-requests: write
 
 jobs:
+  check-dispatch-sender:
+    name: Check dispatch sender
+    uses: ./.github/workflows/workflow-check-dispatch-sender.yml
+    with:
+      # dialogporten-bot, which sends release_created from ci-cd-release-please.yml (RELEASE_PLEASE_PAT)
+      sender_id: 164321870
+
   generate-git-short-sha:
     name: Generate git short sha
+    needs: [check-dispatch-sender]
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml
 
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub
+    needs: [check-dispatch-sender]
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
     with:
       environment: staging
@@ -118,11 +127,10 @@ jobs:
       version: ${{ github.event.client_payload.version }}-rc+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
       path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Digdir.Library.Dialogporten.WebApiClient.csproj'
       source: 'https://api.nuget.org/v3/index.json'
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     permissions:
       contents: read
       packages: write
+      id-token: write
 
   store-apps-version:
     name: Store Latest Deployed Apps Version as GitHub Variable
@@ -205,3 +213,37 @@ jobs:
       version: ${{ github.event.client_payload.version }}
     secrets:
       token: ${{ secrets.SWARMIA_DEPLOYMENTS_AUTHORIZATION }}
+
+  update-deploy-badge:
+    name: Update deploy badge
+    # needs lists every job so the badge color covers the whole run
+    needs:
+      [
+        check-dispatch-sender,
+        generate-git-short-sha,
+        get-versions-from-github,
+        check-for-changes,
+        deploy-infra,
+        store-infra-version,
+        deploy-apps,
+        update-manifests,
+        tag-issues-with-environment,
+        publish-sdk-to-nuget,
+        store-apps-version,
+        run-e2e-tests,
+        run-graphql-e2e-tests,
+        run-webapi-e2e-tests,
+        send-slack-message-on-failure,
+        send-deployment-to-swarmia,
+      ]
+    # A rejected sender deployed nothing, so it leaves the badge alone.
+    if: ${{ always() && !cancelled() && needs.check-dispatch-sender.result == 'success' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: staging
+      label: CI/CD Staging
+      status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+      # The badge shows the app version, so it only moves when the apps deploy. An infra-only or failed app deployment keeps it.
+      version: ${{ needs.deploy-apps.outputs.deployment_executed == 'true' && github.event.client_payload.version || '' }}

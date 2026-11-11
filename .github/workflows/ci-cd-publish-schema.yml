@@ -45,8 +45,17 @@ permissions:
   contents: read   # id-token: write is scoped to the publish job only
 
 jobs:
+  # Only checks repository_dispatch; push and workflow_dispatch pass.
+  check-dispatch-sender:
+    name: Check dispatch sender
+    uses: ./.github/workflows/workflow-check-dispatch-sender.yml
+    with:
+      # dialogporten-bot, which sends release_created from ci-cd-release-please.yml (RELEASE_PLEASE_PAT)
+      sender_id: 164321870
+
   resolve-context:
     name: Resolve trigger context
+    needs: [check-dispatch-sender]
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.context.outputs.version }}
@@ -56,7 +65,7 @@ jobs:
       force_publish: ${{ steps.context.outputs.force_publish }}
       dist_tag: ${{ steps.context.outputs.dist_tag }}
     steps:
-      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
 
@@ -298,7 +307,7 @@ jobs:
     env:
       WORKING_DIRECTORY: docs/schema/V1
     steps:
-      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
 
@@ -377,7 +386,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
 
@@ -389,7 +398,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Send Slack message
-        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         env:
           CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
           # resolve-context can be the failing job, and then its outputs are empty -

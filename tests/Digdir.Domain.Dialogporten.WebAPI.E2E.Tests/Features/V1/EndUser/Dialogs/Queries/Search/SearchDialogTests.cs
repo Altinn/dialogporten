@@ -162,15 +162,11 @@ public class SearchDialogTests(WebApiE2EFixture fixture) : E2ETestBase<WebApiE2E
             Fixture.Settings,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        var uriBuilder = new UriBuilder(Fixture.Settings.DialogportenBaseUri)
-        {
-            Port = Fixture.Settings.WebAPiPort
-        };
-        uriBuilder.Path = $"{uriBuilder.Path.TrimEnd('/')}/api/v1/enduser/dialogs";
-        uriBuilder.Query = $"party={Uri.EscapeDataString(E2EConstants.DefaultParty)}" +
-                           $"&systemLabel={Uri.EscapeDataString("invalid")}";
+        var requestUri = new Uri(Fixture.WebApiUri,
+            $"api/v1/enduser/dialogs?party={Uri.EscapeDataString(E2EConstants.DefaultParty)}" +
+            $"&systemLabel={Uri.EscapeDataString("invalid")}");
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+        using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         using var response = await HttpClient.SendAsync(request, TestContext.Current.CancellationToken);
 

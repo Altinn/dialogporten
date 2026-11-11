@@ -29,6 +29,7 @@ public sealed class DomainEventConsumerDefinition<THandler, TEvent> : ConsumerDe
         IConsumerConfigurator<DomainEventConsumer<THandler, TEvent>> consumerConfigurator,
         IRegistrationContext context)
     {
+        endpointConfigurator.ConfigureDeadLetterQueueErrorTransport();
         endpointConfigurator.UseDelayedRedelivery(r => r.Intervals(
             TimeSpan.FromMinutes(1),
             TimeSpan.FromMinutes(5),

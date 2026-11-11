@@ -1,5 +1,94 @@
 # Changelog
 
+## [1.126.4](https://github.com/Altinn/dialogporten/compare/v1.126.3...v1.126.4) (2026-11-11)
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-dotnet action to v6.1.0 ([#4593](https://github.com/Altinn/dialogporten/issues/4593)) ([480c6c6](https://github.com/Altinn/dialogporten/commit/480c6c65ebb0d4c20b2940652ef02e7fed002c27))
+* **deps:** update dotnet monorepo ([#4595](https://github.com/Altinn/dialogporten/issues/4595)) ([f9308bf](https://github.com/Altinn/dialogporten/commit/f9308bf390d0b92141afbc8051b41f40a6d8d225))
+
+## [1.126.3](https://github.com/Altinn/dialogporten/compare/v1.126.2...v1.126.3) (2026-11-08)
+
+
+### Miscellaneous Chores
+
+* **agents:** add a backend developer agent definition ([#4527](https://github.com/Altinn/dialogporten/issues/4527)) ([0b04995](https://github.com/Altinn/dialogporten/commit/0b04995e270ae723683ee89d735d6e8884b638b7))
+* **deps:** update actions/download-artifact action to v8.0.2 ([#4568](https://github.com/Altinn/dialogporten/issues/4568)) ([32cef82](https://github.com/Altinn/dialogporten/commit/32cef82493b05bf730533a7c6a524051580b484e))
+* **deps:** update actions/upload-artifact action to v7 ([#4578](https://github.com/Altinn/dialogporten/issues/4578)) ([22289ef](https://github.com/Altinn/dialogporten/commit/22289effe74a2d79c2ff70415060c37546d89c26))
+* **deps:** update azure/bicep-deploy action to v2.5.0 ([#4571](https://github.com/Altinn/dialogporten/issues/4571)) ([30d479a](https://github.com/Altinn/dialogporten/commit/30d479a191d25d452b6fd26c62b47d295a857edd))
+* **deps:** update dependency altinn.apiclients.maskinporten to 10.2.1 ([#4569](https://github.com/Altinn/dialogporten/issues/4569)) ([46d138f](https://github.com/Altinn/dialogporten/commit/46d138f7587c639fd28cbf586fe2e976476bcc8e))
+* **deps:** update dependency entityframeworkcore.exceptions.postgresql to v10 ([#4584](https://github.com/Altinn/dialogporten/issues/4584)) ([83d4f9f](https://github.com/Altinn/dialogporten/commit/83d4f9f18f787fa03b2b84b71147ecef7d292514))
+* **deps:** update dependency polly to 8.9.0 ([#4572](https://github.com/Altinn/dialogporten/issues/4572)) ([88ef2a1](https://github.com/Altinn/dialogporten/commit/88ef2a1f649cb73d4a0f87ab9f5a2c6ca9ddc858))
+* **deps:** update dependency scalar.aspnetcore to 2.18.7 ([#4570](https://github.com/Altinn/dialogporten/issues/4570)) ([3628c0d](https://github.com/Altinn/dialogporten/commit/3628c0de2b1424656275602149e00383d92b40c7))
+* **deps:** update dependency testcontainers.postgresql to 4.16.0 ([#4573](https://github.com/Altinn/dialogporten/issues/4573)) ([cc23d9f](https://github.com/Altinn/dialogporten/commit/cc23d9f2a6abdd48210ecf1d0403325f065b5a47))
+* **deps:** update docker/login-action action to v4.7.0 ([#4574](https://github.com/Altinn/dialogporten/issues/4574)) ([82eb3de](https://github.com/Altinn/dialogporten/commit/82eb3decec49dbea5c129047a36a1db0efde2b26))
+* **deps:** update googleapis/release-please-action action to v5 ([#4580](https://github.com/Altinn/dialogporten/issues/4580)) ([77ad008](https://github.com/Altinn/dialogporten/commit/77ad0089354beb4395beb5ac9071f7aa5c9261b6))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.164.0 ([#4575](https://github.com/Altinn/dialogporten/issues/4575)) ([dce9b9b](https://github.com/Altinn/dialogporten/commit/dce9b9bbeb8fc7e9b5ac0525e385612c6a7c7bc7))
+* **deps:** update slackapi/slack-github-action action to v4 ([#4581](https://github.com/Altinn/dialogporten/issues/4581)) ([d4cfdcf](https://github.com/Altinn/dialogporten/commit/d4cfdcf1a149d7ff5fbad6eef62c222055a37e05))
+* **deps:** update test dependencies ([#4577](https://github.com/Altinn/dialogporten/issues/4577)) ([45fba72](https://github.com/Altinn/dialogporten/commit/45fba7243f7ddda9fe24e96f6669e9269e80f3e7))
+* **deps:** update thehanimo/pr-title-checker action to v2 ([#4579](https://github.com/Altinn/dialogporten/issues/4579)) ([c206b50](https://github.com/Altinn/dialogporten/commit/c206b5025242509af425441412e09f5a0c6d7d37))
+* **infra:** keep yt01 scale-down going when the E2E purge fails ([#4559](https://github.com/Altinn/dialogporten/issues/4559)) ([da8d9ed](https://github.com/Altinn/dialogporten/commit/da8d9ed1ecfa90516eaf094824668b3ff477b720))
+
+## [1.126.2](https://github.com/Altinn/dialogporten/compare/v1.126.1...v1.126.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* Configure dlq handling per ConsumerDefinition ([#4562](https://github.com/Altinn/dialogporten/issues/4562)) ([9e02575](https://github.com/Altinn/dialogporten/commit/9e02575cc013696c852680bc0b3dd3945f330168))
+
+## [1.126.1](https://github.com/Altinn/dialogporten/compare/v1.126.0...v1.126.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **infra:** keep module-managed Postgres parameters out of prod server configurations ([#4557](https://github.com/Altinn/dialogporten/issues/4557)) ([cb01f1f](https://github.com/Altinn/dialogporten/commit/cb01f1fa6d60577ba32778e04e30803706fe86cd))
+
+
+### Miscellaneous Chores
+
+* clarify which database changes need manual rollout ([#4481](https://github.com/Altinn/dialogporten/issues/4481)) ([85b7042](https://github.com/Altinn/dialogporten/commit/85b7042f199c033afe5c71a79291f0e284fbf898))
+* **deps:** update dependency altinn.apiclients.maskinporten to 10.2.0 ([#4544](https://github.com/Altinn/dialogporten/issues/4544)) ([6305b36](https://github.com/Altinn/dialogporten/commit/6305b365d3085b2a6b31b00fdd32100e422dbbab))
+* **deps:** update docker/login-action action to v4.7.0 ([#4545](https://github.com/Altinn/dialogporten/issues/4545)) ([97d2195](https://github.com/Altinn/dialogporten/commit/97d2195e306cc434874dc5faf62fcfeba677f369))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.25.0 ([#4546](https://github.com/Altinn/dialogporten/issues/4546)) ([4c670c5](https://github.com/Altinn/dialogporten/commit/4c670c5894523426ba33bb8edff4fefab15d92b8))
+* **deps:** update fusioncache dependencies to 2.9.0 ([#4547](https://github.com/Altinn/dialogporten/issues/4547)) ([308706a](https://github.com/Altinn/dialogporten/commit/308706a7d31222bd27b13dbe5a6590cee2fd7489))
+* **deps:** update hotchocolate dependencies to 16.7.3 and keep batching off ([#4548](https://github.com/Altinn/dialogporten/issues/4548)) ([431175c](https://github.com/Altinn/dialogporten/commit/431175c24420221a1cc80b2ba66b808f082cb201))
+* **deps:** update microsoft dependencies ([#4549](https://github.com/Altinn/dialogporten/issues/4549)) ([7ad70ca](https://github.com/Altinn/dialogporten/commit/7ad70cadf228a595fea4b907f3ff185847bef7a1))
+* **deps:** update opentelemetry dependencies ([#4550](https://github.com/Altinn/dialogporten/issues/4550)) ([0dc9e15](https://github.com/Altinn/dialogporten/commit/0dc9e15ab0d7a83dd2b9c1376ea29953e10dfaab))
+* **deps:** update step-security/harden-runner action to v2.22.3 ([#4551](https://github.com/Altinn/dialogporten/issues/4551)) ([cec401f](https://github.com/Altinn/dialogporten/commit/cec401fef40921d0d5cbce99bcf58973294e0eef))
+* **renovate:** raise PR hourly limit and require approval for major updates ([#4542](https://github.com/Altinn/dialogporten/issues/4542)) ([1eb2f21](https://github.com/Altinn/dialogporten/commit/1eb2f211e21026fedd203e0a0d97343c3def122f))
+
+## [1.126.0](https://github.com/Altinn/dialogporten/compare/v1.125.0...v1.126.0) (2026-11-04)
+
+
+### Features
+
+* **sdk:** SDKs enums 1-based instead of 0-based ([#4524](https://github.com/Altinn/dialogporten/issues/4524)) ([a4330ea](https://github.com/Altinn/dialogporten/commit/a4330eae94f6a0fc27e4564954b53fff54ce50b6))
+
+
+### Bug Fixes
+
+* **dialogs:** return 200 for API-only end user dialogs without content ([#4515](https://github.com/Altinn/dialogporten/issues/4515)) ([a11e9fd](https://github.com/Altinn/dialogporten/commit/a11e9fd628f7f77c8f9aeff193189b9c8d18ce9a))
+* **dialogs:** return 200 for API-only end user transmissions without content ([#4523](https://github.com/Altinn/dialogporten/issues/4523)) ([9ffaee5](https://github.com/Altinn/dialogporten/commit/9ffaee5d113179f644305cb49a2dc01c3dbb7a19))
+* snapshot tests after merge with 1-base enums ([#4534](https://github.com/Altinn/dialogporten/issues/4534)) ([971f063](https://github.com/Altinn/dialogporten/commit/971f063b1e68fbbbcb68804badaa14f4520c04ce))
+* Uncouple actor name lookup failures from dialogporten endpoints ([#4196](https://github.com/Altinn/dialogporten/issues/4196)) ([8855659](https://github.com/Altinn/dialogporten/commit/88556591af91c3b324a983b2ad8900fef96df63f))
+
+
+### Miscellaneous Chores
+
+* **db:** codify hand-tuned prod indexes, storage parameters and server settings ([#4466](https://github.com/Altinn/dialogporten/issues/4466)) ([fd73899](https://github.com/Altinn/dialogporten/commit/fd738998a33280604c34444915a0b2530b0cecfe))
+* **deps:** update azure/bicep-deploy action to v2.4.0 ([#4519](https://github.com/Altinn/dialogporten/issues/4519)) ([6fb58b5](https://github.com/Altinn/dialogporten/commit/6fb58b5085b067914733edaf0fc32e97471c67d7))
+* **deps:** update dependency altinn.authorization.abac to 0.3.0 ([#4520](https://github.com/Altinn/dialogporten/issues/4520)) ([8d2c16b](https://github.com/Altinn/dialogporten/commit/8d2c16b3e573f208e90df070b262a0c26384bf0d))
+* **deps:** update dependency dotnet-sdk to v10.0.403 ([#4530](https://github.com/Altinn/dialogporten/issues/4530)) ([4ae1786](https://github.com/Altinn/dialogporten/commit/4ae1786a35e9101b0730b8bcd6891fbd6523bd53))
+* **deps:** update dependency fluentvalidation.dependencyinjectionextensions to 12.2.0 ([#4532](https://github.com/Altinn/dialogporten/issues/4532)) ([94cc693](https://github.com/Altinn/dialogporten/commit/94cc693031a69ca1dfe14b3510f445ea84f1b474))
+* **deps:** update dependency messagepack to 3.1.12 ([#4517](https://github.com/Altinn/dialogporten/issues/4517)) ([737ddc5](https://github.com/Altinn/dialogporten/commit/737ddc531c199775dbb45f7f4d65a6e25a112a37))
+* **deps:** update dependency polly to 8.8.1 ([#4540](https://github.com/Altinn/dialogporten/issues/4540)) ([d3298f8](https://github.com/Altinn/dialogporten/commit/d3298f801e45dffdde00136429421841a90e1c8d))
+* **deps:** update dependency scalar.aspnetcore to 2.18.3 ([#4533](https://github.com/Altinn/dialogporten/issues/4533)) ([095b27a](https://github.com/Altinn/dialogporten/commit/095b27a0226f5da6f5534fd26adcdef6e996bf35))
+* **deps:** update grafana/grafana docker tag to v12.4.13 ([#4518](https://github.com/Altinn/dialogporten/issues/4518)) ([f8d6221](https://github.com/Altinn/dialogporten/commit/f8d6221555b515e7a0682f92af234818cee76082))
+* **deps:** update grafana/loki docker tag to v3.7.9 ([#4525](https://github.com/Altinn/dialogporten/issues/4525)) ([d4a18f8](https://github.com/Altinn/dialogporten/commit/d4a18f85bc00b57b97a33229cf9697947da0bbfb))
+* **deps:** update hotchocolate dependencies to 16.6.9 ([#4526](https://github.com/Altinn/dialogporten/issues/4526)) ([a879f19](https://github.com/Altinn/dialogporten/commit/a879f192aa7abc3e46dc1d6857848df3a0bed224))
+* **deps:** update nginx docker tag to v1.31.7 ([#4531](https://github.com/Altinn/dialogporten/issues/4531)) ([1cf8e81](https://github.com/Altinn/dialogporten/commit/1cf8e8124bc923b29a9d22899b4706b03503c1fe))
+
 ## [1.125.0](https://github.com/Altinn/dialogporten/compare/v1.124.1...v1.125.0) (2026-10-22)
 
 

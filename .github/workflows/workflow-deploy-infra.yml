@@ -58,7 +58,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+      - uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
         with:
           egress-policy: audit
 
@@ -92,7 +92,7 @@ jobs:
           echo "::set-output name=postgresqlPassword::$password"
 
       - name: Dryrun Deploy infrastructure (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ inputs.dryRun }}
         id: deploy-dry-run
         env:
@@ -115,7 +115,7 @@ jobs:
           parameters-file: ./.azure/infrastructure/${{ inputs.environment }}.bicepparam
 
       - name: Deploy infrastructure (${{ inputs.environment }})
-        uses: azure/bicep-deploy@4dc076a544e5297d3aeb3cb972e7614e12f5a55b # v2.4.0
+        uses: azure/bicep-deploy@c66bb161da87636b24a64aa8e0a427645d846c57 # v2.5.0
         if: ${{ !inputs.dryRun }}
         id: deploy
         env:

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.126.4](https://github.com/Altinn/dialogporten/compare/v1.126.3...v1.126.4) (2026-11-11)
+
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-dotnet action to v6.1.0 ([#4593](https://github.com/Altinn/dialogporten/issues/4593)) ([480c6c6](https://github.com/Altinn/dialogporten/commit/480c6c65ebb0d4c20b2940652ef02e7fed002c27))
+* **deps:** update dotnet monorepo ([#4595](https://github.com/Altinn/dialogporten/issues/4595)) ([f9308bf](https://github.com/Altinn/dialogporten/commit/f9308bf390d0b92141afbc8051b41f40a6d8d225))
+
 ## [1.126.3](https://github.com/Altinn/dialogporten/compare/v1.126.2...v1.126.3) (2026-11-08)
 
 

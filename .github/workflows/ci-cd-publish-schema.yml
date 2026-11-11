@@ -45,8 +45,17 @@ permissions:
   contents: read   # id-token: write is scoped to the publish job only
 
 jobs:
+  # Only checks repository_dispatch; push and workflow_dispatch pass.
+  check-dispatch-sender:
+    name: Check dispatch sender
+    uses: ./.github/workflows/workflow-check-dispatch-sender.yml
+    with:
+      # dialogporten-bot, which sends release_created from ci-cd-release-please.yml (RELEASE_PLEASE_PAT)
+      sender_id: 164321870
+
   resolve-context:
     name: Resolve trigger context
+    needs: [check-dispatch-sender]
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.context.outputs.version }}

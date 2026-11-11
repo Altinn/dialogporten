@@ -16,12 +16,21 @@ permissions:
   pull-requests: write
 
 jobs:
+  check-dispatch-sender:
+    name: Check dispatch sender
+    uses: ./.github/workflows/workflow-check-dispatch-sender.yml
+    with:
+      # dialogporten-bot, which sends release_created from ci-cd-release-please.yml (RELEASE_PLEASE_PAT)
+      sender_id: 164321870
+
   generate-git-short-sha:
     name: Generate git short sha
+    needs: [check-dispatch-sender]
     uses: ./.github/workflows/workflow-generate-git-short-sha.yml
 
   get-versions-from-github:
     name: Get Latest Deployed Version Info from GitHub
+    needs: [check-dispatch-sender]
     uses: ./.github/workflows/workflow-get-latest-deployed-version-info-from-github.yml
     with:
       environment: staging
@@ -210,6 +219,7 @@ jobs:
     # needs lists every job so the badge color covers the whole run
     needs:
       [
+        check-dispatch-sender,
         generate-git-short-sha,
         get-versions-from-github,
         check-for-changes,
@@ -226,7 +236,8 @@ jobs:
         send-slack-message-on-failure,
         send-deployment-to-swarmia,
       ]
-    if: ${{ always() && !cancelled() }}
+    # A rejected sender deployed nothing, so it leaves the badge alone.
+    if: ${{ always() && !cancelled() && needs.check-dispatch-sender.result == 'success' }}
     permissions:
       contents: write
     uses: ./.github/workflows/workflow-update-deploy-badge.yml

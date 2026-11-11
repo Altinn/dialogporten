@@ -73,6 +73,13 @@ four parallel workflows consume:
      `latest` dist-tag
    - Runs in parallel with the staging deployment, not after it
 
+Any token with write access to this repository can send a repository dispatch,
+so the staging, production dry run and schema workflows first run
+`workflow-check-dispatch-sender.yml`, which accepts `release_created` only from
+`dialogporten-bot`, the account behind `RELEASE_PLEASE_PAT`. Other senders fail
+the run before anything deploys or publishes. If the PAT moves to another
+account, update `sender_id` in those three workflows.
+
 > **Note:** `ci-cd-publish-schema.yml` is the sole publisher of the npm schema
 > package and authenticates via npm Trusted Publishing over OIDC, so no npm token
 > is involved.

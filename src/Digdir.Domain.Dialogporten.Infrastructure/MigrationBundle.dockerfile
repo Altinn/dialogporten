@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0.404@sha256:fe0fd4e93bd2fbb47c883b7a6369e5
 WORKDIR /src
 
 ENV PATH="/root/.dotnet/tools:${PATH}"
-RUN dotnet tool install --global dotnet-ef --version 10.0.14
+RUN dotnet tool install --global dotnet-ef --version 10.0.15
 
 COPY [".editorconfig", "."]
 COPY ["Directory.Build.props", "."]

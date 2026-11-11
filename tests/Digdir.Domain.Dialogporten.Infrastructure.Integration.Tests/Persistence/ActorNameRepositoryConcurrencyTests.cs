@@ -42,6 +42,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Act
         var actorNameA = await a.EnsureActorName(actorName, ct);
         var actorNameBTask = b.EnsureActorName(actorName, ct);
+        await b.AssertPsqlProcessBlocked(actorNameBTask, ct);
+
         await a.Db.Database.CommitTransactionAsync(ct);
         var actorNameB = await actorNameBTask;
         await b.Db.Database.CommitTransactionAsync(ct);
@@ -104,12 +106,6 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
             .And.Subject.As<PostgresException>().SqlState.Should().Be(SerializationFailureSqlState);
     }
 
-    /// <summary>
-    /// Ensuring an already committed actor name should be a plain read. If the lookup of
-    /// preexisting rows misses (e.g. a non-null-safe join on ActorId), the query falls through
-    /// to INSERT ... ON CONFLICT DO UPDATE, which writes a new row version and holds a row lock
-    /// until commit, blocking every other transaction that uses the same actor name.
-    /// </summary>
     [Theory, ClassData<TestData>]
     public async Task EnsureActorName_For_Existing_Row_Does_Not_Block_Concurrent_Transactions(ActorName actorName)
     {

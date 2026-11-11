@@ -64,13 +64,16 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         await using var a = await CreateSut();
         await using var b = await CreateSut();
 
+        // Act
         var actorNameA = await a.EnsureActorName(actorName, ct);
-        var actorNameBTask = await b.EnsureActorNameAssertBlock(actorName, ct);
+        var actorNameBTask = b.EnsureActorName(actorName, ct);
+        await b.AssertPsqlProcessBlocked(actorNameBTask, ct);
 
         await a.Db.Database.RollbackTransactionAsync(ct);
         var actorNameB = await actorNameBTask;
         await b.Db.Database.CommitTransactionAsync(ct);
 
+        // Assert
         actorNameB.Id.Should().NotBe(actorNameA.Id);
         AssertResyncRequestedIfNeeded(actorNameB);
 
@@ -87,12 +90,15 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         await using var a = await CreateSut();
         await using var b = await CreateSut(IsolationLevel.RepeatableRead);
 
+        // Act
         await a.EnsureActorName(actorName, ct);
-        var actorNameBTask = await b.EnsureActorNameAssertBlock(actorName, ct);
+        var actorNameBTask = b.EnsureActorName(actorName, ct);
+        await b.AssertPsqlProcessBlocked(actorNameBTask, ct);
 
         await a.Db.Database.CommitTransactionAsync(ct);
         var act = () => actorNameBTask;
 
+        // Assert
         var exception = (await act.Should().ThrowAsync<Exception>()).Which;
         FindPostgresException(exception).Should().NotBeNull()
             .And.Subject.As<PostgresException>().SqlState.Should().Be(SerializationFailureSqlState);
@@ -121,8 +127,10 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         // Act
         var actorNameA = await a.EnsureActorName(actorName, ct);
-        var actorNameBTask = await b.EnsureActorNameAssertNonBlock(actorName, ct);
+        var actorNameBTask = b.EnsureActorName(actorName, ct);
+        await b.AssertPsqlProcessNotBlocked(actorNameBTask, ct);
         var actorNameB = await actorNameBTask;
+
         await a.Db.Database.CommitTransactionAsync(ct);
         await b.Db.Database.CommitTransactionAsync(ct);
 
@@ -210,18 +218,16 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         private static ActorName CopyOf(ActorName actorName) =>
             new() { ActorId = actorName.ActorId, Name = actorName.Name };
 
-        public async Task<Task<ActorName>> EnsureActorNameAssertBlock(ActorName actorName, CancellationToken cancellationToken)
+        public async Task AssertPsqlProcessBlocked(Task pending, CancellationToken cancellationToken)
         {
-            var task = EnsureActorName(actorName, cancellationToken);
-            if (await WasBlockedBeforeCompleting(task, cancellationToken)) return task;
-            await task; // Surface any exception
+            if (await WasBlockedBeforeCompleting(pending, cancellationToken)) return;
+            await pending; // Surface any exception
             throw new InvalidOperationException("Expected the transaction to block, but it completed.");
         }
 
-        public async Task<Task<ActorName>> EnsureActorNameAssertNonBlock(ActorName actorName, CancellationToken cancellationToken)
+        public async Task AssertPsqlProcessNotBlocked(Task pending, CancellationToken cancellationToken)
         {
-            var task = EnsureActorName(actorName, cancellationToken);
-            if (!await WasBlockedBeforeCompleting(task, cancellationToken)) return task;
+            if (!await WasBlockedBeforeCompleting(pending, cancellationToken)) return;
             throw new InvalidOperationException("Expected the transaction not to block, but it was blocked by another transaction.");
         }
 

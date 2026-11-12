@@ -55,8 +55,11 @@ internal sealed class DialogSeenLogWriter(
             return null;
         }
 
+        var actorName = await GetActorName(userId.ExternalIdWithPrefix, cancellationToken);
+
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
-        var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
+        var actorNameEntity = await actorNameRepository.EnsureActorName(actorName, cancellationToken);
+
         var newSeenLog = await EnsureSeenLog(
             seenLogId,
             dialog.Id,
@@ -124,7 +127,7 @@ internal sealed class DialogSeenLogWriter(
             };
     }
 
-    private async Task<ActorName> CreateActorNameEntity(string actorId, CancellationToken ct)
+    private async Task<ActorName> GetActorName(string actorId, CancellationToken ct)
     {
         var normalizedActorId = actorId.ToLowerInvariant();
         var result = await partyNameRegistry.GetName(normalizedActorId, ct);
@@ -135,8 +138,7 @@ internal sealed class DialogSeenLogWriter(
             unavailable => null
         );
 
-        var actorNameEntity = new ActorName { ActorId = normalizedActorId, Name = actorName };
-        return await actorNameRepository.EnsureActorName(actorNameEntity, ct);
+        return new ActorName { ActorId = actorId, Name = actorName };
     }
 
     private async Task<int> EnsureSeenLog(

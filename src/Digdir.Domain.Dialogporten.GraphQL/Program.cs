@@ -159,6 +159,9 @@ static void BuildAndRun(string[] args)
 
     app.UseCors();
     app.MapDialogportenHealthChecks();
+    // Under /graphql, the only prefix the edge forwards to this app. The literal route takes precedence over the
+    // catch-all route of the GraphQL endpoint, which requires authorization.
+    app.MapVersionEndpoint("/graphql/version");
 
     app.UseMaintenanceMode()
         .UseJwtSchemeSelector()

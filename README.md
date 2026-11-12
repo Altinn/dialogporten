@@ -7,8 +7,8 @@
 [![CI/CD Production Dry Run](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Altinn/dialogporten/badges/prod-dry-run.json)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod-dry-run.yml)
 [![CI/CD Production](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Altinn/dialogporten/badges/prod.json)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-prod.yml)  
 
-![NuGet Version](https://img.shields.io/nuget/v/Altinn.ApiClients.Dialogporten)
-![NPM Version](https://img.shields.io/npm/v/%40digdir%2Fdialogporten-schema)
+[![NuGet Version](https://img.shields.io/nuget/v/Altinn.ApiClients.Dialogporten)](https://www.nuget.org/packages/Altinn.ApiClients.Dialogporten)
+[![NPM Version](https://img.shields.io/npm/v/%40digdir%2Fdialogporten-schema)](https://www.npmjs.com/package/@digdir/dialogporten-schema)
 
 ## Table of Contents
 - [Getting started with local development](#getting-started-with-local-development)

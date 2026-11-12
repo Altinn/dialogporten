@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.126.5](https://github.com/Altinn/dialogporten/compare/v1.126.4...v1.126.5) (2026-11-11)
+
+
+### Bug Fixes
+
+* **persistence:** clamp DateTimeOffset extremes so timestamps never persist as infinity ([#4539](https://github.com/Altinn/dialogporten/issues/4539)) ([3bd2cca](https://github.com/Altinn/dialogporten/commit/3bd2cca9b55be290597e9fa82541646c76763a0d)), closes [#4014](https://github.com/Altinn/dialogporten/issues/4014)
+
 ## [1.126.4](https://github.com/Altinn/dialogporten/compare/v1.126.3...v1.126.4) (2026-11-11)
 
 

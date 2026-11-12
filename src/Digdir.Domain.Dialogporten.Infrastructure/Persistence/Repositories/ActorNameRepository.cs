@@ -24,6 +24,8 @@ internal sealed class ActorNameRepository(
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {
+        if (db.Database.CurrentTransaction is null) throw new InvalidOperationException("This method must be run in a transaction");
+
         var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(actorNames);
         var maps = await GetOrCreateActorNames(consolidatedActorNames, cancellationToken);
         var actorNameIdTuples = consolidatedActorNames

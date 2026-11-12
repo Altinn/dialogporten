@@ -50,11 +50,18 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         if (addedActorNameEntities.Count == 0) return;
         await TrySetActorNames(addedActorNameEntities, cancellationToken);
-
-        // Outside a transaction, the repository commits actor names and their resync events in a
-        // short, isolated transaction. Inside one, it writes to the caller's transaction, so this
-        // works under any isolation level.
+        await EnsureTransaction(dbContext, cancellationToken);
         await _actorNameRepository.Value.EnsureActorNames(addedActorNameEntities, cancellationToken);
+    }
+
+    private static async Task EnsureTransaction(DbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (dbContext.Database.CurrentTransaction is null)
+        {
+            // Here we assume that UnitOfWork will pick up this transaction
+            // and commit or rollback it when SaveChanges is called.
+            await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        }
     }
 
     /// <summary>

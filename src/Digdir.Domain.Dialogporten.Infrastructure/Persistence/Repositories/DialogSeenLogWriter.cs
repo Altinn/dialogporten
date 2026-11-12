@@ -55,10 +55,8 @@ internal sealed class DialogSeenLogWriter(
             return null;
         }
 
-        // Resolve the actor name before opening the transaction, so it is
-        // committed in its own short transaction (see IActorNameRepository).
-        var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
+        var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
         var newSeenLog = await EnsureSeenLog(
             seenLogId,
             dialog.Id,

@@ -3,6 +3,7 @@ using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
@@ -33,12 +34,11 @@ internal sealed class ActorNameRepository(
         // resync events are persisted atomically through this context. Instead, we let an isolated
         // repository (own scope, own DbContext, own transaction) do the insert and publish the events,
         // and only repair the entities tracked by this context afterward.
-        var isolated = db.Database.CurrentTransaction is null;
         var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(actorNames);
         var inputActorNames = consolidatedActorNames.Select(x => x.Entity).ToList();
-        var maps = isolated
+        var maps = db.Database.CurrentTransaction is null
             ? await GetOrCreateActorNamesInIsolatedScope(inputActorNames, cancellationToken)
-            : await GetOrCreateActorNames(inputActorNames, cancellationToken);
+            : await GetOrCreateActorNamesAndPublishResyncEvents(inputActorNames, cancellationToken);
         var actorNameIdTuples = consolidatedActorNames
             .Join(maps,
                 actorName => actorName.Entity.Id,
@@ -61,12 +61,6 @@ internal sealed class ActorNameRepository(
             actorNameEntry.Entity.CreatedAt = mapping.ActualCreatedAt;
             actorNameEntry.OriginalValues.SetValues(actorNameEntry.Entity);
             actorNameEntry.State = EntityState.Unchanged;
-
-            // In the isolated case the resync events are already committed by the isolated repository.
-            if (mapping.Created && !isolated)
-            {
-                actorNameEntry.Entity.TryRequestActorNameResync(NewlyCreatedResyncReason);
-            }
         }
 
         return actorNameIdTuples
@@ -86,8 +80,6 @@ internal sealed class ActorNameRepository(
     /// <summary>
     /// Inserts the actor names and persists their resync events in a single transaction owned by this
     /// repository's <see cref="DialogDbContext"/>. The given actor names are only read, never attached.
-    /// The resync events are handed to <see cref="IDomainEventPublisher"/>, which lets the save changes
-    /// interceptors turn them into outbox messages as part of this transaction.
     /// </summary>
     private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNamesInOwnTransaction(
         IReadOnlyCollection<ActorName> actorNames,
@@ -99,23 +91,37 @@ internal sealed class ActorNameRepository(
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var maps = await GetOrCreateActorNames(actorNames, cancellationToken);
-        var resyncEvents = actorNames
-            .Join(maps.Where(x => x.Created),
-                actorName => actorName.Id,
-                map => map.InputActorNameId,
-                (actorName, map) => new ActorName { Id = map.ActualActorNameId, ActorId = actorName.ActorId, Name = actorName.Name })
-            .Where(x => x.TryRequestActorNameResync(NewlyCreatedResyncReason))
-            .SelectMany(x => x.PopDomainEvents())
-            .ToList();
-
-        if (resyncEvents.Count > 0)
+        var maps = await GetOrCreateActorNamesAndPublishResyncEvents(actorNames, cancellationToken);
+        if (domainEventPublisher.HasEvents())
         {
-            resyncEvents.ForEach(domainEventPublisher.Publish);
             await db.SaveChangesAsync(cancellationToken);
         }
 
         await transaction.CommitAsync(cancellationToken);
+        return maps;
+    }
+
+    /// <summary>
+    /// Requests a resync for every newly created actor name that has an actor id but no name. The events
+    /// go through <see cref="IDomainEventPublisher"/>, so they are turned into outbox messages by the
+    /// save changes interceptors as part of the next save on this repository's <see cref="DialogDbContext"/>.
+    /// </summary>
+    private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNamesAndPublishResyncEvents(
+        IReadOnlyCollection<ActorName> actorNames,
+        CancellationToken cancellationToken)
+    {
+        var maps = await GetOrCreateActorNames(actorNames, cancellationToken);
+        var events = actorNames
+            .Join(maps.Where(x => x.Created),
+                actorName => actorName.Id,
+                map => map.InputActorNameId,
+                (actorName, map) => (actorName, map))
+            .Where(x => x.actorName.NeedsActorNameResync)
+            .Select(x => new ResyncActorNameEvent(x.map.ActualActorNameId, NewlyCreatedResyncReason));
+        foreach (var map in events)
+        {
+            domainEventPublisher.Publish(map);
+        }
         return maps;
     }
 

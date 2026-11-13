@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Infrastructure.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
+using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -52,8 +53,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Assert
         actorNameB.Id.Should().Be(actorNameA.Id);
         actorNameB.CreatedAt.Should().Be(actorNameA.CreatedAt);
-        AssertResyncRequestedIfNeeded(actorNameA);
-        actorNameB.HasEvents().Should().BeFalse("B did not create the row, so it should not request a resync");
+        AssertResyncRequestedIfNeeded(a.DomainEventPublisher, actorNameA);
+        AssertNoResyncRequested(b.DomainEventPublisher); // B did not create the row
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
             .Which.Id.Should().Be(actorNameA.Id);
@@ -78,7 +79,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         // Assert
         actorNameB.Id.Should().NotBe(actorNameA.Id);
-        AssertResyncRequestedIfNeeded(actorNameB);
+        AssertResyncRequestedIfNeeded(b.DomainEventPublisher, actorNameB);
 
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorNameB.ActorId && x.Name == actorNameB.Name)
@@ -134,8 +135,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Assert
         actorNameA.Id.Should().Be(seeded.Id);
         actorNameB.Id.Should().Be(seeded.Id);
-        actorNameA.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
-        actorNameB.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
+        AssertNoResyncRequested(a.DomainEventPublisher); // The row already existed
+        AssertNoResyncRequested(b.DomainEventPublisher);
 
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
@@ -160,20 +161,13 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Assert
         db.Database.CurrentTransaction.Should().BeNull("the caller's context must not be enlisted in a transaction");
         db.Entry(result).State.Should().Be(EntityState.Unchanged);
-        result.HasEvents().Should().BeFalse("resync events are committed by the isolated transaction, not the caller");
+        result.HasEvents().Should().BeFalse();
 
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
             .Which.Id.Should().Be(result.Id);
 
-        if (result.NeedsActorNameResync)
-        {
-            domainEventPublisher.Received(1).Publish(Arg.Is<ResyncActorNameEvent>(x => x.ActorNameId == result.Id));
-        }
-        else
-        {
-            domainEventPublisher.DidNotReceiveWithAnyArgs().Publish(null!);
-        }
+        AssertResyncRequestedIfNeeded(domainEventPublisher, result);
     }
 
     [Theory, ClassData<TestData>]
@@ -200,7 +194,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Assert
         result.Id.Should().Be(seeded.Id);
         result.HasEvents().Should().BeFalse();
-        domainEventPublisher.DidNotReceiveWithAnyArgs().Publish(null!);
+        AssertNoResyncRequested(domainEventPublisher);
     }
 
     private ServiceProvider CreateServiceProvider(IDomainEventPublisher domainEventPublisher)
@@ -231,16 +225,21 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         return await db.Set<ActorName>().AsNoTracking().ToListAsync(TestContext.Current.CancellationToken);
     }
 
-    private static void AssertResyncRequestedIfNeeded(ActorName actorName)
+    private static void AssertResyncRequestedIfNeeded(IDomainEventPublisher domainEventPublisher, ActorName actorName)
     {
-        if (actorName.ActorId is null || actorName.Name is not null)
+        actorName.HasEvents().Should().BeFalse("resync events are published through the domain event publisher");
+        if (!actorName.NeedsActorNameResync)
         {
-            actorName.HasEvents().Should().BeFalse("a resync is only needed for an actor id without a name");
+            AssertNoResyncRequested(domainEventPublisher);
             return;
         }
 
-        actorName.PopDomainEvents().Should().ContainSingle().Which.Should().BeOfType<ResyncActorNameEvent>();
+        domainEventPublisher.Received(1).Publish(Arg.Any<IDomainEvent>());
+        domainEventPublisher.Received(1).Publish(Arg.Is<ResyncActorNameEvent>(x => x.ActorNameId == actorName.Id));
     }
+
+    private static void AssertNoResyncRequested(IDomainEventPublisher domainEventPublisher) =>
+        domainEventPublisher.DidNotReceiveWithAnyArgs().Publish(null!);
 
     private static PostgresException? FindPostgresException(Exception? exception) => exception switch
     {
@@ -256,6 +255,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         public DialogDbContext Db { get; set; }
         public ActorNameRepository Repository { get; }
+        public IDomainEventPublisher DomainEventPublisher { get; } = Substitute.For<IDomainEventPublisher>();
 
         private Sut(DialogDbContext db, NpgsqlDataSource dataSource, int processId)
         {
@@ -267,7 +267,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
             Repository = new(
                 db,
                 transactionTime,
-                Substitute.For<IDomainEventPublisher>(),
+                DomainEventPublisher,
                 Substitute.For<IServiceScopeFactory>());
         }
 

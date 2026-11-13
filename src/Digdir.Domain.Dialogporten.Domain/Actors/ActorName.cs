@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
-using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Library.Entity.Abstractions.Features.Immutable;
@@ -27,12 +26,4 @@ public sealed class ActorName : IImmutableEntity, IIdentifiableEntity, ICreatabl
 
     [NotMapped]
     public bool NeedsActorNameResync => ActorId is not null && Name is null;
-
-    public bool TryRequestActorNameResync(string reason)
-    {
-        if (!NeedsActorNameResync) return false;
-        this.EnsureId();
-        _domainEvents.Add(new ResyncActorNameEvent(Id, reason));
-        return true;
-    }
 }

@@ -21,6 +21,7 @@ internal sealed class UnitOfWork : IUnitOfWork
     private readonly ITransactionTime _transactionTime;
     private readonly IDomainContext _domainContext;
     private readonly IApplicationContext _applicationContext;
+    private readonly IDomainEventPublisher _domainEventPublisher;
     private readonly SaveChangesOptions _saveChangesOptions = new();
 
     private bool _enableConcurrencyCheck;
@@ -28,17 +29,20 @@ internal sealed class UnitOfWork : IUnitOfWork
     public UnitOfWork(DialogDbContext dialogDbContext,
         ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IApplicationContext applicationContext)
+        IApplicationContext applicationContext,
+        IDomainEventPublisher domainEventPublisher)
     {
         ArgumentNullException.ThrowIfNull(dialogDbContext);
         ArgumentNullException.ThrowIfNull(transactionTime);
         ArgumentNullException.ThrowIfNull(domainContext);
         ArgumentNullException.ThrowIfNull(applicationContext);
+        ArgumentNullException.ThrowIfNull(domainEventPublisher);
 
         _dialogDbContext = dialogDbContext;
         _transactionTime = transactionTime;
         _domainContext = domainContext;
         _applicationContext = applicationContext;
+        _domainEventPublisher = domainEventPublisher;
     }
 
     public IUnitOfWork EnableConcurrencyCheck<TEntity>(
@@ -173,7 +177,7 @@ internal sealed class UnitOfWork : IUnitOfWork
             ? new DomainError(_domainContext.Pop())
             : new Success();
     }
-    private bool HasPendingEvents() => _dialogDbContext.ChangeTracker.Entries()
+    private bool HasPendingEvents() => _domainEventPublisher.HasEvents() || _dialogDbContext.ChangeTracker.Entries()
         .Select(x => x.Entity)
         .OfType<IEventPublisher>()
         .Any(x => x.HasEvents());

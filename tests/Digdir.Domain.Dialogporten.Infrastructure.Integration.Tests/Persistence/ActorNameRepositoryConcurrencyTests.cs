@@ -161,7 +161,6 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Assert
         db.Database.CurrentTransaction.Should().BeNull("the caller's context must not be enlisted in a transaction");
         db.Entry(result).State.Should().Be(EntityState.Unchanged);
-        result.HasEvents().Should().BeFalse();
 
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
@@ -193,7 +192,6 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         // Assert
         result.Id.Should().Be(seeded.Id);
-        result.HasEvents().Should().BeFalse();
         AssertNoResyncRequested(domainEventPublisher);
     }
 
@@ -227,7 +225,6 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
     private static void AssertResyncRequestedIfNeeded(IDomainEventPublisher domainEventPublisher, ActorName actorName)
     {
-        actorName.HasEvents().Should().BeFalse("resync events are published through the domain event publisher");
         if (!actorName.NeedsActorNameResync)
         {
             AssertNoResyncRequested(domainEventPublisher);

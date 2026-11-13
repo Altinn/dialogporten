@@ -149,11 +149,13 @@ internal sealed class ActorNameRepository(
             {
                 actor.ActorNameEntityId = null;
                 actor.ActorNameEntity = mainActorName.Entity;
+                mainActorName.Entity.ActorEntities.Add(actor);
             }
 
             foreach (var discardInstance in duplicatedActorNames)
             {
                 discardInstance.State = EntityState.Detached;
+                discardInstance.Entity.ActorEntities.Clear();
             }
         }
 

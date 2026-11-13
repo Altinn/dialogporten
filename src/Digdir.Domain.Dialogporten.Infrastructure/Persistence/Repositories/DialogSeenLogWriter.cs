@@ -134,11 +134,11 @@ internal sealed class DialogSeenLogWriter(
         var actorName = result.Match<string?>(
             found => found.Name,
             notFound => null,
-            unsupported => throw new InvalidOperationException($"Unable to look up name for actor {actorId}. Reason: {unsupported.Reason}"),
+            unsupported => throw new InvalidOperationException($"Unable to look up name for actor {normalizedActorId}. Reason: {unsupported.Reason}"),
             unavailable => null
         );
 
-        return new ActorName { ActorId = actorId, Name = actorName };
+        return new ActorName { ActorId = normalizedActorId, Name = actorName };
     }
 
     private async Task<int> EnsureSeenLog(

@@ -50,6 +50,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 
         if (addedActorNameEntities.Count == 0) return;
         await TrySetActorNames(addedActorNameEntities, cancellationToken);
+        if (!_domainContext.IsValid) return;
         await EnsureTransaction(dbContext, cancellationToken);
         await _actorNameRepository.Value.EnsureActorNames(addedActorNameEntities, cancellationToken);
     }

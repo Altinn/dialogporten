@@ -107,6 +107,9 @@ public class DialogApplication : IAsyncLifetime
         publishEndpointSubstitute
             .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
             .Do(x => _publishedEvents.Enqueue(x[0]));
+        publishEndpointSubstitute
+            .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<IPipe<PublishContext>>(), Arg.Any<CancellationToken>()))
+            .Do(x => _publishedEvents.Enqueue(x[0]));
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())

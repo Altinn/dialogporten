@@ -20,6 +20,7 @@ internal sealed class ActorNameRepository(
     IServiceProvider services) : IActorNameRepository
 {
     private const string NewlyCreatedResyncReason = "Newly created actor name";
+    private static readonly TimeSpan ResyncDeliveryDelay = TimeSpan.FromSeconds(30);
 
     public async Task<ActorName> EnsureActorName(ActorName actorName, CancellationToken cancellationToken)
     {
@@ -80,10 +81,6 @@ internal sealed class ActorNameRepository(
         return await isolatedRepository.GetOrCreateActorNamesInOwnTransaction(actorNames, cancellationToken);
     }
 
-    /// <summary>
-    /// Inserts the actor names and persists their resync events in a single transaction owned by this
-    /// repository's <see cref="DialogDbContext"/>. The given actor names are only read, never attached.
-    /// </summary>
     private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNamesInOwnTransaction(
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
@@ -104,11 +101,6 @@ internal sealed class ActorNameRepository(
         return maps;
     }
 
-    /// <summary>
-    /// Requests a resync for every newly created actor name that has an actor id but no name. The events
-    /// go through <see cref="IDomainEventPublisher"/>, so they are turned into outbox messages by the
-    /// save changes interceptors as part of the next save on this repository's <see cref="DialogDbContext"/>.
-    /// </summary>
     private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNamesAndPublishResyncEvents(
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
@@ -120,7 +112,10 @@ internal sealed class ActorNameRepository(
                 map => map.InputActorNameId,
                 (actorName, map) => (actorName, map))
             .Where(x => x.actorName.NeedsActorNameResync)
-            .Select(x => new ResyncActorNameEvent(x.map.ActualActorNameId, NewlyCreatedResyncReason));
+            .Select(x => new ResyncActorNameEvent(x.map.ActualActorNameId, NewlyCreatedResyncReason)
+            {
+                DeliveryDelay = ResyncDeliveryDelay
+            });
         foreach (var map in events)
         {
             domainEventPublisher.Publish(map);

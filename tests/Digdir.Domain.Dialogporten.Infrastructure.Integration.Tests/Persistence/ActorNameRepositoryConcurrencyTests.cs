@@ -24,6 +24,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
     private const string Name = "Brando Sando";
     private const string SerializationFailureSqlState = "40001";
     private static readonly TimeSpan BlockedTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan ResyncDeliveryDelay = TimeSpan.FromSeconds(30);
 
     private async Task<Sut> CreateSut(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
     {
@@ -234,7 +235,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         }
 
         domainEventPublisher.Received(1).Publish(Arg.Any<IDomainEvent>());
-        domainEventPublisher.Received(1).Publish(Arg.Is<ResyncActorNameEvent>(x => x.ActorNameId == actorName.Id));
+        domainEventPublisher.Received(1).Publish(Arg.Is<ResyncActorNameEvent>(x =>
+            x.ActorNameId == actorName.Id && x.DeliveryDelay == ResyncDeliveryDelay));
     }
 
     private static void AssertNoResyncRequested(IDomainEventPublisher domainEventPublisher) =>

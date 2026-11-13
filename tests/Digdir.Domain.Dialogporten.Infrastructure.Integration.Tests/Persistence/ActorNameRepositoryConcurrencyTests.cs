@@ -2,12 +2,15 @@ using System.Data;
 using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Infrastructure.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
+using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Npgsql;
 
@@ -51,8 +54,8 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Assert
         actorNameB.Id.Should().Be(actorNameA.Id);
         actorNameB.CreatedAt.Should().Be(actorNameA.CreatedAt);
-        AssertResyncRequestedIfNeeded(actorNameA);
-        actorNameB.HasEvents().Should().BeFalse("B did not create the row, so it should not request a resync");
+        AssertResyncRequestedIfNeeded(a.DomainEventPublisher, actorNameA);
+        AssertNoResyncRequested(b.DomainEventPublisher); // B did not create the row
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
             .Which.Id.Should().Be(actorNameA.Id);
@@ -77,7 +80,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         // Assert
         actorNameB.Id.Should().NotBe(actorNameA.Id);
-        AssertResyncRequestedIfNeeded(actorNameB);
+        AssertResyncRequestedIfNeeded(b.DomainEventPublisher, actorNameB);
 
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorNameB.ActorId && x.Name == actorNameB.Name)
@@ -133,12 +136,77 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         // Assert
         actorNameA.Id.Should().Be(seeded.Id);
         actorNameB.Id.Should().Be(seeded.Id);
-        actorNameA.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
-        actorNameB.HasEvents().Should().BeFalse("the row already existed, so no resync should be requested");
+        AssertNoResyncRequested(a.DomainEventPublisher); // The row already existed
+        AssertNoResyncRequested(b.DomainEventPublisher);
 
         var persisted = await GetPersistedActorNames();
         persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
             .Which.Id.Should().Be(seeded.Id);
+    }
+
+    [Theory, ClassData<TestData>]
+    public async Task EnsureActorName_Without_Transaction_Commits_In_Isolated_Transaction(ActorName actorName)
+    {
+        // Arrange
+        var ct = TestContext.Current.CancellationToken;
+        var domainEventPublisher = Substitute.For<IDomainEventPublisher>();
+        await using var serviceProvider = CreateServiceProvider(domainEventPublisher);
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        var repository = scope.ServiceProvider.GetRequiredService<ActorNameRepository>();
+
+        // Act
+        var result = await repository.EnsureActorName(
+            new ActorName { ActorId = actorName.ActorId, Name = actorName.Name }, ct);
+
+        // Assert
+        db.Database.CurrentTransaction.Should().BeNull("the caller's context must not be enlisted in a transaction");
+        db.Entry(result).State.Should().Be(EntityState.Unchanged);
+
+        var persisted = await GetPersistedActorNames();
+        persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
+            .Which.Id.Should().Be(result.Id);
+
+        AssertResyncRequestedIfNeeded(domainEventPublisher, result);
+    }
+
+    [Theory, ClassData<TestData>]
+    public async Task EnsureActorName_Without_Transaction_For_Existing_Row_Does_Not_Publish_Resync(ActorName actorName)
+    {
+        // Arrange
+        var ct = TestContext.Current.CancellationToken;
+        ActorName seeded;
+        await using (var seed = await CreateSut())
+        {
+            seeded = await seed.EnsureActorName(actorName, ct);
+            await seed.Db.Database.CommitTransactionAsync(ct);
+        }
+
+        var domainEventPublisher = Substitute.For<IDomainEventPublisher>();
+        await using var serviceProvider = CreateServiceProvider(domainEventPublisher);
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<ActorNameRepository>();
+
+        // Act
+        var result = await repository.EnsureActorName(
+            new ActorName { ActorId = actorName.ActorId, Name = actorName.Name }, ct);
+
+        // Assert
+        result.Id.Should().Be(seeded.Id);
+        AssertNoResyncRequested(domainEventPublisher);
+    }
+
+    private ServiceProvider CreateServiceProvider(IDomainEventPublisher domainEventPublisher)
+    {
+        var transactionTime = Substitute.For<ITransactionTime>();
+        transactionTime.Value.Returns(DateTimeOffset.UtcNow);
+        return new ServiceCollection()
+            .AddScoped(_ => Database.CreateDbContext())
+            .AddSingleton(transactionTime)
+            .AddScoped<IApplicationContext, ApplicationContext>()
+            .AddSingleton(domainEventPublisher)
+            .AddTransient<ActorNameRepository>()
+            .BuildServiceProvider(validateScopes: true);
     }
 
     private sealed class TestData : TheoryData<ActorName>
@@ -157,16 +225,20 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         return await db.Set<ActorName>().AsNoTracking().ToListAsync(TestContext.Current.CancellationToken);
     }
 
-    private static void AssertResyncRequestedIfNeeded(ActorName actorName)
+    private static void AssertResyncRequestedIfNeeded(IDomainEventPublisher domainEventPublisher, ActorName actorName)
     {
-        if (actorName.ActorId is null || actorName.Name is not null)
+        if (!actorName.NeedsActorNameResync)
         {
-            actorName.HasEvents().Should().BeFalse("a resync is only needed for an actor id without a name");
+            AssertNoResyncRequested(domainEventPublisher);
             return;
         }
 
-        actorName.PopDomainEvents().Should().ContainSingle().Which.Should().BeOfType<ResyncActorNameEvent>();
+        domainEventPublisher.Received(1).Publish(Arg.Any<IDomainEvent>());
+        domainEventPublisher.Received(1).Publish(Arg.Is<ResyncActorNameEvent>(x => x.ActorNameId == actorName.Id));
     }
+
+    private static void AssertNoResyncRequested(IDomainEventPublisher domainEventPublisher) =>
+        domainEventPublisher.DidNotReceiveWithAnyArgs().Publish(null!);
 
     private static PostgresException? FindPostgresException(Exception? exception) => exception switch
     {
@@ -182,6 +254,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
 
         public DialogDbContext Db { get; set; }
         public ActorNameRepository Repository { get; }
+        public IDomainEventPublisher DomainEventPublisher { get; } = Substitute.For<IDomainEventPublisher>();
 
         private Sut(DialogDbContext db, NpgsqlDataSource dataSource, int processId)
         {
@@ -190,7 +263,11 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
             Db = db;
             _dataSource = dataSource;
             _processId = processId;
-            Repository = new(db, transactionTime);
+            Repository = new(
+                db,
+                transactionTime,
+                DomainEventPublisher,
+                Substitute.For<IServiceProvider>());
         }
 
         public static async Task<Sut> Begin(

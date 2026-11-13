@@ -1,19 +1,26 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Library.Entity.Abstractions.Features.Creatable;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 internal sealed class ActorNameRepository(
     DialogDbContext db,
-    ITransactionTime transactionTime) : IActorNameRepository
+    ITransactionTime transactionTime,
+    IDomainEventPublisher domainEventPublisher,
+    IServiceProvider services) : IActorNameRepository
 {
+    private const string NewlyCreatedResyncReason = "Newly created actor name";
+
     public async Task<ActorName> EnsureActorName(ActorName actorName, CancellationToken cancellationToken)
     {
         var names = await EnsureActorNames([actorName], cancellationToken);
@@ -24,10 +31,15 @@ internal sealed class ActorNameRepository(
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {
-        if (db.Database.CurrentTransaction is null) throw new InvalidOperationException("This method must be run in a transaction");
-
+        // Without an ambient transaction we cannot guarantee that the inserted actor names and their
+        // resync events are persisted atomically through this context. Instead, we let an isolated
+        // repository (own scope, own DbContext, own transaction) do the insert and publish the events,
+        // and only repair the entities tracked by this context afterward.
         var consolidatedActorNames = ConsolidateDuplicateActorNameInstances(actorNames);
-        var maps = await GetOrCreateActorNames(consolidatedActorNames, cancellationToken);
+        var inputActorNames = consolidatedActorNames.Select(x => x.Entity).ToList();
+        var maps = db.Database.CurrentTransaction is null
+            ? await GetOrCreateActorNamesInIsolatedScope(inputActorNames, cancellationToken)
+            : await GetOrCreateActorNamesAndPublishResyncEvents(inputActorNames, cancellationToken);
         var actorNameIdTuples = consolidatedActorNames
             .Join(maps,
                 actorName => actorName.Entity.Id,
@@ -50,15 +62,70 @@ internal sealed class ActorNameRepository(
             actorNameEntry.Entity.CreatedAt = mapping.ActualCreatedAt;
             actorNameEntry.OriginalValues.SetValues(actorNameEntry.Entity);
             actorNameEntry.State = EntityState.Unchanged;
-            if (mapping.Created)
-            {
-                actorNameEntry.Entity.TryRequestActorNameResync("Newly created actor name");
-            }
         }
 
         return actorNameIdTuples
             .Select(x => x.actorName.Entity)
             .ToList();
+    }
+
+    private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNamesInIsolatedScope(
+        IReadOnlyCollection<ActorName> actorNames,
+        CancellationToken cancellationToken)
+    {
+        // The isolated scope inherits the transaction time and application context so that the
+        // actor names and resync events it persists look like they belong to the current request.
+        await using var scope = services.CreateInheritingAsyncScope();
+        var isolatedRepository = scope.ServiceProvider.GetRequiredService<ActorNameRepository>();
+        return await isolatedRepository.GetOrCreateActorNamesInOwnTransaction(actorNames, cancellationToken);
+    }
+
+    /// <summary>
+    /// Inserts the actor names and persists their resync events in a single transaction owned by this
+    /// repository's <see cref="DialogDbContext"/>. The given actor names are only read, never attached.
+    /// </summary>
+    private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNamesInOwnTransaction(
+        IReadOnlyCollection<ActorName> actorNames,
+        CancellationToken cancellationToken)
+    {
+        if (db.Database.CurrentTransaction is not null)
+        {
+            throw new UnreachableException("The isolated actor name repository must not share a transaction with anyone.");
+        }
+
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        var maps = await GetOrCreateActorNamesAndPublishResyncEvents(actorNames, cancellationToken);
+        if (domainEventPublisher.HasEvents())
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        await transaction.CommitAsync(cancellationToken);
+        return maps;
+    }
+
+    /// <summary>
+    /// Requests a resync for every newly created actor name that has an actor id but no name. The events
+    /// go through <see cref="IDomainEventPublisher"/>, so they are turned into outbox messages by the
+    /// save changes interceptors as part of the next save on this repository's <see cref="DialogDbContext"/>.
+    /// </summary>
+    private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNamesAndPublishResyncEvents(
+        IReadOnlyCollection<ActorName> actorNames,
+        CancellationToken cancellationToken)
+    {
+        var maps = await GetOrCreateActorNames(actorNames, cancellationToken);
+        var events = actorNames
+            .Join(maps.Where(x => x.Created),
+                actorName => actorName.Id,
+                map => map.InputActorNameId,
+                (actorName, map) => (actorName, map))
+            .Where(x => x.actorName.NeedsActorNameResync)
+            .Select(x => new ResyncActorNameEvent(x.map.ActualActorNameId, NewlyCreatedResyncReason));
+        foreach (var map in events)
+        {
+            domainEventPublisher.Publish(map);
+        }
+        return maps;
     }
 
     private List<EntityEntry<ActorName>> ConsolidateDuplicateActorNameInstances(IReadOnlyCollection<ActorName> actorNames)
@@ -85,11 +152,13 @@ internal sealed class ActorNameRepository(
             {
                 actor.ActorNameEntityId = null;
                 actor.ActorNameEntity = mainActorName.Entity;
+                mainActorName.Entity.ActorEntities.Add(actor);
             }
 
             foreach (var discardInstance in duplicatedActorNames)
             {
                 discardInstance.State = EntityState.Detached;
+                discardInstance.Entity.ActorEntities.Clear();
             }
         }
 
@@ -99,11 +168,10 @@ internal sealed class ActorNameRepository(
     }
 
     private async Task<IReadOnlyCollection<ActorNameIdMapping>> GetOrCreateActorNames(
-        IReadOnlyCollection<EntityEntry<ActorName>> actorNames,
+        IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {
         var actorNameById = actorNames
-            .Select(x => x.Entity)
             .ToDictionary(_ => IdentifiableExtensions.CreateVersion7());
 
         var inputRows = JsonSerializer.Serialize(actorNameById

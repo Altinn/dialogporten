@@ -33,7 +33,7 @@ jobs:
       - name: Resolve the release
         id: release
         if: steps.result.outputs.outcome != 'ignored' && steps.result.outputs.revision != ''
-        uses: Altinn/dialogporten-manifests/.github/actions/resolve-release@640b738f813eab585e7432dd4f12724c329c4cb9 # feat/flux-release-mapping
+        uses: Altinn/dialogporten-manifests/.github/actions/resolve-release@86623d41554c57681b44f398ca97f1a4ba6dae16 # main
         with:
           origin_revision: ${{ fromJSON(steps.result.outputs.event_json).metadata.originRevision }}
           environment: ${{ steps.result.outputs.environment }}

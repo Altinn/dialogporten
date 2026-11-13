@@ -56,7 +56,7 @@
 
 #### Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) (see [global.json](global.json) for the currently required version)
+- [.NET 11 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/11.0) (see [global.json](global.json) for the currently required version)
   - Remember to install and trust the dotnet dev certificates: `dotnet dev-certs https --trust`
 
 #### Installing Podman (Mac)
@@ -89,7 +89,7 @@ brew install docker-compose
 #### Prerequisites
 
 - [Git](https://git-scm.com/download/win)
-- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) (see [global.json](global.json) for the currently required version)
+- [.NET 11 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/11.0) (see [global.json](global.json) for the currently required version)
 - [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install) (To install, open a PowerShell admin window and run `wsl --install`)
 - [Virtual Machine Platform](https://support.microsoft.com/en-us/windows/enable-virtualization-on-windows-11-pcs-c5578302-6e43-4b4b-a449-8ced115f58e1) (Installs with WSL2, see the link above)
 

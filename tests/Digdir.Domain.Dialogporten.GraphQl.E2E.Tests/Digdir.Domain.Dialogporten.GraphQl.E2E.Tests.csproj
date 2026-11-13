@@ -9,11 +9,15 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="10.1.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.14" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.14" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.14" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="11.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="11.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="11.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
         <PackageReference Include="StrawberryShake.Server" Version="16.7.3" />
+        <!-- StrawberryShake.Transport.Http 16.7.3 depends on a vulnerable 11.0.0 release candidate of
+             Microsoft.AspNetCore.WebUtilities (GHSA-x33c-w48q-qrgc). Pin the GA version. Remove once
+             StrawberryShake references 11.0.0 or later. -->
+        <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="11.0.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
         <PackageReference Include="xunit.v3" Version="3.2.2" />
     </ItemGroup>
@@ -27,8 +31,8 @@
     </ItemGroup>
 
     <!-- StrawberryShake.Server 15.1.16 ships its code-gen tool as a net9.0 DLL and the package's
-         MSBuild targets invoke it without runtime roll-forward, so on a .NET 10-only machine the
-         build fails with "framework version '9.0.0' not found". We require the .NET 10 SDK (see
+         MSBuild targets invoke it without runtime roll-forward, so on a .NET 11-only machine the
+         build fails with "framework version '9.0.0' not found". We require the .NET 11 SDK (see
          global.json), so enable roll-forward for the code-gen invocation. Remove this once
          StrawberryShake ships net10 binaries. -->
     <UsingTask TaskName="SetEnvVar"

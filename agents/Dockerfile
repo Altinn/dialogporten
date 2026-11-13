@@ -27,7 +27,7 @@ ARG TARGETARCH
 # The SDK global.json pins, with rollForward disabled, so it must match exactly. Renovate moves it in the same pull
 # request as global.json, and the smoke test fails when the two differ.
 # renovate: datasource=dotnet-version depName=dotnet-sdk
-ARG DOTNET_SDK_VERSION=10.0.404
+ARG DOTNET_SDK_VERSION=11.0.100
 ARG DOTNET_INSTALL_SCRIPT_COMMIT=6f559c420847ded38591392dafe785ad511f39f5
 ARG DOTNET_INSTALL_SCRIPT_SHA256=082f7685e156738a1b2e2ed8381a621870d4ce8e8c59278034556f05c186eb2e
 

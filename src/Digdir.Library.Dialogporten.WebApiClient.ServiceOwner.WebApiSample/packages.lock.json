@@ -1,21 +1,15 @@
 {
   "version": 1,
   "dependencies": {
-    "net10.0": {
+    "net11.0": {
       "Microsoft.AspNetCore.OpenApi": {
         "type": "Direct",
-        "requested": "[10.0.14, )",
-        "resolved": "10.0.14",
-        "contentHash": "3M6yO4nv8fmvM/1X7DqQcMxw/ptNLBcUzZt19SBEyfZF32gqZuwoPNnYd1xlDnFvQOGOkZDncf7p9E24blcTkQ==",
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "B5nHzRjpd5BhKN1ijqc2X4QVuQCCbQAWL/q3wpJgUBZou60IT0wgi1eiU3fF/DAj21RgBHXYAVNCV/AJ9y1GKw==",
         "dependencies": {
-          "Microsoft.OpenApi": "[2.12.2, 3.0.0)"
+          "Microsoft.OpenApi": "[3.11.0, 4.0.0)"
         }
-      },
-      "Microsoft.OpenApi": {
-        "type": "Direct",
-        "requested": "[2.13.0, )",
-        "resolved": "2.13.0",
-        "contentHash": "wavlgBYnn7uU/ZGhFHNl0UlDOlwz+6KRduKkqdCCbfxxANaQ1rmBpETVGdwXanAM6twQOxsvI3CBEGF4OScbeQ=="
       },
       "Altinn.ApiClients.Maskinporten": {
         "type": "Transitive",
@@ -65,6 +59,11 @@
           "Microsoft.Bcl.Cryptography": "10.0.2",
           "Microsoft.IdentityModel.Logging": "8.23.0"
         }
+      },
+      "Microsoft.OpenApi": {
+        "type": "Transitive",
+        "resolved": "3.11.0",
+        "contentHash": "kvQz+mL/fnDw2VaE8zMyQhbMv7FmOYUydIhCVNKxQdrLu9XiMT/07DHwJ5YkRO2uzcxTFvMAKFKKywxoyLKHcA=="
       },
       "NSec.Cryptography": {
         "type": "Transitive",

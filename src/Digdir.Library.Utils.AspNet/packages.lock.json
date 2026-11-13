@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net10.0": {
+    "net11.0": {
       "Altinn.AspNet.HealthChecks": {
         "type": "Direct",
         "requested": "[0.4.0, )",
@@ -987,8 +987,8 @@
       },
       "Microsoft.Extensions.Caching.StackExchangeRedis": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "pd+40ZOZQ63O01wkPFLx2ODVILiPQ0AoQCz0YbQrH7y88z3ahaT1Vq3oOKnLrH7VeIYgH/C+X1R4MPkU3kpckQ==",
+        "resolved": "11.0.0",
+        "contentHash": "pLOYsJmqt/jx4dbEojwnz1MsRTz8lDBceXMcKpnpjxPiOxtXUUVqw4f7aDmpJbDnCE3K5yMvnW3ZXzeFLoGmaw==",
         "dependencies": {
           "StackExchange.Redis": "2.7.27"
         }
@@ -1013,8 +1013,8 @@
       },
       "Microsoft.Extensions.Http.Polly": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "4r76/T7jtrfJjy+mmV5ti1Sa7jqPVSN74Brj5r3If0ayIByrDrdk6lnqzzE6X5Djq2/xETqKeG7vI0J03VjF0w==",
+        "resolved": "11.0.0",
+        "contentHash": "0Y5hw06s9ZMqJ+mPtq9C3Genys51qSTErxhh2xsGkxiV9lo7dmEaAibGHGwBO7VF3oi4IautqIJ1kVcoRd0wnA==",
         "dependencies": {
           "Polly": "7.2.4",
           "Polly.Extensions.Http": "3.0.0"
@@ -1380,8 +1380,8 @@
           "MassTransit.Azure.ServiceBus.Core": "[8.5.7, 9.0.0)",
           "MassTransit.EntityFrameworkCore": "[8.5.7, 9.0.0)",
           "MessagePack": "[3.1.12, )",
-          "Microsoft.Extensions.Caching.StackExchangeRedis": "[10.0.14, )",
-          "Microsoft.Extensions.Http.Polly": "[10.0.14, )",
+          "Microsoft.Extensions.Caching.StackExchangeRedis": "[11.0.0, )",
+          "Microsoft.Extensions.Http.Polly": "[11.0.0, )",
           "Npgsql": "[10.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )",
           "Polly.Contrib.WaitAndRetry": "[1.1.1, )",

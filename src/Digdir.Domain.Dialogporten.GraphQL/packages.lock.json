@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net10.0": {
+    "net11.0": {
       "Azure.Identity": {
         "type": "Direct",
         "requested": "[1.21.0, )",
@@ -56,7 +56,7 @@
           "GreenDonut.Data.EntityFramework": "16.7.3",
           "HotChocolate": "16.7.3",
           "HotChocolate.Data": "16.7.3",
-          "Microsoft.EntityFrameworkCore": "10.0.0"
+          "Microsoft.EntityFrameworkCore": "11.0.0-rc.1.26425.128"
         }
       },
       "HotChocolate.Diagnostics": {
@@ -86,9 +86,9 @@
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Direct",
-        "requested": "[10.0.14, )",
-        "resolved": "10.0.14",
-        "contentHash": "DaTs32NtRkTabidrvhLhcXpa+Uguw0rN5FaX8Q1HmzbYtcI72iSauYlN4WmqbrXp6QQoB8fmZlHk5/bjiMTY7A==",
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "iWIWAOw3TGa8OxAForwBWlkp/VCelVTYbSc633I6E8zfpjG456xOtSMGIiSEU2E6rdSfJS1vf+EySP19efab8g==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.19.2"
         }
@@ -401,7 +401,7 @@
         "contentHash": "zGm+lziJfHXYtFtamTK5Dzqam8ZOGuNc66RPqUXG/ruHmwqqPMvvNsmzJv0nEajeiJ8Vq7O4DwyMAcbFM4RmsQ==",
         "dependencies": {
           "GreenDonut.Data": "16.7.3",
-          "Microsoft.EntityFrameworkCore": "10.0.0"
+          "Microsoft.EntityFrameworkCore": "11.0.0-rc.1.26425.128"
         }
       },
       "GreenDonut.Data.Primitives": {
@@ -963,22 +963,22 @@
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "vY3931PYPIDBbKovGHbACmpOWvURvKNyRXfCjMh5yLW+FH6vLWeqUu2xzSCRo4Oz4tgx9GYpd0JlV5LDyAoQdg==",
+        "resolved": "11.0.0-rc.1.26425.128",
+        "contentHash": "nichlvtvebHy90cJoHQjTr6TvWhdxbUxK1mQac/6NJcVMz/HYRQF0ihJ1ZkE/JeKr2ys3jDjl1IdNhHiWpQ/HQ==",
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.14",
-          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.14"
+          "Microsoft.EntityFrameworkCore.Abstractions": "[11.0.0-rc.1.26425.128, 12.0.0-a)",
+          "Microsoft.EntityFrameworkCore.Analyzers": "[11.0.0-rc.1.26425.128, 12.0.0-a)"
         }
       },
       "Microsoft.EntityFrameworkCore.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "/SaznoTTFfKzxYEbCPAwwKBR3XT92DZgH4jJ3/cqs2skP3o2D+TL6i9Aaj+8Azwtu6/sRd0ve4P2mN12nfVmCw=="
+        "resolved": "11.0.0-rc.1.26425.128",
+        "contentHash": "WFsX+C+h2e/BKr//Cv9c82+zPweVUQN/dWXJiW8KvXwhkpJXB5tj3E3vgDmjX0nHbVnrrnE9G7iJlMSf0l2VoQ=="
       },
       "Microsoft.EntityFrameworkCore.Analyzers": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "gaANlGNTxkgODX2eeVT8jjd3AmlFilQV4DFf8qoW30+wUCm2o4N7nEHtZvnHIwfhaJni2DqcjE47Au7tC0Q5jA=="
+        "resolved": "11.0.0-rc.1.26425.128",
+        "contentHash": "EC8SOxAcKbRGToF7MpHr0zPZ2QSZ3mkHuqI+rxu3ITz19ctvep0dzaHPN3F/JQ1vVQBbMr7gN0a9KxMqDhRcoQ=="
       },
       "Microsoft.EntityFrameworkCore.Relational": {
         "type": "Transitive",
@@ -998,8 +998,8 @@
       },
       "Microsoft.Extensions.Caching.StackExchangeRedis": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "pd+40ZOZQ63O01wkPFLx2ODVILiPQ0AoQCz0YbQrH7y88z3ahaT1Vq3oOKnLrH7VeIYgH/C+X1R4MPkU3kpckQ==",
+        "resolved": "11.0.0",
+        "contentHash": "pLOYsJmqt/jx4dbEojwnz1MsRTz8lDBceXMcKpnpjxPiOxtXUUVqw4f7aDmpJbDnCE3K5yMvnW3ZXzeFLoGmaw==",
         "dependencies": {
           "StackExchange.Redis": "2.7.27"
         }
@@ -1024,8 +1024,8 @@
       },
       "Microsoft.Extensions.Http.Polly": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "4r76/T7jtrfJjy+mmV5ti1Sa7jqPVSN74Brj5r3If0ayIByrDrdk6lnqzzE6X5Djq2/xETqKeG7vI0J03VjF0w==",
+        "resolved": "11.0.0",
+        "contentHash": "0Y5hw06s9ZMqJ+mPtq9C3Genys51qSTErxhh2xsGkxiV9lo7dmEaAibGHGwBO7VF3oi4IautqIJ1kVcoRd0wnA==",
         "dependencies": {
           "Polly": "7.2.4",
           "Polly.Extensions.Http": "3.0.0"
@@ -1460,8 +1460,8 @@
           "MassTransit.Azure.ServiceBus.Core": "[8.5.7, 9.0.0)",
           "MassTransit.EntityFrameworkCore": "[8.5.7, 9.0.0)",
           "MessagePack": "[3.1.12, )",
-          "Microsoft.Extensions.Caching.StackExchangeRedis": "[10.0.14, )",
-          "Microsoft.Extensions.Http.Polly": "[10.0.14, )",
+          "Microsoft.Extensions.Caching.StackExchangeRedis": "[11.0.0, )",
+          "Microsoft.Extensions.Http.Polly": "[11.0.0, )",
           "Npgsql": "[10.0.3, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )",
           "Polly.Contrib.WaitAndRetry": "[1.1.1, )",

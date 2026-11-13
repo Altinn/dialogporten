@@ -53,7 +53,7 @@ All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyz
 - Prefer immutable LINQ pipelines over mutating existing collections.
 
 ### Modern C# Syntax (Required)
-- Target latest language features available in the solution (.NET 10 / C# 14).
+- Target latest language features available in the solution (.NET 11 / C# 15).
 - Use extension block syntax
 - Use the field keyword for auto properties
 - Prefer pattern matching (`switch` expressions, property patterns) over `if/else` chains.

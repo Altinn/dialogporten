@@ -10,7 +10,7 @@ Sample projects are available at https://github.com/Altinn/dialogporten-samples.
 dotnet add package Altinn.ApiClients.Dialogporten.EndUser
 ```
 
-Targets net8.0, net9.0, and net10.0.
+Targets net8.0, net9.0, net10.0, and net11.0.
 
 ## Setup
 

@@ -29,12 +29,12 @@ public class OpenApiSpecSnapshotTests
         var rootPath = Utils.GetSolutionRootFolder();
         var snapshotPath = Path.Combine(rootPath!, "docs/schema/V1");
 
-#if NET10_0
+#if NET11_0
         var generatedSpecPath = Path.Combine(
             rootPath!,
-            "src/Digdir.Domain.Dialogporten.WebApi/bin/Release/net10.0",
+            "src/Digdir.Domain.Dialogporten.WebApi/bin/Release/net11.0",
             generatedSpecFileName);
-#endif // NET10_0
+#endif // NET11_0
 
         Assert.True(
             File.Exists(generatedSpecPath),

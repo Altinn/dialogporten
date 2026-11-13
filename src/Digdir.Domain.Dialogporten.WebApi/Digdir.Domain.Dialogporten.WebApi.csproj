@@ -13,10 +13,10 @@
         <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
         <PackageReference Include="FastEndpoints.Swagger" Version="8.3.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.14" />
-        <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
-        <PackageReference Include="NSwag.MSBuild" Version="14.7.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="11.0.0" />
+        <PackageReference Include="NSwag.AspNetCore" Version="14.8.0" />
+        <PackageReference Include="NSwag.MSBuild" Version="14.8.0" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.18.7" />
     </ItemGroup>
 
@@ -46,7 +46,7 @@
         <Exec
             WorkingDirectory="$(ProjectDir)"
             EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development"
-            Command="$(NSwagExe_Net100) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /documentName:%(OpenApiDocument.Identity) /output:$(TargetDir)%(OpenApiDocument.OutputFileName) /verbose:true"
+            Command="$(NSwagExe_Net110) aspnetcore2openapi /nobuild:true /project:$(MSBuildProjectFullPath) /configuration:$(Configuration) /documentName:%(OpenApiDocument.Identity) /output:$(TargetDir)%(OpenApiDocument.OutputFileName) /verbose:true"
             StandardOutputImportance="High"
             StandardErrorImportance="High" />
     </Target>

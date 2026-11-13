@@ -20,7 +20,7 @@
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <AnalysisMode>Recommended</AnalysisMode>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
-        <AnalysisLevel>10</AnalysisLevel>
+        <AnalysisLevel>11</AnalysisLevel>
     </PropertyGroup>
 
  </Project>

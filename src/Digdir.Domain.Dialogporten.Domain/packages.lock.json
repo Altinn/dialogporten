@@ -1,18 +1,12 @@
 {
   "version": 1,
   "dependencies": {
-    "net10.0": {
+    "net11.0": {
       "DeterministicGuids": {
         "type": "Direct",
         "requested": "[1.0.11, )",
         "resolved": "1.0.11",
         "contentHash": "wEhcv8QYNfxWG2mMByiOcqQY+NOYgaDMAuj5Tygx2x6pUEVUPHwyHzktrhrO5ry58JRx9nZIzgpM/WX02Achug=="
-      },
-      "Microsoft.Extensions.DependencyInjection.Abstractions": {
-        "type": "Direct",
-        "requested": "[10.0.14, )",
-        "resolved": "10.0.14",
-        "contentHash": "QtpQzuSZVyTPCuHW058yCs9Nj0394uUkNyFHS813nOmK9UgUdBdaprJ5PPsBgsQIpxADTsTkbaMMonykem6qdw=="
       },
       "MediatR.Contracts": {
         "type": "Transitive",

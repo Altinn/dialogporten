@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="GraphQL (E2E)" type="DotNetProject" factoryName=".NET Project">
-    <option name="EXE_PATH" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.GraphQL/bin/Debug/net10.0/Digdir.Domain.Dialogporten.GraphQL.dll" />
+    <option name="EXE_PATH" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.GraphQL/bin/Debug/net11.0/Digdir.Domain.Dialogporten.GraphQL.dll" />
     <option name="PROGRAM_PARAMETERS" value="--urls http://localhost:5181" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.GraphQL" />
     <option name="PASS_PARENT_ENVS" value="1" />
@@ -8,7 +8,7 @@
     <option name="USE_MONO" value="0" />
     <option name="RUNTIME_ARGUMENTS" value="" />
     <option name="PROJECT_PATH" value="$PROJECT_DIR$/src/Digdir.Domain.Dialogporten.GraphQL/Digdir.Domain.Dialogporten.GraphQL.csproj" />
-    <option name="PROJECT_TFM" value="net10.0" />
+    <option name="PROJECT_TFM" value="net11.0" />
     <envs>
       <env name="ASPNETCORE_ENVIRONMENT" value="Development" />
       <env name="DOTNET_ENVIRONMENT" value="Development" />

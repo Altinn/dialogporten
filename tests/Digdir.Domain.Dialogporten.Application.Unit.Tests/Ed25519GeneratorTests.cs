@@ -39,7 +39,7 @@ public class CompactJwsGeneratorTests
 
         // Assert
         var header = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(jws.Split('.')[0]));
-        Assert.Equal(DialogTokenTypes.DialogToken, JsonDocument.Parse(header).RootElement.GetProperty("typ").GetString());
+        Assert.Equal(DialogTokenTypes.DialogToken, JsonElement.Parse(header).GetProperty("typ").GetString());
     }
 
     private static ApplicationSettings GetSettings()

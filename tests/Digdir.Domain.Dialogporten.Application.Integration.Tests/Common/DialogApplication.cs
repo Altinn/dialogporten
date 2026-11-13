@@ -10,7 +10,6 @@ using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.SaveChangesTestInterceptors;
 using Digdir.Domain.Dialogporten.Infrastructure;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.Authorization;
 using Digdir.Domain.Dialogporten.Infrastructure.Altinn.NameRegistry;
@@ -108,6 +107,9 @@ public class DialogApplication : IAsyncLifetime
         publishEndpointSubstitute
             .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<CancellationToken>()))
             .Do(x => _publishedEvents.Enqueue(x[0]));
+        publishEndpointSubstitute
+            .When(x => x.Publish(Arg.Any<object>(), Arg.Any<Type>(), Arg.Any<IPipe<PublishContext>>(), Arg.Any<CancellationToken>()))
+            .Do(x => _publishedEvents.Enqueue(x[0]));
 
         return serviceCollection
             .AddApplication(Substitute.For<IConfiguration>(), Substitute.For<IHostEnvironment>())
@@ -132,7 +134,6 @@ public class DialogApplication : IAsyncLifetime
                     .EnableDetailedErrors()
                     .AddInterceptors(services.GetRequiredService<PopulateActorNameInterceptor>())
                     .AddInterceptors(services.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>())
-                    .AddInterceptors(services.GetServices<ISaveChangesTestInterceptor>()) // Must be last
             )
             .AddDapperTypeHandlers()
             .AddScoped<IDialogDbContext>(x => x.GetRequiredService<DialogDbContext>())

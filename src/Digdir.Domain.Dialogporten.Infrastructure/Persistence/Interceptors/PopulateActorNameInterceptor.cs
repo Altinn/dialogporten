@@ -1,9 +1,6 @@
-using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Library.Entity.Abstractions.Features.Creatable;
-using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -13,18 +10,16 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
 {
     private readonly IDomainContext _domainContext;
     private readonly IPartyNameRegistry _partyNameRegistry;
-    private readonly ITransactionTime _transactionTime;
-    private bool _hasBeenExecuted;
+    private readonly Lazy<IActorNameRepository> _actorNameRepository;
 
     public PopulateActorNameInterceptor(
-        ITransactionTime transactionTime,
         IDomainContext domainContext,
-        IPartyNameRegistry partyNameRegistry
-    )
+        IPartyNameRegistry partyNameRegistry,
+        Lazy<IActorNameRepository> actorNameRepository)
     {
         _domainContext = domainContext ?? throw new ArgumentNullException(nameof(domainContext));
         _partyNameRegistry = partyNameRegistry ?? throw new ArgumentNullException(nameof(partyNameRegistry));
-        _transactionTime = transactionTime ?? throw new ArgumentNullException(nameof(transactionTime));
+        _actorNameRepository = actorNameRepository ?? throw new ArgumentNullException(nameof(actorNameRepository));
     }
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -32,45 +27,42 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        // If the interceptor has already run during this transaction, we don't want to run it again.
-        // This is to avoid doing the same work over multiple retries.
-        if (_hasBeenExecuted)
+        if (eventData.Context is not null)
         {
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+            await PopulateActorNames(eventData.Context, cancellationToken);
         }
 
-        var dbContext = eventData.Context;
-        if (dbContext is null)
-        {
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
-        }
+        return _domainContext.IsValid
+            ? await base.SavingChangesAsync(eventData, result, cancellationToken)
+            : InterceptionResult<int>.SuppressWithResult(0);
+    }
 
+    private async ValueTask PopulateActorNames(DbContext dbContext, CancellationToken cancellationToken)
+    {
+        using var _ = dbContext.DisableAutoDetectChanges();
+        dbContext.ChangeTracker.DetectChanges();
         var addedActorNameEntities = dbContext.ChangeTracker
             .Entries<ActorName>()
             .Where(e => e.State is EntityState.Added)
             .Where(e => e.Entity.ActorId is not null || e.Entity.Name is not null)
-            .Select(e =>
-            {
-                var entity = e.Entity;
-                entity.ActorId = entity.ActorId?.ToLowerInvariant();
-                return entity;
-            })
+            .Select(e => e.Entity)
             .ToList();
 
-        if (addedActorNameEntities.Count == 0)
-        {
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
-        }
+        if (addedActorNameEntities.Count == 0) return;
+        await TrySetActorNames(addedActorNameEntities, cancellationToken);
+        if (!_domainContext.IsValid) return;
+        await EnsureTransaction(dbContext, cancellationToken);
+        await _actorNameRepository.Value.EnsureActorNames(addedActorNameEntities, cancellationToken);
+    }
 
-        if (!await TrySetActorNames(addedActorNameEntities, cancellationToken))
+    private static async Task EnsureTransaction(DbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (dbContext.Database.CurrentTransaction is null)
         {
-            _hasBeenExecuted = true;
-            return InterceptionResult<int>.SuppressWithResult(0);
+            // Here we assume that UnitOfWork will pick up this transaction
+            // and commit or rollback it when SaveChanges is called.
+            await dbContext.Database.BeginTransactionAsync(cancellationToken);
         }
-
-        await ConsolidateActorNameInstances(dbContext, addedActorNameEntities, cancellationToken);
-        _hasBeenExecuted = true;
-        return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     /// <summary>
@@ -78,7 +70,7 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
     /// for the actor, we persist the actor with a null name instead of failing the request. Null names are
     /// filled in later by the ResyncActorNameEvent handler.
     /// </summary>
-    private async Task<bool> TrySetActorNames(
+    private async Task TrySetActorNames(
         IEnumerable<ActorName> actorNameEntities,
         CancellationToken cancellationToken)
     {
@@ -103,71 +95,9 @@ internal sealed class PopulateActorNameInterceptor : SaveChangesInterceptor
                 unavailable => actorName.Name = null
             );
         }
-
-        return _domainContext.IsValid;
-    }
-
-    private async Task ConsolidateActorNameInstances(
-        DbContext dbContext,
-        List<ActorName> added,
-        CancellationToken cancellationToken
-    )
-    {
-        var existing = await GetExistingActorNames(dbContext, added, cancellationToken);
-
-        var actorNamePairs = added
-            .GroupBy(x => new { x.ActorId, x.Name })
-            .GroupJoin(
-                inner: existing,
-                outerKeySelector: x => x.Key,
-                innerKeySelector: x => new { x.ActorId, x.Name },
-                resultSelector: (left, right) => (left.ToList(), right.SingleOrDefault()));
-
-        foreach (var (newActorNames, existingActorName) in actorNamePairs)
-        {
-            var (mainActorName, discardActorNames) = newActorNames switch
-            {
-                _ when existingActorName is not null => (existingActorName, newActorNames),
-                [var first, ..] => (first, newActorNames.Except([first]).ToList()),
-                _ => throw new UnreachableException()
-            };
-
-            mainActorName.EnsureId();
-            mainActorName.Create(_transactionTime.Value);
-            mainActorName.RequestActorNameResync($"{nameof(PopulateActorNameInterceptor)}: Unable to look up actor name");
-
-            foreach (var actor in discardActorNames.SelectMany(x => x.ActorEntities))
-            {
-                actor.ActorNameEntity = mainActorName;
-            }
-
-            foreach (var discardInstance in discardActorNames)
-            {
-                dbContext.Entry(discardInstance).State = EntityState.Detached;
-            }
-        }
     }
 
     private async Task<(string ActorId, GetPartyNameResult Result)> ActorNameByActorId(string actorId,
         CancellationToken cancellationToken) =>
         (actorId, await _partyNameRegistry.GetName(actorId, cancellationToken));
-
-    private static async Task<List<ActorName>> GetExistingActorNames(DbContext dbContext,
-        IEnumerable<ActorName> actorNameEntities, CancellationToken cancellationToken)
-    {
-        // Why are we doing "composite key contains" this way, you ask?
-        // See https://stackoverflow.com/a/26201371/2301766
-        var distinctIdNameTupples = actorNameEntities
-            .Select(x => (x.ActorId, x.Name))
-            .Distinct()
-            .ToList();
-        var actorIds = distinctIdNameTupples.Select(x => x.ActorId).Distinct();
-        var actorNames = distinctIdNameTupples.Select(x => x.Name).Distinct();
-        var existingActorNames = await dbContext.Set<ActorName>()
-            .Where(x => actorIds.Contains(x.ActorId) && actorNames.Contains(x.Name))
-            .ToListAsync(cancellationToken);
-        return existingActorNames
-            .Where(x => distinctIdNameTupples.Any(xx => xx.ActorId == x.ActorId && xx.Name == x.Name))
-            .ToList();
-    }
 }

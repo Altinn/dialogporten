@@ -80,9 +80,7 @@ internal sealed class ConvertDomainEventsToOutboxMessagesInterceptor : SaveChang
             domainEvent.OccurredAt = _transactionTime.Value;
         }
 
-        await Task.WhenAll(_domainEvents
-            .Select(x => _publishEndpoint.Value
-                .Publish(x, x.GetType(), cancellationToken)));
+        await Task.WhenAll(_domainEvents.Select(x => _publishEndpoint.Value.PublishDomainEvent(x, cancellationToken)));
 
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }

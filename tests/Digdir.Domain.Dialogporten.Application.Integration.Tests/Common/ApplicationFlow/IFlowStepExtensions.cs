@@ -15,14 +15,12 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Co
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateFormSavedActivityTime;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.UpdateTransmission;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.ServiceOwnerContext.Commands.Update;
-using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.SaveChangesTestInterceptors;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
 using MessagePack.Resolvers;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OneOf;
@@ -303,18 +301,6 @@ public static class IFlowStepExtensions
             {
                 cache.Clear(allowFailSafe: false);
             }
-        });
-
-    public static IFlowStep WithSaveChangesInterceptor(this IFlowStep step, ISaveChangesInterceptor interceptor) =>
-        step.Do(x =>
-        {
-            x.Application.ConfigureServices(services => services.AddSingleton(interceptor));
-        });
-
-    public static IFlowStep WithSaveChangesInterceptor<T>(this IFlowStep s) where T : class, ISaveChangesTestInterceptor =>
-        s.Do(x =>
-        {
-            x.Application.ConfigureServices(services => services.AddSingleton<ISaveChangesTestInterceptor, T>());
         });
 
     public static IFlowExecutor<DeleteDialogResult> DeleteDialog(this IFlowStep<CreateDialogResult> step,

@@ -1,4 +1,3 @@
-using System.Data;
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Logging;
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.Common.Events.ResyncActorName;
 
 public sealed class ResyncActorName(
-    IUnitOfWork unitOfWork,
     IDialogDbContext db,
     IPartyNameRegistry partyNameRegistry,
     IActorNameRepository actorNameRepository,
@@ -59,11 +57,7 @@ public sealed class ResyncActorName(
         CancellationToken cancellationToken)
     {
         var actorName = new ActorName { ActorId = actorId, Name = result.Name };
-
-        await unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-        actorName = await actorNameRepository.EnsureActorName(actorName, cancellationToken);
-        var saveResult = await unitOfWork.SaveChangesAsync(cancellationToken);
-        if (!saveResult.IsT0) throw new InvalidOperationException("Unable to save changes.");
+        actorName = await actorNameRepository.EnsureActorNameTransactional(actorName, cancellationToken);
 
         if (actorName.Id == inputActorNameId)
         {

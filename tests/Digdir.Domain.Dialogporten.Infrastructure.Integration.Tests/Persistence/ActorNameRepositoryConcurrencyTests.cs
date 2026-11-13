@@ -8,6 +8,7 @@ using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Npgsql;
 
@@ -141,6 +142,79 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
             .Which.Id.Should().Be(seeded.Id);
     }
 
+    [Theory, ClassData<TestData>]
+    public async Task EnsureActorName_Without_Transaction_Commits_In_Isolated_Transaction(ActorName actorName)
+    {
+        // Arrange
+        var ct = TestContext.Current.CancellationToken;
+        var domainEventPublisher = Substitute.For<IDomainEventPublisher>();
+        await using var serviceProvider = CreateServiceProvider(domainEventPublisher);
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        var repository = scope.ServiceProvider.GetRequiredService<ActorNameRepository>();
+
+        // Act
+        var result = await repository.EnsureActorName(
+            new ActorName { ActorId = actorName.ActorId, Name = actorName.Name }, ct);
+
+        // Assert
+        db.Database.CurrentTransaction.Should().BeNull("the caller's context must not be enlisted in a transaction");
+        db.Entry(result).State.Should().Be(EntityState.Unchanged);
+        result.HasEvents().Should().BeFalse("resync events are committed by the isolated transaction, not the caller");
+
+        var persisted = await GetPersistedActorNames();
+        persisted.Should().ContainSingle(x => x.ActorId == actorName.ActorId && x.Name == actorName.Name)
+            .Which.Id.Should().Be(result.Id);
+
+        if (result.NeedsActorNameResync)
+        {
+            domainEventPublisher.Received(1).Publish(Arg.Is<ResyncActorNameEvent>(x => x.ActorNameId == result.Id));
+        }
+        else
+        {
+            domainEventPublisher.DidNotReceiveWithAnyArgs().Publish(null!);
+        }
+    }
+
+    [Theory, ClassData<TestData>]
+    public async Task EnsureActorName_Without_Transaction_For_Existing_Row_Does_Not_Publish_Resync(ActorName actorName)
+    {
+        // Arrange
+        var ct = TestContext.Current.CancellationToken;
+        ActorName seeded;
+        await using (var seed = await CreateSut())
+        {
+            seeded = await seed.EnsureActorName(actorName, ct);
+            await seed.Db.Database.CommitTransactionAsync(ct);
+        }
+
+        var domainEventPublisher = Substitute.For<IDomainEventPublisher>();
+        await using var serviceProvider = CreateServiceProvider(domainEventPublisher);
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<ActorNameRepository>();
+
+        // Act
+        var result = await repository.EnsureActorName(
+            new ActorName { ActorId = actorName.ActorId, Name = actorName.Name }, ct);
+
+        // Assert
+        result.Id.Should().Be(seeded.Id);
+        result.HasEvents().Should().BeFalse();
+        domainEventPublisher.DidNotReceiveWithAnyArgs().Publish(null!);
+    }
+
+    private ServiceProvider CreateServiceProvider(IDomainEventPublisher domainEventPublisher)
+    {
+        var transactionTime = Substitute.For<ITransactionTime>();
+        transactionTime.Value.Returns(DateTimeOffset.UtcNow);
+        return new ServiceCollection()
+            .AddScoped(_ => Database.CreateDbContext())
+            .AddSingleton(transactionTime)
+            .AddSingleton(domainEventPublisher)
+            .AddTransient<ActorNameRepository>()
+            .BuildServiceProvider(validateScopes: true);
+    }
+
     private sealed class TestData : TheoryData<ActorName>
     {
         public TestData()
@@ -190,7 +264,11 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
             Db = db;
             _dataSource = dataSource;
             _processId = processId;
-            Repository = new(db, transactionTime);
+            Repository = new(
+                db,
+                transactionTime,
+                Substitute.For<IDomainEventPublisher>(),
+                Substitute.For<IServiceScopeFactory>());
         }
 
         public static async Task<Sut> Begin(

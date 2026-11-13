@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
@@ -16,7 +17,7 @@ internal sealed class ActorNameRepository(
     DialogDbContext db,
     ITransactionTime transactionTime,
     IDomainEventPublisher domainEventPublisher,
-    IServiceScopeFactory serviceScopeFactory) : IActorNameRepository
+    IServiceProvider services) : IActorNameRepository
 {
     private const string NewlyCreatedResyncReason = "Newly created actor name";
 
@@ -72,7 +73,9 @@ internal sealed class ActorNameRepository(
         IReadOnlyCollection<ActorName> actorNames,
         CancellationToken cancellationToken)
     {
-        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        // The isolated scope inherits the transaction time and application context so that the
+        // actor names and resync events it persists look like they belong to the current request.
+        await using var scope = services.CreateInheritingAsyncScope();
         var isolatedRepository = scope.ServiceProvider.GetRequiredService<ActorNameRepository>();
         return await isolatedRepository.GetOrCreateActorNamesInOwnTransaction(actorNames, cancellationToken);
     }

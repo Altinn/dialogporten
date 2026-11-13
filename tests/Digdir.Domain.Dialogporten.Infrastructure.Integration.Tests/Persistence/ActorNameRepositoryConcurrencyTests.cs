@@ -2,6 +2,7 @@ using System.Data;
 using System.Diagnostics;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common;
+using Digdir.Domain.Dialogporten.Application.Common.Context;
 using Digdir.Domain.Dialogporten.Infrastructure.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
@@ -202,6 +203,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
         return new ServiceCollection()
             .AddScoped(_ => Database.CreateDbContext())
             .AddSingleton(transactionTime)
+            .AddScoped<IApplicationContext, ApplicationContext>()
             .AddSingleton(domainEventPublisher)
             .AddTransient<ActorNameRepository>()
             .BuildServiceProvider(validateScopes: true);
@@ -265,7 +267,7 @@ public sealed class ActorNameRepositoryConcurrencyTests(PostgresDatabaseFixture 
                 db,
                 transactionTime,
                 DomainEventPublisher,
-                Substitute.For<IServiceScopeFactory>());
+                Substitute.For<IServiceProvider>());
         }
 
         public static async Task<Sut> Begin(

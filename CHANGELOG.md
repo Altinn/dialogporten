@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.126.6](https://github.com/Altinn/dialogporten/compare/v1.126.5...v1.126.6) (2026-11-16)
+
+
+### Bug Fixes
+
+* answer health probes and refresh App Configuration during maintenance mode ([#4582](https://github.com/Altinn/dialogporten/issues/4582)) ([d3d7c9f](https://github.com/Altinn/dialogporten/commit/d3d7c9f84011efa02fb786fa35debc34ca8280b9))
+* **ci:** key PR title check concurrency on the PR and head commit ([#4583](https://github.com/Altinn/dialogporten/issues/4583)) ([cb11f75](https://github.com/Altinn/dialogporten/commit/cb11f7588c6563422aec4d2409178062fd1c35e7))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency polly to 8.9.1 ([#4602](https://github.com/Altinn/dialogporten/issues/4602)) ([1268fc3](https://github.com/Altinn/dialogporten/commit/1268fc30b77d18f416c7a0bf6e0dbef4def56f17))
+* **deps:** update dependency scalar.aspnetcore to 2.19.0 ([#4605](https://github.com/Altinn/dialogporten/issues/4605)) ([9209a71](https://github.com/Altinn/dialogporten/commit/9209a71f88752f8a4aa8a70a42089fd2bcece098))
+* **deps:** update docker/login-action action to v4.8.0 ([#4606](https://github.com/Altinn/dialogporten/issues/4606)) ([6c9a64f](https://github.com/Altinn/dialogporten/commit/6c9a64fa6206fa7d6724a53102ec6720d7acfce0))
+* **deps:** update enricomi/publish-unit-test-result-action action to v2.26.0 ([#4607](https://github.com/Altinn/dialogporten/issues/4607)) ([8e672e5](https://github.com/Altinn/dialogporten/commit/8e672e5ceb05832133b6b74484b414f16bc83a7a))
+* **deps:** update nginx docker tag to v1.31.8 ([#4603](https://github.com/Altinn/dialogporten/issues/4603)) ([7aa3bf8](https://github.com/Altinn/dialogporten/commit/7aa3bf80b4a0b887080178092178ca737de6f924))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.165.0 ([#4608](https://github.com/Altinn/dialogporten/issues/4608)) ([c7af272](https://github.com/Altinn/dialogporten/commit/c7af27251bed7cf7372bc666382d08d09303bbc7))
+* **deps:** update postgres docker tag to v18.6 ([#4609](https://github.com/Altinn/dialogporten/issues/4609)) ([7ae0d33](https://github.com/Altinn/dialogporten/commit/7ae0d336153877950bf345de16284f0252a53330))
+* **deps:** update prom/prometheus docker tag to v3.16.0 ([#4610](https://github.com/Altinn/dialogporten/issues/4610)) ([1c512a1](https://github.com/Altinn/dialogporten/commit/1c512a1f9ffd9cb6f335c31949cd89801a2e4bf3))
+* **deps:** update step-security/harden-runner action to v2.22.4 ([#4604](https://github.com/Altinn/dialogporten/issues/4604)) ([8988914](https://github.com/Altinn/dialogporten/commit/898891409b386a8f117b2d75b7b3cd141a392fb8))
+* **infra:** add a version endpoint for deploy checks ([#4567](https://github.com/Altinn/dialogporten/issues/4567)) ([b695906](https://github.com/Altinn/dialogporten/commit/b695906165c20092112f1afcb39a4fc1e2cfb531))
+
 ## [1.126.5](https://github.com/Altinn/dialogporten/compare/v1.126.4...v1.126.5) (2026-11-11)
 
 

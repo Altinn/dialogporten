@@ -9,6 +9,12 @@ internal static class Constants
     internal const string CurrentTokenIssuer = "CurrentIssuer";
     internal const int MaxRequestBodySizeInBytes = 20_000_000;
 
+    internal static class VersionEndpointPaths
+    {
+        internal const string ServiceOwner = "/api/v1/serviceowner/version";
+        internal const string EndUser = "/api/v1/enduser/version";
+    }
+
     internal static class SwaggerSummary
     {
         internal const string GlobalDescription = "Dialogporten API description for both enduser and serviceowner users, as well as open metadata information for public key material.<br><br>All operations* described within this document require authentication and authorization. Read more at <a href=\"https://docs.altinn.studio/en/dialogporten/user-guides/authenticating/\">https://docs.altinn.studio/en/dialogporten/user-guides/authenticating/</a><br><br><strong>All GET operations* and POST operations may return or contain, respectively, personal identifiable information (national identity numbers and names).</strong><br><br>For more information about this product, see <a href=\"https://docs.altinn.studio/en/dialogporten\">https://docs.altinn.studio/en/dialogporten</a><br><br><em>* Except the metadata APIs";

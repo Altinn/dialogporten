@@ -13,6 +13,9 @@ public sealed class FeatureMetricOptions
         "/health",
         "/metrics",
         "/swagger",
-        "/openapi"
+        "/openapi",
+        // Deploy checks poll the version endpoints, which is not feature use.
+        Constants.VersionEndpointPaths.ServiceOwner,
+        Constants.VersionEndpointPaths.EndUser
     ];
 }

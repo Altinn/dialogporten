@@ -9,6 +9,9 @@ on:
       - Kustomization/dialogporten-apps.product-dialogporten
       - Kustomization/dialogporten-migration.product-dialogporten
       - OCIRepository/dialogporten-manifests.product-dialogporten
+      # Temporary canary for the acceptance run (altinn-platform#4384). Remove it after the run.
+      - Kustomization/dialogporten-flux-canary.product-dialogporten
+      - OCIRepository/dialogporten-flux-canary.product-dialogporten
 
 permissions: {}
 
@@ -30,7 +33,9 @@ jobs:
             [{"environment": "at23", "cluster": "dis-core-at23-aks", "namespace": "product-dialogporten",
             "kustomization": "dialogporten-apps", "oci_repository": "dialogporten-manifests"},
             {"environment": "at23", "cluster": "dis-core-at23-aks", "namespace": "product-dialogporten",
-            "kustomization": "dialogporten-migration"}]
+            "kustomization": "dialogporten-migration"},
+            {"environment": "at23", "cluster": "dis-core-at23-aks", "namespace": "product-dialogporten",
+            "kustomization": "dialogporten-flux-canary", "oci_repository": "dialogporten-flux-canary"}]
 
       # The event names the manifests commit, not the Dialogporten release.
       - name: Resolve the release

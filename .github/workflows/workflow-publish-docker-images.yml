@@ -81,6 +81,8 @@ jobs:
           push: ${{ inputs.push }}
           tags: |
             ${{ env.DOCKER_IMAGE_BASE_NAME }}${{ matrix.imageName }}:${{ inputs.version }}
+          build-args: |
+            VERSION=${{ inputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.imageName }}
           cache-to: type=gha,mode=max,scope=${{ matrix.imageName }}

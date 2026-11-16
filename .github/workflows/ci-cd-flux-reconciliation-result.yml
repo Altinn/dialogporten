@@ -1,0 +1,67 @@
+name: CI/CD Flux Reconciliation Result
+
+# Records the rollout results that Flux sends from at23 (RFC 0019,
+# https://github.com/Altinn/altinn-platform/blob/main/rfcs/0019-flux-workflow-notifications.md).
+# Record only for the pilot: no tests or notifications yet.
+on:
+  repository_dispatch:
+    types:
+      - Kustomization/dialogporten-apps.product-dialogporten
+      - OCIRepository/dialogporten-manifests.product-dialogporten
+
+permissions: {}
+
+jobs:
+  record:
+    name: Record the Flux result
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Fails for any sender other than the Flux dispatch App and for events of other
+      # subscriptions, so a failed run means an unexpected event, not a failed rollout.
+      - name: Read the Flux result
+        id: result
+        uses: Altinn/altinn-platform/actions/flux/read-reconciliation-result@1c7f2d7fc99eebaf55612468c49efefa6750b766 # main
+        with:
+          expected_sender_id: 352877119 # dis-flux-dispatch[bot]
+          product: dialogporten
+          subscriptions: >-
+            [{"environment": "at23", "cluster": "dis-core-at23-aks", "namespace": "product-dialogporten",
+            "kustomization": "dialogporten-apps", "oci_repository": "dialogporten-manifests"}]
+
+      # The event names the manifests commit, not the Dialogporten release.
+      - name: Resolve the release
+        id: release
+        if: steps.result.outputs.outcome != 'ignored' && steps.result.outputs.revision != ''
+        uses: Altinn/dialogporten-manifests/.github/actions/resolve-release@86623d41554c57681b44f398ca97f1a4ba6dae16 # main
+        with:
+          origin_revision: ${{ fromJSON(steps.result.outputs.event_json).metadata.originRevision }}
+          environment: ${{ steps.result.outputs.environment }}
+
+      - name: Record the result
+        env:
+          OUTCOME: ${{ steps.result.outputs.outcome }}
+          ENVIRONMENT: ${{ steps.result.outputs.environment }}
+          REVISION: ${{ steps.result.outputs.revision }}
+          EVENT_JSON: ${{ steps.result.outputs.event_json }}
+          MANIFESTS_COMMIT: ${{ steps.release.outputs.manifests_commit }}
+          APP_VERSION: ${{ steps.release.outputs.app_version }}
+          APP_COMMIT: ${{ steps.release.outputs.app_commit }}
+        run: |
+          resource=$(jq -r '"\(.involvedObject.kind)/\(.involvedObject.name)"' <<< "$EVENT_JSON")
+          {
+            echo "### ${OUTCOME}: ${resource} in ${ENVIRONMENT}"
+            echo
+            echo "- Artifact: \`${REVISION:-none}\`"
+            if [ -n "$MANIFESTS_COMMIT" ]; then
+              echo "- Manifests commit: [${MANIFESTS_COMMIT:0:7}](https://github.com/Altinn/dialogporten-manifests/commit/${MANIFESTS_COMMIT})"
+            fi
+            if [ -n "$APP_COMMIT" ]; then
+              echo "- Release: ${APP_VERSION}, commit [${APP_COMMIT:0:7}](https://github.com/${GITHUB_REPOSITORY}/commit/${APP_COMMIT})"
+            fi
+            # The message is event text: keep it inside a code block.
+            echo
+            echo '```text'
+            jq -r '.message' <<< "$EVENT_JSON" | tr -d '`'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

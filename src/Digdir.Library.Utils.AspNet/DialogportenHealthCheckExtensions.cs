@@ -99,7 +99,7 @@ public static class DialogportenHealthCheckExtensions
 
     /// <summary>
     /// Maps the Altinn health check endpoints, with exception details and entry data in the response
-    /// body only in development.
+    /// body only in development. The endpoints stay reachable while maintenance mode is on.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -137,6 +137,15 @@ public static class DialogportenHealthCheckExtensions
         options.DetailLevel = isDevelopment
             ? HealthReportDetailLevel.Full
             : HealthReportDetailLevel.Summary;
+
+        // The health endpoints answer during maintenance mode as at any other time. Failing probes
+        // would restart containers (liveness, startup) or take replicas out of traffic (readiness),
+        // and clients would then get the edge's 503 without the app's Retry-After. Readiness still
+        // runs its usual checks, so a dependency outage takes replicas out of traffic either way.
+        foreach (var endpoint in options.All)
+        {
+            endpoint.Configure += builder => builder.AllowDuringMaintenance();
+        }
 
         app.MapAltinnHealthChecks(options);
 

@@ -20,7 +20,7 @@ internal sealed class MaintenanceModeMiddleware
             .GetRequiredService<IOptionsSnapshot<WebHostCommonSettings>>()
             .Value;
 
-        if (settings.MaintenanceMode.Enabled)
+        if (settings.MaintenanceMode.Enabled && !IsAllowedDuringMaintenance(context))
         {
             context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             context.Response.ContentType = "text/plain";
@@ -37,10 +37,29 @@ internal sealed class MaintenanceModeMiddleware
 
         await _next(context);
     }
+
+    // Endpoint metadata is only there once routing has matched the request. Neither host calls
+    // UseRouting explicitly, so WebApplication routes before any app.Use* middleware runs.
+    private static bool IsAllowedDuringMaintenance(HttpContext context) =>
+        context.GetEndpoint()?.Metadata.GetMetadata<AllowDuringMaintenanceAttribute>() is not null;
 }
 
 public static class MaintenanceModeMiddlewareExtensions
 {
+    /// <summary>
+    /// Answers every request with 503 while maintenance mode is on, except requests to endpoints
+    /// marked with <see cref="AllowDuringMaintenanceAttribute"/>.
+    /// </summary>
     public static IApplicationBuilder UseMaintenanceMode(this IApplicationBuilder app)
         => app.UseMiddleware<MaintenanceModeMiddleware>();
+
+    extension<TBuilder>(TBuilder builder)
+        where TBuilder : IEndpointConventionBuilder
+    {
+        /// <summary>
+        /// Lets requests to the endpoint through while maintenance mode is on.
+        /// </summary>
+        public TBuilder AllowDuringMaintenance() =>
+            builder.WithMetadata(new AllowDuringMaintenanceAttribute());
+    }
 }

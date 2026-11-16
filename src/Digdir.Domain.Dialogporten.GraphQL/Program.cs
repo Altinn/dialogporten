@@ -163,11 +163,11 @@ static void BuildAndRun(string[] args)
     // catch-all route of the GraphQL endpoint, which requires authorization.
     app.MapVersionEndpoint("/graphql/version");
 
-    app.UseMaintenanceMode()
+    app.UseAzureConfiguration()
+        .UseMaintenanceMode()
         .UseJwtSchemeSelector()
         .UseAuthentication()
-        .UseAuthorization()
-        .UseAzureConfiguration();
+        .UseAuthorization();
 
     app.MapGraphQL()
         .RequireCors(GraphQlCorsOptions.PolicyName)

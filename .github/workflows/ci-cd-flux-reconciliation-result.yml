@@ -7,6 +7,7 @@ on:
   repository_dispatch:
     types:
       - Kustomization/dialogporten-apps.product-dialogporten
+      - Kustomization/dialogporten-migration.product-dialogporten
       - OCIRepository/dialogporten-manifests.product-dialogporten
 
 permissions: {}
@@ -27,7 +28,9 @@ jobs:
           product: dialogporten
           subscriptions: >-
             [{"environment": "at23", "cluster": "dis-core-at23-aks", "namespace": "product-dialogporten",
-            "kustomization": "dialogporten-apps", "oci_repository": "dialogporten-manifests"}]
+            "kustomization": "dialogporten-apps", "oci_repository": "dialogporten-manifests"},
+            {"environment": "at23", "cluster": "dis-core-at23-aks", "namespace": "product-dialogporten",
+            "kustomization": "dialogporten-migration"}]
 
       # The event names the manifests commit, not the Dialogporten release.
       - name: Resolve the release

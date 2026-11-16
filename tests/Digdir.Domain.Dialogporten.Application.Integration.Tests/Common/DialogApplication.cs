@@ -61,7 +61,7 @@ public class DialogApplication : IAsyncLifetime
     internal static TestApplicationSettings Settings { get; } = new();
 
     private readonly PostgreSqlContainer _dbContainer =
-        new PostgreSqlBuilder("postgres:18.3")
+        new PostgreSqlBuilder("postgres:18.6")
             .Build();
 
     public async ValueTask InitializeAsync()

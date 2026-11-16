@@ -37,6 +37,15 @@
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+ARG \\w+=(?<currentValue>\\S+)"
       ]
+    },
+    {
+      "description": "The Postgres image the integration tests start through Testcontainers. Same depName as the docker compose image, so both move in one PR",
+      "customType": "regex",
+      "managerFilePatterns": ["/^tests/.+\\.cs$/"],
+      "matchStrings": [
+        "new PostgreSqlBuilder\\(\"(?<depName>postgres):(?<currentValue>[^\"]+)\"\\)"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [

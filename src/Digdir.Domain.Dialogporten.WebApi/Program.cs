@@ -208,8 +208,8 @@ static void BuildAndRun(string[] args)
     app.MapDialogportenHealthChecks();
     // The edge can route the service owner and end user prefixes to separate deployments, so a version check
     // needs a path under each.
-    app.MapVersionEndpoint("/api/v1/serviceowner/version");
-    app.MapVersionEndpoint("/api/v1/enduser/version");
+    app.MapVersionEndpoint(Constants.VersionEndpointPaths.ServiceOwner);
+    app.MapVersionEndpoint(Constants.VersionEndpointPaths.EndUser);
     app.MapControllers();
 
     app.UseStaticFiles();

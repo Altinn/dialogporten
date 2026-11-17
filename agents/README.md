@@ -21,11 +21,13 @@ credentials, the WebApi and GraphQL E2E tests, and opens pull requests that show
 host puts each value only into requests to its hosts.
 
 - The GitHub account the agent works as. Make a GitHub user for your agents and keep it out of organizations, since
-  the agent can do whatever that user can. Choose the browser sign-in, sign in as that user, such as in a private
-  window, and check that agentctl names it before it keeps the token. That user works from its fork of this
-  repository, and a maintainer approves the CI runs of its pull requests. If you use your own account instead, choose
-  the fine-grained token and select only `Altinn/dialogporten`: a browser sign-in as yourself lets the agent act
-  wherever you can. The agent pushes and opens pull requests as the account, and Git commits as it.
+  the agent can do whatever that user can. The token is not limited to this repository: the agent could act as that
+  user on any public repository, and only its instructions keep it to this one. Choose the browser sign-in, sign in
+  as that user, such as in a private window, and check that agentctl names it before it keeps the token. That user
+  works from its fork of this repository, and a maintainer approves the CI runs of its pull requests. If you use your
+  own account instead, choose the fine-grained token and select only `Altinn/dialogporten`: a browser sign-in as
+  yourself lets the agent act wherever you can. The agent pushes and opens pull requests as the account, and Git
+  commits as it.
 
   ```sh
   agentctl github login default

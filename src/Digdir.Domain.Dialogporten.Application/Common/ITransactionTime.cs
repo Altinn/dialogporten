@@ -16,10 +16,25 @@ public interface ITransactionTime
 internal sealed class TransactionTime : ITransactionTime
 {
     private readonly Lazy<DateTimeOffset> _lazyValue;
+    private DateTimeOffset? _inheritedValue;
     public DateTimeOffset Value => _lazyValue.Value;
     public TransactionTime(IClock clock)
     {
         ArgumentNullException.ThrowIfNull(clock);
-        _lazyValue = new(() => clock.UtcNow);
+        _lazyValue = new(() => _inheritedValue ?? clock.UtcNow);
+    }
+
+    /// <summary>
+    /// Makes this transaction time use the value of another transaction time, typically
+    /// one from a parent scope. Must be called before <see cref="Value"/> is read.
+    /// </summary>
+    internal void Inherit(DateTimeOffset value)
+    {
+        if (_lazyValue.IsValueCreated)
+        {
+            throw new InvalidOperationException("Cannot inherit a transaction time that has already been used.");
+        }
+
+        _inheritedValue = value;
     }
 }

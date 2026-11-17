@@ -40,6 +40,7 @@ using MessagePack.Resolvers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -154,7 +155,8 @@ public static class InfrastructureExtensions
             .AddTransient<IQueryStrategy<EndUserSearchContext>, MultiServiceStrategy>()
             .AddTransient<IPartyResourceReferenceRepository, PartyResourceRepository>()
             .AddTransient<IDialogSearchRepository, DialogSearchRepository>()
-            .AddTransient<IActorNameRepository, ActorNameRepository>()
+            .AddTransient<ActorNameRepository>()
+            .AddTransient<IActorNameRepository>(x => x.GetRequiredService<ActorNameRepository>())
             .AddTransient<IDialogSeenLogWriter, DialogSeenLogWriter>()
             .AddTransient<ITransmissionHierarchyRepository, TransmissionHierarchyRepository>()
             .AddTransient<ISubjectResourceRepository, SubjectResourceRepository>()
@@ -162,8 +164,6 @@ public static class InfrastructureExtensions
             .AddTransient<IMetadataLinkProvider, MetadataLinkProvider>()
             .AddTransient<IAuthorizedServiceResourcesProvider, AuthorizedServiceResourcesProvider>()
             .AddTransient<IServiceResourceMetadataCatalogue, ServiceResourceMetadataCatalogue>()
-            .AddTransient(x => new Lazy<IPublishEndpoint>(x.GetRequiredService<IPublishEndpoint>))
-            .AddTransient(x => new Lazy<ITopicEventSender>(x.GetRequiredService<ITopicEventSender>))
 
             // Singleton
             .AddSingleton<INotificationProcessingContextFactory, NotificationProcessingContextFactory>()

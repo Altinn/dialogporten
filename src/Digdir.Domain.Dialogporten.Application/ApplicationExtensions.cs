@@ -91,6 +91,8 @@ public static class ApplicationExtensions
             .AddScoped<FeatureMetricRecorder>()
             .AddServiceResourceResolvers();
 
+        services.TryAddTransient(typeof(Lazy<>), typeof(LazyService<>));
+
         if (!environment.IsDevelopment())
         {
             return services;
@@ -170,3 +172,7 @@ public static class ApplicationExtensions
         return services;
     }
 }
+
+internal sealed class LazyService<T>(IServiceProvider provider) :
+    Lazy<T>(provider.GetRequiredService<T>)
+    where T : notnull;

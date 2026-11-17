@@ -1,4 +1,7 @@
+using System.Data;
+using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Externals;
+using Digdir.Domain.Dialogporten.Domain.Actors;
 using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -51,26 +54,33 @@ public sealed class ResyncActorName(
     private async Task UpdateActors(
         PartyNameFound result,
         string actorId,
-        Guid nullActorNameId,
-        CancellationToken cancellationToken
-    )
+        Guid inputActorNameId,
+        CancellationToken cancellationToken)
     {
-        var newActorNameId = await actorNameRepository.GetOrCreateActorName(actorId, result.Name, cancellationToken);
-        if (newActorNameId == nullActorNameId) return;
+        var actorName = new ActorName { ActorId = actorId, Name = result.Name };
+        actorName = await actorNameRepository.EnsureActorName(actorName, cancellationToken);
+
+        if (actorName.Id == inputActorNameId)
+        {
+            throw new UnreachableException(
+                "We should never get into this method without an actual actor name. Therefore we " +
+                "should never collide with the 'promise' - that is the actorName with name=null. " +
+                "If we do, it is a bug in the code.");
+        }
 
         int updatedRows;
         do
         {
             updatedRows = await db.Actor
-                .Where(x => x.ActorNameEntityId == nullActorNameId)
+                .Where(x => x.ActorNameEntityId == inputActorNameId)
                 .Take(BatchSize)
                 .ExecuteUpdateAsync(
-                    setters => setters.SetProperty(x => x.ActorNameEntityId, newActorNameId),
+                    setters => setters.SetProperty(x => x.ActorNameEntityId, actorName.Id),
                     cancellationToken
                 );
         } while (updatedRows == BatchSize);
 
-        await DeleteActorName(nullActorNameId, cancellationToken);
+        await DeleteActorName(inputActorNameId, cancellationToken);
     }
 
     private Task<int> DeleteActorName(Guid actorNameId, CancellationToken cancellationToken) =>

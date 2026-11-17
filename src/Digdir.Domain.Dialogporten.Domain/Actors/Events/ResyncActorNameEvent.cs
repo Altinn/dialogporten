@@ -1,4 +1,6 @@
-﻿using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
+﻿using System.Text.Json.Serialization;
+using Digdir.Domain.Dialogporten.Domain.Common.DomainEvents;
+using Digdir.Domain.Dialogporten.Domain.Common.EventPublisher;
 
 namespace Digdir.Domain.Dialogporten.Domain.Actors.Events;
 
@@ -11,10 +13,13 @@ namespace Digdir.Domain.Dialogporten.Domain.Actors.Events;
 ///
 /// Ideally, we want to see none of these events in ASB.
 /// </summary>
-public sealed record ResyncActorNameEvent : DomainEvent
+public sealed record ResyncActorNameEvent : DomainEvent, IDelayedDomainEvent
 {
     public Guid ActorNameId { get; }
     public string Reason { get; }
+
+    [JsonIgnore]
+    public TimeSpan? DeliveryDelay { get; init; }
 
     public ResyncActorNameEvent(
         Guid actorNameId,

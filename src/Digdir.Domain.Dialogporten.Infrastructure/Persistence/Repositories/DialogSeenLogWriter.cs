@@ -1,7 +1,6 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.Actors;
-using Digdir.Domain.Dialogporten.Domain.Actors.Events;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
@@ -14,8 +13,7 @@ internal sealed class DialogSeenLogWriter(
     IPartyNameRegistry partyNameRegistry,
     ITransactionTime transactionTime,
     IUnitOfWork unitOfWork,
-    IActorNameRepository actorNameRepository,
-    IDomainEventPublisher domainEventPublisher
+    IActorNameRepository actorNameRepository
 ) : IDialogSeenLogWriter
 {
 
@@ -56,19 +54,12 @@ internal sealed class DialogSeenLogWriter(
         {
             return null;
         }
-        var actorNameEntity = await CreateActorNameEntity(userId.ExternalIdWithPrefix, cancellationToken);
 
-        if (actorNameEntity.ActorId is not null && actorNameEntity.Name is null)
-        {
-            domainEventPublisher.Publish(
-                new ResyncActorNameEvent(
-                    actorNameEntity.Id,
-                    $"Actor name for SeenLog/LabelAssignment is null for dialog {dialog.Id}"
-                )
-            );
-        }
+        var actorName = await GetActorName(userId.ExternalIdWithPrefix, cancellationToken);
 
         await unitOfWork.BeginTransactionAsync(cancellationToken: cancellationToken);
+        var actorNameEntity = await actorNameRepository.EnsureActorName(actorName, cancellationToken);
+
         var newSeenLog = await EnsureSeenLog(
             seenLogId,
             dialog.Id,
@@ -136,24 +127,18 @@ internal sealed class DialogSeenLogWriter(
             };
     }
 
-    private async Task<ActorName> CreateActorNameEntity(string actorId, CancellationToken ct)
+    private async Task<ActorName> GetActorName(string actorId, CancellationToken ct)
     {
         var normalizedActorId = actorId.ToLowerInvariant();
         var result = await partyNameRegistry.GetName(normalizedActorId, ct);
         var actorName = result.Match<string?>(
             found => found.Name,
             notFound => null,
-            unsupported => throw new InvalidOperationException($"Unable to look up name for actor {actorId}. Reason: {unsupported.Reason}"),
+            unsupported => throw new InvalidOperationException($"Unable to look up name for actor {normalizedActorId}. Reason: {unsupported.Reason}"),
             unavailable => null
         );
 
-        var actorNameId = await actorNameRepository.GetOrCreateActorName(normalizedActorId, actorName, ct);
-        return new ActorName
-        {
-            Id = actorNameId,
-            ActorId = normalizedActorId,
-            Name = actorName
-        };
+        return new ActorName { ActorId = normalizedActorId, Name = actorName };
     }
 
     private async Task<int> EnsureSeenLog(

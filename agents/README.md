@@ -51,6 +51,8 @@ test client, and give it in a variant of your own beside the manifest, `minimal/
 apiVersion: agents.platform/v1alpha1
 kind: AgentVariant
 extends: agent.yaml
+metadata:
+  name: dialogporten-backend
 spec:
   environment:
     - name: MASKINPORTEN_AT23_CLIENT_ID
@@ -59,12 +61,12 @@ spec:
       value: <base64-encoded JWK>
 ```
 
-Then apply the manifest from a checkout, with `--variant mine` when you have that variant:
+Then apply the manifest from a checkout, adding `--variant mine` when you have that variant:
 
 ```sh
 git clone https://github.com/Altinn/dialogporten
 cd dialogporten/agents/minimal
-agentctl apply --wait --variant mine
+agentctl apply --wait
 ```
 
 The agent works in its own clone of this repository.

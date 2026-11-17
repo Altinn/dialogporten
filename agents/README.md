@@ -25,7 +25,8 @@ host puts each value only into requests to its hosts.
   do, so with your own account choose the fine-grained token and select only `Altinn/dialogporten`. With a GitHub user
   made for agents, sign in as that user, such as in a private window. Check that agentctl names the account before it
   keeps the token. The agent pushes and opens pull requests as the account, and Git commits as it. An account that
-  cannot push to this repository pushes to its fork, and a maintainer approves the CI runs of its pull requests.
+  cannot push to this repository pushes to its fork, and a maintainer approves the CI runs of its pull requests. A
+  fine-grained token reaches one owner's repositories, so it cannot both push to a fork and open the pull request here.
 
   ```sh
   agentctl github login default

@@ -26,17 +26,20 @@ did.
 ## Recordings
 
 For a change to a script, a tool or command output, record it in a terminal, as the `recording` skill describes. Keep
-artifacts under `/home/agent/code/.artifacts/<task>/`, outside the checkout, each under 10 MiB and free of secrets: the
-AT23 values in the environment are placeholders, but tokens the apps receive are real.
+artifacts under `/home/agent/code/.artifacts/<task>/`, outside the checkout, each under 10 MiB and free of secrets. The
+AT23 subscription key and token generator credentials in the environment are placeholders, but the Maskinporten key, in
+`MASKINPORTEN_AT23_ENCODED_JWK` and the user secrets, and the tokens the apps receive are real.
 
 From the artifact directory, use local file references in the body and pass one `--attach` per file, which uploads
 them and rewrites the references:
 
 ```sh
-gh pr create --repo Altinn/dialogporten --base main --head <owner>:<branch> \
+gh pr create --repo Altinn/dialogporten --base main --head <branch> \
   --title 'fix: ...' --body-file pr-body.md --attach ./result.gif
 gh pr edit <number> --attach ./result.gif
 ```
+
+After a push to the account's fork, `--head` takes `<account>:<branch>`.
 
 If an upload fails, look at the pull request before retrying, since it may exist already. Read the body back with
 `gh pr view <number> --json body -q .body` and check that attachments have hosted URLs.

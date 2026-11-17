@@ -33,10 +33,10 @@ When a check could not run, say which and why, rather than leaving it out or wor
 Push the branch to `origin` when your GitHub account may push to `Altinn/dialogporten`, and otherwise to the
 account's fork, which `gh repo fork --remote --remote-name fork` adds as the remote `fork`, creating the fork when it
 has none. Then open the pull request with `gh pr create`, passing `--repo Altinn/dialogporten`, `--base main`,
-`--head <owner>:<branch>`, `--title` and `--body-file`. Titles follow Conventional Commits, as
-`.github/workflows/ci-cd-pull-request-title.yml` checks, and the body follows `.github/pull_request_template.md`. After
-review, read the whole current discussion and answer in its threads. Pass multiline comments through `--body-file` or
-stdin.
+`--head <branch>` after a push to `origin` or `--head <account>:<branch>` after a push to the fork, `--title` and
+`--body-file`. Titles follow Conventional Commits, as `.github/workflows/ci-cd-pull-request-title.yml` checks, and the
+body follows `.github/pull_request_template.md`. After review, read the whole current discussion and answer in its
+threads. Pass multiline comments through `--body-file` or stdin.
 
 ## References
 

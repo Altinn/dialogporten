@@ -13,16 +13,30 @@ public class ResourceRegistryClientTests
     {
         // language=xml
         var expressions = $""" 
-                            <xacml:ObligationExpressions>
-                                {AuthenticationExpression(3)}
-                                {SystemUserAuthenticationExpression(4)}
-                            </xacml:ObligationExpressions>
-                            """;
-        var policy = ParsePolicy(expressions);
-        var systemUserAuthLevel = ResourceRegistryClient.GetMinimumSystemUserAuthenticationLevel(policy);
-        var authLevel = ResourceRegistryClient.GetMinimumAuthenticationLevel(policy);
-        Assert.Equal(4, systemUserAuthLevel);
-        Assert.Equal(3, authLevel);
+                           <xacml:ObligationExpressions>
+                               {AuthenticationExpression(3)}
+                               {SystemUserAuthenticationExpression(4)}
+                           </xacml:ObligationExpressions>
+                           """;
+
+        var secondExpression = $""" 
+                                <xacml:ObligationExpressions>
+                                   {SystemUserAuthenticationExpression(4)}
+                                   {AuthenticationExpression(3)}
+                                </xacml:ObligationExpressions>
+                                """;
+        var firstPolicy = ParsePolicy(expressions);
+        var firstSystemUserAuthLevel = ResourceRegistryClient.GetMinimumSystemUserAuthenticationLevel(firstPolicy);
+        var firstAuthLevel = ResourceRegistryClient.GetMinimumAuthenticationLevel(firstPolicy);
+
+        var secondPolicy = ParsePolicy(secondExpression);
+        var secondSystemUserAuthLevel = ResourceRegistryClient.GetMinimumSystemUserAuthenticationLevel(secondPolicy);
+        var secondAuthLevel = ResourceRegistryClient.GetMinimumAuthenticationLevel(secondPolicy);
+
+        Assert.Equal(4, firstSystemUserAuthLevel);
+        Assert.Equal(3, firstAuthLevel);
+        Assert.Equal(firstAuthLevel, secondAuthLevel);
+        Assert.Equal(firstSystemUserAuthLevel, secondSystemUserAuthLevel);
     }
 
     [Fact]

@@ -122,8 +122,8 @@
       },
       "Medo.Uuid7": {
         "type": "Transitive",
-        "resolved": "3.2.0",
-        "contentHash": "18Gp47N8I7Vq319f5qTEdqX1GPOworXeNIjuxLN3Szqz96aMuORklGbnSllhEUmQZf3UWmp+X9pVDCKEf5zoaA=="
+        "resolved": "3.3.0",
+        "contentHash": "UNfjPT2jNcXk3beRZXoHb+7EB3pZXDRg8IoJtzKx6L7Hoha5wiuRvIK6sc5SzfVdDNHlUN7eX4bjiBVWP4k+ZA=="
       },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",
@@ -813,7 +813,7 @@
         "type": "Project",
         "dependencies": {
           "MediatR.Contracts": "[2.0.1, )",
-          "Medo.Uuid7": "[3.2.0, )"
+          "Medo.Uuid7": "[3.3.0, )"
         }
       },
       "digdir.library.entity.entityframeworkcore": {

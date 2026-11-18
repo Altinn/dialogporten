@@ -201,7 +201,7 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
         handler.RequestCount.Should().Be(1);
     }
 
-    private static AltinnAuthorizationClient CreateAltinnAuthorizationClient(
+    private AltinnAuthorizationClient CreateAltinnAuthorizationClient(
         string userAuthLevel, DialogDbContext db)
     {
         var cacheProvider = Substitute.For<IFusionCacheProvider>();
@@ -220,7 +220,10 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             user,
             db,
             new ServiceResourceMinimumAuthenticationLevelResolver(
-                new ResourcePolicyInformationRepository(db, cacheProvider)),
+                new ResourcePolicyInformationRepository(
+                    db,
+                    Application.GetServiceProvider().GetRequiredService<IServiceScopeFactory>(),
+                    cacheProvider)),
             Substitute.For<IPartyResourceReferenceRepository>(),
             Substitute.For<ILogger<AltinnAuthorizationClient>>(),
             Substitute.For<IServiceScopeFactory>(),

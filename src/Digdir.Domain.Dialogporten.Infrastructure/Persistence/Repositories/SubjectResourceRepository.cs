@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.SubjectResources;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -13,19 +14,23 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
     private const string ReferencedPartyResourcesCacheKey = ReferencedPartyResourcesCacheName;
 
     private readonly DialogDbContext _dbContext;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly IFusionCache _referencedPartyResourcesCache;
 
     public SubjectResourceRepository(
         DialogDbContext dbContext,
+        IServiceScopeFactory scopeFactory,
         IFusionCacheProvider cacheProvider)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(scopeFactory);
         ArgumentNullException.ThrowIfNull(cacheProvider);
 
         var referencedPartyResourcesCache = cacheProvider.GetCache(ReferencedPartyResourcesCacheName);
         ArgumentNullException.ThrowIfNull(referencedPartyResourcesCache);
 
         _dbContext = dbContext;
+        _scopeFactory = scopeFactory;
         _referencedPartyResourcesCache = referencedPartyResourcesCache;
     }
 
@@ -73,7 +78,13 @@ internal sealed class SubjectResourceRepository : ISubjectResourceRepository
               ON sr."Resource" = 'urn:altinn:resource:' || r."UnprefixedResourceIdentifier"
             """;
 
-        return (await _dbContext.Database
+        // Use a dedicated scope rather than the injected (request-scoped) DbContext. The factory can run detached
+        // from the caller (soft-timeout background completion / eager refresh), after the request scope has been
+        // disposed or while the caller is using its DbContext concurrently.
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        return (await dbContext.Database
                 .SqlQueryRaw<SubjectResourceRow>(sql)
                 .ToListAsync(cancellationToken))
             .GroupBy(x => x.Resource, StringComparer.OrdinalIgnoreCase)

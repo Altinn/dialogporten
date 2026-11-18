@@ -17,7 +17,7 @@
   the user secrets' names. List the names only, since the values include its real key:
 
   ```sh
-  dotnet user-secrets list --project src/Digdir.Domain.Dialogporten.WebApi | cut -d ' ' -f 1
+  jq -r 'keys[]' ~/.microsoft/usersecrets/750256a4-f332-4783-8802-8a7d9566f9ca/secrets.json
   ```
 - The E2E tests list and label dialogs from the local copy of Altinn's subject-resource mappings and resource
   policies. `scripts/e2e/.env` turns off their sync at startup, so on a database the launcher has just created they

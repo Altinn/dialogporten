@@ -1840,6 +1840,9 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
                     b.Property<int>("MinimumAuthenticationLevel")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("MinimumSystemUserAuthenticationLevel")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Resource")
                         .IsRequired()
                         .HasMaxLength(255)

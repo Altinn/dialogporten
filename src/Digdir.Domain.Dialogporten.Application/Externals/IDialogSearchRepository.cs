@@ -50,6 +50,7 @@ public interface IDialogSearchRepository
 
     Task<Dictionary<Guid, DataContentDto>> FetchContentByDialogId(Guid[] dialogIds,
         int userAuthLevel,
+        bool systemUser,
         CancellationToken cancellationToken);
 
     Task<Dictionary<Guid, DataDialogEndUserContextDto>> FetchEndUserContextByDialogId(

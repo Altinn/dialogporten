@@ -18,6 +18,7 @@ public sealed class ServiceResourceMetadataServiceResourceDto
     public required string Status { get; set; }
     public required bool IsDelegable { get; set; }
     public required int MinimumAuthenticationLevel { get; set; }
+    public int? MinimumSystemUserAuthenticationLevel { get; set; }
     public List<LocalizationDto> Name { get; set; } = [];
     public required LinkDto Links { get; set; }
 }

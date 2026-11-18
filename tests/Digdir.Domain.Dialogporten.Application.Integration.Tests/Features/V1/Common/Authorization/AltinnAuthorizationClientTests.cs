@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using System.Text.Json.Nodes;
 using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Common.Authorization;
@@ -72,6 +73,69 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
         });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
+        var client = CreateAltinnAuthorizationClient(userAuthLevel, db);
+
+        // Act
+        var result = await client.UserHasRequiredAuthLevel(
+            serviceResource,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(4, 3, true)]  // system user level 3 >= system user requirement 3
+    [InlineData(3, 4, false)] // system user level 3 < system user requirement 4, general requirement is ignored
+    public async Task UserHasRequiredAuthLevel_Should_Use_SystemUser_Level_When_Principal_Is_SystemUser(
+        int minimumAuthenticationLevel, int minimumSystemUserAuthenticationLevel, bool expected)
+    {
+        // Arrange
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        var serviceResource = await SeedMinimumAuthenticationLevels(db, minimumAuthenticationLevel, minimumSystemUserAuthenticationLevel);
+        var client = CreateAltinnAuthorizationClient(TestUsers.FromDefaultSystemUser().Build(), db);
+
+        // Act
+        var result = await client.UserHasRequiredAuthLevel(
+            serviceResource,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(4, false)] // system user level 3 < general requirement 4
+    [InlineData(3, true)]  // system user level 3 >= general requirement 3
+    public async Task UserHasRequiredAuthLevel_Should_Fall_Back_To_General_Level_When_SystemUser_Level_Is_Missing(
+        int minimumAuthenticationLevel, bool expected)
+    {
+        // Arrange
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        var serviceResource = await SeedMinimumAuthenticationLevels(db, minimumAuthenticationLevel, minimumSystemUserAuthenticationLevel: null);
+        var client = CreateAltinnAuthorizationClient(TestUsers.FromDefaultSystemUser().Build(), db);
+
+        // Act
+        var result = await client.UserHasRequiredAuthLevel(
+            serviceResource,
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(Constants.IdportenLoaSubstantial, false)] // user level 3 < general requirement 4
+    [InlineData(Constants.IdportenLoaHigh, true)]         // user level 4 >= general requirement 4
+    public async Task UserHasRequiredAuthLevel_Should_Ignore_SystemUser_Level_For_EndUser(
+        string userAuthLevel, bool expected)
+    {
+        // Arrange
+        using var scope = Application.GetServiceProvider().CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+        var serviceResource = await SeedMinimumAuthenticationLevels(db, minimumAuthenticationLevel: 4, minimumSystemUserAuthenticationLevel: 3);
         var client = CreateAltinnAuthorizationClient(userAuthLevel, db);
 
         // Act
@@ -201,8 +265,32 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
         handler.RequestCount.Should().Be(1);
     }
 
+    private static async Task<string> SeedMinimumAuthenticationLevels(
+        DialogDbContext db,
+        int minimumAuthenticationLevel,
+        int? minimumSystemUserAuthenticationLevel)
+    {
+        var serviceResource = $"urn:altinn:resource:test-{Guid.NewGuid()}";
+        db.ResourcePolicyInformation.Add(new()
+        {
+            Resource = serviceResource,
+            MinimumAuthenticationLevel = minimumAuthenticationLevel,
+            MinimumSystemUserAuthenticationLevel = minimumSystemUserAuthenticationLevel
+        });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        return serviceResource;
+    }
+
     private static AltinnAuthorizationClient CreateAltinnAuthorizationClient(
-        string userAuthLevel, DialogDbContext db)
+        string userAuthLevel, DialogDbContext db) =>
+        CreateAltinnAuthorizationClient(
+            TestUsers.FromDefaultPidUser()
+                .WithClaim(ClaimsPrincipalExtensions.IdportenAuthLevelClaim, userAuthLevel)
+                .Build(),
+            db);
+
+    private static AltinnAuthorizationClient CreateAltinnAuthorizationClient(
+        ClaimsPrincipal principal, DialogDbContext db)
     {
         var cacheProvider = Substitute.For<IFusionCacheProvider>();
         cacheProvider
@@ -210,9 +298,7 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
             .Returns(_ => new NullFusionCache(Options.Create(new FusionCacheOptions())));
 
         var user = Substitute.For<IUser>();
-        user.GetPrincipal().Returns(TestUsers.FromDefaultPidUser()
-            .WithClaim(ClaimsPrincipalExtensions.IdportenAuthLevelClaim, userAuthLevel)
-            .Build());
+        user.GetPrincipal().Returns(principal);
 
         return new AltinnAuthorizationClient(
             new HttpClient(),

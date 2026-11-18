@@ -1,10 +1,12 @@
 ﻿using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
@@ -165,19 +167,23 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly IAltinnAuthorization _altinnAuthorization;
     private readonly IDialogSearchRepository _searchRepository;
+    private readonly IUser _user;
 
     public SearchDialogQueryHandler(
         IUserResourceRegistry userResourceRegistry,
         IAltinnAuthorization altinnAuthorization,
-        IDialogSearchRepository searchRepository)
+        IDialogSearchRepository searchRepository,
+        IUser user)
     {
         ArgumentNullException.ThrowIfNull(userResourceRegistry);
         ArgumentNullException.ThrowIfNull(altinnAuthorization);
         ArgumentNullException.ThrowIfNull(searchRepository);
+        ArgumentNullException.ThrowIfNull(user);
 
         _userResourceRegistry = userResourceRegistry;
         _altinnAuthorization = altinnAuthorization;
         _searchRepository = searchRepository;
+        _user = user;
     }
 
     public async Task<SearchDialogResult> Handle(SearchDialogQuery request, CancellationToken cancellationToken)
@@ -366,7 +372,8 @@ internal sealed class SearchDialogQueryHandler : IRequestHandler<SearchDialogQue
 
     private async Task<Dictionary<Guid, ContentDto>> FetchContentByDialogId(Guid[] dialogIds, CancellationToken cancellationToken)
     {
-        var result = await _searchRepository.FetchContentByDialogId(dialogIds, userAuthLevel: 0, cancellationToken);
+        var systemUser = _user.GetPrincipal().TryGetSystemUserId(out _);
+        var result = await _searchRepository.FetchContentByDialogId(dialogIds, userAuthLevel: 0, systemUser, cancellationToken);
         return result.ToDictionary(x => x.Key, x => ToContentDto(x.Value));
         static ContentDto ToContentDto(DataContentDto dataContent)
         {

@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.IdentifierLookup;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
@@ -26,22 +28,26 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
     private readonly IIdentifierLookupDialogResolver _dialogResolver;
     private readonly IIdentifierLookupPresentationResolver _presentationResolver;
     private readonly IIdentifierLookupAuthorizationResolver _authorizationResolver;
+    private readonly IUser _user;
     private readonly ILogger<GetDialogLookupQueryHandler> _logger;
 
     public GetDialogLookupQueryHandler(
         IIdentifierLookupDialogResolver dialogResolver,
         IIdentifierLookupPresentationResolver presentationResolver,
         IIdentifierLookupAuthorizationResolver authorizationResolver,
+        IUser user,
         ILogger<GetDialogLookupQueryHandler> logger)
     {
         ArgumentNullException.ThrowIfNull(dialogResolver);
         ArgumentNullException.ThrowIfNull(presentationResolver);
         ArgumentNullException.ThrowIfNull(authorizationResolver);
+        ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(logger);
 
         _dialogResolver = dialogResolver;
         _presentationResolver = presentationResolver;
         _authorizationResolver = authorizationResolver;
+        _user = user;
         _logger = logger;
     }
 
@@ -98,7 +104,7 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         var title = IdentifierLookupTitleResolver.ResolveEndUserTitle(
             dialogData,
             authorization.Evidence.CurrentAuthenticationLevel,
-            serviceResource.MinimumAuthenticationLevel);
+            GetMinimumAuthLevel(serviceResource));
         title.PruneLocalizations(request.AcceptedLanguages);
 
         return new EndUserIdentifierLookupDto
@@ -111,5 +117,12 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
             Title = title,
             AuthorizationEvidence = authorization.Evidence
         };
+    }
+
+    private int GetMinimumAuthLevel(IdentifierLookupServiceResourceDto serviceResource)
+    {
+        return _user.GetPrincipal().TryGetSystemUserId(out _)
+            ? serviceResource.MinimumSystemUserAuthenticationLevel ?? serviceResource.MinimumAuthenticationLevel
+            : serviceResource.MinimumAuthenticationLevel;
     }
 }

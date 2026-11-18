@@ -37,6 +37,7 @@ internal static class ServiceResourceMetadataMapExtensions
             Status = item.ServiceResource.Status,
             IsDelegable = item.ServiceResource.IsDelegable,
             MinimumAuthenticationLevel = item.ServiceResource.MinimumAuthenticationLevel,
+            MinimumSystemUserAuthenticationLevel = item.ServiceResource.MinimumSystemUserAuthenticationLevel,
             Name = MapLocalizations(item.ServiceResource.Name),
             Links = MapLinks(item.ServiceResource.Links)
         },

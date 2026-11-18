@@ -28,14 +28,15 @@ spec:
     - source: ../_skills/pr-evidence
     - source: ../_skills/altinn-token-generator
     - source: ../_skills/altinn-access-management
-  # Each harness uses the login `agentctl claude login` and `agentctl codex login` store without a name. A variant of
-  # your own can name another with `login: <name>`.
+  # `login: any` runs on whichever login the host has stored for the harness, whatever its name.
   harnesses:
     - type: claudeCode
       default: true
+      login: any
     # Optional: without a Codex login on the host, the agent starts without Codex. Run `agentctl codex login` and
     # the next reconcile adds it.
     - type: codex
+      login: any
       optional: true
   # The GitHub account the agent pushes and opens pull requests as, stored with `agentctl github login default`. The
   # agent gets a GITHUB_TOKEN placeholder for GitHub's hosts, and Git commits as the account.

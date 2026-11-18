@@ -36,13 +36,13 @@
       },
       "Medo.Uuid7": {
         "type": "Transitive",
-        "resolved": "3.2.0",
-        "contentHash": "18Gp47N8I7Vq319f5qTEdqX1GPOworXeNIjuxLN3Szqz96aMuORklGbnSllhEUmQZf3UWmp+X9pVDCKEf5zoaA=="
+        "resolved": "3.3.0",
+        "contentHash": "UNfjPT2jNcXk3beRZXoHb+7EB3pZXDRg8IoJtzKx6L7Hoha5wiuRvIK6sc5SzfVdDNHlUN7eX4bjiBVWP4k+ZA=="
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.14",
-        "contentHash": "QtpQzuSZVyTPCuHW058yCs9Nj0394uUkNyFHS813nOmK9UgUdBdaprJ5PPsBgsQIpxADTsTkbaMMonykem6qdw=="
+        "resolved": "10.0.15",
+        "contentHash": "KczR2nV7ooeimtZxAawPht/FJUHnX+uoWy7y4pba+iaRQBwUM2NwtiqZg+/FpZDHUf2RkkzveGkhMTWDNzmDUA=="
       },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "Transitive",
@@ -57,14 +57,14 @@
         "dependencies": {
           "DeterministicGuids": "[1.0.11, )",
           "Digdir.Library.Entity.Abstractions": "[1.0.0, )",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.14, )"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.15, )"
         }
       },
       "digdir.library.entity.abstractions": {
         "type": "Project",
         "dependencies": {
           "MediatR.Contracts": "[2.0.1, )",
-          "Medo.Uuid7": "[3.2.0, )"
+          "Medo.Uuid7": "[3.3.0, )"
         }
       }
     },

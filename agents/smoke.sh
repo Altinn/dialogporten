@@ -71,7 +71,13 @@ sudo env MASKINPORTEN_AT23_CLIENT_ID=smoke-client MASKINPORTEN_AT23_ENCODED_JWK=
 [[ "$(jq -r '."Infrastructure:Maskinporten:EncodedJwk"' "$secrets")" == smoke-jwk ]] \
     || fail "the Maskinporten key was not written to the user secrets"
 
-# A third run, with `none` again, removes the client the second wrote and keeps the generated pair.
+# A run without the values, as through sudo, which leaves the caller's environment out, keeps the client.
+sudo env -u MASKINPORTEN_AT23_CLIENT_ID -u MASKINPORTEN_AT23_ENCODED_JWK /usr/local/libexec/agent-dialogporten-dev-init
+jq -e '."Infrastructure:Maskinporten:ClientId" == "smoke-client"
+    and ."Infrastructure:Maskinporten:EncodedJwk" == "smoke-jwk"' "$secrets" >/dev/null \
+    || fail "a run without the Maskinporten values changed the client in the user secrets"
+
+# A run with `none` again removes the client and keeps the generated pair.
 sudo env MASKINPORTEN_AT23_CLIENT_ID=none MASKINPORTEN_AT23_ENCODED_JWK=none \
     /usr/local/libexec/agent-dialogporten-dev-init
 jq -e 'has("Infrastructure:Maskinporten:ClientId") or has("Infrastructure:Maskinporten:EncodedJwk") | not' \

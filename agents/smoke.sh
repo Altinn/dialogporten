@@ -85,6 +85,66 @@ jq -e 'has("Infrastructure:Maskinporten:ClientId") or has("Infrastructure:Maskin
 [[ "$(jq -r '."Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent"' "$secrets")" == "$private" ]] \
     || fail "a run with a Maskinporten client of none replaced the generated key pair"
 
+# The two values act as one client. Each row below gives the client ID and the key, each a value, `none`, empty or
+# unset; the client the user secrets start with, the agent's earlier pair or forms of it set by hand; what the run
+# must leave, the given pair written flat, no client, or the client it started with; and the value the unit must name
+# as not written, or `-`.
+without_client="$(jq -c . "$secrets")"
+earlier='{"Infrastructure:Maskinporten:ClientId": "smoke-client",
+    "Infrastructure:Maskinporten:EncodedJwk": "smoke-jwk"}'
+# Forms .NET reads as the same two keys, flat in other casing, mixed and nested, beside settings that must stay.
+hand_set='{"infrastructure:maskinporten:clientid": "hand-client",
+    "Infrastructure:Maskinporten": {"clientId": "hand-client"},
+    "Infrastructure": {"Maskinporten": {"EncodedJwk": "hand-jwk", "Scope": "smoke-scope"}},
+    "Infrastructure:Maskinporten:ClientIdOld": "smoke-near"}'
+hand_set_others='["Infrastructure","Maskinporten","Scope"]=smoke-scope
+["Infrastructure:Maskinporten:ClientIdOld"]=smoke-near'
+# The Maskinporten settings in the user secrets, a line per path .NET reads, so that their forms can be told apart.
+maskinporten_settings() {
+    jq -r 'paths(type != "object" and type != "array") as $p
+        | select($p | map(tostring) | join(":") | ascii_downcase | startswith("infrastructure:maskinporten:"))
+        | "\($p | tojson)=\(getpath($p))"' "$secrets" | LC_ALL=C sort
+}
+value() { [[ "$1" == empty ]] || printf '%s' "$1"; }
+while read -r client_id jwk start leaves named; do
+    row="client ID $client_id and key $jwk on the $start client"
+    fixture="$earlier" others=''
+    [[ "$start" == earlier ]] || fixture="$hand_set" others="$hand_set_others"
+    jq -n --argjson base "$without_client" --argjson fixture "$fixture" '$base + $fixture' >"$secrets"
+    before="$(maskinporten_settings)"
+    assignments=()
+    [[ "$client_id" == unset ]] || assignments+=("MASKINPORTEN_AT23_CLIENT_ID=$(value "$client_id")")
+    [[ "$jwk" == unset ]] || assignments+=("MASKINPORTEN_AT23_ENCODED_JWK=$(value "$jwk")")
+    {
+        sudo env -u MASKINPORTEN_AT23_CLIENT_ID -u MASKINPORTEN_AT23_ENCODED_JWK "${assignments[@]}" \
+            /usr/local/libexec/agent-dialogporten-dev-init </dev/null
+    } >"$work/out" 2>"$work/err" || { cat "$work/err" >&2; fail "$row: the unit failed"; }
+    case "$leaves" in
+        pair) expected="$(printf '%s\n' "$others" "[\"Infrastructure:Maskinporten:ClientId\"]=$client_id" \
+            "[\"Infrastructure:Maskinporten:EncodedJwk\"]=$jwk" | sed '/^$/d' | LC_ALL=C sort)" ;;
+        none) expected="$others" ;;
+        kept) expected="$before" ;;
+    esac
+    [[ "$(maskinporten_settings)" == "$expected" ]] \
+        || fail "$row: the user secrets do not hold what the run must leave, $leaves"
+    [[ "$(sed -n 's/^agent-dialogporten-dev-init: \(MASKINPORTEN_AT23_[A-Z_]*\) is not written.*/\1/p' "$work/err")" \
+        == "${named#-}" ]] || fail "$row: the unit did not name exactly the value it did not write, $named"
+    ! grep -qF -e smoke-client-2 -e smoke-jwk-2 "$work/out" "$work/err" || fail "$row: the unit printed a value"
+    [[ "$(jq -r '."Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent"' "$secrets")" == "$private" ]] \
+        || fail "$row: the run replaced the generated key pair"
+done <<'EOF'
+smoke-client-2 none earlier none MASKINPORTEN_AT23_CLIENT_ID
+none smoke-jwk-2 earlier none MASKINPORTEN_AT23_ENCODED_JWK
+smoke-client-2 unset earlier kept MASKINPORTEN_AT23_CLIENT_ID
+unset smoke-jwk-2 earlier kept MASKINPORTEN_AT23_ENCODED_JWK
+smoke-client-2 empty earlier kept MASKINPORTEN_AT23_CLIENT_ID
+none unset earlier none -
+unset none earlier none -
+empty none earlier none -
+none none hand-set none -
+smoke-client-2 smoke-jwk-2 hand-set pair -
+EOF
+
 echo "## dev certificate"
 # Against the system store itself: a container runtime may point SSL_CERT_FILE at a CA bundle it copied when the
 # container started, before the boot unit added the certificate, as the agent's own Podman does.

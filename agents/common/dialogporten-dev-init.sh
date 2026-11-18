@@ -7,8 +7,8 @@
 #   it needs no shared key;
 # - the local database connection string, from the credentials in the repository's .env that
 #   docker-compose-db-redis.yml starts Postgres with;
-# - the AT23 Maskinporten client from the agent's MASKINPORTEN_AT23_* values, removed when they are `none` and left
-#   as it is when they are unset.
+# - the AT23 Maskinporten client from the agent's MASKINPORTEN_AT23_* values, which act as one client: both replace
+#   it in every form, either of them `none` removes every form, and anything else leaves it as it is.
 #
 # They go in the user secrets every runtime project shares (UserSecretsId in Directory.Build.props). Generated values
 # already there are kept, while the Maskinporten client follows the agent's values. The other AT23 credentials are
@@ -96,17 +96,39 @@ jq --arg connection "$connection" \
         "Application:Dialogporten:Ed25519KeyPairs:Secondary:PublicComponent": $secondary.PublicComponent
     } + .' "$secrets" >"$work/secrets.json"
 
-# Sets a secret to the agent's value, or removes it when the value is `none`. Without a value, as in a run through
-# sudo, which leaves the caller's environment out, the secret stays as it is.
-set_secret() {
-    key="$1"
-    value="$2"
-    [ -n "$value" ] || return 0
-    jq --arg key "$key" --arg value "$value" 'if $value == "none" then del(.[$key]) else .[$key] = $value end' \
-        "$work/secrets.json" >"$work/secrets.next.json"
-    mv "$work/secrets.next.json" "$work/secrets.json"
+# The Maskinporten client's two values act as one client. Both given replace it, either of them `none` removes it, and
+# anything else, such as a run through sudo, which leaves the caller's environment out, leaves it as it is. A value
+# that is given but not written is named in the unit's output, never shown.
+client_id="${MASKINPORTEN_AT23_CLIENT_ID:-}"
+jwk="${MASKINPORTEN_AT23_ENCODED_JWK:-}"
+given() { [ -n "$1" ] && [ "$1" != none ]; }
+not_written() {
+    echo "agent-dialogporten-dev-init: $1 is not written, since the Maskinporten client needs both values" >&2
 }
-set_secret Infrastructure:Maskinporten:ClientId "${MASKINPORTEN_AT23_CLIENT_ID:-}"
-set_secret Infrastructure:Maskinporten:EncodedJwk "${MASKINPORTEN_AT23_ENCODED_JWK:-}"
+client=keep
+if [ "$client_id" = none ] || [ "$jwk" = none ]; then
+    client=remove
+elif given "$client_id" && given "$jwk"; then
+    client=replace
+fi
+if [ "$client" != replace ]; then
+    if given "$client_id"; then not_written MASKINPORTEN_AT23_CLIENT_ID; fi
+    if given "$jwk"; then not_written MASKINPORTEN_AT23_ENCODED_JWK; fi
+fi
+
+# Replacing or removing the client takes every form of its two keys that .NET reads: any path whose keys, joined with
+# colons, name one of them, ignoring ASCII case as .NET does, flat, nested or both. An empty object or array there reads
+# as the key without a value. The replacement is written flat, since two forms of one key make the apps fail to load
+# the user secrets.
+if [ "$client" != keep ]; then
+    jq --arg client "$client" --arg client_id "$client_id" --arg jwk "$jwk" '
+        delpaths([paths((type != "object" and type != "array") or length == 0)
+            | select(map(tostring) | join(":") | ascii_downcase
+                | IN("infrastructure:maskinporten:clientid", "infrastructure:maskinporten:encodedjwk"))])
+        | if $client == "replace" then
+            . + {"Infrastructure:Maskinporten:ClientId": $client_id, "Infrastructure:Maskinporten:EncodedJwk": $jwk}
+          else . end' "$work/secrets.json" >"$work/secrets.next.json"
+    mv "$work/secrets.next.json" "$work/secrets.json"
+fi
 
 install -m 0600 -o "$user" -g "$user" "$work/secrets.json" "$secrets"

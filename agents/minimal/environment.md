@@ -8,7 +8,9 @@
   one, into the user secrets every runtime project shares. It runs in the background after the workspace clone, so
   on a fresh boot wait until `systemctl show -P SubState agent-dialogporten-dev-init` says `exited` before you run
   the apps. After you change those secrets by hand, keep in mind that rerunning the unit keeps the generated values
-  you have, and replaces the Maskinporten client with the agent's or removes it when the agent has none.
+  you have. It treats the agent's two Maskinporten values as one client: it replaces any client you set with the
+  agent's when the agent has both, removes it when either is `none`, and otherwise leaves it as it is.
+  `sudo journalctl -u agent-dialogporten-dev-init` names a value it was given but did not write.
 - The E2E tests run against AT23. `TokenGeneratorUser` and `TokenGeneratorPassword` for the E2E tests and
   `Infrastructure__Altinn__SubscriptionKey` for the apps are in the environment as placeholders, which the host
   replaces with the real values only in requests to their hosts. Never print, copy or persist them. When one of them

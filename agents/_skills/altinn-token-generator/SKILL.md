@@ -62,7 +62,7 @@ Parameters per kind, from the generator's source:
 - **The generator looks nothing up.** A personal token carries `urn:altinn:userid`, `urn:altinn:partyid` and
   `urn:altinn:party:uuid` only when you pass `userId`, `partyId` and `partyuuid`. The E2E tokens carry only `pid`.
   APIs that read the party from the token, such as Altinn's end-user Access Management APIs, answer 403 to a
-  pid-only token; the `altinn-access-management` skill's `am.sh enduser-token` fills them in.
+  pid-only token; the `altinn-access-management` skill's `am.sh get` calls them with a token that carries them.
 - **`dump` needs a value.** The generator's own `dump=true` returns the decoded token, but a bare `dump` is
   ignored and returns the token. Use `token.sh claims`, which decodes locally and gives plain JSON.
 - **Scopes are space separated in one param.** Quote it: `"scopes=a b"`.

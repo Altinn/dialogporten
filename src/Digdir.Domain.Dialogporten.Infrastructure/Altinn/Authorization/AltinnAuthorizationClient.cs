@@ -212,7 +212,6 @@ internal sealed partial class AltinnAuthorizationClient : IAltinnAuthorization
 
     public async Task<bool> UserHasRequiredAuthLevel(string serviceResource, CancellationToken cancellationToken)
     {
-
         var minimumAuthenticationLevels = await _serviceResourceMinimumAuthenticationLevelResolver
             .GetMinimumAuthenticationLevel(serviceResource, cancellationToken);
         if (_user.GetPrincipal().TryGetSystemUserId(out _))

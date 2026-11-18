@@ -36,10 +36,10 @@ them and rewrites the references:
 ```sh
 gh pr create --repo Altinn/dialogporten --base main --head <branch> \
   --title 'fix: ...' --body-file pr-body.md --attach ./result.gif
-gh pr edit <number> --attach ./result.gif
+gh pr edit <number> --repo Altinn/dialogporten --attach ./result.gif
 ```
 
 After a push to the account's fork, `--head` takes `<account>:<branch>`.
 
 If an upload fails, look at the pull request before retrying, since it may exist already. Read the body back with
-`gh pr view <number> --json body -q .body` and check that attachments have hosted URLs.
+`gh pr view <number> --repo Altinn/dialogporten --json body -q .body` and check that attachments have hosted URLs.

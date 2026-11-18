@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.126.7](https://github.com/Altinn/dialogporten/compare/v1.126.6...v1.126.7) (2026-11-18)
+
+
+### Bug Fixes
+
+* optimize actor name conflict resolution ([#4591](https://github.com/Altinn/dialogporten/issues/4591)) ([f5e9640](https://github.com/Altinn/dialogporten/commit/f5e9640111d5dbd8d076352124d4a0e43faaff18))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency medo.uuid7 to 3.3.0 ([#4625](https://github.com/Altinn/dialogporten/issues/4625)) ([76aa415](https://github.com/Altinn/dialogporten/commit/76aa415257e22f917dc9175f0c6f9c52808ed2d1))
+* **deps:** update hotchocolate dependencies to 16.7.5 ([#4622](https://github.com/Altinn/dialogporten/issues/4622)) ([3f1e46a](https://github.com/Altinn/dialogporten/commit/3f1e46ae547ce6c97f7ee45d65d94e7bd352c02b))
+* **deps:** update microsoft dependencies to 10.0.15 ([#4623](https://github.com/Altinn/dialogporten/issues/4623)) ([59ca284](https://github.com/Altinn/dialogporten/commit/59ca2840dd6c410057354c41071ca6845706c4c0))
+* **deps:** update test dependencies ([#4624](https://github.com/Altinn/dialogporten/issues/4624)) ([38c7fef](https://github.com/Altinn/dialogporten/commit/38c7fef6e2c98ae62f5ed6136ec00301a8c070f1))
+
 ## [1.126.6](https://github.com/Altinn/dialogporten/compare/v1.126.5...v1.126.6) (2026-11-16)
 
 

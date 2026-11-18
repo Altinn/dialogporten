@@ -7,7 +7,7 @@
 #   it needs no shared key;
 # - the local database connection string, from the credentials in the repository's .env that
 #   docker-compose-db-redis.yml starts Postgres with;
-# - the AT23 Maskinporten client from the agent's MASKINPORTEN_AT23_* values, unless they are `none`.
+# - the AT23 Maskinporten client from the agent's MASKINPORTEN_AT23_* values, removed when they are `none`.
 #
 # They go in the user secrets every runtime project shares (UserSecretsId in Directory.Build.props). Generated values
 # already there are kept, while the Maskinporten client follows the agent's values. The other AT23 credentials are
@@ -95,15 +95,15 @@ jq --arg connection "$connection" \
         "Application:Dialogporten:Ed25519KeyPairs:Secondary:PublicComponent": $secondary.PublicComponent
     } + .' "$secrets" >"$work/secrets.json"
 
+# Sets a secret to the agent's value, or removes it when the value is `none`.
 set_secret() {
     key="$1"
     value="$2"
-    jq --arg key "$key" --arg value "$value" '.[$key] = $value' "$work/secrets.json" >"$work/secrets.next.json"
+    jq --arg key "$key" --arg value "$value" 'if $value == "none" then del(.[$key]) else .[$key] = $value end' \
+        "$work/secrets.json" >"$work/secrets.next.json"
     mv "$work/secrets.next.json" "$work/secrets.json"
 }
-client_id="${MASKINPORTEN_AT23_CLIENT_ID:-none}"
-jwk="${MASKINPORTEN_AT23_ENCODED_JWK:-none}"
-[ "$client_id" = none ] || set_secret Infrastructure:Maskinporten:ClientId "$client_id"
-[ "$jwk" = none ] || set_secret Infrastructure:Maskinporten:EncodedJwk "$jwk"
+set_secret Infrastructure:Maskinporten:ClientId "${MASKINPORTEN_AT23_CLIENT_ID:-none}"
+set_secret Infrastructure:Maskinporten:EncodedJwk "${MASKINPORTEN_AT23_ENCODED_JWK:-none}"
 
 install -m 0600 -o "$user" -g "$user" "$work/secrets.json" "$secrets"

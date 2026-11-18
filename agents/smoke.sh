@@ -68,6 +68,16 @@ sudo env MASKINPORTEN_AT23_CLIENT_ID=smoke-client MASKINPORTEN_AT23_ENCODED_JWK=
     || fail "a second run replaced the generated key pair"
 [[ "$(jq -r '."Infrastructure:Maskinporten:ClientId"' "$secrets")" == smoke-client ]] \
     || fail "the Maskinporten client was not written to the user secrets"
+[[ "$(jq -r '."Infrastructure:Maskinporten:EncodedJwk"' "$secrets")" == smoke-jwk ]] \
+    || fail "the Maskinporten key was not written to the user secrets"
+
+# A third run, with `none` again, removes the client the second wrote and keeps the generated pair.
+sudo env MASKINPORTEN_AT23_CLIENT_ID=none MASKINPORTEN_AT23_ENCODED_JWK=none \
+    /usr/local/libexec/agent-dialogporten-dev-init
+jq -e 'has("Infrastructure:Maskinporten:ClientId") or has("Infrastructure:Maskinporten:EncodedJwk") | not' \
+    "$secrets" >/dev/null || fail "a Maskinporten client of none left the earlier client in the user secrets"
+[[ "$(jq -r '."Application:Dialogporten:Ed25519KeyPairs:Primary:PrivateComponent"' "$secrets")" == "$private" ]] \
+    || fail "a run with a Maskinporten client of none replaced the generated key pair"
 
 echo "## dev certificate"
 # Against the system store itself: a container runtime may point SSL_CERT_FILE at a CA bundle it copied when the

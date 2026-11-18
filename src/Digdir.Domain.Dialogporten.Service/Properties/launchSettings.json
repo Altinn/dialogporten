@@ -7,6 +7,30 @@
         "DOTNET_ENVIRONMENT": "Development"
       },
       "applicationUrl": "https://localhost:56841;http://localhost:56842"
+    },
+    "Digdir.Domain.Dialogporten.Service (E2E)": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:56841",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RUNNING_E2E_TESTS": "true",
+        "LocalDevelopment__UseLocalDevelopmentUser": "false",
+        "LocalDevelopment__UseLocalDevelopmentResourceRegister": "false",
+        "LocalDevelopment__UseLocalMetricsAggregationStorage": "true",
+        "LocalDevelopment__DisableSubjectResourceSyncOnStartup": "true",
+        "LocalDevelopment__DisableCache": "false",
+        "LocalDevelopment__UseLocalDevelopmentPartyNameRegistry": "false",
+        "LocalDevelopment__UseLocalDevelopmentCloudEventBus": "true",
+        "LocalDevelopment__UseLocalDevelopmentCompactJwsGenerator": "true",
+        "LocalDevelopment__UseLocalDevelopmentOrganizationRegister": "false",
+        "LocalDevelopment__UseInMemoryServiceBusTransport": "true",
+        "LocalDevelopment__UseLocalDevelopmentAltinnAuthorization": "false",
+        "LocalDevelopment__DisablePolicyInformationSyncOnStartup": "true",
+        "LocalDevelopment__UseLocalDevelopmentNameRegister": "false",
+        "LocalDevelopment__DisableAuth": "false"
+      }
     }
   }
 }

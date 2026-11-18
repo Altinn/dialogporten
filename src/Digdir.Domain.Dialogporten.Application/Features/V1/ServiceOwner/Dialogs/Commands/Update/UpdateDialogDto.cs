@@ -105,6 +105,11 @@ public sealed class UpdateDialogDto
     /// <summary>
     /// An immutable list of activities associated with the dialog. When updating via PUT, any activities added here
     /// will be appended to the existing list of activities.
+    ///
+    /// A transmission can only be opened once, so only the first TransmissionOpened activity per transmission is stored.
+    /// Any TransmissionOpened activity referencing a transmission that already has one, either on the dialog or earlier
+    /// in this list, is silently skipped (regardless of who performed it), but is still validated.
+    /// Other changes in the request are applied as normal.
     /// </summary>
     public List<ActivityDto> Activities { get; set; } = [];
 }
@@ -271,6 +276,8 @@ public sealed class ActivityDto
     /// <summary>
     /// A UUIDv7 may be provided to support idempotent additions to the list of activities.
     /// If not supplied, a new UUIDv7 will be generated.
+    /// If the activity is a duplicate TransmissionOpened activity (see the activities list), it is not stored,
+    /// and this id cannot be used to look up the activity afterwards.
     /// </summary>
     /// <example>01913cd5-784f-7d3b-abef-4c77b1f0972d</example>
     public Guid? Id { get; set; }

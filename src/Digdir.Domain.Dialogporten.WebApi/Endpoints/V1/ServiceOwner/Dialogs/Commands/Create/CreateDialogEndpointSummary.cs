@@ -13,8 +13,10 @@ public sealed class CreateDialogEndpointSummary : Summary<CreateDialogEndpoint>
     public CreateDialogEndpointSummary()
     {
         Summary = "Creates a new dialog";
-        Description = """
+        Description = $"""
                       The dialog is created with the given configuration.
+
+                      {Constants.SwaggerSummary.DuplicateTransmissionOpenedNote}
 
                       For detailed information on validation rules, see [the source for create dialog validators](https://github.com/Altinn/dialogporten/tree/main/src/Digdir.Domain.Dialogporten.Application/Features/V1/ServiceOwner/Dialogs/Commands/Create/Validators)
                       """;

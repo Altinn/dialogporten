@@ -20,13 +20,9 @@ credentials, the WebApi and GraphQL E2E tests, and opens pull requests that show
 `agentctl claude login`. Then store, once on your machine, what the agent uses without it entering the sandbox. The
 host puts each value only into requests to its hosts.
 
-- The GitHub account the agent works as. The agent can do whatever that account can, on any repository the account
-  reaches, and only its instructions keep it to this one. A browser sign-in as yourself gives it everything you can
-  do, so with your own account choose the fine-grained token and select only `Altinn/dialogporten`. With a GitHub user
-  made for agents, sign in as that user, such as in a private window. Check that agentctl names the account before it
-  keeps the token. The agent pushes and opens pull requests as the account, and Git commits as it. An account that
-  cannot push to this repository pushes to its fork, and a maintainer approves the CI runs of its pull requests. A
-  fine-grained token reaches one owner's repositories, so it cannot both push to a fork and open the pull request here.
+- The GitHub account the agent works as: it pushes and opens pull requests as the account, and Git commits as it.
+  `agentctl github login` offers the ways to sign in. An account that cannot push to this repository pushes to its
+  fork, and a maintainer approves the CI runs of its pull requests.
 
   ```sh
   agentctl github login default
@@ -42,8 +38,8 @@ host puts each value only into requests to its hosts.
 - For the E2E tests, the test token generator's user and password, which the [E2E docs](../docs/E2E-Tests.md) list.
 
   ```sh
-  agentctl secret set altinn-token-generator-user --hosts altinn-testtools-token-generator.azurewebsites.net
-  agentctl secret set altinn-token-generator-password --hosts altinn-testtools-token-generator.azurewebsites.net
+  agentctl secret set e2e-token-generator-user --hosts altinn-testtools-token-generator.azurewebsites.net
+  agentctl secret set e2e-token-generator-password --hosts altinn-testtools-token-generator.azurewebsites.net
   ```
 
 The E2E tests also need an AT23 Maskinporten client with the scopes `Infrastructure:Maskinporten:Scope` lists in the

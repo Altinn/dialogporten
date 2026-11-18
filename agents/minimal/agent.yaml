@@ -62,12 +62,12 @@ spec:
       allowedHosts:
         - platform.at23.altinn.cloud
     # The test token generator the E2E tests get their tokens from, with Basic authentication.
-    - name: altinn-token-generator-user
+    - name: e2e-token-generator-user
       environment: TokenGeneratorUser
       optional: true
       allowedHosts:
         - altinn-testtools-token-generator.azurewebsites.net
-    - name: altinn-token-generator-password
+    - name: e2e-token-generator-password
       environment: TokenGeneratorPassword
       optional: true
       allowedHosts:

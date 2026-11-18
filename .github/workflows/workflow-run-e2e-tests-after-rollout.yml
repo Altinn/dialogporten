@@ -1,0 +1,163 @@
+name: Run E2E tests after a rollout
+
+# Runs the E2E tests against a release that Flux has rolled out (RFC 0019). The version
+# endpoints are checked before and after the tests, so a result never certifies a release
+# that the environment no longer runs.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Test environment, for example test"
+        required: true
+        type: string
+      base_url:
+        description: "Public Dialogporten URL of the environment, for example https://platform.at23.altinn.cloud/dialogporten"
+        required: true
+        type: string
+      version:
+        description: "Image tag that Flux rolled out, for example 1.126.7-a3df68f"
+        required: true
+        type: string
+      ref:
+        description: "Commit of that release on main. The tests run from it."
+        required: true
+        type: string
+    secrets:
+      TOKEN_GENERATOR_USERNAME:
+        required: true
+      TOKEN_GENERATOR_PASSWORD:
+        required: true
+      SLACK_BOT_TOKEN:
+        required: true
+      SLACK_CHANNEL_ID:
+        required: true
+
+permissions: {}
+
+jobs:
+  check-release:
+    name: Check the running release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      current: ${{ steps.check.outputs.current }}
+    steps:
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout the check script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      # Old pods can answer for a moment after the health checks pass, so wait up to two
+      # minutes for every app to run the release.
+      - name: Check the running release
+        id: check
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          EXPECTED_VERSION: ${{ inputs.version }}
+          WAIT_SECONDS: 120
+        run: bash .github/scripts/check-deployed-version.sh
+
+  run-e2e-tests:
+    name: Run K6 functional end-to-end tests
+    needs: check-release
+    # When a newer release already runs, the result for that release tests it.
+    if: needs.check-release.outputs.current == 'true'
+    uses: ./.github/workflows/workflow-run-k6-tests.yml
+    permissions:
+      checks: write
+      pull-requests: write
+    secrets:
+      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+    with:
+      environment: ${{ inputs.environment }}
+      apiVersion: v1
+      testSuitePath: tests/k6/suites/all-single-pass.js
+      ref: ${{ inputs.ref }}
+
+  run-graphql-e2e-tests:
+    name: Run GraphQL E2E tests
+    needs: run-e2e-tests
+    uses: ./.github/workflows/workflow-run-graphql-e2e-tests.yml
+    permissions:
+      contents: read
+    secrets:
+      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+    with:
+      environment: ${{ inputs.environment }}
+      ref: ${{ inputs.ref }}
+
+  run-webapi-e2e-tests:
+    name: Run WebAPI E2E tests
+    needs: run-e2e-tests
+    uses: ./.github/workflows/workflow-run-webapi-e2e-tests.yml
+    permissions:
+      contents: read
+    secrets:
+      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+    with:
+      environment: ${{ inputs.environment }}
+      ref: ${{ inputs.ref }}
+
+  check-release-after-tests:
+    name: Check that the release did not change
+    needs: [ run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests ]
+    if: ${{ always() && !cancelled() && needs.run-e2e-tests.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout the check script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - name: Check the running release
+        id: check
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: bash .github/scripts/check-deployed-version.sh
+
+      - name: Fail a stale result
+        if: steps.check.outputs.current != 'true'
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          echo "::error::The release changed during the tests, so they do not certify ${EXPECTED_VERSION}."
+          exit 1
+
+  # Not for a stale result: the run for the newer release reports its own tests.
+  send-slack-message-on-failure:
+    name: Send Slack message on failure
+    needs: [ check-release, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests ]
+    if: ${{ always() && !cancelled() && contains(needs.*.result, 'failure') }}
+    uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
+    permissions:
+      contents: read
+    with:
+      environment: ${{ inputs.environment }}
+      # The apps line shows whether every app answered with the release.
+      apps_status: ${{ needs.check-release.result }}
+      e2e_tests_status: ${{ needs.run-e2e-tests.result }}
+      graphql_e2e_tests_status: ${{ needs.run-graphql-e2e-tests.result }}
+      webapi_e2e_tests_status: ${{ needs.run-webapi-e2e-tests.result }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}

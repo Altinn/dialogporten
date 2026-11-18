@@ -1,6 +1,7 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Domain.ResourcePolicyInformation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -13,19 +14,23 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
     private const string MinimumAuthenticationLevelsCacheKey = MinimumAuthenticationLevelsCacheName;
 
     private readonly DialogDbContext _dbContext;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly IFusionCache _minimumAuthenticationLevelsCache;
 
     public ResourcePolicyInformationRepository(
         DialogDbContext dbContext,
+        IServiceScopeFactory scopeFactory,
         IFusionCacheProvider cacheProvider)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(scopeFactory);
         ArgumentNullException.ThrowIfNull(cacheProvider);
 
         var minimumAuthenticationLevelsCache = cacheProvider.GetCache(MinimumAuthenticationLevelsCacheName);
         ArgumentNullException.ThrowIfNull(minimumAuthenticationLevelsCache);
 
         _dbContext = dbContext;
+        _scopeFactory = scopeFactory;
         _minimumAuthenticationLevelsCache = minimumAuthenticationLevelsCache;
     }
 
@@ -35,8 +40,15 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
             FetchMinimumAuthenticationLevels,
             token: cancellationToken);
 
-    private async Task<Dictionary<string, int>> FetchMinimumAuthenticationLevels(CancellationToken cancellationToken) =>
-        await _dbContext.ResourcePolicyInformation
+    private async Task<Dictionary<string, int>> FetchMinimumAuthenticationLevels(CancellationToken cancellationToken)
+    {
+        // Use a dedicated scope rather than the injected (request-scoped) DbContext. The factory can run detached
+        // from the caller (soft-timeout background completion / eager refresh), after the request scope has been
+        // disposed or while the caller is using its DbContext concurrently.
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        return await dbContext.ResourcePolicyInformation
             .AsNoTracking()
             .Select(x => new { x.Resource, x.MinimumAuthenticationLevel })
             .ToDictionaryAsync(
@@ -44,6 +56,7 @@ internal sealed class ResourcePolicyInformationRepository : IResourcePolicyInfor
                 x => x.MinimumAuthenticationLevel,
                 StringComparer.OrdinalIgnoreCase,
                 cancellationToken);
+    }
 
     public async Task<DateTimeOffset> GetLastUpdatedAt(
         TimeSpan? timeSkew = null,

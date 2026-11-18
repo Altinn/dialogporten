@@ -5,7 +5,7 @@
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
-        <PackageReference Include="HotChocolate.AspNetCore" Version="16.7.3" />
+        <PackageReference Include="HotChocolate.AspNetCore" Version="16.7.5" />
         <PackageReference Include="HotChocolate.Diagnostics" Version="16.7.5" />
         <PackageReference Include="HotChocolate.Data.EntityFramework" Version="16.7.5" />
         <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="16.7.5" />

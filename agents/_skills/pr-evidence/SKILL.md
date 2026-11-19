@@ -39,7 +39,9 @@ gh pr create --repo Altinn/dialogporten --base main --head <branch> \
 gh pr edit <number> --repo Altinn/dialogporten --attach ./result.gif
 ```
 
-After a push to the account's fork, `--head` takes `<account>:<branch>`.
+After a push to the account's fork, `--head` takes `<account>:<branch>`. Attaching needs write access to this
+repository, which such an account lacks: open its pull request without `--attach` and without local file references,
+and tell the user which recordings are under `/home/agent/code/.artifacts/<task>/`, for them to add.
 
 If an upload fails, look at the pull request before retrying, since it may exist already. Read the body back with
 `gh pr view <number> --repo Altinn/dialogporten --json body -q .body` and check that attachments have hosted URLs.

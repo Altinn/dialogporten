@@ -119,14 +119,15 @@ fi
 # Replacing or removing the client takes every form of its two keys that .NET reads: any path whose keys, joined with
 # colons, name one of them, ignoring ASCII case as .NET does, flat, nested or both. An empty object or array there reads
 # as the key without a value. The replacement is written flat, since two forms of one key make the apps fail to load
-# the user secrets.
+# the user secrets. jq takes the pair from its environment, never its command line, which other processes can read.
 if [ "$client" != keep ]; then
-    jq --arg client "$client" --arg client_id "$client_id" --arg jwk "$jwk" '
+    jq --arg client "$client" '
         delpaths([paths((type != "object" and type != "array") or length == 0)
             | select(map(tostring) | join(":") | ascii_downcase
                 | IN("infrastructure:maskinporten:clientid", "infrastructure:maskinporten:encodedjwk"))])
         | if $client == "replace" then
-            . + {"Infrastructure:Maskinporten:ClientId": $client_id, "Infrastructure:Maskinporten:EncodedJwk": $jwk}
+            . + {"Infrastructure:Maskinporten:ClientId": $ENV.MASKINPORTEN_AT23_CLIENT_ID,
+                "Infrastructure:Maskinporten:EncodedJwk": $ENV.MASKINPORTEN_AT23_ENCODED_JWK}
           else . end' "$work/secrets.json" >"$work/secrets.next.json"
     mv "$work/secrets.next.json" "$work/secrets.json"
 fi

@@ -74,7 +74,7 @@ ID. `partyId` is null for a system user.
 | `parties <subject> <orgNo\|pid>` | that one party's roles, access packages, resources and instance count |
 | `lookup <pid\|orgNo\|uuid> ...` | each party's type, `partyUuid`, `partyId` and name, from the register |
 | `whoami <pid>` | the person's own `partyUuid` and `partyId` |
-| `enduser-token <pid> [scopes]` | a personal token with the `partyId` and `partyuuid` `lookup` finds, default scope `altinn:portal/enduser` |
+| `enduser-token <pid> [scopes]` | a personal token with the `partyId` and `partyuuid` `lookup` finds, default scope `altinn:portal/enduser`. It prints the token, so use it only inside `$(…)`, as under Repairing state |
 | `decide <pid\|systemUserUuid> <pid\|orgNo> <resource> [action]` | the PDP's decision, default action `read` |
 | `policy <resource>` | the roles, access packages and orgs the resource's policy grants to |
 | `get <pid> <path>` | GET an end-user API as that person |
@@ -102,8 +102,9 @@ The first two show the client delegation the E2E tests use. 08885399984 is dagli
 AT23 is shared with other teams, and Altinn Authorization's own tests depend on some of the same parties, so
 **confirm with the user before changing anything**. Say what you will change and why. None of the requests below
 has been run by this skill; their shapes come from `ClientDelegationController.cs` and `ConnectionsController.cs` in
-altinn-auth. Send them with `curl` and the method each names, `POST` or `DELETE`, and a token from
-`am.sh enduser-token <the administrator's pid>`. Client delegations are taken back with a `POST` to a `/delete` route.
+altinn-auth. Send them with `curl` and the method each names, `POST` or `DELETE`, and the administrator's token as
+`-H "Authorization: Bearer $(bash $S/am.sh enduser-token <the administrator's pid>)"`, so only the answer reaches the
+terminal. Client delegations are taken back with a `POST` to a `/delete` route.
 
 - **Client delegation** (as the firm's daglig leder, base `/accessmanagement/api/v2/enduser/clientdelegations`):
   - add an agent: `POST agents?party=<firmUuid>` with `{"personIdentifier":"<pid>","lastName":"<last name>"}`;
@@ -120,7 +121,7 @@ altinn-auth. Send them with `curl` and the method each names, `POST` or `DELETE`
 ## Gotchas
 
 - **End-user APIs reject pid-only tokens.** They answer 403 with an empty body unless the personal token carries
-  `partyId` and `partyuuid`, which the generator does not look up. Use `am.sh enduser-token` or `am.sh get`.
+  `partyId` and `partyuuid`, which the generator does not look up. Use `am.sh get`, which mints a token with them.
 - **Three identifier kinds.** Request bodies take URNs with a pid or orgNo, end-user query parameters take party
   UUIDs, and the system user API in Authentication takes the integer party ID. `lookup` maps between them.
 - **The register leaves out what it does not know.** A pid or orgNo with no party gives 206 Partial Content and no

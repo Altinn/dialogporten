@@ -8,13 +8,19 @@
   one, into the user secrets every runtime project shares. It runs in the background after the workspace clone, so
   on a fresh boot wait until `systemctl show -P SubState agent-dialogporten-dev-init` says `exited` before you run
   the apps. After you change those secrets by hand, keep in mind that rerunning the unit keeps the generated values
-  you have and overwrites the Maskinporten client.
+  you have. It treats the agent's two Maskinporten values as one client: it replaces any client you set with the
+  agent's when the agent has both, removes it when either is `none`, and otherwise leaves it as it is.
+  `sudo journalctl -u agent-dialogporten-dev-init` names a value it was given but did not write.
 - The E2E tests run against AT23. `TokenGeneratorUser` and `TokenGeneratorPassword` for the E2E tests and
   `Infrastructure__Altinn__SubscriptionKey` for the apps are in the environment as placeholders, which the host
   replaces with the real values only in requests to their hosts. Never print, copy or persist them. When one of them
-  or the Maskinporten client (`Infrastructure:Maskinporten:ClientId` in `dotnet user-secrets list --project
-  src/Digdir.Domain.Dialogporten.WebApi`) is missing, the E2E tests cannot run here: say so in the pull request
-  rather than working around it, such as with the `LocalDevelopment` switches.
+  or the Maskinporten client is missing, the E2E tests cannot run here: say so in the pull request rather than working
+  around it, such as with the `LocalDevelopment` switches. The client is `Infrastructure:Maskinporten:ClientId` among
+  the user secrets' names. List the names only, since the values include its real key:
+
+  ```sh
+  jq -r 'keys[]' ~/.microsoft/usersecrets/750256a4-f332-4783-8802-8a7d9566f9ca/secrets.json
+  ```
 - The E2E tests list and label dialogs from the local copy of Altinn's subject-resource mappings and resource
   policies. `scripts/e2e/.env` turns off their sync at startup, so on a database the launcher has just created they
   are empty: searches time out and system labels answer 403 while single-dialog GETs pass. Fill them once Postgres

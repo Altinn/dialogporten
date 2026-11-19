@@ -28,45 +28,47 @@ spec:
     - source: ../_skills/pr-evidence
     - source: ../_skills/altinn-token-generator
     - source: ../_skills/altinn-access-management
+  # `login: any` runs on whichever login the host has stored for the harness, whatever its name.
   harnesses:
     - type: claudeCode
       default: true
+      login: any
     # Optional: without a Codex login on the host, the agent starts without Codex. Run `agentctl codex login` and
     # the next reconcile adds it.
     - type: codex
+      login: any
       optional: true
+  # The GitHub account the agent pushes and opens pull requests as, stored with `agentctl github login default`. The
+  # agent gets a GITHUB_TOKEN placeholder for GitHub's hosts, and Git commits as the account.
+  accounts:
+    - type: github
+      login: default
   environment:
-    - name: GIT_USER_NAME
-    - name: GIT_USER_EMAIL
     # The AT23 Maskinporten client the local WebApi, GraphQL and Service use for Altinn's APIs, or `none`. The apps
     # sign their client assertion with the JWK themselves, so the host cannot substitute it in a request: the real
-    # key is in the sandbox. Use a dedicated test client. The boot unit writes them into the shared user secrets.
+    # key is in the sandbox. Use a dedicated test client, given in a variant of your own as README.md describes. The
+    # boot unit writes them into the shared user secrets.
     - name: MASKINPORTEN_AT23_CLIENT_ID
+      value: none
     - name: MASKINPORTEN_AT23_ENCODED_JWK
+      value: none
+  # Stored on the host with `agentctl secret set NAME --hosts HOST`, as README.md describes. The sandbox sees a
+  # placeholder, which the host replaces with the value only in requests to these hosts.
   secrets:
-    - environment: GITHUB_TOKEN
-      # gh only attaches files with a token it classifies by prefix, so the inert placeholder carries the
-      # fine-grained token's prefix.
-      placeholder: github_pat_AGENT_MEDIATED_GITHUB_TOKEN
-      allowedHosts:
-        - github.com
-        - api.github.com
-        - gist.github.com
-        - uploads.github.com
     # Altinn platform APIs in AT23, which the local apps call in Development. Required: several of them, such as the
     # PDP and the register, answer 401 without it.
-    - environment: Infrastructure__Altinn__SubscriptionKey
-      source: ALTINN_AT23_SUBSCRIPTION_KEY
+    - name: altinn-at23-subscription-key
+      environment: Infrastructure__Altinn__SubscriptionKey
       allowedHosts:
         - platform.at23.altinn.cloud
     # The test token generator the E2E tests get their tokens from, with Basic authentication.
-    - environment: TokenGeneratorUser
-      source: E2E_TOKEN_GENERATOR_USER
+    - name: e2e-token-generator-user
+      environment: TokenGeneratorUser
       optional: true
       allowedHosts:
         - altinn-testtools-token-generator.azurewebsites.net
-    - environment: TokenGeneratorPassword
-      source: E2E_TOKEN_GENERATOR_PASSWORD
+    - name: e2e-token-generator-password
+      environment: TokenGeneratorPassword
       optional: true
       allowedHosts:
         - altinn-testtools-token-generator.azurewebsites.net

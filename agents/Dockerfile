@@ -1,9 +1,9 @@
-# The Dialogporten agent image, built on the agentctl base image. The base carries the agent user, the harnesses at
-# the versions agentctl is tested with, Node.js, gh, asciinema and agg and the common build tools, and offers the
-# browser, containers and desktop as features:
-# https://github.com/digdir/digdir-agents/tree/main/images/agentctl-base
-# Renovate moves the digest, and with it the harness versions.
-FROM ghcr.io/digdir/agentctl-base:ubuntu-26.04@sha256:2ee51d4619a9e13b1d1e6037b48c76fcc6bbed46ef6203aadde1270c1a2fb790 AS minimal
+# The Dialogporten agent image, built on the base image of the agentctl release this definition is written for. The
+# base carries the agent user, the harnesses at the versions that release is tested with, Node.js, gh, asciinema and
+# agg, the recording skill and the common build tools, and offers the browser, containers and desktop as features:
+# https://github.com/digdir/digdir-agents/tree/agentctl/v0.1.0-preview.15/images/agentctl-base
+# A release's tag never moves. `agentctl update` brings the definition, and this tag with it, to a later release.
+FROM ghcr.io/digdir/agentctl-base:ubuntu-26.04-v0.1.0-preview.15@sha256:dd96a8413e1890b58ae4cde092bfc8b97fcb9e221822fdcb8bb3dc26466be949 AS minimal
 
 # The base ends as the unprivileged agent user; installing packages needs root again.
 USER root

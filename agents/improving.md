@@ -3,7 +3,7 @@
 This agent's definition is `agents/` in `Altinn/dialogporten`: the `Dockerfile` and `smoke.sh` for the image, the
 boot unit in `common/`, these instructions, the skills in `_skills/` and the manifests in `minimal/`. When it gets in
 the way of the work, such as a missing tool or a wrong instruction, propose a change to it in a pull request, as the
-`agent-definition` skill describes when it is available.
+`agent-definition` skill describes.
 
 Try the change before you propose it, from your worktree. For a change to the image, build it with Podman and run
 the smoke test in it, as CI does:

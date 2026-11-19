@@ -13,7 +13,7 @@ public class FusionCacheMetricsExtensionsTests
         var cacheName = $"failsafe-metrics-{Guid.NewGuid():N}";
         var exporter = new CollectingExporter();
         using var meterProvider = Sdk.CreateMeterProviderBuilder()
-            .AddFusionCacheResilienceMetrics()
+            .AddFusionCacheMetrics()
             .AddReader(new BaseExportingMetricReader(exporter))
             .Build();
 
@@ -39,7 +39,7 @@ public class FusionCacheMetricsExtensionsTests
         var cacheName = $"failsafe-metrics-{Guid.NewGuid():N}";
         var exporter = new CollectingExporter();
         using var meterProvider = Sdk.CreateMeterProviderBuilder()
-            .AddFusionCacheResilienceMetrics()
+            .AddFusionCacheMetrics()
             .AddReader(new BaseExportingMetricReader(exporter))
             .Build();
 

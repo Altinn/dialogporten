@@ -113,7 +113,7 @@ public static class OpenTelemetryExtensions
             {
                 metrics.AddRuntimeInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddFusionCacheResilienceMetrics();
+                    .AddFusionCacheMetrics();
 
                 var appInsightsConnectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
                 if (!string.IsNullOrEmpty(appInsightsConnectionString))

@@ -75,6 +75,7 @@ The agent works in its own clone of this repository.
 Change these files in a pull request. The `build` variant builds the image from your checkout, to try a change before CI
 publishes it. Changes to the instructions and skills, and to secrets, reach an agent when you run `agentctl apply`
 again from an updated checkout. A new image reaches it only when it is created again. After an agentctl release,
-`agentctl update` in a checkout proposes the changes the definition needs for it. The agent that proposes them also
-reads personal variants, and yours can hold the Maskinporten key, so run it in a checkout without yours, such as a
-fresh clone, and update your variant yourself.
+`agentctl update` in a checkout proposes the changes the definition needs for it. The agent that proposes them reads
+the checkout's personal variants and can read `~/agents`, which it also mounts, and yours can hold the Maskinporten
+key. So run `agentctl update --rm` in a fresh clone, keep your variant out of that clone and out of `~/agents`, and
+update it yourself.

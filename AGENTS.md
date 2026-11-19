@@ -81,13 +81,15 @@ All code must compile with `TreatWarningsAsErrors=true` and pass the .NET analyz
 
 The following files are manually maintained SDK client files that mirror the WebAPI surface. They are **not** auto-generated — there is no build step or CLI tool that regenerates them. When you add, remove, or modify API endpoints or DTO types in `src/Digdir.Domain.Dialogporten.WebApi/`, you must also update the affected files below to match.
 
-| File | Project | Description |
+| Path | Project | Description |
 |------|---------|-------------|
-| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/RefitterInterface.cs` | EndUser SDK | Refit interfaces for the end-user API |
-| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/RefitterInterfaceContracts.cs` | EndUser SDK | DTO contracts for the end-user API |
-| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/RefitterInterface.cs` | ServiceOwner SDK | Refit interfaces for the service-owner API |
-| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/RefitterInterfaceContracts.cs` | ServiceOwner SDK | DTO contracts for the service-owner API |
-| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Features/V1/RefitterInterface.cs` | ServiceOwner SDK (legacy) | Refit interfaces for the legacy service-owner API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/RefitterInterface.cs` | EndUser SDK | Refit interfaces and query parameter classes for the end-user API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.EndUser/Features/V1/<subfolder>/*.cs` | EndUser SDK | DTO contracts for the end-user API, one type per file. `<subfolder>` is any subfolder of `Features/V1/` except `Mapping/`, for example `Common/`, `Enums/`, `Get/` or `Search/` |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/RefitterInterface.cs` | ServiceOwner SDK | Refit interfaces and query parameter classes for the service-owner API |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Features/V1/<subfolder>/*.cs` | ServiceOwner SDK | DTO contracts for the service-owner API, one type per file. `<subfolder>` is any subfolder of `Features/V1/` except `Mapping/`, for example `Common/`, `Create/`, `Enums/`, `Get/`, `Search/` or `Update/` |
+| `src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient/Features/V1/RefitterInterface.cs` | ServiceOwner SDK (legacy) | Refit interfaces, query parameter classes and all DTO contracts for the legacy service-owner API, together in this one file |
+
+The EndUser and ServiceOwner SDKs also keep hand-written mappers in `Features/V1/Mapping/` that copy DTO fields one by one. When you add a field to a DTO, check whether the mappers should carry it.
 
 What triggers an update:
 - Adding or removing an API endpoint

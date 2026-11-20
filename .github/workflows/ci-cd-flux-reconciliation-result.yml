@@ -1,8 +1,9 @@
 name: CI/CD Flux Reconciliation Result
 
-# Records the rollout results that Flux sends from at23 (RFC 0019,
+# Handles the rollout results that Flux sends from at23 (RFC 0019,
 # https://github.com/Altinn/altinn-platform/blob/main/rfcs/0019-flux-workflow-notifications.md).
-# Record only for the pilot: no tests or notifications yet.
+# A successful rollout of the apps runs the E2E tests against the release and updates the
+# E2E at23 badge, and a failed rollout is reported to Slack.
 on:
   repository_dispatch:
     types:
@@ -17,6 +18,14 @@ jobs:
     name: Record the Flux result
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      outcome: ${{ steps.result.outputs.outcome }}
+      environment: ${{ steps.result.outputs.environment }}
+      revision: ${{ steps.result.outputs.revision }}
+      event_json: ${{ steps.result.outputs.event_json }}
+      resource: ${{ steps.summary.outputs.resource }}
+      app_version: ${{ steps.release.outputs.app_version }}
+      app_commit: ${{ steps.release.outputs.app_commit }}
     steps:
       # Fails for any sender other than the Flux dispatch App and for events of other
       # subscriptions, so a failed run means an unexpected event, not a failed rollout.
@@ -32,7 +41,9 @@ jobs:
             {"environment": "at23", "cluster": "dis-core-at23-aks", "namespace": "product-dialogporten",
             "kustomization": "dialogporten-migration"}]
 
-      # The event names the manifests commit, not the Dialogporten release.
+      # The event names the manifests commit, not the Dialogporten release. resolve-release
+      # looks the commit of the image tag up on main only, so the tests below never check
+      # out code that has not been merged.
       - name: Resolve the release
         id: release
         if: steps.result.outputs.outcome != 'ignored' && steps.result.outputs.revision != ''
@@ -42,6 +53,7 @@ jobs:
           environment: ${{ steps.result.outputs.environment }}
 
       - name: Record the result
+        id: summary
         env:
           OUTCOME: ${{ steps.result.outputs.outcome }}
           ENVIRONMENT: ${{ steps.result.outputs.environment }}
@@ -52,6 +64,7 @@ jobs:
           APP_COMMIT: ${{ steps.release.outputs.app_commit }}
         run: |
           resource=$(jq -r '"\(.involvedObject.kind)/\(.involvedObject.name)"' <<< "$EVENT_JSON")
+          echo "resource=${resource}" >> "$GITHUB_OUTPUT"
           {
             echo "### ${OUTCOME}: ${resource} in ${ENVIRONMENT}"
             echo
@@ -68,3 +81,142 @@ jobs:
             jq -r '.message' <<< "$EVENT_JSON" | tr -d '`'
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # The E2E tests are repeatable, so a repeated success for the same release, such as a
+  # recovery after a failed attempt, runs them again. A release that resolve-release could not
+  # look up fails the first check, which reports it to Slack.
+  test-release:
+    name: Test the deployed release
+    needs: record
+    if: >-
+      needs.record.outputs.outcome == 'succeeded' &&
+      needs.record.outputs.resource == 'Kustomization/dialogporten-apps' &&
+      needs.record.outputs.environment == 'at23'
+    # One E2E run against at23 at a time, shared with the K6 tests of ci-cd-main.yml, because
+    # the K6 cleanup purges the test dialogs of every run. Every success waits its turn, and a
+    # run whose release has been replaced by then skips its tests.
+    concurrency:
+      group: dialogporten-e2e-at23
+      queue: max
+    uses: ./.github/workflows/workflow-run-e2e-tests-after-rollout.yml
+    # Each job in the called workflow sets its own permissions. Only the badge job writes,
+    # to the badges branch.
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: write
+    with:
+      # at23 is Dialogporten's test environment.
+      environment: test
+      base_url: https://platform.at23.altinn.cloud/dialogporten
+      version: ${{ needs.record.outputs.app_version }}
+      ref: ${{ needs.record.outputs.app_commit }}
+      badge_name: test-e2e
+      badge_label: E2E at23
+    secrets:
+      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
+      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
+
+  report-failure:
+    name: Send Slack message on a failed rollout
+    needs: record
+    # Also when the release lookup failed, which must not hide the rollout failure.
+    if: ${{ always() && needs.record.outputs.outcome == 'failed' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    # One report at a time, so two reports of the same failure cannot both miss the key below.
+    concurrency:
+      group: flux-rollout-failure-slack
+      queue: max
+    env:
+      ENVIRONMENT: ${{ needs.record.outputs.environment }}
+      REVISION: ${{ needs.record.outputs.revision }}
+      APP_VERSION: ${{ needs.record.outputs.app_version }}
+      EVENT_JSON: ${{ needs.record.outputs.event_json }}
+    steps:
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      # A stuck rollout reports again at every retry and for every new artifact. Send one
+      # message per resource and release, or per resource and failure text when the release
+      # is unknown, as for a source error.
+      - name: Make the message key
+        id: key
+        run: |
+          resource=$(jq -r '"\(.involvedObject.kind)/\(.involvedObject.name)"' <<< "${EVENT_JSON}")
+          if [ -n "${APP_VERSION}" ]; then
+            id="${APP_VERSION}"
+          else
+            id=$(jq -r '"\(.reason) \(.message)"' <<< "${EVENT_JSON}" | sha256sum | cut -c1-16)
+          fi
+          echo "resource=${resource}" >> "$GITHUB_OUTPUT"
+          echo "key=flux-rollout-failure-${ENVIRONMENT}-${resource//\//-}-${id}" >> "$GITHUB_OUTPUT"
+
+      - name: Look for an earlier message
+        id: earlier
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .flux-rollout-failure
+          key: ${{ steps.key.outputs.key }}
+          lookup-only: true
+
+      - name: Write the Slack message
+        if: steps.earlier.outputs.cache-hit != 'true'
+        env:
+          RESOURCE: ${{ steps.key.outputs.resource }}
+          CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # Slack reads &, < and > as markup, even in a code block.
+          jq -n \
+            --arg channel "${CHANNEL_ID}" \
+            --arg environment "${ENVIRONMENT}" \
+            --arg resource "${RESOURCE}" \
+            --arg release "${APP_VERSION:-unknown}" \
+            --arg revision "${REVISION:-none}" \
+            --arg run_url "${RUN_URL}" \
+            --argjson event "${EVENT_JSON}" '
+            def escape: gsub("&"; "&amp;") | gsub("<"; "&lt;") | gsub(">"; "&gt;");
+            {
+              channel: $channel,
+              text: "Flux rollout failed in \($environment): \($resource)",
+              attachments: [{
+                color: "#FF0000",
+                blocks: [
+                  {type: "header", text: {type: "plain_text", text: "Flux rollout failed in \($environment)"}},
+                  {type: "section", text: {type: "mrkdwn", text: (
+                    "*Resource:* \($resource)\n*Release:* \($release)\n*Artifact:* \($revision)\n" +
+                    "*Reason:* \($event.reason)\n*Time:* \($event.timestamp)" | escape)}},
+                  {type: "section", text: {type: "mrkdwn", text: (
+                    "```" + ($event.message | gsub("`"; "") | escape | .[0:2900]) + "```")}},
+                  {type: "actions", elements: [
+                    {type: "button", text: {type: "plain_text", text: "View Run"}, url: $run_url}]}
+                ]
+              }]
+            }' > slack-payload.json
+
+      - name: Send the Slack message
+        if: steps.earlier.outputs.cache-hit != 'true'
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        with:
+          errors: true
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload-file-path: slack-payload.json
+
+      - name: Remember the message
+        if: steps.earlier.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .flux-rollout-failure
+          date -u +%Y-%m-%dT%H:%M:%SZ > .flux-rollout-failure/sent-at
+
+      - name: Save the message key
+        if: steps.earlier.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .flux-rollout-failure
+          key: ${{ steps.key.outputs.key }}

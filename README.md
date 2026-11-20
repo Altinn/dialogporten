@@ -1,6 +1,7 @@
 # Dialogporten
 
 [![CI/CD Main](https://raw.githubusercontent.com/Altinn/dialogporten/badges/test.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-main.yml)
+[![E2E at23](https://raw.githubusercontent.com/Altinn/dialogporten/badges/test-e2e.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-flux-reconciliation-result.yml)
 [![CI/CD Staging](https://raw.githubusercontent.com/Altinn/dialogporten/badges/staging.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-staging.yml)
 [![CI/CD YT01](https://raw.githubusercontent.com/Altinn/dialogporten/badges/yt01.svg)](https://github.com/Altinn/dialogporten/actions/workflows/ci-cd-yt01.yml)  
 

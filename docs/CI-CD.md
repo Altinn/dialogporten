@@ -26,7 +26,9 @@ third that only starts when the schema package is touched:
    - Runs full deployment including:
      - Infrastructure if changed
      - Applications if changed
-     - Runs tests
+     - Runs the E2E tests for manual runs and for test changes without backend changes. After
+       a backend change, `ci-cd-flux-reconciliation-result.yml` runs them once Flux has
+       rolled the release out to at23 (see [Automated Monitoring](#6-automated-monitoring)).
 
    b. **Release Please** (`ci-cd-release-please.yml`)
    - Checks if changes warrant a new release
@@ -146,7 +148,9 @@ Available manual workflows for all environments:
 ### 6. Automated Monitoring
 
 - `ci-cd-deployment-lag-monitor.yml`: Monitors deployment lag between staging and production environments. Runs weekdays at 12pm Norway time and sends Slack notifications when production is lagging behind staging. See [DeploymentLagMonitoring.md](DeploymentLagMonitoring.md) for detailed documentation.
-- `ci-cd-flux-reconciliation-result.yml`: Records the at23 rollout results that Flux sends as repository dispatches ([RFC 0019](https://github.com/Altinn/altinn-platform/blob/main/rfcs/0019-flux-workflow-notifications.md)). It accepts events only from the `dis-flux-dispatch` GitHub App and the at23 subscription, and gets the Dialogporten version and commit from `resolve-release` in Altinn/dialogporten-manifests. For now it only writes a job summary; tests and notifications come later.
+- `ci-cd-flux-reconciliation-result.yml`: Handles the at23 rollout results that Flux sends as repository dispatches ([RFC 0019](https://github.com/Altinn/altinn-platform/blob/main/rfcs/0019-flux-workflow-notifications.md)). It accepts events only from the `dis-flux-dispatch` GitHub App and the at23 subscription, and gets the Dialogporten version and commit from `resolve-release` in Altinn/dialogporten-manifests, which looks the commit up on `main` only. Delivery is best effort: Flux can skip a release that a newer one replaces during its rollout, and an event can be lost or repeated.
+  - After a successful rollout of `dialogporten-apps`, `workflow-run-e2e-tests-after-rollout.yml` checks that the web APIs and GraphQL answer with the release on their version endpoints, runs the K6, GraphQL and WebAPI E2E tests from the release commit, and checks the versions again. If a newer release already runs, it skips the tests, because the run for that release tests it. If the release changes during the tests, the run fails as stale, without a Slack message. Test failures go to the CI/CD status channel, and so do a release that `resolve-release` cannot look up and an app that gives no version. The runs wait in one queue with the K6 tests of CI/CD Main, because the K6 cleanup purges the test dialogs of every run. The `E2E at23` badge in the README shows the result of the latest run that tested its release.
+  - After a failed rollout, a Slack message with the resource, release, reason and Flux message goes to the CI/CD status channel. A cache key per resource and release, or per resource and failure text when the release is unknown, keeps the repeats of a stuck rollout from posting again. The reports run one at a time, so two reports of the same failure cannot both post.
 - `check-container-image-vulnerabilities.yml`: Scans the container images deployed to production with Trivy for HIGH and CRITICAL vulnerabilities that have a fix available, covering OS packages, the .NET runtime and NuGet packages. Runs Monday and Wednesday mornings and sends a Slack notification when it finds any or the scan fails. Run it manually with a `version` input to scan other image tags. It never blocks a pull request or a deployment.
 
 #### Using `dispatch-apps.yml`

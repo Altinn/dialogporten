@@ -27,13 +27,16 @@ on:
         required: false
         default: ""
         type: string
-    outputs:
-      tested:
-        description: "true when the tests ran and the release did not change during them"
-        value: ${{ jobs.check-release-after-tests.outputs.current }}
-      result:
-        description: "success when every test suite passed, otherwise failure"
-        value: ${{ jobs.check-release-after-tests.outputs.tests }}
+      badge_name:
+        description: "Badge that shows the result of a run that tested its release, for example test-e2e. Empty: no badge"
+        required: false
+        default: ""
+        type: string
+      badge_label:
+        description: "Label of that badge, for example E2E at23"
+        required: false
+        default: ""
+        type: string
     secrets:
       TOKEN_GENERATOR_USERNAME:
         required: true
@@ -162,6 +165,21 @@ jobs:
         run: |
           echo "::error::The release changed during the tests, so they do not certify ${EXPECTED_VERSION}."
           exit 1
+
+  # Only for a run that tested its release to the end. It runs inside the caller's queue, so
+  # the badge follows the order of the test runs.
+  update-badge:
+    name: Update the E2E badge
+    needs: check-release-after-tests
+    if: ${{ always() && !cancelled() && inputs.badge_name != '' && needs.check-release-after-tests.outputs.current == 'true' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: ${{ inputs.badge_name }}
+      label: ${{ inputs.badge_label }}
+      status: ${{ needs.check-release-after-tests.outputs.tests }}
+      version: ${{ inputs.version }}
 
   # Quiet when the release changed during the tests, even if a suite failed: the run for the
   # newer release reports its own tests. A final check without an answer still reports.

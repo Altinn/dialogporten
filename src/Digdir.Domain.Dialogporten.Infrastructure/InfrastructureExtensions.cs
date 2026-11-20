@@ -120,6 +120,7 @@ public static class InfrastructureExtensions
             })
             .AddDapperTypeHandlers()
             .AddHostedService<FusionCacheWarmupHostedService>()
+            .AddHostedService<ServiceResourceMetadataCatalogueHostedService>()
             .AddHostedService<DevelopmentMigratorHostedService>()
             .AddHostedService<DevelopmentCleanupOutboxHostedService>()
             .AddHostedService<DevelopmentSubjectResourceSyncHostedService>()

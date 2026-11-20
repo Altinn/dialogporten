@@ -3,7 +3,9 @@ using AwesomeAssertions;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.AuthorizationContexts;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.EndUserContext.Queries.SearchLabelAssignmentLog;
+using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.ServiceResources.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.Actors;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.CreateActivity;
@@ -283,6 +285,19 @@ public static class IFlowStepExtensions
             x.AddFusionCacheNeueccMessagePackSerializer(ContractlessStandardResolverAllowPrivate.Options);
 
             x.ConfigureCaches();
+        });
+
+    /// <summary>
+    /// Builds the service-resource metadata catalogue and writes it to the cache, as
+    /// ServiceResourceMetadataCatalogueHostedService does in a running host. Queries reading the catalogue fail
+    /// until this has run, so call it after seeding the referenced resources and after <see cref="EnableCaching"/>.
+    /// </summary>
+    public static IFlowStep UpdateCatalogueCache(this IFlowStep step) =>
+        step.Do(async ctx =>
+        {
+            using var scope = ctx.Application.GetServiceProvider().CreateScope();
+            var catalogue = scope.ServiceProvider.GetRequiredService<IServiceResourceMetadataCatalogue>();
+            await catalogue.UpdateCatalogueCache(TestContext.Current.CancellationToken);
         });
 
     public static IFlowStep ExpireAllCaches(this IFlowStep step) =>
@@ -657,6 +672,17 @@ public static class IFlowStepExtensions
 
     public static Task<T> ExecuteAndAssert<T>(this IFlowStep<IOneOf> step, Action<T, FlowContext> assert)
         => step.AssertResult(assert).ExecuteAsync();
+
+    // Typed to the result instead of generic over IFlowStep<T>: a generic overload would out-rank
+    // ExecuteAndAssert(Action<object>) for every IOneOf step and silently change what existing tests assert on.
+    public static Task<SearchAuthorizedServiceResourcesDto> ExecuteAndAssert(
+        this IFlowStep<SearchAuthorizedServiceResourcesDto> step,
+        Action<SearchAuthorizedServiceResourcesDto> assert) =>
+        step.Select(result =>
+        {
+            assert(result);
+            return result;
+        }).ExecuteAsync();
 
     public static TFlowStep ConsumeEvents<TFlowStep>(this TFlowStep flowStep, Action<List<object>, FlowContext>? assert = null) where TFlowStep : IFlowStep =>
         flowStep.Do(async ctx =>

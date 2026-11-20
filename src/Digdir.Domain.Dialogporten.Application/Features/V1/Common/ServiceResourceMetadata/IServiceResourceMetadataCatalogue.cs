@@ -17,4 +17,5 @@ public sealed record ServiceResourceMetadataCatalogueEntry(string ResourceUrn, S
 public interface IServiceResourceMetadataCatalogue
 {
     Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken);
+    Task UpdateCatalogueCache(CancellationToken cancellationToken);
 }

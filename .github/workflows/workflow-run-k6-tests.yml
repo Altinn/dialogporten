@@ -36,6 +36,7 @@ jobs:
         egress-policy: audit
 
     - name: Checkout code
+      id: checkout
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ inputs.ref }}
@@ -64,5 +65,8 @@ jobs:
       if: always()
       with:
         action_fail: true
+        # The tested commit. By default the results go on the event's commit, which for a
+        # repository dispatch is the newest commit on main, not the release under test.
+        commit: ${{ steps.checkout.outputs.commit }}
         files: |
           junit.xml

@@ -20,9 +20,12 @@ while :; do
   answered=true
   for path in "${paths[@]}"; do
     version=$(curl --silent --fail --max-time 10 "${BASE_URL}/${path}") || version=""
-    # The body is an image tag. Keep it on one short line, since the log prints it.
+    # The body is an image tag, for example 1.126.7-a3df68f. Anything else, such as an error
+    # page, counts as no answer, so it fails the check instead of passing as another release.
     version=${version//[[:space:]]/}
-    version=${version:0:64}
+    if [[ ! "${version}" =~ ^[0-9A-Za-z._-]{1,128}$ ]]; then
+      version=""
+    fi
     versions+=("${version}")
     if [ -z "${version}" ]; then
       answered=false
@@ -38,7 +41,7 @@ while :; do
 done
 
 for i in "${!paths[@]}"; do
-  echo "/${paths[i]}: ${versions[i]:-no answer}"
+  echo "/${paths[i]}: ${versions[i]:-no version}"
 done
 
 if [ "${answered}" = false ]; then

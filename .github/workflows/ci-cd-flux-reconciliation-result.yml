@@ -2,8 +2,8 @@ name: CI/CD Flux Reconciliation Result
 
 # Handles the rollout results that Flux sends from at23 (RFC 0019,
 # https://github.com/Altinn/altinn-platform/blob/main/rfcs/0019-flux-workflow-notifications.md).
-# A successful rollout of the apps runs the E2E tests against the release, and a failed
-# rollout is reported to Slack.
+# A successful rollout of the apps runs the E2E tests against the release and updates the
+# E2E at23 badge, and a failed rollout is reported to Slack.
 on:
   repository_dispatch:
     types:
@@ -83,20 +83,21 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   # The E2E tests are repeatable, so a repeated success for the same release, such as a
-  # recovery after a failed attempt, runs them again.
+  # recovery after a failed attempt, runs them again. A release that resolve-release could not
+  # look up fails the first check, which reports it to Slack.
   test-release:
     name: Test the deployed release
     needs: record
     if: >-
       needs.record.outputs.outcome == 'succeeded' &&
       needs.record.outputs.resource == 'Kustomization/dialogporten-apps' &&
-      needs.record.outputs.environment == 'at23' &&
-      needs.record.outputs.app_commit != ''
-    # One test run at a time. A newer pending run replaces an older one, whose release the
-    # newer one includes.
+      needs.record.outputs.environment == 'at23'
+    # One E2E run against at23 at a time, shared with the K6 tests of ci-cd-main.yml, because
+    # the K6 cleanup purges the test dialogs of every run. Every success waits its turn, and a
+    # run whose release has been replaced by then skips its tests.
     concurrency:
-      group: flux-result-e2e-at23
-      cancel-in-progress: false
+      group: dialogporten-e2e-at23
+      queue: max
     uses: ./.github/workflows/workflow-run-e2e-tests-after-rollout.yml
     permissions:
       contents: read
@@ -114,6 +115,21 @@ jobs:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
 
+  # Only for a run that tested its release to the end. A stale or unanswered run leaves the
+  # badge as it is.
+  update-e2e-badge:
+    name: Update the E2E at23 badge
+    needs: [ record, test-release ]
+    if: ${{ always() && needs.test-release.outputs.tested == 'true' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/workflow-update-deploy-badge.yml
+    with:
+      name: test-e2e
+      label: E2E at23
+      status: ${{ needs.test-release.outputs.result }}
+      version: ${{ needs.record.outputs.app_version }}
+
   report-failure:
     name: Send Slack message on a failed rollout
     needs: record
@@ -122,6 +138,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
+    # One report at a time, so two reports of the same failure cannot both miss the key below.
+    concurrency:
+      group: flux-rollout-failure-slack
+      queue: max
     env:
       ENVIRONMENT: ${{ needs.record.outputs.environment }}
       REVISION: ${{ needs.record.outputs.revision }}

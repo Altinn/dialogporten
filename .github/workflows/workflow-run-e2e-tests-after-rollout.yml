@@ -1,8 +1,9 @@
 name: Run E2E tests after a rollout
 
 # Runs the E2E tests against a release that Flux has rolled out (RFC 0019). The version
-# endpoints are checked before and after the tests, so a result never certifies a release
-# that the environment no longer runs.
+# endpoints are checked before and after the tests, and the result is stale when the release
+# changed in between. Each check reads each app once, so it can miss a rollout that is still
+# in progress.
 
 on:
   workflow_call:
@@ -15,14 +16,24 @@ on:
         description: "Public Dialogporten URL of the environment, for example https://platform.at23.altinn.cloud/dialogporten"
         required: true
         type: string
+      # Empty when the release could not be looked up, which fails the first check.
       version:
         description: "Image tag that Flux rolled out, for example 1.126.7-a3df68f"
-        required: true
+        required: false
+        default: ""
         type: string
       ref:
         description: "Commit of that release on main. The tests run from it."
-        required: true
+        required: false
+        default: ""
         type: string
+    outputs:
+      tested:
+        description: "true when the tests ran and the release did not change during them"
+        value: ${{ jobs.check-release-after-tests.outputs.current }}
+      result:
+        description: "success when every test suite passed, otherwise failure"
+        value: ${{ jobs.check-release-after-tests.outputs.tests }}
     secrets:
       TOKEN_GENERATOR_USERNAME:
         required: true
@@ -48,6 +59,12 @@ jobs:
       - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
         with:
           egress-policy: audit
+
+      - name: Check that the release is known
+        if: inputs.version == '' || inputs.ref == ''
+        run: |
+          echo "::error::The release of this rollout is unknown, so the tests cannot run. The Resolve the release step of the calling run says why."
+          exit 1
 
       - name: Checkout the check script
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -117,6 +134,9 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+    outputs:
+      current: ${{ steps.check.outputs.current }}
+      tests: ${{ (needs.run-e2e-tests.result == 'success' && needs.run-graphql-e2e-tests.result == 'success' && needs.run-webapi-e2e-tests.result == 'success') && 'success' || 'failure' }}
     steps:
       - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
         with:
@@ -143,18 +163,19 @@ jobs:
           echo "::error::The release changed during the tests, so they do not certify ${EXPECTED_VERSION}."
           exit 1
 
-  # Not for a stale result: the run for the newer release reports its own tests.
+  # Quiet when the release changed during the tests, even if a suite failed: the run for the
+  # newer release reports its own tests. A final check without an answer still reports.
   send-slack-message-on-failure:
     name: Send Slack message on failure
-    needs: [ check-release, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests ]
-    if: ${{ always() && !cancelled() && contains(needs.*.result, 'failure') }}
+    needs: [ check-release, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests, check-release-after-tests ]
+    if: ${{ always() && !cancelled() && contains(needs.*.result, 'failure') && needs.check-release-after-tests.outputs.current != 'false' }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     permissions:
       contents: read
     with:
       environment: ${{ inputs.environment }}
-      # The apps line shows whether every app answered with the release.
-      apps_status: ${{ needs.check-release.result }}
+      # The apps line shows whether every app answered with the release, before and after the tests.
+      apps_status: ${{ needs.check-release-after-tests.result == 'failure' && 'failure' || needs.check-release.result }}
       e2e_tests_status: ${{ needs.run-e2e-tests.result }}
       graphql_e2e_tests_status: ${{ needs.run-graphql-e2e-tests.result }}
       webapi_e2e_tests_status: ${{ needs.run-webapi-e2e-tests.result }}

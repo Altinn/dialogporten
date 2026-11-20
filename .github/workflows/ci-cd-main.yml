@@ -195,9 +195,14 @@ jobs:
     # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
     # Backend changes reach at23 through Flux, and ci-cd-flux-reconciliation-result.yml runs the
     # E2E tests once that rollout passes its health checks. Here they run only for manual runs and
-    # for changes to the tests alone, which start no rollout.
+    # for test changes without backend changes, which start no rollout.
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.check-for-changes.outputs.hasTestChanges == 'true' && needs.check-for-changes.outputs.hasBackendChanges != 'true')) }}
     needs: [ deploy-apps, check-for-changes ]
+    # Takes turns with the E2E runs of ci-cd-flux-reconciliation-result.yml against at23, because
+    # the K6 cleanup purges the test dialogs of every run.
+    concurrency:
+      group: dialogporten-e2e-at23
+      queue: max
     uses: ./.github/workflows/workflow-run-k6-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}

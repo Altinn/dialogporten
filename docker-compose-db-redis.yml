@@ -27,7 +27,7 @@ services:
     restart: "no"
 
   dialogporten-redis:
-    image: redis:6.0-alpine
+    image: redis:6.2-alpine
     restart: always
     ports:
       - "16379:6379"

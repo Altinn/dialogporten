@@ -15,8 +15,8 @@
         <PackageReference Include="FastEndpoints.Swagger" Version="8.3.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.15" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.15" />
-        <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
-        <PackageReference Include="NSwag.MSBuild" Version="14.7.1" />
+        <PackageReference Include="NSwag.AspNetCore" Version="14.8.0" />
+        <PackageReference Include="NSwag.MSBuild" Version="14.8.0" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.21.0" />
     </ItemGroup>
 

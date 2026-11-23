@@ -59,7 +59,7 @@ public class SearchLabelAssignmentLogTests(DialogApplication application) : Appl
             .CreateSimpleDialog()
             .SetSystemLabelsServiceOwner(x => x.AddLabels = [SystemLabel.Values.Archive])
             .AsServiceOwner()
-            .SearchSystemLabelsServiceOwner()
+            .SearchSystemLabelsServiceOwner(x => x.EndUserId = null)
             .ExecuteAndAssert<List<LabelAssignmentLogDto>>(x =>
             {
                 var log = x.Should().ContainSingle().Subject;
@@ -140,7 +140,7 @@ public class SearchLabelAssignmentLogTests(DialogApplication application) : Appl
             .AsServiceOwner()
             .CreateSimpleDialog()
             .DeleteDialog()
-            .SearchSystemLabelsServiceOwner()
+            .SearchSystemLabelsServiceOwner(x => x.EndUserId = null)
             .ExecuteAndAssert<EntityDeleted<DialogEntity>>();
 
     [Fact]
@@ -161,6 +161,7 @@ public class SearchLabelAssignmentLogTests(DialogApplication application) : Appl
             .SearchSystemLabelsServiceOwner(_ => new SearchLabelAssignmentLogQuery
             {
                 DialogId = NewUuidV7(),
+                EndUserId = null,
             })
             .ExecuteAndAssert<EntityNotFound<DialogEntity>>();
 }

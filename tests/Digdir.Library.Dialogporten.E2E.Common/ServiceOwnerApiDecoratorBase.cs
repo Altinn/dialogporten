@@ -48,6 +48,10 @@ internal abstract class ServiceOwnerApiDecoratorBase : IServiceownerApi
         CancellationToken cancellationToken = default) =>
         _serviceownerApi.V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(dialogId, cancellationToken);
 
+    public Task<IApiResponse<ICollection<V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(Guid dialogId,
+        string? enduserId = default, CancellationToken cancellationToken = default) =>
+        _serviceownerApi.V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(dialogId, enduserId, cancellationToken);
+
     public virtual Task<IApiResponse<PaginatedListOfV1ServiceOwnerDialogsQueriesSearchEndUserContext_DialogEndUserContextItem>> V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContext(
         V1ServiceOwnerDialogsQueriesSearchEndUserContextDialogEndUserContextQueryParams queryParams,
         CancellationToken cancellationToken = default) =>

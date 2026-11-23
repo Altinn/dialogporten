@@ -82,6 +82,8 @@ using SearchSeenLogQueryEu = Digdir.Domain.Dialogporten.Application.Features.V1.
 using SearchSeenLogResultEu = Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.SearchSeenLogs.SearchSeenLogResult;
 using SearchSeenLogQuerySo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchSeenLogs.SearchSeenLogQuery;
 using SearchSeenLogResultSo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.SearchSeenLogs.SearchSeenLogResult;
+using SearchLabelAssignmentLogQuerySo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Queries.SearchLabelAssignmentLog.SearchLabelAssignmentLogQuery;
+using SearchLabelAssignmentLogResultSo = Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.EndUserContext.Queries.SearchLabelAssignmentLog.SearchLabelAssignmentLogResult;
 
 namespace Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 
@@ -232,9 +234,9 @@ public static class IFlowStepExtensions
         });
 
     public static IFlowExecutor<SetSystemLabelResultSO> SetSystemLabelsServiceOwner(
-        this IFlowStep<CreateDialogResult> step,
+        this IFlowStep step,
         Action<SetSystemLabelCommandSO>? modify = null) =>
-        step.AssertResult<CreateDialogSuccess>()
+        step
             .SendCommand(x =>
             {
                 var command = new SetSystemLabelCommandSO
@@ -246,6 +248,24 @@ public static class IFlowStepExtensions
                 return command;
             });
 
+    public static IFlowExecutor<SearchLabelAssignmentLogResultSo> SearchSystemLabelsServiceOwner(
+        this IFlowStep step,
+        Action<SearchLabelAssignmentLogQuerySo>? modify = null) =>
+
+        step.SendCommand(ctx =>
+            {
+                var command = new SearchLabelAssignmentLogQuerySo
+                {
+                    DialogId = ctx.GetDialogId(),
+                    EndUserId = ctx.GetParty()
+                };
+                modify?.Invoke(command);
+                return command;
+            });
+
+    public static IFlowExecutor<SearchLabelAssignmentLogResultSo> SearchSystemLabelsServiceOwner(
+        this IFlowStep step,
+        Func<FlowContext, SearchLabelAssignmentLogQuerySo> query) => step.SendCommand(query.Invoke);
 
     public static IFlowExecutor<PurgeDialogResult> PurgeDialog(this IFlowStep<CreateDialogResult> step,
         Action<PurgeDialogCommand>? modify = null) =>

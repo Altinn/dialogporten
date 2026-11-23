@@ -743,6 +743,56 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
         [Get("/api/v1/serviceowner/dialogs/{dialogId}/seenlog")]
         Task<IApiResponse<ICollection<V1ServiceOwnerDialogsQueriesSearchSeenLogs_SeenLog>>> V1ServiceOwnerDialogsQueriesSearchSeenLogsDialogSeenLog(System.Guid dialogId, CancellationToken cancellationToken = default);
 
+        /// <summary>Gets a list of dialog label assignment logs</summary>
+        /// <remarks>
+        /// Gets the list of label assignment logs belonging to a dialog.
+        ///
+        /// If enduserId is supplied, the end user must have access to the dialog.
+        /// </remarks>
+        /// <param name="dialogId">dialogId parameter</param>
+        /// <param name="enduserId">Optional end user to act on behalf of. If supplied, the end user must have access to the dialog.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the request.</param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
+        /// <list type="table">
+        /// <listheader>
+        /// <term>Status</term>
+        /// <description>Description</description>
+        /// </listheader>
+        /// <item>
+        /// <term>200</term>
+        /// <description>Successfully returned the dialog label assignment log list.</description>
+        /// </item>
+        /// <item>
+        /// <term>400</term>
+        /// <description>Validation error occurred. See problem details for a list of errors.</description>
+        /// </item>
+        /// <item>
+        /// <term>401</term>
+        /// <description>Unauthorized</description>
+        /// </item>
+        /// <item>
+        /// <term>403</term>
+        /// <description>Forbidden</description>
+        /// </item>
+        /// <item>
+        /// <term>404</term>
+        /// <description>The given dialog ID was not found.</description>
+        /// </item>
+        /// <item>
+        /// <term>410</term>
+        /// <description>Entity with the given key(s) is removed.</description>
+        /// </item>
+        /// <item>
+        /// <term>503</term>
+        /// <description>Service Unavailable, used when Dialogporten is in maintenance mode</description>
+        /// </item>
+        /// </list>
+        /// </returns>
+        [Headers("Accept: application/json, application/problem+json, text/plain")]
+        [Get("/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/labellog")]
+        Task<IApiResponse<ICollection<V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog>>> V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLogsDialogLabelAssignmentLog(System.Guid dialogId, [Query] string? enduserId = default, CancellationToken cancellationToken = default);
+
         /// <summary>Gets end user context system labels for dialogs</summary>
         /// <remarks>
         /// Performs a search for dialog end user context labels, returning a paginated list of dialog ids and end user context revisions.
@@ -2368,6 +2418,36 @@ namespace Altinn.ApiClients.Dialogporten.Features.V1
 
         [System.Runtime.Serialization.EnumMember(Value = @"ClientDelegation")]
         ClientDelegation = 3,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog
+    {
+
+        /// <summary>
+        /// The date and time when the label was set or removed.
+        /// </summary>
+        [JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        /// <summary>
+        /// The name of the label.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// The action performed on the label, either "set" or "remove".
+        /// </summary>
+        [JsonPropertyName("action")]
+        public string Action { get; set; }
+
+        /// <summary>
+        /// The actor that performed the label change.
+        /// </summary>
+        [JsonPropertyName("performedBy")]
+        public V1ServiceOwnerCommonActors_Actor PerformedBy { get; set; }
 
     }
 

@@ -19,6 +19,7 @@ public sealed class FullDialogAggregateDataLoader
     private readonly IDialogDbContext _dialogDbContext;
     private readonly IUserResourceRegistry _userResourceRegistry;
     private readonly Dictionary<Guid, DialogEntity> _dialogEntities = new();
+    private readonly Dictionary<Guid, DialogEntity> _dialogEntitiesWithoutTransmissions = new();
 
     private static readonly Expression<Func<DialogEntity, IEnumerable<DialogSearchTag>>> OrderedSearchTags =
         e => e.SearchTags.OrderBy(s => s.CreatedAt).ThenBy(s => s.Id);
@@ -53,9 +54,20 @@ public sealed class FullDialogAggregateDataLoader
         _userResourceRegistry = userResourceRegistry;
     }
 
-    public async Task<DialogEntity?> LoadDialogEntity(Guid dialogId, CancellationToken cancellationToken)
+    public Task<DialogEntity?> LoadDialogEntity(Guid dialogId, CancellationToken cancellationToken) =>
+        LoadDialogEntity(dialogId, includeTransmissions: true, cancellationToken);
+
+    /// <summary>
+    /// Loads the dialog aggregate without its transmissions, which can number in the thousands.
+    /// A dialog already loaded with its transmissions in this scope is returned as is.
+    /// </summary>
+    public Task<DialogEntity?> LoadDialogEntityWithoutTransmissions(Guid dialogId, CancellationToken cancellationToken) =>
+        LoadDialogEntity(dialogId, includeTransmissions: false, cancellationToken);
+
+    private async Task<DialogEntity?> LoadDialogEntity(Guid dialogId, bool includeTransmissions, CancellationToken cancellationToken)
     {
-        if (_dialogEntities.TryGetValue(dialogId, out var entity))
+        if (_dialogEntities.TryGetValue(dialogId, out var entity) ||
+            (!includeTransmissions && _dialogEntitiesWithoutTransmissions.TryGetValue(dialogId, out entity)))
         {
             return entity;
         }
@@ -63,7 +75,8 @@ public sealed class FullDialogAggregateDataLoader
         var resourceIds = await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
 
         var dialogEntity = await _dialogDbContext.WrapWithRepeatableRead((dbCtx, ct) =>
-            dbCtx.Dialogs
+        {
+            IQueryable<DialogEntity> query = dbCtx.Dialogs
                 .Include(OrderedSearchTags)
                 .Include(OrderedContent).ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(OrderedAttachments).ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
@@ -74,31 +87,39 @@ public sealed class FullDialogAggregateDataLoader
                 .Include(OrderedAttachments).ThenInclude(x => x.AuthorizationContext)
                 .Include(OrderedGuiActions).ThenInclude(x => x.AuthorizationContext)
                 .Include(OrderedApiActions).ThenInclude(x => x.AuthorizationContext)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionContent).ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
-                .Include(OrderedTransmissions).ThenInclude(x => x.Sender).ThenInclude(x => x.ActorNameEntity)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions).ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
-                .Include(OrderedTransmissions).ThenInclude(x => x.AuthorizationContext)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.AuthorizationContext)
-                .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions).ThenInclude(x => x.AuthorizationContext)
                 .Include(OrderedActivities).ThenInclude(x => x.Description!.Localizations.OrderBy(x => x.LanguageCode))
                 .Include(OrderedActivities).ThenInclude(x => x.PerformedBy).ThenInclude(x => x.ActorNameEntity)
                 .Include(OrderedSeenLog).ThenInclude(x => x.SeenBy).ThenInclude(x => x.ActorNameEntity)
                 .Include(x => x.EndUserContext).ThenInclude(OrderedEndUserContextSystemLabels)
-                .Include(x => x.ServiceOwnerContext).ThenInclude(OrderedServiceOwnerLabels)
+                .Include(x => x.ServiceOwnerContext).ThenInclude(OrderedServiceOwnerLabels);
+
+            if (includeTransmissions)
+            {
+                query = query
+                    .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionContent).ThenInclude(x => x.Value.Localizations.OrderBy(x => x.LanguageCode))
+                    .Include(OrderedTransmissions).ThenInclude(x => x.Sender).ThenInclude(x => x.ActorNameEntity)
+                    .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.Urls.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+                    .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.DisplayName!.Localizations.OrderBy(x => x.LanguageCode))
+                    .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions).ThenInclude(x => x.Title.Localizations.OrderBy(x => x.LanguageCode))
+                    .Include(OrderedTransmissions).ThenInclude(x => x.AuthorizationContext)
+                    .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionAttachments).ThenInclude(x => x.AuthorizationContext)
+                    .Include(OrderedTransmissions).ThenInclude(OrderedTransmissionNavigationalActions).ThenInclude(x => x.AuthorizationContext);
+            }
+
+            return query
                 .IgnoreQueryFilters()
                 .WhereIf(!_userResourceRegistry.IsCurrentUserServiceOwnerAdmin(),
                     x => resourceIds.Contains(x.ServiceResource))
-                .FirstOrDefaultAsync(x => x.Id == dialogId, ct),
-            cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == dialogId, ct);
+        }, cancellationToken);
 
-        if (dialogEntity is not null)
+        if (dialogEntity is null)
         {
-            _dialogEntities.TryAdd(dialogId, dialogEntity);
-            return dialogEntity;
+            return null;
         }
 
-        return null;
+        var cache = includeTransmissions ? _dialogEntities : _dialogEntitiesWithoutTransmissions;
+        cache.TryAdd(dialogId, dialogEntity);
+        return dialogEntity;
     }
 }

@@ -5,6 +5,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Qu
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.ApplicationFlow;
 using Digdir.Domain.Dialogporten.Domain.Actors;
+using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using Digdir.Tool.Dialogporten.GenerateFakeData;
@@ -249,6 +250,75 @@ public class UpdateDialogTransmissionTests : ApplicationCollectionFixture
                         action.ExpiresAt = DateTimeOffset.UtcNow.AddDays(-1))))
             .ExecuteAndAssert<ValidationError>(error =>
                 error.ShouldHaveErrorWithText("future"));
+
+    [Fact]
+    public Task Can_Relate_New_Transmission_To_Stored_Transmission_In_Update()
+    {
+        var storedTransmissionId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.AddTransmission(x => x.Id = storedTransmissionId))
+            .AssertSuccessAndUpdateDialog(x =>
+                x.AddTransmission(x => x.RelatedTransmissionId = storedTransmissionId))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(dialog =>
+                dialog.Transmissions
+                    .Should().ContainSingle(x => x.RelatedTransmissionId == storedTransmissionId));
+    }
+
+    [Fact]
+    public Task Cannot_Extend_Stored_100_Linked_Chain_In_Update()
+    {
+        var transmissions = CreateLinkedTransmissions(100);
+        var tailTransmissionId = transmissions.Last().Id!.Value;
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x => x.Dto.Transmissions = transmissions)
+            .AssertSuccessAndUpdateDialog(x =>
+                x.AddTransmission(x => x.RelatedTransmissionId = tailTransmissionId))
+            .ExecuteAndAssert<DomainError>(error =>
+                error.ShouldHaveErrorWithText("depth violation"));
+    }
+
+    [Fact]
+    public Task Activity_Can_Reference_Transmission_Added_In_Same_Update()
+    {
+        var transmissionId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x => x
+                .AddTransmission(x => x.Id = transmissionId)
+                .AddActivity(x =>
+                {
+                    x.Type = DialogActivityType.Values.TransmissionOpened;
+                    x.TransmissionId = transmissionId;
+                    x.Description = [];
+                }))
+            .ExecuteAndAssert<UpdateDialogSuccess>();
+    }
+
+    [Fact]
+    public Task Activity_Cannot_Reference_Transmission_On_Another_Dialog()
+    {
+        var otherDialogTransmissionId = NewUuidV7();
+
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+                x.AddTransmission(x => x.Id = otherDialogTransmissionId))
+            .CreateSimpleDialog()
+            .AssertSuccessAndUpdateDialog(x => x
+                .AddActivity(x =>
+                {
+                    x.Type = DialogActivityType.Values.TransmissionOpened;
+                    x.TransmissionId = otherDialogTransmissionId;
+                    x.Description = [];
+                }))
+            .ExecuteAndAssert<DomainError>(error =>
+                error.ShouldHaveErrorWithText(otherDialogTransmissionId.ToString()));
+    }
 
     private static TransmissionDto UpdateDialogDialogTransmissionDto() => new()
     {

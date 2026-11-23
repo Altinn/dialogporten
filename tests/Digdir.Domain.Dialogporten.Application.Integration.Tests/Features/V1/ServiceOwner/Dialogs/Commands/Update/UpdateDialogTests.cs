@@ -843,6 +843,64 @@ public class UpdateDialogTests(DialogApplication application) : ApplicationColle
     }
 
     [Fact]
+    public Task Opening_One_Of_Two_Stored_Transmissions_Keeps_HasUnopenedContent()
+    {
+        var openedTransmissionId = Guid.CreateVersion7();
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x
+                .AddTransmission(x =>
+                {
+                    x.Id = openedTransmissionId;
+                    x.Type = DialogTransmissionType.Values.Information;
+                })
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Information))
+            .AssertSuccessAndUpdateDialog(x => x.AddActivity(x =>
+            {
+                x.Type = DialogActivityType.Values.TransmissionOpened;
+                x.TransmissionId = openedTransmissionId;
+                x.Description = [];
+            }))
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.HasUnopenedContent.Should().BeTrue());
+    }
+
+    [Fact]
+    public Task Update_Without_Activities_Keeps_HasUnopenedContent_For_Stored_Unopened_Transmission() =>
+        FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x
+                .AddTransmission(x => x.Type = DialogTransmissionType.Values.Information))
+            .AssertSuccessAndUpdateDialog(x => x.ChangeTitle())
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.HasUnopenedContent.Should().BeTrue());
+
+    [Fact]
+    public Task Adding_Transmission_After_All_Are_Opened_Sets_HasUnopenedContent()
+    {
+        var transmissionId = Guid.CreateVersion7();
+        return FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) => x
+                .AddTransmission(x =>
+                {
+                    x.Id = transmissionId;
+                    x.Type = DialogTransmissionType.Values.Information;
+                }))
+            .AssertSuccessAndUpdateDialog(x => x.AddActivity(x =>
+            {
+                x.Type = DialogActivityType.Values.TransmissionOpened;
+                x.TransmissionId = transmissionId;
+                x.Description = [];
+            }))
+            .GetServiceOwnerDialog()
+            .AssertResult<DialogDto>(x => x.HasUnopenedContent.Should().BeFalse())
+            .UpdateDialog(x => x.AddTransmission())
+            .GetServiceOwnerDialog()
+            .ExecuteAndAssert<DialogDto>(x =>
+                x.HasUnopenedContent.Should().BeTrue());
+    }
+
+    [Fact]
     public Task Adding_Transmission_From_Party_Should_Increase_FromPartyTransmissionsCount()
     {
         return FlowBuilder.For(Application)

@@ -209,6 +209,7 @@ internal static class OpenApiTypeNameOverrides
         ["V1ServiceOwnerDialogsQueriesSearchTransmissions_Transmission"] = "DialogTransmissionSearchItem",
         ["V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_BulkSetSystemLabel"] = "BulkSetSystemLabel",
         ["V1ServiceOwnerEndUserContextCommandsBulkSetSystemLabels_DialogRevision"] = "DialogRevision",
+        ["V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog"] = "LabelAssignmentLog",
         ["V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabelsQuery"] = "GetServiceOwnerLabelsRequest",
         ["V1ServiceOwnerServiceOwnerContextQueriesGetServiceOwnerLabels_ServiceOwnerLabel"] = "ServiceOwnerLabel"
     }.ToFrozenDictionary(StringComparer.Ordinal);

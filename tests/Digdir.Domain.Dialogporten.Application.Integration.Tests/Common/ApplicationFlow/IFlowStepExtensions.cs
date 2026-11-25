@@ -731,6 +731,13 @@ public static class IFlowStepExtensions
 
     public static Guid GetDialogId(this FlowContext ctx)
     {
+        if (!ctx.State.CreatedDialogs.Any())
+        {
+            throw new InvalidOperationException(
+                "Found no CreatedDialogs in the FlowContext. Did you forget to create a Dialog before using a flowStep that requires one?"
+            );
+        }
+
         return ctx.State.CreatedDialogs.Last().Command.Dto.Id!.Value;
     }
 

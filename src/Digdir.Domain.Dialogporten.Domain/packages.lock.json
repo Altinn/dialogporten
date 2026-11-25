@@ -4,9 +4,9 @@
     "net10.0": {
       "DeterministicGuids": {
         "type": "Direct",
-        "requested": "[1.0.11, )",
-        "resolved": "1.0.11",
-        "contentHash": "wEhcv8QYNfxWG2mMByiOcqQY+NOYgaDMAuj5Tygx2x6pUEVUPHwyHzktrhrO5ry58JRx9nZIzgpM/WX02Achug=="
+        "requested": "[1.0.12, )",
+        "resolved": "1.0.12",
+        "contentHash": "9W4Va/ZklJ0koboL2Wpkid+VABfIStbIMrrgQxHih+u25yiEXEXxcW5FsWxfSmFAX6SQB0UcAEOXi55hRMLgUw=="
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Direct",

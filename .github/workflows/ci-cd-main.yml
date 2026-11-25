@@ -193,16 +193,8 @@ jobs:
   run-e2e-tests:
     name: "Run K6 functional end-to-end tests"
     # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
-    # Backend changes reach at23 through Flux, and ci-cd-flux-reconciliation-result.yml runs the
-    # E2E tests once that rollout passes its health checks. Here they run only for manual runs and
-    # for test changes without backend changes, which start no rollout.
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.check-for-changes.outputs.hasTestChanges == 'true' && needs.check-for-changes.outputs.hasBackendChanges != 'true')) }}
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
     needs: [ deploy-apps, check-for-changes ]
-    # Takes turns with the E2E runs of ci-cd-flux-reconciliation-result.yml against at23, because
-    # the K6 cleanup purges the test dialogs of every run.
-    concurrency:
-      group: dialogporten-e2e-at23
-      queue: max
     uses: ./.github/workflows/workflow-run-k6-tests.yml
     secrets:
       TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
@@ -217,7 +209,7 @@ jobs:
 
   run-graphql-e2e-tests:
     name: "Run GraphQL E2E tests"
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.check-for-changes.outputs.hasTestChanges == 'true' && needs.check-for-changes.outputs.hasBackendChanges != 'true')) }}
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
     needs: [ run-e2e-tests, check-for-changes ]
     uses: ./.github/workflows/workflow-run-graphql-e2e-tests.yml
     secrets:
@@ -228,7 +220,7 @@ jobs:
 
   run-webapi-e2e-tests:
     name: "Run WebAPI E2E tests"
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.check-for-changes.outputs.hasTestChanges == 'true' && needs.check-for-changes.outputs.hasBackendChanges != 'true')) }}
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true' || needs.check-for-changes.outputs.hasTestChanges == 'true') }}
     needs: [ run-e2e-tests, check-for-changes ]
     uses: ./.github/workflows/workflow-run-webapi-e2e-tests.yml
     secrets:

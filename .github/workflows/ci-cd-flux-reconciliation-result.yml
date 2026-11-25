@@ -92,9 +92,9 @@ jobs:
       needs.record.outputs.outcome == 'succeeded' &&
       needs.record.outputs.resource == 'Kustomization/dialogporten-apps' &&
       needs.record.outputs.environment == 'at23'
-    # One E2E run against at23 at a time, shared with the K6 tests of ci-cd-main.yml, because
-    # the K6 cleanup purges the test dialogs of every run. Every success waits its turn, and a
-    # run whose release has been replaced by then skips its tests.
+    # One E2E run against at23 at a time, because the K6 cleanup purges the test dialogs of
+    # every run. Every success waits its turn, and a run whose release has been replaced by
+    # then skips its tests.
     concurrency:
       group: dialogporten-e2e-at23
       queue: max

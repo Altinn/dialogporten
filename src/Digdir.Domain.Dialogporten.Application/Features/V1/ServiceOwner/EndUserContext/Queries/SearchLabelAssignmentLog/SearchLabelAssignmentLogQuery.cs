@@ -44,8 +44,7 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
     public async Task<SearchLabelAssignmentLogResult> Handle(SearchLabelAssignmentLogQuery request, CancellationToken cancellationToken)
     {
         var isAdmin = _userResourceRegistry.IsCurrentUserServiceOwnerAdmin();
-        var resourceIds = isAdmin ? null : await _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
-        var org = isAdmin ? null : await _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+        var (resourceIds, org) = isAdmin ? (null, null) : await GetCurrentOrgAndResourceIds(cancellationToken);
 
         var dialog = await _db.WrapWithRepeatableRead((dbCtx, ct) =>
                 dbCtx.Dialogs
@@ -87,5 +86,16 @@ internal sealed class SearchLabelAssignmentLogQueryHandler : IRequestHandler<Sea
             .ThenBy(x => x.Id)
             .Select(x => x.ToDto())
             .ToList();
+    }
+
+    private async Task<(IReadOnlyCollection<string>? resourceIds, string? org)> GetCurrentOrgAndResourceIds(
+        CancellationToken cancellationToken
+    )
+    {
+        var resourceIds = _userResourceRegistry.GetCurrentUserResourceIds(cancellationToken);
+        var org = _userResourceRegistry.GetCurrentUserOrgShortName(cancellationToken);
+        await Task.WhenAll(resourceIds, org);
+
+        return (await resourceIds, await org);
     }
 }

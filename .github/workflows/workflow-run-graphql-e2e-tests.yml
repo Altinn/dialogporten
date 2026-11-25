@@ -20,6 +20,9 @@ on:
 jobs:
   graphql-e2e-tests:
     runs-on: ubuntu-latest
+    # The suite takes about a minute and a half in yt01, the slowest environment. The limit keeps
+    # a stuck run from holding the at23 queue for hours.
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

@@ -20,6 +20,12 @@ on:
         required: true
         default: 'tests/k6/suites/all-single-pass.js'
 
+# at23 (test) shares its queue with the E2E runs of ci-cd-flux-reconciliation-result.yml,
+# because the K6 cleanup purges the test dialogs of every run.
+concurrency:
+  group: ${{ inputs.environment == 'test' && 'dialogporten-e2e-at23' || format('{0}-{1}', github.workflow, inputs.environment) }}
+  queue: max
+
 permissions:
   contents: read
 

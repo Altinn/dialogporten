@@ -20,6 +20,9 @@ on:
 jobs:
   webapi-e2e-tests:
     runs-on: ubuntu-latest
+    # The suite takes about 6 minutes in yt01, the slowest environment. The limit keeps a stuck
+    # run from holding the at23 queue for hours.
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

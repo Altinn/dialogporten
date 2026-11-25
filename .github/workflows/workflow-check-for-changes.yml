@@ -109,6 +109,8 @@ jobs:
             azure:
               - '.azure/infrastructure/**/*'
               - '.azure/modules/**/*'
+              - '.azure/functions/**/*'
+              - '.azure/bicepconfig.json'
             github_workflows:
               - '.github/**/*'
               - '!.github/ISSUE_TEMPLATE/**/*'

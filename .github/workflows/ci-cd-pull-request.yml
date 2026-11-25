@@ -161,8 +161,8 @@ jobs:
           fi
           echo "No new vulnerable dependencies introduced." >> "$GITHUB_STEP_SUMMARY"
 
-  # Builds the application templates and their parameter files for every environment. Needs no
-  # Azure access, so it also covers environments the app dry run does not deploy to.
+  # Builds the application templates and their parameter files for every environment, without
+  # Azure access.
   build-app-bicep:
     name: Build application Bicep
     needs: [ check-for-changes ]

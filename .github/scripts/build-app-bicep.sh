@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Builds every application Bicep template in .azure/applications and each of its parameter files.
 # Catches template and parameter errors in PRs without Azure access. The parameter files read their
-# values from the environment at deploy time, so this sets placeholders for them.
+# values from the environment at deploy time, so this sets placeholders for them. A parameter file that
+# reads a new environment variable needs a placeholder here.
 set -euo pipefail
+shopt -s nullglob
 
 export AZURE_APP_CONFIGURATION_NAME="placeholder-appconfig"
 export AZURE_APP_INSIGHTS_CONNECTION_STRING="InstrumentationKey=00000000-0000-0000-0000-000000000000"
@@ -23,6 +25,9 @@ for template in .azure/applications/*/main.bicep; do
   if ! az bicep build --file "$template" --outfile "$out_dir/$app.json"; then
     echo "::error file=$template::Bicep build failed for $app"
     failed=1
+    # Every parameter file would fail on the same template error.
+    echo "::endgroup::"
+    continue
   fi
   for params in "$(dirname "$template")"/*.bicepparam; do
     if ! az bicep build-params --file "$params" --outfile "$out_dir/$app-$(basename "$params" .bicepparam).parameters.json"; then

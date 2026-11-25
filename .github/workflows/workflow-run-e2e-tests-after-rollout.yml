@@ -182,11 +182,13 @@ jobs:
       version: ${{ inputs.version }}
 
   # Quiet when the release changed during the tests, even if a suite failed: the run for the
-  # newer release reports its own tests. A final check without an answer still reports.
+  # newer release reports its own tests. A final check without an answer still reports. A job
+  # that hits its timeout ends as cancelled, not failed. Nothing else cancels a job in a run that
+  # was not cancelled, so a cancelled job counts as a failure.
   send-slack-message-on-failure:
     name: Send Slack message on failure
     needs: [ check-release, run-e2e-tests, run-graphql-e2e-tests, run-webapi-e2e-tests, check-release-after-tests ]
-    if: ${{ always() && !cancelled() && contains(needs.*.result, 'failure') && needs.check-release-after-tests.outputs.current != 'false' }}
+    if: ${{ always() && !cancelled() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && needs.check-release-after-tests.outputs.current != 'false' }}
     uses: ./.github/workflows/workflow-send-ci-cd-status-slack-message.yml
     permissions:
       contents: read

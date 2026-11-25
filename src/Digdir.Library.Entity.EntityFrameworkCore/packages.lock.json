@@ -21,8 +21,8 @@
       },
       "Medo.Uuid7": {
         "type": "Transitive",
-        "resolved": "3.3.0",
-        "contentHash": "UNfjPT2jNcXk3beRZXoHb+7EB3pZXDRg8IoJtzKx6L7Hoha5wiuRvIK6sc5SzfVdDNHlUN7eX4bjiBVWP4k+ZA=="
+        "resolved": "3.3.1",
+        "contentHash": "3yVZM9L3z5HcF0auUXYqx54Gh+B0R1CMS4aCVRH1zMavkgsOSTbzVNfBCKsFvGtk96v0a6PpBwr7rRtGp8h9YQ=="
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
@@ -122,7 +122,7 @@
         "type": "Project",
         "dependencies": {
           "MediatR.Contracts": "[2.0.1, )",
-          "Medo.Uuid7": "[3.3.0, )"
+          "Medo.Uuid7": "[3.3.1, )"
         }
       }
     }

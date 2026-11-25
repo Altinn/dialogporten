@@ -33,13 +33,13 @@
       },
       "AsyncKeyedLock": {
         "type": "Transitive",
-        "resolved": "8.1.2",
-        "contentHash": "FworLhWdK1fnSW8mbUtmQSqO2cSdQ7Ctb4q1WGZvNbu10xTHSS0WjuWk6UNLO3MbxtCk8uhduX8yu6HNoaI0Tw=="
+        "resolved": "8.1.3",
+        "contentHash": "/4iI329KfH9KiQe09QjCf5iM4pTsOSNdVwTRxHyFRUXlOtEh4TwLFsX8isHpAAyz3HvmRRhs5eJRlwD7qcK7jA=="
       },
       "DeterministicGuids": {
         "type": "Transitive",
-        "resolved": "1.0.11",
-        "contentHash": "wEhcv8QYNfxWG2mMByiOcqQY+NOYgaDMAuj5Tygx2x6pUEVUPHwyHzktrhrO5ry58JRx9nZIzgpM/WX02Achug=="
+        "resolved": "1.0.12",
+        "contentHash": "9W4Va/ZklJ0koboL2Wpkid+VABfIStbIMrrgQxHih+u25yiEXEXxcW5FsWxfSmFAX6SQB0UcAEOXi55hRMLgUw=="
       },
       "FluentValidation": {
         "type": "Transitive",
@@ -81,8 +81,8 @@
       },
       "Medo.Uuid7": {
         "type": "Transitive",
-        "resolved": "3.3.0",
-        "contentHash": "UNfjPT2jNcXk3beRZXoHb+7EB3pZXDRg8IoJtzKx6L7Hoha5wiuRvIK6sc5SzfVdDNHlUN7eX4bjiBVWP4k+ZA=="
+        "resolved": "3.3.1",
+        "contentHash": "3yVZM9L3z5HcF0auUXYqx54Gh+B0R1CMS4aCVRH1zMavkgsOSTbzVNfBCKsFvGtk96v0a6PpBwr7rRtGp8h9YQ=="
       },
       "Microsoft.Bcl.Cryptography": {
         "type": "Transitive",
@@ -531,7 +531,7 @@
       "digdir.domain.dialogporten.application": {
         "type": "Project",
         "dependencies": {
-          "AsyncKeyedLock": "[8.1.2, )",
+          "AsyncKeyedLock": "[8.1.3, )",
           "Digdir.Domain.Dialogporten.Domain": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.2.0, )",
@@ -550,7 +550,7 @@
       "digdir.domain.dialogporten.domain": {
         "type": "Project",
         "dependencies": {
-          "DeterministicGuids": "[1.0.11, )",
+          "DeterministicGuids": "[1.0.12, )",
           "Digdir.Library.Entity.Abstractions": "[1.0.0, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[10.0.15, )"
         }
@@ -559,7 +559,7 @@
         "type": "Project",
         "dependencies": {
           "MediatR.Contracts": "[2.0.1, )",
-          "Medo.Uuid7": "[3.3.0, )"
+          "Medo.Uuid7": "[3.3.1, )"
         }
       },
       "digdir.library.entity.entityframeworkcore": {

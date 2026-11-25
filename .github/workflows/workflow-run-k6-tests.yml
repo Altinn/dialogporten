@@ -26,6 +26,8 @@ on:
 jobs:
   k6-test:
     runs-on: ubuntu-latest
+    # The suites take a minute or two. The limit keeps a stuck run from holding the at23 queue.
+    timeout-minutes: 15
     permissions:
       checks: write
       pull-requests: write

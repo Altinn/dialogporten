@@ -190,53 +190,6 @@ jobs:
       path: 'src/WebApiClient/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner/Digdir.Library.Dialogporten.WebApiClient.ServiceOwner.csproj'
       source: 'https://api.nuget.org/v3/index.json'
 
-  run-e2e-tests:
-    name: "Run K6 functional end-to-end tests"
-    # we want the end-to-end tests to be dependent on deployment of infrastructure and apps, but if infrastructure is skipped, we still want to run the tests
-    # Backend changes reach at23 through Flux, and ci-cd-flux-reconciliation-result.yml runs the
-    # E2E tests once that rollout passes its health checks. Here they run only for manual runs and
-    # for test changes without backend changes, which start no rollout.
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.check-for-changes.outputs.hasTestChanges == 'true' && needs.check-for-changes.outputs.hasBackendChanges != 'true')) }}
-    needs: [ deploy-apps, check-for-changes ]
-    # Takes turns with the E2E runs of ci-cd-flux-reconciliation-result.yml against at23, because
-    # the K6 cleanup purges the test dialogs of every run.
-    concurrency:
-      group: dialogporten-e2e-at23
-      queue: max
-    uses: ./.github/workflows/workflow-run-k6-tests.yml
-    secrets:
-      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
-      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
-    with:
-      environment: test
-      apiVersion: v1
-      testSuitePath: tests/k6/suites/all-single-pass.js
-    permissions:
-      checks: write
-      pull-requests: write
-
-  run-graphql-e2e-tests:
-    name: "Run GraphQL E2E tests"
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.check-for-changes.outputs.hasTestChanges == 'true' && needs.check-for-changes.outputs.hasBackendChanges != 'true')) }}
-    needs: [ run-e2e-tests, check-for-changes ]
-    uses: ./.github/workflows/workflow-run-graphql-e2e-tests.yml
-    secrets:
-      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
-      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
-    with:
-      environment: test
-
-  run-webapi-e2e-tests:
-    name: "Run WebAPI E2E tests"
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.check-for-changes.outputs.hasTestChanges == 'true' && needs.check-for-changes.outputs.hasBackendChanges != 'true')) }}
-    needs: [ run-e2e-tests, check-for-changes ]
-    uses: ./.github/workflows/workflow-run-webapi-e2e-tests.yml
-    secrets:
-      TOKEN_GENERATOR_USERNAME: ${{ secrets.TOKEN_GENERATOR_USERNAME }}
-      TOKEN_GENERATOR_PASSWORD: ${{ secrets.TOKEN_GENERATOR_PASSWORD }}
-    with:
-      environment: test
-
   send-slack-message-on-failure:
     name: Send Slack message on failure
     needs: [
@@ -245,9 +198,6 @@ jobs:
       get-previous-deployed-sha,
       tag-issues-with-environment,
       store-latest-deployed-sha,
-      run-e2e-tests,
-      run-graphql-e2e-tests,
-      run-webapi-e2e-tests,
       publish-docker-images,
       build-and-test,
     ]
@@ -257,9 +207,6 @@ jobs:
       environment: test
       infra_status: ${{ needs.deploy-infra.result }}
       apps_status: ${{ needs.deploy-apps.result }}
-      e2e_tests_status: ${{ needs.run-e2e-tests.result }}
-      graphql_e2e_tests_status: ${{ needs.run-graphql-e2e-tests.result }}
-      webapi_e2e_tests_status: ${{ needs.run-webapi-e2e-tests.result }}
       publish_status: ${{ needs.publish-docker-images.result }}
       build_and_test_status: ${{ needs.build-and-test.result }}
     secrets:
@@ -298,9 +245,6 @@ jobs:
         publish-sdk-to-nuget,
         publish-enduser-sdk-to-nuget,
         publish-serviceowner-sdk-to-nuget,
-        run-e2e-tests,
-        run-graphql-e2e-tests,
-        run-webapi-e2e-tests,
         send-slack-message-on-failure,
         send-deployment-to-swarmia,
       ]

@@ -29,6 +29,8 @@ third that only starts when the schema package is touched:
      - Runs the E2E tests for manual runs and for test changes without backend changes. After
        a backend change, `ci-cd-flux-reconciliation-result.yml` runs them once Flux has
        rolled the release out to at23 (see [Automated Monitoring](#6-automated-monitoring)).
+       The CI/CD Main badge then covers the build and deploy only; the `E2E at23` badge
+       shows the test result.
 
    b. **Release Please** (`ci-cd-release-please.yml`)
    - Checks if changes warrant a new release

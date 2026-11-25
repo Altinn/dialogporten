@@ -283,15 +283,15 @@
       },
       "DbExceptionClassifier.Common": {
         "type": "Transitive",
-        "resolved": "1.0.1",
-        "contentHash": "Lz0R2s1+7iIin7TUvz4XjCg8zD0D8aLTAU3WfGnS+M5cEiIdNYmGWn1h7wZXpAzHh8Js4De7MLChp8qE2wl3ig=="
+        "resolved": "1.0.2",
+        "contentHash": "fxtklldglV1GaCNi+HbP+d+xI3KdIP6+F/66xjnTkwtmdUHLj0Nnl89tVV8+N+o8joSiAodgmPEHO0M/fVb6XA=="
       },
       "DbExceptionClassifier.PostgreSQL": {
         "type": "Transitive",
-        "resolved": "1.0.1",
-        "contentHash": "bs2PvMf3kUMYPGJBMDwgUz3dO9MSa+DO765IsZbe2wAxc8zgfircZBqaWPNi4OxLe8zCX+azD0ySaBxKQa7xTQ==",
+        "resolved": "1.0.2",
+        "contentHash": "l15q14zk2CSFNQ2ibxO5uK5cdIfY/sV5yraHmy0Rw9j2PuIlbBxxG/9z438Bf4tACDgGvgj1s2Rhn7+jR6lwMA==",
         "dependencies": {
-          "DbExceptionClassifier.Common": "1.0.1",
+          "DbExceptionClassifier.Common": "1.0.2",
           "Npgsql": "10.0.2"
         }
       },
@@ -320,20 +320,20 @@
       },
       "EntityFrameworkCore.Exceptions.Common": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "dUuK9lJFQeLHqnPq5kTusu9MUIxvm3QVukwKDIB5ti0iaN6wBtm2SIQ4JNKU3ZneC6IQUEU57L6tWB+fB2IhCw==",
+        "resolved": "10.0.2",
+        "contentHash": "r418AEN5NKAxwHeTmSImWxDhufFRUwofroW2jIb/pt4HdSxiYjM8HbYVACOuCESoWgiu2juWjSYIMBaUt56Rgg==",
         "dependencies": {
-          "DbExceptionClassifier.Common": "1.0.1",
+          "DbExceptionClassifier.Common": "1.0.2",
           "Microsoft.EntityFrameworkCore.Relational": "10.0.5"
         }
       },
       "EntityFrameworkCore.Exceptions.PostgreSQL": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "xB59v0MquOrRGh7FPwAyuVa+TkbmguWC6zYpaMOJE9uwC475BpXLctTdGXgxiQhwqPoq+i9yL6HQqnVFTBNutw==",
+        "resolved": "10.0.2",
+        "contentHash": "a1z3LrzyMP51am426wo8mRpGwkOkAlYZZEprXXpwMaMPfB7tCDcX7xA4rhdKcl32UYKlYjXguJenk/G6NNx7fw==",
         "dependencies": {
-          "DbExceptionClassifier.PostgreSQL": "1.0.1",
-          "EntityFrameworkCore.Exceptions.Common": "10.0.1"
+          "DbExceptionClassifier.PostgreSQL": "1.0.2",
+          "EntityFrameworkCore.Exceptions.Common": "10.0.2"
         }
       },
       "FluentValidation": {
@@ -2128,7 +2128,7 @@
           "Dapper": "[2.1.89, )",
           "Digdir.Domain.Dialogporten.Application": "[1.0.0, )",
           "Digdir.Library.Entity.EntityFrameworkCore": "[1.0.0, )",
-          "EntityFrameworkCore.Exceptions.PostgreSQL": "[10.0.1, )",
+          "EntityFrameworkCore.Exceptions.PostgreSQL": "[10.0.2, )",
           "HotChocolate.Subscriptions.Redis": "[16.7.5, )",
           "MassTransit.Azure.ServiceBus.Core": "[8.5.7, 9.0.0)",
           "MassTransit.EntityFrameworkCore": "[8.5.7, 9.0.0)",

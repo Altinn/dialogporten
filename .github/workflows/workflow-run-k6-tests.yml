@@ -26,8 +26,9 @@ on:
 jobs:
   k6-test:
     runs-on: ubuntu-latest
-    # The suites take a minute or two. The limit keeps a stuck run from holding the at23 queue.
-    timeout-minutes: 15
+    # The suites take a minute or two in at23 and staging and about 11 minutes in yt01. The
+    # limit keeps a stuck run from holding the at23 queue for hours.
+    timeout-minutes: 30
     permissions:
       checks: write
       pull-requests: write

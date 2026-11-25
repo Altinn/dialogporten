@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="10.1.0" />
+        <PackageReference Include="coverlet.collector" Version="10.1.1" />
         <PackageReference Include="AwesomeAssertions" Version="9.6.0" />
         <PackageReference Include="Verify.XunitV3" Version="31.28.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.15" />

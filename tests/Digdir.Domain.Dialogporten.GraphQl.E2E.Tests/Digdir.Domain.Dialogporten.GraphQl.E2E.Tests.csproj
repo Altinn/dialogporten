@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="10.1.0" />
+        <PackageReference Include="coverlet.collector" Version="10.1.1" />
         <!-- StrawberryShake.Transport.Http only requires WebUtilities >= 10.0.0, which NuGet resolves to 10.0.0.
              This direct reference sets the version for this project and the projects that reference it. -->
         <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.15" />

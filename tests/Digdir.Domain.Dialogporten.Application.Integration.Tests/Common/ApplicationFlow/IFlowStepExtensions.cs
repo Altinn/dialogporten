@@ -250,18 +250,19 @@ public static class IFlowStepExtensions
 
     public static IFlowExecutor<SearchLabelAssignmentLogResultSo> SearchSystemLabelsServiceOwner(
         this IFlowStep step,
-        Action<SearchLabelAssignmentLogQuerySo>? modify = null) =>
-
-        step.SendCommand(ctx =>
+        Action<SearchLabelAssignmentLogQuerySo>? modify = null)
+    {
+        return SearchSystemLabelsServiceOwner(step, ctx =>
+        {
+            var command = new SearchLabelAssignmentLogQuerySo
             {
-                var command = new SearchLabelAssignmentLogQuerySo
-                {
-                    DialogId = ctx.GetDialogId(),
-                    EndUserId = ctx.GetParty()
-                };
-                modify?.Invoke(command);
-                return command;
-            });
+                DialogId = ctx.GetDialogId(),
+                EndUserId = ctx.GetParty()
+            };
+            modify?.Invoke(command);
+            return command;
+        });
+    }
 
     public static IFlowExecutor<SearchLabelAssignmentLogResultSo> SearchSystemLabelsServiceOwner(
         this IFlowStep step,

@@ -1,9 +1,12 @@
 using AwesomeAssertions;
+using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Continuation;
 using Digdir.Domain.Dialogporten.Application.Common.Pagination.Order;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Content;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Localizations;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Create;
 using Digdir.Domain.Dialogporten.Application.Integration.Tests.Common;
@@ -13,7 +16,10 @@ using Digdir.Domain.Dialogporten.Domain.DialogEndUserContexts.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Domain.Dialogporten.Domain.Parties;
+using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
+using Microsoft.Extensions.DependencyInjection;
 using static Digdir.Domain.Dialogporten.Application.Integration.Tests.Common.Common;
+using Constants = Digdir.Domain.Dialogporten.Application.Common.Authorization.Constants;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -245,6 +251,67 @@ public class SearchDialogTests(DialogApplication application) : ApplicationColle
                 dialog.FromPartyTransmissionsCount.Should().Be(1);
                 dialog.FromServiceOwnerTransmissionsCount.Should().Be(1);
             });
+
+    [Theory]
+    [InlineData(4, 3, true, "Gradert tittel")]    // the system-user level relaxes the general level
+    [InlineData(3, 4, true, "Gradert tittel")]    // the general level is met, so the stricter system-user level does not apply
+    [InlineData(4, null, true, "Ugradert tittel")] // no system-user level, so the general level 4 applies
+    [InlineData(4, 3, false, "Ugradert tittel")]   // the system-user level never applies to end users
+    public Task Search_Should_Pick_Title_By_The_Level_The_Caller_Must_Have(
+        int minimumAuthenticationLevel,
+        int? minimumSystemUserAuthenticationLevel,
+        bool asSystemUser,
+        string expectedTitle)
+    {
+        const string serviceResource = "urn:altinn:resource:test-service-system-user-auth-level";
+
+        var flow = FlowBuilder.For(Application)
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.ServiceResource = serviceResource;
+                x.Dto.Content!.Title.Value =
+                [
+                    new LocalizationDto { LanguageCode = "nb", Value = "Gradert tittel" }
+                ];
+                x.Dto.Content.NonSensitiveTitle = new ContentValueDto
+                {
+                    Value =
+                    [
+                        new LocalizationDto { LanguageCode = "nb", Value = "Ugradert tittel" }
+                    ]
+                };
+            })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevels(
+                ctx, serviceResource, minimumAuthenticationLevel, minimumSystemUserAuthenticationLevel));
+
+        return (asSystemUser
+                ? flow.AsSystemUser()
+                : flow.AsIntegrationTestUser(x => x.WithClaim(
+                    ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                    Constants.IdportenLoaSubstantial)))
+            .SearchEndUserDialogs((x, ctx) => x.Party = [ctx.GetParty()])
+            .ExecuteAndAssert<PaginatedList<DialogDto>>(x =>
+                x.Items.Single().Content!.Title.Value.Single().Value.Should().Be(expectedTitle));
+    }
+
+    private static async Task SeedMinimumAuthenticationLevels(
+        FlowContext ctx,
+        string serviceResource,
+        int minimumAuthenticationLevel,
+        int? minimumSystemUserAuthenticationLevel)
+    {
+        using var scope = ctx.Application.GetServiceProvider().CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
+
+        db.ResourcePolicyInformation.Add(new()
+        {
+            Resource = serviceResource,
+            MinimumAuthenticationLevel = minimumAuthenticationLevel,
+            MinimumSystemUserAuthenticationLevel = minimumSystemUserAuthenticationLevel
+        });
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+    }
 
     private const string DummyService = "urn:altinn:resource:test-service";
 

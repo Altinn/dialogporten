@@ -423,12 +423,12 @@ Refer to [docs/Infrastructure.md](docs/Infrastructure.md) for more detailed info
 
 ### Applications
 
-All application Bicep definitions are located in the `.azure/applications` folder. To add a new application, follow the existing pattern found within this directory. This involves creating a new folder for your application under `.azure/applications` and adding the necessary Bicep files (`main.bicep` and environment-specific parameter files, e.g., `test.bicepparam`, `staging.bicepparam`).
+All application Bicep definitions are located in the `.azure/applications` folder. To add a new application, follow the existing pattern found within this directory. This involves creating a new folder for your application under `.azure/applications` and adding the necessary Bicep files (`main.bicep` and environment-specific parameter files, e.g., `yt01.bicepparam`, `staging.bicepparam`). at23 (`test`) runs the apps on DIS (AKS) from [Altinn/dialogporten-manifests](https://github.com/Altinn/dialogporten-manifests), so it has no application parameter files.
 
 For example, to add a new application named `web-api-new`, you would:
 - Create a new folder: `.azure/applications/web-api-new`
 - Add a `main.bicep` file within this folder to define the application's infrastructure.
 - Use the appropriate `Bicep`-modules within this file. There is one for `Container apps` which you most likely would use.
-- Add parameter files for each environment (e.g., `test.bicepparam`, `staging.bicepparam`) to specify environment-specific values.
+- Add parameter files for each environment (e.g., `yt01.bicepparam`, `staging.bicepparam`) to specify environment-specific values.
 
 Refer to the existing applications like `web-api-so` and `web-api-eu` as templates.

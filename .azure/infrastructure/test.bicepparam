@@ -6,6 +6,8 @@ param keyVaultSourceKeys = json(readEnvironmentVariable('AZURE_KEY_VAULT_SOURCE_
 
 param redisVersion = '6.0'
 
+// at23 runs the apps and jobs on DIS (AKS) from Altinn/dialogporten-manifests
+param deployContainerAppEnvironment = false
 param containerAppEnvZoneRedundancyEnabled = false
 
 // secrets

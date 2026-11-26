@@ -50,6 +50,9 @@ param apimUrl string
 @description('Whether to purge data immediately after 30 days in Application Insights')
 param appInsightsPurgeDataOn30Days bool = false
 
+@description('Whether to deploy the container app environment and its identity. False where the apps run on DIS (AKS) instead.')
+param deployContainerAppEnvironment bool = true
+
 @description('Whether zone redundancy should be enabled for the container app environment')
 param containerAppEnvZoneRedundancyEnabled bool
 
@@ -332,7 +335,7 @@ module copyEnvironmentSecrets '../modules/keyvault/copySecrets.bicep' = {
   }
 }
 
-module containerAppIdentity '../modules/managedIdentity/main.bicep' = {
+module containerAppIdentity '../modules/managedIdentity/main.bicep' = if (deployContainerAppEnvironment) {
   scope: resourceGroup
   name: 'containerAppIdentity'
   params: {
@@ -342,7 +345,7 @@ module containerAppIdentity '../modules/managedIdentity/main.bicep' = {
   }
 }
 
-module containerAppEnv '../modules/containerAppEnv/main.bicep' = {
+module containerAppEnv '../modules/containerAppEnv/main.bicep' = if (deployContainerAppEnvironment) {
   scope: resourceGroup
   name: 'containerAppEnv'
   params: {
@@ -350,7 +353,7 @@ module containerAppEnv '../modules/containerAppEnv/main.bicep' = {
     location: location
     appInsightWorkspaceName: appInsights.outputs.appInsightsWorkspaceName
     appInsightsConnectionString: appInsights.outputs.connectionString
-    userAssignedIdentityId: containerAppIdentity.outputs.managedIdentityId
+    userAssignedIdentityId: containerAppIdentity!.outputs.managedIdentityId
     subnetId: vnet.outputs.containerAppEnvironmentSubnetId
     tags: tags
     zoneRedundancyEnabled: containerAppEnvZoneRedundancyEnabled
@@ -383,5 +386,5 @@ module redisConnectionStringAppConfig '../modules/appConfiguration/upsertKeyValu
 }
 
 output resourceGroupName string = resourceGroup.name
-output containerAppEnvId string = containerAppEnv.outputs.containerAppEnvId
+output containerAppEnvId string = containerAppEnv.?outputs.containerAppEnvId ?? ''
 output environmentKeyVaultName string = environmentKeyVault.outputs.name

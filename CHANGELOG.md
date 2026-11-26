@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.126.8](https://github.com/Altinn/dialogporten/compare/v1.126.7...v1.126.8) (2026-11-25)
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency asynckeyedlock to 8.1.3 ([#4637](https://github.com/Altinn/dialogporten/issues/4637)) ([60cf940](https://github.com/Altinn/dialogporten/commit/60cf940c0bf7e1c28f9e1e445424a275acc13a34))
+* **deps:** update dependency coverlet.collector to 10.1.1 ([#4651](https://github.com/Altinn/dialogporten/issues/4651)) ([e653686](https://github.com/Altinn/dialogporten/commit/e6536861751bac162f853b6608d7f05073c98917))
+* **deps:** update dependency deterministicguids to 1.0.12 ([#4652](https://github.com/Altinn/dialogporten/issues/4652)) ([10c08d2](https://github.com/Altinn/dialogporten/commit/10c08d2d0e4ca09e65d5788df4348f720fe01b5d))
+* **deps:** update dependency entityframeworkcore.exceptions.postgresql to 10.0.2 ([#4653](https://github.com/Altinn/dialogporten/issues/4653)) ([4d06280](https://github.com/Altinn/dialogporten/commit/4d062808cbecaaaaa1979e1d9dfca1cf054dd437))
+* **deps:** update dependency medo.uuid7 to 3.3.1 ([#4638](https://github.com/Altinn/dialogporten/issues/4638)) ([988bc83](https://github.com/Altinn/dialogporten/commit/988bc83b6acb0789152c37738f671c0d5fa6b4ec))
+* **deps:** update dependency microsoft.net.test.sdk to 18.12.0 ([#4640](https://github.com/Altinn/dialogporten/issues/4640)) ([13f41e1](https://github.com/Altinn/dialogporten/commit/13f41e1d64515be0465c87c1248da11611f438eb))
+* **deps:** update dependency microsoft.openapi to 2.13.1 ([#4654](https://github.com/Altinn/dialogporten/issues/4654)) ([2218147](https://github.com/Altinn/dialogporten/commit/22181471b96123fd7542511e3256c92d391c6a11))
+* **deps:** update dependency scalar.aspnetcore to 2.21.0 ([#4641](https://github.com/Altinn/dialogporten/issues/4641)) ([77ae62f](https://github.com/Altinn/dialogporten/commit/77ae62f6ab61809466964d3674e28eaaeb1ef94c))
+* **deps:** update dependency testcontainers.postgresql to 4.16.0 ([#4642](https://github.com/Altinn/dialogporten/issues/4642)) ([75028b3](https://github.com/Altinn/dialogporten/commit/75028b331c6c5baf55da53a51388472d5e7e09d7))
+* **deps:** update grafana/loki docker tag to v3.7.10 ([#4639](https://github.com/Altinn/dialogporten/issues/4639)) ([fb1cf95](https://github.com/Altinn/dialogporten/commit/fb1cf9598adb65b520cd3c5274800d0dd4a6e3e4))
+* **deps:** update grafana/setup-k6-action action to v1.3.0 ([#4643](https://github.com/Altinn/dialogporten/issues/4643)) ([d4c2f6b](https://github.com/Altinn/dialogporten/commit/d4c2f6ba738e6c6213f3397babf6a66be37971c5))
+* **deps:** update hotchocolate dependencies to 16.7.6 ([#4655](https://github.com/Altinn/dialogporten/issues/4655)) ([8ed2c32](https://github.com/Altinn/dialogporten/commit/8ed2c32a41f21cd58d5ce7f7e887e163c4642189))
+* **deps:** update nswag dependencies to 14.8.0 ([#4644](https://github.com/Altinn/dialogporten/issues/4644)) ([736befb](https://github.com/Altinn/dialogporten/commit/736befb9462d15ef0c0e9b1ed982dd53adad3f86))
+* **deps:** update opentelemetry dependencies to 1.21.0 ([#4645](https://github.com/Altinn/dialogporten/issues/4645)) ([4af40fb](https://github.com/Altinn/dialogporten/commit/4af40fb6cc0fe36006a0ce4bcfe843604df6d550))
+
 ## [1.126.7](https://github.com/Altinn/dialogporten/compare/v1.126.6...v1.126.7) (2026-11-18)
 
 

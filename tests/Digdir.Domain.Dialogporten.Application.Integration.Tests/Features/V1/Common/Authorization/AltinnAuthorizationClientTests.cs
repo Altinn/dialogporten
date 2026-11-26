@@ -85,9 +85,11 @@ public class AltinnAuthorizationClientTests(DialogApplication application) : App
     }
 
     [Theory]
-    [InlineData(4, 3, true)]  // system user level 3 >= system user requirement 3
-    [InlineData(3, 4, false)] // system user level 3 < system user requirement 4, general requirement is ignored
-    public async Task UserHasRequiredAuthLevel_Should_Use_SystemUser_Level_When_Principal_Is_SystemUser(
+    [InlineData(4, 3, true)]  // system user level 3 meets the system-user level 3
+    [InlineData(3, 4, true)]  // system user level 3 meets the general level 3, so the stricter system-user level does not apply
+    [InlineData(2, 4, true)]  // system user level 3 meets the general level 2
+    [InlineData(4, 4, false)] // system user level 3 meets neither level
+    public async Task UserHasRequiredAuthLevel_Should_Pass_SystemUser_That_Meets_Either_Level(
         int minimumAuthenticationLevel, int minimumSystemUserAuthenticationLevel, bool expected)
     {
         // Arrange

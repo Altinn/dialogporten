@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.AltinnAuthorization;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.Extensions;
@@ -119,10 +120,9 @@ internal sealed class GetDialogLookupQueryHandler : IRequestHandler<GetDialogLoo
         };
     }
 
-    private int GetMinimumAuthLevel(IdentifierLookupServiceResourceDto serviceResource)
-    {
-        return _user.GetPrincipal().TryGetSystemUserId(out _)
-            ? serviceResource.MinimumSystemUserAuthenticationLevel ?? serviceResource.MinimumAuthenticationLevel
-            : serviceResource.MinimumAuthenticationLevel;
-    }
+    private int GetMinimumAuthLevel(IdentifierLookupServiceResourceDto serviceResource) =>
+        new MinimumAuthenticationLevels(
+                serviceResource.MinimumAuthenticationLevel,
+                serviceResource.MinimumSystemUserAuthenticationLevel)
+            .RequiredFor(_user.GetPrincipal().TryGetSystemUserId(out _));
 }

@@ -201,19 +201,29 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     }
 
     [Theory]
-    [InlineData(4, null)]
-    [InlineData(3, 4)]
-    public Task Get_Should_Return_NonSensitiveTitle_As_Title_When_SystemUser_Auth_Level_Is_Too_Low(int minimumAuthenticationLevel, int? minimumSystemUserAuthenticationLevel)
+    [InlineData(4, null, true, "Ugradert tittel")] // no system-user level, so the general level 4 applies
+    [InlineData(4, 4, true, "Ugradert tittel")]    // the system user meets neither level
+    [InlineData(4, 3, true, "Gradert tittel")]     // the system-user level relaxes the general level
+    [InlineData(3, 4, true, "Gradert tittel")]     // the general level is met, so the stricter system-user level does not apply
+    [InlineData(4, 3, false, "Ugradert tittel")]   // the system-user level never applies to end users
+    public Task Get_Should_Pick_Title_By_The_Level_The_Caller_Must_Have(
+        int minimumAuthenticationLevel,
+        int? minimumSystemUserAuthenticationLevel,
+        bool asSystemUser,
+        string expectedTitle)
     {
         var party = Party;
-        const string serviceResource = "urn:altinn:resource:test-service-auth-level-too-low";
+        const string serviceResource = "urn:altinn:resource:test-service-system-user-auth-level";
 
-        return FlowBuilder.For(Application)
+        var flow = FlowBuilder.For(Application)
             .ConfigureAltinnAuthorization(altinnAuthorization =>
-                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource))
-            .AsSystemUser(x => x.WithClaim(
-                ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
-                Constants.IdportenLoaSubstantial))
+                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource));
+
+        return (asSystemUser
+                ? flow.AsSystemUser()
+                : flow.AsIntegrationTestUser(x => x.WithClaim(
+                    ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                    Constants.IdportenLoaSubstantial)))
             .CreateSimpleDialog((x, _) =>
             {
                 x.Dto.Party = party;
@@ -238,7 +248,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
                 result.Title.Should().ContainSingle();
-                result.Title[0].Value.Should().Be("Ugradert tittel");
+                result.Title[0].Value.Should().Be(expectedTitle);
                 result.AuthorizationEvidence.CurrentAuthenticationLevel.Should().Be(3);
             });
     }

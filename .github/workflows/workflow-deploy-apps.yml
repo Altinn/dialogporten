@@ -56,10 +56,22 @@ concurrency:
   # if the dryrun input is true, we want to cancel any running deployments in order to not block the pipeline e.g for environment approvals
   cancel-in-progress: ${{ inputs.dryRun }}
 jobs:
+  # at23 (test) runs on DIS and is deployed from Altinn/dialogporten-manifests.
+  reject-test-environment:
+    name: Reject the test environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail for test
+        if: ${{ inputs.environment == 'test' }}
+        run: |
+          echo "::error::Container Apps are not deployed to test (at23). It runs on DIS from Altinn/dialogporten-manifests."
+          exit 1
+
   deploy-migration-job:
     name: Deploy migration job to ${{ inputs.environment }}
     runs-on: ubuntu-latest
     if: ${{ inputs.runMigration }}
+    needs: reject-test-environment
     environment: ${{inputs.environment}}
     permissions:
       id-token: write
@@ -147,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
     # Should run even though the migration job was skipped
     if: ${{ always() && !failure() && !cancelled() }}
-    needs: deploy-migration-job
+    needs: [ reject-test-environment, deploy-migration-job ]
     strategy:
       fail-fast: true
       matrix:

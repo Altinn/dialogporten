@@ -11,6 +11,13 @@ on:
       - Kustomization/dialogporten-migration.product-dialogporten
       - OCIRepository/dialogporten-manifests.product-dialogporten
 
+# The event has no app version, so the version shows in the job names below. Unvalidated
+# payload, only for display; the record job validates the event.
+run-name: >-
+  ${{ github.event.client_payload.metadata.environment }}:
+  ${{ github.event.client_payload.involvedObject.name }}
+  ${{ github.event.client_payload.severity == 'error' && 'failed' || 'succeeded' }}
+
 permissions: {}
 
 jobs:
@@ -86,7 +93,7 @@ jobs:
   # recovery after a failed attempt, runs them again. A release that resolve-release could not
   # look up fails the first check, which reports it to Slack.
   test-release:
-    name: Test the deployed release
+    name: Test ${{ needs.record.outputs.app_version || 'the deployed release' }}
     needs: record
     if: >-
       needs.record.outputs.outcome == 'succeeded' &&
@@ -120,7 +127,7 @@ jobs:
       SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_FOR_CI_CD_STATUS }}
 
   report-failure:
-    name: Send Slack message on a failed rollout
+    name: Report the failed rollout of ${{ needs.record.outputs.app_version || 'an unknown release' }}
     needs: record
     # Also when the release lookup failed, which must not hide the rollout failure.
     if: ${{ always() && needs.record.outputs.outcome == 'failed' }}

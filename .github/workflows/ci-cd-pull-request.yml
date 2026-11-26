@@ -161,6 +161,25 @@ jobs:
           fi
           echo "No new vulnerable dependencies introduced." >> "$GITHUB_STEP_SUMMARY"
 
+  # Builds the application templates and their parameter files for every environment, without
+  # Azure access.
+  build-app-bicep:
+    name: Build application Bicep
+    needs: [ check-for-changes ]
+    if: ${{ needs.check-for-changes.outputs.hasInfraChanges == 'true' || needs.check-for-changes.outputs.hasBackendChanges == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build application templates and parameter files
+        run: bash .github/scripts/build-app-bicep.sh
+
   build-infrastructure:
     uses: ./.github/workflows/workflow-build-infrastructure.yml
     needs: [ check-for-changes ]

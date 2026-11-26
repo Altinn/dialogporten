@@ -51,9 +51,11 @@ jobs:
       dockerImageBaseName: ghcr.io/altinn/dialogporten-
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
 
+  # Waits for the infra deploy, so new secrets and configuration exist before Flux rolls out the
+  # code that reads them.
   update-manifests:
     name: Update manifest image tags for at23
-    needs: [get-current-version, generate-git-short-sha, publish-docker-images, check-for-changes]
+    needs: [get-current-version, generate-git-short-sha, publish-docker-images, check-for-changes, deploy-infra]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
     uses: ./.github/workflows/workflow-dispatch-update-manifests.yml
     with:

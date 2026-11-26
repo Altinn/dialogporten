@@ -74,7 +74,7 @@ All resources are tagged with:
 The Virtual Network follows a consistent subnet allocation pattern:
 1. Default subnet: 10.0.0.0/24
 2. PostgreSQL subnet: 10.0.1.0/24
-3. Container Apps Environment: 10.0.2.0/23
+3. Container Apps Environment: 10.0.2.0/23 (not used in `test`, which runs the apps on DIS. The existing at23 Container Apps environment stays until the manual teardown in [#4660](https://github.com/Altinn/dialogporten/issues/4660))
 4. Service Bus subnet: 10.0.4.0/24
 5. Redis subnet: 10.0.5.0/24
 

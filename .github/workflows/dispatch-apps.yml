@@ -6,10 +6,9 @@ on:
       environment:
         description: "Environment to deploy to"
         required: true
-        default: "test"
+        default: "yt01"
         type: choice
         options:
-          - test
           - yt01
           - staging
           - prod

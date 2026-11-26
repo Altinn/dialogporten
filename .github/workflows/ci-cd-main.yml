@@ -51,8 +51,9 @@ jobs:
       dockerImageBaseName: ghcr.io/altinn/dialogporten-
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
 
-  # Waits for the infra deploy, so new secrets and configuration exist before Flux rolls out the
-  # code that reads them.
+  # at23 runs on DIS (AKS): Flux rolls out the image tags set here and reports the result to
+  # ci-cd-flux-reconciliation-result.yml, which runs the E2E tests. Waits for the infra deploy, so new
+  # secrets and configuration exist before Flux rolls out the code that reads them.
   update-manifests:
     name: Update manifest image tags for at23
     needs: [get-current-version, generate-git-short-sha, publish-docker-images, check-for-changes, deploy-infra]
@@ -82,35 +83,6 @@ jobs:
       region: norwayeast
       version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
 
-  deploy-apps:
-    name: Deploy apps to test
-    needs:
-      [
-        get-current-version,
-        check-for-changes,
-        generate-git-short-sha,
-        publish-docker-images,
-        deploy-infra,
-      ]
-    # we want deployment of apps to be dependent on deployment of infrastructure, but if infrastructure is skipped, we still want to deploy the apps
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'workflow_dispatch' || needs.check-for-changes.outputs.hasBackendChanges == 'true') }}
-    uses: ./.github/workflows/workflow-deploy-apps.yml
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      # todo: consider resolving these in another way since they are created in the infra-step
-      AZURE_RESOURCE_GROUP_NAME: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-      AZURE_ENVIRONMENT_KEY_VAULT_NAME: ${{ secrets.AZURE_ENVIRONMENT_KEY_VAULT_NAME }}
-      AZURE_CONTAINER_APP_ENVIRONMENT_NAME: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
-      AZURE_APP_INSIGHTS_CONNECTION_STRING: ${{ secrets.AZURE_APP_INSIGHTS_CONNECTION_STRING }}
-      AZURE_APP_CONFIGURATION_NAME: ${{ secrets.AZURE_APP_CONFIGURATION_NAME }}
-      AZURE_SERVICE_BUS_NAMESPACE_NAME: ${{ secrets.AZURE_SERVICE_BUS_NAMESPACE_NAME }}
-    with:
-      environment: test
-      version: ${{ needs.get-current-version.outputs.version }}-${{ needs.generate-git-short-sha.outputs.gitShortSha }}
-      runMigration: true
-
   get-previous-deployed-sha:
     name: Get previous deployed SHA for test
     runs-on: ubuntu-latest
@@ -135,8 +107,8 @@ jobs:
 
   tag-issues-with-environment:
     name: Tag deployed PRs and issues for test
-    needs: [ deploy-apps, deploy-infra, get-previous-deployed-sha ]
-    if: ${{ always() && !failure() && !cancelled() && github.event_name == 'push' && (needs.deploy-apps.outputs.deployment_executed == 'true' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
+    needs: [ update-manifests, deploy-infra, get-previous-deployed-sha ]
+    if: ${{ always() && !failure() && !cancelled() && github.event_name == 'push' && (needs.update-manifests.result == 'success' || needs.deploy-infra.outputs.deployment_executed == 'true') }}
     uses: ./.github/workflows/workflow-tag-issues-with-environment.yml
     with:
       environment-label: at23
@@ -167,7 +139,7 @@ jobs:
 
   publish-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
-    needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
+    needs: [ update-manifests, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasSwaggerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
@@ -176,7 +148,7 @@ jobs:
 
   publish-enduser-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
-    needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
+    needs: [ update-manifests, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasOpenApiEndUserSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiEndUserClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
@@ -185,7 +157,7 @@ jobs:
 
   publish-serviceowner-sdk-to-nuget:
     uses: ./.github/workflows/workflow-publish-nuget.yml
-    needs: [ deploy-apps, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
+    needs: [ update-manifests, get-current-version, generate-git-short-sha, check-for-changes, generate-timestamp ]
     if: ${{ always() && !failure() && !cancelled() && ( needs.check-for-changes.outputs.hasOpenApiServiceOwnerSchemaChanges == 'true' || needs.check-for-changes.outputs.hasWebApiServiceOwnerClientChanges == 'true' ) }}
     with:
       version: ${{ needs.get-current-version.outputs.version }}-alpha.${{ needs.generate-timestamp.outputs.timestamp }}+${{ needs.generate-git-short-sha.outputs.gitShortSha }}
@@ -196,7 +168,7 @@ jobs:
     name: Send Slack message on failure
     needs: [
       deploy-infra,
-      deploy-apps,
+      update-manifests,
       get-previous-deployed-sha,
       tag-issues-with-environment,
       store-latest-deployed-sha,
@@ -208,7 +180,7 @@ jobs:
     with:
       environment: test
       infra_status: ${{ needs.deploy-infra.result }}
-      apps_status: ${{ needs.deploy-apps.result }}
+      apps_status: ${{ needs.update-manifests.result }}
       publish_status: ${{ needs.publish-docker-images.result }}
       build_and_test_status: ${{ needs.build-and-test.result }}
     secrets:
@@ -219,7 +191,7 @@ jobs:
     name: Send deployment to Swarmia
     if: ${{ always() && !failure() && !cancelled() }}
     uses: ./.github/workflows/workflow-swarmia-deployment.yml
-    needs: [ deploy-infra, deploy-apps, get-current-version, generate-git-short-sha ]
+    needs: [ deploy-infra, update-manifests, get-current-version, generate-git-short-sha ]
     with:
       app-name: dialogporten
       environment: 'test'
@@ -239,7 +211,6 @@ jobs:
         publish-docker-images,
         update-manifests,
         deploy-infra,
-        deploy-apps,
         get-previous-deployed-sha,
         tag-issues-with-environment,
         store-latest-deployed-sha,
@@ -258,5 +229,6 @@ jobs:
       name: test
       label: CI/CD Main
       status: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
-      # The badge shows the app version, so it only moves when the apps deploy. An infra-only or failed app deployment keeps it.
-      version: ${{ needs.deploy-apps.outputs.deployment_executed == 'true' && format('{0}-{1}', needs.get-current-version.outputs.version, needs.generate-git-short-sha.outputs.gitShortSha) || '' }}
+      # The badge shows the app version. It moves when the at23 image tag update has been dispatched, before Flux
+      # rolls it out. An infra-only run or a failed dispatch keeps it.
+      version: ${{ needs.update-manifests.result == 'success' && format('{0}-{1}', needs.get-current-version.outputs.version, needs.generate-git-short-sha.outputs.gitShortSha) || '' }}

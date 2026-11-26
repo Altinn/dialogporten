@@ -10,7 +10,7 @@ Dialogporten's monitoring dashboards are hosted in Grafana and provide comprehen
 - **Infrastructure**: PostgreSQL, Redis, Service Bus status
 
 ### Usage
-- Select environment (test, yt01, staging, prod)
+- Select environment (test, yt01, staging, prod). test (at23) runs on DIS, so the Container Apps panels are empty there
 - Default view: Last 24 hours
 - Start with system health, then drill down as needed
 

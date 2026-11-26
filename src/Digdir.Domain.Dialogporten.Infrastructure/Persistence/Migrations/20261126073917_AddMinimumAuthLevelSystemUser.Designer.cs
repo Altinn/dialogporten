@@ -14,8 +14,8 @@ using NpgsqlTypes;
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DialogDbContext))]
-    [Migration("20261105141332_addMinimumAuthLevelSystemUser")]
-    partial class addMinimumAuthLevelSystemUser
+    [Migration("20261126073917_AddMinimumAuthLevelSystemUser")]
+    partial class AddMinimumAuthLevelSystemUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -136,8 +136,8 @@ keeps everything, including exception stack traces.
 
 Setting the level explicitly matters. Left unset, the library derives it from `IHostEnvironment`:
 `Development` → `Full`, `Production` → `Summary`, anything else → `Diagnostic` (which publishes
-entry data and exception messages). Our container apps run with `ASPNETCORE_ENVIRONMENT` set to
-`prod`, `staging`, `test` or `yt01` — none of which is the literal `Production` — so every
+entry data and exception messages). Our deployed apps (Container Apps, and DIS in at23) run with
+`ASPNETCORE_ENVIRONMENT` set to `prod`, `staging`, `test` or `yt01` — none of which is the literal `Production` — so every
 deployed environment would land on `Diagnostic`.
 
 ## Warmup

@@ -10,7 +10,7 @@ Dialogporten's monitoring dashboards are hosted in Grafana and provide comprehen
 - **Infrastructure**: PostgreSQL, Redis, Service Bus status
 
 ### Usage
-- Select environment (test, yt01, staging, prod)
+- Select environment (test, yt01, staging, prod). test (at23) runs on DIS, so the Container Apps panels are empty there
 - Default view: Last 24 hours
 - Start with system health, then drill down as needed
 
@@ -19,6 +19,9 @@ Dialogporten's monitoring dashboards are hosted in Grafana and provide comprehen
 Dialogporten uses OpenTelemetry for collecting and routing telemetry data:
 
 ### OpenTelemetry Integration
+
+This section and the data flow below cover the Container Apps environments (yt01, staging and prod). In test (at23) the apps run on DIS and send OTLP to the platform OpenTelemetry Collector, which drops logs below Warning. Feature metrics go to a separate collector that sends them to Application Insights. See [Altinn/dialogporten-manifests](https://github.com/Altinn/dialogporten-manifests/blob/main/docs/summary.md).
+
 - Utilizes Azure Container Apps' managed OpenTelemetry agent
 - Automatically collects traces and logs from container apps
 - Routes telemetry data to Azure Application Insights

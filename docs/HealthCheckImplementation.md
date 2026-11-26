@@ -255,9 +255,9 @@ has no cold-start traffic to gate.
   only `Name`, `Tags`, `FailureStatus`, `MinimalFailureStatus`). Withheld fields are omitted from
   the JSON rather than written empty. Worth suppressing because the endpoints are public: WebApi
   and GraphQL through APIM, and the Service directly on its container app ingress, which carries
-  no IP allow-list. The level is set explicitly rather than left to the library's default
+  no IP allow-list (in at23 on DIS the Service has no public route). The level is set explicitly rather than left to the library's default
   derivation, which only recognises the literal environment name `Production` and would resolve
-  our `prod`/`staging`/`test`/`yt01` container apps to `Diagnostic` — exactly the level that
+  our `prod`/`staging`/`test`/`yt01` deployments to `Diagnostic` — exactly the level that
   publishes entry data and exception messages.
 - **Per-service configuration**: WebApi and GraphQL bind their probe list from their own settings
   section (`WebApi:HealthProbes`, `GraphQl:HealthProbes`) and add their well-known auth URLs; the

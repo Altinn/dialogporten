@@ -22,10 +22,12 @@ When code is merged to `main`, two workflows always run in parallel, plus a
 third that only starts when the schema package is touched:
 
    a. **CI/CD Main** (`ci-cd-main.yml`)
-   - Automatically deploys to Test environment
+   - Automatically deploys to Test environment (at23)
    - Runs full deployment including:
      - Infrastructure if changed
-     - Applications if changed
+     - Applications if changed: sets the new image tags for at23 in
+       [Altinn/dialogporten-manifests](https://github.com/Altinn/dialogporten-manifests), and
+       Flux rolls them out to DIS (AKS). CI/CD Main deploys no Container Apps to at23.
      - Runs no E2E tests. `ci-cd-flux-reconciliation-result.yml` runs them once Flux has
        rolled the release out to at23 (see [Automated Monitoring](#6-automated-monitoring)),
        and `dispatch-k6-tests.yml` and `dispatch-e2e-tests.yml` run them on demand. A change
@@ -164,7 +166,7 @@ The `dispatch-apps.yml` workflow is responsible for deploying applications. To t
 2. Select the `Dispatch Apps` workflow.
 3. Click on "Run workflow".
 4. Fill in the required inputs:
-   - **environment**: Choose the target environment (`test`, `yt01`, `staging`, or `prod`).
+   - **environment**: Choose the target environment (`yt01`, `staging`, or `prod`). at23 (`test`) runs on DIS and is deployed from Altinn/dialogporten-manifests.
    - **version**: Specify the version to deploy. Could be git tag or a docker-tag published in packages.
    - **runMigration** (optional): Indicate whether to run database migrations (`true` or `false`).
 

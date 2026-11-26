@@ -8,6 +8,7 @@ param redisVersion = '6.0'
 
 // at23 runs the apps and jobs on DIS (AKS) from Altinn/dialogporten-manifests
 param deployContainerAppEnvironment = false
+// Unused in test, but main.bicep requires it (no default)
 param containerAppEnvZoneRedundancyEnabled = false
 
 // secrets

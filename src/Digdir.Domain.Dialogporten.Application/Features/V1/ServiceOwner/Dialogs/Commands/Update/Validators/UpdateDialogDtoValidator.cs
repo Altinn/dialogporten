@@ -1,10 +1,12 @@
 using Digdir.Domain.Dialogporten.Application.Common;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.FluentValidation;
+using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Common;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Actions;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update.Validators;
 
@@ -18,7 +20,8 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
         IValidator<ActivityDto> activityValidator,
         IValidator<SearchTagDto> searchTagValidator,
         IValidator<ContentDto?> contentValidator,
-        IUserResourceRegistry userResourceRegistry)
+        IUserResourceRegistry userResourceRegistry,
+        IDialogDbContext db)
     {
         RuleFor(x => x.Progress)
             .InclusiveBetween(0, 100);
@@ -52,10 +55,13 @@ internal sealed class UpdateDialogDtoValidator : AbstractValidator<UpdateDialogD
                     .NotEmpty()
                     .SetValidator(contentValidator);
 
+                // The preloaded dialog does not include its transmissions, so look for one without content in the database.
                 RuleFor(x => x.Transmissions)
-                    .Must((_, _, ctx) => UpdateDialogDataLoader
-                        .GetPreloadedData(ctx)!.Transmissions
-                        .All(x => x.Content.Count != 0))
+                    .MustAsync(async (_, _, ctx, ct) =>
+                        UpdateDialogDataLoader.GetPreloadedData(ctx) is not { } dialog ||
+                        !await db.DialogTransmissions
+                            .Where(x => x.DialogId == dialog.Id)
+                            .AnyAsync(x => !x.Content.Any(), ct))
                     .WithMessage(
                         $"This dialog is locked to {nameof(DialogDto.IsApiOnly)}=true, as one or " +
                         $"more of the existing immutable transmissions do not have content.");

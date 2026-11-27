@@ -4,10 +4,10 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
 
-// TODO: The hierarchy validator can now fetch only the referenced transmissions,
-// so the preloader no longer needs to hydrate the full transmission graph to validate updates.
+// Transmissions are append-only, and every check on them in the update queries the database,
+// so the preloader leaves them out. Dialogs can have tens of thousands of them.
 internal sealed class UpdateDialogDataLoader(FullDialogAggregateDataLoader fullDialogDataLoader) : TypedDataLoader<UpdateDialogCommand, UpdateDialogResult, DialogEntity, UpdateDialogDataLoader>
 {
     public override Task<DialogEntity?> Load(UpdateDialogCommand request, CancellationToken cancellationToken) =>
-        fullDialogDataLoader.LoadDialogEntity(request.Id, cancellationToken);
+        fullDialogDataLoader.LoadDialogEntityWithoutTransmissions(request.Id, cancellationToken);
 }

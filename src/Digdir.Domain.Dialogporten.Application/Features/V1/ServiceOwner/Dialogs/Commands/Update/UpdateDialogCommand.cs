@@ -5,7 +5,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours.DataLoader;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions.Enumerables;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common;
@@ -22,6 +21,7 @@ using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Activities;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities.Transmissions;
 using Digdir.Library.Entity.Abstractions.Features.Identifiable;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using OneOf;
 
 namespace Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Commands.Update;
@@ -134,7 +134,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             ValidateTimeFields(dialog);
         }
 
-        AppendActivity(dialog, request.Dto);
+        var newDialogActivities = AppendActivity(dialog, request.Dto);
 
         var activityTypes = request.Dto.Activities
             .Select(x => x.Type)
@@ -145,32 +145,17 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return new Forbidden(errorMessage);
         }
 
-        await AppendTransmission(dialog, request.Dto, cancellationToken);
+        // The dialog's stored transmissions are not loaded (see UpdateDialogDataLoader),
+        // so every check against them below queries the database.
+        var newDialogTransmissions = await AppendTransmission(dialog, request.Dto, cancellationToken);
 
-        var duplicatedKeys = dialog.Transmissions
-            .Select(x => x.IdempotentKey)
-            .OfType<string>()
-            .GroupBy(t => t)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToList();
-
-        if (duplicatedKeys.Count != 0)
+        var idempotentKeyConflict = await _db.FindIdempotentKeyConflict(dialog.Id, newDialogTransmissions, cancellationToken);
+        if (idempotentKeyConflict is not null)
         {
-            var conflictingKeys = string.Join(", ", duplicatedKeys.Select(x => $"'{x}'"));
-            return new Conflict(
-                nameof(DialogTransmission.IdempotentKey),
-                $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.",
-                new IdempotentKeysExist
-                {
-                    IdempotentKeys = duplicatedKeys
-                }
-            );
+            return idempotentKeyConflict;
         }
 
-        _transmissionHierarchyValidator.ValidateWholeAggregate(dialog);
-
-        VerifyActivityTransmissionRelations(dialog);
+        await VerifyActivityTransmissionRelations(dialog, newDialogActivities, cancellationToken);
 
         dialog.SearchTags
             .Merge(request.Dto.SearchTags,
@@ -215,7 +200,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         _domainContext.AddErrors(dialog.ValidateAuthorizationContexts());
 
         var serviceResourceInformation = await _resourceRegistry.GetResourceInformation(dialog.ServiceResource, cancellationToken);
-        dialog.HasUnopenedContent = DialogUnopenedContent.HasUnopenedContent(dialog, serviceResourceInformation);
+        dialog.HasUnopenedContent = await DialogUnopenedContent.HasUnopenedContentAsync(
+            _db, dialog, newDialogActivities, serviceResourceInformation, cancellationToken);
 
         // Only reset the end user's system labels to Default when the change counts as a content update
         if (!request.IsSilentUpdate && await _db.HasContentChanges(dialog, cancellationToken))
@@ -276,7 +262,7 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
     }
 
-    private void AppendActivity(DialogEntity dialog, UpdateDialogDto dto)
+    private List<DialogActivity> AppendActivity(DialogEntity dialog, UpdateDialogDto dto)
     {
         var newDialogActivities = dto.Activities
             .Select(x => x.ToDialogActivity())
@@ -291,20 +277,28 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         if (existingIds.Length != 0)
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogActivity>(existingIds));
-            return;
+            return [];
         }
 
         dialog.Activities.AddRange(newDialogActivities);
 
         // Tell ef explicitly to add activities as new to the database.
         _db.DialogActivities.AddRange(newDialogActivities);
+
+        return newDialogActivities;
     }
 
-    private void VerifyActivityTransmissionRelations(DialogEntity dialog)
+    private async Task VerifyActivityTransmissionRelations(
+        DialogEntity dialog,
+        List<DialogActivity> newDialogActivities,
+        CancellationToken cancellationToken)
     {
-        var relatedTransmissionIds = dialog.Activities
-            .Where(x => x.TransmissionId is not null)
+        // Stored activities reference stored transmissions through a foreign key, so only new activities need checking.
+        var relatedTransmissionIds = newDialogActivities
             .Select(x => x.TransmissionId)
+            .OfType<Guid>()
+            .Distinct()
+            .Except(dialog.Transmissions.Select(x => x.Id))
             .ToList();
 
         if (relatedTransmissionIds.Count == 0)
@@ -312,10 +306,13 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             return;
         }
 
-        var transmissionIds = dialog.Transmissions.Select(x => x.Id).ToList();
+        var storedTransmissionIds = await _db.DialogTransmissions
+            .Where(x => x.DialogId == dialog.Id && relatedTransmissionIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
 
         var invalidTransmissionIds = relatedTransmissionIds
-            .Where(id => !transmissionIds.Contains(id!.Value))
+            .Except(storedTransmissionIds)
             .ToList();
 
         if (invalidTransmissionIds.Count != 0)
@@ -327,11 +324,16 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         }
     }
 
-    private async Task AppendTransmission(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
+    private async Task<List<DialogTransmission>> AppendTransmission(DialogEntity dialog, UpdateDialogDto dto, CancellationToken cancellationToken)
     {
         var newDialogTransmissions = dto.Transmissions
             .Select(x => x.ToDialogTransmission())
             .ToList();
+
+        if (newDialogTransmissions.Count == 0)
+        {
+            return [];
+        }
 
         // Ensure transmissions, attachments and navigational actions have a UUIDv7 ID, needed for the
         // transmission hierarchy validation and to guarantee deterministic order of input to output dtos.
@@ -340,53 +342,51 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
             .Concat(newDialogTransmissions.SelectMany(x => x.NavigationalActions))
             .EnsureIds();
 
-        var existingIds = _db.DialogTransmissions
-            .Local
+        var newTransmissionIds = newDialogTransmissions
             .Select(x => x.Id)
-            .Intersect(newDialogTransmissions.Select(x => x.Id))
-            .ToArray();
+            .ToList();
+
+        var existingIds = await _db.DialogTransmissions
+            .Where(x => x.DialogId == dialog.Id && newTransmissionIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToArrayAsync(cancellationToken);
 
         if (existingIds.Length != 0)
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogTransmission>(existingIds));
-            return;
+            return [];
         }
 
-        var newAttachments = newDialogTransmissions
-            .SelectMany(x => x.Attachments)
-            .ToList();
-
-        var newAttachmentIds = newAttachments
-            .Select(x => x.Id);
-
-        var existingAttachmentIds = _db.DialogTransmissions
-            .Local
+        var newAttachmentIds = newDialogTransmissions
             .SelectMany(x => x.Attachments)
             .Select(x => x.Id)
-            .Intersect(newAttachmentIds)
-            .ToArray();
+            .ToList();
+
+        var existingAttachmentIds = newAttachmentIds.Count == 0 ? [] : await _db.DialogTransmissionAttachments
+            .Where(x => x.Transmission.DialogId == dialog.Id && newAttachmentIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToArrayAsync(cancellationToken);
 
         if (existingAttachmentIds.Length != 0)
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogAttachment>(existingAttachmentIds));
-            return;
+            return [];
         }
 
         var newNavigationalActionIds = newDialogTransmissions
             .SelectMany(x => x.NavigationalActions)
-            .Select(x => x.Id);
-
-        var existingNavigationalActionIds = _db.DialogTransmissions
-            .Local
-            .SelectMany(x => x.NavigationalActions)
             .Select(x => x.Id)
-            .Intersect(newNavigationalActionIds)
-            .ToArray();
+            .ToList();
+
+        var existingNavigationalActionIds = newNavigationalActionIds.Count == 0 ? [] : await _db.DialogTransmissionNavigationalActions
+            .Where(x => x.Transmission.DialogId == dialog.Id && newNavigationalActionIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToArrayAsync(cancellationToken);
 
         if (existingNavigationalActionIds.Length != 0)
         {
             _domainContext.AddError(DomainFailure.EntityExists<DialogTransmissionNavigationalAction>(existingNavigationalActionIds));
-            return;
+            return [];
         }
 
         await _transmissionHierarchyValidator.ValidateNewTransmissionsAsync(
@@ -400,6 +400,8 @@ internal sealed class UpdateDialogCommandHandler : IRequestHandler<UpdateDialogC
         {
             _systemLabelAdder.AddSystemLabel(dialog, SystemLabel.Values.Sent);
         }
+
+        return newDialogTransmissions;
     }
 
     private IEnumerable<DialogGuiAction> CreateGuiActions(IEnumerable<GuiActionDto> creatables)

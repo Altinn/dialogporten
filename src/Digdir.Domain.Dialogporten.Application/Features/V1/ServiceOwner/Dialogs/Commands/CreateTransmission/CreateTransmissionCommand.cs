@@ -4,7 +4,6 @@ using Digdir.Domain.Dialogporten.Application.Common.Behaviours;
 using Digdir.Domain.Dialogporten.Application.Common.Behaviours.FeatureMetric;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes;
-using Digdir.Domain.Dialogporten.Application.Common.ReturnTypes.Conflicts;
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Common.SystemLabelAdder;
 using Digdir.Domain.Dialogporten.Application.Features.V1.ServiceOwner.Dialogs.Common;
@@ -100,7 +99,7 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
         // Map incoming DTOs to domain entities without loading existing transmissions.
         var newTransmissions = request.Transmissions.Select(x => x.ToDialogTransmission()).ToList();
 
-        var conflict = await ValidateIdempotentKeys(dialog.Id, newTransmissions, cancellationToken);
+        var conflict = await _db.FindIdempotentKeyConflict(dialog.Id, newTransmissions, cancellationToken);
         if (conflict is not null)
         {
             return conflict;
@@ -154,49 +153,6 @@ internal sealed class CreateTransmissionCommandHandler : IRequestHandler<CreateT
             domainError => domainError,
             concurrencyError => concurrencyError,
             conflict => conflict);
-    }
-
-    private async Task<Conflict?> ValidateIdempotentKeys(Guid dialogId, List<DialogTransmission> newTransmissions,
-        CancellationToken cancellationToken)
-    {
-        var newIdempotentKeys = newTransmissions
-            .Select(x => x.IdempotentKey)
-            .OfType<string>()
-            .ToList();
-
-        if (newIdempotentKeys.Count == 0)
-        {
-            return null;
-        }
-
-        var existingIdempotentKeys = await _db.DialogTransmissions
-            .Where(x => x.DialogId == dialogId)
-            .Select(x => x.IdempotentKey)
-            .OfType<string>()
-            .Where(x => newIdempotentKeys.Contains(x))
-            .ToListAsync(cancellationToken);
-
-        var duplicatedIdempotentKeys = newIdempotentKeys
-            .Concat(existingIdempotentKeys)
-            .GroupBy(x => x)
-            .Where(x => x.Count() > 1)
-            .Select(x => x.Key)
-            .ToList();
-
-        if (duplicatedIdempotentKeys.Count == 0)
-        {
-            return null;
-        }
-
-        var conflictingKeys = string.Join(", ", duplicatedIdempotentKeys.Select(x => $"'{x}'"));
-        return new Conflict(
-            nameof(DialogTransmission.IdempotentKey),
-            $"Duplicate IdempotentKey detected in dialog transmissions. Conflicting keys: {conflictingKeys}.",
-            new IdempotentKeysExist
-            {
-                IdempotentKeys = duplicatedIdempotentKeys
-            }
-        );
     }
 
     private async Task<DialogEntity?> LoadDialogAsync(Guid dialogId, CancellationToken cancellationToken)

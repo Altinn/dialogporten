@@ -55,6 +55,7 @@ Generated\ Files/
 
 # JetBrains Rider
 .idea/
+.run/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/

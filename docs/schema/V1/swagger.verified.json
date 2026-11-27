@@ -7967,6 +7967,35 @@
         },
         "type": "object"
       },
+      "V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "The action performed on the label, either \u0022set\u0022 or \u0022remove\u0022.",
+            "example": "set",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "The date and time when the label was set or removed.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the label.",
+            "example": "archive",
+            "type": "string"
+          },
+          "performedBy": {
+            "description": "The actor that performed the label change.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1ServiceOwnerCommonActors_Actor"
+              }
+            ]
+          }
+        },
+        "type": "object"
+      },
       "V1ServiceOwnerServiceOwnerContextCommandsCreateServiceOwnerLabel_Label": {
         "additionalProperties": false,
         "properties": {
@@ -12547,6 +12576,128 @@
           }
         ],
         "summary": "Delete a service owner label for a dialog",
+        "tags": [
+          "Serviceowner"
+        ]
+      }
+    },
+    "/api/v1/serviceowner/dialogs/{dialogId}/endusercontext/labellog": {
+      "get": {
+        "description": "Gets the list of label assignment logs belonging to a dialog.\n\nIf enduserId is supplied, the end user must have access to the dialog.",
+        "operationId": "V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLogs_DialogLabelAssignmentLog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dialogId",
+            "required": true,
+            "schema": {
+              "format": "guid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional end user to act on behalf of. If supplied, the end user must have access to the dialog.",
+            "example": "urn:altinn:person:identifier-no:01125512345",
+            "in": "query",
+            "name": "enduserId",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/V1ServiceOwnerEndUserContextQueriesSearchLabelAssignmentLog_LabelAssignmentLog"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successfully returned the dialog label assignment log list."
+          },
+          "400": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation error occurred. See problem details for a list of errors."
+          },
+          "401": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Missing or invalid authentication token. Please verify your access token."
+          },
+          "403": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "This endpoint requires a token from Maskinporten with the scope(s) \u0022digdir:dialogporten.serviceprovider\u0022."
+          },
+          "404": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "The given dialog ID was not found."
+          },
+          "410": {
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Entity with the given key(s) is removed."
+          },
+          "503": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "example": "Service Unavailable",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Service Unavailable, used when Dialogporten is in maintenance mode",
+            "headers": {
+              "Retry-After": {
+                "description": "Delay before retrying the request. Datetime format RFC1123",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "maskinporten": [
+              "digdir:dialogporten.serviceprovider"
+            ]
+          }
+        ],
+        "summary": "Gets a list of dialog label assignment logs",
         "tags": [
           "Serviceowner"
         ]

@@ -69,7 +69,8 @@ internal sealed class GetDialogQueryHandler : IRequestHandler<GetDialogQuery, Ge
         {
             var authorizationResult = await _altinnAuthorization.GetDialogDetailsAuthorization(
                 dialog,
-                cancellationToken);
+                cancellationToken
+            );
 
             if (!authorizationResult.HasAccessToMainResource())
             {

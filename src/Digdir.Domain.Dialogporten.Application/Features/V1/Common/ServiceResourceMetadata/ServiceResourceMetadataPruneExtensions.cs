@@ -26,6 +26,7 @@ public static class ServiceResourceMetadataPruneExtensions
                 Status = source.ServiceResource.Status,
                 IsDelegable = source.ServiceResource.IsDelegable,
                 MinimumAuthenticationLevel = source.ServiceResource.MinimumAuthenticationLevel,
+                MinimumSystemUserAuthenticationLevel = source.ServiceResource.MinimumSystemUserAuthenticationLevel,
                 Name = source.ServiceResource.Name.Pruned(acceptedLanguages),
                 Links = source.ServiceResource.Links
             },

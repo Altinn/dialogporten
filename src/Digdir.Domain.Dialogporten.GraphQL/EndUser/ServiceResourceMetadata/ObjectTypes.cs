@@ -30,6 +30,7 @@ public sealed class ServiceResourceMetadataServiceResource
     public string Status { get; set; } = null!;
     public bool IsDelegable { get; set; }
     public int MinimumAuthenticationLevel { get; set; }
+    public int? MinimumSystemUserAuthenticationLevel { get; set; }
     public List<Localization> Name { get; set; } = [];
     public ServiceResourceMetadataLinks Links { get; set; } = null!;
 }

@@ -2527,6 +2527,11 @@
             "format": "int32",
             "type": "integer"
           },
+          "minimumSystemUserAuthenticationLevel": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
           "name": {
             "items": {
               "$ref": "#/components/schemas/Localization"
@@ -2820,6 +2825,11 @@
           },
           "minimumAuthenticationLevel": {
             "format": "int32",
+            "type": "integer"
+          },
+          "minimumSystemUserAuthenticationLevel": {
+            "format": "int32",
+            "nullable": true,
             "type": "integer"
           },
           "name": {

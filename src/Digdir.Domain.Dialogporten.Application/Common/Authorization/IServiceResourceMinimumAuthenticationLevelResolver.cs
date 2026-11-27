@@ -4,9 +4,9 @@ namespace Digdir.Domain.Dialogporten.Application.Common.Authorization;
 
 public interface IServiceResourceMinimumAuthenticationLevelResolver
 {
-    Task<int> GetMinimumAuthenticationLevel(string serviceResource, CancellationToken cancellationToken);
+    Task<MinimumAuthenticationLevels> GetMinimumAuthenticationLevel(string serviceResource, CancellationToken cancellationToken);
 
-    Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(
+    Task<Dictionary<string, MinimumAuthenticationLevels>> GetMinimumAuthenticationLevels(
         IReadOnlyCollection<string> serviceResources,
         CancellationToken cancellationToken);
 }
@@ -20,7 +20,7 @@ internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServi
     /// incorrect authorization failures when the resource policy sync has not yet run (e.g., on first deploy or
     /// during transient sync delays), while still ensuring that low-assurance users (level &lt; 3) are rejected.
     /// </summary>
-    private const int DefaultMinimumAuthenticationLevel = 3;
+    private static readonly MinimumAuthenticationLevels DefaultMinimumAuthenticationLevel = new(3, null);
 
     private readonly IResourcePolicyInformationRepository _resourcePolicyInformationRepository;
 
@@ -32,13 +32,13 @@ internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServi
         _resourcePolicyInformationRepository = resourcePolicyInformationRepository;
     }
 
-    public async Task<int> GetMinimumAuthenticationLevel(string serviceResource, CancellationToken cancellationToken)
+    public async Task<MinimumAuthenticationLevels> GetMinimumAuthenticationLevel(string serviceResource, CancellationToken cancellationToken)
     {
         var minimumAuthenticationLevels = await GetMinimumAuthenticationLevels([serviceResource], cancellationToken);
         return minimumAuthenticationLevels.GetValueOrDefault(serviceResource, DefaultMinimumAuthenticationLevel);
     }
 
-    public async Task<IReadOnlyDictionary<string, int>> GetMinimumAuthenticationLevels(
+    public async Task<Dictionary<string, MinimumAuthenticationLevels>> GetMinimumAuthenticationLevels(
         IReadOnlyCollection<string> serviceResources,
         CancellationToken cancellationToken)
     {
@@ -49,13 +49,13 @@ internal sealed class ServiceResourceMinimumAuthenticationLevelResolver : IServi
 
         if (requestedResources.Count == 0)
         {
-            return new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            return new Dictionary<string, MinimumAuthenticationLevels>(StringComparer.OrdinalIgnoreCase);
         }
 
         var fetchedMinimumAuthenticationLevels = await _resourcePolicyInformationRepository
             .GetMinimumAuthenticationLevels(cancellationToken);
 
-        var minimumAuthenticationLevels = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var minimumAuthenticationLevels = new Dictionary<string, MinimumAuthenticationLevels>(StringComparer.OrdinalIgnoreCase);
         foreach (var serviceResource in requestedResources)
         {
             if (fetchedMinimumAuthenticationLevels.TryGetValue(serviceResource, out var minimumAuthenticationLevel))

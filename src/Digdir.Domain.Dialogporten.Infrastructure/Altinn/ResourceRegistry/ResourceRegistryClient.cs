@@ -19,6 +19,7 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
     private const string ServiceResourceInformationCacheKey = "ServiceResourceInformationCacheKey_V4";
     private const string ResourceRegistryResourceEndpoint = "resourceregistry/api/v1/resource/";
     private const string AuthenticationLevelCategory = "urn:altinn:minimum-authenticationlevel";
+    private const string AuthenticationLevelSystemUserCategory = "urn:altinn:minimum-authenticationlevel-systemuser";
 
     private readonly IFusionCache _cache;
     private readonly HttpClient _client;
@@ -160,12 +161,15 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
 
         try
         {
-            var minimumAuthenticationLevel = GetMinimumAuthenticationLevel(await FetchPolicy(resourceRegistryEntry.Identifier, cancellationToken));
+            var fetchPolicy = await FetchPolicy(resourceRegistryEntry.Identifier, cancellationToken);
+            var minimumAuthenticationLevel = GetMinimumAuthenticationLevel(fetchPolicy);
+            var minimumSystemUserAuthenticationLevel = GetMinimumSystemUserAuthenticationLevel(fetchPolicy);
             return minimumAuthenticationLevel is null
                 ? null
                 : new UpdatedResourcePolicyInformation(
                     resource.ResourceUrn,
                     minimumAuthenticationLevel.Value,
+                    minimumSystemUserAuthenticationLevel,
                     resource.UpdatedAt);
         }
         catch (Exception ex)
@@ -188,23 +192,18 @@ internal sealed class ResourceRegistryClient : IResourceRegistry
         return XacmlParser.ParseXacmlPolicy(reader);
     }
 
-    private static int? GetMinimumAuthenticationLevel(XacmlPolicy policy)
-    {
-        var authenticationLevelAttributeAssignmentExpression = policy.ObligationExpressions
-            .FirstOrDefault()?.AttributeAssignmentExpressions
-            .FirstOrDefault(x => x.Category?.ToString() == AuthenticationLevelCategory);
+    private static int? GetObligationIntValue(XacmlPolicy policy, string category) =>
+    policy.ObligationExpressions
+        .SelectMany(x => x.AttributeAssignmentExpressions)
+        .Where(x => x.Category?.ToString() == category)
+        .Select(x =>
+            x.Property is XacmlAttributeValue v
+            && int.TryParse(v.Value, out var value) ? value : (int?)null)
+        .FirstOrDefault(x => x.HasValue);
 
-        if (authenticationLevelAttributeAssignmentExpression?.Property is XacmlAttributeValue attributeValue)
-        {
-            if (int.TryParse(attributeValue.Value, out var minimumSecurityLevel))
-            {
-                return minimumSecurityLevel;
-            }
-        }
+    internal static int? GetMinimumAuthenticationLevel(XacmlPolicy policy) => GetObligationIntValue(policy, AuthenticationLevelCategory);
 
-        // No minimum authentication level defined
-        return null;
-    }
+    internal static int? GetMinimumSystemUserAuthenticationLevel(XacmlPolicy policy) => GetObligationIntValue(policy, AuthenticationLevelSystemUserCategory);
 
     private async Task<ServiceResourceInformation[]> FetchServiceResources(CancellationToken cancellationToken)
     {

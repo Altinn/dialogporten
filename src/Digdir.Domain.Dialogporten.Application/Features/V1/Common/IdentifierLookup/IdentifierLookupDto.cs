@@ -18,6 +18,7 @@ public sealed class IdentifierLookupServiceResourceDto
     public required string Id { get; set; }
     public required bool IsDelegable { get; set; }
     public required int MinimumAuthenticationLevel { get; set; }
+    public int? MinimumSystemUserAuthenticationLevel { get; set; }
     public List<LocalizationDto> Name { get; set; } = [];
 }
 

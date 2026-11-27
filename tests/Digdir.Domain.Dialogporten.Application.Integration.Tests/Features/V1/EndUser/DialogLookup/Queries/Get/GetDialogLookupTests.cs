@@ -200,6 +200,59 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             });
     }
 
+    [Theory]
+    [InlineData(4, null, true, "Ugradert tittel")] // no system-user level, so the general level 4 applies
+    [InlineData(4, 4, true, "Ugradert tittel")]    // the system user meets neither level
+    [InlineData(4, 3, true, "Gradert tittel")]     // the system-user level relaxes the general level
+    [InlineData(3, 4, true, "Gradert tittel")]     // the general level is met, so the stricter system-user level does not apply
+    [InlineData(4, 3, false, "Ugradert tittel")]   // the system-user level never applies to end users
+    public Task Get_Should_Pick_Title_By_The_Level_The_Caller_Must_Have(
+        int minimumAuthenticationLevel,
+        int? minimumSystemUserAuthenticationLevel,
+        bool asSystemUser,
+        string expectedTitle)
+    {
+        var party = Party;
+        const string serviceResource = "urn:altinn:resource:test-service-system-user-auth-level";
+
+        var flow = FlowBuilder.For(Application)
+            .ConfigureAltinnAuthorization(altinnAuthorization =>
+                ConfigureLookupAccessViaResourceDelegation(altinnAuthorization, party, serviceResource));
+
+        return (asSystemUser
+                ? flow.AsSystemUser()
+                : flow.AsIntegrationTestUser(x => x.WithClaim(
+                    ClaimsPrincipalExtensions.IdportenAuthLevelClaim,
+                    Constants.IdportenLoaSubstantial)))
+            .CreateSimpleDialog((x, _) =>
+            {
+                x.Dto.Party = party;
+                x.Dto.ServiceResource = serviceResource;
+                x.Dto.Content!.Title.Value =
+                [
+                    new LocalizationDto { LanguageCode = "nb", Value = "Gradert tittel" }
+                ];
+                x.Dto.Content.NonSensitiveTitle = new ContentValueDto
+                {
+                    Value =
+                    [
+                        new LocalizationDto { LanguageCode = "nb", Value = "Ugradert tittel" }
+                    ]
+                };
+            })
+            .Do(async (_, ctx) => await SeedMinimumAuthenticationLevel(ctx, serviceResource, minimumAuthenticationLevel, minimumSystemUserAuthenticationLevel))
+            .SendCommand((_, ctx) => new GetDialogLookupQuery
+            {
+                InstanceRef = $"urn:altinn:dialog-id:{ctx.GetDialogId()}"
+            })
+            .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
+            {
+                result.Title.Should().ContainSingle();
+                result.Title[0].Value.Should().Be(expectedTitle);
+                result.AuthorizationEvidence.CurrentAuthenticationLevel.Should().Be(3);
+            });
+    }
+
     [Fact]
     public Task Get_Should_Fall_Back_To_Title_When_EndUser_Auth_Level_Is_Too_Low_And_NonSensitiveTitle_Is_Not_Set()
     {
@@ -533,6 +586,7 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
             .ExecuteAndAssert<EndUserIdentifierLookupDto>(result =>
             {
                 result.ServiceResource.MinimumAuthenticationLevel.Should().Be(4);
+                result.ServiceResource.MinimumSystemUserAuthenticationLevel.Should().BeNull();
                 result.AuthorizationEvidence.ViaRole.Should().BeTrue();
                 result.AuthorizationEvidence.ViaAccessPackage.Should().BeFalse();
                 result.AuthorizationEvidence.ViaResourceDelegation.Should().BeFalse();
@@ -698,7 +752,8 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
     private static async Task SeedMinimumAuthenticationLevel(
         FlowContext ctx,
         string serviceResource,
-        int minimumAuthenticationLevel)
+        int minimumAuthenticationLevel,
+        int? minimumSystemUserAuthenticationLevel = null)
     {
         using var scope = ctx.Application.GetServiceProvider().CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<DialogDbContext>();
@@ -706,7 +761,8 @@ public class GetDialogLookupTests(DialogApplication application) : ApplicationCo
         db.ResourcePolicyInformation.Add(new()
         {
             Resource = serviceResource,
-            MinimumAuthenticationLevel = minimumAuthenticationLevel
+            MinimumAuthenticationLevel = minimumAuthenticationLevel,
+            MinimumSystemUserAuthenticationLevel = minimumSystemUserAuthenticationLevel
         });
 
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);

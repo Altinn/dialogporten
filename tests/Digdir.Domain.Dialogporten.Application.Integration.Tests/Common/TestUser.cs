@@ -58,8 +58,29 @@ internal static class TestUsers
         [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim
     };
 
+    private static readonly Dictionary<string, string> DefaultSystemUser = new()
+    {
+        [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim
+    };
+
     public static ClaimsPrincipalBuilder FromDefaultPidUser() => ClaimsPrincipalBuilder.From(DefaultPidUser);
     public static ClaimsPrincipalBuilder FromDefaultOrgUser() => ClaimsPrincipalBuilder.From(DefaultOrgUser);
+
+    public static ClaimsPrincipalBuilder FromDefaultSystemUser() =>
+        ClaimsPrincipalBuilder.From(DefaultSystemUser)
+            .WithScope("digdir:dialogporten")
+            .WithAuthorizationDetails([
+                new()
+                {
+                    Type = "urn:altinn:systemuser",
+                    SystemUserIds = [DefaultSystemUserId],
+                    SystemUserOrg = new ClaimsPrincipalExtensions.ConsumerOrganization
+                    {
+                        Authority = "iso6523-actorid-upis",
+                        Id = "0192:" + DefaultSystemUserOrg
+                    }
+                }
+            ]);
 
     private static ClaimsPrincipalBuilder FromSelfIdentifiedUser() =>
         ClaimsPrincipalBuilder.From(DefaultPidUser)
@@ -106,29 +127,9 @@ internal static class TestUsers
                 .Build());
 
         public TFlowStep AsSystemUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
-            flowStep.AsUser(() =>
-            {
-                var defaultClaims = new Dictionary<string, string>
-                {
-                    [ClaimsPrincipalExtensions.ConsumerClaim] = DefaultConsumerClaim
-                };
-                return ClaimsPrincipalBuilder.From(defaultClaims)
-                    .WithScope("digdir:dialogporten")
-                    .WithAuthorizationDetails([
-                        new()
-                        {
-                            Type = "urn:altinn:systemuser",
-                            SystemUserIds = [DefaultSystemUserId],
-                            SystemUserOrg = new ClaimsPrincipalExtensions.ConsumerOrganization
-                            {
-                                Authority = "iso6523-actorid-upis",
-                                Id = "0192:" + DefaultSystemUserOrg
-                            }
-                        }
-                    ])
-                    .Configure(configure)
-                    .Build();
-            });
+            flowStep.AsUser(() => FromDefaultSystemUser()
+                .Configure(configure)
+                .Build());
 
         public TFlowStep AsChangeTransmissionUser(Action<ClaimsPrincipalBuilder>? configure = null) =>
             flowStep.AsUser(() => FromDefaultPidUser()

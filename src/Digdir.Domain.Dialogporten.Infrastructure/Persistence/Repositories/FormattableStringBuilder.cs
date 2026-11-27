@@ -1,14 +1,31 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Dapper;
 using Npgsql;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Repositories;
 
 [SuppressMessage("Style", "IDE0060:Remove unused parameter")]
-internal class FormattableStringBuilder
+internal partial class FormattableStringBuilder
 {
+    // Matches a literal "{{" escape (group 1 empty) or a placeholder index "{<digits>" (group 1 = digits).
+    // The "{{" branch is matched so an escaped brace followed by digits (e.g. "{{1}}") isn't renumbered as
+    // a placeholder. The trailing part of a placeholder (alignment/format, e.g. ",5:yyyy}") is left untouched.
+    [GeneratedRegex(@"\{\{|\{(\d+)")]
+    private static partial Regex PlaceholderRegex();
+
+    // Renumber every placeholder in one pass so multi-digit indices (e.g. "{10}") are rewritten
+    // atomically rather than through a prefix-matching Replace that would also corrupt them.
+    private static string RenumberPlaceholders(string srcFormat, Dictionary<int, int> argNumberBySrcArgNumber) =>
+        PlaceholderRegex().Replace(srcFormat, match =>
+            match.Groups[1].Success
+                ? "{" + argNumberBySrcArgNumber[int.Parse(match.Groups[1].ValueSpan, CultureInfo.InvariantCulture)]
+                    .ToString(CultureInfo.InvariantCulture)
+                : match.Value);
+
     private const string Null = "!!__null__!!";
     private readonly StringBuilder _format = new();
     private readonly Dictionary<object, int> _argNumberByArg = [];
@@ -113,13 +130,15 @@ internal class FormattableStringBuilder
 
         private string ConsolidateFormat(string srcFormat, IEnumerable<(object, int)> srcArgs)
         {
+            // Build the src -> consolidated argument-number map in a single pass. GetArgumentNumber has
+            // side effects (registering args in insertion order), so srcArgs must be enumerated in order.
+            var argNumberBySrcArgNumber = new Dictionary<int, int>();
             foreach (var (srcValue, srcArgNumber) in srcArgs)
             {
-                var argNumber = GetArgumentNumber(srcValue);
-                if (srcArgNumber == argNumber) continue;
-                srcFormat = srcFormat.Replace("{" + srcArgNumber, "{tmp" + argNumber);
+                argNumberBySrcArgNumber[srcArgNumber] = GetArgumentNumber(srcValue);
             }
-            return srcFormat.Replace("{tmp", "{");
+
+            return RenumberPlaceholders(srcFormat, argNumberBySrcArgNumber);
         }
 
         private int GetArgumentNumber(object? value)

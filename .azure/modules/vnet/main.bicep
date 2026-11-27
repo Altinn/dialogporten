@@ -7,6 +7,9 @@ param location string
 @description('Tags to apply to resources')
 param tags object
 
+@description('Whether to create the Container Apps environment subnet and its NSG')
+param deployContainerAppEnvSubnet bool = true
+
 // Network address ranges
 var vnetAddressPrefix = '10.0.0.0/16'
 
@@ -58,7 +61,7 @@ resource defaultNSG 'Microsoft.Network/networkSecurityGroups@2025-07-01' = {
 }
 
 // https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration?tabs=consumption-only
-resource containerAppEnvironmentNSG 'Microsoft.Network/networkSecurityGroups@2025-07-01' = {
+resource containerAppEnvironmentNSG 'Microsoft.Network/networkSecurityGroups@2025-07-01' = if (deployContainerAppEnvSubnet) {
   name: '${namePrefix}-container-app-environment-nsg'
   location: location
   properties: {
@@ -307,7 +310,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2025-07-01' = {
         vnetAddressPrefix
       ]
     }
-    subnets: [
+    subnets: filter([
       {
         name: 'default'
         properties: {
@@ -345,7 +348,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2025-07-01' = {
         properties: {
           addressPrefix: containerAppEnvSubnetPrefix
           networkSecurityGroup: {
-            id: containerAppEnvironmentNSG.id
+            id: containerAppEnvironmentNSG!.id
           }
           privateLinkServiceNetworkPolicies: 'Disabled'
           delegations: [
@@ -385,7 +388,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2025-07-01' = {
           }
         }
       }
-    ]
+    ], subnet => deployContainerAppEnvSubnet || subnet.name != 'containerAppEnvSubnet')
   }
   tags: tags
 }
@@ -398,11 +401,9 @@ output postgresqlSubnetId string = resourceId(
   virtualNetwork.name,
   'postgresqlSubnet'
   )
-output containerAppEnvironmentSubnetId string = resourceId(
-  'Microsoft.Network/virtualNetworks/subnets',
-  virtualNetwork.name,
-  'containerAppEnvSubnet'
-  )
+output containerAppEnvironmentSubnetId string = deployContainerAppEnvSubnet
+  ? resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'containerAppEnvSubnet')
+  : ''
 output serviceBusSubnetId string = resourceId(
   'Microsoft.Network/virtualNetworks/subnets',
   virtualNetwork.name,

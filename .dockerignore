@@ -23,3 +23,6 @@
 **/values.dev.yaml
 LICENSE
 README.md
+# The agent image builds from agents/ as its own context, and a personal variant there can hold a real key. At any
+# depth, for a checkout inside this one, such as a worktree.
+**/agents

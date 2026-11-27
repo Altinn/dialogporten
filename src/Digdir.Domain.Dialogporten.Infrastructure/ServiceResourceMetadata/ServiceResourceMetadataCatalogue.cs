@@ -41,12 +41,12 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
         _scopeFactory = scopeFactory;
     }
 
-    public async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken) =>
-        await _cache.GetOrDefaultAsync<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
+    public async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(
+        CancellationToken cancellationToken) =>
+        await _cache.GetOrSetAsync<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
             CacheKey,
+            BuildCatalogue,
             token: cancellationToken
-        ) ?? throw new UpstreamServiceException(
-            $"No cache entry for {CacheKey} in {CacheName}. Expected cache to always contain an entry"
         );
 
     public async Task UpdateCatalogueCache(CancellationToken cancellationToken)

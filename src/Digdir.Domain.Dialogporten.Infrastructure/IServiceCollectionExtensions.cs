@@ -154,15 +154,27 @@ internal static class IServiceCollectionExtensions
                     // and reused by BOTH the public-catalogue query and the authorized-resources query, so the expensive
                     // per-resource DTO construction no longer runs per request. Single low-cardinality entry -> L1 is
                     // wanted (do not SkipMemoryCache). Memory-only (SkipDistributedCache) to avoid serializing the
-                    // several-MB graph to Redis; each replica rebuilds cheaply from its already-cached inputs.
-                    // BackgroundService to set the cache, which keeps the multi-MB rebuild off the request path.
-                    // Long Duration gives the users stale values while the BackgroundService fails,
-                    // without using write locks and waiting for SoftTimeouts. The Cache is always warm.
-                    Duration = TimeSpan.FromHours(24),
-                    // Disable FailSafe because the BackgroundTask handles
-                    IsFailSafeEnabled = false,
-                    SkipDistributedCache = true,
-                    SkipBackplaneNotifications = true
+                    // several-MB graph to Redis; each replica rebuilds cheaply from its already-cached inputs. Eager
+                    // refresh + fail-safe keep the multi-MB rebuild off the request path.
+                    Duration = TimeSpan.FromMinutes(20),
+                    // A stale value must stay servable for longer than any realistic rebuild-failure streak: while one
+                    // exists, callers waiting on the per-key memory lock are served it at FactorySoftTimeout (behavior
+                    // pinned by FusionCacheFailSafeSemanticsTests); without one they wait on the lock until their
+                    // request is cancelled. Freshness in normal operation is governed by Duration alone.
+                    FailSafeMaxDuration = TimeSpan.FromHours(24),
+                    EagerRefreshThreshold = 0.8f,
+                    // The caller-facing latency ceiling while a rebuild is in flight and a stale value exists: both the
+                    // triggering caller and lock waiters fall back to stale when it elapses, and the rebuild completes
+                    // in the background. Kept small so callers never wait long on an in-flight rebuild; fresh data
+                    // arrives via eager refresh and background completion rather than on the request path.
+                    FactorySoftTimeout = TimeSpan.FromSeconds(1),
+                    // Substantial headroom for the full sequential rebuild (referenced resources + the item builder's
+                    // cached lookups, each DB-bound step capped by the 30s CommandTimeout); sized operationally, not a
+                    // guaranteed worst-case bound. Rebuilds that cannot finish within this budget never succeed, and
+                    // fail-safe silently becomes the only data source. On a cold miss this hard timeout is the
+                    // caller-facing wait ceiling.
+                    FactoryHardTimeout = TimeSpan.FromSeconds(120),
+                    SkipDistributedCache = true
                 })
                 .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()
                 {

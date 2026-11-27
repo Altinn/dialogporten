@@ -37,7 +37,7 @@ internal static partial class WarmupPhases
     // run-budget rule in WarmupSettingsValidator both read these, so they cannot drift apart.
     internal const int DbPoolBudgetSeconds = 20;
     internal const int EfModelBudgetSeconds = 20;
-    internal const int ServiceResourceMetadataBudgetSeconds = 15;
+    internal const int ServiceResourceMetadataBudgetSeconds = 30;
     internal const int EndUserSearchBudgetSeconds = 15;
 
     /// <summary>
@@ -86,7 +86,7 @@ internal static partial class WarmupPhases
     internal static async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
         var catalogue = services.GetRequiredService<IServiceResourceMetadataCatalogue>();
-        await catalogue.UpdateCatalogueCache(cancellationToken);
+        await catalogue.UpdateCatalogueCache(CancellationToken.None).WaitAsync(cancellationToken);
     }
 
     internal static async Task WarmupEndUserSearchAsync(IServiceProvider services, CancellationToken cancellationToken)

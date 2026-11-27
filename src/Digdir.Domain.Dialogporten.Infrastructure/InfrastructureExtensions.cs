@@ -447,7 +447,7 @@ public static class InfrastructureExtensions
             // queries today.
             options.AddPhase("db-pool", WarmupPhases.WarmupDbPoolAsync, timeoutSeconds: WarmupPhases.DbPoolBudgetSeconds);
             options.AddPhase("ef-model", WarmupPhases.WarmupEfModelAsync, timeoutSeconds: WarmupPhases.EfModelBudgetSeconds);
-            options.AddPhase("service-resource-metadata", WarmupPhases.WarmupServiceResourceMetadataAsync, optional: true, timeoutSeconds: WarmupPhases.ServiceResourceMetadataBudgetSeconds);
+            options.AddPhase("service-resource-metadata", WarmupPhases.WarmupServiceResourceMetadataAsync, timeoutSeconds: WarmupPhases.ServiceResourceMetadataBudgetSeconds);
 
             if (settings.Warmup.RunEndUserSearch)
             {

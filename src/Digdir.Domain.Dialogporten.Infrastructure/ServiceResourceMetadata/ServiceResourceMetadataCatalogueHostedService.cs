@@ -6,9 +6,8 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 
 internal sealed class ServiceResourceMetadataCatalogueHostedService : BackgroundService
 {
-    private static readonly TimeSpan InitInterval = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan InitInterval = TimeSpan.FromMinutes(10);
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(15);
-    private static readonly TimeSpan ErrorInterval = TimeSpan.FromMinutes(5);
 
     private readonly PeriodicTimer _timer = new(InitInterval);
     private readonly IServiceResourceMetadataCatalogue _serviceResourceMetadataCatalogue;
@@ -30,9 +29,8 @@ internal sealed class ServiceResourceMetadataCatalogueHostedService : Background
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            _timer.Period = await TryRefreshAsync(stoppingToken)
-                ? RefreshInterval
-                : ErrorInterval;
+            await TryRefreshAsync(stoppingToken);
+            _timer.Period = RefreshInterval;
         }
     }
 

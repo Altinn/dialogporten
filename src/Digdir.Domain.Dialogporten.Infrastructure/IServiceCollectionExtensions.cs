@@ -174,7 +174,8 @@ internal static class IServiceCollectionExtensions
                     // fail-safe silently becomes the only data source. On a cold miss this hard timeout is the
                     // caller-facing wait ceiling.
                     FactoryHardTimeout = TimeSpan.FromSeconds(120),
-                    SkipDistributedCache = true
+                    SkipDistributedCache = true,
+                    SkipBackplaneNotifications = true,
                 })
                 .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()
                 {

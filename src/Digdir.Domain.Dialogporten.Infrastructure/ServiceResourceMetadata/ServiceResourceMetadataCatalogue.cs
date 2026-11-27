@@ -1,7 +1,8 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
-using Digdir.Domain.Dialogporten.Infrastructure.Common.Exceptions;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
@@ -10,14 +11,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 /// Builds the caller-independent, all-language service-resource metadata catalogue once and caches it as a
 /// single low-cardinality entry. Both the public-catalogue query and the authorized-resources query select
 /// from this, so the expensive per-resource metadata construction runs once per cache window instead of on
-/// every request. The Catalogue builder is slow. So we separate the build-call from the user-request by populating
-/// the cache from the BackgroundService <see cref="ServiceResourceMetadataCatalogueHostedService"/>
-/// Advantages:
-/// - Even the first request, after cache expiry, is fast.
-/// - Request cancellation doesn't affect the cache writes
-/// Drawbacks:
-/// - Longer mean time to recovery. We mitigate by using a short ErrorInterval and long cache duration.
-///   Restart the application to trigger the warmup service for immediate recovery.
+/// every request. The Catalogue builder is slow. So we try to always keep it warm by setting the
+/// cache value from the BackgroundService <see cref="ServiceResourceMetadataCatalogueHostedService"/>.
+/// This prevents complete eviction, making the first request after cache expiry fast.
+/// We dont pass the cancellation token to the factory just to make sure the factory always completes, regardless of
+/// user cancellation. In practice, the factory should never run from a request
+/// because of the Warmup and Background service.
 /// </summary>
 internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadataCatalogue
 {
@@ -26,11 +25,12 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
 
     private readonly IFusionCache _cache;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IHostApplicationLifetime _hostApplicationLifetime;
 
     public ServiceResourceMetadataCatalogue(
         IFusionCacheProvider cacheProvider,
-        IServiceScopeFactory scopeFactory
-    )
+        IServiceScopeFactory scopeFactory,
+        IHostApplicationLifetime hostApplicationLifetime)
     {
         ArgumentNullException.ThrowIfNull(cacheProvider);
 
@@ -39,13 +39,14 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
 
         _cache = cache;
         _scopeFactory = scopeFactory;
+        _hostApplicationLifetime = hostApplicationLifetime;
     }
 
     public async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(
         CancellationToken cancellationToken) =>
         await _cache.GetOrSetAsync<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
             CacheKey,
-            BuildCatalogue,
+            _ => BuildCatalogue(_hostApplicationLifetime.ApplicationStopping),
             token: cancellationToken
         );
 
@@ -75,7 +76,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
 
         return items
             .Select(item => new ServiceResourceMetadataCatalogueEntry(
-                Domain.Common.Constants.ServiceResourcePrefix + item.ServiceResource.Id,
+                Constants.ServiceResourcePrefix + item.ServiceResource.Id,
                 item))
             .ToList();
     }

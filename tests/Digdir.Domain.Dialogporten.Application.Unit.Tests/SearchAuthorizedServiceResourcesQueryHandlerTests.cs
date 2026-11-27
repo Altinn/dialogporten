@@ -55,6 +55,8 @@ public class SearchAuthorizedServiceResourcesQueryHandlerTests
         public Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
                 resourceUrns.Select(urn => new ServiceResourceMetadataCatalogueEntry(urn, CreateItem(urn))).ToList());
+
+        public Task UpdateCatalogueCache(CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
     private static ServiceResourceMetadataItemDto CreateItem(string fullUrn) => new()

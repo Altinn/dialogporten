@@ -1,11 +1,10 @@
 using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
-using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,7 +85,7 @@ internal static partial class WarmupPhases
 
     internal static async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
-        var catalogue = services.GetRequiredService<ServiceResourceMetadataCatalogue>();
+        var catalogue = services.GetRequiredService<IServiceResourceMetadataCatalogue>();
         await catalogue.UpdateCatalogueCache(cancellationToken);
     }
 

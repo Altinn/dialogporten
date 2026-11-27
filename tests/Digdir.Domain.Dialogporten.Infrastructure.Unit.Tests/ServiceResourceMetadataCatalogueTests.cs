@@ -29,6 +29,7 @@ public class ServiceResourceMetadataCatalogueTests
         var catalogue = new ServiceResourceMetadataCatalogue(
             CreateCacheProvider(), serviceProvider.GetRequiredService<IServiceScopeFactory>());
 
+        await catalogue.UpdateCatalogueCache(TestContext.Current.CancellationToken);
         var first = await catalogue.GetEntries(TestContext.Current.CancellationToken);
         var second = await catalogue.GetEntries(TestContext.Current.CancellationToken);
 

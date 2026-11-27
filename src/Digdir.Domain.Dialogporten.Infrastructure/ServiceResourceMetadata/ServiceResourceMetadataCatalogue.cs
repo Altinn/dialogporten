@@ -49,8 +49,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
             $"No cache entry for {CacheKey} in {CacheName}. Expected cache to always contain an entry"
         );
 
-    public async Task UpdateCatalogueCache(
-        CancellationToken cancellationToken)
+    public async Task UpdateCatalogueCache(CancellationToken cancellationToken)
     {
         var catalogue = await BuildCatalogue(cancellationToken);
         await _cache.SetAsync(

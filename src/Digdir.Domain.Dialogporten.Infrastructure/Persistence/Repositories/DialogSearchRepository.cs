@@ -452,11 +452,9 @@ internal sealed class DialogSearchRepository : IDialogSearchRepository
             .GroupBy(x => new { x.DialogId, x.AuthLevel, x.SystemUserAuthLevel })
             .ToDictionary(x => x.Key.DialogId, row =>
             {
-                var level = systemUser ?
-                    row.Key.SystemUserAuthLevel ?? row.Key.AuthLevel : // Use auth level if system user auth level is null
-                    row.Key.AuthLevel;
-
-                var hasRequiredAuth = level <= userAuthLevel;
+                var requiredAuthLevel = new MinimumAuthenticationLevels(row.Key.AuthLevel, row.Key.SystemUserAuthLevel)
+                    .RequiredFor(systemUser);
+                var hasRequiredAuth = requiredAuthLevel <= userAuthLevel;
                 var contentValues = row
                     .GroupBy(r => new { r.TypeId, r.MediaType })
                     .Select(x => new DataContentValueDto(TypeId: x.Key.TypeId, MediaType: x.Key.MediaType, Value: x

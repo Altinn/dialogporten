@@ -5,7 +5,7 @@
 namespace Digdir.Domain.Dialogporten.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class addMinimumAuthLevelSystemUser : Migration
+    public partial class AddMinimumAuthLevelSystemUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

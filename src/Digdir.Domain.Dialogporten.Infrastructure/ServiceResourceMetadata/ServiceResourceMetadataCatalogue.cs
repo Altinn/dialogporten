@@ -1,6 +1,8 @@
 using Digdir.Domain.Dialogporten.Application.Externals;
 using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
+using Digdir.Domain.Dialogporten.Domain.Common;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ZiggyCreatures.Caching.Fusion;
 
 namespace Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
@@ -9,7 +11,12 @@ namespace Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 /// Builds the caller-independent, all-language service-resource metadata catalogue once and caches it as a
 /// single low-cardinality entry. Both the public-catalogue query and the authorized-resources query select
 /// from this, so the expensive per-resource metadata construction runs once per cache window instead of on
-/// every request.
+/// every request. The Catalogue builder is slow. So we try to always keep it warm by setting the
+/// cache value from the BackgroundService <see cref="ServiceResourceMetadataCatalogueHostedService"/>.
+/// This prevents complete eviction, making the first request after cache expiry fast.
+/// We dont pass the cancellation token to the factory just to make sure the factory always completes, regardless of
+/// user cancellation. In practice, the factory should never run from a request
+/// because of the Warmup and Background service.
 /// </summary>
 internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadataCatalogue
 {
@@ -18,34 +25,45 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
 
     private readonly IFusionCache _cache;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IHostApplicationLifetime _hostApplicationLifetime;
 
     public ServiceResourceMetadataCatalogue(
         IFusionCacheProvider cacheProvider,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        IHostApplicationLifetime hostApplicationLifetime)
     {
         ArgumentNullException.ThrowIfNull(cacheProvider);
-        ArgumentNullException.ThrowIfNull(scopeFactory);
 
         var cache = cacheProvider.GetCache(CacheName);
         ArgumentNullException.ThrowIfNull(cache);
 
         _cache = cache;
         _scopeFactory = scopeFactory;
+        _hostApplicationLifetime = hostApplicationLifetime;
     }
 
-    public async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(CancellationToken cancellationToken) =>
+    public async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> GetEntries(
+        CancellationToken cancellationToken) =>
         await _cache.GetOrSetAsync<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>>(
             CacheKey,
-            BuildCatalogue,
-            token: cancellationToken);
+            _ => BuildCatalogue(_hostApplicationLifetime.ApplicationStopping),
+            token: cancellationToken
+        );
+
+    public async Task UpdateCatalogueCache(CancellationToken cancellationToken)
+    {
+        var catalogue = await BuildCatalogue(cancellationToken);
+        await _cache.SetAsync(
+            CacheKey,
+            catalogue,
+            token: cancellationToken
+        );
+    }
 
     private async Task<IReadOnlyList<ServiceResourceMetadataCatalogueEntry>> BuildCatalogue(CancellationToken cancellationToken)
     {
-        // Build in a fresh DI scope rather than via injected (request-scoped) dependencies. This cache uses
-        // eager refresh, so the factory can run on a background task that outlives the request that triggered
-        // it; the item builder transitively resolves the request-scoped DialogDbContext (via
-        // SubjectResourceRepository), which would already be disposed by then -> ObjectDisposedException. A
-        // dedicated scope gives the (possibly background) build its own DbContext for its full lifetime.
+        // The renewer is a singleton (hosted service), but the item builder and repository depend on the scoped
+        // DialogDbContext. Create a scope per refresh so each build gets its own short-lived DbContext.
         await using var scope = _scopeFactory.CreateAsyncScope();
         var itemBuilder = scope.ServiceProvider.GetRequiredService<IServiceResourceMetadataItemBuilder>();
         var partyResourceReferenceRepository = scope.ServiceProvider.GetRequiredService<IPartyResourceReferenceRepository>();
@@ -58,7 +76,7 @@ internal sealed class ServiceResourceMetadataCatalogue : IServiceResourceMetadat
 
         return items
             .Select(item => new ServiceResourceMetadataCatalogueEntry(
-                Domain.Common.Constants.ServiceResourcePrefix + item.ServiceResource.Id,
+                Constants.ServiceResourcePrefix + item.ServiceResource.Id,
                 item))
             .ToList();
     }

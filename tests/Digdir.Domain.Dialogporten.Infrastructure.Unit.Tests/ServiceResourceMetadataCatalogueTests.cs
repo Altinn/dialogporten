@@ -6,6 +6,7 @@ using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceM
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Common;
 using Digdir.Domain.Dialogporten.Infrastructure.ServiceResourceMetadata;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Xunit;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -27,8 +28,12 @@ public class ServiceResourceMetadataCatalogueTests
             .AddSingleton<IPartyResourceReferenceRepository>(new StubReferencedResourcesRepository([ResourceUrn]))
             .BuildServiceProvider();
         var catalogue = new ServiceResourceMetadataCatalogue(
-            CreateCacheProvider(), serviceProvider.GetRequiredService<IServiceScopeFactory>());
+            CreateCacheProvider(),
+            serviceProvider.GetRequiredService<IServiceScopeFactory>(),
+            serviceProvider.GetRequiredService<IHostApplicationLifetime>()
+        );
 
+        await catalogue.UpdateCatalogueCache(TestContext.Current.CancellationToken);
         var first = await catalogue.GetEntries(TestContext.Current.CancellationToken);
         var second = await catalogue.GetEntries(TestContext.Current.CancellationToken);
 

@@ -1,13 +1,14 @@
 using System.Security.Claims;
 using Digdir.Domain.Dialogporten.Application.Common.Extensions;
 using Digdir.Domain.Dialogporten.Application.Externals.Presentation;
+using Digdir.Domain.Dialogporten.Application.Features.V1.Common.ServiceResourceMetadata;
 using Digdir.Domain.Dialogporten.Application.Features.V1.EndUser.Dialogs.Queries.Search;
-using Digdir.Domain.Dialogporten.Application.Features.V1.Metadata.ServiceResources.Queries.Get;
 using Digdir.Domain.Dialogporten.Domain.Dialogs.Entities;
 using Digdir.Domain.Dialogporten.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -85,8 +86,9 @@ internal static partial class WarmupPhases
 
     internal static async Task WarmupServiceResourceMetadataAsync(IServiceProvider services, CancellationToken cancellationToken)
     {
-        var sender = services.GetRequiredService<ISender>();
-        await sender.Send(new GetServiceResourceMetadataQuery(), cancellationToken);
+        var catalogue = services.GetRequiredService<IServiceResourceMetadataCatalogue>();
+        var lifetime = services.GetRequiredService<IHostApplicationLifetime>();
+        await catalogue.UpdateCatalogueCache(lifetime.ApplicationStopping).WaitAsync(cancellationToken);
     }
 
     internal static async Task WarmupEndUserSearchAsync(IServiceProvider services, CancellationToken cancellationToken)

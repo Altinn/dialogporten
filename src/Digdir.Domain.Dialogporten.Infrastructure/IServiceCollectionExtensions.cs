@@ -174,7 +174,8 @@ internal static class IServiceCollectionExtensions
                     // fail-safe silently becomes the only data source. On a cold miss this hard timeout is the
                     // caller-facing wait ceiling.
                     FactoryHardTimeout = TimeSpan.FromSeconds(120),
-                    SkipDistributedCache = true
+                    SkipDistributedCache = true,
+                    SkipBackplaneNotifications = true,
                 })
                 .ConfigureFusionCache(AuthorizedServiceResourcesProvider.CacheName, new()
                 {
@@ -232,6 +233,7 @@ internal static class IServiceCollectionExtensions
                     SkipMemoryCacheRead = settings.SkipMemoryCache,
                     SkipDistributedCacheRead = settings.SkipDistributedCache,
                     SkipDistributedCacheWrite = settings.SkipDistributedCache,
+                    SkipBackplaneNotifications = settings.SkipBackplaneNotifications,
 
                     // This will stop deserialization exceptions to be re-thrown, which will cause the factory to run as if
                     // the cache entry was not found. This avoids crashes which otherwise would happen if entities that
@@ -265,6 +267,7 @@ internal static class IServiceCollectionExtensions
         public float EagerRefreshThreshold { get; set; } = 0.8f;
         public bool SkipMemoryCache { get; set; }
         public bool SkipDistributedCache { get; set; }
+        public bool SkipBackplaneNotifications { get; set; }
     }
 
     internal sealed record FusionCacheRegistration(string CacheName);

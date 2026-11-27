@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.126.9](https://github.com/Altinn/dialogporten/compare/v1.126.8...v1.126.9) (2026-11-27)
+
+
+### Bug Fixes
+
+* Dont pass request-scoped resources into long-lived cache factories ([#4633](https://github.com/Altinn/dialogporten/issues/4633)) ([b059105](https://github.com/Altinn/dialogporten/commit/b059105465149aab6ad3e9bc1144fc3e2d35e8cd))
+
+
+### Miscellaneous Chores
+
+* **infra:** remove the at23 Container Apps Bicep configuration ([#4663](https://github.com/Altinn/dialogporten/issues/4663)) ([dd5e916](https://github.com/Altinn/dialogporten/commit/dd5e9161dfe0a54b72390a09cb4578468e746a6a))
+* **infra:** remove the Container Apps subnet and NSG from the test VNet ([#4665](https://github.com/Altinn/dialogporten/issues/4665)) ([497afb9](https://github.com/Altinn/dialogporten/commit/497afb9e463f84810548b9a4e953c5bd08a70f7a))
+
 ## [1.126.8](https://github.com/Altinn/dialogporten/compare/v1.126.7...v1.126.8) (2026-11-25)
 
 
